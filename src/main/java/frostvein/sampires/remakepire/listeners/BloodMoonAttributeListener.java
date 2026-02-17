@@ -36,8 +36,8 @@ public class BloodMoonAttributeListener implements Listener {
 
     @EventHandler
     public void onPotionEffectChange(EntityPotionEffectEvent event) {
-        Entity var3 = event.getEntity();
-        if (var3 instanceof Player player) {
+        Entity entity = event.getEntity();
+        if (entity instanceof Player player) {
             if (this.vampireManager.isVampireStage2(player) || this.vampireManager.isVampireStage3(player)) {
                 if (event.getNewEffect() != null && event.getNewEffect().getType() == PotionEffectType.UNLUCK) {
                     this.applyBloodMoonAttributes(player);
@@ -55,8 +55,10 @@ public class BloodMoonAttributeListener implements Listener {
 
     private void applyBloodMoonAttributes(Player player) {
         UUID playerId = player.getUniqueId();
+
         if (!(Boolean)this.playersWithBloodMoonAttributes.getOrDefault(playerId, false)) {
             AttributeInstance speedAttribute = player.getAttribute(Attribute.MOVEMENT_SPEED);
+
             if (speedAttribute != null) {
                 AttributeModifier speedModifier = new AttributeModifier("BloodMoon_Speed", 0.3, Operation.MULTIPLY_SCALAR_1);
                 speedAttribute.addModifier(speedModifier);
@@ -64,6 +66,7 @@ public class BloodMoonAttributeListener implements Listener {
             }
 
             AttributeInstance strengthAttribute = player.getAttribute(Attribute.ATTACK_DAMAGE);
+
             if (strengthAttribute != null) {
                 AttributeModifier strengthModifier = new AttributeModifier("BloodMoon_Strength", 0.15, Operation.MULTIPLY_SCALAR_1);
                 strengthAttribute.addModifier(strengthModifier);
@@ -77,15 +80,18 @@ public class BloodMoonAttributeListener implements Listener {
 
     private void removeBloodMoonAttributes(Player player) {
         UUID playerId = player.getUniqueId();
-        if ((Boolean)this.playersWithBloodMoonAttributes.getOrDefault(playerId, false)) {
+
+        if (this.playersWithBloodMoonAttributes.getOrDefault(playerId, false)) {
             AttributeInstance speedAttribute = player.getAttribute(Attribute.MOVEMENT_SPEED);
             AttributeModifier speedModifier = (AttributeModifier)this.speedModifiers.remove(playerId);
+
             if (speedAttribute != null && speedModifier != null) {
                 speedAttribute.removeModifier(speedModifier);
             }
 
             AttributeInstance strengthAttribute = player.getAttribute(Attribute.ATTACK_DAMAGE);
             AttributeModifier strengthModifier = (AttributeModifier)this.strengthModifiers.remove(playerId);
+
             if (strengthAttribute != null && strengthModifier != null) {
                 strengthAttribute.removeModifier(strengthModifier);
             }
@@ -99,7 +105,8 @@ public class BloodMoonAttributeListener implements Listener {
     public void onPlayerQuit(PlayerQuitEvent event) {
         Player player = event.getPlayer();
         UUID playerId = player.getUniqueId();
-        if ((Boolean)this.playersWithBloodMoonAttributes.getOrDefault(playerId, false)) {
+
+        if (this.playersWithBloodMoonAttributes.getOrDefault(playerId, false)) {
             this.removeBloodMoonAttributes(player);
             this.plugin.getLogger().info("Cleaned up blood moon attributes for quitting player: " + player.getName());
         }
@@ -115,6 +122,7 @@ public class BloodMoonAttributeListener implements Listener {
             UUID playerId = player.getUniqueId();
             int removedCount = 0;
             AttributeInstance speedAttribute = player.getAttribute(Attribute.MOVEMENT_SPEED);
+
             if (speedAttribute != null) {
                 double baseSpeed = speedAttribute.getBaseValue();
 
@@ -137,12 +145,14 @@ public class BloodMoonAttributeListener implements Listener {
             this.playersWithBloodMoonAttributes.put(playerId, false);
             this.speedModifiers.remove(playerId);
             this.strengthModifiers.remove(playerId);
+
             if (removedCount > 0) {
                 this.plugin.getLogger().info("AGGRESSIVE cleanup removed " + removedCount + " suspicious attribute modifiers from: " + player.getName());
                 player.sendMessage("§aRemoved " + removedCount + " attribute modifiers that were causing speed/jump issues.");
             } else {
                 this.plugin.getLogger().info("No suspicious attribute modifiers found for: " + player.getName());
             }
+
         } catch (Exception e) {
             this.plugin.getLogger().warning("Error during aggressive cleanup of attributes for " + player.getName() + ": " + e.getMessage());
             e.printStackTrace();

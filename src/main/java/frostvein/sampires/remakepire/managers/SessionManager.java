@@ -122,10 +122,10 @@ public class SessionManager {
     public void sendActionBar(Player player, String message) {
         try {
             player.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(message));
-        } catch (Exception var6) {
+        } catch (Exception e) {
             try {
                 player.sendTitle("", message, 0, 25, 5);
-            } catch (Exception var5) {
+            } catch (Exception e1) {
                 player.sendMessage("§8[§6Session§8] " + message);
             }
         }
@@ -153,7 +153,6 @@ public class SessionManager {
         for(Player player : Bukkit.getOnlinePlayers()) {
             player.addPotionEffect(new PotionEffect(PotionEffectType.SATURATION, 100, 100, false, false));
         }
-
     }
 
     private void setAllPlayersMaxFood() {
@@ -161,7 +160,6 @@ public class SessionManager {
             player.setFoodLevel(20);
             player.setSaturation(20.0F);
         }
-
     }
 
     private void capturePausedFoodLevels() {

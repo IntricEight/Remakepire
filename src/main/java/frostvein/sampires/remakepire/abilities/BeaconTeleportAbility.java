@@ -79,14 +79,13 @@ public class BeaconTeleportAbility extends VampireAbility {
     private ItemStack createBeaconItem(BeaconSite beacon, Player player) {
         ItemStack item = new ItemStack(Material.BEACON);
         ItemMeta meta = item.getItemMeta();
+
         if (meta != null) {
             meta.setDisplayName("§4§l" + beacon.getName());
             List<String> lore = new ArrayList();
             lore.add("§7Location: §f" + beacon.getLocation().getWorld().getName());
-            int var10001 = beacon.getLocation().getBlockX();
-            lore.add("§7Coordinates: §f" + var10001 + ", " + beacon.getLocation().getBlockY() + ", " + beacon.getLocation().getBlockZ());
-            String var8 = beacon.getState().getColorCode();
-            lore.add("§7State: " + var8 + beacon.getState().getDisplayName());
+            lore.add("§7Coordinates: §f" + beacon.getLocation().getBlockX() + ", " + beacon.getLocation().getBlockY() + ", " + beacon.getLocation().getBlockZ());
+            lore.add("§7State: " + beacon.getState().getColorCode() + beacon.getState().getDisplayName());
             double distance = beacon.getLocation().distance(player.getLocation());
             lore.add("§7Distance: §e" + Math.round(distance) + " blocks");
             lore.add("");

@@ -67,7 +67,7 @@ public class PassiveMobSpawningManager {
         try {
             Biome paleOakForest = Biome.valueOf("PALE_GARDEN");
             this.blacklistedBiomes.add(paleOakForest);
-        } catch (IllegalArgumentException var2) {
+        } catch (IllegalArgumentException e) {
         }
 
         this.blacklistedBiomes.add(Biome.DEEP_DARK);

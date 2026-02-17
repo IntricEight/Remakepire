@@ -25,6 +25,7 @@ public class StashFourthBookCommand implements CommandExecutor {
         if (args.length < 3) {
             sender.sendMessage("§cUsage: /stash_fourth_book <x> <y> <z>");
             return true;
+
         } else {
             int x, y, z;
 
@@ -32,7 +33,8 @@ public class StashFourthBookCommand implements CommandExecutor {
                 x = Integer.parseInt(args[0]);
                 y = Integer.parseInt(args[1]);
                 z = Integer.parseInt(args[2]);
-            } catch (NumberFormatException var14) {
+
+            } catch (NumberFormatException e) {
                 sender.sendMessage("§cInvalid coordinates. Use whole numbers.");
                 return true;
             }
@@ -41,12 +43,15 @@ public class StashFourthBookCommand implements CommandExecutor {
             if (world == null) {
                 sender.sendMessage("§cWorld 'world' not found.");
                 return true;
+
             } else {
                 Location chestLocation = new Location(world, x, y, z);
                 Block block = world.getBlockAt(chestLocation);
+
                 if (!(block.getState() instanceof Chest)) {
                     sender.sendMessage("§cNo chest found at coordinates " + x + ", " + y + ", " + z + ".");
                     return true;
+
                 } else {
                     Chest chest = (Chest)block.getState();
                     Inventory chestInventory = chest.getInventory();
@@ -64,6 +69,7 @@ public class StashFourthBookCommand implements CommandExecutor {
     private ItemStack createRetributionBook() {
         ItemStack book = new ItemStack(Material.WRITTEN_BOOK);
         BookMeta bookMeta = (BookMeta)book.getItemMeta();
+
         if (bookMeta != null) {
             bookMeta.setTitle("The Retribution 4/3");
             bookMeta.setAuthor("§4A vengeful hand...");

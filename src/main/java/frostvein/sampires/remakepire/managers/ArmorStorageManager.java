@@ -116,7 +116,7 @@ public class ArmorStorageManager {
                     try {
                         UUID playerId = UUID.fromString((String)entry.getKey());
                         this.armorCache.put(playerId, (StoredArmor)entry.getValue());
-                    } catch (IllegalArgumentException var9) {
+                    } catch (IllegalArgumentException e) {
                         this.plugin.getLogger().warning("ArmorStorageManager: Invalid UUID in storage: " + (String)entry.getKey());
                     }
                 }

@@ -209,8 +209,7 @@ public class BeaconConversionListener implements Listener {
                     }
                 }
             } else {
-                String var10001 = beacon.getName();
-                player.sendMessage("§c⏰ Beacon " + var10001 + " cannot be converted yet. Cooldown remaining: §e" + beacon.getRemainingCooldownString(this.sessionManager) + " (session time)");
+                player.sendMessage("§c⏰ Beacon " + beacon.getName() + " cannot be converted yet. Cooldown remaining: §e" + beacon.getRemainingCooldownString(this.sessionManager) + " (session time)");
                 return false;
             }
         }
@@ -220,6 +219,7 @@ public class BeaconConversionListener implements Listener {
         String beaconKey = beacon.getName().toLowerCase();
         boolean isVampireConversion = this.vampireManager.isVampire(player);
         ConversionData data = (ConversionData)this.activeConversions.get(beaconKey);
+
         if (data == null) {
             data = new ConversionData(beacon, isVampireConversion);
             this.activeConversions.put(beaconKey, data);
@@ -233,6 +233,7 @@ public class BeaconConversionListener implements Listener {
     private void cancelConversion(String beaconKey, ConversionData data) {
         data.cleanup();
         BeaconSite beacon = this.beaconManager.getBeacon(beaconKey);
+
         if (beacon != null) {
             this.broadcastToBeaconArea(beacon, "§7Beacon conversion of §e" + beacon.getName() + " §7has been interrupted!");
         }

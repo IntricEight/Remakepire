@@ -72,8 +72,7 @@ public class PlayerJoinListener implements Listener {
                     player.sendMessage("§c  - " + warning);
                 }
 
-                int var10001 = (int)this.plugin.getConfigManager().getOakhurstMinX();
-                player.sendMessage("§7Border: X[" + var10001 + " to " + (int)this.plugin.getConfigManager().getOakhurstMaxX() + "] Z[" + (int)this.plugin.getConfigManager().getOakhurstMinZ() + " to " + (int)this.plugin.getConfigManager().getOakhurstMaxZ() + "]");
+                player.sendMessage("§7Border: X[" + (int)this.plugin.getConfigManager().getOakhurstMinX() + " to " + (int)this.plugin.getConfigManager().getOakhurstMaxX() + "] Z[" + (int)this.plugin.getConfigManager().getOakhurstMinZ() + " to " + (int)this.plugin.getConfigManager().getOakhurstMaxZ() + "]");
                 player.sendMessage("§7Check config.yml oakhurst.border settings.");
                 player.sendMessage("");
             }

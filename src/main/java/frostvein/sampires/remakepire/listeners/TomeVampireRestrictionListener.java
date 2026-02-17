@@ -35,8 +35,8 @@ public class TomeVampireRestrictionListener implements Listener {
             priority = EventPriority.HIGH
     )
     public void onTomePickup(EntityPickupItemEvent event) {
-        LivingEntity var3 = event.getEntity();
-        if (var3 instanceof Player player) {
+        LivingEntity entity = event.getEntity();
+        if (entity instanceof Player player) {
             if (this.isRestrictedVampire(player)) {
                 ItemStack item = event.getItem().getItemStack();
                 if (this.isTome(item)) {
@@ -51,14 +51,13 @@ public class TomeVampireRestrictionListener implements Listener {
             priority = EventPriority.HIGH
     )
     public void onInventoryClick(InventoryClickEvent event) {
-        HumanEntity var3 = event.getWhoClicked();
-        if (var3 instanceof Player player) {
+        HumanEntity entity = event.getWhoClicked();
+        if (entity instanceof Player player) {
             if (this.isRestrictedVampire(player)) {
                 ItemStack currentItem = event.getCurrentItem();
                 ItemStack cursorItem = event.getCursor();
-                boolean currentIsTome = this.isTome(currentItem);
-                boolean cursorIsTome = this.isTome(cursorItem);
-                if (currentIsTome || cursorIsTome) {
+
+                if (this.isTome(currentItem) || this.isTome(cursorItem)) {
                     event.setCancelled(true);
                     player.sendMessage("§4§lThe tome sears your flesh! You cannot touch such holy artifacts!");
                     Bukkit.getScheduler().runTask(this.plugin, () -> player.updateInventory());
@@ -86,17 +85,19 @@ public class TomeVampireRestrictionListener implements Listener {
 
         for(int i = 0; i < player.getInventory().getSize(); ++i) {
             ItemStack item = player.getInventory().getItem(i);
+
             if (this.isTome(item)) {
                 player.getWorld().dropItemNaturally(player.getLocation(), item);
-                player.getInventory().setItem(i, (ItemStack)null);
+                player.getInventory().setItem(i, null);
                 foundTome = true;
             }
         }
 
         ItemStack offhandItem = player.getInventory().getItemInOffHand();
+
         if (this.isTome(offhandItem)) {
             player.getWorld().dropItemNaturally(player.getLocation(), offhandItem);
-            player.getInventory().setItemInOffHand((ItemStack)null);
+            player.getInventory().setItemInOffHand(null);
             foundTome = true;
         }
 
@@ -114,18 +115,21 @@ public class TomeVampireRestrictionListener implements Listener {
         if (this.isRestrictedVampire(player)) {
             this.checkAndDropTomes(player);
         }
-
     }
 
     private boolean isTome(ItemStack item) {
         if (item == null) {
             return false;
+
         } else if (item.getType() != Material.BOOK && item.getType() != Material.WRITTEN_BOOK) {
             return false;
+
         } else {
             ItemMeta meta = item.getItemMeta();
+
             if (meta == null) {
                 return false;
+
             } else {
                 if (meta.hasDisplayName()) {
                     String displayName = meta.getDisplayName();
@@ -136,6 +140,7 @@ public class TomeVampireRestrictionListener implements Listener {
 
                 if (meta.hasLore()) {
                     List<String> lore = meta.getLore();
+
                     if (lore != null) {
                         for(String line : lore) {
                             if (line.contains("Tome Type: ")) {
@@ -147,6 +152,7 @@ public class TomeVampireRestrictionListener implements Listener {
 
                 if (item.getType() == Material.WRITTEN_BOOK && meta instanceof BookMeta) {
                     BookMeta bookMeta = (BookMeta)meta;
+
                     if (bookMeta.hasTitle()) {
                         String title = bookMeta.getTitle();
                         return this.tomeManager.isValidAbility(title);

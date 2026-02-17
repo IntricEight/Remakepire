@@ -70,13 +70,13 @@ public class VampireAbilityCommand implements CommandExecutor, TabCompleter {
                         }
                     }
 
-                    boolean success = this.abilityManager.useAbility(player, subCommand);
-                    if (!success && this.abilityManager.getAbility(subCommand) == null) {
+                    if (!this.abilityManager.useAbility(player, subCommand) && this.abilityManager.getAbility(subCommand) == null) {
                         player.sendMessage("§cUnknown ability: " + subCommand);
                         player.sendMessage("§eUse '/pow vability list' to see available abilities.");
                     }
 
                     return true;
+
                 } else {
                     Location beaconLoc = suppressingBeacon.getLocation();
                     beaconLoc.distance(player.getLocation());
@@ -172,30 +172,33 @@ public class VampireAbilityCommand implements CommandExecutor, TabCompleter {
                         String[] parts = globalInfo.split("\\(last used by ");
                         if (parts.length > 1) {
                             String lastUser = parts[1].replace(")", "");
-                            String var10000 = VampireAbilityManager.formatTime(remaining);
-                            status = " §c(Global: " + var10000 + " - " + lastUser + ")";
+                            status = " §c(Global: " + VampireAbilityManager.formatTime(remaining) + " - " + lastUser + ")";
                         }
                     }
                 } else {
                     status = " §a(Ready - Global Ability)";
                 }
+
             } else if (this.abilityManager.isOnCooldown(player, ability.getName())) {
                 long remaining = this.abilityManager.getRemainingCooldown(player, ability.getName());
                 status = " §c(Cooldown: " + VampireAbilityManager.formatTime(remaining) + ")";
+
             } else {
                 status = " §a(Ready)";
             }
+
         } else if (suppressed && canUse) {
             status = " §c(SUPPRESSED by Holy Power)";
             nameColor = "§8";
+
         } else {
             status = " §c(Locked - Requires Stage " + ability.getMinimumStage() + ")";
         }
 
         player.sendMessage(nameColor + ability.getDisplayName() + status);
         player.sendMessage("  §7" + ability.getDescription());
-        int var17 = ability.getMinimumStage();
-        String cooldownInfo = "  §7Required Stage: §e" + var17 + " §7| Cooldown: §e" + VampireAbilityManager.formatTime((long)ability.getCooldownSeconds(this.plugin));
+        String cooldownInfo = "  §7Required Stage: §e" + ability.getMinimumStage() + " §7| Cooldown: §e" + VampireAbilityManager.formatTime((long)ability.getCooldownSeconds(this.plugin));
+
         if (ability instanceof StormCallAbility) {
             cooldownInfo = cooldownInfo + " §c(Global)";
         }
@@ -204,6 +207,7 @@ public class VampireAbilityCommand implements CommandExecutor, TabCompleter {
         if (canUse && !suppressed) {
             if (ability.getName().equals("bat") && this.plugin.getBatTransformationManager().isInBatForm(player)) {
                 player.sendMessage("  §7Usage: §e/pow vability " + ability.getName() + " §7(to transform back)");
+
             } else {
                 player.sendMessage("  §7Usage: §e/pow vability " + ability.getName());
             }
@@ -216,12 +220,13 @@ public class VampireAbilityCommand implements CommandExecutor, TabCompleter {
 
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         if (!(sender instanceof Player player)) {
-            return new ArrayList();
+            return new ArrayList<>();
         } else {
-            List<String> completions = new ArrayList();
+            List<String> completions = new ArrayList<>();
             if (args.length == 1) {
                 completions.add("list");
                 completions.add("all");
+
                 if (this.plugin.getVampireManager().isVampire(player)) {
                     List<VampireAbility> availableAbilities = this.abilityManager.getAvailableAbilities(player);
                     completions.addAll((Collection)availableAbilities.stream().map(VampireAbility::getName).collect(Collectors.toList()));

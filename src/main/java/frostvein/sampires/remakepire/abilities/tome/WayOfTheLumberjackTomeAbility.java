@@ -82,8 +82,7 @@ public class WayOfTheLumberjackTomeAbility extends TomeAbility implements Listen
     }
 
     private String locationToString(Location location) {
-        String var10000 = location.getWorld().getName();
-        return var10000 + "," + location.getBlockX() + "," + location.getBlockY() + "," + location.getBlockZ();
+        return location.getWorld().getName() + "," + location.getBlockX() + "," + location.getBlockY() + "," + location.getBlockZ();
     }
 
     private void loadPlacedLogs() {
@@ -92,6 +91,7 @@ public class WayOfTheLumberjackTomeAbility extends TomeAbility implements Listen
                 Type setType = (new TypeToken<HashSet<String>>() {
                 }).getType();
                 Set<String> loaded = (Set)this.gson.fromJson(reader, setType);
+
                 if (loaded != null) {
                     this.placedLogs = loaded;
                     this.plugin.getLogger().info("WayOfTheLumberjack: Loaded " + this.placedLogs.size() + " placed log locations");

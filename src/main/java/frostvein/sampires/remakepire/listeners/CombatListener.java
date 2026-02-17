@@ -363,8 +363,8 @@ public class CombatListener implements Listener {
             priority = EventPriority.HIGH
     )
     public void onEntityDamage(EntityDamageEvent event) {
-        Entity var3 = event.getEntity();
-        if (var3 instanceof Player player) {
+        Entity entity = event.getEntity();
+        if (entity instanceof Player player) {
             if (!this.plugin.getSessionManager().isSessionActive()) {
                 event.setCancelled(true);
             } else {
@@ -471,27 +471,20 @@ public class CombatListener implements Listener {
     }
 
     private double getVampireFistMultiplier(int stage) {
-        double var10000;
-        switch (stage) {
-            case 1 -> var10000 = 1.0;
-            case 2 -> var10000 = 2.0;
-            case 3 -> var10000 = 3.0;
-            default -> var10000 = 1.0;
-        }
-
-        return var10000;
+        return switch (stage) {
+            case 1 -> 1.0;
+            case 2 -> 2.0;
+            case 3 -> 3.0;
+            default -> 1.0;
+        };
     }
 
     private double getFireDamageMultiplier(int stage) {
-        double var10000;
-        switch (stage) {
-            case 1 -> var10000 = 1.5;
-            case 2 -> var10000 = 2.0;
-            case 3 -> var10000 = 2.0;
-            default -> var10000 = 1.0;
-        }
-
-        return var10000;
+        return switch (stage) {
+            case 1 -> 1.5;
+            case 2, 3 -> 2.0;
+            default -> 1.0;
+        };
     }
 
     private void playCrimsonSwipeSound(Player vampire) {

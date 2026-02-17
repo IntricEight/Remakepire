@@ -183,10 +183,8 @@ public class BeaconTeleportListener implements Listener {
         final Location finalDestination = destination;
         (new BukkitRunnable() {
             public void run() {
-                boolean success = player.teleport(finalDestination);
-                if (success) {
-                    boolean cooldownApplied = BeaconTeleportListener.this.plugin.getVampireAbilityManager().applyCooldownForAbility(player, "beacontravel");
-                    if (cooldownApplied) {
+                if (player.teleport(finalDestination)) {
+                    if (BeaconTeleportListener.this.plugin.getVampireAbilityManager().applyCooldownForAbility(player, "beacontravel")) {
                         BeaconTeleportListener.this.plugin.getLogger().info("Applied beacon travel cooldown for player: " + player.getName());
                     } else {
                         BeaconTeleportListener.this.plugin.getLogger().warning("Failed to apply beacon travel cooldown for player: " + player.getName());
@@ -215,6 +213,7 @@ public class BeaconTeleportListener implements Listener {
         Location safe = original.clone();
         if (this.isSafeLocation(safe)) {
             return safe;
+
         } else {
             for(int y = -2; y <= 3; ++y) {
                 for(int x = -2; x <= 2; ++x) {
@@ -235,13 +234,16 @@ public class BeaconTeleportListener implements Listener {
     private boolean isSafeLocation(Location loc) {
         if (loc.getWorld() == null) {
             return false;
+
         } else {
             Material groundMaterial = loc.clone().subtract(0.0, 1.0, 0.0).getBlock().getType();
             Material feetMaterial = loc.getBlock().getType();
             Material headMaterial = loc.clone().add(0.0, 1.0, 0.0).getBlock().getType();
+
             boolean hasGround = groundMaterial.isSolid() && !groundMaterial.equals(Material.LAVA) && !groundMaterial.equals(Material.WATER);
             boolean feetClear = !feetMaterial.isSolid() || feetMaterial.equals(Material.WATER) || feetMaterial.equals(Material.LAVA);
             boolean headClear = !headMaterial.isSolid() || headMaterial.equals(Material.WATER) || headMaterial.equals(Material.LAVA);
+
             return hasGround && feetClear && headClear;
         }
     }

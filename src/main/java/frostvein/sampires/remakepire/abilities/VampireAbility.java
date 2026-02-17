@@ -11,7 +11,7 @@ public abstract class VampireAbility {
 
     public abstract String getDescription();
 
-    public abstract int getCooldownSeconds(RemakepirePlugin var1);
+    public abstract int getCooldownSeconds(RemakepirePlugin plugin);
 
     public abstract int getMinimumStage();
 
@@ -31,11 +31,13 @@ public abstract class VampireAbility {
     public String getRequirementMessage(Player player, VampireManager vampireManager) {
         if (!vampireManager.isVampire(player)) {
             return "You must be a vampire to use this ability!";
+
         } else {
             int playerStage = vampireManager.getVampireStage(player);
+
             if (playerStage < this.getMinimumStage()) {
-                int var10000 = this.getMinimumStage();
-                return "You must be at least a Stage " + var10000 + " vampire to use " + this.getDisplayName() + "! (You are Stage " + playerStage + ")";
+                return "You must be at least a Stage " + this.getMinimumStage() + " vampire to use " + this.getDisplayName() + "! (You are Stage " + playerStage + ")";
+
             } else {
                 return this.getAdditionalRequirementMessage(player, vampireManager);
             }
@@ -46,5 +48,5 @@ public abstract class VampireAbility {
         return "You cannot use this ability right now!";
     }
 
-    public abstract boolean execute(Player var1, VampireManager var2, RemakepirePlugin var3);
+    public abstract boolean execute(Player player, VampireManager vampireManager, RemakepirePlugin plugin);
 }

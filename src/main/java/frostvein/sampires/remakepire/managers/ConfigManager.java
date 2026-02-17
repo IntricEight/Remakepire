@@ -46,7 +46,7 @@ public class ConfigManager {
                         int z = Integer.parseInt(parts[2].trim());
                         locations.add(new Location(world, x, y, z));
                     }
-                } catch (NumberFormatException var10) {
+                } catch (NumberFormatException e) {
                     this.plugin.getLogger().warning("Invalid tome chest location format: " + locString);
                 }
             }
@@ -261,7 +261,7 @@ public class ConfigManager {
             double z = Double.parseDouble(parts[2].trim());
             return new Location(world, x, y, z);
 
-        } catch (Exception var10) {
+        } catch (Exception e) {
             this.plugin.getLogger().warning("Invalid vampire respawn location format: " + locationStr + ". Using default.");
             return new Location(world, 40.0, 101.0, -113.0);
         }

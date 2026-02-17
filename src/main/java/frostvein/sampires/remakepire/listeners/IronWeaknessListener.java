@@ -100,8 +100,7 @@ public class IronWeaknessListener implements Listener {
                     if (item != null && !item.getType().isAir() && this.ironMaterials.contains(item.getType())) {
                         player.getWorld().dropItemNaturally(player.getLocation(), item);
                         inventory.setItem(i, (ItemStack)null);
-                        int var10001 = item.getAmount();
-                        droppedItems.add(var10001 + "x " + item.getType().name().replace("_", " ").toLowerCase());
+                        droppedItems.add(item.getAmount() + "x " + item.getType().name().replace("_", " ").toLowerCase());
                         foundIronItems = true;
                     }
                 }
@@ -113,8 +112,7 @@ public class IronWeaknessListener implements Listener {
                     if (item != null && !item.getType().isAir() && this.ironMaterials.contains(item.getType())) {
                         player.getWorld().dropItemNaturally(player.getLocation(), item);
                         armor[i] = null;
-                        int var13 = item.getAmount();
-                        droppedItems.add(var13 + "x " + item.getType().name().replace("_", " ").toLowerCase());
+                        droppedItems.add(item.getAmount() + "x " + item.getType().name().replace("_", " ").toLowerCase());
                         foundIronItems = true;
                     }
                 }
@@ -123,9 +121,8 @@ public class IronWeaknessListener implements Listener {
                 ItemStack offhand = inventory.getItemInOffHand();
                 if (offhand != null && !offhand.getType().isAir() && this.ironMaterials.contains(offhand.getType())) {
                     player.getWorld().dropItemNaturally(player.getLocation(), offhand);
-                    inventory.setItemInOffHand((ItemStack)null);
-                    int var14 = offhand.getAmount();
-                    droppedItems.add(var14 + "x " + offhand.getType().name().replace("_", " ").toLowerCase());
+                    inventory.setItemInOffHand(null);
+                    droppedItems.add(offhand.getAmount() + "x " + offhand.getType().name().replace("_", " ").toLowerCase());
                     foundIronItems = true;
                 }
 
@@ -144,6 +141,7 @@ public class IronWeaknessListener implements Listener {
             if (this.vampireManager.isIronAffected(player)) {
                 if (event.getClick() == ClickType.SHIFT_LEFT || event.getClick() == ClickType.SHIFT_RIGHT || event.getClick() == ClickType.LEFT || event.getClick() == ClickType.RIGHT) {
                     ItemStack clickedItem = event.getCurrentItem();
+
                     if (clickedItem == null || clickedItem.getType().isAir()) {
                         return;
                     }
@@ -152,7 +150,6 @@ public class IronWeaknessListener implements Listener {
                         this.handleShiftClickIntoInventory(player, clickedItem, event);
                     }
                 }
-
             }
         }
     }
@@ -177,7 +174,6 @@ public class IronWeaknessListener implements Listener {
                         player.sendMessage("§cThe silver you have tried to pick up burns your fingers as you touch it... Best leave it alone...");
                     }
                 }
-
             }
         }
     }
@@ -194,7 +190,6 @@ public class IronWeaknessListener implements Listener {
                     event.setCancelled(true);
                     player.sendMessage("§cThe Holy Water burns your hand as you try to throw it! You feel unable to bring yourself to use this item...");
                 }
-
             }
         }
     }
@@ -212,7 +207,6 @@ public class IronWeaknessListener implements Listener {
                     if (this.isHolyWater(potionItem)) {
                         event.setCancelled(true);
                     }
-
                 }
             }
         }
@@ -247,16 +241,13 @@ public class IronWeaknessListener implements Listener {
                         this.plugin.getServer().getScheduler().runTask(this.plugin, () -> player.setVelocity(knockbackDirection));
                         this.knockbackCooldowns.put(playerId, currentTime);
                     }
-
                 }
             }
         }
     }
 
     private Vector getDirectionAwayFromNearestIron(Location location) {
-        int x = location.getBlockX();
-        int y = location.getBlockY();
-        int z = location.getBlockZ();
+        int x = location.getBlockX(), y = location.getBlockY(), z = location.getBlockZ();
         Location nearestIron = null;
         double nearestDistance = Double.MAX_VALUE;
 
@@ -264,9 +255,11 @@ public class IronWeaknessListener implements Listener {
             for(int dy = -2; dy <= 2; ++dy) {
                 for(int dz = -2; dz <= 2; ++dz) {
                     Block block = location.getWorld().getBlockAt(x + dx, y + dy, z + dz);
+
                     if (this.ironMaterials.contains(block.getType())) {
                         Location ironLoc = block.getLocation().add(0.5, 0.5, 0.5);
                         double distance = location.distance(ironLoc);
+
                         if (distance < nearestDistance) {
                             nearestDistance = distance;
                             nearestIron = ironLoc;
@@ -277,8 +270,7 @@ public class IronWeaknessListener implements Listener {
         }
 
         if (nearestIron != null) {
-            Vector direction = location.toVector().subtract(nearestIron.toVector()).normalize();
-            return direction;
+            return location.toVector().subtract(nearestIron.toVector()).normalize();
         } else {
             return new Vector(0, 0, 1);
         }
@@ -288,6 +280,7 @@ public class IronWeaknessListener implements Listener {
         for(Player player : Bukkit.getOnlinePlayers()) {
             if (this.vampireManager.isVampire(player)) {
                 Location playerLoc = player.getLocation();
+
                 if (this.isNearIronBlock(playerLoc, 5.0)) {
                     this.applyIronEffects(player);
                 }
@@ -297,14 +290,13 @@ public class IronWeaknessListener implements Listener {
     }
 
     private boolean isNearIronBlock(Location location, double radius) {
-        int x = location.getBlockX();
-        int y = location.getBlockY();
-        int z = location.getBlockZ();
+        int x = location.getBlockX(), y = location.getBlockY(), z = location.getBlockZ();
 
         for(double dx = -radius; dx <= radius; ++dx) {
             for(double dy = -radius; dy <= radius; ++dy) {
                 for(double dz = -radius; dz <= radius; ++dz) {
                     Block block = location.getWorld().getBlockAt((int)(x + dx), (int)(y + dy), (int)(z + dz));
+
                     if (this.ironMaterials.contains(block.getType())) {
                         return true;
                     }
@@ -317,11 +309,11 @@ public class IronWeaknessListener implements Listener {
 
     private void applyIronEffects(Player player) {
         player.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, 40, 2, false, false));
+
         if (!player.getScoreboardTags().contains("informed_iron_block_effects")) {
             player.addScoreboardTag("informed_iron_block_effects");
             player.sendMessage("§cA source of silver nearby is weakening you...");
         }
-
     }
 
     private boolean isHolyWater(ItemStack item) {

@@ -72,8 +72,7 @@ public class TomeAbilityCommand implements CommandExecutor, TabCompleter {
     }
 
     private boolean handleAbilityUse(Player player, String abilityName) {
-        boolean success = this.tomeManager.useAbility(player, abilityName);
-        return !success ? true : true;
+        return !this.tomeManager.useAbility(player, abilityName) ? true : true;
     }
 
     private void sendUsage(Player player) {

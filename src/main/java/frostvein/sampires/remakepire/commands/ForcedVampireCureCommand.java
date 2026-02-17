@@ -130,10 +130,7 @@ public class ForcedVampireCureCommand implements CommandExecutor {
     }
 
     private ItemStack findHolyWater(Player player) {
-        ListIterator var2 = player.getInventory().iterator();
-
-        while(var2.hasNext()) {
-            ItemStack item = (ItemStack)var2.next();
+        for (ItemStack item : player.getInventory()) {
             if (this.isWaterSplashBottle(item)) {
                 return item;
             }
@@ -146,17 +143,21 @@ public class ForcedVampireCureCommand implements CommandExecutor {
         if (item != null && item.getType() == Material.SPLASH_POTION) {
             if (!item.hasItemMeta()) {
                 return true;
+
             } else if (!(item.getItemMeta() instanceof PotionMeta)) {
                 return true;
+
             } else {
                 PotionMeta potionMeta = (PotionMeta)item.getItemMeta();
+
                 if (potionMeta.hasCustomEffects()) {
                     return false;
+
                 } else {
                     try {
                         PotionType baseType = potionMeta.getBasePotionType();
                         return baseType == PotionType.WATER;
-                    } catch (Exception var4) {
+                    } catch (Exception e) {
                         return true;
                     }
                 }

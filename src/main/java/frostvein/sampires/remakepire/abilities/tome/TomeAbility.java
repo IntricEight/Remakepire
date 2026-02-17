@@ -43,17 +43,18 @@ public abstract class TomeAbility {
             long remainingTime = this.getRemainingCooldown(player);
             this.sendCannotUseMessage(player, "ability is on cooldown! " + VampireAbilityManager.formatTime(remainingTime) + " remaining.");
             return false;
-        } else {
-            boolean success = this.useAbility(player);
-            if (success) {
-                this.setCooldown(player);
-            }
 
-            return success;
+        } else {
+            if (this.useAbility(player)) {
+                this.setCooldown(player);
+                return true;
+            } else {
+                return false;
+            }
         }
     }
 
-    protected abstract boolean useAbility(Player var1);
+    protected abstract boolean useAbility(Player player);
 
     protected boolean canUse(Player player) {
         return this.plugin.getVampireManager().isHuman(player);
@@ -70,9 +71,11 @@ public abstract class TomeAbility {
     protected boolean isOnCooldown(Player player) {
         UUID playerId = player.getUniqueId();
         Map<String, Long> cooldowns = (Map)playerCooldowns.get(playerId);
+
         if (cooldowns != null && cooldowns.containsKey(this.name)) {
             long cooldownEnd = (Long)cooldowns.get(this.name);
             return System.currentTimeMillis() < cooldownEnd;
+
         } else {
             return false;
         }
@@ -99,9 +102,9 @@ public abstract class TomeAbility {
     }
 
     private void scheduleCooldownNotification(Player player, int cooldownSeconds) {
-        String var10000 = String.valueOf(player.getUniqueId());
-        String taskKey = var10000 + ":" + this.name;
+        String taskKey = String.valueOf(player.getUniqueId()) + ":" + this.name;
         BukkitTask existingTask = (BukkitTask)cooldownNotificationTasks.get(taskKey);
+
         if (existingTask != null && !existingTask.isCancelled()) {
             existingTask.cancel();
         }
@@ -129,8 +132,7 @@ public abstract class TomeAbility {
             cooldowns.remove(abilityName);
         }
 
-        String var10000 = String.valueOf(playerId);
-        String taskKey = var10000 + ":" + abilityName;
+        String taskKey = String.valueOf(playerId) + ":" + abilityName;
         BukkitTask task = (BukkitTask)cooldownNotificationTasks.get(taskKey);
         if (task != null && !task.isCancelled()) {
             task.cancel();

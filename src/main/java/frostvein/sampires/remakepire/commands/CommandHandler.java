@@ -207,7 +207,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                 y = Double.parseDouble(args[1]);
                 z = Double.parseDouble(args[2]);
 
-            } catch (NumberFormatException var11) {
+            } catch (NumberFormatException e) {
                 sender.sendMessage("§cInvalid coordinates. Usage: /pow admin set_vampire_spawn [x y z]");
                 return true;
             }
@@ -344,7 +344,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                         sender.sendMessage("§7Changes saved to config and take effect immediately");
                         return true;
                     }
-                } catch (NumberFormatException var6) {
+                } catch (NumberFormatException e) {
                     sender.sendMessage("§cInvalid number: " + args[1]);
                     return true;
                 }
@@ -543,9 +543,10 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                         if (this.vampireManager.hasStageCap(target)) {
                             int cap = this.vampireManager.getStageCap(target);
                             this.vampireManager.clearStageCap(target);
-                            String var10001 = target.getName();
-                            sender.sendMessage("§aCleared stage cap for " + var10001 + " (was capped at stage " + cap + ")");
+
+                            sender.sendMessage("§aCleared stage cap for " + target.getName() + " (was capped at stage " + cap + ")");
                             target.sendMessage("§aYour stage cap has been removed by an administrator. You can now level up freely.");
+
                         } else {
                             sender.sendMessage("§c" + target.getName() + " does not have a stage cap.");
                         }
@@ -556,6 +557,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                             this.vampireManager.clearPromotionBan(target);
                             sender.sendMessage("§aCleared promotion ban for " + target.getName());
                             target.sendMessage("§aYour promotion ban has been removed by an administrator. You can now level up.");
+
                         } else {
                             sender.sendMessage("§c" + target.getName() + " does not have a promotion ban.");
                         }
@@ -712,7 +714,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                             } else {
                                 sender.sendMessage("§cRadius must be between 1 and 100. Using default radius of 10.");
                             }
-                        } catch (NumberFormatException var10) {
+                        } catch (NumberFormatException e) {
                             sender.sendMessage("§cInvalid radius number. Using default radius of 10.");
                         }
                     }
@@ -749,8 +751,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                         sender.sendMessage("§7Teleported to beacon location to ensure chunk is loaded...");
 
                         this.plugin.getServer().getScheduler().runTaskLater(this.plugin, () -> {
-                            boolean success = this.beaconManager.removeBeacon(name);
-                            if (success) {
+                            if (this.beaconManager.removeBeacon(name)) {
                                 sender.sendMessage("§aBeacon '" + name + "' removed.");
                             } else {
                                 sender.sendMessage("§cFailed to remove beacon '" + name + "'.");
@@ -759,12 +760,12 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                             player.teleport(originalLoc);
                             sender.sendMessage("§7Teleported back to original location.");
                         }, 5L);
+
                         return true;
                     }
                 }
 
-                boolean success = this.beaconManager.removeBeacon(name);
-                if (success) {
+                if (this.beaconManager.removeBeacon(name)) {
                     sender.sendMessage("§aBeacon '" + name + "' removed.");
                 } else {
                     sender.sendMessage("§cFailed to remove beacon '" + name + "'.");
@@ -968,7 +969,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                                 return true;
                             }
 
-                        } catch (NumberFormatException var17) {
+                        } catch (NumberFormatException e) {
                             sender.sendMessage("§cInvalid amount: '" + args[2] + "'. Must be a number between 1 and 64.");
                             return true;
                         }
@@ -1076,7 +1077,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                         sender.sendMessage("§cBook number must be 1, 2, 3, or 4.");
                         return true;
                     }
-                } catch (NumberFormatException var6) {
+                } catch (NumberFormatException e) {
                     sender.sendMessage("§cInvalid book number: '" + args[1] + "'. Must be 1, 2, 3, or 4.");
                     return true;
                 }
@@ -1153,20 +1154,20 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         if (!(sender instanceof Player player)) {
             sender.sendMessage("§cThis command can only be used by players.");
             return true;
+
         } else {
             Location location = player.getLocation();
-            boolean success = this.plugin.getTomeDistributionManager().addTomeLocation(location);
-            if (success) {
+
+            if (this.plugin.getTomeDistributionManager().addTomeLocation(location)) {
                 location.getBlock().setType(Material.CHEST);
                 sender.sendMessage("§a✔ Successfully added tome chest location.");
-                int var10001 = location.getBlockX();
-                sender.sendMessage("§7Location: §e" + var10001 + ", " + location.getBlockY() + ", " + location.getBlockZ());
+                sender.sendMessage("§7Location: §e" + location.getBlockX() + ", " + location.getBlockY() + ", " + location.getBlockZ());
                 sender.sendMessage("§7A chest has been placed at this location.");
                 sender.sendMessage("§7Total tome chest locations: §e" + this.plugin.getTomeDistributionManager().getTomeLocations().size());
+
             } else {
                 sender.sendMessage("§c✖ This location already exists in the tome chest list.");
-                int var6 = location.getBlockX();
-                sender.sendMessage("§7Location: §e" + var6 + ", " + location.getBlockY() + ", " + location.getBlockZ());
+                sender.sendMessage("§7Location: §e" + location.getBlockX() + ", " + location.getBlockY() + ", " + location.getBlockZ());
             }
 
             return true;
@@ -1177,6 +1178,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         if (!(sender instanceof Player player)) {
             sender.sendMessage("§cThis command can only be used by players.");
             return true;
+
         } else {
             Location playerLocation = player.getLocation();
             List<Location> tomeLocations = this.plugin.getTomeDistributionManager().getTomeLocations();
@@ -1199,14 +1201,12 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                     sender.sendMessage("§7Removed physical chest at location.");
                 }
 
-                boolean success = this.plugin.getTomeDistributionManager().removeTomeLocation(nearestLocation);
-                if (success) {
+                if (this.plugin.getTomeDistributionManager().removeTomeLocation(nearestLocation)) {
                     sender.sendMessage("§a✔ Successfully removed tome chest location.");
-                    int var10001 = nearestLocation.getBlockX();
-                    sender.sendMessage("§7Location: §e" + var10001 + ", " + nearestLocation.getBlockY() + ", " + nearestLocation.getBlockZ());
-                    Object[] var10002 = new Object[]{nearestDistance};
-                    sender.sendMessage("§7Distance: §e" + String.format("%.1f", var10002) + " blocks");
+                    sender.sendMessage("§7Location: §e" + nearestLocation.getBlockX() + ", " + nearestLocation.getBlockY() + ", " + nearestLocation.getBlockZ());
+                    sender.sendMessage("§7Distance: §e" + String.format("%.1f", nearestDistance) + " blocks");
                     sender.sendMessage("§7Total tome chest locations: §e" + this.plugin.getTomeDistributionManager().getTomeLocations().size());
+
                 } else {
                     sender.sendMessage("§c✖ Failed to remove tome chest location from config.");
                 }
@@ -1402,7 +1402,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
 
                         sender.sendMessage("§cPercentage must be between 0 and 100.");
                         return true;
-                    } catch (NumberFormatException var8) {
+                    } catch (NumberFormatException e) {
                         sender.sendMessage("§cInvalid number format. Use whole numbers (e.g., 50).");
                     } catch (Exception e) {
                         sender.sendMessage("§cError setting damage suppression: " + e.getMessage());

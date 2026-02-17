@@ -29,27 +29,28 @@ public class BatAbility extends VampireAbility {
 
     public boolean execute(Player player, VampireManager vampireManager, RemakepirePlugin plugin) {
         if (plugin.getBatTransformationManager().isInBatForm(player)) {
-            boolean success = plugin.getBatTransformationManager().transformToHuman(player);
-            if (success) {
+            if (plugin.getBatTransformationManager().transformToHuman(player)) {
                 player.sendMessage("§6You transform back into your vampiric form.");
                 player.playSound(player, Sound.ENTITY_BAT_TAKEOFF, SoundCategory.MASTER, 0.8F, 0.8F);
+                return true;
+
             } else {
                 player.sendMessage("§cFailed to transform back to human form.");
+                return false;
             }
-
-            return success;
         } else {
-            boolean success = plugin.getBatTransformationManager().transformToBat(player);
-            if (success) {
+            if (plugin.getBatTransformationManager().transformToBat(player)) {
                 player.sendMessage("§cIn a flurry of wings, you transform into a bat");
                 player.sendMessage("§cBe warned, if you die in bat form, your human form dies too");
                 player.sendMessage("§7Use §e/pow vability bat §7again to transform back early.");
+
                 player.playSound(player, Sound.ENTITY_BAT_AMBIENT, SoundCategory.MASTER, 1.0F, 1.2F);
+                return true;
+
             } else {
                 player.sendMessage("§cFailed to transform into bat form.");
+                return false;
             }
-
-            return success;
         }
     }
 

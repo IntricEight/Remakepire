@@ -112,12 +112,11 @@ public class BatTransformationManager {
             UUID playerId = (UUID)entry.getKey();
             BatData batData = (BatData)entry.getValue();
             Player player = Bukkit.getPlayer(playerId);
+
             if (player != null && player.isOnline()) {
                 int remainingSeconds = batData.getRemainingSeconds();
-                int minutes = remainingSeconds / 60;
-                int seconds = remainingSeconds % 60;
-                Object[] var10001 = new Object[]{minutes, seconds};
-                String actionBar = "§8Bat Form: §c§l" + String.format("%d:%02d", var10001);
+                int minutes = remainingSeconds / 60, seconds = remainingSeconds % 60;
+                String actionBar = "§8Bat Form: §c§l" + String.format("%d:%02d", minutes, seconds);
                 player.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText(actionBar));
             }
         }
@@ -131,8 +130,10 @@ public class BatTransformationManager {
             Map.Entry<UUID, BatData> entry = (Map.Entry)iterator.next();
             UUID playerId = (UUID)entry.getKey();
             BatData batData = (BatData)entry.getValue();
+
             if (batData.batEntity != null && !batData.batEntity.isValid()) {
                 Player player = Bukkit.getPlayer(playerId);
+
                 if (player != null && player.isOnline()) {
                     this.handleBatDeath(player, batData);
                 }
@@ -149,6 +150,7 @@ public class BatTransformationManager {
         player.removeScoreboardTag("bat_form");
         this.restorePlayerArmor(player);
         player.removePotionEffect(PotionEffectType.INVISIBILITY);
+
         if (player.getGameMode() != GameMode.CREATIVE && player.getGameMode() != GameMode.SPECTATOR) {
             player.setFlying(false);
             player.setAllowFlight(false);
@@ -161,6 +163,7 @@ public class BatTransformationManager {
     public void handleBatDeath(Player player) {
         if (this.isInBatForm(player)) {
             BatData batData = (BatData)this.activeBats.get(player.getUniqueId());
+
             if (batData != null) {
                 this.handleBatDeath(player, batData);
                 this.cleanupBatData(batData);
@@ -188,6 +191,7 @@ public class BatTransformationManager {
         if (bat.getCustomName() != null && bat.getCustomName().startsWith("Â§8")) {
             String playerName = bat.getCustomName().substring(2);
             return Bukkit.getPlayer(playerName);
+
         } else {
             return null;
         }
@@ -201,8 +205,8 @@ public class BatTransformationManager {
                 Location currentLoc = player.getLocation().clone();
                 BatData batData = new BatData(System.currentTimeMillis());
                 batData.lastValidLocation = currentLoc;
-                boolean armorStored = this.armorStorageManager.storeAndClearPlayerArmor(player.getUniqueId(), player);
-                if (armorStored) {
+
+                if (this.armorStorageManager.storeAndClearPlayerArmor(player.getUniqueId(), player)) {
                     this.plugin.getLogger().info("Successfully stored and cleared armor for player " + player.getName() + " during bat transformation");
                 } else {
                     this.plugin.getLogger().info("No armor to store for player " + player.getName() + " during bat transformation");
@@ -222,6 +226,7 @@ public class BatTransformationManager {
                 bat.setCustomNameVisible(false);
                 bat.setSilent(true);
                 bat.setPersistent(true);
+
                 if (this.plugin.getVampireCastTeam() != null) {
                     this.plugin.getVampireCastTeam().addEntry(bat.getUniqueId().toString());
                 }
@@ -242,10 +247,12 @@ public class BatTransformationManager {
                         }
                     }
                 }).runTaskTimer(this.plugin, 1L, 1L);
+
                 this.activeBats.put(player.getUniqueId(), batData);
                 this.saveBatStates();
                 this.plugin.getLogger().info("Player " + player.getName() + " transformed into bat form");
                 return true;
+
             } catch (Exception e) {
                 this.plugin.getLogger().severe("Failed to transform player " + player.getName() + " into bat: " + e.getMessage());
                 e.printStackTrace();
@@ -257,11 +264,14 @@ public class BatTransformationManager {
     public boolean transformToHuman(Player player) {
         if (!this.isInBatForm(player)) {
             return false;
+
         } else {
             BatData batData = (BatData)this.activeBats.get(player.getUniqueId());
+
             if (batData == null) {
                 player.removeScoreboardTag("bat_form");
                 return false;
+
             } else {
                 this.forceTransformToHuman(player, batData);
                 this.activeBats.remove(player.getUniqueId());
@@ -278,12 +288,14 @@ public class BatTransformationManager {
             this.restorePlayerArmor(player);
             player.removePotionEffect(PotionEffectType.INVISIBILITY);
             player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW_FALLING, 200, 0, false, false));
+
             if (player.getGameMode() != GameMode.CREATIVE && player.getGameMode() != GameMode.SPECTATOR) {
                 player.setFlying(false);
                 player.setAllowFlight(false);
             }
 
             this.cleanupBatData(batData);
+
         } catch (Exception e) {
             this.plugin.getLogger().severe("Failed to transform player " + player.getName() + " back to human: " + e.getMessage());
             e.printStackTrace();
@@ -430,8 +442,7 @@ public class BatTransformationManager {
                 UUID playerId = (UUID)entry.getKey();
                 BatData batData = (BatData)entry.getValue();
                 if (!batData.isExpired()) {
-                    String var10001 = playerId.toString();
-                    writer.write(var10001 + ":" + batData.startTime);
+                    writer.write(playerId.toString() + ":" + batData.startTime);
                     writer.newLine();
                 }
             }

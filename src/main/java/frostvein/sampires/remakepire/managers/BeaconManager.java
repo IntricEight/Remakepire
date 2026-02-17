@@ -927,12 +927,10 @@ public class BeaconManager {
                             icon = "◯ ";
                     }
 
-                    String var10001 = state.getColorCode();
-                    list.add(var10001 + "§l" + icon + state.getDisplayName() + " Beacons: §r§7(" + stateBeacons.size() + ")");
+                    list.add(state.getColorCode() + "§l" + icon + state.getDisplayName() + " Beacons: §r§7(" + stateBeacons.size() + ")");
 
                     for(BeaconSite beacon : stateBeacons) {
-                        var10001 = beacon.getStatusString();
-                        list.add("  " + var10001.replace("\n", "\n  "));
+                        list.add("  " + beacon.getStatusString().replace("\n", "\n  "));
                     }
 
                     list.add("");
@@ -950,6 +948,7 @@ public class BeaconManager {
 
                 for(Map.Entry<String, BeaconSite> entry : this.beacons.entrySet()) {
                     BeaconSite beacon = (BeaconSite)entry.getValue();
+
                     if (beacon == null) {
                         this.plugin.getLogger().severe("Found null beacon with key: " + (String)entry.getKey());
                     } else if (beacon.getName() == null || beacon.getWorldName() == null) {
@@ -958,6 +957,7 @@ public class BeaconManager {
                 }
 
                 File backupFile = new File(this.dataFile.getParent(), "beacons_backup.json");
+
                 if (this.dataFile.exists()) {
                     try {
                         Files.copy(this.dataFile.toPath(), backupFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
@@ -966,9 +966,9 @@ public class BeaconManager {
                     }
                 }
 
-                Type type = (new TypeToken<Map<String, BeaconSite>>() {
-                }).getType();
+                Type type = (new TypeToken<Map<String, BeaconSite>>() {}).getType();
                 String jsonString = this.gson.toJson(this.beacons, type);
+
                 if (!this.beacons.isEmpty() && jsonString.length() < 50) {
                     this.plugin.getLogger().severe("JSON output suspiciously small for " + this.beacons.size() + " beacons. JSON: " + jsonString);
                     this.plugin.getLogger().severe("ABORTING SAVE to prevent data loss!");
@@ -981,14 +981,15 @@ public class BeaconManager {
                 try {
                     writer.write(jsonString);
                     writer.flush();
-                } catch (Throwable var11) {
+
+                } catch (Throwable failedWrite) {
                     try {
                         writer.close();
-                    } catch (Throwable var10) {
-                        var11.addSuppressed(var10);
+                    } catch (Throwable failedClose) {
+                        failedWrite.addSuppressed(failedClose);
                     }
 
-                    throw var11;
+                    throw failedWrite;
                 }
 
                 writer.close();

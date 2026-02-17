@@ -78,7 +78,7 @@ public class PermadeathManager {
                             UUID playerId = UUID.fromString((String)entry.getKey());
                             PermadeathMode mode = PermadeathManager.PermadeathMode.valueOf((String)entry.getValue());
                             this.permadeathModes.put(playerId, mode);
-                        } catch (IllegalArgumentException var9) {
+                        } catch (IllegalArgumentException e) {
                             this.plugin.getLogger().warning("PermadeathManager: Invalid data in file: " + (String)entry.getKey() + " = " + (String)entry.getValue());
                         }
                     }
@@ -99,17 +99,18 @@ public class PermadeathManager {
         boolean migrated = false;
         if (oldPermadeathFile.exists()) {
             try (FileReader reader = new FileReader(oldPermadeathFile)) {
-                Type type = (new TypeToken<Map<String, Boolean>>() {
-                }).getType();
+                Type type = (new TypeToken<Map<String, Boolean>>() {}).getType();
                 Map<String, Boolean> oldData = (Map)this.gson.fromJson(reader, type);
+
                 if (oldData != null) {
                     for(Map.Entry<String, Boolean> entry : oldData.entrySet()) {
                         try {
                             UUID playerId = UUID.fromString((String)entry.getKey());
-                            if ((Boolean)entry.getValue() && !this.permadeathModes.containsKey(playerId)) {
+
+                            if (entry.getValue() && !this.permadeathModes.containsKey(playerId)) {
                                 this.permadeathModes.put(playerId, PermadeathManager.PermadeathMode.ON);
                             }
-                        } catch (IllegalArgumentException var13) {
+                        } catch (IllegalArgumentException e) {
                         }
                     }
 
@@ -125,14 +126,15 @@ public class PermadeathManager {
                 Type type = (new TypeToken<Map<String, Boolean>>() {
                 }).getType();
                 Map<String, Boolean> oldData = (Map)this.gson.fromJson(reader, type);
+
                 if (oldData != null) {
                     for(Map.Entry<String, Boolean> entry : oldData.entrySet()) {
                         try {
                             UUID playerId = UUID.fromString((String)entry.getKey());
-                            if ((Boolean)entry.getValue()) {
+                            if (entry.getValue()) {
                                 this.permadeathModes.put(playerId, PermadeathManager.PermadeathMode.ABSOLUTE);
                             }
-                        } catch (IllegalArgumentException var11) {
+                        } catch (IllegalArgumentException e) {
                         }
                     }
 

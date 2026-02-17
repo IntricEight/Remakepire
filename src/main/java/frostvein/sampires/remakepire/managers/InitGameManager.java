@@ -323,7 +323,7 @@ public class InitGameManager {
                     admin.sendMessage("");
                     return true;
                 }
-            } catch (NumberFormatException var6) {
+            } catch (NumberFormatException e) {
                 admin.sendMessage("§c'" + input + "' is not a valid number. Please try again:");
                 return true;
             }
@@ -354,7 +354,7 @@ public class InitGameManager {
                     this.showFinalConfirmation(admin);
                     return true;
                 }
-            } catch (NumberFormatException var6) {
+            } catch (NumberFormatException e) {
                 admin.sendMessage("§c'" + input + "' is not a valid number. Please try again:");
                 return true;
             }
@@ -517,8 +517,7 @@ public class InitGameManager {
                     if (player.getGameMode() != GameMode.SURVIVAL) {
                         GameMode oldMode = player.getGameMode();
                         player.setGameMode(GameMode.SURVIVAL);
-                        String var10001 = player.getName();
-                        admin.sendMessage("§7  → Reset " + var10001 + " from " + oldMode.name().toLowerCase() + " to survival");
+                        admin.sendMessage("§7  → Reset " + player.getName() + " from " + oldMode.name().toLowerCase() + " to survival");
                     }
 
                     Location teleportLoc = this.getRandomTeleportLocation(world);

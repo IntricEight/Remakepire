@@ -123,8 +123,7 @@ public class ThirstManager {
     private void saveImmunityData() {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(this.immunityFile))) {
             for(Map.Entry<UUID, Integer> entry : this.immunityTimers.entrySet()) {
-                String var10001 = ((UUID)entry.getKey()).toString();
-                writer.write(var10001 + ":" + String.valueOf(entry.getValue()));
+                writer.write(((UUID)entry.getKey()).toString() + ":" + String.valueOf(entry.getValue()));
                 writer.newLine();
             }
         } catch (IOException e) {

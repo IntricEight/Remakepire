@@ -96,6 +96,7 @@ public class TomeListener implements Listener {
                                 player.sendMessage("\n§6§lTOME LEARNT");
                                 player.sendMessage("§eYou feel ancient knowledge flowing into your mind...");
                                 player.sendMessage("§aYou have learned the ability: §f" + tomeTitle);
+
                                 String command = "/pow tome " + tomeTitle.toLowerCase();
                                 TextComponent prefix = new TextComponent("§7Use ");
                                 TextComponent clickableCommand = new TextComponent("§f§n" + command);
@@ -103,12 +104,15 @@ public class TomeListener implements Listener {
                                 clickableCommand.setHoverEvent(new HoverEvent(net.md_5.bungee.api.chat.HoverEvent.Action.SHOW_TEXT, (new ComponentBuilder("§7Click to copy command to clipboard")).create()));
                                 TextComponent suffix = new TextComponent("§7 to activate this ability.");
                                 TextComponent fullMessage = new TextComponent("");
+
                                 fullMessage.addExtra(prefix);
                                 fullMessage.addExtra(clickableCommand);
                                 fullMessage.addExtra(suffix);
+
                                 player.sendMessage("");
                                 player.spigot().sendMessage(fullMessage);
                                 player.sendMessage("");
+
                                 if (item.getAmount() > 1) {
                                     item.setAmount(item.getAmount() - 1);
                                 } else {
@@ -117,7 +121,6 @@ public class TomeListener implements Listener {
 
                                 player.playSound(player, "minecraft:ambient.crimson_forest.mood", 1.0F, 1.0F);
                             }
-
                         }
                     }
                 }
@@ -189,21 +192,20 @@ public class TomeListener implements Listener {
 
     private void handleCureBookClick(Player admin, Player target, String tag) {
         boolean hasTag = target.getScoreboardTags().contains(tag);
-        String var10000;
-        switch (tag) {
-            case "CureBook1Read" -> var10000 = "Cure Book 1 (The Remedy)";
-            case "CureBook2Read" -> var10000 = "Cure Book 2 (The Cure)";
-            case "CureBook3Read" -> var10000 = "Cure Book 3 (The Absolution)";
-            case "CureBook4Read" -> var10000 = "Cure Book 4 (The Retribution)";
-            default -> var10000 = tag;
-        }
+        String friendlyName = switch (tag) {
+            case "CureBook1Read" -> "Cure Book 1 (The Remedy)";
+            case "CureBook2Read" -> "Cure Book 2 (The Cure)";
+            case "CureBook3Read" -> "Cure Book 3 (The Absolution)";
+            case "CureBook4Read" -> "Cure Book 4 (The Retribution)";
+            default -> tag;
+        };
 
-        String friendlyName = var10000;
         if (hasTag) {
             target.removeScoreboardTag(tag);
             admin.sendMessage("§cRemoved §5" + friendlyName + " §ctag from §e" + target.getName());
             target.sendMessage("§cThe §5" + friendlyName + " §ctag has been removed from you.");
             target.playSound(target.getLocation(), Sound.BLOCK_FIRE_EXTINGUISH, 1.0F, 1.0F);
+
         } else {
             target.addScoreboardTag(tag);
             admin.sendMessage("§aGranted §5" + friendlyName + " §atag to §e" + target.getName());
@@ -219,6 +221,7 @@ public class TomeListener implements Listener {
         if (event.getView().getTitle() != null && event.getView().getTitle().equals("§6§lSelect Tome Abilities")) {
             if (event.getPlayer() instanceof Player) {
                 Player player = (Player)event.getPlayer();
+
                 Bukkit.getScheduler().runTaskLater(this.plugin, () -> {
                     if (player.getOpenInventory() == null || player.getOpenInventory().getTitle() == null || !player.getOpenInventory().getTitle().equals("§6§lSelect Tome Abilities")) {
                         this.tomeManager.removeTomeSelectionTarget(player.getUniqueId());
@@ -226,7 +229,6 @@ public class TomeListener implements Listener {
 
                 }, 1L);
             }
-
         }
     }
 }
