@@ -39,7 +39,7 @@ public class HolyWaterEffectManager implements Listener {
     public void onPotionSplash(PotionSplashEvent event) {
         if (event instanceof WaterBottleSplashEvent waterEvent) {
             Location splashLocation = waterEvent.getPotion().getLocation();
-            double splashRadius = (double)4.0F;
+            double splashRadius = 4.0;
 
             for(Entity nearby : splashLocation.getWorld().getNearbyEntities(splashLocation, splashRadius, splashRadius, splashRadius)) {
                 if (nearby instanceof Player player) {

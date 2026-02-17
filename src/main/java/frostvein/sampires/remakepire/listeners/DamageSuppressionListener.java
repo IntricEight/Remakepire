@@ -22,9 +22,9 @@ public class DamageSuppressionListener implements Listener {
             try {
                 int suppressionScore = this.plugin.getConfig().getInt("damage_suppression", 50);
                 if (suppressionScore > 0) {
-                    double suppressionPercentage = (double)suppressionScore / (double)100.0F;
+                    double suppressionPercentage = suppressionScore / 100.0;
                     double originalDamage = event.getDamage();
-                    double suppressedDamage = originalDamage * ((double)1.0F - suppressionPercentage);
+                    double suppressedDamage = originalDamage * (1.0 - suppressionPercentage);
                     event.setDamage(suppressedDamage);
                 }
             } catch (Exception e) {

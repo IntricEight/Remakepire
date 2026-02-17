@@ -44,7 +44,7 @@ public class BeaconSite {
     public boolean isWithinCaptureRadius(Location location) {
         Location beaconLoc = this.getLocation();
         if (beaconLoc != null && beaconLoc.getWorld().equals(location.getWorld())) {
-            return beaconLoc.distance(location) <= (double)this.captureRadius;
+            return beaconLoc.distance(location) <= this.captureRadius;
         } else {
             return false;
         }
@@ -264,7 +264,7 @@ public class BeaconSite {
 
     public Location getParticleLocation() {
         Location loc = this.getLocation();
-        return loc != null ? loc.add((double)0.0F, (double)1.5F, (double)0.0F) : null;
+        return loc != null ? loc.add(0.0, 1.5, 0.0) : null;
     }
 
     public boolean shouldShowParticles() {

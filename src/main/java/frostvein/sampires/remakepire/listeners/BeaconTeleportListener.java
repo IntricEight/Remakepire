@@ -102,16 +102,15 @@ public class BeaconTeleportListener implements Listener {
                         }
 
                         if (this.ticksElapsed % 4 == 0) {
-                            Location particleLoc = player.getLocation().add((double)0.0F, (double)1.0F, (double)0.0F);
-                            player.getWorld().spawnParticle(Particle.PORTAL, particleLoc, 2, 0.2, (double)0.5F, 0.2, 0.1);
-                            player.getWorld().spawnParticle(Particle.ENCHANT, particleLoc, 1, 0.3, 0.3, 0.3, (double)0.5F);
+                            Location particleLoc = player.getLocation().add(0.0, 1.0, 0.0);
+                            player.getWorld().spawnParticle(Particle.PORTAL, particleLoc, 2, 0.2, 0.5, 0.2, 0.1);
+                            player.getWorld().spawnParticle(Particle.ENCHANT, particleLoc, 1, 0.3, 0.3, 0.3, 0.5);
                         }
 
                         if (this.ticksElapsed >= 100) {
                             BeaconTeleportListener.this.completeChanneling(playerId);
                             this.cancel();
                         }
-
                     }
                 }
             }
@@ -125,12 +124,13 @@ public class BeaconTeleportListener implements Listener {
             data.channelingTask.cancel();
             if (sendMessage) {
                 Player player = this.plugin.getServer().getPlayer(playerId);
+
                 if (player != null) {
                     player.sendMessage("§c§lShadow Travel cancelled.");
                     player.sendMessage("§7You moved during channeling. Your cooldown has been reset.");
                     player.playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_HURT, 0.8F, 1.2F);
-                    Location particleLoc = player.getLocation().add((double)0.0F, (double)1.0F, (double)0.0F);
-                    player.getWorld().spawnParticle(Particle.LARGE_SMOKE, particleLoc, 10, 0.3, (double)0.5F, 0.3, 0.1);
+                    Location particleLoc = player.getLocation().add(0.0, 1.0, 0.0);
+                    player.getWorld().spawnParticle(Particle.LARGE_SMOKE, particleLoc, 10, 0.3, 0.5, 0.3, 0.1);
                 }
             }
         }
@@ -176,9 +176,9 @@ public class BeaconTeleportListener implements Listener {
         player.sendMessage("§7Destination: §f" + beacon.getName());
         player.playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1.0F, 0.5F);
 
-        Location playerLoc = player.getLocation().add((double)0.0F, (double)1.0F, (double)0.0F);
-        player.getWorld().spawnParticle(Particle.PORTAL, playerLoc, 50, (double)0.5F, (double)1.0F, (double)0.5F, (double)1.0F);
-        player.getWorld().spawnParticle(Particle.LARGE_SMOKE, playerLoc, 20, 0.3, (double)0.5F, 0.3, 0.1);
+        Location playerLoc = player.getLocation().add(0.0, 1.0, 0.0);
+        player.getWorld().spawnParticle(Particle.PORTAL, playerLoc, 50, 0.5, 1.0, 0.5, 1.0);
+        player.getWorld().spawnParticle(Particle.LARGE_SMOKE, playerLoc, 20, 0.3, 0.5, 0.3, 0.1);
 
         final Location finalDestination = destination;
         (new BukkitRunnable() {
@@ -219,7 +219,7 @@ public class BeaconTeleportListener implements Listener {
             for(int y = -2; y <= 3; ++y) {
                 for(int x = -2; x <= 2; ++x) {
                     for(int z = -2; z <= 2; ++z) {
-                        Location test = original.clone().add((double)x, (double)y, (double)z);
+                        Location test = original.clone().add(x, y, z);
                         if (this.isSafeLocation(test)) {
                             return test;
                         }
@@ -236,9 +236,9 @@ public class BeaconTeleportListener implements Listener {
         if (loc.getWorld() == null) {
             return false;
         } else {
-            Material groundMaterial = loc.clone().subtract((double)0.0F, (double)1.0F, (double)0.0F).getBlock().getType();
+            Material groundMaterial = loc.clone().subtract(0.0, 1.0, 0.0).getBlock().getType();
             Material feetMaterial = loc.getBlock().getType();
-            Material headMaterial = loc.clone().add((double)0.0F, (double)1.0F, (double)0.0F).getBlock().getType();
+            Material headMaterial = loc.clone().add(0.0, 1.0, 0.0).getBlock().getType();
             boolean hasGround = groundMaterial.isSolid() && !groundMaterial.equals(Material.LAVA) && !groundMaterial.equals(Material.WATER);
             boolean feetClear = !feetMaterial.isSolid() || feetMaterial.equals(Material.WATER) || feetMaterial.equals(Material.LAVA);
             boolean headClear = !headMaterial.isSolid() || headMaterial.equals(Material.WATER) || headMaterial.equals(Material.LAVA);

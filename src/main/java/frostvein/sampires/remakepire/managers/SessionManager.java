@@ -488,7 +488,7 @@ public class SessionManager {
             this.plugin.getLogger().info("Reset " + player.getName() + " from spectator to survival mode (new game/session)");
         }
 
-        player.getAttribute(Attribute.MAX_HEALTH).setBaseValue((double)20.0F);
+        player.getAttribute(Attribute.MAX_HEALTH).setBaseValue(20.0);
         double actualMaxHealth = player.getAttribute(Attribute.MAX_HEALTH).getValue();
         player.setHealth(actualMaxHealth);
 

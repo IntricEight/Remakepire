@@ -45,7 +45,7 @@ public class WayOfTheProspectorTomeAbility extends TomeAbility implements Listen
             if (ORE_MATERIALS.contains(block.getType())) {
                 ItemStack tool = player.getInventory().getItemInMainHand();
                 if (!tool.containsEnchantment(Enchantment.SILK_TOUCH)) {
-                    if (this.random.nextDouble() < (double)0.5F) {
+                    if (this.random.nextDouble() < 0.5) {
                         for(ItemStack drop : block.getDrops(tool)) {
                             if (drop != null && drop.getType() != Material.AIR) {
                                 ItemStack extraDrop = drop.clone();

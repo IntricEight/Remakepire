@@ -54,10 +54,10 @@ public class StormCallAbility extends VampireAbility {
     private void createStormSummonEffects(Player player) {
         if (player.getWorld() != null) {
             for(int i = 0; i < 50; ++i) {
-                double angle = (double)i * 0.3, radius = 2.0;
+                double angle = i * 0.3, radius = 2.0;
                 double x = Math.cos(angle) * radius;
                 double y = Math.sin(angle) * radius;
-                double z = (double)i * 0.1;
+                double z = i * 0.1;
 
                 player.getWorld().spawnParticle(Particle.SMOKE, player.getLocation().add(x, z + 1.0, y), 1, 0.0, 0.0, 0.0, 0.05);
             }

@@ -59,7 +59,7 @@ public class VampireTexturePackManager {
             }
         }, delayTicks);
 
-        this.plugin.getLogger().info("Scheduled vampire texture pack for " + player.getName() + " in " + (double)delayTicks / 20.0 + " seconds - " + reason);
+        this.plugin.getLogger().info("Scheduled vampire texture pack for " + player.getName() + " in " + delayTicks / 20.0 + " seconds - " + reason);
     }
 
     public void onVampireTransformation(Player player) {

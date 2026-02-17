@@ -50,12 +50,13 @@ public class LanternThrashTomeAbility extends TomeAbility {
 
         for(int x = playerX - 6; x <= playerX + 6; ++x) {
             for(int z = playerZ - 6; z <= playerZ + 6; ++z) {
-                double distance = Math.sqrt(Math.pow((double)(x - playerX), (double)2.0F) + Math.pow((double)(z - playerZ), (double)2.0F));
-                if (distance <= (double)6.0F && distance >= (double)2.0F) {
+                double distance = Math.sqrt(Math.pow((x - playerX), 2) + Math.pow((z - playerZ), 2));
+                if (distance <= 6.0 && distance >= 2.0) {
                     for(int yOffset = -1; yOffset <= 0; ++yOffset) {
-                        Location blockLocation = new Location(playerLoc.getWorld(), (double)x, (double)(playerY + yOffset), (double)z);
+                        Location blockLocation = new Location(playerLoc.getWorld(), x, playerY + yOffset, z);
                         Block block = blockLocation.getBlock();
-                        Block blockAbove = blockLocation.clone().add((double)0.0F, (double)1.0F, (double)0.0F).getBlock();
+                        Block blockAbove = blockLocation.clone().add(0.0, 1.0, 0.0).getBlock();
+
                         if (blockAbove.getType() == Material.AIR && block.getType() != Material.AIR) {
                             locations.add(blockAbove.getLocation());
                         }
@@ -73,6 +74,7 @@ public class LanternThrashTomeAbility extends TomeAbility {
             double angle2 = Math.atan2(loc2.getZ() - playerLoc.getZ(), loc2.getX() - playerLoc.getX());
             angle1 = this.normalizeAngleRelativeToStart(angle1, startAngle);
             angle2 = this.normalizeAngleRelativeToStart(angle2, startAngle);
+
             int angleComparison = Double.compare(angle1, angle2);
             if (angleComparison != 0) {
                 return angleComparison;
@@ -86,7 +88,7 @@ public class LanternThrashTomeAbility extends TomeAbility {
 
     private double normalizeAngleRelativeToStart(double angle, double startAngle) {
         double relativeAngle;
-        for(relativeAngle = angle - startAngle; relativeAngle < (double)0.0F; relativeAngle += (Math.PI * 2D)) {
+        for(relativeAngle = angle - startAngle; relativeAngle < 0.0; relativeAngle += (Math.PI * 2D)) {
         }
 
         while(relativeAngle >= (Math.PI * 2D)) {

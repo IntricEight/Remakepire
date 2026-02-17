@@ -38,7 +38,7 @@ public class BeetrootHarvestListener implements Listener {
                         event.setCancelled(true);
                     } else {
                         event.setDropItems(false);
-                        Location dropLocation = event.getBlock().getLocation().add((double)0.5F, (double)0.5F, (double)0.5F);
+                        Location dropLocation = event.getBlock().getLocation().add(0.5, 0.5, 0.5);
                         int beetrootQuantity = this.calculateBeetrootQuantity(player);
                         this.giveAlwaysEdibleBeetroot(player, beetrootQuantity);
                         this.dropBeetrootSeeds(dropLocation, player.getInventory().getItemInMainHand());
@@ -49,14 +49,13 @@ public class BeetrootHarvestListener implements Listener {
     }
 
     private int calculateBeetrootQuantity(Player player) {
-        return this.tomeManager.hasAbility(player, "wayoftheland") && this.random.nextDouble() < (double)0.75F ? 2 : 1;
+        return this.tomeManager.hasAbility(player, "wayoftheland") && this.random.nextDouble() < 0.75 ? 2 : 1;
     }
 
     private void giveAlwaysEdibleBeetroot(Player harvester, int quantity) {
         try {
             if (harvester != null) {
-                String var10000 = harvester.getName();
-                String command = "give " + var10000 + " minecraft:beetroot[minecraft:food={can_always_eat:1b,nutrition:1,saturation:1.2}] " + quantity;
+                String command = "give " + harvester.getName() + " minecraft:beetroot[minecraft:food={can_always_eat:1b,nutrition:1,saturation:1.2}] " + quantity;
                 Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command);
                 this.plugin.getLogger().info("Gave " + quantity + " always-edible beetroot(s) to " + harvester.getName());
             } else {

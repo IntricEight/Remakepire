@@ -336,9 +336,10 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                     if (newTicks < 1) {
                         sender.sendMessage("§cInterval must be at least 1 tick.");
                         return true;
+
                     } else {
                         this.sessionManager.setVampireHealthCheckTicks(newTicks);
-                        double seconds = (double)newTicks / 20.0;
+                        double seconds = newTicks / 20.0;
                         sender.sendMessage("§aVampire Health Check Interval set to: §e" + newTicks + " ticks §7(" + seconds + " seconds)");
                         sender.sendMessage("§7Changes saved to config and take effect immediately");
                         return true;
@@ -356,7 +357,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
             }
         } else {
             int currentTicks = this.sessionManager.getVampireHealthCheckTicks();
-            double seconds = (double)currentTicks / 20.0;
+            double seconds = currentTicks / 20.0;
             sender.sendMessage("§aVampire Health Check Interval: §e" + currentTicks + " ticks §7(" + seconds + " seconds)");
             return true;
         }
@@ -691,13 +692,12 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                 return true;
             } else {
                 Location playerLocation = player.getLocation();
-                Location blockLocation = new Location(playerLocation.getWorld(), (double)playerLocation.getBlockX() + (double)0.5F, (double)playerLocation.getBlockY(), (double)playerLocation.getBlockZ() + (double)0.5F, 0.0F, 0.0F);
+                Location blockLocation = new Location(playerLocation.getWorld(), playerLocation.getBlockX() + 0.5, playerLocation.getBlockY(), playerLocation.getBlockZ() + 0.5, 0.0F, 0.0F);
                 blockLocation.getBlock().setType(Material.BARRIER);
 
                 if (this.beaconManager.addBeacon(name, blockLocation)) {
                     sender.sendMessage("§aBeacon '" + name + "' added at your location.");
-                    String var10001 = blockLocation.getWorld().getName();
-                    sender.sendMessage("§7Location: §f" + var10001 + " (" + blockLocation.getBlockX() + ", " + blockLocation.getBlockY() + ", " + blockLocation.getBlockZ() + ")");
+                    sender.sendMessage("§7Location: §f" + blockLocation.getWorld().getName() + " (" + blockLocation.getBlockX() + ", " + blockLocation.getBlockY() + ", " + blockLocation.getBlockZ() + ")");
                     sender.sendMessage("§7An item display beacon has been created at this location.");
                     player.playSound(blockLocation, Sound.BLOCK_BEACON_ACTIVATE, SoundCategory.BLOCKS, 1.0F, 1.0F);
 
@@ -733,9 +733,11 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         } else {
             String name = args[1];
             BeaconSite beacon = this.beaconManager.getBeacon(name);
+
             if (beacon == null) {
                 sender.sendMessage("§cBeacon '" + name + "' not found.");
                 return true;
+
             } else {
                 if (sender instanceof Player) {
                     Player player = (Player)sender;
@@ -745,6 +747,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                         Location originalLoc = player.getLocation().clone();
                         player.teleport(beaconLoc);
                         sender.sendMessage("§7Teleported to beacon location to ensure chunk is loaded...");
+
                         this.plugin.getServer().getScheduler().runTaskLater(this.plugin, () -> {
                             boolean success = this.beaconManager.removeBeacon(name);
                             if (success) {
@@ -796,7 +799,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
 
         for(BeaconSite.BeaconState state : BeaconState.values()) {
             int count = (Integer)stateStats.get(state);
-            double percentage = total > 0 ? (double)count * 100.0 / (double)total : 0.0;
+            double percentage = total > 0 ? count * 100.0 / (double)total : 0.0;
             String icon = "";
 
             switch (state) {
@@ -842,10 +845,11 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         if (args.length < 2) {
             sender.sendMessage("§cUsage: /pow admin beacon holy <name>");
             return true;
+
         } else {
             String name = args[1];
-            boolean success = this.beaconManager.setBeaconHoly(name);
-            if (success) {
+
+            if (this.beaconManager.setBeaconHoly(name)) {
                 sender.sendMessage("§aBeacon '" + name + "' has been consecrated as holy.");
                 sender.sendMessage("§7The beacon now emanates divine light and protection.");
             } else {
@@ -860,12 +864,14 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         if (args.length < 2) {
             sender.sendMessage("§cUsage: /pow admin beacon desecrated <name>");
             return true;
+
         } else {
             String name = args[1];
-            boolean success = this.beaconManager.setBeaconDesecrated(name);
-            if (success) {
+
+            if (this.beaconManager.setBeaconDesecrated(name)) {
                 sender.sendMessage("§4Beacon '" + name + "' has been desecrated by dark forces.");
                 sender.sendMessage("§7The beacon now radiates malevolent energy and shadow.");
+
             } else {
                 sender.sendMessage("§cBeacon '" + name + "' not found.");
             }
@@ -878,12 +884,14 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         if (args.length < 2) {
             sender.sendMessage("§cUsage: /pow admin beacon neutral <name>");
             return true;
+
         } else {
             String name = args[1];
-            boolean success = this.beaconManager.setBeaconNeutral(name);
-            if (success) {
+
+            if (this.beaconManager.setBeaconNeutral(name)) {
                 sender.sendMessage("§7Beacon '" + name + "' has been set to neutral.");
                 sender.sendMessage("§7The beacon texture has changed. Players will receive notification in 60 seconds.");
+
             } else {
                 sender.sendMessage("§cBeacon '" + name + "' not found.");
             }
@@ -941,14 +949,17 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
             if (target == null) {
                 sender.sendMessage("§cPlayer '" + args[0] + "' not found.");
                 return true;
+
             } else {
                 String abilityName = args[1];
                 if (!this.tomeManager.isValidAbility(abilityName)) {
                     sender.sendMessage("§cUnknown tome ability: '" + abilityName + "'");
                     sender.sendMessage("§7Available abilities: " + String.join(", ", this.tomeManager.getAllAbilityNames()));
                     return true;
+
                 } else {
                     int amount = 1;
+
                     if (args.length >= 3) {
                         try {
                             amount = Integer.parseInt(args[2]);
@@ -956,6 +967,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                                 sender.sendMessage("§cAmount must be between 1 and 64.");
                                 return true;
                             }
+
                         } catch (NumberFormatException var17) {
                             sender.sendMessage("§cInvalid amount: '" + args[2] + "'. Must be a number between 1 and 64.");
                             return true;
@@ -965,10 +977,12 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                     TomeAbility ability = this.tomeManager.getAbility(abilityName);
                     ItemStack tome = new ItemStack(Material.WRITTEN_BOOK, amount);
                     BookMeta bookMeta = (BookMeta)tome.getItemMeta();
+
                     if (bookMeta != null) {
                         String canonicalName = ability != null ? ability.getName() : abilityName;
                         bookMeta.setTitle(canonicalName);
                         bookMeta.setAuthor("§6A source unknown...");
+
                         if (ability != null) {
                             List<String> lore = new ArrayList();
                             String[] descriptionLines = ability.getDescriptionLines();
@@ -986,6 +1000,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                         StringBuilder pageContent = new StringBuilder();
                         pageContent.append("§5§lANCIENT KNOWLEDGE§r\n\n");
                         pageContent.append("§8The secrets of ").append(abilityName).append(" are contained within these pages.\n\n");
+
                         if (ability != null) {
                             String[] descriptionLines = ability.getDescriptionLines();
 
@@ -1005,6 +1020,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                     if (target.getInventory().firstEmpty() == -1) {
                         target.getWorld().dropItemNaturally(target.getLocation(), tome);
                         target.sendMessage("§eA mysterious tome appears at your feet...");
+
                     } else {
                         target.getInventory().addItem(new ItemStack[]{tome});
                         target.sendMessage("§eA mysterious tome has appeared in your inventory...");
@@ -1021,12 +1037,15 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         if (!(sender instanceof Player)) {
             sender.sendMessage("§cThis command can only be used by players.");
             return true;
+
         } else if (args.length < 1) {
             sender.sendMessage("§cUsage: /pow admin select_tomes <player>");
             return true;
+
         } else {
             Player admin = (Player)sender;
             Player target = Bukkit.getPlayer(args[0]);
+
             if (target == null) {
                 sender.sendMessage("§cPlayer '" + args[0] + "' not found.");
                 return true;
@@ -1041,11 +1060,14 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         if (args.length < 2) {
             sender.sendMessage("§cUsage: /pow admin give_cure_book <player> <1|2|3|4>");
             return true;
+
         } else {
             Player target = Bukkit.getPlayer(args[0]);
+
             if (target == null) {
                 sender.sendMessage("§cPlayer '" + args[0] + "' not found.");
                 return true;
+
             } else {
                 int bookNum;
                 try {
@@ -1063,6 +1085,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                 if (target.getInventory().firstEmpty() == -1) {
                     target.getWorld().dropItemNaturally(target.getLocation(), book);
                     target.sendMessage("§5An ancient tome appears at your feet...");
+
                 } else {
                     target.getInventory().addItem(new ItemStack[]{book});
                     target.sendMessage("§5An ancient tome has appeared in your inventory...");
@@ -1170,7 +1193,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                 }
             }
 
-            if (nearestLocation != null && !(nearestDistance > (double)10.0F)) {
+            if (nearestLocation != null && !(nearestDistance > 10)) {
                 if (nearestLocation.getBlock().getType() == Material.CHEST) {
                     nearestLocation.getBlock().setType(Material.AIR);
                     sender.sendMessage("§7Removed physical chest at location.");

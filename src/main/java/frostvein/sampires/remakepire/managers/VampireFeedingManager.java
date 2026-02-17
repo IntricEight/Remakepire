@@ -25,9 +25,9 @@ public class VampireFeedingManager implements Listener {
     private final VampireManager vampireManager;
     private final ThirstManager thirstManager;
     private final ConfigManager configManager;
-    private static final double FEEDING_RANGE = (double)1.5F;
+    private static final double FEEDING_RANGE = 1.5;
     private static final int PREPARATION_TIME = 5;
-    private static final double HEALTH_DRAIN_PER_SECOND = (double)1.0F;
+    private static final double HEALTH_DRAIN_PER_SECOND = 1.0;
     private static final int THIRST_GAIN_PER_SECOND = 2;
     private final Map<UUID, FeedingSession> activeSessions = new HashMap();
     private final Map<UUID, Integer> sessionFeedingThirst = new HashMap();
@@ -77,7 +77,6 @@ public class VampireFeedingManager implements Listener {
                 this.cancelFeedingSession(session);
             }
         }
-
     }
 
     private void processPreparationPhase(FeedingSession session, Player vampire, Player target) {
@@ -105,7 +104,6 @@ public class VampireFeedingManager implements Listener {
 
             vampire.getWorld().playSound(vampire.getLocation(), Sound.ENTITY_WITCH_DRINK, SoundCategory.PLAYERS, 1.0F, 0.8F);
         }
-
     }
 
     private void processActiveFeedingPhase(FeedingSession session, Player vampire, Player target) {
@@ -179,11 +177,13 @@ public class VampireFeedingManager implements Listener {
                 Objective deathObjective = mainScoreboard.getObjective("vsmp_death");
                 if (deathObjective != null) {
                     int currentDeaths = deathObjective.getScore(target.getName()).getScore();
+
                     if (currentDeaths >= 5) {
                         vampire.sendMessage("§4You watch the light of " + target.getName() + "'s eyes fade, and extinguish. Lost forever.");
                         target.sendMessage("§7The world grows dim, blurry, you feel a darkness reach out, offering you one last chance to live, as a creature of the night... But you refuse... And slip under the veil of the afterlife.");
                         target.addScoreboardTag("PermadeathChosen");
                         target.setHealth(0.0);
+
                         this.cancelFeedingSession(session);
                         return;
                     }
@@ -204,6 +204,7 @@ public class VampireFeedingManager implements Listener {
             target.sendMessage("§7You feel yourself slipping away, into a peaceful sleep.");
             target.addScoreboardTag("PermadeathChosen");
             target.setHealth(0.0);
+
             this.cancelFeedingSession(session);
 
         } else if (this.plugin.getPermadeathManager().hasPermadeathEnabled(target)) {
@@ -211,6 +212,7 @@ public class VampireFeedingManager implements Listener {
             target.sendMessage("§7The world grows dim, blurry, you feel a darkness reach out, offering you one last chance to live, as a creature of the night... But you refuse... And slip under the veil of the afterlife.");
             target.addScoreboardTag("PermadeathChosen");
             target.setHealth(0.0);
+
             this.cancelFeedingSession(session);
 
         } else {
@@ -234,7 +236,7 @@ public class VampireFeedingManager implements Listener {
         if (!vampire.getWorld().equals(target.getWorld())) {
             return false;
         } else {
-            return vampire.getLocation().distance(target.getLocation()) <= (double)1.5F;
+            return vampire.getLocation().distance(target.getLocation()) <= 1.5;
         }
     }
 
@@ -256,6 +258,7 @@ public class VampireFeedingManager implements Listener {
                                 boolean isHuman = this.vampireManager.isHuman(nearbyPlayer);
                                 boolean inRange = this.isInFeedingRange(vampire, nearbyPlayer);
                                 boolean isVampire = this.vampireManager.isVampire(nearbyPlayer);
+
                                 if ((isHuman || isVampire) && inRange) {
                                     if (isVampire && nearbyPlayer.getExp() <= 0.1F) {
                                         vampire.sendMessage("§cThe vampiric essence has become too low to continue siphoning from.");

@@ -43,7 +43,7 @@ public class WayOfTheLandTomeAbility extends TomeAbility implements Listener {
         if (this.plugin.getTomeManager().hasAbility(player, "wayoftheland")) {
             if (this.isFullyGrownCrop(block)) {
                 if (block.getType() != Material.BEETROOTS) {
-                    if (this.random.nextDouble() < (double)0.75F) {
+                    if (this.random.nextDouble() < 0.75) {
                         for(ItemStack drop : block.getDrops(player.getInventory().getItemInMainHand())) {
                             if (drop != null && drop.getType() != Material.AIR) {
                                 ItemStack extraDrop = drop.clone();

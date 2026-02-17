@@ -64,7 +64,7 @@ public class CombatListener implements Listener {
         reducedDamage = event.getEntity();
         if (reducedDamage instanceof Player victim) {
             if (this.vampireManager.isHuman(victim) && !(event.getDamager() instanceof Player)) {
-                event.setDamage(event.getDamage() * (double)0.5F);
+                event.setDamage(event.getDamage() * 0.5);
             }
         }
 
@@ -273,7 +273,7 @@ public class CombatListener implements Listener {
                                         this.plugin.getThirstManager().modifyQuench(attacker, killThirst, true);
                                         attacker.sendMessage("§cYou have killed " + victim.getName() + ". They will respawn as a human, wounded.");
                                         victim.sendMessage("§7You have been slain by a vampire, but they do not turn you...");
-                                        this.plugin.getServer().getScheduler().runTask(this.plugin, () -> victim.setHealth((double)0.0F));
+                                        this.plugin.getServer().getScheduler().runTask(this.plugin, () -> victim.setHealth(0.0));
                                         return;
                                     }
 
@@ -304,7 +304,7 @@ public class CombatListener implements Listener {
                                     }
 
                                     event.setCancelled(true);
-                                    victim.setHealth((double)2.0F);
+                                    victim.setHealth(2.0);
                                     this.plugin.getVampireManager().performVampireTurning(victim, attacker);
                                     victim.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, 300, 2, false, false));
                                     this.plugin.getServer().getScheduler().runTaskLater(this.plugin, () -> {
@@ -339,14 +339,15 @@ public class CombatListener implements Listener {
                             if (this.vampireManager.isVampire(victim)) {
                                 boolean killedWithIronWeapon = weaponType == Material.IRON_SWORD || weaponType == Material.IRON_AXE;
                                 boolean killedWithWoodenSword = weaponType == Material.WOODEN_SWORD;
-                                double finalDamage = event.getFinalDamage();
-                                if (victim.getHealth() - finalDamage <= (double)0.0F) {
+
+                                if (victim.getHealth() - event.getFinalDamage() <= 0.0) {
                                     int vampireStage = this.vampireManager.getVampireStage(victim);
                                     int maximumStakeableStage = this.plugin.getConfigManager().getPermadeathMinimumStage();
+
                                     boolean canBeStaked = killedWithWoodenSword && vampireStage <= maximumStakeableStage;
                                     if (!killedWithIronWeapon && !canBeStaked) {
                                         event.setCancelled(true);
-                                        victim.setHealth((double)1.0F);
+                                        victim.setHealth(1.0);
                                     }
                                 }
                             }
@@ -368,10 +369,10 @@ public class CombatListener implements Listener {
                 event.setCancelled(true);
             } else {
                 if (event.getCause() == DamageCause.WITHER && this.vampireManager.isHuman(player)) {
-                    double currentHealth = player.getHealth();
-                    double finalDamage = event.getFinalDamage();
-                    if (currentHealth - finalDamage < (double)10.0F) {
-                        event.setDamage(currentHealth - (double)10.0F);
+                    double currentHealth = player.getHealth(), finalDamage = event.getFinalDamage();
+
+                    if (currentHealth - finalDamage < 10.0) {
+                        event.setDamage(currentHealth - 10.0);
                         player.removePotionEffect(PotionEffectType.WITHER);
                     }
                 }
@@ -381,6 +382,7 @@ public class CombatListener implements Listener {
                 } else {
                     if (this.vampireManager.isVampire(player)) {
                         EntityDamageEvent.DamageCause cause = event.getCause();
+
                         if (cause == DamageCause.FIRE || cause == DamageCause.FIRE_TICK || cause == DamageCause.LAVA) {
                             int vampireStage = this.vampireManager.getVampireStage(player);
                             double multiplier = this.getFireDamageMultiplier(vampireStage);
@@ -399,9 +401,9 @@ public class CombatListener implements Listener {
                         }
 
                         double finalDamage = event.getFinalDamage();
-                        if (player.getHealth() - finalDamage <= (double)0.0F) {
+                        if (player.getHealth() - finalDamage <= 0.0) {
                             event.setCancelled(true);
-                            player.setHealth((double)1.0F);
+                            player.setHealth(1.0);
                         }
                     }
 
@@ -471,10 +473,10 @@ public class CombatListener implements Listener {
     private double getVampireFistMultiplier(int stage) {
         double var10000;
         switch (stage) {
-            case 1 -> var10000 = (double)1.0F;
-            case 2 -> var10000 = (double)2.0F;
-            case 3 -> var10000 = (double)3.0F;
-            default -> var10000 = (double)1.0F;
+            case 1 -> var10000 = 1.0;
+            case 2 -> var10000 = 2.0;
+            case 3 -> var10000 = 3.0;
+            default -> var10000 = 1.0;
         }
 
         return var10000;
@@ -483,10 +485,10 @@ public class CombatListener implements Listener {
     private double getFireDamageMultiplier(int stage) {
         double var10000;
         switch (stage) {
-            case 1 -> var10000 = (double)1.5F;
-            case 2 -> var10000 = (double)2.0F;
-            case 3 -> var10000 = (double)2.0F;
-            default -> var10000 = (double)1.0F;
+            case 1 -> var10000 = 1.5;
+            case 2 -> var10000 = 2.0;
+            case 3 -> var10000 = 2.0;
+            default -> var10000 = 1.0;
         }
 
         return var10000;
@@ -499,7 +501,7 @@ public class CombatListener implements Listener {
     }
 
     private void createSweepAttackEffect(Entity target) {
-        target.getWorld().spawnParticle(Particle.SWEEP_ATTACK, target.getLocation().add((double)0.0F, target.getHeight() / (double)2.0F, (double)0.0F), 3, (double)0.5F, 0.3, (double)0.5F, (double)0.0F);
+        target.getWorld().spawnParticle(Particle.SWEEP_ATTACK, target.getLocation().add(0.0, target.getHeight() / 2.0, 0.0), 3, 0.5, 0.3, 0.5, 0.0);
     }
 
     private void applyWoodenStakeDurabilityDamage(Player attacker, ItemStack woodenSword) {
@@ -509,11 +511,13 @@ public class CombatListener implements Listener {
             int currentDamage = damageable.getDamage();
             int additionalDamage = maxDurability / 2;
             int newDamage = currentDamage + additionalDamage;
+
             if (newDamage >= maxDurability) {
                 attacker.getInventory().setItemInMainHand(new ItemStack(Material.AIR));
                 attacker.sendMessage("§cYour wooden stake breaks apart on impact.");
                 attacker.getWorld().playSound(attacker.getLocation(), Sound.ENTITY_ITEM_BREAK, SoundCategory.PLAYERS, 1.0F, 1.0F);
                 attacker.setCooldown(Material.WOODEN_SWORD, this.plugin.getConfigManager().getWoodenStakeCooldownTicks());
+
             } else {
                 damageable.setDamage(newDamage);
                 woodenSword.setItemMeta(damageable);
@@ -525,26 +529,28 @@ public class CombatListener implements Listener {
     private void applyVampireClawEffects(Player attacker, Entity victim, int vampireStage) {
         boolean witherApplied = false;
         if (victim instanceof Player livingVictim) {
-            double bleedingChance = (double)0.0F;
+            double bleedingChance = 0.0;
             int witherLevel = 0;
+
             if (vampireStage == 2) {
                 bleedingChance = 0.33;
                 witherLevel = 0;
+
             } else if (vampireStage == 3) {
                 bleedingChance = 0.66;
                 witherLevel = 1;
             }
 
-            if (bleedingChance > (double)0.0F && this.random.nextDouble() < bleedingChance) {
+            if (bleedingChance > 0.0 && this.random.nextDouble() < bleedingChance) {
                 livingVictim.addPotionEffect(new PotionEffect(PotionEffectType.WITHER, 140, witherLevel, false, false));
                 witherApplied = true;
             }
         }
 
         if (witherApplied) {
-            Location particleLocation = victim.getLocation().add((double)0.0F, victim.getHeight() / (double)2.0F, (double)0.0F);
-            victim.getWorld().spawnParticle(Particle.DUST, particleLocation, 20, (double)0.5F, 0.3, (double)0.5F, (double)0.0F, new Particle.DustOptions(Color.RED, 1.0F));
-            victim.getWorld().spawnParticle(Particle.DAMAGE_INDICATOR, particleLocation, 8, 0.3, 0.2, 0.3, (double)0.0F);
+            Location particleLocation = victim.getLocation().add(0.0, victim.getHeight() / 2.0, 0.0);
+            victim.getWorld().spawnParticle(Particle.DUST, particleLocation, 20, 0.5, 0.3, 0.5, 0.0, new Particle.DustOptions(Color.RED, 1.0F));
+            victim.getWorld().spawnParticle(Particle.DAMAGE_INDICATOR, particleLocation, 8, 0.3, 0.2, 0.3, 0.0);
         }
 
         if (victim instanceof Player humanVictim && this.vampireManager.isHuman((Player)victim)) {
@@ -553,6 +559,5 @@ public class CombatListener implements Listener {
                 humanVictim.addScoreboardTag("informed_vampire_claws");
             }
         }
-
     }
 }

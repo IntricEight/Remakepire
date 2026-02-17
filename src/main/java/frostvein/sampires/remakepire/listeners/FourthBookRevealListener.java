@@ -25,7 +25,7 @@ public class FourthBookRevealListener implements Listener {
         this.configManager = configManager;
         this.tomeChestLocations = configManager.getTomeChestLocations();
         if (plugin.getWorld() != null) {
-            this.townChestLocation = new Location(plugin.getWorld(), (double)76.0F, (double)80.0F, (double)407.0F);
+            this.townChestLocation = new Location(plugin.getWorld(), 76.0, 80.0, 407.0);
             plugin.getLogger().info("FourthBookRevealListener: Loaded " + this.tomeChestLocations.size() + " tome chest locations from config");
         } else {
             this.townChestLocation = null;

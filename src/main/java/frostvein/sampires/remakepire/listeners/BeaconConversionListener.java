@@ -42,7 +42,7 @@ public class BeaconConversionListener implements Listener {
     private final Map<String, ConversionData> activeConversions;
     private final long BASE_CONVERSION_TIME;
     private static final long CONVERSION_TICK_INTERVAL = 20L;
-    private static final double BEACON_INTERACTION_RANGE = (double)3.0F;
+    private static final double BEACON_INTERACTION_RANGE = 3.0;
 
     public BeaconConversionListener(RemakepirePlugin plugin) {
         this.plugin = plugin;
@@ -81,7 +81,7 @@ public class BeaconConversionListener implements Listener {
     private void handlePlayerStartCrouching(Player player) {
         if (this.vampireManager.isHuman(player) || this.vampireManager.isVampire(player)) {
             if (player.getGameMode() != GameMode.SPECTATOR) {
-                for(BeaconSite beacon : this.beaconManager.getBeaconsInRange(player.getLocation(), (double)3.0F)) {
+                for(BeaconSite beacon : this.beaconManager.getBeaconsInRange(player.getLocation(), 3.0)) {
                     if (!this.sessionManager.isSessionActive()) {
                         player.sendMessage("§c⚠ Cannot convert beacons - no session is currently active.");
                         return;
@@ -120,10 +120,12 @@ public class BeaconConversionListener implements Listener {
         for(Map.Entry<String, ConversionData> entry : this.activeConversions.entrySet()) {
             ConversionData data = (ConversionData)entry.getValue();
             BeaconSite beacon = this.beaconManager.getBeacon((String)entry.getKey());
+
             if (beacon != null) {
                 if (data.getConverters().contains(player.getUniqueId())) {
                     Location beaconLoc = beacon.getLocation();
-                    if (beaconLoc == null || !beaconLoc.getWorld().equals(player.getWorld()) || beaconLoc.distance(player.getLocation()) > (double)3.0F || player.getGameMode() == GameMode.SPECTATOR) {
+
+                    if (beaconLoc == null || !beaconLoc.getWorld().equals(player.getWorld()) || beaconLoc.distance(player.getLocation()) > 3 || player.getGameMode() == GameMode.SPECTATOR) {
                         this.handlePlayerStopCrouching(player);
                         break;
                     }
@@ -144,7 +146,7 @@ public class BeaconConversionListener implements Listener {
             return false;
         } else {
             Location beaconLoc = beacon.getLocation();
-            if (beaconLoc != null && beaconLoc.getWorld().equals(player.getWorld()) && !(beaconLoc.distance(player.getLocation()) > (double)3.0F)) {
+            if (beaconLoc != null && beaconLoc.getWorld().equals(player.getWorld()) && !(beaconLoc.distance(player.getLocation()) > 3.0)) {
                 if (data.getConverters().contains(player.getUniqueId())) {
                     return false;
                 } else {
@@ -180,15 +182,17 @@ public class BeaconConversionListener implements Listener {
                 } else {
                     boolean playerIsVampire = this.vampireManager.isVampire(player);
                     BeaconSite.BeaconState currentState = beacon.getState();
+
                     if (playerIsVampire && currentState == BeaconState.DESECRATED) {
                         return false;
                     } else if (!playerIsVampire && currentState == BeaconState.HOLY) {
                         return false;
                     } else {
-                        for(Player nearbyPlayer : this.getPlayersInRange(beacon.getLocation(), (double)3.0F)) {
+                        for(Player nearbyPlayer : this.getPlayersInRange(beacon.getLocation(), 3.0)) {
                             if (!nearbyPlayer.equals(player)) {
                                 boolean nearbyIsVampire = this.vampireManager.isVampireStage2OrHigher(nearbyPlayer);
                                 boolean nearbyIsHuman = this.vampireManager.isHuman(nearbyPlayer);
+
                                 if ((!nearbyIsVampire || !nearbyPlayer.hasPotionEffect(PotionEffectType.INVISIBILITY)) && (playerIsVampire && nearbyIsHuman || !playerIsVampire && nearbyIsVampire)) {
                                     if (playerIsVampire) {
                                         player.sendMessage("§cA pure being is nearby... They are stopping you from converting this beacon...");
@@ -253,7 +257,7 @@ public class BeaconConversionListener implements Listener {
     private void broadcastToBeaconArea(BeaconSite beacon, String message) {
         Location beaconLoc = beacon.getLocation();
         if (beaconLoc != null) {
-            for(Player player : this.getPlayersInRange(beaconLoc, (double)(beacon.getCaptureRadius() * 2))) {
+            for(Player player : this.getPlayersInRange(beaconLoc, beacon.getCaptureRadius() * 2)) {
                 player.sendMessage(message);
             }
 
@@ -276,20 +280,19 @@ public class BeaconConversionListener implements Listener {
                 player.sendMessage("§4Beacon §e" + beacon.getName() + " §4has been consumed by dark forces.");
             }
         }
-
     }
 
     private void showConversionParticles(BeaconSite beacon, boolean isVampireConversion, double progress) {
         Location particleLoc = beacon.getParticleLocation();
         if (particleLoc != null) {
             if (isVampireConversion) {
-                particleLoc.getWorld().spawnParticle(Particle.LARGE_SMOKE, particleLoc, (int)((double)5.0F * progress), (double)0.5F, (double)0.5F, (double)0.5F, 0.01);
-                particleLoc.getWorld().spawnParticle(Particle.SOUL_FIRE_FLAME, particleLoc, (int)((double)3.0F * progress), 0.3, 0.3, 0.3, 0.02);
-            } else {
-                particleLoc.getWorld().spawnParticle(Particle.WHITE_ASH, particleLoc, (int)((double)8.0F * progress), (double)0.5F, (double)0.5F, (double)0.5F, 0.01);
-                particleLoc.getWorld().spawnParticle(Particle.ENCHANT, particleLoc, (int)((double)5.0F * progress), 0.3, 0.3, 0.3, 0.1);
-            }
+                particleLoc.getWorld().spawnParticle(Particle.LARGE_SMOKE, particleLoc, (int)(5.0 * progress), 0.5, 0.5, 0.5, 0.01);
+                particleLoc.getWorld().spawnParticle(Particle.SOUL_FIRE_FLAME, particleLoc, (int)(3.0 * progress), 0.3, 0.3, 0.3, 0.02);
 
+            } else {
+                particleLoc.getWorld().spawnParticle(Particle.WHITE_ASH, particleLoc, (int)(8.0 * progress), 0.5, 0.5, 0.5, 0.01);
+                particleLoc.getWorld().spawnParticle(Particle.ENCHANT, particleLoc, (int)(5.0 * progress), 0.3, 0.3, 0.3, 0.1);
+            }
         }
     }
 
@@ -311,6 +314,7 @@ public class BeaconConversionListener implements Listener {
         int permanentlyDesecratedCount = (Integer)stateStats.getOrDefault(BeaconState.PERMANENTLY_DESECRATED, 0);
         int totalEvilCount = desecratedCount + permanentlyDesecratedCount;
         int totalBeacons = this.beaconManager.getAllBeacons().size();
+
         if (holyCount >= totalBeacons && totalBeacons > 0) {
             this.triggerHumansFinalStand();
         }
@@ -318,7 +322,6 @@ public class BeaconConversionListener implements Listener {
         if (totalEvilCount >= totalBeacons && totalBeacons > 0) {
             this.triggerVampiresEternalNight();
         }
-
     }
 
     private void triggerHumansFinalStand() {
@@ -333,9 +336,9 @@ public class BeaconConversionListener implements Listener {
 
         for(Player player : this.plugin.getServer().getOnlinePlayers()) {
             if (this.vampireManager.isVampire(player)) {
-                player.getAttribute(Attribute.MAX_HEALTH).setBaseValue((double)6.0F);
-                if (player.getHealth() > (double)6.0F) {
-                    player.setHealth((double)6.0F);
+                player.getAttribute(Attribute.MAX_HEALTH).setBaseValue(6.0);
+                if (player.getHealth() > 6.0) {
+                    player.setHealth(6.0);
                 }
             }
         }
@@ -354,7 +357,7 @@ public class BeaconConversionListener implements Listener {
 
         for(Player player : this.plugin.getServer().getOnlinePlayers()) {
             if (this.vampireManager.isVampire(player)) {
-                player.getAttribute(Attribute.MAX_HEALTH).setBaseValue((double)20.0F);
+                player.getAttribute(Attribute.MAX_HEALTH).setBaseValue(20.0);
             }
         }
 
@@ -430,7 +433,7 @@ public class BeaconConversionListener implements Listener {
             BarColor color = this.vampireConversion ? BarColor.RED : BarColor.WHITE;
             String title = this.vampireConversion ? "§4Desecrating Beacon: §f" + beaconName : "§fConsecrating Beacon: §f" + beaconName;
             this.bossBar = BeaconConversionListener.this.plugin.getServer().createBossBar(title, color, BarStyle.SOLID, new BarFlag[0]);
-            this.bossBar.setProgress(this.neutralStageComplete ? (double)0.5F : (double)0.0F);
+            this.bossBar.setProgress(this.neutralStageComplete ? 0.5 : 0.0);
         }
 
         public void addConverter(UUID playerId) {
@@ -452,17 +455,17 @@ public class BeaconConversionListener implements Listener {
         }
 
         public void updateBossBar(double progress, String phase) {
-            this.bossBar.setProgress(Math.min((double)1.0F, progress));
+            this.bossBar.setProgress(Math.min(1.0, progress));
             String beaconName = this.beacon.getName();
             String title;
             if (phase.equals("neutral")) {
-                title = "§7Cleansing Beacon: §f" + beaconName + " §7(" + (int)(progress * (double)100.0F) + "%)";
+                title = "§7Cleansing Beacon: §f" + beaconName + " §7(" + (int)(progress * 100.0) + "%)";
                 this.bossBar.setColor(BarColor.YELLOW);
             } else if (this.vampireConversion) {
-                title = "§4Desecrating Beacon: §f" + beaconName + " §4(" + (int)(progress * (double)100.0F) + "%)";
+                title = "§4Desecrating Beacon: §f" + beaconName + " §4(" + (int)(progress * 100.0) + "%)";
                 this.bossBar.setColor(BarColor.RED);
             } else {
-                title = "§fConsecrating Beacon: §f" + beaconName + " §f(" + (int)(progress * (double)100.0F) + "%)";
+                title = "§fConsecrating Beacon: §f" + beaconName + " §f(" + (int)(progress * 100.0) + "%)";
                 this.bossBar.setColor(BarColor.WHITE);
             }
 
@@ -479,16 +482,16 @@ public class BeaconConversionListener implements Listener {
                 this.task.cancel();
                 this.task = null;
             }
-
         }
 
         public void recalculateConversionTime() {
             long currentTime = System.currentTimeMillis();
             long existingElapsed = currentTime - this.phaseStartTime;
-            double currentProgress = Math.min((double)1.0F, (double)existingElapsed / (double)this.adjustedConversionTime);
+            double currentProgress = Math.min(1.0, (double)existingElapsed / (double)this.adjustedConversionTime);
             long oldAdjustedTime = this.adjustedConversionTime;
             double speedMultiplier = (double)this.converters.size();
             double humanSpeedMultiplier = BeaconConversionListener.this.plugin.getConfigManager().getBeaconHumanSpeedMultiplier();
+
             if (!this.vampireConversion) {
                 speedMultiplier *= humanSpeedMultiplier;
             }
@@ -527,14 +530,14 @@ public class BeaconConversionListener implements Listener {
                     BeaconConversionListener.this.activeConversions.remove(this.beacon.getName().toLowerCase());
                 } else {
                     long elapsed = System.currentTimeMillis() - this.phaseStartTime;
-                    double rawProgress = Math.min((double)1.0F, (double)elapsed / (double)this.adjustedConversionTime);
+                    double rawProgress = Math.min(1.0, (double)elapsed / (double)this.adjustedConversionTime);
                     double displayProgress;
                     String currentPhase;
                     if (this.neutralStageComplete) {
-                        displayProgress = (double)0.5F + rawProgress * (double)0.5F;
+                        displayProgress = 0.5 + rawProgress * 0.5;
                         currentPhase = this.vampireConversion ? "desecrating" : "consecrating";
                     } else {
-                        displayProgress = rawProgress * (double)0.5F;
+                        displayProgress = rawProgress * 0.5;
                         currentPhase = "cleansing";
                     }
 
@@ -572,10 +575,11 @@ public class BeaconConversionListener implements Listener {
             BeaconConversionListener.this.beaconManager.updateBeaconDisplay(this.beacon);
             BeaconConversionListener.this.beaconManager.saveBeacons();
             BeaconConversionListener.this.plugin.getBeaconMajorityManager().updateBeaconMajorityBonuses();
-            this.updateBossBar((double)0.5F, "neutral");
+            this.updateBossBar(0.5, "neutral");
             BeaconSite.BeaconState previousState = BeaconConversionListener.this.getPreviousBeaconState(this.beacon, this.vampireConversion);
             BeaconConversionListener.this.broadcastNeutralConversionToAll(this.beacon, previousState);
             Location beaconLoc = this.beacon.getLocation();
+
             if (beaconLoc != null) {
                 beaconLoc.getWorld().playSound(beaconLoc, Sound.BLOCK_BEACON_DEACTIVATE, SoundCategory.BLOCKS, 1.0F, 1.0F);
             }
@@ -585,17 +589,21 @@ public class BeaconConversionListener implements Listener {
         private void completeConversion() {
             BeaconSite.BeaconState newState = this.vampireConversion ? BeaconState.DESECRATED : BeaconState.HOLY;
             BeaconConversionListener.this.beaconManager.cancelPendingNeutralBroadcast(this.beacon.getName());
+
             long cooldownMs = BeaconConversionListener.this.plugin.getConfigManager().getBeaconConversionCooldownMs();
             this.beacon.changeState(newState, "Player conversion", BeaconConversionListener.this.plugin.getSessionManager(), cooldownMs);
+
             BeaconConversionListener.this.beaconManager.updateBeaconDisplay(this.beacon);
             BeaconConversionListener.this.beaconManager.saveBeacons();
             BeaconConversionListener.this.plugin.getBeaconMajorityManager().updateBeaconMajorityBonuses();
+
             if (newState == BeaconState.HOLY || newState == BeaconState.DESECRATED) {
                 BeaconConversionListener.this.beaconManager.triggerFirstBeaconConvertedEffects(this.beacon, this.vampireConversion);
             }
 
             BeaconConversionListener.this.broadcastBeaconGainToTeam(this.beacon, newState);
             BeaconConversionListener.this.beaconManager.checkAndBroadcastCompleteControl();
+
             if (newState == BeaconState.HOLY) {
                 BeaconConversionListener.this.checkForHumansFinalStand();
             }
@@ -626,8 +634,9 @@ public class BeaconConversionListener implements Listener {
             Location beaconLoc = this.beacon.getLocation();
             if (beaconLoc == null) {
                 return false;
+
             } else {
-                for(Player player : BeaconConversionListener.this.getPlayersInRange(beaconLoc, (double)3.0F)) {
+                for(Player player : BeaconConversionListener.this.getPlayersInRange(beaconLoc, 3.0)) {
                     if (!this.converters.contains(player.getUniqueId())) {
                         boolean playerIsVampire = BeaconConversionListener.this.vampireManager.isVampireStage2OrHigher(player);
                         boolean playerIsHuman = BeaconConversionListener.this.vampireManager.isHuman(player);

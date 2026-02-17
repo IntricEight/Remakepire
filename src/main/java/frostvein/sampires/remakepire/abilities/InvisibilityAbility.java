@@ -69,10 +69,10 @@ public class InvisibilityAbility extends VampireAbility {
     private void createVanishEffects(Player player, boolean isVanishing) {
         if (player.getWorld() != null) {
             if (isVanishing) {
-                player.getWorld().spawnParticle(Particle.SMOKE, player.getLocation().add((double)0.0F, (double)1.0F, (double)0.0F), 30, (double)0.5F, (double)1.0F, (double)0.5F, 0.1);
-                player.getWorld().spawnParticle(Particle.ENCHANT, player.getLocation().add((double)0.0F, (double)1.0F, (double)0.0F), 15, (double)1.0F, (double)1.5F, (double)1.0F, 0.3);
+                player.getWorld().spawnParticle(Particle.SMOKE, player.getLocation().add(0.0, 1.0, 0.0), 30, 0.5, 1.0, 0.5, 0.1);
+                player.getWorld().spawnParticle(Particle.ENCHANT, player.getLocation().add(0.0, 1.0, 0.0), 15, 1.0, 1.5, 1.0, 0.3);
             } else {
-                player.getWorld().spawnParticle(Particle.CLOUD, player.getLocation().add((double)0.0F, (double)1.0F, (double)0.0F), 20, 0.3, 0.8, 0.3, 0.05);
+                player.getWorld().spawnParticle(Particle.CLOUD, player.getLocation().add(0.0, 1.0, 0.0), 20, 0.3, 0.8, 0.3, 0.05);
             }
 
         }
@@ -95,6 +95,7 @@ public class InvisibilityAbility extends VampireAbility {
             }
 
         }, (long)warningDelay);
+
         plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
             if (player.isOnline() && player.isInvisible() && !player.hasPotionEffect(PotionEffectType.INVISIBILITY)) {
                 plugin.getVampireAbilityManager().clearInvisibilityAttackCount(player);

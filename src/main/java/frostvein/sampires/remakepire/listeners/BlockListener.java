@@ -63,7 +63,7 @@ public class BlockListener implements Listener {
             event.setCancelled(true);
             player.sendMessage("§cYou cannot place blocks while in bat form");
         } else {
-            if (event.getBlock().getLocation().distance(this.plugin.getVampireRespawnLocation()) < (double)3.0F) {
+            if (event.getBlock().getLocation().distance(this.plugin.getVampireRespawnLocation()) < 3.0) {
                 if (!this.plugin.getVampireManager().isVampire(player)) {
                     player.sendMessage("§cThis is desecrated ground, you find yourself unable to place blocks here.");
                     event.setCancelled(true);

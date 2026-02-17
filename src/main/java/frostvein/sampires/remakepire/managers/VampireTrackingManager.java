@@ -72,31 +72,31 @@ public class VampireTrackingManager {
     private String getRelativeDirection(double deltaX, double deltaZ, float playerYaw) {
         double targetAngle = Math.atan2(deltaX, -deltaZ);
         double targetDegrees = Math.toDegrees(targetAngle);
-        if (targetDegrees < (double)0.0F) {
-            targetDegrees += (double)360.0F;
+        if (targetDegrees < 0) {
+            targetDegrees += 360.0;
         }
 
         double playerFacing = (double)((playerYaw + 180.0F) % 360.0F);
-        if (playerFacing < (double)0.0F) {
-            playerFacing += (double)360.0F;
+        if (playerFacing < 0) {
+            playerFacing += 360.0;
         }
 
-        double relativeAngle = (targetDegrees - playerFacing + (double)360.0F) % (double)360.0F;
-        if (!(relativeAngle >= (double)337.5F) && !(relativeAngle < (double)22.5F)) {
-            if (relativeAngle >= (double)22.5F && relativeAngle < (double)67.5F) {
+        double relativeAngle = (targetDegrees - playerFacing + 360.0) % 360.0;
+        if (!(relativeAngle >= 337.5) && !(relativeAngle < 22.5)) {
+            if (relativeAngle >= 22.5 && relativeAngle < 67.5) {
                 return "\ue00b";
-            } else if (relativeAngle >= (double)67.5F && relativeAngle < (double)112.5F) {
+            } else if (relativeAngle >= 67.5 && relativeAngle < 112.5) {
                 return "\ue00c";
-            } else if (relativeAngle >= (double)112.5F && relativeAngle < (double)157.5F) {
+            } else if (relativeAngle >= 112.5 && relativeAngle < 157.5) {
                 return "\ue00d";
-            } else if (relativeAngle >= (double)157.5F && relativeAngle < (double)202.5F) {
+            } else if (relativeAngle >= 157.5 && relativeAngle < 202.5) {
                 return "\ue00e";
-            } else if (relativeAngle >= (double)202.5F && relativeAngle < (double)247.5F) {
+            } else if (relativeAngle >= 202.5 && relativeAngle < 247.5) {
                 return "\ue00f";
-            } else if (relativeAngle >= (double)247.5F && relativeAngle < (double)292.5F) {
+            } else if (relativeAngle >= 247.5 && relativeAngle < 292.5) {
                 return "\ue010";
             } else {
-                return relativeAngle >= (double)292.5F && relativeAngle < (double)337.5F ? "\ue011" : "\ue00a";
+                return relativeAngle >= 292.5 && relativeAngle < 337.5 ? "\ue011" : "\ue00a";
             }
         } else {
             return "\ue00a";

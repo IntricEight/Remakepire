@@ -38,8 +38,8 @@ public class IronWeaknessListener implements Listener {
     private final VampireManager vampireManager;
     private final Set<Material> ironMaterials;
     private final Map<UUID, Long> knockbackCooldowns;
-    private double repelDistance = (double)2.0F;
-    private double repelStrength = (double)0.5F;
+    private double repelDistance = 2.0;
+    private double repelStrength = 0.5;
 
     public IronWeaknessListener(RemakepirePlugin plugin, VampireManager vampireManager) {
         this.plugin = plugin;
@@ -64,6 +64,7 @@ public class IronWeaknessListener implements Listener {
 
     private Set<Material> initializeIronMaterials() {
         Set<Material> materials = new HashSet();
+
         materials.add(Material.IRON_INGOT);
         materials.add(Material.IRON_NUGGET);
         materials.add(Material.RAW_IRON);
@@ -82,6 +83,7 @@ public class IronWeaknessListener implements Listener {
         materials.add(Material.IRON_HORSE_ARMOR);
         materials.add(Material.IRON_DOOR);
         materials.add(Material.IRON_TRAPDOOR);
+
         return materials;
     }
 
@@ -263,7 +265,7 @@ public class IronWeaknessListener implements Listener {
                 for(int dz = -2; dz <= 2; ++dz) {
                     Block block = location.getWorld().getBlockAt(x + dx, y + dy, z + dz);
                     if (this.ironMaterials.contains(block.getType())) {
-                        Location ironLoc = block.getLocation().add((double)0.5F, (double)0.5F, (double)0.5F);
+                        Location ironLoc = block.getLocation().add(0.5, 0.5, 0.5);
                         double distance = location.distance(ironLoc);
                         if (distance < nearestDistance) {
                             nearestDistance = distance;
@@ -286,7 +288,7 @@ public class IronWeaknessListener implements Listener {
         for(Player player : Bukkit.getOnlinePlayers()) {
             if (this.vampireManager.isVampire(player)) {
                 Location playerLoc = player.getLocation();
-                if (this.isNearIronBlock(playerLoc, (double)5.0F)) {
+                if (this.isNearIronBlock(playerLoc, 5.0)) {
                     this.applyIronEffects(player);
                 }
             }
@@ -302,7 +304,7 @@ public class IronWeaknessListener implements Listener {
         for(double dx = -radius; dx <= radius; ++dx) {
             for(double dy = -radius; dy <= radius; ++dy) {
                 for(double dz = -radius; dz <= radius; ++dz) {
-                    Block block = location.getWorld().getBlockAt((int)((double)x + dx), (int)((double)y + dy), (int)((double)z + dz));
+                    Block block = location.getWorld().getBlockAt((int)(x + dx), (int)(y + dy), (int)(z + dz));
                     if (this.ironMaterials.contains(block.getType())) {
                         return true;
                     }

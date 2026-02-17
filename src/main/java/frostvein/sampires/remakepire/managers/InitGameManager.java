@@ -67,7 +67,7 @@ import frostvein.sampires.remakepire.beacons.BeaconSite;
 
 public class InitGameManager {
     private final RemakepirePlugin plugin;
-    private static final double BORDER_BUFFER = (double)50.0F;
+    private static final double BORDER_BUFFER = 50.0;
     private static final String COMMAND_PREFIX = "/pow_init_internal_";
     private final Map<UUID, InitState> adminStates = new HashMap();
     private final Map<UUID, InitData> adminData = new HashMap();
@@ -83,6 +83,7 @@ public class InitGameManager {
         UUID adminId = admin.getUniqueId();
         this.adminStates.put(adminId, InitGameManager.InitState.AWAITING_FIRST_CONFIRM);
         this.adminData.put(adminId, new InitData());
+
         admin.sendMessage("§c§l========================================");
         admin.sendMessage("§c§lWARNING: GAME INITIALIZATION");
         admin.sendMessage("§c§l========================================");
@@ -95,11 +96,13 @@ public class InitGameManager {
         admin.sendMessage("§7  • Teleport all online players");
         admin.sendMessage("§7  • Assign new vampires");
         admin.sendMessage("");
+
         TextComponent confirmMessage = new TextComponent("§7Are you sure? ");
         TextComponent clickableText = new TextComponent("§e§n[CLICK HERE TO CONTINUE]");
         clickableText.setClickEvent(new ClickEvent(Action.RUN_COMMAND, "/pow_init_internal_confirm1"));
         clickableText.setHoverEvent(new HoverEvent(net.md_5.bungee.api.chat.HoverEvent.Action.SHOW_TEXT, (new ComponentBuilder("§7Click to proceed with initialization")).create()));
         confirmMessage.addExtra(clickableText);
+
         admin.spigot().sendMessage(confirmMessage);
         admin.sendMessage("");
         admin.sendMessage("§7Type §e/pow admin init cancel §7at any time to cancel.");
@@ -110,8 +113,10 @@ public class InitGameManager {
         UUID adminId = admin.getUniqueId();
         if (this.adminStates.get(adminId) != InitGameManager.InitState.AWAITING_FIRST_CONFIRM) {
             admin.sendMessage("§cError: Invalid initialization state.");
+
         } else {
             this.adminStates.put(adminId, InitGameManager.InitState.AWAITING_MODE_SELECTION);
+
             admin.sendMessage("");
             admin.sendMessage("§6§l========================================");
             admin.sendMessage("§6How would you like to assign vampires?");
@@ -119,6 +124,7 @@ public class InitGameManager {
             admin.sendMessage("");
             admin.sendMessage("§7Type §e/pow admin init cancel §7to cancel.");
             admin.sendMessage("");
+
             TextComponent randomButton = new TextComponent("§a§l[RANDOM] ");
             randomButton.setClickEvent(new ClickEvent(Action.RUN_COMMAND, "/pow_init_internal_mode_random"));
             randomButton.setHoverEvent(new HoverEvent(net.md_5.bungee.api.chat.HoverEvent.Action.SHOW_TEXT, (new ComponentBuilder("§7Randomly select vampires from online players")).create()));
@@ -128,6 +134,7 @@ public class InitGameManager {
             TextComponent buttonMessage = new TextComponent("");
             buttonMessage.addExtra(randomButton);
             buttonMessage.addExtra(selectedButton);
+
             admin.spigot().sendMessage(buttonMessage);
             admin.sendMessage("");
         }
@@ -135,12 +142,15 @@ public class InitGameManager {
 
     public void handleRandomMode(Player admin) {
         UUID adminId = admin.getUniqueId();
+
         if (this.adminStates.get(adminId) != InitGameManager.InitState.AWAITING_MODE_SELECTION) {
             admin.sendMessage("§cError: Invalid initialization state.");
+
         } else {
             InitData data = (InitData)this.adminData.get(adminId);
             data.mode = InitGameManager.InitData.VampireMode.RANDOM;
             this.adminStates.put(adminId, InitGameManager.InitState.AWAITING_MIN_VAMPIRES);
+
             admin.sendMessage("");
             admin.sendMessage("§e§l========================================");
             admin.sendMessage("§eWhat should the §lminimum§e number of starting vampires be?");
@@ -153,8 +163,10 @@ public class InitGameManager {
 
     public void handleSelectedMode(Player admin) {
         UUID adminId = admin.getUniqueId();
+
         if (this.adminStates.get(adminId) != InitGameManager.InitState.AWAITING_MODE_SELECTION) {
             admin.sendMessage("§cError: Invalid initialization state.");
+
         } else {
             InitData data = (InitData)this.adminData.get(adminId);
             data.mode = InitGameManager.InitData.VampireMode.SELECTED;
@@ -165,12 +177,14 @@ public class InitGameManager {
     public void openPlayerSelectionGUI(Player admin) {
         List<Player> onlinePlayers = new ArrayList(Bukkit.getOnlinePlayers());
         int playerCount = onlinePlayers.size();
+
         if (playerCount == 0) {
             admin.sendMessage("§cNo players are online to select.");
             this.cancelInitialization(admin);
+
         } else {
             InitData data = (InitData)this.adminData.get(admin.getUniqueId());
-            int totalPages = (int)Math.ceil((double)playerCount / (double)45.0F);
+            int totalPages = (int)Math.ceil(playerCount / 45.0);
             int currentPage = Math.min(data.currentPage, totalPages - 1);
             data.currentPage = currentPage;
             int startIndex = currentPage * 45;
@@ -183,6 +197,7 @@ public class InitGameManager {
                 boolean isVampire = data.selectedVampires.contains(player.getUniqueId());
                 ItemStack item = new ItemStack(isVampire ? Material.EXPERIENCE_BOTTLE : Material.GLASS_BOTTLE);
                 ItemMeta meta = item.getItemMeta();
+
                 if (isVampire) {
                     meta.setDisplayName("§4" + player.getName() + " - Vampire");
                 } else {
@@ -217,6 +232,7 @@ public class InitGameManager {
             pageMeta.setLore(pageLore);
             pageIndicator.setItemMeta(pageMeta);
             inventory.setItem(49, pageIndicator);
+
             if (currentPage < totalPages - 1) {
                 ItemStack nextButton = new ItemStack(Material.ARROW);
                 ItemMeta nextMeta = nextButton.getItemMeta();
@@ -288,9 +304,11 @@ public class InitGameManager {
         } else {
             try {
                 int min = Integer.parseInt(input.trim());
+
                 if (min < 0) {
                     admin.sendMessage("§cThe minimum must be 0 or more. Please try again:");
                     return true;
+
                 } else {
                     InitData data = (InitData)this.adminData.get(adminId);
                     data.minVampires = min;
@@ -314,16 +332,20 @@ public class InitGameManager {
 
     public boolean handleMaxVampiresInput(Player admin, String input) {
         UUID adminId = admin.getUniqueId();
+
         if (this.adminStates.get(adminId) != InitGameManager.InitState.AWAITING_MAX_VAMPIRES) {
             return false;
+
         } else {
             InitData data = (InitData)this.adminData.get(adminId);
 
             try {
                 int max = Integer.parseInt(input.trim());
+
                 if (max < data.minVampires) {
                     admin.sendMessage("§cThe maximum must be " + data.minVampires + " or more. Please try again:");
                     return true;
+
                 } else {
                     data.maxVampires = max;
                     this.adminStates.put(adminId, InitGameManager.InitState.AWAITING_FINAL_CONFIRM);
@@ -348,9 +370,11 @@ public class InitGameManager {
         admin.sendMessage("§a§l========================================");
         admin.sendMessage("");
         admin.sendMessage("§7Configuration:");
+
         if (data.mode == InitGameManager.InitData.VampireMode.RANDOM) {
             admin.sendMessage("§7  • Mode: §eRandom");
             admin.sendMessage("§7  • Vampires: §e" + data.minVampires + "-" + data.maxVampires);
+
         } else {
             admin.sendMessage("§7  • Mode: §eManually Selected");
             admin.sendMessage("§7  • Vampires: §e" + data.selectedVampires.size() + " players");
@@ -359,19 +383,23 @@ public class InitGameManager {
         admin.sendMessage("");
         admin.sendMessage("§7This will reset the entire game state.");
         admin.sendMessage("");
+
         TextComponent confirmMessage = new TextComponent("§7Ready to begin? ");
         TextComponent clickableText = new TextComponent("§a§l§n[START GAME]");
         clickableText.setClickEvent(new ClickEvent(Action.RUN_COMMAND, "/pow_init_internal_execute"));
         clickableText.setHoverEvent(new HoverEvent(net.md_5.bungee.api.chat.HoverEvent.Action.SHOW_TEXT, (new ComponentBuilder("§7Click to initialize the game")).create()));
         confirmMessage.addExtra(clickableText);
+
         admin.spigot().sendMessage(confirmMessage);
         admin.sendMessage("§a§l========================================");
     }
 
     public void executeInitialization(Player admin) {
         UUID adminId = admin.getUniqueId();
+
         if (this.adminStates.get(adminId) != InitGameManager.InitState.AWAITING_FINAL_CONFIRM) {
             admin.sendMessage("§cError: Invalid initialization state.");
+
         } else {
             InitData data = (InitData)this.adminData.get(adminId);
             admin.sendMessage("");
@@ -383,6 +411,7 @@ public class InitGameManager {
             if (world == null) {
                 admin.sendMessage("§cError: World 'world' not found.");
                 this.cancelInitialization(admin);
+
             } else {
                 admin.sendMessage("§7[1/9] Neutralizing beacons...");
 
@@ -431,8 +460,8 @@ public class InitGameManager {
                         healthAttr.removeModifier(modifier);
                     }
 
-                    healthAttr.setBaseValue((double)20.0F);
-                    player.setHealth((double)20.0F);
+                    healthAttr.setBaseValue(20.0);
+                    player.setHealth(20.0);
                     player.setLevel(0);
                     player.setExp(0.0F);
                     player.setTotalExperience(0);
@@ -473,7 +502,7 @@ public class InitGameManager {
                 this.plugin.getPermadeathManager().clearAllPermadeathModes();
                 admin.sendMessage("§7[5/9] Setting world time and border...");
                 world.setFullTime(1L);
-                world.getWorldBorder().setSize((double)900000.0F);
+                world.getWorldBorder().setSize(900000.0);
                 Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "gamerule playersNetherPortalDefaultDelay 80");
                 Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "gamerule locatorBar false");
                 admin.sendMessage("§7[6/9] Applying saturation effect...");
@@ -501,6 +530,7 @@ public class InitGameManager {
                 }
 
                 admin.sendMessage("§7[8/9] Assigning vampires...");
+
                 List<Player> playersToConvert = new ArrayList();
                 if (data.mode == InitGameManager.InitData.VampireMode.RANDOM) {
                     int vampireCount = ThreadLocalRandom.current().nextInt(data.minVampires, data.maxVampires + 1);
@@ -508,6 +538,7 @@ public class InitGameManager {
                     Collections.shuffle(availablePlayers);
                     vampireCount = Math.min(vampireCount, availablePlayers.size());
                     playersToConvert = availablePlayers.subList(0, vampireCount);
+
                 } else {
                     for(Player player : onlinePlayers) {
                         if (data.selectedVampires.contains(player.getUniqueId())) {
@@ -521,6 +552,7 @@ public class InitGameManager {
                 for(Player player : playersToConvert) {
                     this.plugin.getVampireManager().setPlayerAsVampire(player, 1);
                     vampireIds.add(player.getUniqueId());
+
                     player.setExp(0.5F);
                     player.sendTitle("§4§lVampire", "", 10, 100, 20);
                     player.sendMessage("");
@@ -530,11 +562,13 @@ public class InitGameManager {
                     player.sendMessage("§7What to do: Turn other humans by 'killing' them when no one is looking. As a level 1 vampire, there are very few ways you can be found out, but still be cautious. You cannot help turn beacons, eating food is bad but stomachable for now, only attack during the night. Press \"k\" to customize your vampire ability keybinds.");
                     player.sendMessage("§4§l========================================");
                     player.sendMessage("");
+
                     TextComponent textureMessage = new TextComponent("§7Apply the vampire texture pack: ");
                     TextComponent clickableText = new TextComponent("§c§n[CLICK HERE]");
                     clickableText.setClickEvent(new ClickEvent(Action.RUN_COMMAND, "/pow texture vampire"));
                     clickableText.setHoverEvent(new HoverEvent(net.md_5.bungee.api.chat.HoverEvent.Action.SHOW_TEXT, (new ComponentBuilder("§7Click to apply the vampire texture pack")).create()));
                     textureMessage.addExtra(clickableText);
+
                     player.spigot().sendMessage(textureMessage);
                 }
 
@@ -597,19 +631,21 @@ public class InitGameManager {
         double maxZ = config.getOakhurstMaxZ();
 
         for(int attempt = 0; attempt < maxAttempts; ++attempt) {
-            double angle = ThreadLocalRandom.current().nextDouble() * (double)2.0F * Math.PI;
+            double angle = ThreadLocalRandom.current().nextDouble() * 2.0 * Math.PI;
             double distance = Math.sqrt(ThreadLocalRandom.current().nextDouble()) * teleportRadius;
             double x = townCenterX + distance * Math.cos(angle);
             double z = townCenterZ + distance * Math.sin(angle);
-            if (!(x < minX + (double)50.0F) && !(x > maxX - (double)50.0F) && !(z < minZ + (double)50.0F) && !(z > maxZ - (double)50.0F)) {
+
+            if (!(x < minX + 50.0) && !(x > maxX - 50.0) && !(z < minZ + 50.0) && !(z > maxZ - 50.0)) {
                 Location loc = new Location(world, x, (double)(world.getHighestBlockYAt((int)x, (int)z) + 1), z);
-                if (loc.getY() > (double)0.0F && loc.getY() < (double)world.getMaxHeight()) {
+
+                if (loc.getY() > 0.0 && loc.getY() < world.getMaxHeight()) {
                     return loc;
                 }
             }
         }
 
-        return new Location(world, townCenterX, (double)(world.getHighestBlockYAt((int)townCenterX, (int)townCenterZ) + 1), townCenterZ);
+        return new Location(world, townCenterX, world.getHighestBlockYAt((int)townCenterX, (int)townCenterZ) + 1, townCenterZ);
     }
 
     public void cancelInitialization(Player admin) {
@@ -626,6 +662,7 @@ public class InitGameManager {
     public boolean handleInternalCommand(Player admin, String command) {
         if (!command.startsWith("/pow_init_internal_")) {
             return false;
+
         } else {
             switch (command.substring("/pow_init_internal_".length())) {
                 case "confirm1":

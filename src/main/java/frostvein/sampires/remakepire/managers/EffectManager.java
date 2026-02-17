@@ -153,16 +153,6 @@ public class EffectManager {
                 AttributeModifier safeFallIncrease = new AttributeModifier(VAMPIRE_SAFE_FALL_KEY, 5.0, AttributeModifier.Operation.ADD_NUMBER);
                 safeFallAttribute.addModifier(safeFallIncrease);
             }
-
-
-            // TODO: Decompilation Fixing, remove comments once success is confirmed
-
-//            boolean hasModifier = safeFallAttribute.getModifiers().stream().anyMatch((modifier) -> modifier.getUniqueId().equals(VAMPIRE_SAFE_FALL_UUID));
-//
-//            if (!hasModifier) {
-//                AttributeModifier safeFallIncrease = new AttributeModifier(VAMPIRE_SAFE_FALL_UUID, "Vampire Safe Fall Distance", (double)5.0F, Operation.ADD_NUMBER);
-//                safeFallAttribute.addModifier(safeFallIncrease);
-//            }
         }
     }
 
@@ -209,10 +199,12 @@ public class EffectManager {
     private void applyHumansFinalStandHealthReduction(Player player) {
         if (this.plugin.getSessionManager().isHumansFinalStandActive()) {
             AttributeInstance healthAttribute = player.getAttribute(Attribute.MAX_HEALTH);
-            if (healthAttribute != null && healthAttribute.getBaseValue() > (double)6.0F) {
-                healthAttribute.setBaseValue((double)6.0F);
-                if (player.getHealth() > (double)6.0F) {
-                    player.setHealth((double)6.0F);
+
+            if (healthAttribute != null && healthAttribute.getBaseValue() > 6.0) {
+                healthAttribute.setBaseValue(6.0);
+
+                if (player.getHealth() > 6.0) {
+                    player.setHealth(6.0);
                 }
             }
         }
@@ -226,8 +218,10 @@ public class EffectManager {
             this.applyHumansFinalStandHealthReduction(player);
             this.plugin.getVampireTurningManager().applyLuckEffectIfEnabled(player);
             this.removeSunWeaknessEffects(player);
+
         } else {
             this.removeVampireSafeFall(player);
+
             if (this.vampireManager.isHuman(player) && this.plugin.getSessionManager().isVampiresEternalNightActive() && player.getGameMode() == GameMode.SURVIVAL) {
                 this.applyEternalNightDarkness(player);
             }

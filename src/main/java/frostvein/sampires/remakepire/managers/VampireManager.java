@@ -55,7 +55,7 @@ public class VampireManager {
     }
 
     public void addFallProtection(Player player) {
-        this.lungingPlayers.put(player.getUniqueId(), player.getLocation().getY() - (double)5.0F);
+        this.lungingPlayers.put(player.getUniqueId(), player.getLocation().getY() - 5.0);
         this.lungeTimestamps.put(player.getUniqueId(), System.currentTimeMillis());
     }
 
@@ -63,14 +63,18 @@ public class VampireManager {
         UUID playerId = player.getUniqueId();
         if (!this.lungingPlayers.containsKey(playerId)) {
             return false;
+
         } else {
             Long lungeTime = (Long)this.lungeTimestamps.get(playerId);
+
             if (lungeTime != null && System.currentTimeMillis() - lungeTime <= 10000L) {
-                Double startingY = (Double)this.lungingPlayers.get(playerId);
+                Double startingY = this.lungingPlayers.get(playerId);
+
                 if (startingY != null && player.getLocation().getY() >= startingY) {
                     this.lungingPlayers.remove(playerId);
                     this.lungeTimestamps.remove(playerId);
                     return true;
+
                 } else {
                     return false;
                 }
@@ -90,10 +94,12 @@ public class VampireManager {
 
     public void setPlayerAsHuman(Player player) {
         this.removeAllVampireTags(player);
+
         player.removeScoreboardTag("vampire");
         player.addScoreboardTag("human");
         this.addPlayerToCorrectTeam(player);
         player.setInvulnerable(false);
+
         if (this.plugin.getForcedCureChoiceManager() != null && this.plugin.getForcedCureChoiceManager().hasPendingCure(player)) {
             this.plugin.getForcedCureChoiceManager().removePendingCure(player);
             if (player.getGameMode() != GameMode.CREATIVE && player.getGameMode() != GameMode.SPECTATOR) {
@@ -109,7 +115,7 @@ public class VampireManager {
         this.removeVampireAttributeModifiers(player);
         AttributeInstance healthAttribute = player.getAttribute(Attribute.MAX_HEALTH);
         if (healthAttribute != null) {
-            healthAttribute.setBaseValue((double)20.0F);
+            healthAttribute.setBaseValue(20.0);
         }
 
         player.removeScoreboardTag("ImmuneToThirst");
@@ -390,7 +396,8 @@ public class VampireManager {
         for(Player nearbyPlayer : Bukkit.getOnlinePlayers()) {
             if (this.isHuman(nearbyPlayer) && nearbyPlayer.getWorld().equals(vampire.getWorld())) {
                 double distance = nearbyPlayer.getLocation().distance(vampireLocation);
-                if (distance <= (double)10.0F) {
+
+                if (distance <= 10) {
                     nearbyPlayer.sendMessage("§8You feel a darkness lunge out at you, a vampire near you has lost a piece of their essence and grown weaker...");
                     nearbyPlayer.playSound(nearbyPlayer.getLocation(), Sound.ENTITY_WARDEN_HEARTBEAT, SoundCategory.MASTER, 1.0F, 0.8F);
                     Vector direction = nearbyPlayer.getLocation().toVector().subtract(vampireLocation.toVector()).normalize();
@@ -521,11 +528,11 @@ public class VampireManager {
 
     public double getWoodenWeaponMultiplier(Player player) {
         if (this.isVampireStage1(player)) {
-            return (double)2.5F;
+            return 2.5;
         } else if (this.isVampireStage2(player)) {
-            return (double)3.0F;
+            return 3.0;
         } else {
-            return this.isVampireStage3(player) ? (double)4.0F : (double)1.0F;
+            return this.isVampireStage3(player) ? 4.0 : 1.0;
         }
     }
 

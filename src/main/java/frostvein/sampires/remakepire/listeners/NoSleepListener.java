@@ -24,9 +24,8 @@ public class NoSleepListener implements Listener {
 
         this.plugin.getServer().getScheduler().runTaskLater(this.plugin, () -> {
             if (player.isSleeping()) {
-                player.teleport(player.getLocation().add((double)0.0F, (double)1.0F, (double)0.0F));
+                player.teleport(player.getLocation().add(0.0, 1.0, 0.0));
             }
-
         }, 2L);
     }
 }

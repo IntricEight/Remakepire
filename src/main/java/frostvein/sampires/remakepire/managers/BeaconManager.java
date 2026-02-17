@@ -57,9 +57,9 @@ public class BeaconManager {
     private BukkitTask holyRegenTask;
     private BukkitTask cooldownTrackingTask;
     private BukkitTask beaconMaintenanceTask;
-    public static final double BEACON_CONVERSION_RANGE = (double)3.0F;
-    public static final double HOLY_SUPPRESSION_RANGE = (double)25.0F;
-    public static final double HOLY_REGENERATION_RANGE = (double)25.0F;
+    public static final double BEACON_CONVERSION_RANGE = 3.0;
+    public static final double HOLY_SUPPRESSION_RANGE = 25.0;
+    public static final double HOLY_REGENERATION_RANGE = 25.0;
     private static final int REGEN_DURATION_TICKS = 100;
     private static final int REGEN_AMPLIFIER = 0;
     private long lastCooldownUpdate = System.currentTimeMillis();
@@ -155,7 +155,6 @@ public class BeaconManager {
 
                 this.lastCooldownUpdate = currentTime;
             }
-
         }
     }
 
@@ -173,7 +172,6 @@ public class BeaconManager {
         if (clearedBeacons > 0) {
             this.saveBeacons();
         }
-
     }
 
     private void startConversionCircleParticleTask() {
@@ -199,13 +197,12 @@ public class BeaconManager {
                 }
             }
         }
-
     }
 
     public void createBeaconDisplay(BeaconSite beacon) {
         if (beacon != null && beacon.getLocation() != null) {
             Location displayLoc = beacon.getLocation().clone();
-            displayLoc.add((double)0.0F, (double)0.5F, (double)0.0F);
+            displayLoc.add(0.0, 0.5, 0.0);
             ItemStack pumpkinItem = new ItemStack(Material.CARVED_PUMPKIN);
             ItemMeta meta = pumpkinItem.getItemMeta();
             String expectedCMD = this.getCustomModelDataForState(beacon.getState());
@@ -220,6 +217,7 @@ public class BeaconManager {
             display.setPersistent(true);
             Transformation transform = new Transformation(new Vector3f(0.0F, 0.0F, 0.0F), new AxisAngle4f(0.0F, 0.0F, 1.0F, 0.0F), new Vector3f(1.0F, 1.0F, 1.0F), new AxisAngle4f(0.0F, 0.0F, 1.0F, 0.0F));
             display.setTransformation(transform);
+
             this.beaconDisplays.put(beacon.getName().toLowerCase(), display);
             this.plugin.getLogger().info("Created item display for beacon: " + beacon.getName());
         } else {
@@ -233,6 +231,7 @@ public class BeaconManager {
             ItemStack pumpkinItem = new ItemStack(Material.CARVED_PUMPKIN);
             ItemMeta meta = pumpkinItem.getItemMeta();
             String expectedCMD = this.getCustomModelDataForState(beacon.getState());
+
             if (meta != null) {
                 meta.setDisplayName("§6Beacon: " + beacon.getName());
                 pumpkinItem.setItemMeta(meta);
@@ -256,10 +255,11 @@ public class BeaconManager {
             display.remove();
             this.beaconDisplays.remove(beaconName.toLowerCase());
             this.plugin.getLogger().info("Removed item display for beacon: " + beaconName);
+
         } else if (fallbackLocation != null && fallbackLocation.getWorld() != null) {
             int removed = 0;
 
-            for(Entity entity : fallbackLocation.getWorld().getNearbyEntities(fallbackLocation, (double)5.0F, (double)5.0F, (double)5.0F)) {
+            for(Entity entity : fallbackLocation.getWorld().getNearbyEntities(fallbackLocation, 5.0, 5.0, 5.0)) {
                 if (entity instanceof ItemDisplay) {
                     entity.remove();
                     ++removed;
@@ -292,6 +292,7 @@ public class BeaconManager {
         this.forceLoadBeaconChunks();
         this.aggressiveCleanupItemDisplays();
         this.beaconDisplays.clear();
+
         this.plugin.getServer().getScheduler().runTaskLater(this.plugin, () -> {
             for(BeaconSite beacon : this.beacons.values()) {
                 this.createBeaconDisplay(beacon);
@@ -319,7 +320,7 @@ public class BeaconManager {
         for(BeaconSite beacon : this.beacons.values()) {
             Location location = beacon.getLocation();
             if (location != null && location.getWorld() != null) {
-                for(Entity entity : location.getWorld().getNearbyEntities(location, (double)5.0F, (double)5.0F, (double)5.0F)) {
+                for(Entity entity : location.getWorld().getNearbyEntities(location, 5.0, 5.0, 5.0)) {
                     if (entity instanceof ItemDisplay) {
                         entity.remove();
                         ++totalRemoved;
@@ -370,21 +371,25 @@ public class BeaconManager {
             info.append("§e").append(beacon.getName()).append("§7:\n");
             info.append("  §7Beacon State: §f").append(beacon.getState().getDisplayName()).append("\n");
             info.append("  §7Expected CMD: §f").append(this.getCustomModelDataForState(beacon.getState())).append("\n");
+
             if (display == null) {
                 info.append("  §cNo item display found!");
             } else if (!display.isValid()) {
                 info.append("  §cItem display is invalid/removed!");
             } else {
                 ItemStack item = display.getItemStack();
+
                 if (item != null && item.getType() == Material.CARVED_PUMPKIN) {
                     ItemMeta meta = item.getItemMeta();
                     if (meta == null) {
                         info.append("  §cItem has no metadata!");
+
                     } else {
                         CustomModelData cmdComponent = (CustomModelData)item.getData(DataComponentTypes.CUSTOM_MODEL_DATA);
                         String actualCMD = cmdComponent != null && !cmdComponent.strings().isEmpty() ? (String)cmdComponent.strings().get(0) : "none";
                         String expectedCMD = this.getCustomModelDataForState(beacon.getState());
                         info.append("  §7Actual CMD: §f").append(actualCMD);
+
                         if (!actualCMD.equals(expectedCMD)) {
                             info.append(" §c(WRONG! Should be ").append(expectedCMD).append(")");
                         } else {
@@ -412,7 +417,7 @@ public class BeaconManager {
                     Location beaconLoc = beacon.getLocation();
                     if (beaconLoc != null && beaconLoc.getWorld().equals(location.getWorld())) {
                         double distance = beaconLoc.distance(location);
-                        if (distance <= (double)25.0F && distance < nearestDistance) {
+                        if (distance <= 25 && distance < nearestDistance) {
                             nearestHolyBeacon = beacon;
                             nearestDistance = distance;
                         }
@@ -525,6 +530,7 @@ public class BeaconManager {
 
     public boolean setBeaconHoly(String name) {
         BeaconSite beacon = (BeaconSite)this.beacons.get(name.toLowerCase());
+
         if (beacon != null) {
             this.cancelPendingNeutralBroadcast(name.toLowerCase());
             beacon.setState(BeaconState.HOLY);
@@ -548,6 +554,7 @@ public class BeaconManager {
         if (this.plugin.getSessionManager().isVampiresEternalNightActive()) {
             int evilCount = this.getAllEvilBeacons().size();
             int totalBeacons = this.getAllBeacons().size();
+
             if (evilCount < totalBeacons) {
                 this.plugin.getLogger().info("ETERNAL NIGHT LIFTED - Not all beacons are evil anymore!");
                 this.plugin.getSessionManager().setVampiresEternalNightActive(false);
@@ -572,8 +579,8 @@ public class BeaconManager {
         if (!this.plugin.getSessionManager().isFirstBeaconConvertedTriggered()) {
             this.plugin.getSessionManager().setFirstBeaconConvertedTriggered(true);
             Location beaconLocation = beacon.getLocation();
-            String nearMessage;
-            String farMessage;
+            String nearMessage, farMessage;
+
             if (isDesecration) {
                 nearMessage = "\n§4A cold dread washes over you as the beacon's light twists into something sinister. The air grows heavy with malice... \n§7But just as suddenly, you feel a faint warmth stirring within, as if a force of light is rising to oppose the darkness. Perhaps there is still hope...\n";
                 farMessage = "§4A dark beacon has been desecrated somewhere amongst the land, you feel its corrupted presence seep through the earth. \n§7But just as soon after, a faint warmth touches your heart, like a force of good is awakening to fight back. Probably just your imagination...\n";
@@ -585,7 +592,8 @@ public class BeaconManager {
             for(Player player : Bukkit.getOnlinePlayers()) {
                 player.playSound(player.getLocation(), Sound.ENTITY_WITHER_SPAWN, SoundCategory.MASTER, 0.8F, 0.7F);
                 player.addPotionEffect(new PotionEffect(PotionEffectType.DARKNESS, 60, 0, false, false));
-                if (beaconLocation.getWorld() == player.getLocation().getWorld() && beaconLocation.distance(player.getLocation()) <= (double)50.0F) {
+
+                if (beaconLocation.getWorld() == player.getLocation().getWorld() && beaconLocation.distance(player.getLocation()) <= 50.0) {
                     player.sendMessage(nearMessage);
                 } else {
                     player.sendMessage(farMessage);
@@ -598,6 +606,7 @@ public class BeaconManager {
 
     public boolean setBeaconDesecrated(String name) {
         BeaconSite beacon = (BeaconSite)this.beacons.get(name.toLowerCase());
+
         if (beacon != null) {
             this.cancelPendingNeutralBroadcast(name.toLowerCase());
             beacon.setState(BeaconState.DESECRATED);
@@ -625,6 +634,7 @@ public class BeaconManager {
 
     public boolean setBeaconNeutral(String name, boolean silent) {
         BeaconSite beacon = (BeaconSite)this.beacons.get(name.toLowerCase());
+
         if (beacon != null) {
             BeaconSite.BeaconState previousState = beacon.getState();
             beacon.setState(BeaconState.NEUTRAL);
@@ -633,6 +643,7 @@ public class BeaconManager {
             this.saveBeacons();
             this.plugin.getLogger().info("Set beacon '" + name + "' as neutral (cooldown cleared)");
             this.plugin.getBeaconMajorityManager().updateBeaconMajorityBonuses();
+
             if (!silent) {
                 this.broadcastNeutralConversionToAll(beacon, previousState);
                 this.checkAndDisableHumansFinalStand();
@@ -647,8 +658,8 @@ public class BeaconManager {
 
     private void checkAndDisableHumansFinalStand() {
         if (this.plugin.getSessionManager().isHumansFinalStandActive()) {
-            int holyCount = this.getHolyBeacons().size();
-            int totalBeacons = this.getAllBeacons().size();
+            int holyCount = this.getHolyBeacons().size(), totalBeacons = this.getAllBeacons().size();
+
             if (holyCount < totalBeacons) {
                 this.plugin.getLogger().info("HUMANS FINAL STAND ENDED - Not all beacons are holy anymore!");
 
@@ -666,7 +677,6 @@ public class BeaconManager {
 
                 this.plugin.getSessionManager().setHumansFinalStandActive(false);
             }
-
         }
     }
 
@@ -682,7 +692,6 @@ public class BeaconManager {
                 this.showParticleEffect(beacon, particleLoc);
             }
         }
-
     }
 
     public Set<String> getBeaconNames() {
@@ -703,16 +712,14 @@ public class BeaconManager {
         } catch (Exception e) {
             this.plugin.getLogger().warning("Failed to show particles for beacon " + beacon.getName() + ": " + e.getMessage());
         }
-
     }
 
     private void showHolyParticles(Location location) {
         double radius = 1.5;
 
         for(int i = 0; i < 8; ++i) {
-            double angle = (Math.PI * 2D) * (double)i / 8.0;
-//            double radius = 1.5;
-            Location particleLoc = location.clone().add(Math.cos(angle) * radius, Math.sin((double)System.currentTimeMillis() / 1000.0) * 0.3, Math.sin(angle) * radius);
+            double angle = (Math.PI * 2D) * i / 8.0;
+            Location particleLoc = location.clone().add(Math.cos(angle) * radius, Math.sin(System.currentTimeMillis() / 1000.0) * 0.3, Math.sin(angle) * radius);
             location.getWorld().spawnParticle(Particle.WHITE_ASH, particleLoc, 2, 0.1, 0.1, 0.1, 0.01);
         }
 
@@ -725,11 +732,12 @@ public class BeaconManager {
 
     private void showDesecratedParticles(Location location) {
         location.getWorld().spawnParticle(Particle.LARGE_SMOKE, location, 3, 0.3, 0.1, 0.3, 0.02);
+        double radius = 1.2;
 
         for(int i = 0; i < 6; ++i) {
-            double angle = (Math.PI * 2D) * (double)i / (double)6.0F;
-            double radius = 1.2;
-            Location particleLoc = location.clone().add(Math.cos(angle) * radius, -Math.sin((double)System.currentTimeMillis() / (double)800.0F) * 0.2, Math.sin(angle) * radius);
+            double angle = (Math.PI * 2D) * i / 6.0;
+
+            Location particleLoc = location.clone().add(Math.cos(angle) * radius, -Math.sin(System.currentTimeMillis() / 800.0) * 0.2, Math.sin(angle) * radius);
             Particle.DustOptions dustOptions = new Particle.DustOptions(Color.fromRGB(139, 0, 0), 1.0F);
             location.getWorld().spawnParticle(Particle.DUST, particleLoc, 1, 0.1, 0.1, 0.1, dustOptions);
         }
@@ -739,9 +747,8 @@ public class BeaconManager {
         }
 
         if (Math.random() < 0.2) {
-            location.getWorld().spawnParticle(Particle.CRIMSON_SPORE, location, 4, (double)0.5F, (double)0.5F, (double)0.5F, 0.01);
+            location.getWorld().spawnParticle(Particle.CRIMSON_SPORE, location, 4, 0.5, 0.5, 0.5, 0.01);
         }
-
     }
 
     private void showConversionRangeCircle(BeaconSite beacon, Location center) {
@@ -769,8 +776,8 @@ public class BeaconManager {
             double radius = 25.0;
             long time = System.currentTimeMillis();
             int currentPointIndex = (int)(time / 50L % (long)circlePoints);
-            double angle = (Math.PI * 2D) * (double)currentPointIndex / (double)circlePoints;
-            double rotationOffset = (double)time / 12000.0 % (Math.PI * 2D);
+            double angle = (Math.PI * 2D) * currentPointIndex / (double)circlePoints;
+            double rotationOffset = time / 12000.0 % (Math.PI * 2D);
             angle += rotationOffset;
             double x = Math.cos(angle) * radius;
             double z = Math.sin(angle) * radius;
@@ -790,7 +797,7 @@ public class BeaconManager {
             int minY = location.getWorld().getMinHeight();
 
             for(int y = maxY; y >= minY; --y) {
-                highest.setY((double)y);
+                highest.setY(y);
                 Material blockType = highest.getBlock().getType();
                 if (blockType.isSolid() && blockType != Material.AIR) {
                     return highest.clone().add(0.0, 1.5, 0.0);
@@ -838,7 +845,7 @@ public class BeaconManager {
         Location ground = location.clone();
 
         for(int y = 0; y >= -5; --y) {
-            ground.setY(location.getY() + (double)y);
+            ground.setY(location.getY() + y);
             if (ground.getBlock().getType().isSolid()) {
                 return ground.add(0.0, 1.2, 0.0);
             }
@@ -1015,38 +1022,48 @@ public class BeaconManager {
 
     private void createDefaultBeacons() {
         this.beacons.clear();
+
         World world = this.plugin.getServer().getWorld("world");
+
         if (world == null) {
             this.plugin.getLogger().severe("World 'world' not found! Cannot create default beacons.");
+
         } else {
-            BeaconSite town = new BeaconSite("Town", new Location(world, (double)79.5F, (double)86.0F, (double)440.5F));
+            BeaconSite town = new BeaconSite("Town", new Location(world, 79.5, 86.0, 440.5));
             town.setState(BeaconState.NEUTRAL);
             town.setLastChangedBy("Default");
             this.beacons.put("town", town);
-            BeaconSite castle = new BeaconSite("Castle", new Location(world, (double)39.5F, (double)104.0F, (double)-170.5F));
+
+            BeaconSite castle = new BeaconSite("Castle", new Location(world, 39.5, 104.0, -170.5));
             castle.setState(BeaconState.DESECRATED);
             castle.setLastChangedBy("Default");
             this.beacons.put("castle", castle);
-            BeaconSite crypt = new BeaconSite("Crypt", new Location(world, (double)454.5F, (double)138.0F, (double)395.5F));
+
+            BeaconSite crypt = new BeaconSite("Crypt", new Location(world, 454.5, 138.0, 395.5));
             crypt.setState(BeaconState.NEUTRAL);
             crypt.setLastChangedBy("Default");
             this.beacons.put("crypt", crypt);
-            BeaconSite obelisk = new BeaconSite("Obelisk", new Location(world, (double)-374.5F, (double)72.0F, (double)73.5F));
+
+            BeaconSite obelisk = new BeaconSite("Obelisk", new Location(world, -374.5, 72.0, 73.5F));
             obelisk.setState(BeaconState.NEUTRAL);
             obelisk.setLastChangedBy("Default");
             this.beacons.put("obelisk", obelisk);
-            BeaconSite paleoakforest = new BeaconSite("PaleOakForest", new Location(world, (double)481.5F, (double)113.0F, (double)-433.5F));
+
+            BeaconSite paleoakforest = new BeaconSite("PaleOakForest", new Location(world, 481.5, 113.0, -433.5));
             paleoakforest.setState(BeaconState.NEUTRAL);
             paleoakforest.setLastChangedBy("Default");
             this.beacons.put("paleoakforest", paleoakforest);
-            BeaconSite lake = new BeaconSite("Lake", new Location(world, (double)-328.5F, (double)76.0F, (double)492.5F));
+
+            BeaconSite lake = new BeaconSite("Lake", new Location(world, -328.5, 76.0, 492.5));
             lake.setState(BeaconState.NEUTRAL);
             lake.setLastChangedBy("Default");
             this.beacons.put("lake", lake);
-            BeaconSite ruinedtower = new BeaconSite("RuinedTower", new Location(world, (double)-300.5F, (double)231.0F, (double)-371.5F));
+
+            BeaconSite ruinedtower = new BeaconSite("RuinedTower", new Location(world, -300.5, 231.0, -371.5));
             ruinedtower.setState(BeaconState.NEUTRAL);
             ruinedtower.setLastChangedBy("Default");
             this.beacons.put("ruinedtower", ruinedtower);
+
             this.plugin.getServer().getScheduler().runTaskLater(this.plugin, () -> this.recreateAllDisplays(), 20L);
         }
     }
@@ -1057,6 +1074,7 @@ public class BeaconManager {
             this.createDefaultBeacons();
             this.saveBeacons();
             this.plugin.getLogger().info("Created " + this.beacons.size() + " default beacons.");
+
         } else {
             File backupFile = new File(this.dataFile.getParent(), "beacons_backup.json");
             this.plugin.getLogger().info("Loading beacons from file: " + this.dataFile.getAbsolutePath());
@@ -1087,6 +1105,7 @@ public class BeaconManager {
                             this.plugin.getLogger().info("Restored from backup, retrying load...");
                             this.loadBeacons();
                             return;
+
                         } catch (Exception e) {
                             this.plugin.getLogger().severe("Failed to restore from backup: " + e.getMessage());
                             return;
@@ -1097,8 +1116,7 @@ public class BeaconManager {
                     }).getType();
                     Map<String, BeaconSite> loadedBeacons = (Map)this.gson.fromJson(fileContent, type);
                     if (loadedBeacons != null) {
-                        int validBeacons = 0;
-                        int invalidBeacons = 0;
+                        int validBeacons = 0, invalidBeacons = 0;
 
                         for(Map.Entry<String, BeaconSite> entry : loadedBeacons.entrySet()) {
                             BeaconSite beacon = (BeaconSite)entry.getValue();
@@ -1125,14 +1143,16 @@ public class BeaconManager {
 
                     this.plugin.getLogger().severe("Gson returned null when parsing beacons file!");
                 }
-
                 return;
+
             } catch (IOException e) {
                 this.plugin.getLogger().severe("Failed to load beacons: " + e.getMessage());
                 e.printStackTrace();
+
             } catch (JsonSyntaxException e) {
                 this.plugin.getLogger().severe("Failed to parse beacons file - JSON syntax error: " + e.getMessage());
                 e.printStackTrace();
+
                 if (backupFile.exists()) {
                     this.plugin.getLogger().info("Attempting to restore from backup due to JSON corruption...");
 
@@ -1140,6 +1160,7 @@ public class BeaconManager {
                         Files.copy(backupFile.toPath(), this.dataFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
                         this.plugin.getLogger().info("Restored from backup, retrying load...");
                         this.loadBeacons();
+
                     } catch (Exception backupError) {
                         this.plugin.getLogger().severe("Failed to restore from backup: " + backupError.getMessage());
                     }

@@ -76,13 +76,15 @@ public class BatTransformationListener implements Listener {
                 Player transformedPlayer = this.batManager.getPlayerFromBat(bat);
                 if (transformedPlayer != null && transformedPlayer.isOnline()) {
                     transformedPlayer.sendMessage("§c You have taken damage while in bat form, be careful...");
+
                     double health = bat.getHealth() - event.getFinalDamage();
                     double maxHealth = bat.getMaxHealth();
-                    double healthPercent = health / maxHealth * (double)100.0F;
+                    double healthPercent = health / maxHealth * 100.0;
+
                     String healthColor;
-                    if (healthPercent > (double)60.0F) {
+                    if (healthPercent > 60.0) {
                         healthColor = "§a";
-                    } else if (healthPercent > (double)30.0F) {
+                    } else if (healthPercent > 30.0) {
                         healthColor = "§e";
                     } else {
                         healthColor = "§c";
@@ -109,16 +111,16 @@ public class BatTransformationListener implements Listener {
                         transformedPlayer.sendMessage("§c You have taken damage while in bat form, be careful...");
                         double health = bat.getHealth() - event.getFinalDamage();
                         double maxHealth = bat.getMaxHealth();
-                        if (health > (double)0.0F) {
-                            double healthPercent = health / maxHealth * (double)100.0F;
-                            String healthColor = healthPercent > (double)50.0F ? "§a" : (healthPercent > (double)25.0F ? "§e" : "§c");
+
+                        if (health > 0.0) {
+                            double healthPercent = health / maxHealth * 100.0;
+                            String healthColor = healthPercent > 50.0 ? "§a" : (healthPercent > 25.0 ? "§e" : "§c");
                             transformedPlayer.sendMessage("§7Remaining Health: " + healthColor + String.format("%.1f", health) + "§7/" + String.format("%.1f", maxHealth));
                         } else {
                             transformedPlayer.sendMessage("§cYour bat forms life force, and your own, are growing thin.");
                         }
                     }
                 }
-
             }
         }
     }
@@ -134,10 +136,8 @@ public class BatTransformationListener implements Listener {
                     player.setAllowFlight(true);
                     player.setFlying(true);
                 }
-
             }, 1L);
         }
-
     }
 
     @EventHandler(
@@ -148,7 +148,6 @@ public class BatTransformationListener implements Listener {
         if (this.batManager.isInBatForm(player) && !event.isCancelled() && (event.getCause() == TeleportCause.COMMAND || event.getCause() == TeleportCause.PLUGIN)) {
             player.sendMessage("§7Your bat form moves with you...");
         }
-
     }
 
     @EventHandler(
@@ -160,7 +159,6 @@ public class BatTransformationListener implements Listener {
             event.setCancelled(true);
             player.sendMessage("§cYou cannot use a fishing rod while in bat form.");
         }
-
     }
 
     @EventHandler(
@@ -173,7 +171,6 @@ public class BatTransformationListener implements Listener {
                 event.setCancelled(true);
                 player.sendMessage("§cYou cannot shoot a bow while in bat form.");
             }
-
         }
     }
 
@@ -188,10 +185,8 @@ public class BatTransformationListener implements Listener {
                 case BOW:
                 case CROSSBOW:
                     event.setCancelled(true);
-                    String var10001 = event.getItem().getType().name().toLowerCase();
-                    player.sendMessage("§cYou cannot use " + var10001.replace("_", " ") + " while in bat form.");
+                    player.sendMessage("§cYou cannot use " + event.getItem().getType().name().toLowerCase().replace("_", " ") + " while in bat form.");
             }
         }
-
     }
 }

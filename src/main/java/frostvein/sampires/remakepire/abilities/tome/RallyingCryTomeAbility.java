@@ -23,8 +23,8 @@ public class RallyingCryTomeAbility extends TomeAbility {
             int affectedCount = 0;
             player.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH, 600, 0, false, false));
             ++affectedCount;
-            List<Player> nearbyHumans = player.getNearbyEntities((double)20.0F, (double)20.0F, (double)20.0F).stream().filter((entity) -> entity instanceof Player).map((entity) -> (Player)entity).filter((nearbyPlayer) -> this.plugin.getVampireManager().isHuman(nearbyPlayer)).toList();
-            List<Player> nearbyVampires = player.getNearbyEntities((double)20.0F, (double)20.0F, (double)20.0F).stream().filter((entity) -> entity instanceof Player).map((entity) -> (Player)entity).filter((nearbyPlayer) -> !this.plugin.getVampireManager().isHuman(nearbyPlayer)).toList();
+            List<Player> nearbyHumans = player.getNearbyEntities(20.0, 20.0, 20.0).stream().filter((entity) -> entity instanceof Player).map((entity) -> (Player)entity).filter((nearbyPlayer) -> this.plugin.getVampireManager().isHuman(nearbyPlayer)).toList();
+            List<Player> nearbyVampires = player.getNearbyEntities(20.0, 20.0, 20.0).stream().filter((entity) -> entity instanceof Player).map((entity) -> (Player)entity).filter((nearbyPlayer) -> !this.plugin.getVampireManager().isHuman(nearbyPlayer)).toList();
 
             for(Player nearbyHuman : nearbyHumans) {
                 nearbyHuman.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH, 600, 0, false, false));

@@ -26,12 +26,15 @@ public class StashThirdBookCommand implements CommandExecutor {
         if (world == null) {
             sender.sendMessage("§cWorld 'world' not found.");
             return true;
+
         } else {
-            Location chestLocation = new Location(world, (double)76.0F, (double)80.0F, (double)407.0F);
+            Location chestLocation = new Location(world, 76.0, 80.0, 407.0);
             Block block = world.getBlockAt(chestLocation);
+
             if (!(block.getState() instanceof Chest)) {
                 sender.sendMessage("§cNo chest found at coordinates 76, 80, 407.");
                 return true;
+
             } else {
                 Chest chest = (Chest)block.getState();
                 Inventory chestInventory = chest.getInventory();
@@ -39,6 +42,7 @@ public class StashThirdBookCommand implements CommandExecutor {
                 ItemStack book = this.createAbsolutionBook();
                 chestInventory.addItem(new ItemStack[]{book});
                 sender.sendMessage("§aSuccessfully stashed 'The Absolution 3/3' in the chest at 76, 80, 407.");
+
                 this.plugin.getLogger().info(sender.getName() + " used /stash_third_book - placed The Absolution 3/3 at 76, 80, 407");
                 return true;
             }

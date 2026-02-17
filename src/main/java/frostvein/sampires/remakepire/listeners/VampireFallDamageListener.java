@@ -24,7 +24,7 @@ public class VampireFallDamageListener implements Listener {
                     event.setCancelled(true);
                 } else {
                     if (this.vampireManager.isVampire(player)) {
-                        event.setDamage(event.getDamage() * (double)0.5F);
+                        event.setDamage(event.getDamage() * 0.5);
                     }
 
                 }

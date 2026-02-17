@@ -152,16 +152,16 @@ public class ThirstEffectsListener implements Listener {
 
     private void processVampireFoodRegeneration(Player vampire) {
         int currentFoodLevel = vampire.getFoodLevel();
-        double currentHealth = vampire.getHealth();
-        double maxHealth = vampire.getAttribute(Attribute.MAX_HEALTH).getValue();
+        double currentHealth = vampire.getHealth(), maxHealth = vampire.getAttribute(Attribute.MAX_HEALTH).getValue();
+
         if (currentFoodLevel < 20) {
             this.thirstManager.regenerateFood(vampire);
         } else {
-            if (currentFoodLevel >= 20 && currentHealth < maxHealth && !vampire.isDead() && vampire.getHealth() > (double)0.0F) {
+            if (currentFoodLevel >= 20 && currentHealth < maxHealth && !vampire.isDead() && vampire.getHealth() > 0.0) {
                 vampire.setFoodLevel(currentFoodLevel - 1);
                 float currentSaturation = vampire.getSaturation();
                 vampire.setSaturation(Math.max(0.0F, currentSaturation - 0.5F));
-                double newHealth = Math.min(maxHealth, currentHealth + (double)1.0F);
+                double newHealth = Math.min(maxHealth, currentHealth + 1.0);
                 vampire.setHealth(newHealth);
             }
 

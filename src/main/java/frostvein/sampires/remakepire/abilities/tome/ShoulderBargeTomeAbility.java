@@ -18,12 +18,12 @@ import frostvein.sampires.remakepire.RemakepirePlugin;
 
 public class ShoulderBargeTomeAbility extends TomeAbility {
     private static final int CHARGE_DURATION = 20;
-    private static final double CHARGE_VELOCITY = (double)1.5F;
+    private static final double CHARGE_VELOCITY = 1.5;
     private static final double UPWARD_VELOCITY = 0.3;
     private static final double KNOCKBACK_STRENGTH = 1.2;
     private static final int SLOWNESS_DURATION = 300;
-    private static final double DAMAGE_TO_PLAYERS = (double)10.0F;
-    private static final double DAMAGE_TO_MOBS = (double)20.0F;
+    private static final double DAMAGE_TO_PLAYERS = 10.0;
+    private static final double DAMAGE_TO_MOBS = 20.0;
     private final Map<UUID, BukkitTask> chargingPlayers = new HashMap();
     private final Map<UUID, Set<UUID>> chargeHitEntities = new HashMap();
     private final Map<UUID, Long> recentlyBargedEntities = new HashMap();
@@ -44,7 +44,7 @@ public class ShoulderBargeTomeAbility extends TomeAbility {
         } else {
             Vector direction = player.getLocation().getDirection();
             direction.setY(Math.max(direction.getY(), 0.1));
-            Vector chargeVelocity = direction.multiply((double)1.5F);
+            Vector chargeVelocity = direction.multiply(1.5);
             chargeVelocity.setY(0.3);
             player.setVelocity(chargeVelocity);
             player.getWorld().playSound(player.getLocation(), "minecraft:entity.player.attack.crit", 0.8F, 1.2F);
@@ -88,7 +88,7 @@ public class ShoulderBargeTomeAbility extends TomeAbility {
         }
 
         if (hitEntities != null) {
-            for(Entity entity : player.getNearbyEntities((double)1.5F, (double)2.0F, (double)1.5F)) {
+            for(Entity entity : player.getNearbyEntities(1.5, 2.0, 1.5)) {
                 UUID entityId = entity.getUniqueId();
                 synchronized(hitEntities) {
                     if (hitEntities.contains(entityId)) {
@@ -110,7 +110,6 @@ public class ShoulderBargeTomeAbility extends TomeAbility {
                     }
                 }
             }
-
         }
     }
 
@@ -120,7 +119,7 @@ public class ShoulderBargeTomeAbility extends TomeAbility {
         }
 
         Vector knockbackDirection = target.getLocation().subtract(player.getLocation()).toVector();
-        if (knockbackDirection.lengthSquared() == (double)0.0F) {
+        if (knockbackDirection.lengthSquared() == 0.0) {
             knockbackDirection = player.getLocation().getDirection();
         }
 
@@ -128,12 +127,13 @@ public class ShoulderBargeTomeAbility extends TomeAbility {
         knockbackDirection.setY(Math.max(knockbackDirection.getY(), 0.2));
         Vector knockback = knockbackDirection.multiply(1.2);
         target.setVelocity(knockback);
+
         if (target instanceof LivingEntity livingTarget) {
             double damageAmount;
             if (target instanceof Player) {
-                damageAmount = (double)10.0F;
+                damageAmount = 10.0;
             } else {
-                damageAmount = (double)20.0F;
+                damageAmount = 20.0;
             }
 
             livingTarget.damage(damageAmount, player);
@@ -142,16 +142,15 @@ public class ShoulderBargeTomeAbility extends TomeAbility {
 
         player.getWorld().playSound(player.getLocation(), "minecraft:entity.player.attack.knockback", 1.0F, 0.8F);
         player.getWorld().playSound(target.getLocation(), "minecraft:entity.generic.hurt", 0.8F, 1.1F);
-        String var10001 = this.getEntityName(target);
-        player.sendMessage("§aYou barrel into " + var10001 + ".");
-        if (target instanceof Player) {
-            ((Player)target).sendMessage("§c" + player.getName() + " charges into you with a shoulder barge.");
-        }
+        player.sendMessage("§aYou barrel into " + this.getEntityName(target) + ".");
 
+        if (target instanceof Player) {
+            target.sendMessage("§c" + player.getName() + " charges into you with a shoulder barge.");
+        }
     }
 
     private String getEntityName(Entity entity) {
-        return entity instanceof Player ? ((Player)entity).getName() : entity.getType().name().toLowerCase().replace("_", " ");
+        return entity instanceof Player ? entity.getName() : entity.getType().name().toLowerCase().replace("_", " ");
     }
 
     private void cleanupOldEntries() {

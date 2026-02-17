@@ -26,9 +26,8 @@ public class StashFourthBookCommand implements CommandExecutor {
             sender.sendMessage("§cUsage: /stash_fourth_book <x> <y> <z>");
             return true;
         } else {
-            int x;
-            int y;
-            int z;
+            int x, y, z;
+
             try {
                 x = Integer.parseInt(args[0]);
                 y = Integer.parseInt(args[1]);
@@ -43,7 +42,7 @@ public class StashFourthBookCommand implements CommandExecutor {
                 sender.sendMessage("§cWorld 'world' not found.");
                 return true;
             } else {
-                Location chestLocation = new Location(world, (double)x, (double)y, (double)z);
+                Location chestLocation = new Location(world, x, y, z);
                 Block block = world.getBlockAt(chestLocation);
                 if (!(block.getState() instanceof Chest)) {
                     sender.sendMessage("§cNo chest found at coordinates " + x + ", " + y + ", " + z + ".");

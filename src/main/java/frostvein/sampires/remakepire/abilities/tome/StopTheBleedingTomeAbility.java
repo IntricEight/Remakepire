@@ -20,7 +20,7 @@ import frostvein.sampires.remakepire.managers.VampireAbilityManager;
 
 public class StopTheBleedingTomeAbility extends TomeAbility {
     private static final int HEALING_DURATION_TICKS = 1200;
-    private static final double PROXIMITY_DISTANCE = (double)2.0F;
+    private static final double PROXIMITY_DISTANCE = 2.0;
     private static final int PARTICLE_INTERVAL_TICKS = 20;
     private final Map<UUID, HealingSession> activeHealingSessions = new HashMap();
     private static final String ACTIVE_TAG = "stopthebleeding_active";
@@ -33,16 +33,19 @@ public class StopTheBleedingTomeAbility extends TomeAbility {
         if (!this.canUse(player)) {
             this.sendCannotUseMessage(player, "Only humans can use tome abilities!");
             return false;
+
         } else {
             UUID playerId = player.getUniqueId();
             if (this.activeHealingSessions.containsKey(playerId)) {
                 this.cancelHealing(player, "You stop focusing on healing.");
                 return false;
+
             } else if (player.getScoreboardTags().contains("stopthebleeding_used_session")) {
                 this.sendCannotUseMessage(player, "You have already used Stop the Bleeding this session!");
                 return false;
+
             } else {
-                Player target = this.findNearestPlayer(player, (double)2.0F);
+                Player target = this.findNearestPlayer(player, 2.0);
                 if (target == null) {
                     target = player;
                 }
@@ -67,10 +70,12 @@ public class StopTheBleedingTomeAbility extends TomeAbility {
     private void startHealing(Player healer, Player target) {
         UUID healerId = healer.getUniqueId();
         healer.addScoreboardTag("stopthebleeding_active");
+
         HealingSession session = new HealingSession(healer, target);
         this.activeHealingSessions.put(healerId, session);
         session.start();
         this.sendSuccessMessage(healer, "You begin focusing your healing energy on " + target.getName() + "...");
+
         if (!healer.equals(target)) {
             target.sendMessage("§a" + healer.getName() + " is focusing healing energy on you. Stay close.");
         } else {
@@ -82,11 +87,13 @@ public class StopTheBleedingTomeAbility extends TomeAbility {
     private void cancelHealing(Player healer, String reason) {
         UUID healerId = healer.getUniqueId();
         HealingSession session = (HealingSession)this.activeHealingSessions.remove(healerId);
+
         if (session != null) {
             session.cancel();
             healer.removeScoreboardTag("stopthebleeding_active");
             healer.sendMessage("§c" + reason);
             Player target = session.getTarget();
+
             if (target != null && !target.equals(healer) && target.isOnline()) {
                 target.sendMessage("§c" + healer.getName() + " stopped healing you.");
             }
@@ -224,9 +231,9 @@ public class StopTheBleedingTomeAbility extends TomeAbility {
                         if (currentTarget != null && currentTarget.isOnline()) {
                             if (!currentHealer.isSneaking()) {
                                 StopTheBleedingTomeAbility.this.cancelHealing(currentHealer, "You stopped crouching - Your healing procedure is cancelled.");
-                            } else if (HealingSession.this.isSelfHeal || currentHealer.getWorld().equals(currentTarget.getWorld()) && !(currentHealer.getLocation().distance(currentTarget.getLocation()) > (double)2.0F)) {
+                            } else if (HealingSession.this.isSelfHeal || currentHealer.getWorld().equals(currentTarget.getWorld()) && !(currentHealer.getLocation().distance(currentTarget.getLocation()) > 2.0)) {
                                 if (HealingSession.this.particleCounter % 20 == 0) {
-                                    currentTarget.getWorld().spawnParticle(Particle.SCRAPE, currentTarget.getLocation().add((double)0.0F, (double)1.0F, (double)0.0F), 3, 0.3, (double)0.5F, 0.3, 0.02);
+                                    currentTarget.getWorld().spawnParticle(Particle.SCRAPE, currentTarget.getLocation().add(0.0, 1.0, 0.0), 3, 0.3, 0.5, 0.3, 0.02);
                                 }
 
                                 ++HealingSession.this.particleCounter;

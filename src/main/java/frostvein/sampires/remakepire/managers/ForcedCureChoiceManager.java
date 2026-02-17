@@ -149,17 +149,19 @@ public class ForcedCureChoiceManager {
         this.plugin.getVampireManager().setPlayerAsHuman(target);
         target.getActivePotionEffects().forEach((effect) -> target.removePotionEffect(effect.getType()));
         target.addScoreboardTag("CuredVampire");
+
         Location targetLoc = target.getLocation();
         Location beaconLoc = holyBeacon.getLocation();
-        target.getWorld().spawnParticle(Particle.SOUL, targetLoc, 100, (double)1.0F, (double)2.0F, (double)1.0F, 0.1);
-        target.getWorld().spawnParticle(Particle.EXPLOSION_EMITTER, targetLoc, 1, (double)0.5F, (double)1.0F, (double)0.5F, (double)0.0F);
-        target.getWorld().spawnParticle(Particle.EXPLOSION_EMITTER, targetLoc, 5, (double)1.0F, (double)1.0F, (double)1.0F, (double)0.0F);
+        target.getWorld().spawnParticle(Particle.SOUL, targetLoc, 100, 1.0, 2.0, 1.0, 0.1);
+        target.getWorld().spawnParticle(Particle.EXPLOSION_EMITTER, targetLoc, 1, 0.5, 1.0, 0.5, 0.0);
+        target.getWorld().spawnParticle(Particle.EXPLOSION_EMITTER, targetLoc, 5, 1.0, 1.0, 1.0, 0.0);
         target.getWorld().playSound(targetLoc, Sound.BLOCK_BELL_USE, SoundCategory.MASTER, 1.5F, 0.8F);
         target.getWorld().playSound(targetLoc, Sound.BLOCK_GLASS_BREAK, SoundCategory.MASTER, 1.0F, 1.0F);
         target.getWorld().playSound(targetLoc, Sound.AMBIENT_SOUL_SAND_VALLEY_MOOD, SoundCategory.MASTER, 1.0F, 1.5F);
+
         if (beaconLoc != null) {
-            target.getWorld().spawnParticle(Particle.LARGE_SMOKE, beaconLoc.clone().add((double)0.0F, (double)1.5F, (double)0.0F), 50, (double)0.5F, (double)1.0F, (double)0.5F, 0.05);
-            target.getWorld().spawnParticle(Particle.SMOKE, beaconLoc.clone().add((double)0.0F, (double)1.5F, (double)0.0F), 30, 0.3, 0.8, 0.3, 0.02);
+            target.getWorld().spawnParticle(Particle.LARGE_SMOKE, beaconLoc.clone().add(0.0, 1.5, 0.0), 50, 0.5, 1.0, 0.5, 0.05);
+            target.getWorld().spawnParticle(Particle.SMOKE, beaconLoc.clone().add(0.0, 1.5, 0.0), 30, 0.3, 0.8, 0.3, 0.02);
             target.getWorld().playSound(beaconLoc, Sound.ENTITY_WITHER_HURT, SoundCategory.MASTER, 0.8F, 0.6F);
         }
 
@@ -169,6 +171,7 @@ public class ForcedCureChoiceManager {
         this.plugin.getBeaconMajorityManager().updateBeaconMajorityBonuses();
         this.plugin.getBeaconManager().checkAndBroadcastCompleteControl();
         this.checkIfAllBeaconsEvil();
+
         if (this.plugin.getVampireTurningManager() != null) {
             this.plugin.getVampireTurningManager().disableAllVampireTurning();
         }
@@ -179,10 +182,10 @@ public class ForcedCureChoiceManager {
     private void checkIfAllBeaconsEvil() {
         int evilCount = this.plugin.getBeaconManager().getAllEvilBeacons().size();
         int totalBeacons = this.plugin.getBeaconManager().getAllBeacons().size();
+
         if (evilCount >= totalBeacons && totalBeacons > 0 && !this.plugin.getSessionManager().isVampiresEternalNightActive()) {
             this.triggerVampiresEternalNight();
         }
-
     }
 
     private void triggerVampiresEternalNight() {
@@ -230,25 +233,28 @@ public class ForcedCureChoiceManager {
         target.sendMessage("§7Your journey has ended.");
         target.sendMessage("§4§l§m                                                    ");
         target.sendMessage("");
+
         DeathHandler.checkAndAnnounceTeamElimination(this.plugin, false, true);
     }
 
     private void createVampireDeathEffects(Location deathLocation) {
         if (deathLocation.getWorld() != null) {
-            Location centerLoc = deathLocation.clone().add((double)0.0F, (double)1.0F, (double)0.0F);
-            deathLocation.getWorld().spawnParticle(Particle.SOUL_FIRE_FLAME, centerLoc, 60, (double)1.5F, (double)1.0F, (double)1.5F, 0.1);
+            Location centerLoc = deathLocation.clone().add(0.0, 1.0, 0.0);
+            deathLocation.getWorld().spawnParticle(Particle.SOUL_FIRE_FLAME, centerLoc, 60, 1.5, 1.0, 1.5, 0.1);
             deathLocation.getWorld().spawnParticle(Particle.FLAME, centerLoc, 40, 1.2, 0.8, 1.2, 0.08);
-            deathLocation.getWorld().spawnParticle(Particle.WHITE_ASH, centerLoc, 50, (double)1.0F, (double)1.5F, (double)1.0F, 0.05);
+            deathLocation.getWorld().spawnParticle(Particle.WHITE_ASH, centerLoc, 50, 1.0, 1.5, 1.0, 0.05);
             deathLocation.getWorld().spawnParticle(Particle.LARGE_SMOKE, centerLoc, 30, 1.8, 1.2, 1.8, 0.02);
             deathLocation.getWorld().playSound(deathLocation, Sound.ITEM_FIRECHARGE_USE, SoundCategory.PLAYERS, 1.5F, 0.8F);
+
             this.plugin.getServer().getScheduler().runTaskLater(this.plugin, () -> {
-                deathLocation.getWorld().spawnParticle(Particle.WHITE_ASH, centerLoc, 30, (double)1.5F, (double)2.0F, (double)1.5F, 0.03);
-                deathLocation.getWorld().spawnParticle(Particle.SOUL_FIRE_FLAME, centerLoc, 20, (double)1.0F, (double)0.5F, (double)1.0F, 0.02);
+                deathLocation.getWorld().spawnParticle(Particle.WHITE_ASH, centerLoc, 30, 1.5, 2.0, 1.5, 0.03);
+                deathLocation.getWorld().spawnParticle(Particle.SOUL_FIRE_FLAME, centerLoc, 20, 1.0, 0.5, 1.0, 0.02);
                 deathLocation.getWorld().playSound(deathLocation, Sound.BLOCK_FIRE_EXTINGUISH, SoundCategory.PLAYERS, 1.0F, 1.2F);
             }, 20L);
+
             this.plugin.getServer().getScheduler().runTaskLater(this.plugin, () -> {
-                deathLocation.getWorld().spawnParticle(Particle.LARGE_SMOKE, centerLoc, 15, (double)2.0F, 1.8, (double)2.0F, 0.01);
-                deathLocation.getWorld().spawnParticle(Particle.WHITE_ASH, centerLoc, 10, 1.8, (double)2.5F, 1.8, 0.02);
+                deathLocation.getWorld().spawnParticle(Particle.LARGE_SMOKE, centerLoc, 15, 2.0, 1.8, 2.0, 0.01);
+                deathLocation.getWorld().spawnParticle(Particle.WHITE_ASH, centerLoc, 10, 1.8, 2.5, 1.8, 0.02);
             }, 40L);
         }
     }

@@ -31,9 +31,11 @@ public class ConfigManager {
         List<String> locationStrings = this.config.getStringList("tome-chests.locations");
         List<Location> locations = new ArrayList();
         World world = this.plugin.getServer().getWorld("world");
+
         if (world == null) {
             this.plugin.getLogger().severe("World 'world' not found! Cannot load tome chest locations.");
             return locations;
+
         } else {
             for(String locString : locationStrings) {
                 try {
@@ -42,7 +44,7 @@ public class ConfigManager {
                         int x = Integer.parseInt(parts[0].trim());
                         int y = Integer.parseInt(parts[1].trim());
                         int z = Integer.parseInt(parts[2].trim());
-                        locations.add(new Location(world, (double)x, (double)y, (double)z));
+                        locations.add(new Location(world, x, y, z));
                     }
                 } catch (NumberFormatException var10) {
                     this.plugin.getLogger().warning("Invalid tome chest location format: " + locString);
@@ -182,11 +184,11 @@ public class ConfigManager {
     }
 
     public double getBeaconHumanSpeedMultiplier() {
-        return this.config.getDouble("beacons.human-speed-multiplier", (double)1.5F);
+        return this.config.getDouble("beacons.human-speed-multiplier", 1.5);
     }
 
     public double getBeaconFinalStandMultiplier() {
-        return this.config.getDouble("beacons.final-stand-multiplier", (double)6.0F);
+        return this.config.getDouble("beacons.final-stand-multiplier", 6.0);
     }
 
     public int getBeaconNeutralAnnouncementDelaySeconds() {
@@ -238,7 +240,7 @@ public class ConfigManager {
     }
 
     public double getCureBeaconDistance() {
-        return this.config.getDouble("cure.cure-distance", (double)25.0F);
+        return this.config.getDouble("cure.cure-distance", 25.0);
     }
 
     public boolean isFirstMessageBlockingEnabled() {
@@ -258,9 +260,10 @@ public class ConfigManager {
             double y = Double.parseDouble(parts[1].trim());
             double z = Double.parseDouble(parts[2].trim());
             return new Location(world, x, y, z);
+
         } catch (Exception var10) {
             this.plugin.getLogger().warning("Invalid vampire respawn location format: " + locationStr + ". Using default.");
-            return new Location(world, (double)40.0F, (double)101.0F, (double)-113.0F);
+            return new Location(world, 40.0, 101.0, -113.0);
         }
     }
 
@@ -270,31 +273,31 @@ public class ConfigManager {
     }
 
     public double getOakhurstTownCenterX() {
-        return this.config.getDouble("oakhurst.town-center-x", (double)79.0F);
+        return this.config.getDouble("oakhurst.town-center-x", 79.0);
     }
 
     public double getOakhurstTownCenterZ() {
-        return this.config.getDouble("oakhurst.town-center-z", (double)440.0F);
+        return this.config.getDouble("oakhurst.town-center-z", 440.0);
     }
 
     public double getOakhurstTeleportRadius() {
-        return this.config.getDouble("oakhurst.teleport-radius", (double)400.0F);
+        return this.config.getDouble("oakhurst.teleport-radius", 400.0);
     }
 
     public double getOakhurstBorderCenterX() {
-        return this.config.getDouble("oakhurst.border.center-x", (double)50.0F);
+        return this.config.getDouble("oakhurst.border.center-x", 50.0);
     }
 
     public double getOakhurstBorderCenterZ() {
-        return this.config.getDouble("oakhurst.border.center-z", (double)50.0F);
+        return this.config.getDouble("oakhurst.border.center-z", 50.0);
     }
 
     public double getOakhurstBorderDiameter() {
-        return this.config.getDouble("oakhurst.border.diameter", (double)1098.0F);
+        return this.config.getDouble("oakhurst.border.diameter", 1098.0);
     }
 
     public double getOakhurstBorderRadius() {
-        return this.getOakhurstBorderDiameter() / (double)2.0F;
+        return this.getOakhurstBorderDiameter() / 2.0;
     }
 
     public double getOakhurstMinX() {
@@ -321,6 +324,7 @@ public class ConfigManager {
         List<String> warnings = new ArrayList();
         double townX = this.getOakhurstTownCenterX();
         double townZ = this.getOakhurstTownCenterZ();
+
         if (!this.isLocationWithinBorder(townX, townZ)) {
             warnings.add("Town center (" + (int)townX + ", " + (int)townZ + ")");
         }
@@ -329,14 +333,12 @@ public class ConfigManager {
         if (world != null) {
             Location vampireSpawn = this.getVampireRespawnLocation(world);
             if (!this.isLocationWithinBorder(vampireSpawn.getX(), vampireSpawn.getZ())) {
-                int var10001 = vampireSpawn.getBlockX();
-                warnings.add("Vampire respawn (" + var10001 + ", " + vampireSpawn.getBlockZ() + ")");
+                warnings.add("Vampire respawn (" + vampireSpawn.getBlockX() + ", " + vampireSpawn.getBlockZ() + ")");
             }
 
             for(Location loc : this.getTomeChestLocations()) {
                 if (!this.isLocationWithinBorder(loc.getX(), loc.getZ())) {
-                    int var15 = loc.getBlockX();
-                    warnings.add("Tome chest at (" + var15 + ", " + loc.getBlockZ() + ")");
+                    warnings.add("Tome chest at (" + loc.getBlockX() + ", " + loc.getBlockZ() + ")");
                 }
             }
         }
@@ -345,8 +347,7 @@ public class ConfigManager {
             for(BeaconSite beacon : beaconManager.getAllBeacons()) {
                 Location loc = beacon.getLocation();
                 if (!this.isLocationWithinBorder(loc.getX(), loc.getZ())) {
-                    String var16 = beacon.getName();
-                    warnings.add("Beacon '" + var16 + "' (" + loc.getBlockX() + ", " + loc.getBlockZ() + ")");
+                    warnings.add("Beacon '" + beacon.getName() + "' (" + loc.getBlockX() + ", " + loc.getBlockZ() + ")");
                 }
             }
         }
