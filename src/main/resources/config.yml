@@ -1,0 +1,253 @@
+# VampireSMP Configuration File
+
+# Damage Suppression Configuration
+# Controls the percentage of damage reduction for all players
+# Valid values: 0-100 (0 = no suppression, 100 = no damage taken)
+# Default: 50 (50% damage reduction)
+damage_suppression: 50
+
+# Vampire Health Check Configuration
+# Controls how often vampire health is checked and regenerated (in ticks)
+# 20 ticks = 1 second
+# Default: 9 ticks (0.45 seconds)
+vampire_health_check_ticks: 9
+
+# Fourth Cure Book Configuration
+# Controls whether "The Retribution 4/3" book should spawn in tome chests
+# Default: false (disabled)
+fourth_book_spawn_enabled: false
+
+# Cure Books in Tome Chests
+# Controls whether cure books (1/3, 2/3, 3/3) should spawn in tome chest distribution
+# Default: true (enabled)
+cure_books_enabled: true
+
+# Chance for a cure book to spawn in remaining empty chests (0.0 to 1.0)
+# Default: 0.3 (30% chance)
+cure_books_spawn_chance: 0.3
+
+# ============================================================================
+# CHAT SYSTEM
+# ============================================================================
+chat:
+  # Enable/disable the first message blocking feature for immersion
+  # When enabled, player's first chat message each session is intercepted with an immersion warning
+  # Default: true (blocking enabled)
+  first-message-blocking-enabled: true
+
+  # The message shown when a player's first chat message is blocked
+  # Use [Click Here] to add a clickable link that sends the message - if omitted, no link is shown
+  first-message-blocked-message: "&eIt looks like you've attempted to send a message! Vampire SMP is geared to revolve around immersion, consider finding the person you need to speak to, or messaging them on discord. If you still need to send your chat message, [Click Here]&e. This prevention message will not appear again until your next log on if you do choose to send your message via the blue text."
+
+# ============================================================================
+# TOME CHEST LOCATIONS
+# ============================================================================
+# List of coordinates where tome chests can spawn
+# Format: "x,y,z" - Use /pow admin addtomechest to add new locations in-game
+tome-chests:
+  locations:
+    - "202,61,-305"
+    - "416,45,-109"
+    - "504,139,398"
+    - "494,125,593"
+    - "153,99,128"
+    - "-19,104,100"
+    - "-125,71,421"
+    - "76,80,407"
+    - "397, 82, 364"
+
+# ============================================================================
+# VAMPIRE ABILITY COOLDOWNS
+# ============================================================================
+# All cooldowns are in seconds
+# 20 ticks = 1 second
+abilities:
+  vampire:
+    # Bat transformation cooldown (default: 900 seconds = 15 minutes)
+    bat-cooldown: 900
+    # Lunge attack cooldown (default: 45 seconds)
+    lunge-cooldown: 45
+    # Vanish/Invisibility cooldown (default: 420 seconds = 7 minutes)
+    vanish-cooldown: 420
+    # Storm Call cooldown (default: 7200 seconds = 2 hours)
+    storm-call-cooldown: 7200
+    # Beacon Teleport cooldown (default: 300 seconds = 5 minutes)
+    beacon-teleport-cooldown: 300
+    # Vampire Vision cooldown (default: 1 second)
+    vampire-vision-cooldown: 1
+
+  # ============================================================================
+  # TOME ABILITY COOLDOWNS
+  # ============================================================================
+  # All cooldowns are in seconds
+  tome:
+    # Blessing cooldown (default: 7200 seconds = 2 hours)
+    blessing-cooldown: 7200
+    # Banish Undead cooldown (default: 900 seconds = 15 minutes)
+    banish-undead-cooldown: 900
+    # Holy Word cooldown (default: 600 seconds = 10 minutes)
+    holy-word-cooldown: 600
+    # Enlightened Eye cooldown (default: 900 seconds = 15 minutes)
+    enlightened-eye-cooldown: 900
+    # Lantern Thrash cooldown (default: 300 seconds = 5 minutes)
+    lantern-thrash-cooldown: 300
+    # Prayer of Faith cooldown (default: 900 seconds = 15 minutes)
+    prayer-of-faith-cooldown: 900
+    # Rallying Cry cooldown (default: 1200 seconds = 20 minutes)
+    rallying-cry-cooldown: 1200
+    # Shoulder Barge cooldown (default: 300 seconds = 5 minutes)
+    shoulder-barge-cooldown: 300
+    # Turn Undead cooldown (default: 1800 seconds = 30 minutes)
+    turn-undead-cooldown: 1800
+    # Uncanny Direction cooldown (default: 30 seconds)
+    uncanny-direction-cooldown: 30
+    # Unnatural Haste cooldown (default: 900 seconds = 15 minutes)
+    unnatural-haste-cooldown: 900
+    # Way of the Land cooldown (default: 600 seconds = 10 minutes)
+    way-of-the-land-cooldown: 600
+    # Way of the Lumberjack cooldown (default: 600 seconds = 10 minutes)
+    way-of-the-lumberjack-cooldown: 600
+    # Way of the Prospector cooldown (default: 600 seconds = 10 minutes)
+    way-of-the-prospector-cooldown: 600
+    # Stop the Bleeding cooldown (default: 7200 seconds = 2 hours)
+    stop-the-bleeding-cooldown: 7200
+
+# ============================================================================
+# THIRST SYSTEM
+# ============================================================================
+thirst:
+  # Time it takes for vampire thirst to deplete from full to empty (in minutes)
+  # Default: 120 minutes (2 hours)
+  depletion-minutes: 120
+
+# ============================================================================
+# VAMPIRE RESPAWN LOCATION
+# ============================================================================
+vampire:
+  # Respawn location for vampire players (x,y,z coordinates)
+  # Default: 40,101,-113 (the vampire crypt)
+  respawn-location: "40,101,-113"
+
+# ============================================================================
+# BEACON SYSTEM
+# ============================================================================
+beacons:
+  # Base conversion time for beacons (in seconds)
+  # Default: 300 seconds (5 minutes)
+  conversion-time-seconds: 300
+
+  # Cooldown after converting a beacon before it can be converted again (in minutes)
+  # Default: 60 minutes (1 hour)
+  conversion-cooldown-minutes: 60
+
+  # Speed multiplier for humans converting beacons
+  # Default: 1.5 (50% faster than vampires)
+  human-speed-multiplier: 1.5
+
+  # Speed multiplier for single human "Final Stand" scenario
+  # Default: 6.0 (6x faster conversion when one human remains)
+  final-stand-multiplier: 6.0
+
+  # Delay before announcing neutral beacon conversions (in seconds)
+  # Default: 60 seconds (beacon texture changes immediately, announcement is delayed)
+  neutral-announcement-delay-seconds: 60
+
+# ============================================================================
+# GARLIC (BEETROOT) SYSTEM
+# ============================================================================
+garlic:
+  # Processing time range in seconds (time for garlic to take effect after eating)
+  # Default: 480 seconds (8 minutes) minimum
+  processing-time-min-seconds: 480
+  # Default: 720 seconds (12 minutes) maximum
+  processing-time-max-seconds: 720
+
+  # Immunity duration range in seconds (how long immunity lasts)
+  # Default: 480 seconds (8 minutes) minimum
+  immunity-duration-min-seconds: 480
+  # Default: 600 seconds (10 minutes) maximum
+  immunity-duration-max-seconds: 600
+
+# ============================================================================
+# PASSIVE MOB SPAWNING SYSTEM
+# ============================================================================
+passive-mob-spawning:
+  # Enable automatic spawning every in-game morning
+  # Default: true
+  auto-spawn-enabled: true
+
+  # Minimum number of passive animals required before spawning is skipped
+  # If animal count is below this threshold, spawning will occur
+  # Default: 40
+  minimum-animal-threshold: 40
+
+  # Number of animals to spawn per cycle (morning auto-spawn or /pow admin spawnanimals)
+  # Default: 80
+  spawn-count: 80
+
+# ============================================================================
+# COMBAT & PERMADEATH SYSTEM
+# ============================================================================
+combat:
+  # Maximum vampire stage that can be staked for permadeath
+  # Vampires at this stage or BELOW can be perma-killed by wooden stakes
+  # Valid values: 1, 2, or 3
+  # Default: 1 (only Stage 1 vampires can be staked)
+  permadeath-minimum-stage: 1
+
+  # Wooden stake cooldown in ticks (20 ticks = 1 second)
+  # This is the cooldown applied after using a wooden stake before another can be used
+  # Default: 80 ticks (4 seconds)
+  wooden-stake-cooldown-ticks: 80
+
+# ============================================================================
+# OAKHURST LOCATION SETTINGS
+# ============================================================================
+oakhurst:
+  # Town center (the main settlement location)
+  # Used for teleportation and direction-based abilities like Uncanny Direction
+  town-center-x: 79
+  town-center-z: 440
+
+  # Teleport radius - how far from town center players can be randomly teleported
+  # Default: 400 blocks
+  teleport-radius: 400
+
+  # Playable area boundary settings
+  # The border is defined by a center point and diameter (total width)
+  border:
+    # Center of the playable area
+    center-x: 50
+    center-z: 50
+    # Total width/height of the playable area (creates a square area)
+    # With center at 50 and diameter 1098: boundaries are -499 to 599
+    diameter: 1098
+
+# ============================================================================
+# INTERNAL STATE TRACKING - DO NOT MODIFY
+# ============================================================================
+# WARNING: The following values are used by the plugin to track game state.
+# Modifying these values manually during an active session may result in unexpected behavior or break the game.
+# Only change these if you know exactly what you're doing!
+# These values are automatically updated and reset when "/pow admin init" is completed.
+# ============================================================================
+
+# First Beacon Converted State
+# Track if any beacon has been converted yet (first time trigger for intro sequence)
+# Default: false (no beacon converted yet)
+first_beacon_converted: false
+
+# Beacon Control States
+# Track which team controls all beacons
+# Default: false (not triggered yet)
+humans_own_all_beacons: false
+vampires_own_all_beacons: false
+
+# Special Game States
+# Track special conditions during gameplay
+# Default: false (inactive)
+one_human_left: false
+
+# Track if the fourth book has already spawned
+# Default: false (not spawned yet)
+fourth_book_has_spawned: false

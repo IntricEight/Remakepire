@@ -1,0 +1,1395 @@
+package frostvein.sampires.remakepire.managers;
+
+import io.papermc.paper.datacomponent.DataComponentTypes;
+import io.papermc.paper.datacomponent.item.CustomModelData;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.lang.reflect.Type;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+import org.bukkit.Bukkit;
+import org.bukkit.Color;
+import org.bukkit.GameMode;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.Particle;
+import org.bukkit.Sound;
+import org.bukkit.SoundCategory;
+import org.bukkit.World;
+import org.bukkit.attribute.Attribute;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.ItemDisplay;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
+import org.bukkit.scheduler.BukkitTask;
+import org.bukkit.util.Transformation;
+import org.joml.AxisAngle4f;
+import org.joml.Vector3f;
+import frostvein.sampires.remakepire.RemakepirePlugin;
+import frostvein.sampires.remakepire.beacons.BeaconSite;
+import frostvein.sampires.remakepire.beacons.BeaconSite.BeaconState;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonSyntaxException;
+import com.google.gson.reflect.TypeToken;
+
+public class BeaconManager {
+    private final RemakepirePlugin plugin;
+    private final Map<String, BeaconSite> beacons;
+    private final File dataFile;
+    private final Gson gson;
+    private BukkitTask particleTask;
+    private BukkitTask conversionCircleParticleTask;
+    private BukkitTask autoSaveTask;
+    private BukkitTask holyRegenTask;
+    private BukkitTask cooldownTrackingTask;
+    private BukkitTask beaconMaintenanceTask;
+    public static final double BEACON_CONVERSION_RANGE = (double)3.0F;
+    public static final double HOLY_SUPPRESSION_RANGE = (double)25.0F;
+    public static final double HOLY_REGENERATION_RANGE = (double)25.0F;
+    private static final int REGEN_DURATION_TICKS = 100;
+    private static final int REGEN_AMPLIFIER = 0;
+    private long lastCooldownUpdate = System.currentTimeMillis();
+    private final Map<String, ItemDisplay> beaconDisplays = new HashMap();
+    private final Map<String, BukkitTask> pendingNeutralBroadcasts = new HashMap();
+
+    public BeaconManager(RemakepirePlugin plugin) {
+        this.plugin = plugin;
+        this.beacons = new HashMap();
+        this.dataFile = new File(plugin.getDataFolder(), "beacons.json");
+        this.gson = (new GsonBuilder()).setPrettyPrinting().create();
+        if (!plugin.getDataFolder().exists()) {
+            plugin.getDataFolder().mkdirs();
+        }
+
+        this.loadBeacons();
+        this.startParticleTask();
+        this.startAutoSaveTask();
+        this.startHolyRegenerationTask();
+        this.startConversionCircleParticleTask();
+        this.startCooldownTrackingTask();
+        this.startBeaconMaintenanceTask();
+    }
+
+    private void startAutoSaveTask() {
+        this.autoSaveTask = this.plugin.getServer().getScheduler().runTaskTimer(this.plugin, () -> {
+            if (this.beacons.size() > 0) {
+                this.plugin.getLogger().fine("Auto-saving beacons...");
+                this.saveBeacons();
+            }
+
+        }, 6000L, 6000L);
+        this.plugin.getLogger().info("Started beacon auto-save task (every 5 minutes)");
+    }
+
+    private void startCooldownTrackingTask() {
+        this.cooldownTrackingTask = this.plugin.getServer().getScheduler().runTaskTimer(this.plugin, () -> this.updateBeaconCooldowns(), 20L, 20L);
+        this.plugin.getLogger().info("Started beacon cooldown tracking task");
+    }
+
+    private void startBeaconMaintenanceTask() {
+        this.beaconMaintenanceTask = this.plugin.getServer().getScheduler().runTaskTimer(this.plugin, () -> {
+            if (this.plugin.getSessionManager().isSessionActive()) {
+                this.performBeaconMaintenance();
+            }
+
+        }, 1200L, 1200L);
+        this.plugin.getLogger().info("Started beacon maintenance task (runs every minute during active sessions)");
+    }
+
+    private void performBeaconMaintenance() {
+        this.forceLoadBeaconChunks();
+        this.validateDisplays();
+        this.plugin.getLogger().fine("Beacon maintenance completed - chunks loaded and displays validated");
+    }
+
+    private void forceLoadBeaconChunks() {
+        int chunksLoaded = 0;
+
+        for(BeaconSite beacon : this.beacons.values()) {
+            Location location = beacon.getLocation();
+            if (location != null && location.getWorld() != null && !location.getWorld().isChunkLoaded(location.getBlockX() >> 4, location.getBlockZ() >> 4)) {
+                location.getWorld().loadChunk(location.getBlockX() >> 4, location.getBlockZ() >> 4);
+                ++chunksLoaded;
+            }
+        }
+
+        if (chunksLoaded > 0) {
+            this.plugin.getLogger().fine("Force loaded " + chunksLoaded + " beacon chunks");
+        }
+
+    }
+
+    private void updateBeaconCooldowns() {
+        if (!this.plugin.getSessionManager().isSessionActive()) {
+            this.lastCooldownUpdate = System.currentTimeMillis();
+        } else {
+            long currentTime = System.currentTimeMillis();
+            long timePassed = currentTime - this.lastCooldownUpdate;
+            if (timePassed >= 500L) {
+                boolean cooldownsChanged = false;
+
+                for(BeaconSite beacon : this.beacons.values()) {
+                    if (beacon.isOnConversionCooldown()) {
+                        beacon.reduceCooldown(timePassed);
+                        cooldownsChanged = true;
+                    }
+                }
+
+                if (cooldownsChanged) {
+                    this.saveBeacons();
+                }
+
+                this.lastCooldownUpdate = currentTime;
+            }
+
+        }
+    }
+
+    public void clearAllBeaconCooldownsForNewSession() {
+        int clearedBeacons = 0;
+
+        for(BeaconSite beacon : this.beacons.values()) {
+            if (beacon.getConversionCooldownUntil() > 0L) {
+                beacon.setConversionCooldownUntil(0L);
+                ++clearedBeacons;
+            }
+        }
+
+        this.plugin.getLogger().info("NEW SESSION: Cleared conversion cooldowns for " + clearedBeacons + " beacons");
+        if (clearedBeacons > 0) {
+            this.saveBeacons();
+        }
+
+    }
+
+    private void startConversionCircleParticleTask() {
+        this.conversionCircleParticleTask = this.plugin.getServer().getScheduler().runTaskTimer(this.plugin, () -> this.showAllConversionAndSuppressionCircles(), 0L, 4L);
+        this.plugin.getLogger().info("Started conversion and suppression circle particle task (every 2 ticks)");
+    }
+
+    private void startHolyRegenerationTask() {
+        this.holyRegenTask = this.plugin.getServer().getScheduler().runTaskTimer(this.plugin, () -> this.applyHolyRegeneration(), 60L, 100L);
+        this.plugin.getLogger().info("Started holy beacon regeneration task for humans");
+    }
+
+    private void applyHolyRegeneration() {
+        for(Player player : this.plugin.getServer().getOnlinePlayers()) {
+            if (this.plugin.getVampireManager().isHuman(player)) {
+                BeaconSite nearestHolyBeacon = this.getNearestHolyBeacon(player.getLocation());
+                if (nearestHolyBeacon != null) {
+                    PotionEffect regenEffect = new PotionEffect(PotionEffectType.REGENERATION, 100, 0, false, false, true);
+                    player.addPotionEffect(regenEffect);
+                    if (!player.hasPotionEffect(PotionEffectType.REGENERATION)) {
+                        player.sendMessage("§a§You feel the holy energy rejuvenating you...");
+                    }
+                }
+            }
+        }
+
+    }
+
+    public void createBeaconDisplay(BeaconSite beacon) {
+        if (beacon != null && beacon.getLocation() != null) {
+            Location displayLoc = beacon.getLocation().clone();
+            displayLoc.add((double)0.0F, (double)0.5F, (double)0.0F);
+            ItemStack pumpkinItem = new ItemStack(Material.CARVED_PUMPKIN);
+            ItemMeta meta = pumpkinItem.getItemMeta();
+            String expectedCMD = this.getCustomModelDataForState(beacon.getState());
+            if (meta != null) {
+                meta.setDisplayName("§6Beacon: " + beacon.getName());
+                pumpkinItem.setItemMeta(meta);
+            }
+
+            pumpkinItem.setData(DataComponentTypes.CUSTOM_MODEL_DATA, (CustomModelData)CustomModelData.customModelData().addString(expectedCMD).build());
+            ItemDisplay display = (ItemDisplay)displayLoc.getWorld().spawn(displayLoc, ItemDisplay.class);
+            display.setItemStack(pumpkinItem);
+            display.setPersistent(true);
+            Transformation transform = new Transformation(new Vector3f(0.0F, 0.0F, 0.0F), new AxisAngle4f(0.0F, 0.0F, 1.0F, 0.0F), new Vector3f(1.0F, 1.0F, 1.0F), new AxisAngle4f(0.0F, 0.0F, 1.0F, 0.0F));
+            display.setTransformation(transform);
+            this.beaconDisplays.put(beacon.getName().toLowerCase(), display);
+            this.plugin.getLogger().info("Created item display for beacon: " + beacon.getName());
+        } else {
+            this.plugin.getLogger().warning("Cannot create display for null beacon or location");
+        }
+    }
+
+    public void updateBeaconDisplay(BeaconSite beacon) {
+        ItemDisplay display = (ItemDisplay)this.beaconDisplays.get(beacon.getName().toLowerCase());
+        if (display != null && display.isValid()) {
+            ItemStack pumpkinItem = new ItemStack(Material.CARVED_PUMPKIN);
+            ItemMeta meta = pumpkinItem.getItemMeta();
+            String expectedCMD = this.getCustomModelDataForState(beacon.getState());
+            if (meta != null) {
+                meta.setDisplayName("§6Beacon: " + beacon.getName());
+                pumpkinItem.setItemMeta(meta);
+            }
+
+            pumpkinItem.setData(DataComponentTypes.CUSTOM_MODEL_DATA, (CustomModelData)CustomModelData.customModelData().addString(expectedCMD).build());
+            display.setItemStack(pumpkinItem);
+        } else {
+            this.createBeaconDisplay(beacon);
+        }
+    }
+
+    public void removeBeaconDisplay(String beaconName, Location fallbackLocation) {
+        if (fallbackLocation != null && fallbackLocation.getWorld() != null) {
+            fallbackLocation.getWorld().loadChunk(fallbackLocation.getBlockX() >> 4, fallbackLocation.getBlockZ() >> 4);
+            this.plugin.getLogger().fine("Loaded chunk for beacon removal: " + beaconName);
+        }
+
+        ItemDisplay display = (ItemDisplay)this.beaconDisplays.get(beaconName.toLowerCase());
+        if (display != null && display.isValid()) {
+            display.remove();
+            this.beaconDisplays.remove(beaconName.toLowerCase());
+            this.plugin.getLogger().info("Removed item display for beacon: " + beaconName);
+        } else if (fallbackLocation != null && fallbackLocation.getWorld() != null) {
+            int removed = 0;
+
+            for(Entity entity : fallbackLocation.getWorld().getNearbyEntities(fallbackLocation, (double)5.0F, (double)5.0F, (double)5.0F)) {
+                if (entity instanceof ItemDisplay) {
+                    entity.remove();
+                    ++removed;
+                }
+            }
+
+            if (removed > 0) {
+                this.plugin.getLogger().info("Removed " + removed + " item displays near beacon: " + beaconName);
+            }
+        }
+
+    }
+
+    private String getCustomModelDataForState(BeaconSite.BeaconState state) {
+        switch (state) {
+            case HOLY:
+                return "664";
+            case DESECRATED:
+                return "666";
+            case PERMANENTLY_DESECRATED:
+                return "668";
+            case NEUTRAL:
+            default:
+                return "665";
+        }
+    }
+
+    public void recreateAllDisplays() {
+        this.plugin.getLogger().info("Recreating item displays for " + this.beacons.size() + " beacons...");
+        this.forceLoadBeaconChunks();
+        this.aggressiveCleanupItemDisplays();
+        this.beaconDisplays.clear();
+        this.plugin.getServer().getScheduler().runTaskLater(this.plugin, () -> {
+            for(BeaconSite beacon : this.beacons.values()) {
+                this.createBeaconDisplay(beacon);
+            }
+
+            this.plugin.getLogger().info("Finished recreating beacon displays after aggressive cleanup");
+        }, 1L);
+    }
+
+    public void cleanupAllDisplays() {
+        for(ItemDisplay display : this.beaconDisplays.values()) {
+            if (display != null && display.isValid()) {
+                display.remove();
+            }
+        }
+
+        this.beaconDisplays.clear();
+        this.aggressiveCleanupItemDisplays();
+        this.plugin.getLogger().info("Cleaned up all beacon displays using both methods");
+    }
+
+    private void aggressiveCleanupItemDisplays() {
+        int totalRemoved = 0;
+
+        for(BeaconSite beacon : this.beacons.values()) {
+            Location location = beacon.getLocation();
+            if (location != null && location.getWorld() != null) {
+                for(Entity entity : location.getWorld().getNearbyEntities(location, (double)5.0F, (double)5.0F, (double)5.0F)) {
+                    if (entity instanceof ItemDisplay) {
+                        entity.remove();
+                        ++totalRemoved;
+                    }
+                }
+            }
+        }
+
+        if (totalRemoved > 0) {
+            this.plugin.getLogger().info("AGGRESSIVE CLEANUP: Removed " + totalRemoved + " item displays at beacon locations");
+        }
+
+    }
+
+    public void forceRefreshAllDisplays() {
+        int refreshed = 0;
+
+        for(BeaconSite beacon : this.beacons.values()) {
+            this.updateBeaconDisplay(beacon);
+            ++refreshed;
+        }
+
+        this.plugin.getLogger().info("Force refreshed " + refreshed + " beacon displays");
+    }
+
+    public void validateDisplays() {
+        this.aggressiveCleanupItemDisplays();
+        this.beaconDisplays.clear();
+        this.plugin.getServer().getScheduler().runTaskLater(this.plugin, () -> {
+            int created = 0;
+
+            for(BeaconSite beacon : this.beacons.values()) {
+                this.createBeaconDisplay(beacon);
+                ++created;
+            }
+
+            this.plugin.getLogger().info("Display validation complete: AGGRESSIVE cleanup + " + created + " displays recreated");
+        }, 1L);
+    }
+
+    public String getBeaconDisplayDebugInfo(String beaconName) {
+        BeaconSite beacon = this.getBeacon(beaconName);
+        if (beacon == null) {
+            return null;
+        } else {
+            ItemDisplay display = (ItemDisplay)this.beaconDisplays.get(beaconName.toLowerCase());
+            StringBuilder info = new StringBuilder();
+            info.append("§e").append(beacon.getName()).append("§7:\n");
+            info.append("  §7Beacon State: §f").append(beacon.getState().getDisplayName()).append("\n");
+            info.append("  §7Expected CMD: §f").append(this.getCustomModelDataForState(beacon.getState())).append("\n");
+            if (display == null) {
+                info.append("  §cNo item display found!");
+            } else if (!display.isValid()) {
+                info.append("  §cItem display is invalid/removed!");
+            } else {
+                ItemStack item = display.getItemStack();
+                if (item != null && item.getType() == Material.CARVED_PUMPKIN) {
+                    ItemMeta meta = item.getItemMeta();
+                    if (meta == null) {
+                        info.append("  §cItem has no metadata!");
+                    } else {
+                        CustomModelData cmdComponent = (CustomModelData)item.getData(DataComponentTypes.CUSTOM_MODEL_DATA);
+                        String actualCMD = cmdComponent != null && !cmdComponent.strings().isEmpty() ? (String)cmdComponent.strings().get(0) : "none";
+                        String expectedCMD = this.getCustomModelDataForState(beacon.getState());
+                        info.append("  §7Actual CMD: §f").append(actualCMD);
+                        if (!actualCMD.equals(expectedCMD)) {
+                            info.append(" §c(WRONG! Should be ").append(expectedCMD).append(")");
+                        } else {
+                            info.append(" §a(Correct)");
+                        }
+
+                        info.append("\n  §7Display Name: §f").append(meta.hasDisplayName() ? meta.getDisplayName() : "none");
+                    }
+                } else {
+                    info.append("  §cItem display has wrong item: §f").append(item != null ? item.getType() : "null");
+                }
+            }
+
+            return info.toString();
+        }
+    }
+
+    public BeaconSite getNearestHolyBeacon(Location location) {
+        if (location != null && location.getWorld() != null) {
+            BeaconSite nearestHolyBeacon = null;
+            double nearestDistance = Double.MAX_VALUE;
+
+            for(BeaconSite beacon : this.beacons.values()) {
+                if (beacon.getState() == BeaconState.HOLY) {
+                    Location beaconLoc = beacon.getLocation();
+                    if (beaconLoc != null && beaconLoc.getWorld().equals(location.getWorld())) {
+                        double distance = beaconLoc.distance(location);
+                        if (distance <= (double)25.0F && distance < nearestDistance) {
+                            nearestHolyBeacon = beacon;
+                            nearestDistance = distance;
+                        }
+                    }
+                }
+            }
+
+            return nearestHolyBeacon;
+        } else {
+            return null;
+        }
+    }
+
+    public BeaconSite getNearestHolyBeacon(Location location, double maxRange) {
+        if (location != null && location.getWorld() != null) {
+            BeaconSite nearestHolyBeacon = null;
+            double nearestDistance = Double.MAX_VALUE;
+
+            for(BeaconSite beacon : this.beacons.values()) {
+                if (beacon.getState() == BeaconState.HOLY) {
+                    Location beaconLoc = beacon.getLocation();
+                    if (beaconLoc != null && beaconLoc.getWorld().equals(location.getWorld())) {
+                        double distance = beaconLoc.distance(location);
+                        if (distance <= maxRange && distance < nearestDistance) {
+                            nearestHolyBeacon = beacon;
+                            nearestDistance = distance;
+                        }
+                    }
+                }
+            }
+
+            return nearestHolyBeacon;
+        } else {
+            return null;
+        }
+    }
+
+    public boolean isInHolyRegenerationZone(Location location) {
+        return this.getNearestHolyBeacon(location) != null;
+    }
+
+    private void showAllConversionAndSuppressionCircles() {
+        for(BeaconSite beacon : this.beacons.values()) {
+            Location particleLoc = beacon.getParticleLocation();
+            if (particleLoc != null && particleLoc.getWorld() != null) {
+                this.showConversionRangeCircle(beacon, particleLoc);
+                if (beacon.getState() == BeaconState.HOLY) {
+                    this.showSuppressionRangeCircle(beacon, particleLoc);
+                }
+            }
+        }
+
+    }
+
+    public boolean addBeacon(String name, Location location) {
+        if (this.beacons.containsKey(name.toLowerCase())) {
+            return false;
+        } else if (location != null && location.getWorld() != null) {
+            BeaconSite beacon = new BeaconSite(name, location);
+            this.beacons.put(name.toLowerCase(), beacon);
+            this.createBeaconDisplay(beacon);
+            this.saveBeacons();
+            this.plugin.getLogger().info("Added new beacon: " + name + " at " + location.getWorld().getName() + " (" + location.getBlockX() + ", " + location.getBlockY() + ", " + location.getBlockZ() + ")");
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public boolean removeBeacon(String name) {
+        BeaconSite removed = (BeaconSite)this.beacons.remove(name.toLowerCase());
+        if (removed != null) {
+            Location beaconLoc = removed.getLocation();
+            if (beaconLoc != null) {
+                beaconLoc.getBlock().setType(Material.AIR);
+            }
+
+            this.removeBeaconDisplay(name, removed.getLocation());
+            this.saveBeacons();
+            this.plugin.getLogger().info("Removed beacon and cleaned up display: " + name);
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public BeaconSite getBeacon(String name) {
+        return (BeaconSite)this.beacons.get(name.toLowerCase());
+    }
+
+    public Collection<BeaconSite> getAllBeacons() {
+        return this.beacons.values();
+    }
+
+    public List<BeaconSite> getDesecratedBeacons() {
+        return (List)this.beacons.values().stream().filter((beacon) -> beacon.getState() == BeaconState.DESECRATED).collect(Collectors.toList());
+    }
+
+    public List<BeaconSite> getAllEvilBeacons() {
+        return (List)this.beacons.values().stream().filter((beacon) -> beacon.getState() == BeaconState.DESECRATED || beacon.getState() == BeaconState.PERMANENTLY_DESECRATED).collect(Collectors.toList());
+    }
+
+    public List<BeaconSite> getHolyBeacons() {
+        return (List)this.beacons.values().stream().filter((beacon) -> beacon.getState() == BeaconState.HOLY).collect(Collectors.toList());
+    }
+
+    public List<BeaconSite> getNeutralBeacons() {
+        return (List)this.beacons.values().stream().filter((beacon) -> beacon.getState() == BeaconState.NEUTRAL).collect(Collectors.toList());
+    }
+
+    public boolean setBeaconHoly(String name) {
+        BeaconSite beacon = (BeaconSite)this.beacons.get(name.toLowerCase());
+        if (beacon != null) {
+            this.cancelPendingNeutralBroadcast(name.toLowerCase());
+            beacon.setState(BeaconState.HOLY);
+            beacon.setLastChangedBy("Admin command");
+            beacon.setConversionCooldownUntil(0L);
+            this.updateBeaconDisplay(beacon);
+            this.saveBeacons();
+            this.plugin.getLogger().info("Set beacon '" + name + "' as holy (cooldown cleared)");
+            this.triggerFirstBeaconConvertedEffects(beacon, false);
+            this.plugin.getBeaconMajorityManager().updateBeaconMajorityBonuses();
+            this.broadcastBeaconGainToTeam(beacon, BeaconState.HOLY);
+            this.checkAndBroadcastCompleteControl();
+            this.checkAndDisableEternalNight();
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    private void checkAndDisableEternalNight() {
+        if (this.plugin.getSessionManager().isVampiresEternalNightActive()) {
+            int evilCount = this.getAllEvilBeacons().size();
+            int totalBeacons = this.getAllBeacons().size();
+            if (evilCount < totalBeacons) {
+                this.plugin.getLogger().info("ETERNAL NIGHT LIFTED - Not all beacons are evil anymore!");
+                this.plugin.getSessionManager().setVampiresEternalNightActive(false);
+
+                for(Player player : Bukkit.getOnlinePlayers()) {
+                    if (this.plugin.getVampireManager().isHuman(player)) {
+                        player.removePotionEffect(PotionEffectType.DARKNESS);
+                    }
+
+                    player.sendMessage("§6A beacon has been reclaimed by the light... The eternal darkness recedes.");
+                }
+
+                for(Player player : Bukkit.getOnlinePlayers()) {
+                    player.playSound(player.getLocation(), Sound.BLOCK_BEACON_POWER_SELECT, SoundCategory.MASTER, 1.0F, 1.0F);
+                }
+            }
+
+        }
+    }
+
+    public void triggerFirstBeaconConvertedEffects(BeaconSite beacon, boolean isDesecration) {
+        if (!this.plugin.getSessionManager().isFirstBeaconConvertedTriggered()) {
+            this.plugin.getSessionManager().setFirstBeaconConvertedTriggered(true);
+            Location beaconLocation = beacon.getLocation();
+            String nearMessage;
+            String farMessage;
+            if (isDesecration) {
+                nearMessage = "\n§4A cold dread washes over you as the beacon's light twists into something sinister. The air grows heavy with malice... \n§7But just as suddenly, you feel a faint warmth stirring within, as if a force of light is rising to oppose the darkness. Perhaps there is still hope...\n";
+                farMessage = "§4A dark beacon has been desecrated somewhere amongst the land, you feel its corrupted presence seep through the earth. \n§7But just as soon after, a faint warmth touches your heart, like a force of good is awakening to fight back. Probably just your imagination...\n";
+            } else {
+                nearMessage = "\n§6The beacons soft light warms your heart, filling you with peace. \n§7But just as soon as it activates, the air around you seems to thicken, like a dark presence is moving to snuff out the light... Have you awoken an evil force? Perhaps it is just superstition...\n";
+                farMessage = "§6A holy beacon has been activated somewhere amongst the land, you feel its divine presence radiate through the earth. \n§7But just as soon after, a chill runs through your spine, like a strange dark force is moving in to snuff the light. Probably just your nerves...\n";
+            }
+
+            for(Player player : Bukkit.getOnlinePlayers()) {
+                player.playSound(player.getLocation(), Sound.ENTITY_WITHER_SPAWN, SoundCategory.MASTER, 0.8F, 0.7F);
+                player.addPotionEffect(new PotionEffect(PotionEffectType.DARKNESS, 60, 0, false, false));
+                if (beaconLocation.getWorld() == player.getLocation().getWorld() && beaconLocation.distance(player.getLocation()) <= (double)50.0F) {
+                    player.sendMessage(nearMessage);
+                } else {
+                    player.sendMessage(farMessage);
+                }
+            }
+
+            this.plugin.getLogger().info("FIRST BEACON CONVERTED EFFECTS triggered for beacon: " + beacon.getName() + " (desecration: " + isDesecration + ")");
+        }
+    }
+
+    public boolean setBeaconDesecrated(String name) {
+        BeaconSite beacon = (BeaconSite)this.beacons.get(name.toLowerCase());
+        if (beacon != null) {
+            this.cancelPendingNeutralBroadcast(name.toLowerCase());
+            beacon.setState(BeaconState.DESECRATED);
+            beacon.setLastChangedBy("Admin command");
+            beacon.setConversionCooldownUntil(0L);
+
+            this.updateBeaconDisplay(beacon);
+            this.saveBeacons();
+            this.plugin.getLogger().info("Set beacon '" + name + "' as desecrated (cooldown cleared)");
+            this.plugin.getBeaconMajorityManager().updateBeaconMajorityBonuses();
+            this.broadcastBeaconGainToTeam(beacon, BeaconState.DESECRATED);
+
+            this.checkAndBroadcastCompleteControl();
+            this.checkAndDisableHumansFinalStand();
+
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public boolean setBeaconNeutral(String name) {
+        return this.setBeaconNeutral(name, false);
+    }
+
+    public boolean setBeaconNeutral(String name, boolean silent) {
+        BeaconSite beacon = (BeaconSite)this.beacons.get(name.toLowerCase());
+        if (beacon != null) {
+            BeaconSite.BeaconState previousState = beacon.getState();
+            beacon.setState(BeaconState.NEUTRAL);
+            beacon.setConversionCooldownUntil(0L);
+            this.updateBeaconDisplay(beacon);
+            this.saveBeacons();
+            this.plugin.getLogger().info("Set beacon '" + name + "' as neutral (cooldown cleared)");
+            this.plugin.getBeaconMajorityManager().updateBeaconMajorityBonuses();
+            if (!silent) {
+                this.broadcastNeutralConversionToAll(beacon, previousState);
+                this.checkAndDisableHumansFinalStand();
+                this.checkAndDisableEternalNight();
+            }
+
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    private void checkAndDisableHumansFinalStand() {
+        if (this.plugin.getSessionManager().isHumansFinalStandActive()) {
+            int holyCount = this.getHolyBeacons().size();
+            int totalBeacons = this.getAllBeacons().size();
+            if (holyCount < totalBeacons) {
+                this.plugin.getLogger().info("HUMANS FINAL STAND ENDED - Not all beacons are holy anymore!");
+
+                for(Player player : Bukkit.getOnlinePlayers()) {
+                    if (this.plugin.getVampireManager().isVampire(player)) {
+                        player.getAttribute(Attribute.MAX_HEALTH).setBaseValue(20.0);
+                    }
+
+                    player.sendMessage("§4A beacon has fallen to darkness... The humans' final stand wavers.");
+                }
+
+                for(Player player : Bukkit.getOnlinePlayers()) {
+                    player.playSound(player.getLocation(), Sound.ENTITY_WITHER_AMBIENT, SoundCategory.MASTER, 1.0F, 0.8F);
+                }
+
+                this.plugin.getSessionManager().setHumansFinalStandActive(false);
+            }
+
+        }
+    }
+
+    private void startParticleTask() {
+        this.particleTask = this.plugin.getServer().getScheduler().runTaskTimer(this.plugin, () -> this.showBeaconParticles(), 0L, 40L);
+        this.plugin.getLogger().fine("Started beacon particle task");
+    }
+
+    private void showBeaconParticles() {
+        for(BeaconSite beacon : this.beacons.values()) {
+            Location particleLoc = beacon.getParticleLocation();
+            if (particleLoc != null && particleLoc.getWorld() != null && beacon.shouldShowParticles()) {
+                this.showParticleEffect(beacon, particleLoc);
+            }
+        }
+
+    }
+
+    public Set<String> getBeaconNames() {
+        return new HashSet(this.beacons.keySet());
+    }
+
+    private void showParticleEffect(BeaconSite beacon, Location location) {
+        try {
+            switch (beacon.getState()) {
+                case HOLY:
+                    this.showHolyParticles(location);
+                    break;
+                case DESECRATED:
+                    this.showDesecratedParticles(location);
+                case PERMANENTLY_DESECRATED:
+                case NEUTRAL:
+            }
+        } catch (Exception e) {
+            this.plugin.getLogger().warning("Failed to show particles for beacon " + beacon.getName() + ": " + e.getMessage());
+        }
+
+    }
+
+    private void showHolyParticles(Location location) {
+        double radius = 1.5;
+
+        for(int i = 0; i < 8; ++i) {
+            double angle = (Math.PI * 2D) * (double)i / 8.0;
+//            double radius = 1.5;
+            Location particleLoc = location.clone().add(Math.cos(angle) * radius, Math.sin((double)System.currentTimeMillis() / 1000.0) * 0.3, Math.sin(angle) * radius);
+            location.getWorld().spawnParticle(Particle.WHITE_ASH, particleLoc, 2, 0.1, 0.1, 0.1, 0.01);
+        }
+
+        location.getWorld().spawnParticle(Particle.ENCHANT, location, 5, 0.5, 0.5, 0.5, 0.5);
+        if (Math.random() < 0.3) {
+            location.getWorld().spawnParticle(Particle.END_ROD, location, 3, 0.3, 0.3, 0.3, 0.1);
+        }
+
+    }
+
+    private void showDesecratedParticles(Location location) {
+        location.getWorld().spawnParticle(Particle.LARGE_SMOKE, location, 3, 0.3, 0.1, 0.3, 0.02);
+
+        for(int i = 0; i < 6; ++i) {
+            double angle = (Math.PI * 2D) * (double)i / (double)6.0F;
+            double radius = 1.2;
+            Location particleLoc = location.clone().add(Math.cos(angle) * radius, -Math.sin((double)System.currentTimeMillis() / (double)800.0F) * 0.2, Math.sin(angle) * radius);
+            Particle.DustOptions dustOptions = new Particle.DustOptions(Color.fromRGB(139, 0, 0), 1.0F);
+            location.getWorld().spawnParticle(Particle.DUST, particleLoc, 1, 0.1, 0.1, 0.1, dustOptions);
+        }
+
+        if (Math.random() < 0.4) {
+            location.getWorld().spawnParticle(Particle.SOUL_FIRE_FLAME, location, 2, 0.2, 0.2, 0.2, 0.01);
+        }
+
+        if (Math.random() < 0.2) {
+            location.getWorld().spawnParticle(Particle.CRIMSON_SPORE, location, 4, (double)0.5F, (double)0.5F, (double)0.5F, 0.01);
+        }
+
+    }
+
+    private void showConversionRangeCircle(BeaconSite beacon, Location center) {
+        if (center != null && center.getWorld() != null) {
+            int circlePoints = 24;
+            double radius = 3.0;
+            long time = System.currentTimeMillis();
+
+            int currentPointIndex = (int)(time / 50L % (long)circlePoints);
+            double angle = (Math.PI * 2D) * (double)currentPointIndex / (double)circlePoints;
+            double rotationOffset = (double)time / 8000.0 % (Math.PI * 2D);
+            angle += rotationOffset;
+            double x = Math.cos(angle) * radius;
+            double z = Math.sin(angle) * radius;
+            Location circlePoint = center.clone().add(x, -1.2, z);
+            this.showConversionRangeParticle(beacon.getState(), circlePoint);
+        } else {
+            this.plugin.getLogger().fine("Invalid center location for beacon: " + beacon.getName());
+        }
+    }
+
+    private void showSuppressionRangeCircle(BeaconSite beacon, Location center) {
+        if (center != null && center.getWorld() != null) {
+            int circlePoints = 48;
+            double radius = 25.0;
+            long time = System.currentTimeMillis();
+            int currentPointIndex = (int)(time / 50L % (long)circlePoints);
+            double angle = (Math.PI * 2D) * (double)currentPointIndex / (double)circlePoints;
+            double rotationOffset = (double)time / 12000.0 % (Math.PI * 2D);
+            angle += rotationOffset;
+            double x = Math.cos(angle) * radius;
+            double z = Math.sin(angle) * radius;
+            Location circlePoint = center.clone().add(x, 0.0, z);
+            Location highestPoint = this.plugin.getWorld().getHighestBlockAt(circlePoint).getLocation();
+            highestPoint.add(0.0, 1.2, 0.0);
+            this.showSuppressionRangeParticle(highestPoint);
+        } else {
+            this.plugin.getLogger().fine("Invalid center location for beacon: " + beacon.getName());
+        }
+    }
+
+    private Location findHighestBlock(Location location) {
+        if (location != null && location.getWorld() != null) {
+            Location highest = location.clone();
+            int maxY = location.getWorld().getMaxHeight() - 1;
+            int minY = location.getWorld().getMinHeight();
+
+            for(int y = maxY; y >= minY; --y) {
+                highest.setY((double)y);
+                Material blockType = highest.getBlock().getType();
+                if (blockType.isSolid() && blockType != Material.AIR) {
+                    return highest.clone().add(0.0, 1.5, 0.0);
+                }
+            }
+
+            return location.clone().add(0.0, 0.5, 0.0);
+        } else {
+            return null;
+        }
+    }
+
+    private void showConversionRangeParticle(BeaconSite.BeaconState state, Location location) {
+        if (location != null && location.getWorld() != null) {
+            try {
+                switch (state) {
+                    case HOLY:
+                        location.getWorld().spawnParticle(Particle.END_ROD, location, 1, 0.0, 0.0, 0.0, 0.0);
+                        break;
+                    case DESECRATED:
+                        Particle.DustOptions darkRedDust = new Particle.DustOptions(Color.fromRGB(150, 0, 0), 1.2F);
+                        location.getWorld().spawnParticle(Particle.DUST, location, 1, 0.0, 0.0, 0.0, darkRedDust);
+                    case PERMANENTLY_DESECRATED:
+                    case NEUTRAL:
+                }
+            } catch (Exception e) {
+                this.plugin.getLogger().warning("Failed to show conversion range particle for beacon : " + e.getMessage());
+            }
+
+        }
+    }
+
+    private void showSuppressionRangeParticle(Location location) {
+        if (location != null && location.getWorld() != null) {
+            try {
+                location.getWorld().spawnParticle(Particle.END_ROD, location, 1, 0.0, 0.0, 0.0, 0.0);
+            } catch (Exception e) {
+                this.plugin.getLogger().warning("Failed to show suppression range particle: " + e.getMessage());
+            }
+
+        }
+    }
+
+    private Location findGroundLevel(Location location) {
+        Location ground = location.clone();
+
+        for(int y = 0; y >= -5; --y) {
+            ground.setY(location.getY() + (double)y);
+            if (ground.getBlock().getType().isSolid()) {
+                return ground.add(0.0, 1.2, 0.0);
+            }
+        }
+
+        return location.clone().add(0.0, 0.5, 0.0);
+    }
+
+    public List<BeaconSite> getBeaconsInRange(Location location, double range) {
+        List<BeaconSite> nearby = new ArrayList();
+
+        for(BeaconSite beacon : this.beacons.values()) {
+            Location beaconLoc = beacon.getLocation();
+            if (beaconLoc != null && beaconLoc.getWorld().equals(location.getWorld()) && beaconLoc.distance(location) <= range) {
+                nearby.add(beacon);
+            }
+        }
+
+        return nearby;
+    }
+
+    public BeaconSite checkHolySuppression(Location location) {
+        if (location != null && location.getWorld() != null) {
+            BeaconSite closestHolyBeacon = null;
+            double closestDistance = Double.MAX_VALUE;
+
+            for(BeaconSite beacon : this.beacons.values()) {
+                if (beacon.getState() == BeaconState.HOLY) {
+                    Location beaconLoc = beacon.getLocation();
+                    if (beaconLoc != null && beaconLoc.getWorld().equals(location.getWorld())) {
+                        double distance = beaconLoc.distance(location);
+                        if (distance <= 25.0 && distance < closestDistance) {
+                            closestHolyBeacon = beacon;
+                            closestDistance = distance;
+                        }
+                    }
+                }
+            }
+
+            return closestHolyBeacon;
+        } else {
+            return null;
+        }
+    }
+
+    public List<String> getBeaconList() {
+        List<String> list = new ArrayList();
+        if (this.beacons.isEmpty()) {
+            list.add("§7No beacons configured.");
+            return list;
+        } else {
+            list.add("§6§l=== BEACON SITES ===");
+            list.add("§7Total: §e" + this.beacons.size() + " beacons");
+            list.add("");
+            Map<BeaconSite.BeaconState, List<BeaconSite>> grouped = new HashMap();
+
+            for(BeaconSite.BeaconState state : BeaconState.values()) {
+                grouped.put(state, new ArrayList());
+            }
+
+            for(BeaconSite beacon : this.beacons.values()) {
+                ((List)grouped.get(beacon.getState())).add(beacon);
+            }
+
+            for(BeaconSite.BeaconState state : BeaconState.values()) {
+                List<BeaconSite> stateBeacons = (List)grouped.get(state);
+                if (!stateBeacons.isEmpty()) {
+                    String icon = "";
+                    switch (state) {
+                        case HOLY:
+                            icon = "✦ ";
+                            break;
+                        case DESECRATED:
+                            icon = "☠ ";
+                        case PERMANENTLY_DESECRATED:
+                        default:
+                            break;
+                        case NEUTRAL:
+                            icon = "◯ ";
+                    }
+
+                    String var10001 = state.getColorCode();
+                    list.add(var10001 + "§l" + icon + state.getDisplayName() + " Beacons: §r§7(" + stateBeacons.size() + ")");
+
+                    for(BeaconSite beacon : stateBeacons) {
+                        var10001 = beacon.getStatusString();
+                        list.add("  " + var10001.replace("\n", "\n  "));
+                    }
+
+                    list.add("");
+                }
+            }
+
+            return list;
+        }
+    }
+
+    public void saveBeacons() {
+        synchronized(this) {
+            try {
+                this.plugin.getLogger().fine("Saving " + this.beacons.size() + " beacons to file...");
+
+                for(Map.Entry<String, BeaconSite> entry : this.beacons.entrySet()) {
+                    BeaconSite beacon = (BeaconSite)entry.getValue();
+                    if (beacon == null) {
+                        this.plugin.getLogger().severe("Found null beacon with key: " + (String)entry.getKey());
+                    } else if (beacon.getName() == null || beacon.getWorldName() == null) {
+                        this.plugin.getLogger().severe("Found beacon with null fields: " + (String)entry.getKey());
+                    }
+                }
+
+                File backupFile = new File(this.dataFile.getParent(), "beacons_backup.json");
+                if (this.dataFile.exists()) {
+                    try {
+                        Files.copy(this.dataFile.toPath(), backupFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                    } catch (Exception e) {
+                        this.plugin.getLogger().warning("Failed to create backup: " + e.getMessage());
+                    }
+                }
+
+                Type type = (new TypeToken<Map<String, BeaconSite>>() {
+                }).getType();
+                String jsonString = this.gson.toJson(this.beacons, type);
+                if (!this.beacons.isEmpty() && jsonString.length() < 50) {
+                    this.plugin.getLogger().severe("JSON output suspiciously small for " + this.beacons.size() + " beacons. JSON: " + jsonString);
+                    this.plugin.getLogger().severe("ABORTING SAVE to prevent data loss!");
+                    return;
+                }
+
+                File tempFile = new File(this.dataFile.getParent(), "beacons_temp.json");
+                FileWriter writer = new FileWriter(tempFile);
+
+                try {
+                    writer.write(jsonString);
+                    writer.flush();
+                } catch (Throwable var11) {
+                    try {
+                        writer.close();
+                    } catch (Throwable var10) {
+                        var11.addSuppressed(var10);
+                    }
+
+                    throw var11;
+                }
+
+                writer.close();
+                if (tempFile.exists() && tempFile.length() > 0L) {
+                    if (this.dataFile.exists()) {
+                        this.dataFile.delete();
+                    }
+
+                    if (tempFile.renameTo(this.dataFile)) {
+                        this.plugin.getLogger().fine("Successfully saved " + this.beacons.size() + " beacons to file.");
+                    } else {
+                        this.plugin.getLogger().severe("Failed to rename temp file to main file!");
+                    }
+                } else {
+                    this.plugin.getLogger().severe("Temp file was not created properly!");
+                }
+
+                if (tempFile.exists()) {
+                    tempFile.delete();
+                }
+            } catch (Exception e) {
+                this.plugin.getLogger().severe("Failed to save beacons: " + e.getMessage());
+                e.printStackTrace();
+                this.plugin.getLogger().severe("Beacon map size: " + this.beacons.size());
+                this.plugin.getLogger().severe("Data file path: " + this.dataFile.getAbsolutePath());
+                this.plugin.getLogger().severe("Can write to parent directory: " + this.dataFile.getParentFile().canWrite());
+            }
+
+        }
+    }
+
+    private void createDefaultBeacons() {
+        this.beacons.clear();
+        World world = this.plugin.getServer().getWorld("world");
+        if (world == null) {
+            this.plugin.getLogger().severe("World 'world' not found! Cannot create default beacons.");
+        } else {
+            BeaconSite town = new BeaconSite("Town", new Location(world, (double)79.5F, (double)86.0F, (double)440.5F));
+            town.setState(BeaconState.NEUTRAL);
+            town.setLastChangedBy("Default");
+            this.beacons.put("town", town);
+            BeaconSite castle = new BeaconSite("Castle", new Location(world, (double)39.5F, (double)104.0F, (double)-170.5F));
+            castle.setState(BeaconState.DESECRATED);
+            castle.setLastChangedBy("Default");
+            this.beacons.put("castle", castle);
+            BeaconSite crypt = new BeaconSite("Crypt", new Location(world, (double)454.5F, (double)138.0F, (double)395.5F));
+            crypt.setState(BeaconState.NEUTRAL);
+            crypt.setLastChangedBy("Default");
+            this.beacons.put("crypt", crypt);
+            BeaconSite obelisk = new BeaconSite("Obelisk", new Location(world, (double)-374.5F, (double)72.0F, (double)73.5F));
+            obelisk.setState(BeaconState.NEUTRAL);
+            obelisk.setLastChangedBy("Default");
+            this.beacons.put("obelisk", obelisk);
+            BeaconSite paleoakforest = new BeaconSite("PaleOakForest", new Location(world, (double)481.5F, (double)113.0F, (double)-433.5F));
+            paleoakforest.setState(BeaconState.NEUTRAL);
+            paleoakforest.setLastChangedBy("Default");
+            this.beacons.put("paleoakforest", paleoakforest);
+            BeaconSite lake = new BeaconSite("Lake", new Location(world, (double)-328.5F, (double)76.0F, (double)492.5F));
+            lake.setState(BeaconState.NEUTRAL);
+            lake.setLastChangedBy("Default");
+            this.beacons.put("lake", lake);
+            BeaconSite ruinedtower = new BeaconSite("RuinedTower", new Location(world, (double)-300.5F, (double)231.0F, (double)-371.5F));
+            ruinedtower.setState(BeaconState.NEUTRAL);
+            ruinedtower.setLastChangedBy("Default");
+            this.beacons.put("ruinedtower", ruinedtower);
+            this.plugin.getServer().getScheduler().runTaskLater(this.plugin, () -> this.recreateAllDisplays(), 20L);
+        }
+    }
+
+    public void loadBeacons() {
+        if (!this.dataFile.exists()) {
+            this.plugin.getLogger().info("No beacons file found, creating default beacons...");
+            this.createDefaultBeacons();
+            this.saveBeacons();
+            this.plugin.getLogger().info("Created " + this.beacons.size() + " default beacons.");
+        } else {
+            File backupFile = new File(this.dataFile.getParent(), "beacons_backup.json");
+            this.plugin.getLogger().info("Loading beacons from file: " + this.dataFile.getAbsolutePath());
+
+            try {
+                try (FileReader reader = new FileReader(this.dataFile)) {
+                    StringBuilder content = new StringBuilder();
+                    char[] buffer = new char[1024];
+                    FileReader debugReader = new FileReader(this.dataFile);
+
+                    int bytesRead;
+                    while((bytesRead = debugReader.read(buffer)) != -1) {
+                        content.append(buffer, 0, bytesRead);
+                    }
+
+                    debugReader.close();
+                    String fileContent = content.toString().trim();
+                    if (fileContent.isEmpty()) {
+                        this.plugin.getLogger().severe("Beacons file is empty!");
+                        if (!backupFile.exists()) {
+                            return;
+                        }
+
+                        this.plugin.getLogger().info("Attempting to restore from backup file...");
+
+                        try {
+                            Files.copy(backupFile.toPath(), this.dataFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                            this.plugin.getLogger().info("Restored from backup, retrying load...");
+                            this.loadBeacons();
+                            return;
+                        } catch (Exception e) {
+                            this.plugin.getLogger().severe("Failed to restore from backup: " + e.getMessage());
+                            return;
+                        }
+                    }
+
+                    Type type = (new TypeToken<Map<String, BeaconSite>>() {
+                    }).getType();
+                    Map<String, BeaconSite> loadedBeacons = (Map)this.gson.fromJson(fileContent, type);
+                    if (loadedBeacons != null) {
+                        int validBeacons = 0;
+                        int invalidBeacons = 0;
+
+                        for(Map.Entry<String, BeaconSite> entry : loadedBeacons.entrySet()) {
+                            BeaconSite beacon = (BeaconSite)entry.getValue();
+                            if (beacon == null) {
+                                this.plugin.getLogger().warning("Beacon with key '" + (String)entry.getKey() + "' is null");
+                                ++invalidBeacons;
+                            } else if (beacon.getName() != null && beacon.getWorldName() != null) {
+                                ++validBeacons;
+                            } else {
+                                this.plugin.getLogger().warning("Beacon '" + (String)entry.getKey() + "' has null fields");
+                                ++invalidBeacons;
+                            }
+                        }
+
+                        this.beacons.clear();
+                        this.beacons.putAll(loadedBeacons);
+                        this.plugin.getServer().getScheduler().runTaskLater(this.plugin, () -> {
+                            this.recreateAllDisplays();
+                            this.validateDisplays();
+                        }, 10L);
+                        this.plugin.getLogger().info("Loaded " + this.beacons.size() + " beacons from file.");
+                        return;
+                    }
+
+                    this.plugin.getLogger().severe("Gson returned null when parsing beacons file!");
+                }
+
+                return;
+            } catch (IOException e) {
+                this.plugin.getLogger().severe("Failed to load beacons: " + e.getMessage());
+                e.printStackTrace();
+            } catch (JsonSyntaxException e) {
+                this.plugin.getLogger().severe("Failed to parse beacons file - JSON syntax error: " + e.getMessage());
+                e.printStackTrace();
+                if (backupFile.exists()) {
+                    this.plugin.getLogger().info("Attempting to restore from backup due to JSON corruption...");
+
+                    try {
+                        Files.copy(backupFile.toPath(), this.dataFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                        this.plugin.getLogger().info("Restored from backup, retrying load...");
+                        this.loadBeacons();
+                    } catch (Exception backupError) {
+                        this.plugin.getLogger().severe("Failed to restore from backup: " + backupError.getMessage());
+                    }
+                }
+            } catch (Exception e) {
+                this.plugin.getLogger().severe("Unexpected error loading beacons: " + e.getMessage());
+                e.printStackTrace();
+            }
+
+        }
+    }
+
+    public void reloadBeacons() {
+        this.loadBeacons();
+        this.plugin.getLogger().info("Reloaded beacons from file.");
+    }
+
+    private void migrateBeaconCooldownsToSessionTime() {
+        this.plugin.getLogger().info("Migrating existing beacon cooldowns from system time to session time...");
+        long currentSystemTime = System.currentTimeMillis();
+        long currentSessionTime = this.plugin.getSessionManager().getSessionTime();
+        int migratedBeacons = 0;
+
+        for(BeaconSite beacon : this.beacons.values()) {
+            long systemCooldownUntil = beacon.getConversionCooldownUntil();
+            if (systemCooldownUntil > currentSystemTime) {
+                long remainingSystemTime = systemCooldownUntil - currentSystemTime;
+                long newSessionCooldownUntil = currentSessionTime + remainingSystemTime / 2L;
+                beacon.setConversionCooldownUntil(newSessionCooldownUntil);
+                ++migratedBeacons;
+            }
+        }
+
+        this.plugin.getLogger().info("Migrated " + migratedBeacons + " beacon cooldowns to session time");
+        if (migratedBeacons > 0) {
+            this.saveBeacons();
+        }
+
+    }
+
+    public Map<BeaconSite.BeaconState, Integer> getStateStats() {
+        Map<BeaconSite.BeaconState, Integer> stats = new HashMap();
+
+        for(BeaconSite.BeaconState state : BeaconState.values()) {
+            stats.put(state, 0);
+        }
+
+        for(BeaconSite beacon : this.beacons.values()) {
+            stats.put(beacon.getState(), (Integer)stats.get(beacon.getState()) + 1);
+        }
+
+        return stats;
+    }
+
+    public void validateBeacons() {
+        List<String> invalidBeacons = new ArrayList();
+
+        for(Map.Entry<String, BeaconSite> entry : this.beacons.entrySet()) {
+            if (((BeaconSite)entry.getValue()).getLocation() == null) {
+                invalidBeacons.add((String)entry.getKey());
+            }
+        }
+
+        if (!invalidBeacons.isEmpty()) {
+            this.plugin.getLogger().warning("Found " + invalidBeacons.size() + " beacons with invalid worlds:");
+
+            for(String name : invalidBeacons) {
+                this.plugin.getLogger().warning("  - " + name + " (world: " + ((BeaconSite)this.beacons.get(name)).getWorldName() + ")");
+            }
+        }
+
+    }
+
+    public void shutdown() {
+        this.cleanupAllDisplays();
+        if (this.cooldownTrackingTask != null) {
+            this.cooldownTrackingTask.cancel();
+            this.cooldownTrackingTask = null;
+            this.plugin.getLogger().info("Stopped beacon cooldown tracking task");
+        }
+
+        if (this.beaconMaintenanceTask != null) {
+            this.beaconMaintenanceTask.cancel();
+            this.beaconMaintenanceTask = null;
+            this.plugin.getLogger().info("Stopped beacon maintenance task");
+        }
+
+        if (this.autoSaveTask != null) {
+            this.autoSaveTask.cancel();
+            this.autoSaveTask = null;
+            this.plugin.getLogger().fine("Stopped beacon auto-save task");
+        }
+
+        if (this.particleTask != null) {
+            this.particleTask.cancel();
+            this.particleTask = null;
+            this.plugin.getLogger().fine("Stopped beacon particle task");
+        }
+
+        if (this.conversionCircleParticleTask != null) {
+            this.conversionCircleParticleTask.cancel();
+            this.conversionCircleParticleTask = null;
+            this.plugin.getLogger().info("Stopped conversion circle particle task");
+        }
+
+        if (this.holyRegenTask != null) {
+            this.holyRegenTask.cancel();
+            this.holyRegenTask = null;
+            this.plugin.getLogger().info("Stopped holy beacon regeneration task");
+        }
+
+        for(BukkitTask task : this.pendingNeutralBroadcasts.values()) {
+            if (task != null) {
+                task.cancel();
+            }
+        }
+
+        this.pendingNeutralBroadcasts.clear();
+        this.plugin.getLogger().info("Cancelled all pending neutral broadcast messages");
+        this.saveBeacons();
+        this.plugin.getLogger().info("BeaconManager shutdown - displays cleaned up and data saved.");
+    }
+
+    public void broadcastNeutralConversionToAll(BeaconSite beacon, BeaconSite.BeaconState previousState) {
+        String beaconKey = beacon.getName().toLowerCase();
+        this.cancelPendingNeutralBroadcast(beaconKey);
+        int delaySeconds = this.plugin.getConfigManager().getBeaconNeutralAnnouncementDelaySeconds();
+        long delayTicks = (long)delaySeconds * 20L;
+        BukkitTask task = this.plugin.getServer().getScheduler().runTaskLater(this.plugin, () -> {
+            if (beacon.getState() == BeaconState.NEUTRAL) {
+                String message;
+                if (previousState == BeaconState.HOLY) {
+                    message = "§7Beacon §e" + beacon.getName() + " §7has lost its divine protection...";
+                } else if (previousState == BeaconState.DESECRATED) {
+                    message = "§7Beacon §e" + beacon.getName() + " §7has been cleansed of dark influence...";
+                } else {
+                    message = "§7Beacon §e" + beacon.getName() + " §7is now neutral.";
+                }
+
+                for(Player player : this.plugin.getServer().getOnlinePlayers()) {
+                    player.sendMessage(message);
+                }
+            }
+
+            this.pendingNeutralBroadcasts.remove(beaconKey);
+        }, delayTicks);
+        this.pendingNeutralBroadcasts.put(beaconKey, task);
+    }
+
+    public void cancelPendingNeutralBroadcast(String beaconKey) {
+        BukkitTask existingTask = (BukkitTask)this.pendingNeutralBroadcasts.remove(beaconKey.toLowerCase());
+        if (existingTask != null) {
+            existingTask.cancel();
+            this.plugin.getLogger().fine("Cancelled pending neutral broadcast for beacon: " + beaconKey);
+        }
+
+    }
+
+    private void broadcastBeaconGainToTeam(BeaconSite beacon, BeaconSite.BeaconState newState) {
+        String message;
+        if (newState == BeaconState.HOLY) {
+            message = "§aBeacon §e" + beacon.getName() + " §ahas been blessed with divine energy!";
+        } else {
+            if (newState != BeaconState.DESECRATED) {
+                return;
+            }
+
+            message = "§4Beacon §e" + beacon.getName() + " §4has been consumed by dark forces!";
+        }
+
+        for(Player player : this.plugin.getServer().getOnlinePlayers()) {
+            player.sendMessage(message);
+        }
+
+    }
+
+    public void checkAndBroadcastCompleteControl() {
+        if (!this.beacons.isEmpty()) {
+            boolean allDesecrated = true;
+            boolean allHoly = true;
+
+            for(BeaconSite beacon : this.beacons.values()) {
+                if (beacon.getState() != BeaconState.DESECRATED && beacon.getState() != BeaconState.PERMANENTLY_DESECRATED) {
+                    allDesecrated = false;
+                }
+
+                if (beacon.getState() != BeaconState.HOLY) {
+                    allHoly = false;
+                }
+            }
+
+            if (allDesecrated) {
+                boolean humansRemain = false;
+
+                for(Player player : this.plugin.getServer().getOnlinePlayers()) {
+                    if (player.getGameMode() == GameMode.SURVIVAL && this.plugin.getVampireManager().isHuman(player)) {
+                        humansRemain = true;
+                        break;
+                    }
+                }
+
+                String message;
+                if (humansRemain) {
+                    message = "§cBut while humans remain... Hope still stands...";
+                } else {
+                    message = "§cYou are free of your chains, creatures of the night...";
+                }
+
+                for(Player player : this.plugin.getServer().getOnlinePlayers()) {
+                    if (this.plugin.getVampireManager().isVampire(player)) {
+                        player.sendMessage(message);
+                    }
+                }
+            } else if (allHoly) {
+                boolean vampiresRemain = false;
+
+                for(Player player : this.plugin.getServer().getOnlinePlayers()) {
+                    if (player.getGameMode() == GameMode.SURVIVAL && this.plugin.getVampireManager().isVampire(player)) {
+                        vampiresRemain = true;
+                        break;
+                    }
+                }
+
+                if (vampiresRemain) {
+                    for(Player player : this.plugin.getServer().getOnlinePlayers()) {
+                        if (this.plugin.getVampireManager().isHuman(player)) {
+                            player.sendMessage("§aBut while vampires remain... Now only the vampires lie between you and freedom...");
+                        }
+                    }
+                } else {
+                    for(Player player : this.plugin.getServer().getOnlinePlayers()) {
+                        if (this.plugin.getVampireManager().isVampire(player)) {
+                            player.sendTitle("§c§lDEFEAT", "§7The light has prevailed", 20, 100, 40);
+                            player.sendMessage("");
+                            player.sendMessage("§cAll beacons shine with divine light...");
+                            player.sendMessage("§cLight reigns supreme over Oakhurst. You have lost.");
+                            player.sendMessage("");
+                            player.playSound(player.getLocation(), Sound.BLOCK_BEACON_ACTIVATE, SoundCategory.MASTER, 1.0F, 1.0F);
+                        } else {
+                            player.sendTitle("§a§lVICTORY", "§eThe darkness has been vanquished", 20, 100, 40);
+                            player.sendMessage("");
+                            player.sendMessage("§aAll beacons shine with divine light...");
+                            player.sendMessage("§aLight reigns supreme over Oakhurst. You are free.");
+                            player.sendMessage("");
+                            player.playSound(player.getLocation(), Sound.BLOCK_BEACON_ACTIVATE, SoundCategory.MASTER, 1.0F, 1.0F);
+                        }
+                    }
+                }
+            }
+
+        }
+    }
+}

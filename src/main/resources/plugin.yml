@@ -1,0 +1,17 @@
+name: Remakepire
+version: 1.0.0
+main: frostvein.sampires.remakepire.RemakepirePlugin
+api-version: 1.21
+authors:
+  - PowCreations
+  - IntricEight
+description: A remake of the Vampire SMP plugin by POW Creations.
+
+permissions:
+  vampiresmp.admin:
+    description: Allows access to all vampire SMP admin commands
+    default: op
+
+  vampiresmp.player:
+    description: Allows access to basic vampire SMP player features
+    default: true
