@@ -184,7 +184,7 @@ public class LanternThrashTomeAbility extends TomeAbility {
      * Determine if the player has a lantern in their inventory.
      *
      * @param player the player who cast the ability.
-     * @return {@code true} if the player has a lantern in their inventory.
+     * @return {@code true} if the {@code player} has a lantern in their inventory.
      */
     private boolean hasLanternInInventory(Player player) {
         for(ItemStack item : player.getInventory().getContents()) {

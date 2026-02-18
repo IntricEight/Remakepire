@@ -127,7 +127,7 @@ public class HolyWordTomeAbility extends TomeAbility implements Listener {
      * Determine if the player is paralyzed.
      *
      * @param player who we are checking the paralysis state of.
-     * @return {@code true} if the player is in the list of paralyzed players.
+     * @return {@code true} if the {@code player} is in the list of paralyzed players.
      */
     public boolean isParalyzed(Player player) {
         return this.paralyzedPlayers.containsKey(player.getUniqueId());

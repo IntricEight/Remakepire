@@ -64,7 +64,7 @@ public abstract class TomeAbility {
      * Attempt to use the tome ability if its cooldown has elapsed.
      *
      * @param player the player attempting to use the ability.
-     * @return {@code true} if the player successfully used the ability.
+     * @return {@code true} if the {@code player} successfully used the ability.
      */
     public final boolean use(Player player) {
         if (this.isOnCooldown(player)) {
@@ -95,7 +95,7 @@ public abstract class TomeAbility {
      * Determines if the player can use the human ability.
      *
      * @param player the player attempting to use the ability.
-     * @return {@code true} if the player is human.
+     * @return {@code true} if the {@code player} is human.
      */
     protected boolean canUse(Player player) {
         return this.plugin.getVampireManager().isHuman(player);
@@ -125,7 +125,7 @@ public abstract class TomeAbility {
      * Determine if the tome ability is currently on a cooldown.
      *
      * @param player the player attempting to use the ability.
-     * @return
+     * @return {@code true} if the ability's cooldown has not yet elapsed.
      */
     protected boolean isOnCooldown(Player player) {
         UUID playerId = player.getUniqueId();
