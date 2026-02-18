@@ -6,7 +6,7 @@ import org.bukkit.potion.PotionEffectType;
 import frostvein.sampires.remakepire.RemakepirePlugin;
 
 public class EnlightenedEyeTomeAbility extends TomeAbility {
-    // Controls the duration of the ability
+    // Controls the duration of the ability (in ticks)
     private static final int NIGHT_VISION_DURATION = 6000;
     // Controls the intensity of the ability
     private static final int NIGHT_VISION_AMPLIFIER = 0;

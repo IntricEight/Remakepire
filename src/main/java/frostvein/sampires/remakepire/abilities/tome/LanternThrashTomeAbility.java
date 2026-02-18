@@ -13,11 +13,11 @@ import org.bukkit.scheduler.BukkitRunnable;
 import frostvein.sampires.remakepire.RemakepirePlugin;
 
 public class LanternThrashTomeAbility extends TomeAbility {
-    // Controls the maximum size of the ability
+    // Controls the maximum size of the ability (in blocks)
     private static final int FIRE_OUTER_RADIUS = 6;
-    // Controls the minimum size of the ability
+    // Controls the minimum size of the ability (in blocks)
     private static final int FIRE_INNER_RADIUS = 2;
-    // Controls the duration the caster is immune to the ability
+    // Controls the duration the caster is immune to the ability (in ticks)
     private static final int FIRE_RESISTANCE_DURATION = 6000;
     // Controls the intensity of the caster's immunity to the ability
     private static final int FIRE_RESISTANCE_AMPLIFIER = 0;

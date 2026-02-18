@@ -13,8 +13,11 @@ import frostvein.sampires.remakepire.RemakepirePlugin;
 import frostvein.sampires.remakepire.managers.VampireAbilityManager;
 
 public class PrayerOfFaithTomeAbility extends TomeAbility {
+    // Controls how long the ability takes to conclude (in seconds)
     private static final int PRAYER_DURATION = 60;
+    // Controls how long the ability effects last (in ticks)
     private static final int ABSORPTION_DURATION = 12000;
+    // Controls the intensity of the ability
     private static final int ABSORPTION_AMPLIFIER = 2;
     private static final Map<UUID, PrayerSession> activePrayers = new HashMap();
 

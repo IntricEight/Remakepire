@@ -21,9 +21,9 @@ import frostvein.sampires.remakepire.RemakepirePlugin;
 import frostvein.sampires.remakepire.managers.VampireManager;
 
 public class HolyWordTomeAbility extends TomeAbility implements Listener {
-    // Controls the size of the ability
+    // Controls the size of the ability (in blocks)
     private static final int RADIUS = 20;
-    // Controls the duration of the ability
+    // Controls the duration of the ability (in ticks)
     private static final int PARALYSIS_DURATION = 300;
     private final Map<UUID, BukkitTask> paralyzedPlayers = new HashMap();
 
