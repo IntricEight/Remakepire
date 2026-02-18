@@ -21,12 +21,19 @@ import frostvein.sampires.remakepire.RemakepirePlugin;
 import frostvein.sampires.remakepire.managers.VampireManager;
 
 public class HolyWordTomeAbility extends TomeAbility implements Listener {
+    // Controls the size of the ability
     private static final int RADIUS = 20;
+    // Controls the duration of the ability
     private static final int PARALYSIS_DURATION = 300;
     private final Map<UUID, BukkitTask> paralyzedPlayers = new HashMap();
 
+    /**
+     * Create an instance of the Holy Word tome ability.
+     *
+     * @param plugin the host plugin object.
+     */
     public HolyWordTomeAbility(RemakepirePlugin plugin) {
-        super(plugin, "HolyWord", new String[]{"You speak a word of divine power,", "paralysing all vampires within a 20 block radius for 15 seconds", "(Vampires are impervious to all damage while frozen)."}, plugin.getConfigManager().getTomeHolyWordCooldown());
+        super(plugin, "HolyWord", new String[]{"You speak a word of divine power,", "paralysing all vampires within a " + RADIUS + " block radius for " + (PARALYSIS_DURATION / 20) + " seconds", "(Vampires are impervious to all damage while frozen)."}, plugin.getConfigManager().getTomeHolyWordCooldown());
         Bukkit.getPluginManager().registerEvents(this, plugin);
     }
 
@@ -34,6 +41,7 @@ public class HolyWordTomeAbility extends TomeAbility implements Listener {
         if (!this.canUse(player)) {
             this.sendCannotUseMessage(player, "Only humans can use tome abilities!");
             return false;
+
         } else {
             VampireManager vampireManager = this.plugin.getVampireManager();
             List<Player> nearbyPlayers = player.getWorld().getPlayers();
@@ -41,16 +49,16 @@ public class HolyWordTomeAbility extends TomeAbility implements Listener {
             int stage2And3Paralyzed = 0;
 
             for(Player target : nearbyPlayers) {
-                if (!target.equals(player) && !(target.getLocation().distance(player.getLocation()) > 20.0)) {
+                if (!target.equals(player) && !(target.getLocation().distance(player.getLocation()) > RADIUS)) {
                     if (vampireManager.isVampireStage1(target)) {
                         target.sendMessage("§cA holy word sends your mind reeling, but you hold fast against it's paralysing effects.");
                         ++stage1Affected;
 
                     } else if (vampireManager.isVampireStage2(target) || vampireManager.isVampireStage3(target)) {
                         target.sendMessage("§cYou are frozen by divine power!");
-                        target.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, 300, 255, false, false));
+                        target.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, PARALYSIS_DURATION, 255, false, false));
                         UUID targetId = target.getUniqueId();
-                        BukkitTask paralysisTask = Bukkit.getScheduler().runTaskLater(this.plugin, () -> this.paralyzedPlayers.remove(targetId), 300L);
+                        BukkitTask paralysisTask = Bukkit.getScheduler().runTaskLater(this.plugin, () -> this.paralyzedPlayers.remove(targetId), (long)(PARALYSIS_DURATION * 20));
 
                         this.paralyzedPlayers.put(targetId, paralysisTask);
                         target.getWorld().playSound(target.getLocation(), "minecraft:entity.zombie_villager.cure", 0.8F, 2.0F);
@@ -59,8 +67,7 @@ public class HolyWordTomeAbility extends TomeAbility implements Listener {
                             if (target.isOnline()) {
                                 target.sendMessage("§7The divine paralysis fades... You can move again.");
                             }
-
-                        }, 300L);
+                        }, (long)(PARALYSIS_DURATION * 20));
                         ++stage2And3Paralyzed;
                     }
                 }
@@ -68,6 +75,7 @@ public class HolyWordTomeAbility extends TomeAbility implements Listener {
 
             this.createHolyLightRings(player);
             player.getWorld().playSound(player.getLocation(), "minecraft:block.beacon.power_select", 1.0F, 1.0F);
+
             if (stage2And3Paralyzed > 0) {
                 this.sendSuccessMessage(player, "You speak the HOLY WORD with divine authority!");
             } else {
@@ -78,6 +86,11 @@ public class HolyWordTomeAbility extends TomeAbility implements Listener {
         }
     }
 
+    /**
+     * Prevent paralyzed players from receiving damage.
+     *
+     * @param event the damage event from the player.
+     */
     @EventHandler(
             priority = EventPriority.HIGHEST
     )
@@ -85,30 +98,44 @@ public class HolyWordTomeAbility extends TomeAbility implements Listener {
         if (event.getEntity() instanceof Player) {
             Player player = (Player)event.getEntity();
             UUID playerId = player.getUniqueId();
+
             if (this.paralyzedPlayers.containsKey(playerId)) {
                 event.setCancelled(true);
             }
-
         }
     }
 
+    /**
+     * Prevent paralyzed players from moving.
+     *
+     * @param event the movement event from the player.
+     */
     @EventHandler
     public void onPlayerMove(PlayerMoveEvent event) {
         Player player = event.getPlayer();
         UUID playerId = player.getUniqueId();
+
         if (this.paralyzedPlayers.containsKey(playerId) && (event.getFrom().getX() != event.getTo().getX() || event.getFrom().getY() != event.getTo().getY() || event.getFrom().getZ() != event.getTo().getZ())) {
             event.setCancelled(true);
             if (System.currentTimeMillis() % 3000L < 50L) {
                 player.sendMessage("§4You are frozen by divine power and cannot move!");
             }
         }
-
     }
 
+    /**
+     * Determine if the player is paralyzed.
+     *
+     * @param player who we are checking the paralysis state of.
+     * @return {@code true} if the player is in the list of paralyzed players.
+     */
     public boolean isParalyzed(Player player) {
         return this.paralyzedPlayers.containsKey(player.getUniqueId());
     }
 
+    /**
+     * Clean up the paralyzed player timers and notification tasks.
+     */
     public void cleanup() {
         for(BukkitTask task : this.paralyzedPlayers.values()) {
             if (task != null && !task.isCancelled()) {
@@ -119,6 +146,11 @@ public class HolyWordTomeAbility extends TomeAbility implements Listener {
         this.paralyzedPlayers.clear();
     }
 
+    /**
+     * Creates a series of particle rings around the ability caster.
+     *
+     * @param player the player who cast the ability.
+     */
     private void createHolyLightRings(Player player) {
         final Location center = player.getLocation().add(0.0, 0.5, 0.0);
         long delayBetweenRings = 8L;
@@ -137,6 +169,12 @@ public class HolyWordTomeAbility extends TomeAbility implements Listener {
         }).runTaskTimer(this.plugin, 0L, delayBetweenRings);
     }
 
+    /**
+     * Creates a ring of particles around the ability caster.
+     *
+     * @param center the center coordinates of the ring.
+     * @param ringIndex which ring in the series this function will make.
+     */
     private void createHolyLightRing(final Location center, int ringIndex) {
         final double baseRadius = 5.0 + ringIndex * 8.0;
         final int particleCount = 40 + ringIndex * 20;
@@ -145,13 +183,8 @@ public class HolyWordTomeAbility extends TomeAbility implements Listener {
         (new BukkitRunnable() {
             double currentRadius = 0.0;
             final double maxRadius = baseRadius;
-            final double radiusStep;
-            int tickCount;
-
-            {
-                this.radiusStep = this.maxRadius / 10.0;
-                this.tickCount = 0;
-            }
+            final double radiusStep = this.maxRadius / 10.0;
+            int tickCount = 0;
 
             public void run() {
                 if (!(this.currentRadius >= this.maxRadius) && this.tickCount < 15) {

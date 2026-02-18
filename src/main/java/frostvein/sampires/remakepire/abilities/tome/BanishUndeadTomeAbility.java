@@ -23,7 +23,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import frostvein.sampires.remakepire.RemakepirePlugin;
 
 public class BanishUndeadTomeAbility extends TomeAbility {
-    // Controls the size of the ability's effect
+    // Controls the size of the ability
     private static final int RADIUS = 40;
     // Controls the mobs effected by the ability
     private final List<Class<? extends Entity>> undeadMobTypes = Arrays.asList(Zombie.class, Skeleton.class, Drowned.class, Husk.class, Stray.class, ZombieVillager.class, SkeletonHorse.class, ZombieHorse.class, Phantom.class, WitherSkeleton.class, Wither.class, Zoglin.class);
