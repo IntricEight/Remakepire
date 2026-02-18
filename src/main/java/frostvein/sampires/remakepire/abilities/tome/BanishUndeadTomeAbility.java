@@ -23,24 +23,33 @@ import org.bukkit.scheduler.BukkitRunnable;
 import frostvein.sampires.remakepire.RemakepirePlugin;
 
 public class BanishUndeadTomeAbility extends TomeAbility {
+    // Controls the size of the ability's effect
     private static final int RADIUS = 40;
+    // Controls the mobs effected by the ability
     private final List<Class<? extends Entity>> undeadMobTypes = Arrays.asList(Zombie.class, Skeleton.class, Drowned.class, Husk.class, Stray.class, ZombieVillager.class, SkeletonHorse.class, ZombieHorse.class, Phantom.class, WitherSkeleton.class, Wither.class, Zoglin.class);
 
+    /**
+     * Create an instance of the Banish Undead tome ability
+     * @param plugin the host plugin object.
+     */
     public BanishUndeadTomeAbility(RemakepirePlugin plugin) {
-        super(plugin, "BanishUndead", new String[]{"All undead mobs within a 40 block radius of you die instantly."}, plugin.getConfigManager().getTomeBanishUndeadCooldown());
+        super(plugin, "BanishUndead", new String[]{"All undead mobs within a " + RADIUS + " block radius of you die instantly."}, plugin.getConfigManager().getTomeBanishUndeadCooldown());
     }
 
     protected boolean useAbility(Player player) {
         if (!this.canUse(player)) {
             this.sendCannotUseMessage(player, "Only humans can use tome abilities!");
             return false;
+
         } else if (player.getWorld() == null) {
             this.sendCannotUseMessage(player, "World not available!");
             return false;
+
         } else {
             int mobsKilled = 0;
 
-            for(Entity entity : player.getNearbyEntities(40.0, 40.0, 40.0)) {
+            // Search and kill all undead entities within a (RADIUS * 2)^3 cube
+            for(Entity entity : player.getNearbyEntities(RADIUS, RADIUS, RADIUS)) {
                 if (this.isUndeadMob(entity) && entity instanceof LivingEntity) {
                     LivingEntity livingEntity = (LivingEntity)entity;
                     livingEntity.setHealth(0.0);
@@ -48,7 +57,10 @@ public class BanishUndeadTomeAbility extends TomeAbility {
                 }
             }
 
+            // Display the visual effect of the ability
             this.createHolyLightRings(player);
+
+            // Inform the player on the effect of their cast
             if (mobsKilled > 0) {
                 player.playSound(player.getLocation(), "minecraft:block.beacon.power_select", 1.0F, 1.2F);
                 this.sendSuccessMessage(player, "Holy light radiates from you, banishing " + mobsKilled + " undead creatures!");
@@ -57,10 +69,17 @@ public class BanishUndeadTomeAbility extends TomeAbility {
                 this.sendSuccessMessage(player, "Holy light radiates from you, but no undead creatures were nearby.");
             }
 
+            // Activate the ability cooldown
             return true;
         }
     }
 
+    /**
+     * Determines if an entity is inside our custom list of undead mobs.
+     *
+     * @param entity the entity being checked.
+     * @return {@code true} if the {@code entity} is considered undead.
+     */
     private boolean isUndeadMob(Entity entity) {
         for(Class<? extends Entity> mobType : this.undeadMobTypes) {
             if (mobType.isInstance(entity)) {
@@ -71,9 +90,15 @@ public class BanishUndeadTomeAbility extends TomeAbility {
         return false;
     }
 
+    /**
+     * Creates a series of particle rings around the ability caster.
+     *
+     * @param player the player who cast the ability.
+     */
     private void createHolyLightRings(Player player) {
         final Location center = player.getLocation().add(0.0, 0.5, 0.0);
         long delayBetweenRings = 8L;
+
         (new BukkitRunnable() {
             int ringCount = 0;
             final int maxRings = 3;
@@ -89,20 +114,22 @@ public class BanishUndeadTomeAbility extends TomeAbility {
         }).runTaskTimer(this.plugin, 0L, delayBetweenRings);
     }
 
+    /**
+     * Creates a ring of particles around the ability caster.
+     *
+     * @param center the center coordinates of the ring.
+     * @param ringIndex which ring in the series this function will make.
+     */
     private void createHolyLightRing(final Location center, int ringIndex) {
         final double baseRadius = 5.0 + ringIndex * 8.0;
         final int particleCount = 40 + ringIndex * 20;
         final double angleStep = (Math.PI * 2D) / (double)particleCount;
+
         (new BukkitRunnable() {
             double currentRadius = 0.0;
             final double maxRadius = baseRadius;
-            final double radiusStep;
-            int tickCount;
-
-            {
-                this.radiusStep = this.maxRadius / 10.0;
-                this.tickCount = 0;
-            }
+            final double radiusStep = this.maxRadius / 10.0;
+            int tickCount = 0;
 
             public void run() {
                 if (!(this.currentRadius >= this.maxRadius) && this.tickCount < 15) {

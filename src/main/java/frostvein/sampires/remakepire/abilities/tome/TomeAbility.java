@@ -19,6 +19,13 @@ public abstract class TomeAbility {
     private static final Map<UUID, Map<String, Long>> playerCooldowns = new HashMap();
     private static final Map<String, BukkitTask> cooldownNotificationTasks = new HashMap();
 
+    /**
+     * Create an instance of a Tome Ability.
+     * @param plugin the host plugin object.
+     * @param name the name of the ability.
+     * @param descriptionLines the description of the ability.
+     * @param cooldownSeconds the seconds between repeated ability uses (per player).
+     */
     public TomeAbility(RemakepirePlugin plugin, String name, String[] descriptionLines, int cooldownSeconds) {
         this.plugin = plugin;
         this.name = name;
@@ -26,18 +33,39 @@ public abstract class TomeAbility {
         this.cooldownSeconds = cooldownSeconds;
     }
 
+    /**
+     * Retrieve the tome ability's name.
+     *
+     * @return A {@code String} of the ability name.
+     */
     public String getName() {
         return this.name;
     }
 
+    /**
+     * Retrieve the tome ability's array-separated description.
+     *
+     * @return A {@code String[]} of the ability description.
+     */
     public String[] getDescriptionLines() {
         return this.descriptionLines;
     }
 
+    /**
+     * Retrieve the tome ability's description in a single line.
+     *
+     * @return A {@code String} of the ability description.
+     */
     public String getDescription() {
         return String.join(" ", this.descriptionLines);
     }
 
+    /**
+     * Attempt to use the tome ability if its cooldown has elapsed.
+     *
+     * @param player the player attempting to use the ability.
+     * @return {@code true} if the player successfully used the ability.
+     */
     public final boolean use(Player player) {
         if (this.isOnCooldown(player)) {
             long remainingTime = this.getRemainingCooldown(player);
@@ -48,26 +76,57 @@ public abstract class TomeAbility {
             if (this.useAbility(player)) {
                 this.setCooldown(player);
                 return true;
+
             } else {
                 return false;
             }
         }
     }
 
+    /**
+     * Use the tome ability using the child class {@code useAbility} implementation.
+     *
+     * @param player the player using the ability.
+     * @return {@code true} if the ability cooldown should be activated.
+     */
     protected abstract boolean useAbility(Player player);
 
+    /**
+     * Determines if the player can use the human ability.
+     *
+     * @param player the player attempting to use the ability.
+     * @return {@code true} if the player is human.
+     */
     protected boolean canUse(Player player) {
         return this.plugin.getVampireManager().isHuman(player);
     }
 
+    /**
+     * Inform the user that they cannot use this tome ability.
+     *
+     * @param player the player attempting to use the ability.
+     * @param reason the reason that the player cannot use this ability.
+     */
     protected void sendCannotUseMessage(Player player, String reason) {
         player.sendMessage("§cCannot use " + this.name + ": " + reason);
     }
 
+    /**
+     * Inform the user that they successfully used this tome ability.
+     *
+     * @param player the player attempting to use the ability.
+     * @param message the ability's successful use message.
+     */
     protected void sendSuccessMessage(Player player, String message) {
         player.sendMessage("§a" + message);
     }
 
+    /**
+     * Determine if the tome ability is currently on a cooldown.
+     *
+     * @param player the player attempting to use the ability.
+     * @return
+     */
     protected boolean isOnCooldown(Player player) {
         UUID playerId = player.getUniqueId();
         Map<String, Long> cooldowns = (Map)playerCooldowns.get(playerId);
@@ -81,26 +140,46 @@ public abstract class TomeAbility {
         }
     }
 
+    /**
+     * Calculate how long the tome ability will remain on cooldown.
+     *
+     * @param player the player attempting to use the ability.
+     * @return the seconds remaining until the cooldown has elapsed.
+     */
     protected long getRemainingCooldown(Player player) {
         UUID playerId = player.getUniqueId();
         Map<String, Long> cooldowns = (Map)playerCooldowns.get(playerId);
+
         if (cooldowns != null && cooldowns.containsKey(this.name)) {
             long cooldownEnd = (Long)cooldowns.get(this.name);
             long remaining = cooldownEnd - System.currentTimeMillis();
             return Math.max(0L, remaining / 1000L);
+
         } else {
             return 0L;
         }
     }
 
+    /**
+     * Set the cooldown on the tome ability.
+     *
+     * @param player the player attempting to use the ability.
+     */
     protected void setCooldown(Player player) {
         UUID playerId = player.getUniqueId();
         Map<String, Long> cooldowns = (Map)playerCooldowns.computeIfAbsent(playerId, (k) -> new HashMap());
+
         long cooldownEnd = System.currentTimeMillis() + (long)this.cooldownSeconds * 1000L;
         cooldowns.put(this.name, cooldownEnd);
         this.scheduleCooldownNotification(player, this.cooldownSeconds);
     }
 
+    /**
+     * Schedule a notification to inform the user when the tome ability's cooldown has elapsed.
+     *
+     * @param player the player that used the ability.
+     * @param cooldownSeconds the ability cooldown.
+     */
     private void scheduleCooldownNotification(Player player, int cooldownSeconds) {
         String taskKey = String.valueOf(player.getUniqueId()) + ":" + this.name;
         BukkitTask existingTask = (BukkitTask)cooldownNotificationTasks.get(taskKey);
@@ -116,35 +195,54 @@ public abstract class TomeAbility {
             }
 
         }, (long)cooldownSeconds * 20L);
+
         cooldownNotificationTasks.put(taskKey, notificationTask);
     }
 
+    /**
+     * Inform the player that the tome ability's cooldown has elapsed.
+     *
+     * @param player the player that used the ability.
+     */
     private void notifyAbilityReady(Player player) {
         player.sendMessage("§a§l⚡ TOME ABILITY READY ⚡");
         player.sendMessage("§a" + this.name + " is now available.");
         player.playSound(player, Sound.BLOCK_NOTE_BLOCK_CHIME, SoundCategory.MASTER, 0.5F, 1.5F);
     }
 
+    /**
+     * Clear the cooldown on the {@code player}'s tome ability.
+     *
+     * @param player the player that used the ability.
+     * @param abilityName the ability that will have its cooldown cleared.
+     */
     public static void clearCooldown(Player player, String abilityName) {
         UUID playerId = player.getUniqueId();
         Map<String, Long> cooldowns = (Map)playerCooldowns.get(playerId);
+
         if (cooldowns != null) {
             cooldowns.remove(abilityName);
         }
 
         String taskKey = String.valueOf(playerId) + ":" + abilityName;
         BukkitTask task = (BukkitTask)cooldownNotificationTasks.get(taskKey);
+
         if (task != null && !task.isCancelled()) {
             task.cancel();
             cooldownNotificationTasks.remove(taskKey);
         }
-
     }
 
+    /**
+     * Clear the cooldown on all of the {@code player}'s tome abilities.
+     *
+     * @param player the player that used the abilities.
+     */
     public static void clearAllCooldowns(Player player) {
         UUID playerId = player.getUniqueId();
         playerCooldowns.remove(playerId);
         String playerPrefix = String.valueOf(playerId) + ":";
+
         cooldownNotificationTasks.entrySet().removeIf((entry) -> {
             if (((String)entry.getKey()).startsWith(playerPrefix)) {
                 BukkitTask task = (BukkitTask)entry.getValue();
@@ -153,12 +251,16 @@ public abstract class TomeAbility {
                 }
 
                 return true;
+
             } else {
                 return false;
             }
         });
     }
 
+    /**
+     * Cancel the scheduled notifications regarding tome abilities.
+     */
     public static void cancelAllNotificationTasks() {
         for(BukkitTask task : cooldownNotificationTasks.values()) {
             if (task != null && !task.isCancelled()) {
