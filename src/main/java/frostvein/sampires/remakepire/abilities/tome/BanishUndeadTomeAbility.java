@@ -29,7 +29,8 @@ public class BanishUndeadTomeAbility extends TomeAbility {
     private final List<Class<? extends Entity>> undeadMobTypes = Arrays.asList(Zombie.class, Skeleton.class, Drowned.class, Husk.class, Stray.class, ZombieVillager.class, SkeletonHorse.class, ZombieHorse.class, Phantom.class, WitherSkeleton.class, Wither.class, Zoglin.class);
 
     /**
-     * Create an instance of the Banish Undead tome ability
+     * Create an instance of the Banish Undead tome ability.
+     *
      * @param plugin the host plugin object.
      */
     public BanishUndeadTomeAbility(RemakepirePlugin plugin) {
