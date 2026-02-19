@@ -14,7 +14,6 @@ import org.bukkit.inventory.ItemStack;
 import frostvein.sampires.remakepire.RemakepirePlugin;
 
 public class WayOfTheLandTomeAbility extends TomeAbility implements Listener {
-    private static final int NO_COOLDOWN = 0;
     private final Random random = new Random();
 
     /**
