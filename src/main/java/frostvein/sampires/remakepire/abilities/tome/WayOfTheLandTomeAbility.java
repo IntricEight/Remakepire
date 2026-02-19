@@ -17,6 +17,11 @@ public class WayOfTheLandTomeAbility extends TomeAbility implements Listener {
     private static final int NO_COOLDOWN = 0;
     private final Random random = new Random();
 
+    /**
+     * Create an instance of the Way of the Land tome ability.
+     *
+     * @param plugin the host plugin object.
+     */
     public WayOfTheLandTomeAbility(RemakepirePlugin plugin) {
         super(plugin, "WayOfTheLand", new String[]{"You gain knowledge on how to live off the land.", "You permanently have a 75% chance when harvesting a crop", "to receive double drops."}, 0);
         Bukkit.getPluginManager().registerEvents(this, plugin);
@@ -26,20 +31,28 @@ public class WayOfTheLandTomeAbility extends TomeAbility implements Listener {
         if (!this.canUse(player)) {
             this.sendCannotUseMessage(player, "Only humans can use tome abilities!");
             return false;
+
         } else {
             this.sendSuccessMessage(player, "You have absorbed the knowledge of living off the land!");
             player.sendMessage("§7You now have a permanent 75% chance to receive double drops when harvesting crops.");
             player.sendMessage("§7This knowledge flows through your very being - you need not activate it again.");
             this.plugin.getWorld().playSound(player.getLocation(), "minecraft:block.grass.break", 1.0F, 1.2F);
             this.plugin.getWorld().playSound(player.getLocation(), "minecraft:entity.experience_orb.pickup", 0.5F, 0.8F);
+
             return true;
         }
     }
 
+    /**
+     * Roll the extra crop chance when breaking relevant blocks.
+     *
+     * @param event the block breaking event by the player.
+     */
     @EventHandler
     public void onBlockBreak(BlockBreakEvent event) {
         Player player = event.getPlayer();
         Block block = event.getBlock();
+
         if (this.plugin.getTomeManager().hasAbility(player, "wayoftheland")) {
             if (this.isFullyGrownCrop(block)) {
                 if (block.getType() != Material.BEETROOTS) {
@@ -51,15 +64,19 @@ public class WayOfTheLandTomeAbility extends TomeAbility implements Listener {
                             }
                         }
                     }
-
                 }
             }
         }
     }
 
+    /**
+     * Determine if the crop being broken was fully grown.
+     *
+     * @param block the crop that has been broken.
+     * @return {@code true} if the crop had reached maturity before being harvested.
+     */
     private boolean isFullyGrownCrop(Block block) {
-        Material type = block.getType();
-        switch (type) {
+        switch (block.getType()) {
             case WHEAT:
             case CARROTS:
             case POTATOES:
@@ -70,10 +87,12 @@ public class WayOfTheLandTomeAbility extends TomeAbility implements Listener {
                     return ageable.getAge() == ageable.getMaximumAge();
                 }
                 break;
+
             case PUMPKIN:
             case MELON:
             case COCOA:
                 return true;
+
             case SWEET_BERRY_BUSH:
                 BlockData berryData = block.getBlockData();
                 if (berryData instanceof Ageable ageable) {
