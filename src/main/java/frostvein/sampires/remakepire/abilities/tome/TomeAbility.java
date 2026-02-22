@@ -21,6 +21,7 @@ public abstract class TomeAbility {
 
     /**
      * Create an instance of a Tome Ability.
+     *
      * @param plugin the host plugin object.
      * @param name the name of the ability.
      * @param descriptionLines the description of the ability.

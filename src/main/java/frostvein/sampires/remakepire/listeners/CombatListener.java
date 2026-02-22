@@ -125,8 +125,8 @@ public class CombatListener implements Listener {
                             int vampireStage = this.vampireManager.getVampireStage(attacker);
                             double multiplier = this.getVampireFistMultiplier(vampireStage);
 
-                            if (multiplier > 1.0) {
-                                multiplier = multiplier * 0.9 * 2.0;
+                            if (multiplier > 1) {
+                                multiplier = multiplier * 0.9 * 2;
                                 event.setDamage(event.getDamage() * multiplier);
 
                                 boolean isCriticalHit = event.getCause() == DamageCause.ENTITY_ATTACK && attacker.getFallDistance() > 0.0F && !attacker.isOnGround() && !attacker.hasPotionEffect(PotionEffectType.BLINDNESS);

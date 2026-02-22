@@ -30,11 +30,10 @@ public class LungeAbility extends VampireAbility {
 
     public boolean execute(Player player, VampireManager vampireManager, RemakepirePlugin plugin) {
         int stage = vampireManager.getVampireStage(player);
-        double lungePower = this.getLungePower(stage);
 
         vampireManager.addFallProtection(player);
         Vector direction = player.getLocation().getDirection().normalize();
-        Vector lungeVector = direction.multiply(lungePower);
+        Vector lungeVector = direction.multiply(this.getLungePower(stage));
         player.setVelocity(lungeVector);
 
         this.sendLungeMessage(player, stage);
@@ -42,27 +41,36 @@ public class LungeAbility extends VampireAbility {
         return true;
     }
 
+    /**
+     * Determine the intensity of the ability based on the vampire's stage.
+     *
+     * @param stage the vampire stage of the ability user.
+     * @return the intensity of the lunge.
+     */
     private double getLungePower(int stage) {
-        switch (stage) {
-            case 1 -> {
-                return 1.6;
-            }
-            case 2 -> {
-                return 2.0;
-            }
-            case 3 -> {
-                return 2.5;
-            }
-            default -> {
-                return 1.0;
-            }
-        }
+        return switch (stage) {
+            case 2 -> 2.0;
+            case 3 -> 2.5;
+            default ->  1.6;
+        };
     }
 
+    /**
+     * Inform the player of the ability's success.
+     *
+     * @param player the player using the ability.
+     * @param stage the vampire stage of the ability user.
+     */
     private void sendLungeMessage(Player player, int stage) {
         player.sendMessage("§c§lYou leap forward with vampiric strength.");
     }
 
+    /**
+     * Alert the player of the ability activation with a sound cue.
+     *
+     * @param player the player using the ability.
+     * @param stage the vampire stage of the ability user.
+     */
     private void playLungeSound(Player player, int stage) {
         player.playSound(player, Sound.ENTITY_ENDER_DRAGON_FLAP, SoundCategory.MASTER, 0.3F, 1.5F);
     }

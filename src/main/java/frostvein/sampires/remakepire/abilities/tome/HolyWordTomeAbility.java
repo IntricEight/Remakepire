@@ -176,12 +176,12 @@ public class HolyWordTomeAbility extends TomeAbility implements Listener {
      * @param ringIndex which ring in the series this function will make.
      */
     private void createHolyLightRing(final Location center, int ringIndex) {
-        final double baseRadius = 5.0 + ringIndex * 8.0;
+        final double baseRadius = 5 + ringIndex * 8.0;
         final int particleCount = 40 + ringIndex * 20;
         final double angleStep = (Math.PI * 2D) / (double)particleCount;
 
         (new BukkitRunnable() {
-            double currentRadius = 0.0;
+            double currentRadius = 0;
             final double maxRadius = baseRadius;
             final double radiusStep = this.maxRadius / 10.0;
             int tickCount = 0;

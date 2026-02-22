@@ -50,10 +50,12 @@ public class BeaconTeleportAbility extends VampireAbility {
             return false;
         } else {
             List<BeaconSite> desecratedBeacons = plugin.getBeaconManager().getDesecratedBeacons();
+
             if (desecratedBeacons.isEmpty()) {
                 player.sendMessage("§cNo desecrated beacons are available for beacon travel.");
                 player.sendMessage("§7Beacons must be desecrated to connect to the beacon network.");
                 return false;
+
             } else {
                 this.openBeaconTeleportGUI(player, desecratedBeacons, plugin);
                 player.sendMessage("§5The shadows whisper of distant beacons...");
@@ -62,13 +64,20 @@ public class BeaconTeleportAbility extends VampireAbility {
         }
     }
 
+    /**
+     * Provide the user with a GUI for the beacon teleportation.
+     *
+     * @param player the player using the ability.
+     * @param desecratedBeacons a list of corrupted beacons for teleportation.
+     * @param plugin the host plugin object.
+     */
     private void openBeaconTeleportGUI(Player player, List<BeaconSite> desecratedBeacons, RemakepirePlugin plugin) {
         int slots = Math.max(9, (desecratedBeacons.size() + 8) / 9 * 9);
         slots = Math.min(54, slots);
-        Inventory inventory = Bukkit.createInventory((InventoryHolder)null, slots, "§4Desecrated Beacon Network");
+        Inventory inventory = Bukkit.createInventory(null, slots, INVENTORY_TITLE);
 
         for(int i = 0; i < desecratedBeacons.size() && i < slots; ++i) {
-            BeaconSite beacon = (BeaconSite)desecratedBeacons.get(i);
+            BeaconSite beacon = desecratedBeacons.get(i);
             ItemStack item = this.createBeaconItem(beacon, player);
             inventory.setItem(i, item);
         }
@@ -76,6 +85,13 @@ public class BeaconTeleportAbility extends VampireAbility {
         player.openInventory(inventory);
     }
 
+    /**
+     * Create a beacon item representing a beacon.
+     *
+     * @param beacon the beacon represented by the generated item.
+     * @param player the player using the ability.
+     * @return a beacon item detailing a desecrated beacon.
+     */
     private ItemStack createBeaconItem(BeaconSite beacon, Player player) {
         ItemStack item = new ItemStack(Material.BEACON);
         ItemMeta meta = item.getItemMeta();
@@ -83,9 +99,11 @@ public class BeaconTeleportAbility extends VampireAbility {
         if (meta != null) {
             meta.setDisplayName("§4§l" + beacon.getName());
             List<String> lore = new ArrayList();
+
             lore.add("§7Location: §f" + beacon.getLocation().getWorld().getName());
             lore.add("§7Coordinates: §f" + beacon.getLocation().getBlockX() + ", " + beacon.getLocation().getBlockY() + ", " + beacon.getLocation().getBlockZ());
             lore.add("§7State: " + beacon.getState().getColorCode() + beacon.getState().getDisplayName());
+
             double distance = beacon.getLocation().distance(player.getLocation());
             lore.add("§7Distance: §e" + Math.round(distance) + " blocks");
             lore.add("");
@@ -94,6 +112,7 @@ public class BeaconTeleportAbility extends VampireAbility {
             lore.add("§8connected to the shadow network.");
             lore.add("");
             lore.add("§e▶ Click to travel through shadows");
+
             meta.setLore(lore);
             item.setItemMeta(meta);
         }

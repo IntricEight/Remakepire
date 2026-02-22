@@ -63,17 +63,17 @@ public class UncannyDirectionTomeAbility extends TomeAbility {
         double targetAngle = Math.atan2(deltaX, -deltaZ);
         double targetDegrees = Math.toDegrees(targetAngle);
 
-        if (targetDegrees < 0.0) {
-            targetDegrees += 360.0;
+        if (targetDegrees < 0) {
+            targetDegrees += 360;
         }
 
         double playerFacing = (playerYaw + 180.0F) % 360.0F;
 
-        if (playerFacing < 0.0) {
-            playerFacing += 360.0;
+        if (playerFacing < 0) {
+            playerFacing += 360;
         }
 
-        double relativeAngle = (targetDegrees - playerFacing + 360.0) % 360.0;
+        double relativeAngle = (targetDegrees - playerFacing + 360) % 360.0;
 
         if (!(relativeAngle >= 337.5) && !(relativeAngle < 22.5)) {
             if (relativeAngle >= 22.5 && relativeAngle < 67.5) {

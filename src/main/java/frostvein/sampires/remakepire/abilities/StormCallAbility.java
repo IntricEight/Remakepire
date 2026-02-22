@@ -9,6 +9,9 @@ import frostvein.sampires.remakepire.RemakepirePlugin;
 import frostvein.sampires.remakepire.managers.VampireManager;
 
 public class StormCallAbility extends VampireAbility {
+    // Controls the duration of the ability in seconds
+    private static final int DURATION = 600;
+
     public String getName() {
         return "stormcall";
     }
@@ -18,7 +21,7 @@ public class StormCallAbility extends VampireAbility {
     }
 
     public String getDescription() {
-        return "Summon dark clouds to shroud the world in snow for 10 minutes. Only very powerful vampires can command the very skies.";
+        return "Summon dark clouds to shroud the world in snow for " + (int)(DURATION / 60) + " minutes. Only the most vampires can command the very skies.";
     }
 
     public int getCooldownSeconds(RemakepirePlugin plugin) {
@@ -51,6 +54,11 @@ public class StormCallAbility extends VampireAbility {
         }
     }
 
+    /**
+     * Create the particle effects of the ability.
+     *
+     * @param player the player using the ability.
+     */
     private void createStormSummonEffects(Player player) {
         if (player.getWorld() != null) {
             for(int i = 0; i < 50; ++i) {
@@ -67,10 +75,20 @@ public class StormCallAbility extends VampireAbility {
         }
     }
 
+    /**
+     * Inform the player of the ability's success.
+     *
+     * @param player the player using the ability.
+     */
     private void sendStormCallMessage(Player player) {
         player.sendMessage("§7Rain will fall for the next 10 minutes.");
     }
 
+    /**
+     * Alert the player of the ability activation with a sound cue.
+     *
+     * @param player the player using the ability.
+     */
     private void playStormCallSound(Player player) {
         player.playSound(player, Sound.ENTITY_LIGHTNING_BOLT_THUNDER, SoundCategory.MASTER, 1.0F, 0.8F);
         player.playSound(player, Sound.AMBIENT_SOUL_SAND_VALLEY_MOOD, SoundCategory.MASTER, 0.8F, 0.6F);
@@ -78,6 +96,12 @@ public class StormCallAbility extends VampireAbility {
         player.playSound(player, Sound.BLOCK_ENCHANTMENT_TABLE_USE, SoundCategory.MASTER, 1.0F, 0.7F);
     }
 
+    /**
+     * Inform all players of the ability activation with a message and sound cue.
+     *
+     * @param world the world hosting the plugin interactions.
+     * @param caster the player using the ability.
+     */
     private void broadcastStormArrival(World world, Player caster) {
         String message = "§8§lDark clouds gather across the sky...";
         String casterMessage = "§7§o A vampire has called upon an ancient storm...";
@@ -90,9 +114,15 @@ public class StormCallAbility extends VampireAbility {
                 player.playSound(player, Sound.ENTITY_LIGHTNING_BOLT_THUNDER, SoundCategory.WEATHER, 0.3F, 1.2F);
             }
         }
-
     }
 
+    /**
+     * Schedule the ability's expiration effects once its time has elapsed.
+     *
+     * @param world the world hosting the plugin interactions.
+     * @param caster the player using the ability.
+     * @param plugin the host plugin object.
+     */
     private void scheduleStormClearing(World world, Player caster, RemakepirePlugin plugin) {
         plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
             if (world.hasStorm()) {
@@ -103,7 +133,7 @@ public class StormCallAbility extends VampireAbility {
                     worldPlayer.playSound(worldPlayer, Sound.BLOCK_NOTE_BLOCK_CHIME, SoundCategory.WEATHER, 0.3F, 0.8F);
                 }
             }
-        }, 10800L);
+        }, (long)(DURATION * 20 * 0.9));
 
         plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
             if (world.hasStorm()) {
@@ -117,9 +147,14 @@ public class StormCallAbility extends VampireAbility {
 
                 this.broadcastStormClearing(world, caster);
             }
-        }, 12000L);
+        }, (long)(DURATION * 20));
     }
 
+    /**
+     * Create particle effects to signal that the ability has expired.
+     *
+     * @param caster the player who used the ability.
+     */
     private void createStormClearingEffects(Player caster) {
         if (caster.getWorld() != null) {
             caster.getWorld().spawnParticle(Particle.END_ROD, caster.getLocation().add(0.0, 1.0, 0.0), 20, 2.0, 3.0, 2.0, 0.1);
@@ -127,6 +162,12 @@ public class StormCallAbility extends VampireAbility {
         }
     }
 
+    /**
+     * Inform all players of the ability activation with a message and sound cue.
+     *
+     * @param world the world hosting the plugin interactions.
+     * @param player the player who used the ability.
+     */
     private void broadcastStormClearing(World world, Player player) {
         String message = "§f§lThe storm clouds part, revealing clear skies once more...";
         String casterMessage = "§7§oYour dominion over the weather comes to an end.";
@@ -137,10 +178,10 @@ public class StormCallAbility extends VampireAbility {
             if (worldPlayer.equals(player)) {
                 worldPlayer.sendMessage(casterMessage);
                 worldPlayer.playSound(worldPlayer, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, SoundCategory.MASTER, 1.0F, 1.5F);
+
             } else {
                 worldPlayer.playSound(worldPlayer, Sound.BLOCK_NOTE_BLOCK_BELL, SoundCategory.WEATHER, 0.4F, 1.8F);
             }
         }
-
     }
 }

@@ -14,7 +14,7 @@ public class UnnaturalHasteTomeAbility extends TomeAbility {
     /**
      * Create an instance of the Unnatural Haste tome ability.
      *
-     * @param plugin the host plugin object..
+     * @param plugin the host plugin object.
      */
     public UnnaturalHasteTomeAbility(RemakepirePlugin plugin) {
         super(plugin, "UnnaturalHaste", new String[]{"You learn how to dip into a pool of strength unknown to this world,", "and gain haste for " + (HASTE_DURATION / 20 / 60) + " minutes."}, plugin.getConfigManager().getTomeUnnaturalHasteCooldown());

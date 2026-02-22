@@ -153,7 +153,7 @@ public class ShoulderBargeTomeAbility extends TomeAbility {
 
         Vector knockbackDirection = target.getLocation().subtract(player.getLocation()).toVector();
 
-        if (knockbackDirection.lengthSquared() == 0.0) {
+        if (knockbackDirection.lengthSquared() == 0) {
             knockbackDirection = player.getLocation().getDirection();
         }
 

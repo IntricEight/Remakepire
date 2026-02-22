@@ -126,8 +126,7 @@ public class LanternThrashTomeAbility extends TomeAbility {
     private double normalizeAngleRelativeToStart(double angle, double startAngle) {
         double normalizedAngle;
 
-        for(normalizedAngle = angle - startAngle; normalizedAngle < 0.0; normalizedAngle += (Math.PI * 2D)) {
-        }
+        for(normalizedAngle = angle - startAngle; normalizedAngle < 0; normalizedAngle += (Math.PI * 2D)) {}
 
         while(normalizedAngle >= (Math.PI * 2D)) {
             normalizedAngle -= (Math.PI * 2D);

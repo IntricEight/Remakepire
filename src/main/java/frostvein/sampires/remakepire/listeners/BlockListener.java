@@ -56,14 +56,17 @@ public class BlockListener implements Listener {
     @EventHandler
     public void onBlockPlace(BlockPlaceEvent event) {
         Player player = event.getPlayer();
+
         if (!this.sessionManager.isSessionActive() && !this.sessionManager.isPreSession()) {
             event.setCancelled(true);
             player.sendMessage("§cYou cannot place blocks while the session is inactive.");
+
         } else if (this.plugin.getBatTransformationManager().isInBatForm(player)) {
             event.setCancelled(true);
             player.sendMessage("§cYou cannot place blocks while in bat form");
+
         } else {
-            if (event.getBlock().getLocation().distance(this.plugin.getVampireRespawnLocation()) < 3.0) {
+            if (event.getBlock().getLocation().distance(this.plugin.getVampireRespawnLocation()) < 3) {
                 if (!this.plugin.getVampireManager().isVampire(player)) {
                     player.sendMessage("§cThis is desecrated ground, you find yourself unable to place blocks here.");
                     event.setCancelled(true);
@@ -76,7 +79,6 @@ public class BlockListener implements Listener {
             if (event.getBlock().getType() == Material.IRON_BLOCK) {
                 event.getBlock().setType(Material.NETHERITE_BLOCK);
             }
-
         }
     }
 }
