@@ -285,14 +285,15 @@ public class BeaconConversionListener implements Listener {
 
     private void showConversionParticles(BeaconSite beacon, boolean isVampireConversion, double progress) {
         Location particleLoc = beacon.getParticleLocation();
+
         if (particleLoc != null) {
             if (isVampireConversion) {
-                particleLoc.getWorld().spawnParticle(Particle.LARGE_SMOKE, particleLoc, (int)(5.0 * progress), 0.5, 0.5, 0.5, 0.01);
-                particleLoc.getWorld().spawnParticle(Particle.SOUL_FIRE_FLAME, particleLoc, (int)(3.0 * progress), 0.3, 0.3, 0.3, 0.02);
+                particleLoc.getWorld().spawnParticle(Particle.LARGE_SMOKE, particleLoc, (int)(5 * progress), 0.5, 0.5, 0.5, 0.01);
+                particleLoc.getWorld().spawnParticle(Particle.SOUL_FIRE_FLAME, particleLoc, (int)(3 * progress), 0.3, 0.3, 0.3, 0.02);
 
             } else {
-                particleLoc.getWorld().spawnParticle(Particle.WHITE_ASH, particleLoc, (int)(8.0 * progress), 0.5, 0.5, 0.5, 0.01);
-                particleLoc.getWorld().spawnParticle(Particle.ENCHANT, particleLoc, (int)(5.0 * progress), 0.3, 0.3, 0.3, 0.1);
+                particleLoc.getWorld().spawnParticle(Particle.WHITE_ASH, particleLoc, (int)(8 * progress), 0.5, 0.5, 0.5, 0.01);
+                particleLoc.getWorld().spawnParticle(Particle.ENCHANT, particleLoc, (int)(5 * progress), 0.3, 0.3, 0.3, 0.1);
             }
         }
     }
