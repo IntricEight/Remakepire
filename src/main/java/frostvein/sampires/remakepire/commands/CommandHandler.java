@@ -63,6 +63,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         if (!sender.hasPermission("vampiresmp.admin")) {
             sender.sendMessage("§cYou don't have permission to use this command.");
             return true;
+
         } else if (command.getName().equalsIgnoreCase("init")) {
             return this.handleInitCommand(sender, args);
         } else if (command.getName().equalsIgnoreCase("session")) {
@@ -126,6 +127,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
             if (target == null) {
                 sender.sendMessage("§cPlayer not found: " + args[0]);
                 return true;
+
             } else {
                 boolean clearInventory = args.length >= 2 && args[1].equalsIgnoreCase("true");
                 if (target.getGameMode() == GameMode.SPECTATOR) {
@@ -182,6 +184,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                 }
 
                 target.setInvulnerable(false);
+
                 if (clearInventory) {
                     target.getInventory().clear();
                     target.getEnderChest().clear();
@@ -238,9 +241,11 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         if (!(sender instanceof Player admin)) {
             sender.sendMessage("§cOnly players can use this command.");
             return true;
+
         } else if (args.length > 0 && args[0].equalsIgnoreCase("cancel")) {
             this.plugin.getInitGameManager().cancelInitialization(admin);
             return true;
+
         } else {
             this.plugin.getInitGameManager().startInitialization(admin);
             return true;
@@ -254,16 +259,20 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
             sender.sendMessage("§7- /pow admin vampirecooldowns reset <player> §8- Reset cooldowns for a specific player");
             sender.sendMessage("§7- /pow admin vampirecooldowns clear §8- Same as reset");
             return true;
+
         } else {
             String action = args[0].toLowerCase();
             if (!action.equals("reset") && !action.equals("clear")) {
                 sender.sendMessage("§cInvalid action. Use 'reset' or 'clear'.");
                 return true;
+
             } else if (args.length >= 2) {
                 Player target = Bukkit.getPlayer(args[1]);
+
                 if (target == null) {
                     sender.sendMessage("§cPlayer '" + args[1] + "' not found.");
                     return true;
+
                 } else {
                     this.resetPlayerCooldowns(target);
                     sender.sendMessage("§aReset all cooldowns for player: §e" + target.getName());
@@ -333,6 +342,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
             if (args[0].equalsIgnoreCase("set") && args.length >= 2) {
                 try {
                     int newTicks = Integer.parseInt(args[1]);
+
                     if (newTicks < 1) {
                         sender.sendMessage("§cInterval must be at least 1 tick.");
                         return true;
@@ -357,8 +367,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
             }
         } else {
             int currentTicks = this.sessionManager.getVampireHealthCheckTicks();
-            double seconds = currentTicks / 20.0;
-            sender.sendMessage("§aVampire Health Check Interval: §e" + currentTicks + " ticks §7(" + seconds + " seconds)");
+            sender.sendMessage("§aVampire Health Check Interval: §e" + currentTicks + " ticks §7(" + (currentTicks / 20) + " seconds)");
             return true;
         }
     }
@@ -366,11 +375,14 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
     private boolean handleBreakWarningCommand(CommandSender sender, String[] args) {
         sender.sendMessage("§ePlaying first warning sound for all players...");
 
+        // Send the first warning noisee (crows)
         for(Player player : Bukkit.getOnlinePlayers()) {
             player.playSound(player.getLocation(), "crimson:crimson.sound.crimson_warning_1", SoundCategory.MASTER, 1.0F, 1.0F);
         }
 
         sender.sendMessage("§aFirst warning sound played. Second warning will play in 5 minutes.");
+
+        // Send the second warning noise (bells) after 5 minutes
         Bukkit.getScheduler().runTaskLater(this.plugin, () -> {
             for(Player player : Bukkit.getOnlinePlayers()) {
                 player.playSound(player.getLocation(), "crimson:crimson.sound.crimson_warning_2", SoundCategory.MASTER, 1.0F, 1.0F);
@@ -378,6 +390,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
 
             this.plugin.getLogger().info("Second warning sound played for all online players");
         }, 6000L);
+
         return true;
     }
 
@@ -385,6 +398,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         if (args.length != 1) {
             sender.sendMessage("§cUsage: /pow admin session <start|pause|end|prime|resume|building>");
             return true;
+
         } else {
             switch (args[0].toLowerCase()) {
                 case "start":
@@ -472,66 +486,72 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
             sender.sendMessage("§7  clearcap - Remove stage cap (allows vampire to level up after thirst demotion)");
             sender.sendMessage("§7  clearban - Remove promotion ban (allows vampire to level up again)");
             return true;
+
         } else {
             Player target = Bukkit.getPlayer(args[0]);
+
             if (target == null) {
                 sender.sendMessage("§cPlayer not found.");
                 return true;
+
             } else {
                 switch (args[1].toLowerCase()) {
                     case "human":
                         this.vampireManager.setPlayerAsHuman(target);
                         target.getActivePotionEffects().forEach((effect) -> target.removePotionEffect(effect.getType()));
+
                         if (this.plugin.getBeaconMajorityManager() != null) {
                             this.plugin.getBeaconMajorityManager().updateBeaconMajorityBonuses();
                         }
 
-                        double humanMaxHealth = target.getAttribute(Attribute.MAX_HEALTH).getValue();
-                        target.setHealth(humanMaxHealth);
+                        target.setHealth(target.getAttribute(Attribute.MAX_HEALTH).getValue());
                         sender.sendMessage("§a" + target.getName() + " is now human.");
                         target.sendMessage("§aYou have been set as human.");
                         break;
                     case "1":
                         this.vampireManager.setPlayerAsVampire(target, 1, true);
+
                         if (this.plugin.getBeaconMajorityManager() != null) {
                             this.plugin.getBeaconMajorityManager().removeBonusesFromPlayer(target);
                             this.plugin.getBeaconMajorityManager().applyBonusesToPlayer(target);
                         }
 
-                        double v1MaxHealth = target.getAttribute(Attribute.MAX_HEALTH).getValue();
-                        target.setHealth(v1MaxHealth);
+                        target.setHealth(target.getAttribute(Attribute.MAX_HEALTH).getValue());
                         this.applyVampireNightVision(target);
                         target.setExp(0.5F);
+
                         sender.sendMessage("§5" + target.getName() + " is now a Stage 1 vampire.");
                         target.sendMessage("§5You have been set as a Stage 1 vampire.");
                         this.sendVampireTexturePackPrompt(target);
                         break;
                     case "2":
                         this.vampireManager.setPlayerAsVampire(target, 2, true);
+
                         if (this.plugin.getBeaconMajorityManager() != null) {
                             this.plugin.getBeaconMajorityManager().removeBonusesFromPlayer(target);
                             this.plugin.getBeaconMajorityManager().applyBonusesToPlayer(target);
                         }
 
-                        double v2MaxHealth = target.getAttribute(Attribute.MAX_HEALTH).getValue();
-                        target.setHealth(v2MaxHealth);
+                        target.setHealth(target.getAttribute(Attribute.MAX_HEALTH).getValue());
                         this.applyVampireNightVision(target);
                         target.setExp(0.5F);
+
                         sender.sendMessage("§5" + target.getName() + " is now a Stage 2 vampire.");
                         target.sendMessage("§5You have been set as a Stage 2 vampire.");
                         this.sendVampireTexturePackPrompt(target);
                         break;
                     case "3":
                         this.vampireManager.setPlayerAsVampire(target, 3, true);
+
                         if (this.plugin.getBeaconMajorityManager() != null) {
                             this.plugin.getBeaconMajorityManager().removeBonusesFromPlayer(target);
                             this.plugin.getBeaconMajorityManager().applyBonusesToPlayer(target);
                         }
 
-                        double v3MaxHealth = target.getAttribute(Attribute.MAX_HEALTH).getValue();
-                        target.setHealth(v3MaxHealth);
+                        target.setHealth(target.getAttribute(Attribute.MAX_HEALTH).getValue());
                         this.applyVampireNightVision(target);
                         target.setExp(0.5F);
+
                         sender.sendMessage("§5" + target.getName() + " is now a Stage 3 vampire.");
                         target.sendMessage("§5You have been set as a Stage 3 vampire.");
                         this.sendVampireTexturePackPrompt(target);
@@ -689,9 +709,11 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         } else {
             Player player = (Player)sender;
             String name = args[1];
+
             if (this.beaconManager.getBeacon(name) != null) {
                 sender.sendMessage("§cA beacon named '" + name + "' already exists.");
                 return true;
+
             } else {
                 Location playerLocation = player.getLocation();
                 Location blockLocation = new Location(playerLocation.getWorld(), playerLocation.getBlockX() + 0.5, playerLocation.getBlockY(), playerLocation.getBlockZ() + 0.5, 0.0F, 0.0F);
@@ -706,11 +728,13 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                     if (args.length >= 3) {
                         try {
                             int radius = Integer.parseInt(args[2]);
+
                             if (radius > 0 && radius <= 100) {
                                 BeaconSite beacon = this.beaconManager.getBeacon(name);
                                 beacon.setCaptureRadius(radius);
                                 this.beaconManager.saveBeacons();
                                 sender.sendMessage("§7Capture radius set to: §e" + radius + " blocks");
+
                             } else {
                                 sender.sendMessage("§cRadius must be between 1 and 100. Using default radius of 10.");
                             }
@@ -732,6 +756,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         if (args.length < 2) {
             sender.sendMessage("§cUsage: /pow admin beacon remove <name>");
             return true;
+
         } else {
             String name = args[1];
             BeaconSite beacon = this.beaconManager.getBeacon(name);
@@ -800,7 +825,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
 
         for(BeaconSite.BeaconState state : BeaconState.values()) {
             int count = (Integer)stateStats.get(state);
-            double percentage = total > 0 ? count * 100.0 / (double)total : 0.0;
+            double percentage = total > 0 ? count * 100.0 / (double)total : 0;
             String icon = "";
 
             switch (state) {
@@ -853,6 +878,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
             if (this.beaconManager.setBeaconHoly(name)) {
                 sender.sendMessage("§aBeacon '" + name + "' has been consecrated as holy.");
                 sender.sendMessage("§7The beacon now emanates divine light and protection.");
+
             } else {
                 sender.sendMessage("§cBeacon '" + name + "' not found.");
             }
@@ -925,6 +951,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
             Player turner = null;
             if (args.length >= 3) {
                 turner = Bukkit.getPlayer(args[2]);
+
                 if (turner == null) {
                     sender.sendMessage("§cTurner player '" + args[2] + "' not found.");
                     return true;
@@ -945,14 +972,17 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         if (args.length < 2) {
             sender.sendMessage("§cUsage: /givetome <player> <ability> [amount]");
             return true;
+
         } else {
             Player target = Bukkit.getPlayer(args[0]);
+
             if (target == null) {
                 sender.sendMessage("§cPlayer '" + args[0] + "' not found.");
                 return true;
 
             } else {
                 String abilityName = args[1];
+
                 if (!this.tomeManager.isValidAbility(abilityName)) {
                     sender.sendMessage("§cUnknown tome ability: '" + abilityName + "'");
                     sender.sendMessage("§7Available abilities: " + String.join(", ", this.tomeManager.getAllAbilityNames()));
@@ -1049,11 +1079,11 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
 
             if (target == null) {
                 sender.sendMessage("§cPlayer '" + args[0] + "' not found.");
-                return true;
             } else {
                 this.tomeManager.openTomeSelectionGUI(admin, target);
-                return true;
             }
+
+            return true;
         }
     }
 
@@ -1071,6 +1101,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
 
             } else {
                 int bookNum;
+
                 try {
                     bookNum = Integer.parseInt(args[1]);
                     if (bookNum < 1 || bookNum > 4) {
@@ -1083,6 +1114,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                 }
 
                 ItemStack book = this.createCureBook(bookNum);
+
                 if (target.getInventory().firstEmpty() == -1) {
                     target.getWorld().dropItemNaturally(target.getLocation(), book);
                     target.sendMessage("§5An ancient tome appears at your feet...");
@@ -1101,6 +1133,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
     private ItemStack createCureBook(int bookNum) {
         ItemStack book = new ItemStack(Material.WRITTEN_BOOK);
         BookMeta meta = (BookMeta)book.getItemMeta();
+
         if (meta != null) {
             switch (bookNum) {
                 case 1:
@@ -1129,6 +1162,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
             lore.add("§7Part " + bookNum + " of the cure series");
             lore.add("");
             lore.add("§eRead this book to absorb its wisdom");
+
             meta.setLore(lore);
             CureBookReadingListener.markAsAuthenticCureBook(meta, bookNum, this.plugin);
             book.setItemMeta(meta);
@@ -1142,6 +1176,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
             sender.sendMessage("§c§lWarning: §cNo tome chest locations are configured!");
             sender.sendMessage("§7Use §e/pow admin addtomechest §7to add tome chest locations first.");
             return true;
+
         } else {
             sender.sendMessage("§eTriggering tome distribution...");
             this.plugin.getTomeDistributionManager().triggerDistribution();
@@ -1188,6 +1223,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
             for(Location loc : tomeLocations) {
                 if (loc.getWorld() != null && loc.getWorld().equals(playerLocation.getWorld())) {
                     double distance = playerLocation.distance(loc);
+
                     if (distance < nearestDistance) {
                         nearestDistance = distance;
                         nearestLocation = loc;
@@ -1210,21 +1246,22 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                 } else {
                     sender.sendMessage("§c✖ Failed to remove tome chest location from config.");
                 }
-
-                return true;
             } else {
                 sender.sendMessage("§c✖ No tome chest found within 10 blocks.");
                 sender.sendMessage("§7Move closer to a tome chest location and try again.");
-                return true;
             }
+
+            return true;
         }
     }
 
     private boolean handleListTomeChestsCommand(CommandSender sender, String[] args) {
         List<Location> tomeLocations = this.plugin.getTomeDistributionManager().getTomeLocations();
+
         sender.sendMessage("§6§l=== TOME CHEST LOCATIONS ===");
         sender.sendMessage("§7Total: §e" + tomeLocations.size() + " locations");
         sender.sendMessage("");
+
         if (tomeLocations.isEmpty()) {
             sender.sendMessage("§7No tome chest locations configured.");
             sender.sendMessage("§7Use §e/pow admin addtomechest §7to add a location.");
@@ -1236,13 +1273,16 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                 String chestStatus = hasChest ? "§a✔" : "§c✖";
                 String tpCommand = String.format("/tp %d %d %d", loc.getBlockX(), loc.getBlockY(), loc.getBlockZ());
                 TextComponent indexPart = new TextComponent(String.format("§7%d. ", index));
+
                 TextComponent coordsPart = new TextComponent(String.format("§e%d, %d, %d", loc.getBlockX(), loc.getBlockY(), loc.getBlockZ()));
                 coordsPart.setClickEvent(new ClickEvent(Action.RUN_COMMAND, tpCommand));
                 coordsPart.setHoverEvent(new HoverEvent(net.md_5.bungee.api.chat.HoverEvent.Action.SHOW_TEXT, (new ComponentBuilder("§aClick to teleport to this location")).create()));
                 TextComponent statusPart = new TextComponent(String.format(" §7(chest: %s§7)", chestStatus));
+
                 if (sender instanceof Player) {
                     Player player = (Player)sender;
                     player.spigot().sendMessage(new BaseComponent[]{indexPart, coordsPart, statusPart});
+
                 } else {
                     sender.sendMessage(String.format("§7%d. §e%d, %d, %d §7(chest: %s§7)", index, loc.getBlockX(), loc.getBlockY(), loc.getBlockZ(), chestStatus));
                 }
@@ -1262,8 +1302,10 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
             sender.sendMessage("§cUsage: /clearbloodmoonbuffs <player|all>");
             sender.sendMessage("§7This command removes stacked blood moon attribute modifiers");
             return true;
+
         } else {
             String target = args[0].toLowerCase();
+
             if (target.equals("all")) {
                 int playersAffected = 0;
 
@@ -1274,8 +1316,10 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
 
                 sender.sendMessage("§aCleared blood moon buffs for §e" + playersAffected + " §aonline players.");
                 this.plugin.getLogger().info("Admin " + sender.getName() + " cleared blood moon buffs for all players");
+
             } else {
                 Player targetPlayer = Bukkit.getPlayer(target);
+
                 if (targetPlayer == null) {
                     sender.sendMessage("§cPlayer '" + target + "' not found or not online.");
                     return true;
@@ -1294,9 +1338,9 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
     private boolean handleFixAttributesCommand(CommandSender sender, String[] args) {
         if (args.length == 0) {
             if (sender instanceof Player) {
-                Player player = (Player)sender;
-                this.plugin.getBloodMoonAttributeListener().forceCleanupOnJoin(player);
+                this.plugin.getBloodMoonAttributeListener().forceCleanupOnJoin((Player)sender);
                 sender.sendMessage("§aAggressively cleaned your attribute modifiers.");
+
             } else {
                 sender.sendMessage("§cUsage: /fixattributes <player|all>");
             }
@@ -1304,6 +1348,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
             return true;
         } else {
             String target = args[0].toLowerCase();
+
             if (target.equals("all")) {
                 int playersAffected = 0;
 
@@ -1314,6 +1359,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
 
                 sender.sendMessage("§aAggressively cleaned attribute modifiers for §e" + playersAffected + " §aonline players.");
                 this.plugin.getLogger().info("Admin " + sender.getName() + " fixed attributes for all players");
+
             } else {
                 Player targetPlayer = Bukkit.getPlayer(target);
 
@@ -1338,6 +1384,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
             sender.sendMessage("§7- /removeendermen toggle §8- Toggle enderman spawn prevention on/off");
             sender.sendMessage("§7- /removeendermen status §8- Check if enderman removal is enabled");
             return true;
+
         } else {
             switch (args[0].toLowerCase()) {
                 case "all":
@@ -1353,8 +1400,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                     this.plugin.getLogger().info("Admin " + sender.getName() + " toggled enderman removal to " + newStatus);
                     break;
                 case "status":
-                    boolean enabled = this.plugin.getEndermanRemovalListener().isEndermanRemovalEnabled();
-                    String statusMessage = enabled ? "§aENABLED" : "§cDISABLED";
+                    String statusMessage = this.plugin.getEndermanRemovalListener().isEndermanRemovalEnabled() ? "§aENABLED" : "§cDISABLED";
                     sender.sendMessage("§7Enderman removal is currently: " + statusMessage);
                     break;
                 default:
@@ -1371,6 +1417,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
             sender.sendMessage("§7- /pow admin damagesuppression get §8- Show current damage suppression percentage");
             sender.sendMessage("§7- /pow admin damagesuppression set <percentage> §8- Set damage suppression (0-100)");
             return true;
+
         } else {
             switch (args[0].toLowerCase()) {
                 case "get":
@@ -1420,14 +1467,18 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         if (args.length != 1) {
             sender.sendMessage("§cUsage: /setupplayer <playername>");
             return true;
+
         } else {
             Player target = Bukkit.getPlayer(args[0]);
+
             if (target == null) {
                 sender.sendMessage("§cPlayer '" + args[0] + "' not found.");
                 return true;
+
             } else {
-                List<ItemStack> starterItems = new ArrayList();
                 Random random = new Random();
+
+                List<ItemStack> starterItems = new ArrayList();
                 starterItems.add(new ItemStack(Material.COOKED_CHICKEN, 1 + random.nextInt(4)));
                 starterItems.add(new ItemStack(Material.COOKED_SALMON, 1 + random.nextInt(4)));
                 starterItems.add(new ItemStack(Material.BREAD, 1 + random.nextInt(4)));
@@ -1440,7 +1491,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
 
                 for(ItemStack item : starterItems) {
                     if (target.getInventory().firstEmpty() != -1) {
-                        target.getInventory().addItem(new ItemStack[]{item});
+                        target.getInventory().addItem(item);
                         ++itemsGiven;
                     } else {
                         target.getWorld().dropItemNaturally(target.getLocation(), item);
@@ -1475,10 +1526,12 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
 
         } else {
             List<String> completions = new ArrayList();
+
             if (command.getName().equalsIgnoreCase("session")) {
                 if (args.length == 1) {
                     completions.addAll(Arrays.asList("start", "pause", "end", "prime", "resume", "building"));
                 }
+
             } else if (command.getName().equalsIgnoreCase("vampire")) {
                 if (args.length == 1) {
                     for(Player player : Bukkit.getOnlinePlayers()) {
@@ -1486,6 +1539,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                     }
                 } else if (args.length == 2) {
                     completions.addAll(Arrays.asList("human", "1", "2", "3", "turn", "clearcap", "clearban"));
+
                 } else if (args.length == 3 && args[1].equalsIgnoreCase("turn")) {
                     for(Player player : Bukkit.getOnlinePlayers()) {
                         if (this.vampireManager.isVampire(player)) {
@@ -1496,8 +1550,10 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
             } else if (command.getName().equalsIgnoreCase("beacon")) {
                 if (args.length == 1) {
                     completions.addAll(Arrays.asList("add", "remove", "list", "info", "stats", "reload", "validate", "holy", "desecrated", "neutral", "fix", "refresh", "cleanup", "clearcooldowns", "debug"));
+
                 } else if (args.length == 2) {
                     String subCommand = args[0].toLowerCase();
+
                     if (!subCommand.equals("remove") && !subCommand.equals("delete") && !subCommand.equals("info") && !subCommand.equals("holy") && !subCommand.equals("desecrated") && !subCommand.equals("desecrate") && !subCommand.equals("neutral")) {
                         if (subCommand.equals("add")) {
                             completions.add("<beacon_name>");
@@ -1511,6 +1567,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
             } else if (command.getName().equalsIgnoreCase("cooldowns")) {
                 if (args.length == 1) {
                     completions.addAll(Arrays.asList("reset", "clear"));
+
                 } else if (args.length == 2 && (args[0].equalsIgnoreCase("reset") || args[0].equalsIgnoreCase("clear"))) {
                     for(Player player : Bukkit.getOnlinePlayers()) {
                         completions.add(player.getName());
@@ -1518,6 +1575,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                 }
             } else if (command.getName().equalsIgnoreCase("break_warning")) {
                 completions.clear();
+
             } else if (command.getName().equalsIgnoreCase("givetome")) {
                 if (args.length == 1) {
                     for(Player player : Bukkit.getOnlinePlayers()) {
@@ -1525,11 +1583,13 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                     }
                 } else if (args.length == 2) {
                     completions.addAll(this.tomeManager.getAllAbilityNames());
+
                 } else if (args.length == 3) {
                     completions.addAll(Arrays.asList("1", "5", "10", "16", "32", "64"));
                 }
             } else if (command.getName().equalsIgnoreCase("distributetomes")) {
                 completions.clear();
+
             } else if (command.getName().equalsIgnoreCase("clearbloodmoonbuffs")) {
                 if (args.length == 1) {
                     completions.add("all");

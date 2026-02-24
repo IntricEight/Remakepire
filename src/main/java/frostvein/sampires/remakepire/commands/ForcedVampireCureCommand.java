@@ -53,6 +53,7 @@ public class ForcedVampireCureCommand implements CommandExecutor {
             caster.sendMessage("§cYou must specify the name of the vampire to sanctify.");
             caster.sendMessage("§7Usage: /hoc-vinculum-tibi-dirumpo-mala-creatura <player-name>");
             return true;
+
         } else {
             String targetName = args[0];
             Player target = Bukkit.getPlayer(targetName);
@@ -72,12 +73,14 @@ public class ForcedVampireCureCommand implements CommandExecutor {
             } else {
                 long time = caster.getWorld().getTime();
                 boolean isDay = time >= 0L && time < 12300L;
+
                 if (!isDay) {
                     caster.sendMessage("§cThe holy words can only be spoken during the day, when the sun's light empowers them.");
                     return true;
 
                 } else {
                     ItemStack holyWater = this.findHolyWater(caster);
+
                     if (holyWater == null) {
                         caster.sendMessage("§cYou need holy water to sanctify the creature with these words.");
                         return true;
@@ -94,6 +97,7 @@ public class ForcedVampireCureCommand implements CommandExecutor {
                             BeaconSite targetNearestBeacon = this.beaconManager.getNearestHolyBeacon(target.getLocation(), cureDistance);
                             if (targetNearestBeacon != null && targetNearestBeacon.equals(nearestHolyBeacon)) {
                                 String sireName = this.sireManager.getSire(target);
+
                                 if (sireName != null && !this.sireManager.isSireDead(target)) {
                                     caster.sendMessage("§4The curse cannot be broken while " + target.getName() + "'s sire, " + sireName + ", still walks the world in mortal form...");
                                     caster.sendMessage("§4The blood bond must be severed through the maker's true death.");
@@ -101,15 +105,18 @@ public class ForcedVampireCureCommand implements CommandExecutor {
 
                                 } else {
                                     holyWater.setAmount(holyWater.getAmount() - 1);
+
                                     caster.sendMessage("§6You speak the holy words of retribution...");
                                     caster.sendMessage("§7Divine light tears through the creature's cursed form...");
                                     caster.sendMessage("§e" + target.getName() + " must now choose their fate...");
 
                                     Location targetLoc = target.getLocation();
+
                                     targetLoc.getWorld().spawnParticle(Particle.END_ROD, targetLoc.clone().add(0.0, 1.0, 0.0), 50, 0.3, 1.0, 0.3, 0.1);
                                     targetLoc.getWorld().spawnParticle(Particle.ENCHANT, targetLoc.clone().add(0.0, 1.0, 0.0), 60, 0.5, 1.5, 0.5, 0.5);
                                     targetLoc.getWorld().spawnParticle(Particle.WHITE_ASH, targetLoc.clone().add(0.0, 1.0, 0.0), 40, 0.4, 1.2, 0.4, 0.05);
                                     targetLoc.getWorld().spawnParticle(Particle.EXPLOSION_EMITTER, targetLoc, 1, 0.0, 0.0, 0.0, 0.0);
+
                                     targetLoc.getWorld().playSound(targetLoc, Sound.BLOCK_BELL_USE, SoundCategory.PLAYERS, 1.5F, 1.0F);
                                     targetLoc.getWorld().playSound(targetLoc, Sound.BLOCK_BEACON_ACTIVATE, SoundCategory.PLAYERS, 1.0F, 1.2F);
                                     targetLoc.getWorld().playSound(targetLoc, Sound.ENTITY_LIGHTNING_BOLT_THUNDER, SoundCategory.PLAYERS, 0.5F, 1.5F);

@@ -41,8 +41,11 @@ public class BrigadierCommands {
         this.plugin.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS, (event) -> {
             Commands commands = (Commands)event.registrar();
             this.registerPowCommand(commands);
+
+            // Register the unique cure commands
             this.registerLatinCureCommand(commands);
             this.registerLatinForcedCureCommand(commands);
+
             this.plugin.getLogger().info("All Brigadier commands registered successfully!");
         });
     }
@@ -215,6 +218,7 @@ public class BrigadierCommands {
     private CompletableFuture<Suggestions> suggestTomeAbilities(CommandContext<CommandSourceStack> ctx, SuggestionsBuilder builder) {
         String remaining = builder.getRemainingLowerCase();
         CommandSender sender = ((CommandSourceStack)ctx.getSource()).getSender();
+
         if (sender instanceof Player player) {
             for(String ability : this.plugin.getTomeManager().getPlayerAbilities(player)) {
                 if (ability.toLowerCase().startsWith(remaining)) {

@@ -28,12 +28,15 @@ public class TomeAbilityCommand implements CommandExecutor, TabCompleter {
         if (!(sender instanceof Player player)) {
             sender.sendMessage("§cOnly players can use tome abilities.");
             return true;
+
         } else if (!this.vampireManager.isHuman(player)) {
             player.sendMessage("§cOnly humans can use tome abilities.");
             return true;
+
         } else if (args.length == 0) {
             this.sendUsage(player);
             return true;
+
         } else {
             String subCommand = args[0].toLowerCase();
             return subCommand.equals("list") ? this.handleListCommand(player) : this.handleAbilityUse(player, subCommand);
@@ -42,16 +45,19 @@ public class TomeAbilityCommand implements CommandExecutor, TabCompleter {
 
     private boolean handleListCommand(Player player) {
         Set<String> playerAbilities = this.tomeManager.getPlayerAbilities(player);
+
         if (playerAbilities.isEmpty()) {
             player.sendMessage("§7You have not learned any tome abilities yet.");
             player.sendMessage("§7Find ancient tomes scattered throughout the world to learn new abilities.");
             return true;
+
         } else {
             player.sendMessage("§6§l=== YOUR TOME ABILITIES ===");
 
             for(String abilityName : playerAbilities) {
                 TomeAbility ability = this.tomeManager.getAbility(abilityName);
                 player.sendMessage("§e" + abilityName);
+
                 if (ability != null) {
                     String[] descriptionLines = ability.getDescriptionLines();
 
@@ -85,15 +91,16 @@ public class TomeAbilityCommand implements CommandExecutor, TabCompleter {
 
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         if (!(sender instanceof Player player)) {
-            return new ArrayList();
+            return new ArrayList<>();
+
         } else {
-            List<String> completions = new ArrayList();
+            List<String> completions = new ArrayList<>();
             if (args.length == 1) {
                 completions.add("list");
+
                 Set<String> playerAbilities = this.tomeManager.getPlayerAbilities(player);
                 completions.addAll(playerAbilities);
-                String input = args[0].toLowerCase();
-                completions.removeIf((s) -> !s.toLowerCase().startsWith(input));
+                completions.removeIf((s) -> !s.toLowerCase().startsWith(args[0].toLowerCase()));
             }
 
             return completions;

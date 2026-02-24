@@ -40,6 +40,7 @@ public class StashFourthBookCommand implements CommandExecutor {
             }
 
             World world = Bukkit.getWorld("world");
+
             if (world == null) {
                 sender.sendMessage("§cWorld 'world' not found.");
                 return true;
@@ -48,16 +49,15 @@ public class StashFourthBookCommand implements CommandExecutor {
                 Location chestLocation = new Location(world, x, y, z);
                 Block block = world.getBlockAt(chestLocation);
 
-                if (!(block.getState() instanceof Chest)) {
+                if (!(block.getState() instanceof Chest chest)) {
                     sender.sendMessage("§cNo chest found at coordinates " + x + ", " + y + ", " + z + ".");
                     return true;
 
                 } else {
-                    Chest chest = (Chest)block.getState();
                     Inventory chestInventory = chest.getInventory();
                     chestInventory.clear();
                     ItemStack book = this.createRetributionBook();
-                    chestInventory.addItem(new ItemStack[]{book});
+                    chestInventory.addItem(book);
                     sender.sendMessage("§aSuccessfully stashed 'The Retribution 4/3' in the chest at " + x + ", " + y + ", " + z + ".");
                     this.plugin.getLogger().info(sender.getName() + " used /stash_fourth_book - placed The Retribution 4/3 at " + x + ", " + y + ", " + z);
                     return true;

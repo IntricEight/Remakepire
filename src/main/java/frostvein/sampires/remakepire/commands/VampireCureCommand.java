@@ -42,16 +42,20 @@ public class VampireCureCommand implements CommandExecutor {
         if (!(sender instanceof Player player)) {
             sender.sendMessage("§cThis command can only be used by players.");
             return true;
+
         } else if (!CureBookReadingListener.hasReadAllCureBooks(player)) {
             player.sendMessage("§cYou do not know these ancient words...");
             player.sendMessage("§7You must first read all three cure books to learn the ritual.");
             return true;
+
         } else if (!this.vampireManager.isVampire(player)) {
             player.sendMessage("§cOnly vampires can use this cure ritual.");
             return true;
+
         } else {
             long time = player.getWorld().getTime();
             boolean isDay = time >= 0L && time < 12300L;
+
             if (!isDay) {
                 player.sendMessage("§cThis ritual can only be performed during the day.");
                 return true;
@@ -60,18 +64,23 @@ public class VampireCureCommand implements CommandExecutor {
                 if (holyWater == null) {
                     player.sendMessage("§cYou need holy water to perform this ritual.");
                     return true;
+
                 } else {
                     double cureDistance = this.plugin.getConfigManager().getCureBeaconDistance();
                     BeaconSite nearestHolyBeacon = this.beaconManager.getNearestHolyBeacon(player.getLocation(), cureDistance);
+
                     if (nearestHolyBeacon == null) {
                         player.sendMessage("§cYou must be close to a holy beacon to perform this ritual.");
                         return true;
+
                     } else {
                         String sireName = this.sireManager.getSire(player);
+
                         if (sireName != null && !this.sireManager.isSireDead(player)) {
                             player.sendMessage("§4The curse cannot be broken while your sire, " + sireName + ", still walks the world in mortal form...");
                             player.sendMessage("§4Only through your maker's true death can you find release.");
                             return true;
+
                         } else {
                             this.performCure(player, holyWater, nearestHolyBeacon);
                             return true;
@@ -99,12 +108,11 @@ public class VampireCureCommand implements CommandExecutor {
 
             } else if (!(item.getItemMeta() instanceof PotionMeta)) {
                 return true;
-
             } else {
                 PotionMeta potionMeta = (PotionMeta)item.getItemMeta();
+
                 if (potionMeta.hasCustomEffects()) {
                     return false;
-
                 } else {
                     try {
                         PotionType baseType = potionMeta.getBasePotionType();
@@ -177,10 +185,10 @@ public class VampireCureCommand implements CommandExecutor {
     private void checkIfAllBeaconsEvil() {
         int evilCount = this.beaconManager.getAllEvilBeacons().size();
         int totalBeacons = this.beaconManager.getAllBeacons().size();
+
         if (evilCount >= totalBeacons && totalBeacons > 0 && !this.plugin.getSessionManager().isVampiresEternalNightActive()) {
             this.triggerVampiresEternalNight();
         }
-
     }
 
     private void triggerVampiresEternalNight() {

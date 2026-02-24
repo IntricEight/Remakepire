@@ -44,9 +44,11 @@ public class PowCommand implements CommandExecutor, TabCompleter {
         if (args.length == 0) {
             this.sendHelp(sender);
             return true;
+
         } else {
             String subCommand = args[0].toLowerCase();
             String[] subArgs = (String[])Arrays.copyOfRange(args, 1, args.length);
+
             switch (subCommand) {
                 case "admin":
                     return this.handleAdminCommand(sender, subArgs);
@@ -91,17 +93,21 @@ public class PowCommand implements CommandExecutor, TabCompleter {
         if (!sender.hasPermission("vampiresmp.admin")) {
             sender.sendMessage("§cYou don't have permission to use admin commands.");
             return true;
+
         } else if (args.length == 0) {
             this.sendAdminHelp(sender);
             return true;
+
         } else {
             String adminSubCommand = args[0].toLowerCase();
             String[] adminArgs = (String[])Arrays.copyOfRange(args, 1, args.length);
+
             Command dummyCommand = new BukkitCommand(adminSubCommand) {
                 public boolean execute(CommandSender sender, String commandLabel, String[] args) {
                     return false;
                 }
             };
+
             return this.adminHandler.onCommand(sender, dummyCommand, adminSubCommand, adminArgs);
         }
     }
@@ -150,6 +156,7 @@ public class PowCommand implements CommandExecutor, TabCompleter {
 
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         List<String> completions = new ArrayList();
+
         if (args.length == 1) {
             List<String> subCommands = new ArrayList(Arrays.asList("vability", "tome", "beaconstatus", "permadeath", "toggle-turning", "help"));
             if (sender.hasPermission("vampiresmp.admin")) {
@@ -157,13 +164,15 @@ public class PowCommand implements CommandExecutor, TabCompleter {
             }
 
             return (List)subCommands.stream().filter((s) -> s.startsWith(args[0].toLowerCase())).collect(Collectors.toList());
+
         } else if (args.length == 2 && args[0].equalsIgnoreCase("permadeath")) {
             List<String> permadeathOptions = Arrays.asList("on", "off", "absolute");
             return (List)permadeathOptions.stream().filter((s) -> s.startsWith(args[1].toLowerCase())).collect(Collectors.toList());
+
         } else {
             if (args.length >= 2 && args[0].equalsIgnoreCase("admin")) {
                 if (!sender.hasPermission("vampiresmp.admin")) {
-                    return new ArrayList();
+                    return new ArrayList<>();
                 }
 
                 if (args.length == 2) {
@@ -255,9 +264,10 @@ public class PowCommand implements CommandExecutor, TabCompleter {
                 }
 
                 if (args.length == 3 && args[1].equalsIgnoreCase("clearbloodmoonbuffs")) {
-                    List<String> options = new ArrayList();
+                    List<String> options = new ArrayList<>();
                     options.add("all");
                     Bukkit.getOnlinePlayers().forEach((p) -> options.add(p.getName()));
+
                     return (List)options.stream().filter((s) -> s.toLowerCase().startsWith(args[2].toLowerCase())).collect(Collectors.toList());
                 }
 
@@ -270,7 +280,7 @@ public class PowCommand implements CommandExecutor, TabCompleter {
                 }
 
                 if (args.length == 3 && args[1].equalsIgnoreCase("fixattributes")) {
-                    List<String> options = new ArrayList();
+                    List<String> options = new ArrayList<>();
                     options.add("all");
                     Bukkit.getOnlinePlayers().forEach((p) -> options.add(p.getName()));
                     return (List)options.stream().filter((s) -> s.toLowerCase().startsWith(args[2].toLowerCase())).collect(Collectors.toList());
@@ -296,14 +306,16 @@ public class PowCommand implements CommandExecutor, TabCompleter {
             if (args.length == 2 && args[0].equalsIgnoreCase("vability")) {
                 List<String> abilities = Arrays.asList("list", "all", "bat", "lunge", "vanish", "stormcall", "beacontravel", "vision");
                 return (List)abilities.stream().filter((s) -> s.startsWith(args[1].toLowerCase())).collect(Collectors.toList());
+
             } else if (args.length == 2 && args[0].equalsIgnoreCase("tome")) {
-                if (!(sender instanceof Player)) {
-                    return new ArrayList();
+                if (!(sender instanceof Player player)) {
+                    return new ArrayList<>();
+
                 } else {
-                    Player player = (Player)sender;
-                    completions = new ArrayList();
+                    completions = new ArrayList<>();
                     completions.add("list");
                     completions.addAll(this.plugin.getTomeManager().getPlayerAbilities(player));
+
                     return (List)completions.stream().filter((s) -> s.toLowerCase().startsWith(args[1].toLowerCase())).collect(Collectors.toList());
                 }
             } else {

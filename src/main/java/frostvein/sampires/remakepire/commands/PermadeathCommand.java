@@ -24,12 +24,15 @@ public class PermadeathCommand implements CommandExecutor {
         if (!(sender instanceof Player player)) {
             sender.sendMessage("§cThis command can only be used by players.");
             return true;
+
         } else if (!this.vampireManager.isHuman(player)) {
             player.sendMessage("§cOnly humans can use the permadeath setting.");
             return true;
+
         } else if (args.length == 0) {
             this.showCurrentStatus(player);
             return true;
+
         } else {
             switch (args[0].toLowerCase()) {
                 case "on":
@@ -68,6 +71,7 @@ public class PermadeathCommand implements CommandExecutor {
     private void showCurrentStatus(Player player) {
         PermadeathManager.PermadeathMode currentMode = this.permadeathManager.getPermadeathMode(player);
         player.sendMessage("§6§l=== PERMADEATH STATUS ===");
+
         switch (currentMode) {
             case OFF:
                 player.sendMessage("§7Current setting: §aOFF");

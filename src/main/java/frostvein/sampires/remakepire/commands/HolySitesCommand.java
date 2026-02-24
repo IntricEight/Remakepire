@@ -26,21 +26,26 @@ public class HolySitesCommand implements CommandExecutor {
         if (!(sender instanceof Player player)) {
             sender.sendMessage("§cOnly players can use this command.");
             return true;
+
         } else if (!this.vampireManager.isHuman(player) && !this.vampireManager.isVampire(player)) {
             player.sendMessage("§cYou sense nothing from the spiritual realm...");
             return true;
+
         } else {
             Map<BeaconSite.BeaconState, Integer> stateStats = this.beaconManager.getStateStats();
             int holyCount = (Integer)stateStats.get(BeaconState.HOLY);
             int desecratedCount = (Integer)stateStats.get(BeaconState.DESECRATED);
             int neutral = (Integer)stateStats.get(BeaconState.NEUTRAL);
             int totalCount = holyCount + desecratedCount + neutral;
+
+            // Modify the messages based on the player's alignment
             if (this.vampireManager.isHuman(player)) {
                 player.sendMessage("§6§l=== BEACON STATUS ===");
                 player.sendMessage("§aHoly Beacons: §e" + holyCount);
                 player.sendMessage("§4Desecrated Beacons: §c" + desecratedCount);
                 player.sendMessage("§7Neutral Beacons: §f" + neutral);
                 player.sendMessage("§7Total Beacons: §e" + totalCount);
+
                 if (holyCount == 0 && desecratedCount == 0) {
                     player.sendMessage("§7Neither light nor shadow has claimed any sites...");
                 } else if (holyCount > 0 && desecratedCount == 0) {
@@ -60,6 +65,7 @@ public class HolySitesCommand implements CommandExecutor {
                 player.sendMessage("§aHoly Beacons: §e" + holyCount);
                 player.sendMessage("§7Neutral Beacons: §f" + neutral);
                 player.sendMessage("§7Total Beacons: §e" + totalCount);
+
                 if (desecratedCount == 0 && holyCount == 0) {
                     player.sendMessage("§7No sites of power have been claimed by either side...");
                 } else if (desecratedCount > 0 && holyCount == 0) {

@@ -16,10 +16,13 @@ public class ForcedCureReopenCommand implements CommandExecutor {
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (!(sender instanceof Player player)) {
             return true;
+
         } else if (!this.plugin.getForcedCureChoiceManager().hasPendingCure(player)) {
             player.sendMessage("§cYou do not have a pending cure decision.");
             return true;
+
         } else {
+            // Provide the cured with the choice between life and death.
             this.plugin.getForcedCureChoiceManager().reopenChoiceGUI(player);
             return true;
         }

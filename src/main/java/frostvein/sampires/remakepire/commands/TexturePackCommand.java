@@ -20,9 +20,11 @@ public class TexturePackCommand implements CommandExecutor {
         if (!(sender instanceof Player player)) {
             sender.sendMessage("§cThis command can only be used by players.");
             return true;
+
         } else {
             if (args.length > 0) {
                 String subCommand = args[0].toLowerCase();
+
                 if (player.hasPermission("vampiresmp.admin")) {
                     if (subCommand.equals("all")) {
                         this.texturePackManager.ensureAllVampiresHaveTexturePack();
@@ -51,6 +53,7 @@ public class TexturePackCommand implements CommandExecutor {
                 player.sendMessage("§cOnly vampires can apply the vampire texture pack.");
                 player.sendMessage("§7Use §e/pow texture human §7to apply the human texture pack.");
                 return true;
+
             } else {
                 this.texturePackManager.manualApplication(player);
                 return true;
