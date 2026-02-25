@@ -26,36 +26,55 @@ public class BeaconTeleportListener implements Listener {
     private final RemakepirePlugin plugin;
     private final Map<UUID, ChannelingData> channelingPlayers = new HashMap();
 
+    /**
+     * Create an instance of the Beacon Teleport listener.
+     *
+     * @param plugin the host plugin object.
+     */
     public BeaconTeleportListener(RemakepirePlugin plugin) {
         this.plugin = plugin;
     }
 
+    /**
+     * Control interactions with the beacon destination UI.
+     *
+     * @param event a player clicks inside an inventory menu.
+     */
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
         if (event.getView().getTitle().equals("§4Desecrated Beacon Network")) {
             event.setCancelled(true);
+
             if (event.getWhoClicked() instanceof Player) {
                 Player player = (Player)event.getWhoClicked();
                 ItemStack clickedItem = event.getCurrentItem();
+
                 if (clickedItem != null && clickedItem.getType() == Material.BEACON) {
                     ItemMeta meta = clickedItem.getItemMeta();
+
                     if (meta != null && meta.getDisplayName() != null) {
                         String beaconName = meta.getDisplayName().replaceAll("§[0-9a-fklmnor]", "");
                         BeaconSite beacon = this.plugin.getBeaconManager().getBeacon(beaconName);
+
                         if (beacon == null) {
                             player.sendMessage("§cBeacon not found: " + beaconName);
                             player.closeInventory();
+
                         } else if (beacon.getState() != BeaconState.DESECRATED) {
                             player.sendMessage("§cThat beacon is no longer desecrated and cannot be used for beacon travel.");
                             player.closeInventory();
+
                         } else if (!this.plugin.getVampireManager().isVampire(player)) {
                             player.sendMessage("§cOnly vampires can use beacon travel.");
                             player.closeInventory();
+
                         } else {
                             BeaconSite suppressingBeacon = this.plugin.getBeaconManager().checkHolySuppression(player.getLocation());
+
                             if (suppressingBeacon != null) {
                                 player.sendMessage("§cThe holy power from '" + suppressingBeacon.getName() + "' prevents beacon travel.");
                                 player.closeInventory();
+
                             } else {
                                 player.closeInventory();
                                 this.startChanneling(player, beacon);
@@ -67,34 +86,47 @@ public class BeaconTeleportListener implements Listener {
         }
     }
 
+    /**
+     * Begin and process the beacon teleportation.
+     *
+     * @param player the vampire attempting to teleport.
+     * @param beacon the destination beacon.
+     */
     private void startChanneling(final Player player, BeaconSite beacon) {
         final UUID playerId = player.getUniqueId();
         this.cancelChanneling(playerId, false);
+
         Location startLocation = player.getLocation().clone();
         startLocation.setPitch(0.0F);
         startLocation.setYaw(0.0F);
+
         player.sendMessage("§5§lShadow Travel initiated...");
         player.sendMessage("§7Destination: §f" + beacon.getName());
         player.sendMessage("§c§lDo not move for 5 seconds.");
         player.playSound(player.getLocation(), Sound.BLOCK_PORTAL_AMBIENT, 0.5F, 1.5F);
+
         BukkitTask channelingTask = (new BukkitRunnable() {
             int ticksElapsed = 0;
             final int totalTicks = 100;
 
             public void run() {
                 ChannelingData data = (ChannelingData)BeaconTeleportListener.this.channelingPlayers.get(playerId);
+
                 if (data == null) {
                     this.cancel();
                 } else {
                     Location currentLoc = player.getLocation().clone();
                     currentLoc.setPitch(0.0F);
                     currentLoc.setYaw(0.0F);
+
                     if (currentLoc.distanceSquared(data.startLocation) > 0.01) {
                         BeaconTeleportListener.this.cancelChanneling(playerId, true);
                     } else {
                         ++this.ticksElapsed;
+
                         if (this.ticksElapsed % 20 == 0) {
                             int secondsRemaining = (100 - this.ticksElapsed) / 20;
+
                             if (secondsRemaining > 0) {
                                 player.sendMessage("§7Channeling... §e" + VampireAbilityManager.formatTime((long)secondsRemaining) + " remaining");
                                 player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 0.3F, 1.0F + (float)secondsRemaining * 0.1F);
@@ -115,13 +147,22 @@ public class BeaconTeleportListener implements Listener {
                 }
             }
         }).runTaskTimer(this.plugin, 0L, 1L);
+
         this.channelingPlayers.put(playerId, new ChannelingData(startLocation, beacon, channelingTask));
     }
 
+    /**
+     * Cancel the beacon teleportation attempt.
+     *
+     * @param playerId the id of the vampire who just failed to teleport.
+     * @param sendMessage {@code true} if the player should be informed with a message.
+     */
     private void cancelChanneling(UUID playerId, boolean sendMessage) {
         ChannelingData data = (ChannelingData)this.channelingPlayers.remove(playerId);
+
         if (data != null) {
             data.channelingTask.cancel();
+
             if (sendMessage) {
                 Player player = this.plugin.getServer().getPlayer(playerId);
 
@@ -129,44 +170,68 @@ public class BeaconTeleportListener implements Listener {
                     player.sendMessage("§c§lShadow Travel cancelled.");
                     player.sendMessage("§7You moved during channeling. Your cooldown has been reset.");
                     player.playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_HURT, 0.8F, 1.2F);
+
                     Location particleLoc = player.getLocation().add(0.0, 1.0, 0.0);
                     player.getWorld().spawnParticle(Particle.LARGE_SMOKE, particleLoc, 10, 0.3, 0.5, 0.3, 0.1);
                 }
             }
         }
-
     }
 
+    /**
+     * Clear the player from the waiting conditions and execute the teleportation.
+     *
+     * @param playerId the id of the player teleporting.
+     */
     private void completeChanneling(UUID playerId) {
-        ChannelingData data = (ChannelingData)this.channelingPlayers.remove(playerId);
+        ChannelingData data = this.channelingPlayers.remove(playerId);
+
         if (data != null) {
             Player player = this.plugin.getServer().getPlayer(playerId);
+
             if (player != null) {
                 this.performShadowTeleport(player, data.targetBeacon);
             }
         }
     }
 
+    /**
+     * Cancel the teleportation if a teleporting vampire moves.
+     *
+     * @param event a player moving.
+     */
     @EventHandler
     public void onPlayerMove(PlayerMoveEvent event) {
         Player player = event.getPlayer();
         UUID playerId = player.getUniqueId();
+
         if (this.channelingPlayers.containsKey(playerId)) {
             Location from = event.getFrom();
             Location to = event.getTo();
+
             if (to != null && (from.getX() != to.getX() || from.getY() != to.getY() || from.getZ() != to.getZ())) {
                 this.cancelChanneling(playerId, true);
             }
-
         }
     }
 
+    /**
+     * Cancel the teleportation if a teleporting vampire quits the game.
+     *
+     * @param event a player leaving the world.
+     */
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
         UUID playerId = event.getPlayer().getUniqueId();
         this.cancelChanneling(playerId, false);
     }
 
+    /**
+     * Perform the teleportation on the vampire.
+     *
+     * @param player a vampire attempting to teleport.
+     * @param beacon the destination beacon.
+     */
     private void performShadowTeleport(final Player player, final BeaconSite beacon) {
         Location destination = beacon.getLocation().clone();
         destination.add(0.5, 1.0, 0.5);
@@ -204,21 +269,25 @@ public class BeaconTeleportListener implements Listener {
 //                    BeaconTeleportListener.this.plugin.getLogger().warning("Beacon travel failed for " + player.getName() + " to beacon: " + beacon.getName());
                     plugin.getLogger().warning("Beacon travel failed for " + player.getName() + " to beacon: " + beacon.getName());
                 }
-
             }
         }).runTaskLater(this.plugin, 20L);
     }
 
+    /**
+     * Find a safe location for the vampire to be placed after teleporting.
+     *
+     * @param original the vampire's location before teleporting.
+     * @return A location where the vampire can be placed safely, or their original location.
+     */
     private Location findSafeTeleportLocation(Location original) {
         Location safe = original.clone();
-        if (this.isSafeLocation(safe)) {
-            return safe;
 
-        } else {
-            for(int y = -2; y <= 3; ++y) {
-                for(int x = -2; x <= 2; ++x) {
-                    for(int z = -2; z <= 2; ++z) {
+        if (!this.isSafeLocation(safe)) {
+            for (int y = -2; y <= 3; ++y) {
+                for (int x = -2; x <= 2; ++x) {
+                    for (int z = -2; z <= 2; ++z) {
                         Location test = original.clone().add(x, y, z);
+
                         if (this.isSafeLocation(test)) {
                             return test;
                         }
@@ -227,10 +296,17 @@ public class BeaconTeleportListener implements Listener {
             }
 
             this.plugin.getLogger().warning("Could not find safe teleport location near beacon at " + original.getBlockX() + ", " + original.getBlockY() + ", " + original.getBlockZ());
-            return safe;
         }
+
+        return safe;
     }
 
+    /**
+     * Test if a given location is safe for a player to be placed at.
+     *
+     * @param loc the potential teleport destination.
+     * @return {@code true} if the location is safe for a player.
+     */
     private boolean isSafeLocation(Location loc) {
         if (loc.getWorld() == null) {
             return false;
@@ -254,6 +330,13 @@ public class BeaconTeleportListener implements Listener {
         final BukkitTask channelingTask;
         int secondsRemaining;
 
+        /**
+         * Create an instance of a beacon teleportation record.
+         *
+         * @param startLocation the players starting location.
+         * @param targetBeacon the intended destination.
+         * @param channelingTask the beacon teleportation task.
+         */
         ChannelingData(Location startLocation, BeaconSite targetBeacon, BukkitTask channelingTask) {
             this.startLocation = startLocation;
             this.targetBeacon = targetBeacon;
