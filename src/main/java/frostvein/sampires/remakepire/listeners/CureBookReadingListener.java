@@ -24,61 +24,94 @@ public class CureBookReadingListener implements Listener {
     public static final int BOOK_NUM_ABSOLUTION = 3;
     public static final int BOOK_NUM_RETRIBUTION = 4;
 
+    /**
+     * Create an instance of the Cure Book Reading listener.
+     *
+     * @param plugin the host plugin object.
+     */
     public CureBookReadingListener(RemakepirePlugin plugin) {
         this.plugin = plugin;
     }
 
+    /**
+     * Retrieve the identifier key for the cure books.
+     *
+     * @return A {@code NamespacedKey} to retrieve cure books.
+     */
     public NamespacedKey getCureBookKey() {
-        return new NamespacedKey(this.plugin, "vampiresmp_cure_book");
+        return new NamespacedKey(this.plugin, CURE_BOOK_KEY);
     }
 
+    /**
+     * Nothing is written in this function.
+     *
+     * @param event a book is edited.
+     */
     @EventHandler
-    public void onBookEdit(PlayerEditBookEvent event) {
-    }
+    public void onBookEdit(PlayerEditBookEvent event) {}
 
+    /**
+     * Retrieve if the player has read the first three cure books.
+     *
+     * @param player the player whose cure book consumption is being checked.
+     * @return {@code true} if the player has read cure books 1/3, 2/3, and 3/3.
+     */
     public static boolean hasReadAllCureBooks(Player player) {
-        return player.getScoreboardTags().contains("CureBook1Read") && player.getScoreboardTags().contains("CureBook2Read") && player.getScoreboardTags().contains("CureBook3Read");
+        return player.getScoreboardTags().contains(TAG_CURE_BOOK_1) && player.getScoreboardTags().contains(TAG_CURE_BOOK_2) && player.getScoreboardTags().contains(TAG_CURE_BOOK_3);
     }
 
+    /**
+     * Retrieve if the player has read the fourth cure book.
+     *
+     * @param player the player whose cure book consumption is being checked.
+     * @return {@code true} if the player has read cure book 4/3.
+     */
     public static boolean hasReadFourthBook(Player player) {
-        return player.getScoreboardTags().contains("CureBook4Read");
+        return player.getScoreboardTags().contains(TAG_CURE_BOOK_4);
     }
 
+    /**
+     * Add the cure book to the players record, and check whether they have reached a milestone.
+     *
+     * @param player the player reading a cure book.
+     * @param bookNumber the cure book's number.
+     * @return {@code true} if a new cure book is being reading.
+     */
     public boolean onCureBookRead(Player player, int bookNumber) {
         if (bookNumber >= 1 && bookNumber <= 4) {
-            String tagToAdd = null;
-            String bookName = null;
+            String tagToAdd = null, bookName = null;
             boolean isNewTag = false;
+
             switch (bookNumber) {
-                case 1:
-                    if (!player.getScoreboardTags().contains("CureBook1Read")) {
-                        tagToAdd = "CureBook1Read";
+                case BOOK_NUM_REMEDY:
+                    if (!player.getScoreboardTags().contains(TAG_CURE_BOOK_1)) {
+                        tagToAdd = TAG_CURE_BOOK_1;
                         bookName = "The Remedy";
                         isNewTag = true;
                     }
                     break;
-                case 2:
-                    if (!player.getScoreboardTags().contains("CureBook2Read")) {
-                        tagToAdd = "CureBook2Read";
+                case BOOK_NUM_CURE:
+                    if (!player.getScoreboardTags().contains(TAG_CURE_BOOK_2)) {
+                        tagToAdd = TAG_CURE_BOOK_2;
                         bookName = "The Cure";
                         isNewTag = true;
                     }
                     break;
-                case 3:
-                    if (!player.getScoreboardTags().contains("CureBook3Read")) {
-                        tagToAdd = "CureBook3Read";
+                case BOOK_NUM_ABSOLUTION:
+                    if (!player.getScoreboardTags().contains(TAG_CURE_BOOK_3)) {
+                        tagToAdd = TAG_CURE_BOOK_3;
                         bookName = "The Absolution";
                         isNewTag = true;
                     }
                     break;
-                case 4:
+                case BOOK_NUM_RETRIBUTION:
                     if (!hasReadAllCureBooks(player)) {
                         player.sendMessage("§8§o[The words within this tome are beyond your comprehension... Perhaps you must first complete the Trinity of Restoration.]");
                         return false;
                     }
 
-                    if (!player.getScoreboardTags().contains("CureBook4Read")) {
-                        tagToAdd = "CureBook4Read";
+                    if (!player.getScoreboardTags().contains(TAG_CURE_BOOK_4)) {
+                        tagToAdd = TAG_CURE_BOOK_4;
                         bookName = "The Retribution";
                         isNewTag = true;
                     }
@@ -92,13 +125,14 @@ public class CureBookReadingListener implements Listener {
                 player.sendMessage("§8§o[You absorb the ancient knowledge within " + bookName + "...]");
                 this.plugin.getLogger().info("CURE BOOK READ: " + player.getName() + " read book #" + bookNumber);
 
-                if (bookNumber != 4 && hasReadAllCureBooks(player)) {
+                if (bookNumber != BOOK_NUM_RETRIBUTION && hasReadAllCureBooks(player)) {
                     player.sendMessage("");
                     player.sendMessage("§6§lTRINITY OF RESTORATION COMPLETE.");
                     player.sendMessage("§eYou have absorbed the knowledge from all three cure books. You now know the words to cure yourself of vampirism:");
                     player.sendMessage("§7/§6voluntate-mea-hoc-nefandum-vinculum-abicio");
                     player.sendMessage("§7Stand near a holy beacon, with a bottle of holy water on your person, and in the light of day, say those words, and be free.");
                     player.sendMessage("");
+
                     this.plugin.getLogger().info("CURE UNLOCKED: " + player.getName() + " has unlocked the /vol cure command");
 
                     if (!this.plugin.getConfig().getBoolean("fourth_book_spawn_enabled", false)) {
@@ -108,7 +142,7 @@ public class CureBookReadingListener implements Listener {
                     }
                 }
 
-                if (bookNumber == 4 && hasReadAllCureBooks(player)) {
+                if (bookNumber == BOOK_NUM_RETRIBUTION && hasReadAllCureBooks(player)) {
                     player.sendMessage("");
                     player.sendMessage("§4§lWORDS OF RETRIBUTION LEARNED.");
                     player.sendMessage("§cYou have learned the vengeful words to force cure others:");
@@ -127,23 +161,35 @@ public class CureBookReadingListener implements Listener {
         }
     }
 
+    /**
+     * Retrieve the cure book's number.
+     *
+     * @param item an item to inspect.
+     * @param plugin the host plugin object.
+     * @return A cure book's number (out of 4).
+     */
     public static int getAuthenticCureBookNumber(ItemStack item, RemakepirePlugin plugin) {
         if (item != null && item.getType() == Material.WRITTEN_BOOK) {
-            if (item.hasItemMeta() && item.getItemMeta() instanceof BookMeta) {
-                BookMeta bookMeta = (BookMeta)item.getItemMeta();
+            if (item.hasItemMeta() && item.getItemMeta() instanceof BookMeta bookMeta) {
                 PersistentDataContainer pdc = bookMeta.getPersistentDataContainer();
-                NamespacedKey key = new NamespacedKey(plugin, "vampiresmp_cure_book");
+                NamespacedKey key = new NamespacedKey(plugin, CURE_BOOK_KEY);
+
                 return pdc.has(key, PersistentDataType.INTEGER) ? (Integer)pdc.get(key, PersistentDataType.INTEGER) : 0;
-            } else {
-                return 0;
             }
-        } else {
-            return 0;
         }
+
+        return 0;
     }
 
+    /**
+     * Validate the cure book.
+     *
+     * @param meta the meta info on the book item.
+     * @param bookNumber the book's number in the series.
+     * @param plugin the host plugin object.
+     */
     public static void markAsAuthenticCureBook(BookMeta meta, int bookNumber, RemakepirePlugin plugin) {
-        NamespacedKey key = new NamespacedKey(plugin, "vampiresmp_cure_book");
+        NamespacedKey key = new NamespacedKey(plugin, CURE_BOOK_KEY);
         meta.getPersistentDataContainer().set(key, PersistentDataType.INTEGER, bookNumber);
     }
 }
