@@ -11,14 +11,19 @@ import frostvein.sampires.remakepire.RemakepirePlugin;
 
 public class VampireTurningManager {
     private final RemakepirePlugin plugin;
-    private final Map<UUID, Boolean> turningEnabled = new HashMap();
+    private final Map<UUID, Boolean> turningEnabled = new HashMap<>();
 
+    /**
+     * Create an instance of the Vampire Turning manager.
+     *
+     * @param plugin the host plugin object.
+     */
     public VampireTurningManager(RemakepirePlugin plugin) {
         this.plugin = plugin;
     }
 
     public boolean isTurningEnabled(Player vampire) {
-        return (Boolean)this.turningEnabled.getOrDefault(vampire.getUniqueId(), true);
+        return this.turningEnabled.getOrDefault(vampire.getUniqueId(), true);
     }
 
     public boolean toggleTurning(Player vampire) {
@@ -41,7 +46,6 @@ public class VampireTurningManager {
                 this.updateLuckEffect(player, false);
             }
         }
-
     }
 
     public void enableAllVampireTurning() {
@@ -52,7 +56,6 @@ public class VampireTurningManager {
                 this.updateLuckEffect(player, true);
             }
         }
-
     }
 
     private void updateLuckEffect(Player vampire, boolean turningEnabled) {
@@ -61,14 +64,12 @@ public class VampireTurningManager {
         } else {
             vampire.removePotionEffect(PotionEffectType.LUCK);
         }
-
     }
 
     public void applyLuckEffectIfEnabled(Player vampire) {
         if (this.isTurningEnabled(vampire)) {
             this.updateLuckEffect(vampire, true);
         }
-
     }
 
     public void shutdown() {

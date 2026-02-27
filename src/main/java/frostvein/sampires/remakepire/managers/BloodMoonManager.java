@@ -16,8 +16,14 @@ public class BloodMoonManager {
     private RemakepirePlugin plugin;
     private BukkitTask vampireBuffTask;
 
+    /**
+     * Create an instance of the Blood Moon manager.
+     *
+     * @param plugin the host plugin object.
+     */
     public BloodMoonManager(RemakepirePlugin plugin) {
         this.plugin = plugin;
+
         (new BukkitRunnable() {
             public void run() {
                 BloodMoonManager.this.checkTimeAndMoon();
@@ -30,6 +36,7 @@ public class BloodMoonManager {
         long fullTime = this.plugin.getWorld().getFullTime();
         boolean isNight = time >= 12000L && time < 24000L;
         boolean isFullMoon = fullTime % 192000L < 24000L;
+
         if (isNight && isFullMoon && !this.isBloodMoonActive) {
             this.startBloodMoon(this.plugin.getWorld());
         }
@@ -44,6 +51,7 @@ public class BloodMoonManager {
             this.isBloodMoonActive = true;
             this.plugin.getLogger().info("Blood moon started!");
             this.announceBloodMoon(world);
+
             this.vampireBuffTask = (new BukkitRunnable() {
                 public void run() {
                     BloodMoonManager.this.applyVampireBuffs();
@@ -56,20 +64,19 @@ public class BloodMoonManager {
         if (this.isBloodMoonActive) {
             this.isBloodMoonActive = false;
             this.plugin.getLogger().info("Blood moon ended!");
+
             if (this.vampireBuffTask != null && !this.vampireBuffTask.isCancelled()) {
                 this.vampireBuffTask.cancel();
                 this.vampireBuffTask = null;
             }
 
-            String endMessage = "§7The blood moon fades away...";
-            this.plugin.getWorld().getPlayers().forEach((player) -> player.sendMessage(endMessage));
+            this.plugin.getWorld().getPlayers().forEach((player) -> player.sendMessage("§7The blood moon fades away..."));
         }
     }
 
     private void announceBloodMoon(World world) {
-        String message = "§c§lA blood moon rises...";
         world.getPlayers().forEach((player) -> {
-            player.sendMessage(message);
+            player.sendMessage("§c§lA blood moon rises...");
             player.playSound(player, Sound.AMBIENT_CRIMSON_FOREST_MOOD, 1.0F, 1.0F);
         });
     }
@@ -77,10 +84,11 @@ public class BloodMoonManager {
     private void applyVampireBuffs() {
         if (this.isBloodMoonActive) {
             for(Player player : Bukkit.getOnlinePlayers()) {
-                boolean isEligible = this.plugin.getVampireManager().isVampireStage2(player) || this.plugin.getVampireManager().isVampireStage3(player);
-                if (isEligible) {
+                if (this.plugin.getVampireManager().isVampireStage2(player) || this.plugin.getVampireManager().isVampireStage3(player)) {
+
                     if (this.canPlayerSeeSky(player)) {
                         player.addPotionEffect(new PotionEffect(PotionEffectType.UNLUCK, 240, 0, false, false), false);
+
                         if (!player.getScoreboardTags().contains("informed_blood_moon")) {
                             player.addScoreboardTag("informed_blood_moon");
                             player.playSound(player, Sound.AMBIENT_NETHER_WASTES_MOOD, 1.0F, 1.0F);
@@ -114,7 +122,6 @@ public class BloodMoonManager {
         if (this.isBloodMoonActive) {
             this.endBloodMoon();
         }
-
     }
 
     public String getCurrentMoonPhase() {
@@ -123,6 +130,7 @@ public class BloodMoonManager {
 
     private String getMoonPhaseName(long fullTime) {
         long moonCycle = fullTime % 192000L;
+
         if (moonCycle < 24000L) {
             return "Full Moon";
         } else if (moonCycle < 48000L) {

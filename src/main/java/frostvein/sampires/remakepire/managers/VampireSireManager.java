@@ -20,12 +20,18 @@ public class VampireSireManager {
     private final File dataFile;
     private final Gson gson;
 
+    /**
+     * Create an instance of the Vampire Sire manager.
+     *
+     * @param plugin the host plugin object.
+     */
     public VampireSireManager(RemakepirePlugin plugin) {
         this.plugin = plugin;
-        this.sireMap = new HashMap();
+        this.sireMap = new HashMap<>();
         this.dataFile = new File(plugin.getDataFolder(), "sire_mappings.json");
         this.gson = new Gson();
         this.loadSireMappings();
+
         plugin.getLogger().info("VampireSireManager initialized with " + this.sireMap.size() + " sire mappings");
     }
 
@@ -34,11 +40,12 @@ public class VampireSireManager {
     }
 
     public String getSire(Player vampire) {
-        return (String)this.sireMap.get(vampire.getName().toLowerCase());
+        return this.sireMap.get(vampire.getName().toLowerCase());
     }
 
     public boolean isSireDead(Player vampire) {
         String sireName = this.getSire(vampire);
+
         if (sireName == null) {
             return true;
         } else {
@@ -58,10 +65,12 @@ public class VampireSireManager {
 
     public String getSireStatus(Player vampire) {
         String sireName = this.getSire(vampire);
+
         if (sireName == null) {
             return "No sire assigned (can cure freely)";
         } else {
             Player sire = Bukkit.getPlayer(sireName);
+
             if (sire == null) {
                 return "Sire '" + sireName + "' is OFFLINE (can cure)";
             } else {
@@ -84,7 +93,7 @@ public class VampireSireManager {
     }
 
     public Map<String, String> getAllSireMappings() {
-        return new HashMap(this.sireMap);
+        return new HashMap<>(this.sireMap);
     }
 
     public void clearAllSireMappings() {
@@ -93,12 +102,16 @@ public class VampireSireManager {
         this.plugin.getLogger().info("VampireSireManager: Cleared all sire mappings");
     }
 
+    /**
+     * Log the sire relationships and create the file to store them within.
+     */
     private void loadSireMappings() {
         if (!this.dataFile.exists()) {
             this.plugin.getLogger().info("VampireSireManager: No existing sire mappings file found, starting fresh.");
             this.plugin.getLogger().info("VampireSireManager: Edit plugins/VampireSMP/sire_mappings.json to add sire relationships.");
             this.plugin.getLogger().info("VampireSireManager: Format: {\"Fledgling_Name\": \"Sire_Name\"}");
-            Map<String, String> exampleMap = new HashMap();
+
+            Map<String, String> exampleMap = new HashMap<>();
             exampleMap.put("Fledgling_Name", "Sire_Name");
 
             try {
@@ -131,10 +144,12 @@ public class VampireSireManager {
             } catch (IOException e) {
                 this.plugin.getLogger().severe("VampireSireManager: Failed to load sire mappings: " + e.getMessage());
             }
-
         }
     }
 
+    /**
+     * Write the sire relationships into the file.
+     */
     private void saveSireMappings() {
         try {
             if (!this.plugin.getDataFolder().exists()) {
@@ -149,7 +164,6 @@ public class VampireSireManager {
         } catch (IOException e) {
             this.plugin.getLogger().severe("VampireSireManager: Failed to save sire mappings: " + e.getMessage());
         }
-
     }
 
     public void shutdown() {

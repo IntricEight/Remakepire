@@ -31,12 +31,19 @@ public class BatTransformationManager {
     private final RemakepirePlugin plugin;
     private final ArmorStorageManager armorStorageManager;
     public static final String BAT_FORM_TAG = "bat_form";
-    private static final long BAT_DURATION_TICKS = 2400L;
+    // Controls the maximum duration of bat form (in ticks)
     private static final long BAT_DURATION_MS = 120000L;
-    private final Map<UUID, BatData> activeBats = new ConcurrentHashMap();
+    // Controls how long the post-transformation slow falling lasts.
+    private static final int SLOW_FALLING_DURATION = 200;
+    private final Map<UUID, BatData> activeBats = new ConcurrentHashMap<>();
     private File batStateFile;
     private BukkitTask batCheckTask;
 
+    /**
+     * Create an instance of the Bat Transformation manager.
+     *
+     * @param plugin the host plugin object.
+     */
     public BatTransformationManager(RemakepirePlugin plugin) {
         this.plugin = plugin;
         this.armorStorageManager = new ArmorStorageManager(plugin);
@@ -45,6 +52,9 @@ public class BatTransformationManager {
         this.loadBatStates();
     }
 
+    /**
+     * Create the file to store bat location information in.
+     */
     private void setupPersistence() {
         if (!this.plugin.getDataFolder().exists()) {
             this.plugin.getDataFolder().mkdirs();
@@ -62,9 +72,11 @@ public class BatTransformationManager {
             this.plugin.getLogger().severe("Failed to create bat transformation file: " + e.getMessage());
             e.printStackTrace();
         }
-
     }
 
+    /**
+     * Begin monitoring the bats spawned by the Bat ability.
+     */
     private void startBatCheckTask() {
         this.batCheckTask = (new BukkitRunnable() {
             int tickCount = 0;
@@ -74,15 +86,18 @@ public class BatTransformationManager {
                 BatTransformationManager.this.checkBatEntityHealth();
                 BatTransformationManager.this.updateBatActionBars();
                 ++this.tickCount;
+
                 if (this.tickCount >= 6000) {
                     BatTransformationManager.this.armorStorageManager.cleanupExpiredEntries();
                     this.tickCount = 0;
                 }
-
             }
         }).runTaskTimer(this.plugin, 20L, 20L);
     }
 
+    /**
+     * Force the vampire back into human form once the ability duration has elapsed.
+     */
     private void checkExpiredTransformations() {
         Iterator<Map.Entry<UUID, BatData>> iterator = this.activeBats.entrySet().iterator();
 
@@ -90,8 +105,10 @@ public class BatTransformationManager {
             Map.Entry<UUID, BatData> entry = (Map.Entry)iterator.next();
             UUID playerId = (UUID)entry.getKey();
             BatData batData = (BatData)entry.getValue();
+
             if (batData.isExpired()) {
                 Player player = Bukkit.getPlayer(playerId);
+
                 if (player != null && player.isOnline()) {
                     this.forceTransformToHuman(player, batData);
                     player.sendMessage("§6Your bat transformation has expired.");
@@ -104,9 +121,11 @@ public class BatTransformationManager {
                 this.saveBatStates();
             }
         }
-
     }
 
+    /**
+     * Update the visual countdown on the player's remaining time in bat form.
+     */
     private void updateBatActionBars() {
         for(Map.Entry<UUID, BatData> entry : this.activeBats.entrySet()) {
             UUID playerId = (UUID)entry.getKey();
@@ -120,9 +139,11 @@ public class BatTransformationManager {
                 player.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText(actionBar));
             }
         }
-
     }
 
+    /**
+     * Monitor the health of the active bat forms.
+     */
     private void checkBatEntityHealth() {
         Iterator<Map.Entry<UUID, BatData>> iterator = this.activeBats.entrySet().iterator();
 
@@ -143,14 +164,20 @@ public class BatTransformationManager {
                 this.saveBatStates();
             }
         }
-
     }
 
+    /**
+     * Remove the player from bat form and kill them.
+     *
+     * @param player the vampire in bat form.
+     * @param batData the bat ability usage information.
+     */
     public void handleBatDeath(Player player, BatData batData) {
-        player.removeScoreboardTag("bat_form");
+        player.removeScoreboardTag(BAT_FORM_TAG);
         this.restorePlayerArmor(player);
         player.removePotionEffect(PotionEffectType.INVISIBILITY);
 
+        // Make sure to only disable these if bat form is the only way the player can use them
         if (player.getGameMode() != GameMode.CREATIVE && player.getGameMode() != GameMode.SPECTATOR) {
             player.setFlying(false);
             player.setAllowFlight(false);
@@ -160,9 +187,14 @@ public class BatTransformationManager {
         this.plugin.getLogger().info("Player " + player.getName() + " died because their bat form was destroyed");
     }
 
+    /**
+     * Remove the player from bat form and kill them.
+     *
+     * @param player the vampire in bat form.
+     */
     public void handleBatDeath(Player player) {
         if (this.isInBatForm(player)) {
-            BatData batData = (BatData)this.activeBats.get(player.getUniqueId());
+            BatData batData = this.activeBats.get(player.getUniqueId());
 
             if (batData != null) {
                 this.handleBatDeath(player, batData);
@@ -171,10 +203,11 @@ public class BatTransformationManager {
                 this.saveBatStates();
 
             } else {
-                player.removeScoreboardTag("bat_form");
+                player.removeScoreboardTag(BAT_FORM_TAG);
                 this.restorePlayerArmor(player);
                 player.removePotionEffect(PotionEffectType.INVISIBILITY);
 
+                // Make sure to only disable these if bat form is the only way the player can use them
                 if (player.getGameMode() != GameMode.CREATIVE && player.getGameMode() != GameMode.SPECTATOR) {
                     player.setFlying(false);
                     player.setAllowFlight(false);
@@ -183,10 +216,15 @@ public class BatTransformationManager {
                 player.setHealth(0.0);
                 this.plugin.getLogger().warning("Player " + player.getName() + " bat died but no batData found - cleaned up player state");
             }
-
         }
     }
 
+    /**
+     * Retrieve the player using the tag given to their bat.
+     *
+     * @param bat a bat entity.
+     * @return The player who is controlling the bat.
+     */
     public Player getPlayerFromBat(Bat bat) {
         if (bat.getCustomName() != null && bat.getCustomName().startsWith("Â§8")) {
             String playerName = bat.getCustomName().substring(2);
@@ -197,6 +235,12 @@ public class BatTransformationManager {
         }
     }
 
+    /**
+     * Turn the vampire into a bat that they can fly and control. This bat's life force is tied to the vampire's.
+     *
+     * @param player the vampire using the bat ability.
+     * @return {@code true} if the player entered their bat form.
+     */
     public boolean transformToBat(final Player player) {
         if (this.isInBatForm(player)) {
             return false;
@@ -212,7 +256,7 @@ public class BatTransformationManager {
                     this.plugin.getLogger().info("No armor to store for player " + player.getName() + " during bat transformation");
                 }
 
-                player.addScoreboardTag("bat_form");
+                player.addScoreboardTag(BAT_FORM_TAG);
                 player.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, -1, 0, false, false));
                 player.setAllowFlight(true);
                 player.setFlying(true);
@@ -235,13 +279,11 @@ public class BatTransformationManager {
                 batData.transformationTask = (new BukkitRunnable() {
                     public void run() {
                         if (player.isOnline() && BatTransformationManager.this.isInBatForm(player)) {
-                            Location playerLoc = player.getLocation();
                             if (bat.isValid()) {
-                                bat.teleport(playerLoc);
+                                bat.teleport(player.getLocation());
                             } else {
                                 this.cancel();
                             }
-
                         } else {
                             this.cancel();
                         }
@@ -261,15 +303,21 @@ public class BatTransformationManager {
         }
     }
 
+    /**
+     * Turn the vampire back into their ordinary form.
+     *
+     * @param player the vampire using the bat ability.
+     * @return {@code true} if the player ended their bat form.
+     */
     public boolean transformToHuman(Player player) {
         if (!this.isInBatForm(player)) {
             return false;
 
         } else {
-            BatData batData = (BatData)this.activeBats.get(player.getUniqueId());
+            BatData batData = this.activeBats.get(player.getUniqueId());
 
             if (batData == null) {
-                player.removeScoreboardTag("bat_form");
+                player.removeScoreboardTag(BAT_FORM_TAG);
                 return false;
 
             } else {
@@ -282,12 +330,18 @@ public class BatTransformationManager {
         }
     }
 
+    /**
+     * Force the vampire to return to their ordinary form.
+     *
+     * @param player the vampire using the bat ability.
+     * @param batData the bat ability usage information.
+     */
     private void forceTransformToHuman(Player player, BatData batData) {
         try {
-            player.removeScoreboardTag("bat_form");
+            player.removeScoreboardTag(BAT_FORM_TAG);
             this.restorePlayerArmor(player);
             player.removePotionEffect(PotionEffectType.INVISIBILITY);
-            player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW_FALLING, 200, 0, false, false));
+            player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW_FALLING, SLOW_FALLING_DURATION, 0, false, false));
 
             if (player.getGameMode() != GameMode.CREATIVE && player.getGameMode() != GameMode.SPECTATOR) {
                 player.setFlying(false);
@@ -300,9 +354,13 @@ public class BatTransformationManager {
             this.plugin.getLogger().severe("Failed to transform player " + player.getName() + " back to human: " + e.getMessage());
             e.printStackTrace();
         }
-
     }
 
+    /**
+     * Restore the vampire's armor.
+     *
+     * @param player the vampire using the bat ability.
+     */
     private void restorePlayerArmor(Player player) {
         UUID playerId = player.getUniqueId();
 
@@ -340,10 +398,10 @@ public class BatTransformationManager {
                     }
                 }
 
-                player.getInventory().setHelmet((ItemStack)null);
-                player.getInventory().setChestplate((ItemStack)null);
-                player.getInventory().setLeggings((ItemStack)null);
-                player.getInventory().setBoots((ItemStack)null);
+                player.getInventory().setHelmet(null);
+                player.getInventory().setChestplate(null);
+                player.getInventory().setLeggings(null);
+                player.getInventory().setBoots(null);
                 player.getInventory().setArmorContents(new ItemStack[4]);
             }
 
@@ -367,6 +425,11 @@ public class BatTransformationManager {
 
     }
 
+    /**
+     * Clean up the bat entity and cancel the transformation monitor.
+     *
+     * @param batData the bat ability usage information.
+     */
     private void cleanupBatData(BatData batData) {
         if (batData == null) {
             this.plugin.getLogger().warning("Attempted to cleanup null batData");
@@ -381,38 +444,62 @@ public class BatTransformationManager {
         }
     }
 
+    /**
+     * Retrieve if the player is using their bat ability
+     *
+     * @param player the player who is being checked.
+     * @return {@code true} if the player is in bat form.
+     */
     public boolean isInBatForm(Player player) {
-        return player.getScoreboardTags().contains("bat_form");
+        return player.getScoreboardTags().contains(BAT_FORM_TAG);
     }
 
+    /**
+     * Determine how much longer the vampire can remain as a bat.
+     *
+     * @param player the vampire using the bat ability.
+     * @return The seconds remaining until the player will be removed from bat form.
+     */
     public int getRemainingTime(Player player) {
-        BatData batData = (BatData)this.activeBats.get(player.getUniqueId());
+        BatData batData = this.activeBats.get(player.getUniqueId());
         return batData == null ? 0 : batData.getRemainingSeconds();
     }
 
+    /**
+     * Check if a player has rejoined after leaving the game while in bat form.
+     *
+     * @param player the player joining the game.
+     */
     public void handlePlayerJoin(Player player) {
         UUID playerId = player.getUniqueId();
+
         if (this.armorStorageManager.hasStoredArmor(playerId)) {
             this.plugin.getLogger().info("Found stored armor for player " + player.getName() + " on join - attempting restoration");
             this.restorePlayerArmor(player);
         }
 
         if (this.isInBatForm(player)) {
-            BatData batData = (BatData)this.activeBats.get(player.getUniqueId());
+            BatData batData = this.activeBats.get(player.getUniqueId());
             this.forceTransformToHuman(player, batData);
             this.plugin.getLogger().info("Player " + player.getName() + " was forced back to human form upon joining (was in bat form when offline)");
         }
-
     }
 
+    /**
+     * Revert the player to their ordinary form when they quit the game.
+     *
+     * @param player the player quitting the game.
+     */
     public void handlePlayerQuit(Player player) {
         if (this.isInBatForm(player)) {
             this.transformToHuman(player);
             this.plugin.getLogger().info("Player " + player.getName() + " exited bat form due to disconnect");
         }
-
     }
 
+    /**
+     * Load in the list of active bat forms from the file.
+     */
     private void loadBatStates() {
         try (BufferedReader reader = new BufferedReader(new FileReader(this.batStateFile))) {
             while(true) {
@@ -433,14 +520,17 @@ public class BatTransformationManager {
         } catch (IOException e) {
             this.plugin.getLogger().warning("Could not load bat transformation states: " + e.getMessage());
         }
-
     }
 
+    /**
+     * Save the list of active bat forms within the file.
+     */
     private void saveBatStates() {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(this.batStateFile))) {
             for(Map.Entry<UUID, BatData> entry : this.activeBats.entrySet()) {
                 UUID playerId = (UUID)entry.getKey();
                 BatData batData = (BatData)entry.getValue();
+
                 if (!batData.isExpired()) {
                     writer.write(playerId.toString() + ":" + batData.startTime);
                     writer.newLine();
@@ -449,9 +539,11 @@ public class BatTransformationManager {
         } catch (IOException e) {
             this.plugin.getLogger().warning("Could not save bat transformation states: " + e.getMessage());
         }
-
     }
 
+    /**
+     * Clear the bat form effects before shutting down the manager.
+     */
     public void shutdown() {
         if (this.batCheckTask != null) {
             this.batCheckTask.cancel();
@@ -463,7 +555,7 @@ public class BatTransformationManager {
 
         for(Player player : Bukkit.getOnlinePlayers()) {
             if (this.isInBatForm(player)) {
-                player.removeScoreboardTag("bat_form");
+                player.removeScoreboardTag(BAT_FORM_TAG);
                 this.restorePlayerArmor(player);
                 player.removePotionEffect(PotionEffectType.INVISIBILITY);
 
@@ -489,20 +581,40 @@ public class BatTransformationManager {
         public BukkitTask transformationTask;
         public Location lastValidLocation;
 
+        /**
+         * Create an instance of the bat transformation record.
+         *
+         * @param startTime The time when the player entered bat form.
+         */
         public BatData(long startTime) {
             this.startTime = startTime;
-            this.endTime = startTime + 120000L;
+            this.endTime = startTime + BAT_DURATION_MS;
             this.lastValidLocation = null;
         }
 
+        /**
+         * Determine if the bat form duration has elapsed.
+         *
+         * @return {@code true} if the bat form ability is expired.
+         */
         public boolean isExpired() {
             return System.currentTimeMillis() >= this.endTime;
         }
 
+        /**
+         * Retrieve the remaining milliseconds that the bat form can remain active.
+         *
+         * @return The milliseconds remaining until the vampire will be removed from bat form.
+         */
         public long getRemainingTime() {
             return Math.max(0L, this.endTime - System.currentTimeMillis());
         }
 
+        /**
+         * Retrieve the remaining seconds that the bat form can remain active.
+         *
+         * @return The seconds remaining until the vampire will be removed from bat form.
+         */
         public int getRemainingSeconds() {
             return (int)(this.getRemainingTime() / 1000L);
         }

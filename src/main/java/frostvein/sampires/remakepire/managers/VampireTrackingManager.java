@@ -13,7 +13,7 @@ import frostvein.sampires.remakepire.RemakepirePlugin;
 public class VampireTrackingManager {
     private final RemakepirePlugin plugin;
     private final VampireManager vampireManager;
-    private final Map<UUID, BukkitTask> activeTrackingSessions = new ConcurrentHashMap();
+    private final Map<UUID, BukkitTask> activeTrackingSessions = new ConcurrentHashMap<>();
     private UUID mostRecentVampireId = null;
     private static final int TRACKING_DURATION_SECONDS = 120;
     private static final int UPDATE_INTERVAL_TICKS = 4;
@@ -28,23 +28,26 @@ public class VampireTrackingManager {
             final UUID newVampireId = newVampire.getUniqueId();
             this.stopTracking(newVampireId);
             this.mostRecentVampireId = newVampireId;
+
             BukkitTask trackingTask = (new BukkitRunnable() {
-                int ticksRemaining = 2400;
+                int ticksRemaining = TRACKING_DURATION_SECONDS * 20;
 
                 public void run() {
                     if (this.ticksRemaining <= 0) {
                         VampireTrackingManager.this.stopTracking(newVampireId);
                     } else {
                         Player trackedPlayer = Bukkit.getPlayer(newVampireId);
+
                         if (trackedPlayer != null && trackedPlayer.isOnline()) {
                             VampireTrackingManager.this.updateTrackingForAllVampires(trackedPlayer);
-                            this.ticksRemaining -= 4;
+                            this.ticksRemaining -= UPDATE_INTERVAL_TICKS;
                         } else {
                             VampireTrackingManager.this.stopTracking(newVampireId);
                         }
                     }
                 }
             }).runTaskTimer(this.plugin, 0L, 4L);
+
             this.activeTrackingSessions.put(newVampireId, trackingTask);
             this.plugin.getLogger().info("Started vampire tracking for " + newVampire.getName() + " (120s)");
         }
@@ -57,21 +60,24 @@ public class VampireTrackingManager {
             for(Player vampire : Bukkit.getOnlinePlayers()) {
                 if (this.vampireManager.isVampire(vampire) && !vampire.getUniqueId().equals(trackedVampire.getUniqueId()) && vampire.getWorld().equals(trackedVampire.getWorld()) && (this.plugin.getVampireFeedingManager() == null || !this.plugin.getVampireFeedingManager().isFeeding(vampire))) {
                     Location vampireLocation = vampire.getLocation();
+
                     double deltaX = trackedLocation.getX() - vampireLocation.getX();
                     double deltaZ = trackedLocation.getZ() - vampireLocation.getZ();
                     double distance = Math.sqrt(deltaX * deltaX + deltaZ * deltaZ);
+
                     String direction = this.getRelativeDirection(deltaX, deltaZ, vampireLocation.getYaw());
                     String message = String.format("§4New Vampire: §f%s §7(§f%.0f blocks§7)", direction, distance);
+
                     this.plugin.getSessionManager().sendActionBar(vampire, message);
                 }
             }
-
         }
     }
 
     private String getRelativeDirection(double deltaX, double deltaZ, float playerYaw) {
         double targetAngle = Math.atan2(deltaX, -deltaZ);
         double targetDegrees = Math.toDegrees(targetAngle);
+
         if (targetDegrees < 0) {
             targetDegrees += 360.0;
         }
@@ -109,7 +115,6 @@ public class VampireTrackingManager {
             task.cancel();
             this.plugin.getLogger().info("Stopped vampire tracking for " + String.valueOf(vampireId));
         }
-
     }
 
     public void stopAllTracking() {

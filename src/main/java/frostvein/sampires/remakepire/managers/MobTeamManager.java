@@ -19,7 +19,14 @@ public class MobTeamManager {
     private final RemakepirePlugin plugin;
     private BukkitTask mobTeamTask;
     private final List<Class<? extends Entity>> vampireMobTypes = Arrays.asList(Zombie.class, Skeleton.class, Creeper.class, Drowned.class, Husk.class, Spider.class, Witch.class);
+    // Controls how frequently mobs are assigned to the vampire team
+    private final long assignmentIntervals = 200L;
 
+    /**
+     * Create an instance of the Mob Team manager.
+     *
+     * @param plugin the host plugin object.
+     */
     public MobTeamManager(RemakepirePlugin plugin) {
         this.plugin = plugin;
         this.startMobTeamTask();
@@ -34,7 +41,8 @@ public class MobTeamManager {
             public void run() {
                 MobTeamManager.this.assignMobsToVampireTeam();
             }
-        }).runTaskTimer(this.plugin, 0L, 200L);
+        }).runTaskTimer(this.plugin, 0L, assignmentIntervals);
+
         this.plugin.getLogger().info("MobTeamManager: Started mob team assignment task (every 10 seconds)");
     }
 
@@ -44,11 +52,11 @@ public class MobTeamManager {
             this.mobTeamTask = null;
             this.plugin.getLogger().info("MobTeamManager: Stopped mob team assignment task");
         }
-
     }
 
     private void assignMobsToVampireTeam() {
         Team vampireTeam = this.plugin.getVampireCastTeam();
+
         if (vampireTeam == null) {
             this.plugin.getLogger().warning("MobTeamManager: VampireCastTeam not found!");
         } else if (this.plugin.getWorld() == null) {
@@ -59,17 +67,18 @@ public class MobTeamManager {
             for(Entity entity : this.plugin.getWorld().getEntities()) {
                 if (this.isTargetMob(entity)) {
                     String entityName = entity.getUniqueId().toString();
+
                     if (!vampireTeam.hasEntry(entityName)) {
                         try {
                             vampireTeam.addEntry(entityName);
                             ++mobsAdded;
+
                         } catch (Exception e) {
                             this.plugin.getLogger().warning("Failed to add mob " + String.valueOf(entity.getType()) + " to VampireCastTeam: " + e.getMessage());
                         }
                     }
                 }
             }
-
         }
     }
 
@@ -94,12 +103,13 @@ public class MobTeamManager {
 
     public void clearVampireMobs() {
         Team vampireTeam = this.plugin.getVampireCastTeam();
+
         if (vampireTeam == null) {
             this.plugin.getLogger().warning("MobTeamManager: VampireCastTeam not found for clearing!");
         } else {
             int removedCount = vampireTeam.getSize();
 
-            for(String entry : (String[])vampireTeam.getEntries().toArray(new String[0])) {
+            for(String entry : vampireTeam.getEntries().toArray(new String[0])) {
                 vampireTeam.removeEntry(entry);
             }
 

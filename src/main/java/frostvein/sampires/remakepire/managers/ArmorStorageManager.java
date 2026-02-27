@@ -24,8 +24,13 @@ public class ArmorStorageManager {
     private final Gson gson;
     private final File storageFile;
     private final File backupFile;
-    private final Map<UUID, StoredArmor> armorCache = new ConcurrentHashMap();
+    private final Map<UUID, StoredArmor> armorCache = new ConcurrentHashMap<>();
 
+    /**
+     * Create an instance of the Armor Storage manager.
+     *
+     * @param plugin the host plugin object.
+     */
     public ArmorStorageManager(RemakepirePlugin plugin) {
         this.plugin = plugin;
         this.gson = (new GsonBuilder()).registerTypeAdapterFactory(new OptionalTypeAdapter()).setPrettyPrinting().create();
@@ -35,6 +40,9 @@ public class ArmorStorageManager {
         this.loadArmorData();
     }
 
+    /**
+     * Create the file to store armor information in.
+     */
     private void setupStorageFiles() {
         try {
             if (!this.plugin.getDataFolder().exists()) {
@@ -61,14 +69,17 @@ public class ArmorStorageManager {
         try {
             ItemStack[] currentArmor = player.getInventory().getArmorContents();
             StoredArmor storedArmor = new StoredArmor(currentArmor[3], currentArmor[2], currentArmor[1], currentArmor[0]);
+
             if (storedArmor.hasAnyArmor()) {
                 this.armorCache.put(playerId, storedArmor);
-                player.getInventory().setHelmet((ItemStack)null);
-                player.getInventory().setChestplate((ItemStack)null);
-                player.getInventory().setLeggings((ItemStack)null);
-                player.getInventory().setBoots((ItemStack)null);
+
+                player.getInventory().setHelmet(null);
+                player.getInventory().setChestplate(null);
+                player.getInventory().setLeggings(null);
+                player.getInventory().setBoots(null);
                 player.getInventory().setArmorContents(new ItemStack[4]);
                 player.updateInventory();
+
                 this.saveArmorData();
                 this.plugin.getLogger().info("ArmorStorageManager: Stored and cleared armor for player " + player.getName());
                 return true;
@@ -84,11 +95,11 @@ public class ArmorStorageManager {
     }
 
     public StoredArmor getStoredArmor(UUID playerId) {
-        return (StoredArmor)this.armorCache.get(playerId);
+        return this.armorCache.get(playerId);
     }
 
     public boolean hasStoredArmor(UUID playerId) {
-        StoredArmor stored = (StoredArmor)this.armorCache.get(playerId);
+        StoredArmor stored = this.armorCache.get(playerId);
         return stored != null && stored.hasAnyArmor();
     }
 
@@ -97,27 +108,27 @@ public class ArmorStorageManager {
             this.saveArmorData();
             this.plugin.getLogger().info("ArmorStorageManager: Cleared stored armor for player " + String.valueOf(playerId));
         }
-
     }
 
     private void loadArmorData() {
         File fileToLoad = this.storageFile;
+
         if (!this.isFileValid(this.storageFile) && this.isFileValid(this.backupFile)) {
             this.plugin.getLogger().warning("ArmorStorageManager: Main storage file corrupt, using backup");
             fileToLoad = this.backupFile;
         }
 
         try (FileReader reader = new FileReader(fileToLoad)) {
-            Type mapType = (new TypeToken<Map<String, StoredArmor>>() {
-            }).getType();
+            Type mapType = (new TypeToken<Map<String, StoredArmor>>() {}).getType();
             Map<String, StoredArmor> loadedData = (Map)this.gson.fromJson(reader, mapType);
             if (loadedData != null) {
                 for(Map.Entry<String, StoredArmor> entry : loadedData.entrySet()) {
                     try {
-                        UUID playerId = UUID.fromString((String)entry.getKey());
-                        this.armorCache.put(playerId, (StoredArmor)entry.getValue());
+                        UUID playerId = UUID.fromString(entry.getKey());
+                        this.armorCache.put(playerId, entry.getValue());
+
                     } catch (IllegalArgumentException e) {
-                        this.plugin.getLogger().warning("ArmorStorageManager: Invalid UUID in storage: " + (String)entry.getKey());
+                        this.plugin.getLogger().warning("ArmorStorageManager: Invalid UUID in storage: " + entry.getKey());
                     }
                 }
 
@@ -129,7 +140,6 @@ public class ArmorStorageManager {
             this.plugin.getLogger().severe("ArmorStorageManager: Error parsing armor storage file: " + e.getMessage());
             e.printStackTrace();
         }
-
     }
 
     private void saveArmorData() {
@@ -142,7 +152,7 @@ public class ArmorStorageManager {
                 }
             }
 
-            Map<String, StoredArmor> dataToSave = new HashMap();
+            Map<String, StoredArmor> dataToSave = new HashMap<>();
 
             for(Map.Entry<UUID, StoredArmor> entry : this.armorCache.entrySet()) {
                 dataToSave.put(((UUID)entry.getKey()).toString(), (StoredArmor)entry.getValue());
@@ -155,7 +165,6 @@ public class ArmorStorageManager {
             this.plugin.getLogger().severe("ArmorStorageManager: Failed to save armor data: " + e.getMessage());
             e.printStackTrace();
         }
-
     }
 
     private boolean isFileValid(File file) {
@@ -165,6 +174,7 @@ public class ArmorStorageManager {
     public void cleanupExpiredEntries() {
         long currentTime = System.currentTimeMillis();
         long maxAge = 604800000L;
+
         this.armorCache.entrySet().removeIf((entry) -> {
             boolean expired = currentTime - ((StoredArmor)entry.getValue()).timestamp > maxAge;
             if (expired) {
@@ -173,14 +183,14 @@ public class ArmorStorageManager {
 
             return expired;
         });
+
         if (!this.armorCache.isEmpty()) {
             this.saveArmorData();
         }
-
     }
 
     public Map<UUID, StoredArmor> getAllStoredArmor() {
-        return new HashMap(this.armorCache);
+        return new HashMap<>(this.armorCache);
     }
 
     public void shutdown() {

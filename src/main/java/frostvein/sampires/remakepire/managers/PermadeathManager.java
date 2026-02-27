@@ -19,9 +19,14 @@ public class PermadeathManager {
     private final File dataFile;
     private final Gson gson;
 
+    /**
+     * Create an instance of the Permadeath manager.
+     *
+     * @param plugin the host plugin object.
+     */
     public PermadeathManager(RemakepirePlugin plugin) {
         this.plugin = plugin;
-        this.permadeathModes = new HashMap();
+        this.permadeathModes = new HashMap<>();
         this.dataFile = new File(plugin.getDataFolder(), "permadeath_modes.json");
         this.gson = new Gson();
         this.loadPermadeathData();
@@ -29,14 +34,14 @@ public class PermadeathManager {
     }
 
     public PermadeathMode getPermadeathMode(Player player) {
-        return (PermadeathMode)this.permadeathModes.getOrDefault(player.getUniqueId(), PermadeathManager.PermadeathMode.OFF);
+        return this.permadeathModes.getOrDefault(player.getUniqueId(), PermadeathManager.PermadeathMode.OFF);
     }
 
     public void setPermadeathMode(Player player, PermadeathMode mode) {
         UUID playerId = player.getUniqueId();
         this.permadeathModes.put(playerId, mode);
         this.savePermadeathData();
-        this.plugin.getLogger().info("Player " + player.getName() + " permadeath mode set to: " + String.valueOf((Object)mode));
+        this.plugin.getLogger().info("Player " + player.getName() + " permadeath mode set to: " + String.valueOf(mode));
     }
 
     public boolean hasPermadeathEnabled(Player player) {
@@ -69,15 +74,16 @@ public class PermadeathManager {
             this.plugin.getLogger().info("PermadeathManager: No existing permadeath data file found, starting fresh.");
         } else {
             try (FileReader reader = new FileReader(this.dataFile)) {
-                Type type = (new TypeToken<Map<String, String>>() {
-                }).getType();
+                Type type = (new TypeToken<Map<String, String>>() {}).getType();
                 Map<String, String> rawData = (Map)this.gson.fromJson(reader, type);
+
                 if (rawData != null) {
                     for(Map.Entry<String, String> entry : rawData.entrySet()) {
                         try {
                             UUID playerId = UUID.fromString((String)entry.getKey());
                             PermadeathMode mode = PermadeathManager.PermadeathMode.valueOf((String)entry.getValue());
                             this.permadeathModes.put(playerId, mode);
+
                         } catch (IllegalArgumentException e) {
                             this.plugin.getLogger().warning("PermadeathManager: Invalid data in file: " + (String)entry.getKey() + " = " + (String)entry.getValue());
                         }
@@ -88,7 +94,6 @@ public class PermadeathManager {
             } catch (IOException e) {
                 this.plugin.getLogger().severe("PermadeathManager: Failed to load permadeath data: " + e.getMessage());
             }
-
         }
     }
 
@@ -97,6 +102,7 @@ public class PermadeathManager {
         File oldAbsoluteFile = new File(this.plugin.getDataFolder(), "absolute_permadeath_preferences.json");
 
         boolean migrated = false;
+
         if (oldPermadeathFile.exists()) {
             try (FileReader reader = new FileReader(oldPermadeathFile)) {
                 Type type = (new TypeToken<Map<String, Boolean>>() {}).getType();
@@ -110,8 +116,7 @@ public class PermadeathManager {
                             if (entry.getValue() && !this.permadeathModes.containsKey(playerId)) {
                                 this.permadeathModes.put(playerId, PermadeathManager.PermadeathMode.ON);
                             }
-                        } catch (IllegalArgumentException e) {
-                        }
+                        } catch (IllegalArgumentException e) {}
                     }
 
                     migrated = true;
@@ -123,8 +128,7 @@ public class PermadeathManager {
 
         if (oldAbsoluteFile.exists()) {
             try (FileReader reader = new FileReader(oldAbsoluteFile)) {
-                Type type = (new TypeToken<Map<String, Boolean>>() {
-                }).getType();
+                Type type = (new TypeToken<Map<String, Boolean>>() {}).getType();
                 Map<String, Boolean> oldData = (Map)this.gson.fromJson(reader, type);
 
                 if (oldData != null) {
@@ -134,8 +138,7 @@ public class PermadeathManager {
                             if (entry.getValue()) {
                                 this.permadeathModes.put(playerId, PermadeathManager.PermadeathMode.ABSOLUTE);
                             }
-                        } catch (IllegalArgumentException e) {
-                        }
+                        } catch (IllegalArgumentException e) {}
                     }
 
                     migrated = true;
@@ -149,16 +152,18 @@ public class PermadeathManager {
             this.savePermadeathData();
             this.plugin.getLogger().info("PermadeathManager: Migrated old permadeath data to new format");
         }
-
     }
 
+    /**
+     * Save the playerbase's permadeath preferences inside a file.
+     */
     private void savePermadeathData() {
         try {
             if (!this.plugin.getDataFolder().exists()) {
                 this.plugin.getDataFolder().mkdirs();
             }
 
-            Map<String, String> rawData = new HashMap();
+            Map<String, String> rawData = new HashMap<>();
 
             for(Map.Entry<UUID, PermadeathMode> entry : this.permadeathModes.entrySet()) {
                 rawData.put(((UUID)entry.getKey()).toString(), ((PermadeathMode)entry.getValue()).name());
@@ -170,7 +175,6 @@ public class PermadeathManager {
         } catch (IOException e) {
             this.plugin.getLogger().severe("PermadeathManager: Failed to save permadeath data: " + e.getMessage());
         }
-
     }
 
     public void shutdown() {

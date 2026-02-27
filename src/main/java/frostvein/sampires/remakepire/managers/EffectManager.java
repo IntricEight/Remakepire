@@ -24,8 +24,13 @@ public class EffectManager {
     private BukkitTask effectTask;
     private final NamespacedKey SUN_WEAKNESS_SPEED_KEY;
     private final NamespacedKey VAMPIRE_SAFE_FALL_KEY;
-    private final Map<UUID, Long> lastTrialOmenApplied = new HashMap();
+    private final Map<UUID, Long> lastTrialOmenApplied = new HashMap<>();
 
+    /**
+     * Create an instance of the Vampire Effects manager.
+     *
+     * @param plugin the host plugin object.
+     */
     public EffectManager(RemakepirePlugin plugin) {
         this.plugin = plugin;
         this.vampireManager = plugin.getVampireManager();
@@ -42,7 +47,6 @@ public class EffectManager {
         if (this.effectTask != null) {
             this.effectTask.cancel();
         }
-
     }
 
     private void applyVampireEffects() {
@@ -78,6 +82,7 @@ public class EffectManager {
                 UUID playerUUID = player.getUniqueId();
                 Long lastApplied = (Long)this.lastTrialOmenApplied.get(playerUUID);
                 boolean shouldApplyTrialOmen = lastApplied == null || currentTime - lastApplied >= 300000L;
+
                 if (shouldApplyTrialOmen && !player.hasPotionEffect(PotionEffectType.INVISIBILITY) && player.getGameMode() == GameMode.SURVIVAL) {
                     if (stage == 2) {
                         player.addPotionEffect(new PotionEffect(PotionEffectType.TRIAL_OMEN, 6000, 0, false, false, true));

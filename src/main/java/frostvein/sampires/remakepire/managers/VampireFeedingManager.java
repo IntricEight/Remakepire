@@ -25,18 +25,28 @@ public class VampireFeedingManager implements Listener {
     private final VampireManager vampireManager;
     private final ThirstManager thirstManager;
     private final ConfigManager configManager;
+    // Controls the distance players can be while feeding
     private static final double FEEDING_RANGE = 1.5;
+    // Controls the time a vampire needs to be crouching nearby before feeding begins
     private static final int PREPARATION_TIME = 5;
+    // Controls how quickly humans are hurt by feeding
     private static final double HEALTH_DRAIN_PER_SECOND = 1.0;
+    // Controls how quickly vampires gain blood from feeding
     private static final int THIRST_GAIN_PER_SECOND = 2;
-    private final Map<UUID, FeedingSession> activeSessions = new HashMap();
-    private final Map<UUID, Integer> sessionFeedingThirst = new HashMap();
+    private final Map<UUID, FeedingSession> activeSessions = new HashMap<>();
+    private final Map<UUID, Integer> sessionFeedingThirst = new HashMap<>();
 
+    /**
+     * Create an instance of the Vampire Feeding manager.
+     *
+     * @param plugin the host plugin object.
+     */
     public VampireFeedingManager(RemakepirePlugin plugin) {
         this.plugin = plugin;
         this.vampireManager = plugin.getVampireManager();
         this.thirstManager = plugin.getThirstManager();
         this.configManager = plugin.getConfigManager();
+
         Bukkit.getPluginManager().registerEvents(this, plugin);
         this.startFeedingDetectionTask();
         plugin.getLogger().info("VampireFeedingManager initialized");
@@ -109,8 +119,9 @@ public class VampireFeedingManager implements Listener {
     private void processActiveFeedingPhase(FeedingSession session, Player vampire, Player target) {
         if (this.vampireManager.isHuman(target)) {
             UUID vampireId = vampire.getUniqueId();
-            int currentSessionThirst = (Integer)this.sessionFeedingThirst.getOrDefault(vampireId, 0);
+            int currentSessionThirst = this.sessionFeedingThirst.getOrDefault(vampireId, 0);
             int maxFeedingThirst = this.configManager.getMaxFeedingThirstPerSession();
+
             if (currentSessionThirst >= maxFeedingThirst) {
                 vampire.sendMessage("§cYour thirst is quenched, for now. You are unable to drink any more blood from feeding until the next session.");
                 this.cancelFeedingSession(session);
@@ -123,16 +134,19 @@ public class VampireFeedingManager implements Listener {
                 return;
             }
 
-            double newHealth = currentHealth - 1.0;
+            double newHealth = currentHealth - HEALTH_DRAIN_PER_SECOND;
             target.setHealth(newHealth);
             int currentFoodLevel = target.getFoodLevel();
             int newFoodLevel = Math.max(0, currentFoodLevel - 1);
             target.setFoodLevel(newFoodLevel);
             int thirstToGive = Math.min(2, maxFeedingThirst - currentSessionThirst);
+
             this.thirstManager.modifyQuench(vampire, thirstToGive);
             this.sessionFeedingThirst.put(vampireId, currentSessionThirst + thirstToGive);
+
             this.plugin.getSessionManager().sendActionBar(vampire, "§4Feeding...");
             this.plugin.getSessionManager().sendActionBar(target, "§cYour life force is being drained...");
+
         } else {
             if (target.getExp() <= 0.1F) {
                 vampire.sendMessage("§cThe vampiric essence has become too low to continue siphoning from.");
@@ -140,8 +154,8 @@ public class VampireFeedingManager implements Listener {
                 return;
             }
 
-            this.thirstManager.modifyQuench(target, -2);
-            this.thirstManager.modifyQuench(vampire, 2);
+            this.thirstManager.modifyQuench(target, -1 * THIRST_GAIN_PER_SECOND);
+            this.thirstManager.modifyQuench(vampire, THIRST_GAIN_PER_SECOND);
             this.plugin.getSessionManager().sendActionBar(vampire, "§4Siphoning...");
             this.plugin.getSessionManager().sendActionBar(target, "§cYour vampiric essence is being siphoned...");
         }
@@ -158,8 +172,10 @@ public class VampireFeedingManager implements Listener {
             target.addScoreboardTag("PermadeathChosen");
             target.setHealth(0.0);
             this.cancelFeedingSession(session);
+
         } else if (this.plugin.getBeetrootManager().hasBeetrootImmunity(target)) {
             vampire.sendMessage("§cThe sting of garlic sears at your gums, protecting your meal from your bite.");
+
             if (this.plugin.getVampireTurningManager().isTurningEnabled(vampire)) {
                 vampire.sendMessage("§cYou have failed to turn " + target.getName() + " - they will die as a human, wounded.");
             } else {
@@ -171,10 +187,12 @@ public class VampireFeedingManager implements Listener {
             target.sendMessage("§aYou will respawn as a human, not as a cursed creature.");
             target.setHealth(0.0);
             this.cancelFeedingSession(session);
+
         } else if (!this.plugin.getVampireTurningManager().isTurningEnabled(vampire)) {
             try {
                 Scoreboard mainScoreboard = Bukkit.getScoreboardManager().getMainScoreboard();
                 Objective deathObjective = mainScoreboard.getObjective("vsmp_death");
+
                 if (deathObjective != null) {
                     int currentDeaths = deathObjective.getScore(target.getName()).getScore();
 
@@ -236,7 +254,7 @@ public class VampireFeedingManager implements Listener {
         if (!vampire.getWorld().equals(target.getWorld())) {
             return false;
         } else {
-            return vampire.getLocation().distance(target.getLocation()) <= 1.5;
+            return vampire.getLocation().distance(target.getLocation()) <= FEEDING_RANGE;
         }
     }
 
@@ -245,7 +263,8 @@ public class VampireFeedingManager implements Listener {
             if (vampire.isSneaking()) {
                 if (this.vampireManager.isVampire(vampire)) {
                     UUID vampireId = vampire.getUniqueId();
-                    int currentSessionThirst = (Integer)this.sessionFeedingThirst.getOrDefault(vampireId, 0);
+                    int currentSessionThirst = this.sessionFeedingThirst.getOrDefault(vampireId, 0);
+
                     if (currentSessionThirst >= this.configManager.getMaxFeedingThirstPerSession()) {
                         vampire.sendMessage("§cYour thirst is quenched, for now. You are unable to drink any more blood from feeding until the next session.");
                     } else {
@@ -279,7 +298,6 @@ public class VampireFeedingManager implements Listener {
                                 }
                             }
                         }
-
                     }
                 }
             }
@@ -289,6 +307,7 @@ public class VampireFeedingManager implements Listener {
     private void cancelFeedingSession(FeedingSession session) {
         Player vampire = Bukkit.getPlayer(session.vampireId);
         Player target = Bukkit.getPlayer(session.targetId);
+
         if (target != null && target.isOnline() && session.phase == VampireFeedingManager.FeedingPhase.ACTIVE_FEEDING) {
             target.sendMessage("§aYou no longer feel a vampire draining your life force");
         }
@@ -299,18 +318,23 @@ public class VampireFeedingManager implements Listener {
     public void cancelFeedingSessionByTarget(Player target) {
         UUID targetId = target.getUniqueId();
 
-        for(FeedingSession session : (FeedingSession[])this.activeSessions.values().toArray(new FeedingSession[0])) {
+        for(FeedingSession session : this.activeSessions.values().toArray(new FeedingSession[0])) {
             if (session.targetId.equals(targetId)) {
                 this.cancelFeedingSession(session);
                 return;
             }
         }
-
     }
 
+    /**
+     *
+     *
+     * @param event a player beginning or stopping to sneak.
+     */
     @EventHandler
     public void onPlayerToggleSneak(PlayerToggleSneakEvent event) {
         Player player = event.getPlayer();
+
         if (this.vampireManager.isVampire(player) && player.getGameMode() != GameMode.SPECTATOR) {
             if (this.plugin.getSessionManager().isSessionActive()) {
                 if (event.isSneaking()) {
@@ -318,34 +342,39 @@ public class VampireFeedingManager implements Listener {
                         if (player.isOnline() && player.isSneaking()) {
                             this.attemptStartFeeding(player);
                         }
-
                     }, 1L);
+
                 } else {
-                    FeedingSession session = (FeedingSession)this.activeSessions.get(player.getUniqueId());
+                    FeedingSession session = this.activeSessions.get(player.getUniqueId());
+
                     if (session != null) {
                         this.cancelFeedingSession(session);
                     }
                 }
-
             }
         }
     }
 
+    /**
+     *
+     *
+     * @param event a player leaving the world.
+     */
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
         Player player = event.getPlayer();
         UUID playerId = player.getUniqueId();
-        FeedingSession session = (FeedingSession)this.activeSessions.get(playerId);
+        FeedingSession session = this.activeSessions.get(playerId);
+
         if (session != null) {
             this.cancelFeedingSession(session);
         }
 
-        for(FeedingSession activeSession : (FeedingSession[])this.activeSessions.values().toArray(new FeedingSession[0])) {
+        for(FeedingSession activeSession : this.activeSessions.values().toArray(new FeedingSession[0])) {
             if (activeSession.targetId.equals(playerId)) {
                 this.cancelFeedingSession(activeSession);
             }
         }
-
     }
 
     public int getActiveFeedingCount() {
@@ -371,7 +400,7 @@ public class VampireFeedingManager implements Listener {
     }
 
     public int getSessionFeedingThirst(Player vampire) {
-        return (Integer)this.sessionFeedingThirst.getOrDefault(vampire.getUniqueId(), 0);
+        return this.sessionFeedingThirst.getOrDefault(vampire.getUniqueId(), 0);
     }
 
     public int getMaxFeedingThirstPerSession() {
@@ -379,7 +408,7 @@ public class VampireFeedingManager implements Listener {
     }
 
     public void shutdown() {
-        for(FeedingSession session : (FeedingSession[])this.activeSessions.values().toArray(new FeedingSession[0])) {
+        for(FeedingSession session : this.activeSessions.values().toArray(new FeedingSession[0])) {
             this.cancelFeedingSession(session);
         }
 
@@ -402,7 +431,7 @@ public class VampireFeedingManager implements Listener {
             this.targetId = targetId;
             this.startTime = System.currentTimeMillis();
             this.phase = VampireFeedingManager.FeedingPhase.PREPARATION;
-            this.preparationSecondsRemaining = 5;
+            this.preparationSecondsRemaining = PREPARATION_TIME;
             this.highPitch = true;
         }
     }

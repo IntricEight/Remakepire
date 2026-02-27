@@ -23,8 +23,8 @@ import frostvein.sampires.remakepire.RemakepirePlugin;
 
 public class SessionManager {
     private final RemakepirePlugin plugin;
-    private final Map<UUID, Integer> pausedFoodLevels = new HashMap();
-    private final Map<UUID, Float> pausedSaturationLevels = new HashMap();
+    private final Map<UUID, Integer> pausedFoodLevels = new HashMap<>();
+    private final Map<UUID, Float> pausedSaturationLevels = new HashMap<>();
 
     private Objective sessionObjective, sessionIDObjective, gameIDObjective;
     public static final int BEFORE_SESSION = 0;
@@ -53,6 +53,11 @@ public class SessionManager {
     public static final String BLESSING_USED_SESSION = "blessing_used_session";
     public static final List<String> INFORMED_CONSTANTS = Arrays.asList(INFORMED_IRON_BLOCK_REPEL, INFORMED_CRAFTING_ITEMS, INFORMED_PICKUP_ITEM, INFORMED_PICKUP_HOLY_WATER, INFORMED_USE_HOLY_WATER, INFORMED_IRON_BLOCK_WEAKNESS, INFORMED_SUCCESSFUL_FEEDING, INFORMED_BLOOD_MOON, INFORMED_ENCHANTING_ITEMS, INFORMED_WEAPON_WEAKNESS, INFORMED_VAMPIRE_CLAWS, INFORMED_BOUNDARY, STOPTHEBLEEDING_USED_SESSION, BLESSING_USED_SESSION);
 
+    /**
+     * Create an instance of the Session manager.
+     *
+     * @param plugin the host plugin object.
+     */
     public SessionManager(RemakepirePlugin plugin) {
         this.plugin = plugin;
     }
@@ -85,6 +90,7 @@ public class SessionManager {
         (new BukkitRunnable() {
             public void run() {
                 int sessionState = SessionManager.this.getSessionState();
+
                 if (sessionState == PAUSED) {
                     SessionManager.this.restorePausedFoodLevels();
 
@@ -131,19 +137,13 @@ public class SessionManager {
     }
 
     private String getSessionStatusMessage() {
-        switch (this.getSessionState()) {
-            case BEFORE_SESSION:
-                return "§e§lSession is primed and ready to start";
-            case PAUSED:
-                return "§6§lSession is currently paused";
-            case AFTER_SESSION:
-                return "§c§lSession has ended";
-            case PRE_SESSION:
-                return "§b§lBuilding Mode - interactions enabled";
-            case IN_SESSION:
-            default:
-                return "§7§lSession status unknown";
-        }
+        return switch (this.getSessionState()) {
+            case BEFORE_SESSION -> "§e§lSession is primed and ready to start";
+            case PAUSED -> "§6§lSession is currently paused";
+            case AFTER_SESSION -> "§c§lSession has ended";
+            case PRE_SESSION -> "§b§lBuilding Mode - interactions enabled";
+            default -> "§7§lSession status unknown";    // IN_SESSION is included in default
+        };
     }
 
     private void applySaturationToAllPlayers() {
@@ -448,6 +448,7 @@ public class SessionManager {
 
     private void setInSessionRules() {
         World world = this.plugin.getWorld();
+
         world.setGameRule(GameRule.DO_DAYLIGHT_CYCLE, true);
         world.setGameRule(GameRule.DO_WEATHER_CYCLE, false);
         world.setGameRule(GameRule.DO_MOB_SPAWNING, true);
@@ -463,6 +464,7 @@ public class SessionManager {
 
     private void setOutOfSessionRules() {
         World world = this.plugin.getWorld();
+
         world.setGameRule(GameRule.DO_DAYLIGHT_CYCLE, false);
         world.setGameRule(GameRule.DO_WEATHER_CYCLE, false);
         world.setGameRule(GameRule.DO_MOB_SPAWNING, false);

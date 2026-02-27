@@ -37,15 +37,20 @@ public class VampireAbilityManager {
     private final RemakepirePlugin plugin;
     private final VampireManager vampireManager;
     private final SessionManager sessionManager;
-    private final Map<UUID, Map<String, Long>> abilityCooldowns = new ConcurrentHashMap();
-    private final Map<String, GlobalCooldownData> globalCooldowns = new ConcurrentHashMap();
-    private final Map<UUID, Integer> invisibilityAttackCounts = new ConcurrentHashMap();
-    private final Map<String, VampireAbility> abilities = new HashMap();
+    private final Map<UUID, Map<String, Long>> abilityCooldowns = new ConcurrentHashMap<>();
+    private final Map<String, GlobalCooldownData> globalCooldowns = new ConcurrentHashMap<>();
+    private final Map<UUID, Integer> invisibilityAttackCounts = new ConcurrentHashMap<>();
+    private final Map<String, VampireAbility> abilities = new HashMap<>();
     private File cooldownFile;
     private File globalCooldownFile;
     private BukkitTask cooldownTask;
     private static final String COOLDOWN_FILE_VERSION = "VERSION:2";
 
+    /**
+     * Create an instance of the Vampire Ability manager.
+     *
+     * @param plugin the host plugin object.
+     */
     public VampireAbilityManager(RemakepirePlugin plugin) {
         this.plugin = plugin;
         this.vampireManager = plugin.getVampireManager();
@@ -57,6 +62,9 @@ public class VampireAbilityManager {
         this.loadGlobalCooldowns();
     }
 
+    /**
+     * Create the files to store individual and global ability cooldowns in.
+     */
     private void setupPersistence() {
         if (!this.plugin.getDataFolder().exists()) {
             this.plugin.getDataFolder().mkdirs();
@@ -89,6 +97,7 @@ public class VampireAbilityManager {
         this.registerAbility(new BeaconTeleportAbility());
         this.registerAbility(new BatAbility());
         this.registerAbility(new VampireVisionAbility());
+
         this.plugin.getLogger().info("Registered " + this.abilities.size() + " vampire abilities");
     }
 
@@ -110,6 +119,7 @@ public class VampireAbilityManager {
 
         for(UUID playerId : this.abilityCooldowns.keySet()) {
             Player player = Bukkit.getPlayer(playerId);
+
             if (player != null && player.isOnline()) {
                 Map<String, Long> playerCooldowns = (Map)this.abilityCooldowns.get(playerId);
                 Iterator<Map.Entry<String, Long>> iterator = playerCooldowns.entrySet().iterator();
@@ -118,6 +128,7 @@ public class VampireAbilityManager {
                     Map.Entry<String, Long> entry = (Map.Entry)iterator.next();
                     String abilityName = (String)entry.getKey();
                     long cooldownEnd = (Long)entry.getValue();
+
                     if (currentTime >= cooldownEnd) {
                         iterator.remove();
                         this.notifyAbilityReady(player, abilityName);
@@ -129,7 +140,6 @@ public class VampireAbilityManager {
                 }
             }
         }
-
     }
 
     private void checkGlobalCooldownExpirations() {
@@ -140,6 +150,7 @@ public class VampireAbilityManager {
             Map.Entry<String, GlobalCooldownData> entry = (Map.Entry)iterator.next();
             String abilityName = (String)entry.getKey();
             GlobalCooldownData data = (GlobalCooldownData)entry.getValue();
+
             if (currentTime >= data.endTime) {
                 iterator.remove();
                 this.notifyGlobalAbilityReady(abilityName);
@@ -150,17 +161,18 @@ public class VampireAbilityManager {
     }
 
     private void notifyAbilityReady(Player player, String abilityName) {
-        VampireAbility ability = (VampireAbility)this.abilities.get(abilityName.toLowerCase());
+        VampireAbility ability = this.abilities.get(abilityName.toLowerCase());
+
         if (ability != null) {
             player.sendMessage("§a§l⚡ ABILITY READY ⚡");
             player.sendMessage("§a" + ability.getDisplayName() + " is now available.");
             player.playSound(player, Sound.BLOCK_NOTE_BLOCK_CHIME, SoundCategory.MASTER, 0.5F, 2.0F);
         }
-
     }
 
     private void notifyGlobalAbilityReady(String abilityName) {
-        VampireAbility ability = (VampireAbility)this.abilities.get(abilityName.toLowerCase());
+        VampireAbility ability = this.abilities.get(abilityName.toLowerCase());
+
         if (ability != null) {
             for(Player player : Bukkit.getOnlinePlayers()) {
                 if (this.vampireManager.isVampire(player) && ability.canUse(player, this.vampireManager)) {
@@ -169,7 +181,6 @@ public class VampireAbilityManager {
                     player.playSound(player, Sound.BLOCK_NOTE_BLOCK_BELL, SoundCategory.MASTER, 0.7F, 1.5F);
                 }
             }
-
         }
     }
 
@@ -177,43 +188,55 @@ public class VampireAbilityManager {
         if (!this.vampireManager.isVampire(player)) {
             player.sendMessage("§cOnly vampires can use abilities.");
             return false;
+
         } else if (player.getGameMode() == GameMode.SPECTATOR) {
             player.sendMessage("§cYou cannot use vampire abilities while in spectator mode.");
             return false;
+
         } else if (!this.sessionManager.isSessionActive()) {
             player.sendMessage("§cAbilities cannot be used while the session is inactive.");
             return false;
+
         } else if (this.plugin.getHolyWaterEffectManager().isAbilitiesDisabled(player)) {
             long remainingTime = this.plugin.getHolyWaterEffectManager().getRemainingDisableTime(player);
             player.sendMessage("§4§lHOLY WATER EFFECT ACTIVE");
             player.sendMessage("§cYour abilities are disabled by holy water!");
             player.sendMessage("§cAbilities will return in approximately " + (remainingTime / 60L + 1L) + " minute(s).");
             return false;
+
         } else {
             TomeAbility holyWordAbility = this.plugin.getTomeManager().getAbility("holyword");
+
             if (holyWordAbility instanceof HolyWordTomeAbility && ((HolyWordTomeAbility)holyWordAbility).isParalyzed(player)) {
                 player.sendMessage("§cYou cannot use abilities while being cured.");
                 return false;
+
             } else if (this.plugin.getForcedCureChoiceManager().hasPendingCure(player)) {
                 player.sendMessage("§cYou cannot use abilities while being cured.");
                 return false;
+
             } else {
                 VampireAbility ability = (VampireAbility)this.abilities.get(abilityName.toLowerCase());
+
                 if (ability == null) {
                     player.sendMessage("§cUnknown ability: " + abilityName);
                     return false;
+
                 } else if (!ability.canUse(player, this.vampireManager)) {
                     String requirement = ability.getRequirementMessage(player, this.vampireManager);
                     player.sendMessage("§c" + requirement);
                     return false;
+
                 } else {
                     if (ability instanceof StormCallAbility) {
                         if (this.isOnGlobalCooldown(abilityName)) {
                             long remainingSeconds = this.getRemainingGlobalCooldown(abilityName);
-                            GlobalCooldownData data = (GlobalCooldownData)this.globalCooldowns.get(abilityName.toLowerCase());
+                            GlobalCooldownData data = this.globalCooldowns.get(abilityName.toLowerCase());
+
                             player.sendMessage("§c§l GLOBAL ABILITY COOLDOWN");
                             player.sendMessage("§c" + ability.getDisplayName() + " was recently used by " + data.lastUserName + ".");
                             player.sendMessage("§cIt will be available to all vampires in " + formatTime(remainingSeconds) + ".");
+
                             return false;
                         }
                     } else {
@@ -258,7 +281,7 @@ public class VampireAbilityManager {
     }
 
     public boolean applyCooldownForAbility(Player player, String abilityName) {
-        VampireAbility ability = (VampireAbility)this.abilities.get(abilityName.toLowerCase());
+        VampireAbility ability = this.abilities.get(abilityName.toLowerCase());
 
         if (ability == null) {
             return false;
@@ -298,7 +321,8 @@ public class VampireAbilityManager {
     }
 
     public boolean isOnGlobalCooldown(String abilityName) {
-        GlobalCooldownData data = (GlobalCooldownData)this.globalCooldowns.get(abilityName.toLowerCase());
+        GlobalCooldownData data = this.globalCooldowns.get(abilityName.toLowerCase());
+
         if (data == null) {
             return false;
         } else {
@@ -315,7 +339,7 @@ public class VampireAbilityManager {
             return 0L;
 
         } else {
-            Long cooldownEnd = (Long)playerCooldowns.get(abilityName.toLowerCase());
+            Long cooldownEnd = playerCooldowns.get(abilityName.toLowerCase());
 
             if (cooldownEnd == null) {
                 return 0L;
@@ -328,7 +352,7 @@ public class VampireAbilityManager {
     }
 
     public long getRemainingGlobalCooldown(String abilityName) {
-        GlobalCooldownData data = (GlobalCooldownData)this.globalCooldowns.get(abilityName.toLowerCase());
+        GlobalCooldownData data = this.globalCooldowns.get(abilityName.toLowerCase());
 
         if (data == null) {
             return 0L;
@@ -368,7 +392,7 @@ public class VampireAbilityManager {
     public void clearGlobalCooldowns() {
         if (!this.globalCooldowns.isEmpty()) {
             int clearedCount = this.globalCooldowns.size();
-            List<String> clearedAbilities = new ArrayList(this.globalCooldowns.keySet());
+            List<String> clearedAbilities = new ArrayList<>(this.globalCooldowns.keySet());
             this.globalCooldowns.clear();
             this.plugin.getLogger().info("Cleared " + clearedCount + " global cooldowns for abilities: " + String.join(", ", clearedAbilities));
 
@@ -400,7 +424,7 @@ public class VampireAbilityManager {
     }
 
     public List<VampireAbility> getAvailableAbilities(Player player) {
-        List<VampireAbility> available = new ArrayList();
+        List<VampireAbility> available = new ArrayList<>();
 
         for(VampireAbility ability : this.abilities.values()) {
             if (ability.canUse(player, this.vampireManager)) {
@@ -416,11 +440,12 @@ public class VampireAbilityManager {
     }
 
     public VampireAbility getAbility(String name) {
-        return (VampireAbility)this.abilities.get(name.toLowerCase());
+        return this.abilities.get(name.toLowerCase());
     }
 
     public String getGlobalCooldownInfo(String abilityName) {
-        GlobalCooldownData data = (GlobalCooldownData)this.globalCooldowns.get(abilityName.toLowerCase());
+        GlobalCooldownData data = this.globalCooldowns.get(abilityName.toLowerCase());
+
         if (data != null && this.isOnGlobalCooldown(abilityName)) {
             long remaining = this.getRemainingGlobalCooldown(abilityName);
             return "Global cooldown: " + formatTime(remaining) + " (last used by " + data.lastUserName + ")";
@@ -439,6 +464,7 @@ public class VampireAbilityManager {
                     int loadedCount = 0;
 
                     String line;
+
                     while((line = reader.readLine()) != null) {
                         String[] parts = line.split(":");
 
@@ -474,6 +500,7 @@ public class VampireAbilityManager {
         try {
             try (BufferedReader reader = new BufferedReader(new FileReader(this.globalCooldownFile))) {
                 String firstLine = reader.readLine();
+
                 if (firstLine != null && firstLine.equals("VERSION:2")) {
                     int loadedCount = 0;
 
@@ -544,7 +571,6 @@ public class VampireAbilityManager {
         } catch (IOException e) {
             this.plugin.getLogger().warning("Could not save global ability cooldowns: " + e.getMessage());
         }
-
     }
 
     public static String formatTime(long seconds) {
@@ -555,7 +581,8 @@ public class VampireAbilityManager {
 
     public boolean trackInvisibilityAttack(Player player) {
         UUID playerId = player.getUniqueId();
-        int attackCount = (Integer)this.invisibilityAttackCounts.getOrDefault(playerId, 0) + 1;
+        int attackCount = this.invisibilityAttackCounts.getOrDefault(playerId, 0) + 1;
+
         if (attackCount >= 3) {
             this.invisibilityAttackCounts.remove(playerId);
             return true;

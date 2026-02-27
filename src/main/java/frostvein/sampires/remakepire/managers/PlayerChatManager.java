@@ -17,8 +17,13 @@ import frostvein.sampires.remakepire.RemakepirePlugin;
 
 public class PlayerChatManager implements Listener {
     private RemakepirePlugin plugin;
-    private final Map<Player, String> pendingMessages = new HashMap();
+    private final Map<Player, String> pendingMessages = new HashMap<>();
 
+    /**
+     * Create an instance of the Player Chat manager.
+     *
+     * @param plugin the host plugin object.
+     */
     public PlayerChatManager(RemakepirePlugin plugin) {
         this.plugin = plugin;
     }
@@ -36,6 +41,7 @@ public class PlayerChatManager implements Listener {
     )
     public void onAsyncPlayerChat(AsyncPlayerChatEvent event) {
         Player player = event.getPlayer();
+
         if (this.plugin.getConfigManager().isFirstMessageBlockingEnabled()) {
             if (event.getPlayer().getScoreboardTags().contains("ChatPrevented")) {
                 event.setCancelled(true);
@@ -73,7 +79,7 @@ public class PlayerChatManager implements Listener {
     }
 
     public void handleSendPendingMessage(Player player) {
-        String pendingMessage = (String)this.pendingMessages.get(player);
+        String pendingMessage = this.pendingMessages.get(player);
 
         if (pendingMessage != null) {
             player.getServer().broadcastMessage("<" + player.getName() + "> " + pendingMessage);

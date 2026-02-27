@@ -25,10 +25,16 @@ public class TomeDistributionManager {
     private final Random random;
     private BukkitTask distributionTask;
     private int distributionCount = 4;
-    private List<Location> tomeLocations = new ArrayList();
+    private List<Location> tomeLocations = new ArrayList<>();
     private final String[] tomeTypes = new String[]{"BanishUndead", "Blessing", "EnlightenedEye", "HolyWord", "LanternThrash", "PrayerOfFaith", "RallyingCry", "ShoulderBarge", "TurnUndead", "UncannyDirection", "UnnaturalHaste", "WayOfTheLand", "WayOfTheLumberjack", "WayOfTheProspector"};
     private final Enchantment[] enchantmentTypes;
 
+    /**
+     * Create an instance of the Armor Storage manager.
+     *
+     * @param plugin the host plugin object.
+     * @param configManager the manager for the config values.
+     */
     public TomeDistributionManager(RemakepirePlugin plugin, ConfigManager configManager) {
         this.plugin = plugin;
         this.enchantmentTypes = new Enchantment[]{Enchantment.EFFICIENCY, Enchantment.PROTECTION, Enchantment.FEATHER_FALLING, Enchantment.KNOCKBACK, Enchantment.SWEEPING_EDGE};
@@ -40,12 +46,12 @@ public class TomeDistributionManager {
 
     private void initializeTomeLocations() {
         this.tomeLocations = this.configManager.getTomeChestLocations();
+
         if (this.tomeLocations.isEmpty()) {
             this.plugin.getLogger().warning("TomeDistributionManager: No tome locations found in config!");
         } else {
             this.plugin.getLogger().info("TomeDistributionManager: Loaded " + this.tomeLocations.size() + " tome locations from config");
         }
-
     }
 
     private void startDistributionTask() {
@@ -65,7 +71,7 @@ public class TomeDistributionManager {
                 this.distributeTomeToLocation(location, randomTome);
             }
 
-            List<Location> emptyLocations = new ArrayList(this.tomeLocations);
+            List<Location> emptyLocations = new ArrayList<>(this.tomeLocations);
             emptyLocations.removeAll(tomeSelectedLocations);
 
             for(Location location : emptyLocations) {
@@ -75,8 +81,9 @@ public class TomeDistributionManager {
             boolean cureBooksEnabled = this.configManager.isCureBooksEnabled();
             double cureBooksSpawnChance = this.configManager.getCureBooksSpawnChance();
             boolean cureBookAdded = false;
+
             if (cureBooksEnabled && this.random.nextDouble() < cureBooksSpawnChance) {
-                Location randomLocation = (Location)this.tomeLocations.get(this.random.nextInt(this.tomeLocations.size()));
+                Location randomLocation = this.tomeLocations.get(this.random.nextInt(this.tomeLocations.size()));
                 this.replaceCureBookAtLocation(randomLocation);
                 cureBookAdded = true;
             }
@@ -96,7 +103,7 @@ public class TomeDistributionManager {
     }
 
     private List<Location> selectRandomLocations() {
-        List<Location> availableLocations = new ArrayList(this.tomeLocations);
+        List<Location> availableLocations = new ArrayList<>(this.tomeLocations);
         Collections.shuffle(availableLocations, this.random);
         int locationsToSelect = Math.min(this.distributionCount, availableLocations.size());
         return availableLocations.subList(0, locationsToSelect);
@@ -123,12 +130,14 @@ public class TomeDistributionManager {
     private ItemStack createTomeItem(String tomeType) {
         ItemStack tome = new ItemStack(Material.WRITTEN_BOOK);
         BookMeta bookMeta = (BookMeta)tome.getItemMeta();
+
         if (bookMeta != null) {
             bookMeta.setTitle(tomeType);
             bookMeta.setAuthor("§6A source unknown...");
             TomeAbility ability = this.plugin.getTomeManager().getAbility(tomeType);
+
             if (ability != null) {
-                List<String> lore = new ArrayList();
+                List<String> lore = new ArrayList<>();
                 String[] descriptionLines = ability.getDescriptionLines();
 
                 for(String line : descriptionLines) {
@@ -140,10 +149,11 @@ public class TomeDistributionManager {
                 bookMeta.setLore(lore);
             }
 
-            List<String> pages = new ArrayList();
+            List<String> pages = new ArrayList<>();
             StringBuilder pageContent = new StringBuilder();
             pageContent.append("§5§lANCIENT KNOWLEDGE§r\n\n");
             pageContent.append("§8The secrets of ").append(tomeType).append(" are contained within these pages.\n\n");
+
             if (ability != null) {
                 String[] descriptionLines = ability.getDescriptionLines();
 
@@ -166,6 +176,7 @@ public class TomeDistributionManager {
     private ItemStack createRandomEnchantmentBook() {
         ItemStack enchantedBook = new ItemStack(Material.ENCHANTED_BOOK);
         EnchantmentStorageMeta meta = (EnchantmentStorageMeta)enchantedBook.getItemMeta();
+
         if (meta != null) {
             Enchantment randomEnchantment = this.enchantmentTypes[this.random.nextInt(this.enchantmentTypes.length)];
             int level = 1;
@@ -178,6 +189,7 @@ public class TomeDistributionManager {
 
     private void addEnchantmentBookToLocation(Location location) {
         Block block = location.getBlock();
+
         if (block.getType() != Material.CHEST) {
             block.setType(Material.CHEST);
             this.plugin.getLogger().info("TomeDistributionManager: Created chest at " + this.locationToString(location));
@@ -186,12 +198,13 @@ public class TomeDistributionManager {
         Chest chest = (Chest)block.getState();
         ItemStack enchantmentBook = this.createRandomEnchantmentBook();
         Inventory chestInventory = chest.getInventory();
-        chestInventory.addItem(new ItemStack[]{enchantmentBook});
+        chestInventory.addItem(enchantmentBook);
         this.plugin.getLogger().info("TomeDistributionManager: Added enchantment book to chest at " + this.locationToString(location));
     }
 
     private void replaceCureBookAtLocation(Location location) {
         Block block = location.getBlock();
+
         if (block.getType() != Material.CHEST) {
             block.setType(Material.CHEST);
             this.plugin.getLogger().info("TomeDistributionManager: Created chest at " + this.locationToString(location));
@@ -201,7 +214,7 @@ public class TomeDistributionManager {
         Inventory chestInventory = chest.getInventory();
         chestInventory.clear();
         ItemStack cureBook = this.createRandomCureBook();
-        chestInventory.addItem(new ItemStack[]{cureBook});
+        chestInventory.addItem(cureBook);
         this.plugin.getLogger().info("TomeDistributionManager: Replaced chest contents with cure book (" + cureBook.getItemMeta().getDisplayName() + ") at " + this.locationToString(location));
     }
 
@@ -216,24 +229,25 @@ public class TomeDistributionManager {
                 case 0:
                     bookMeta.setTitle("The Remedy 1/3");
                     bookMeta.setAuthor("§5An ancient scholar");
-                    bookMeta.setPages(new String[]{"§5§lTHE REMEDY§r\n§8Part I of III\n\n§7In the darkest hours, when the cursed blood burns within your veins, know that salvation exists.\n\n§7The ancients spoke of a trinity of knowledge...", "§7...that when combined, can sever the unholy bond between mortal and monster.\n\n§7This is the first piece of that forbidden wisdom.\n\n§8Read on, seeker of the light..."});
+                    bookMeta.setPages("§5§lTHE REMEDY§r\n§8Part I of III\n\n§7In the darkest hours, when the cursed blood burns within your veins, know that salvation exists.\n\n§7The ancients spoke of a trinity of knowledge...", "§7...that when combined, can sever the unholy bond between mortal and monster.\n\n§7This is the first piece of that forbidden wisdom.\n\n§8Read on, seeker of the light...");
                     break;
                 case 1:
                     bookMeta.setTitle("The Cure 2/3");
                     bookMeta.setAuthor("§5An ancient scholar");
-                    bookMeta.setPages(new String[]{"§5§lTHE CURE§r\n§8Part II of III\n\n§7The second fragment reveals the nature of the curse itself.\n\n§7Born of darkness, sustained by blood, the vampire's existence is a perversion of nature's order...", "§7...yet within this perversion lies the key to its undoing.\n\n§7Holy water, blessed by the righteous, weakens the bond.\n\n§8Continue your search, truth-seeker..."});
+                    bookMeta.setPages("§5§lTHE CURE§r\n§8Part II of III\n\n§7The second fragment reveals the nature of the curse itself.\n\n§7Born of darkness, sustained by blood, the vampire's existence is a perversion of nature's order...", "§7...yet within this perversion lies the key to its undoing.\n\n§7Holy water, blessed by the righteous, weakens the bond.\n\n§8Continue your search, truth-seeker...");
                     break;
                 case 2:
                     bookMeta.setTitle("The Absolution 3/3");
                     bookMeta.setAuthor("§5An ancient scholar");
-                    bookMeta.setPages(new String[]{"§5§lTHE ABSOLUTION§r\n§8Part III of III\n\n§7The final piece completes the trinity.\n\n§7With all three fragments of knowledge, the words of power are revealed:\n\n§6voluntate-mea-hoc-nefandum-vinculum-abicio", "§7Stand near a holy beacon, with holy water upon your person, beneath the light of day.\n\n§7Speak the words, and be free of the curse forevermore.\n\n§8May the light guide your path."});
+                    bookMeta.setPages("§5§lTHE ABSOLUTION§r\n§8Part III of III\n\n§7The final piece completes the trinity.\n\n§7With all three fragments of knowledge, the words of power are revealed:\n\n§6voluntate-mea-hoc-nefandum-vinculum-abicio", "§7Stand near a holy beacon, with holy water upon your person, beneath the light of day.\n\n§7Speak the words, and be free of the curse forevermore.\n\n§8May the light guide your path.");
             }
 
-            List<String> lore = new ArrayList();
+            List<String> lore = new ArrayList<>();
             lore.add("§5An ancient tome of forbidden knowledge");
             lore.add("§7Part " + bookNumber + " of the cure series");
             lore.add("");
             lore.add("§eRead this book to absorb its wisdom");
+
             bookMeta.setLore(lore);
             CureBookReadingListener.markAsAuthenticCureBook(bookMeta, bookNumber, this.plugin);
             book.setItemMeta(bookMeta);
@@ -280,7 +294,7 @@ public class TomeDistributionManager {
     }
 
     public List<Location> getTomeLocations() {
-        return new ArrayList(this.tomeLocations);
+        return new ArrayList<>(this.tomeLocations);
     }
 
     public void triggerDistribution() {

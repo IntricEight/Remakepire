@@ -29,25 +29,33 @@ public class PassiveMobSpawningManager {
     private long lastDaySpawned = -1L;
     private static final long MORNING_START = 0L;
     private static final long MORNING_END = 100L;
-    private final Map<EntityType, Integer> mobTypeWeights = new LinkedHashMap();
-    private final Set<Biome> blacklistedBiomes = new HashSet();
+    private final Map<EntityType, Integer> mobTypeWeights = new LinkedHashMap<>();
+    private final Set<Biome> blacklistedBiomes = new HashSet<>();
 
+    /**
+     * Create an instance of the Passive Mob Spawning manager.
+     *
+     * @param plugin the host plugin object.
+     * @param configManager the manager for the config values.
+     */
     public PassiveMobSpawningManager(RemakepirePlugin plugin, ConfigManager configManager) {
         this.plugin = plugin;
         this.configManager = configManager;
         this.random = new Random();
+
         this.mobTypeWeights.put(EntityType.COW, 30);
         this.mobTypeWeights.put(EntityType.PIG, 30);
         this.mobTypeWeights.put(EntityType.SHEEP, 25);
         this.mobTypeWeights.put(EntityType.CHICKEN, 15);
+
         this.initializeBiomeBlacklist();
+
         if (configManager.isPassiveMobAutoSpawnEnabled()) {
             this.startAutoSpawnTask();
             plugin.getLogger().info("PassiveMobSpawningManager: Initialized with automatic morning spawning (threshold: " + configManager.getPassiveMobMinimumThreshold() + " animals)");
         } else {
             plugin.getLogger().info("PassiveMobSpawningManager: Initialized (manual spawning only)");
         }
-
     }
 
     private void initializeBiomeBlacklist() {
@@ -67,42 +75,46 @@ public class PassiveMobSpawningManager {
         try {
             Biome paleOakForest = Biome.valueOf("PALE_GARDEN");
             this.blacklistedBiomes.add(paleOakForest);
-        } catch (IllegalArgumentException e) {
-        }
+        } catch (IllegalArgumentException e) {}
 
         this.blacklistedBiomes.add(Biome.DEEP_DARK);
         this.blacklistedBiomes.add(Biome.DRIPSTONE_CAVES);
         this.blacklistedBiomes.add(Biome.LUSH_CAVES);
         this.blacklistedBiomes.add(Biome.STONY_SHORE);
+
         this.plugin.getLogger().info("PassiveMobSpawningManager: Blacklisted " + this.blacklistedBiomes.size() + " biomes");
     }
 
     public void spawnPassiveMobs() {
         World world = this.plugin.getWorld();
+
         if (world == null) {
             this.plugin.getLogger().warning("PassiveMobSpawningManager: World 'world' not found");
         } else {
             Chunk[] loadedChunks = world.getLoadedChunks();
+
             if (loadedChunks.length == 0) {
                 this.plugin.getLogger().warning("PassiveMobSpawningManager: No loaded chunks found");
             } else {
                 List<Location> validLocations = this.findValidSpawnLocations(world, loadedChunks);
+
                 if (validLocations.isEmpty()) {
                     this.plugin.getLogger().warning("PassiveMobSpawningManager: No valid spawn locations found");
                 } else {
                     Collections.shuffle(validLocations, this.random);
                     int mobsSpawned = 0;
-                    Map<EntityType, Integer> spawnCounts = new HashMap();
+                    Map<EntityType, Integer> spawnCounts = new HashMap<>();
                     int mobsToSpawn = this.configManager.getPassiveMobSpawnCount();
 
                     for(int i = 0; i < mobsToSpawn && i < validLocations.size(); ++i) {
-                        Location spawnLocation = (Location)validLocations.get(i);
+                        Location spawnLocation = validLocations.get(i);
                         EntityType mobType = this.selectRandomMobType();
 
                         try {
                             world.spawn(spawnLocation, mobType.getEntityClass(), true, (entity) -> entity.setPersistent(true));
                             ++mobsSpawned;
-                            spawnCounts.put(mobType, (Integer)spawnCounts.getOrDefault(mobType, 0) + 1);
+                            spawnCounts.put(mobType, spawnCounts.getOrDefault(mobType, 0) + 1);
+
                         } catch (Exception e) {
                             this.plugin.getLogger().warning("PassiveMobSpawningManager: Failed to spawn " + String.valueOf(mobType) + " at " + this.locationToString(spawnLocation) + ": " + e.getMessage());
                         }
@@ -121,7 +133,7 @@ public class PassiveMobSpawningManager {
     }
 
     private List<Location> findValidSpawnLocations(World world, Chunk[] loadedChunks) {
-        List<Location> validLocations = new ArrayList();
+        List<Location> validLocations = new ArrayList<>();
         int maxLocationsToCheck = 500;
         int locationsChecked = 0;
         List<Chunk> chunkList = Arrays.asList(loadedChunks);
@@ -176,6 +188,7 @@ public class PassiveMobSpawningManager {
 
         for(Map.Entry<EntityType, Integer> entry : this.mobTypeWeights.entrySet()) {
             cumulative += (Integer)entry.getValue();
+
             if (roll < cumulative) {
                 return (EntityType)entry.getKey();
             }
@@ -203,14 +216,17 @@ public class PassiveMobSpawningManager {
 
     private void checkAndSpawnIfNeeded() {
         World world = this.plugin.getWorld();
+
         if (world != null) {
             long worldTime = world.getTime();
             long currentDay = world.getFullTime() / 24000L;
-            boolean isMorning = worldTime >= 0L && worldTime <= 100L;
+            boolean isMorning = worldTime >= MORNING_START && worldTime <= MORNING_END;
+
             if (isMorning && currentDay != this.lastDaySpawned) {
                 int animalCount = this.countPassiveAnimalsInLoadedChunks(world);
                 int threshold = this.configManager.getPassiveMobMinimumThreshold();
                 this.plugin.getLogger().info("PassiveMobSpawningManager: Morning check - Found " + animalCount + " animals (threshold: " + threshold + ")");
+
                 if (animalCount < threshold) {
                     this.plugin.getLogger().info("PassiveMobSpawningManager: Animal count below threshold, spawning animals...");
                     this.spawnPassiveMobs();
@@ -220,7 +236,6 @@ public class PassiveMobSpawningManager {
                     this.lastDaySpawned = currentDay;
                 }
             }
-
         }
     }
 

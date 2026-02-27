@@ -50,6 +50,9 @@ public class InteractionListener implements Listener {
      */
     @EventHandler
     public void onPlayerInteractEntity(PlayerInteractEntityEvent event) {
+
+        // TODO: Prevent vampires from feeding animals with their off-hand
+
         Player player = event.getPlayer();
         Entity targetEntity = event.getRightClicked();
         ItemStack itemInHand = player.getInventory().getItemInMainHand();

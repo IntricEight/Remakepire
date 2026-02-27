@@ -25,9 +25,15 @@ import frostvein.sampires.remakepire.RemakepirePlugin;
 public class HolyWaterEffectManager implements Listener {
     private final RemakepirePlugin plugin;
     private final VampireManager vampireManager;
+    // Controls how long vampiric abilities are disabled (in seconds)
     private static final int DISABLE_DURATION = 120;
-    private final Map<UUID, BukkitTask> disabledVampires = new HashMap();
+    private final Map<UUID, BukkitTask> disabledVampires = new HashMap<>();
 
+    /**
+     * Create an instance of the Holy Water Effects manager.
+     *
+     * @param plugin the host plugin object.
+     */
     public HolyWaterEffectManager(RemakepirePlugin plugin) {
         this.plugin = plugin;
         this.vampireManager = plugin.getVampireManager();
@@ -44,6 +50,7 @@ public class HolyWaterEffectManager implements Listener {
             for(Entity nearby : splashLocation.getWorld().getNearbyEntities(splashLocation, splashRadius, splashRadius, splashRadius)) {
                 if (nearby instanceof Player player) {
                     double distance = nearby.getLocation().distance(splashLocation);
+
                     if (distance <= splashRadius) {
                         this.processHolyWaterHit(player);
                     }
@@ -53,11 +60,11 @@ public class HolyWaterEffectManager implements Listener {
         } else {
             ThrownPotion potion = event.getPotion();
             ItemStack potionItem = potion.getItem();
+
             if (this.isWaterSplashBottle(potionItem)) {
                 for(LivingEntity entity : event.getAffectedEntities()) {
                     this.processHolyWaterHit(entity);
                 }
-
             }
         }
     }
@@ -68,7 +75,6 @@ public class HolyWaterEffectManager implements Listener {
                 this.applyHolyWaterEffect(player);
             }
         }
-
     }
 
     private boolean isWaterSplashBottle(ItemStack item) {
@@ -82,10 +88,12 @@ public class HolyWaterEffectManager implements Listener {
             return true;
         } else {
             PotionMeta potionMeta = (PotionMeta)item.getItemMeta();
+
             if (potionMeta.hasCustomEffects()) {
                 return false;
             } else {
                 PotionType baseType = potionMeta.getBasePotionType();
+
                 if (baseType != null && baseType != PotionType.WATER) {
                     return baseType == PotionType.AWKWARD || baseType == PotionType.MUNDANE || baseType == PotionType.THICK;
                 } else {
@@ -107,7 +115,7 @@ public class HolyWaterEffectManager implements Listener {
         vampire.getWorld().playSound(vampire.getLocation(), Sound.BLOCK_FIRE_EXTINGUISH, SoundCategory.MASTER, 1.0F, 1.0F);
 
         this.notifyVampireDisabled(vampire);
-        BukkitTask enableTask = Bukkit.getScheduler().runTaskLater(this.plugin, () -> this.removeHolyWaterEffect(vampire), 2400L);
+        BukkitTask enableTask = Bukkit.getScheduler().runTaskLater(this.plugin, () -> this.removeHolyWaterEffect(vampire),  (long)(DISABLE_DURATION * 20));
 
         this.disabledVampires.put(vampireId, enableTask);
         this.plugin.getLogger().info("Applied holy water effect to vampire: " + vampire.getName());
@@ -120,6 +128,7 @@ public class HolyWaterEffectManager implements Listener {
     public void removeHolyWaterEffect(Player vampire, boolean notify) {
         UUID vampireId = vampire.getUniqueId();
         BukkitTask task = (BukkitTask)this.disabledVampires.remove(vampireId);
+
         if (task != null && !task.isCancelled()) {
             task.cancel();
         }
@@ -138,12 +147,13 @@ public class HolyWaterEffectManager implements Listener {
     public long getRemainingDisableTime(Player vampire) {
         UUID vampireId = vampire.getUniqueId();
         BukkitTask task = (BukkitTask)this.disabledVampires.get(vampireId);
-        return task == null ? 0L : Math.max(0L, 120L - System.currentTimeMillis() / 1000L % 120L);
+        return task == null ? 0L : Math.max(0L, (long)DISABLE_DURATION - System.currentTimeMillis() / 1000L % (long)DISABLE_DURATION);
     }
 
     private void notifyVampireDisabled(Player vampire) {
         vampire.sendMessage("§cThe holy water sears your vampiric essence!");
-        vampire.sendMessage("§cYour abilities and blood regeneration have been disabled for 2 minutes.");
+        vampire.sendMessage("§cYour abilities and blood regeneration have been disabled for " + (int)(DISABLE_DURATION / 60.0) + " minutes.");
+
         vampire.playSound(vampire, Sound.ENTITY_GENERIC_HURT, SoundCategory.MASTER, 1.0F, 0.8F);
         vampire.playSound(vampire, Sound.BLOCK_FIRE_EXTINGUISH, SoundCategory.MASTER, 1.0F, 1.2F);
         vampire.playSound(vampire, Sound.ENTITY_WITCH_HURT, SoundCategory.MASTER, 0.8F, 1.5F);
@@ -162,11 +172,13 @@ public class HolyWaterEffectManager implements Listener {
         for(Map.Entry<UUID, BukkitTask> entry : this.disabledVampires.entrySet()) {
             UUID vampireId = (UUID)entry.getKey();
             BukkitTask task = (BukkitTask)entry.getValue();
+
             if (task != null && !task.isCancelled()) {
                 task.cancel();
             }
 
             Player vampire = Bukkit.getPlayer(vampireId);
+
             if (vampire != null && vampire.isOnline()) {
                 vampire.sendMessage("§aAn admin has restored your vampiric abilities.");
             }

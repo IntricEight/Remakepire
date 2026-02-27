@@ -25,8 +25,13 @@ import frostvein.sampires.remakepire.listeners.DeathHandler;
 
 public class ForcedCureChoiceManager {
     private final RemakepirePlugin plugin;
-    private final Map<UUID, ForcedCureData> pendingCures = new HashMap();
+    private final Map<UUID, ForcedCureData> pendingCures = new HashMap<>();
 
+    /**
+     * Create an instance of the Force Cure Choice manager.
+     *
+     * @param plugin the host plugin object.
+     */
     public ForcedCureChoiceManager(RemakepirePlugin plugin) {
         this.plugin = plugin;
     }
@@ -39,7 +44,8 @@ public class ForcedCureChoiceManager {
     }
 
     public void reopenChoiceGUI(Player target) {
-        ForcedCureData data = (ForcedCureData)this.pendingCures.get(target.getUniqueId());
+        ForcedCureData data = this.pendingCures.get(target.getUniqueId());
+
         if (data != null) {
             this.applyEffectsAndOpenGUI(target);
         }
@@ -49,9 +55,10 @@ public class ForcedCureChoiceManager {
         target.setAllowFlight(true);
         target.setFlying(true);
         target.setInvulnerable(true);
-        Inventory gui = Bukkit.createInventory((InventoryHolder)null, 27, "§4§lYour Fate Awaits...");
+        Inventory gui = Bukkit.createInventory(null, 27, "§4§lYour Fate Awaits...");
         ItemStack humanityButton = new ItemStack(Material.PLAYER_HEAD);
         ItemMeta humanityMeta = humanityButton.getItemMeta();
+
         if (humanityMeta != null) {
             humanityMeta.setDisplayName("§a§lReturn to Humanity");
             humanityMeta.setLore(Arrays.asList("§7The holy words have broken your curse.", "§7You can feel your humanity returning...", "", "§eClick to accept your return to mortality."));
@@ -60,6 +67,7 @@ public class ForcedCureChoiceManager {
 
         ItemStack deathButton = new ItemStack(Material.SKELETON_SKULL);
         ItemMeta deathMeta = deathButton.getItemMeta();
+
         if (deathMeta != null) {
             deathMeta.setDisplayName("§4§lFinally Accept Death");
             deathMeta.setLore(Arrays.asList("§7You have lived too long as a creature", "§7of darkness. Perhaps it is time to rest...", "", "§c§lWARNING: This will result in permadeath!", "§eClick to embrace the eternal sleep."));
@@ -69,6 +77,7 @@ public class ForcedCureChoiceManager {
         gui.setItem(11, humanityButton);
         gui.setItem(15, deathButton);
         target.openInventory(gui);
+
         target.sendMessage("");
         target.sendMessage("§4§l§m                                                    ");
         target.sendMessage("§4§lHOLY WORDS PIERCE YOUR SOUL");
@@ -83,7 +92,7 @@ public class ForcedCureChoiceManager {
     }
 
     public ForcedCureData getPendingCure(Player player) {
-        return (ForcedCureData)this.pendingCures.get(player.getUniqueId());
+        return this.pendingCures.get(player.getUniqueId());
     }
 
     public void removePendingCure(Player player) {
@@ -91,11 +100,13 @@ public class ForcedCureChoiceManager {
     }
 
     public void handleHumanityChoice(Player target) {
-        ForcedCureData data = (ForcedCureData)this.pendingCures.get(target.getUniqueId());
+        ForcedCureData data = this.pendingCures.get(target.getUniqueId());
+
         if (data != null) {
             target.closeInventory();
             target.setInvulnerable(data.wasInvulnerableBefore);
             target.setAllowFlight(data.hadFlightBefore);
+
             if (!data.hadFlightBefore) {
                 target.setFlying(false);
             }
@@ -108,11 +119,13 @@ public class ForcedCureChoiceManager {
     }
 
     public void handleDeathChoice(Player target) {
-        ForcedCureData data = (ForcedCureData)this.pendingCures.get(target.getUniqueId());
+        ForcedCureData data = this.pendingCures.get(target.getUniqueId());
+
         if (data != null) {
             target.closeInventory();
             target.setInvulnerable(data.wasInvulnerableBefore);
             target.setAllowFlight(data.hadFlightBefore);
+
             if (!data.hadFlightBefore) {
                 target.setFlying(false);
             }
@@ -152,9 +165,11 @@ public class ForcedCureChoiceManager {
 
         Location targetLoc = target.getLocation();
         Location beaconLoc = holyBeacon.getLocation();
+
         target.getWorld().spawnParticle(Particle.SOUL, targetLoc, 100, 1.0, 2.0, 1.0, 0.1);
         target.getWorld().spawnParticle(Particle.EXPLOSION_EMITTER, targetLoc, 1, 0.5, 1.0, 0.5, 0.0);
         target.getWorld().spawnParticle(Particle.EXPLOSION_EMITTER, targetLoc, 5, 1.0, 1.0, 1.0, 0.0);
+
         target.getWorld().playSound(targetLoc, Sound.BLOCK_BELL_USE, SoundCategory.MASTER, 1.5F, 0.8F);
         target.getWorld().playSound(targetLoc, Sound.BLOCK_GLASS_BREAK, SoundCategory.MASTER, 1.0F, 1.0F);
         target.getWorld().playSound(targetLoc, Sound.AMBIENT_SOUL_SAND_VALLEY_MOOD, SoundCategory.MASTER, 1.0F, 1.5F);

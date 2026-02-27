@@ -57,20 +57,31 @@ public class BeaconManager {
     private BukkitTask holyRegenTask;
     private BukkitTask cooldownTrackingTask;
     private BukkitTask beaconMaintenanceTask;
+    // Controls the radius from a beacon that players can be while effecting it
     public static final double BEACON_CONVERSION_RANGE = 3.0;
+    // Controls the radius from a holy beacon where vampires cannot use their abilities
     public static final double HOLY_SUPPRESSION_RANGE = 25.0;
+    // Controls the radius from a holy beacon where humans gain regeneration
     public static final double HOLY_REGENERATION_RANGE = 25.0;
+    // Controls the duration of the holy beacon's regeneration
     private static final int REGEN_DURATION_TICKS = 100;
+    // Controls the intensity of the regeneration
     private static final int REGEN_AMPLIFIER = 0;
     private long lastCooldownUpdate = System.currentTimeMillis();
-    private final Map<String, ItemDisplay> beaconDisplays = new HashMap();
-    private final Map<String, BukkitTask> pendingNeutralBroadcasts = new HashMap();
+    private final Map<String, ItemDisplay> beaconDisplays = new HashMap<>();
+    private final Map<String, BukkitTask> pendingNeutralBroadcasts = new HashMap<>();
 
+    /**
+     * Create an instance of the Beacon manager.
+     *
+     * @param plugin the host plugin object.
+     */
     public BeaconManager(RemakepirePlugin plugin) {
         this.plugin = plugin;
-        this.beacons = new HashMap();
+        this.beacons = new HashMap<>();
         this.dataFile = new File(plugin.getDataFolder(), "beacons.json");
         this.gson = (new GsonBuilder()).setPrettyPrinting().create();
+
         if (!plugin.getDataFolder().exists()) {
             plugin.getDataFolder().mkdirs();
         }
@@ -84,43 +95,59 @@ public class BeaconManager {
         this.startBeaconMaintenanceTask();
     }
 
+    /**
+     * Begin intermittently saving the current beacon conditions.
+     */
     private void startAutoSaveTask() {
         this.autoSaveTask = this.plugin.getServer().getScheduler().runTaskTimer(this.plugin, () -> {
-            if (this.beacons.size() > 0) {
+            if (!this.beacons.isEmpty()) {
                 this.plugin.getLogger().fine("Auto-saving beacons...");
                 this.saveBeacons();
             }
-
         }, 6000L, 6000L);
+
         this.plugin.getLogger().info("Started beacon auto-save task (every 5 minutes)");
     }
 
+    /**
+     * Begin tracking the beacon cooldown values.
+     */
     private void startCooldownTrackingTask() {
         this.cooldownTrackingTask = this.plugin.getServer().getScheduler().runTaskTimer(this.plugin, () -> this.updateBeaconCooldowns(), 20L, 20L);
         this.plugin.getLogger().info("Started beacon cooldown tracking task");
     }
 
+    /**
+     * Begin regularly validating the beacons placed in unloaded chunks.
+     */
     private void startBeaconMaintenanceTask() {
         this.beaconMaintenanceTask = this.plugin.getServer().getScheduler().runTaskTimer(this.plugin, () -> {
             if (this.plugin.getSessionManager().isSessionActive()) {
                 this.performBeaconMaintenance();
             }
-
         }, 1200L, 1200L);
+
         this.plugin.getLogger().info("Started beacon maintenance task (runs every minute during active sessions)");
     }
 
+    /**
+     * Validate the beacons placed in unloaded chunks.
+     */
     private void performBeaconMaintenance() {
         this.forceLoadBeaconChunks();
         this.validateDisplays();
         this.plugin.getLogger().fine("Beacon maintenance completed - chunks loaded and displays validated");
     }
 
+    /**
+     * Force the world to load chunks with beacons in them.
+     */
     private void forceLoadBeaconChunks() {
         int chunksLoaded = 0;
 
         for(BeaconSite beacon : this.beacons.values()) {
             Location location = beacon.getLocation();
+
             if (location != null && location.getWorld() != null && !location.getWorld().isChunkLoaded(location.getBlockX() >> 4, location.getBlockZ() >> 4)) {
                 location.getWorld().loadChunk(location.getBlockX() >> 4, location.getBlockZ() >> 4);
                 ++chunksLoaded;
@@ -130,15 +157,18 @@ public class BeaconManager {
         if (chunksLoaded > 0) {
             this.plugin.getLogger().fine("Force loaded " + chunksLoaded + " beacon chunks");
         }
-
     }
 
+    /**
+     * Update the conversion cooldowns on the beacons every 500 milliseconds.
+     */
     private void updateBeaconCooldowns() {
         if (!this.plugin.getSessionManager().isSessionActive()) {
             this.lastCooldownUpdate = System.currentTimeMillis();
         } else {
             long currentTime = System.currentTimeMillis();
             long timePassed = currentTime - this.lastCooldownUpdate;
+
             if (timePassed >= 500L) {
                 boolean cooldownsChanged = false;
 
@@ -158,6 +188,9 @@ public class BeaconManager {
         }
     }
 
+    /**
+     * Clear the conversion cooldowns on all beacons.
+     */
     public void clearAllBeaconCooldownsForNewSession() {
         int clearedBeacons = 0;
 
@@ -169,28 +202,40 @@ public class BeaconManager {
         }
 
         this.plugin.getLogger().info("NEW SESSION: Cleared conversion cooldowns for " + clearedBeacons + " beacons");
+
         if (clearedBeacons > 0) {
             this.saveBeacons();
         }
     }
 
+    /**
+     * Begin showing particles around beacons while a conversion is happening.
+     */
     private void startConversionCircleParticleTask() {
         this.conversionCircleParticleTask = this.plugin.getServer().getScheduler().runTaskTimer(this.plugin, () -> this.showAllConversionAndSuppressionCircles(), 0L, 4L);
         this.plugin.getLogger().info("Started conversion and suppression circle particle task (every 2 ticks)");
     }
 
+    /**
+     * Begin applying regeneration to nearby humans from a holy beacon.
+     */
     private void startHolyRegenerationTask() {
         this.holyRegenTask = this.plugin.getServer().getScheduler().runTaskTimer(this.plugin, () -> this.applyHolyRegeneration(), 60L, 100L);
         this.plugin.getLogger().info("Started holy beacon regeneration task for humans");
     }
 
+    /**
+     * Apply regeneration to nearby humans from a holy beacon.
+     */
     private void applyHolyRegeneration() {
         for(Player player : this.plugin.getServer().getOnlinePlayers()) {
             if (this.plugin.getVampireManager().isHuman(player)) {
                 BeaconSite nearestHolyBeacon = this.getNearestHolyBeacon(player.getLocation());
+
                 if (nearestHolyBeacon != null) {
-                    PotionEffect regenEffect = new PotionEffect(PotionEffectType.REGENERATION, 100, 0, false, false, true);
+                    PotionEffect regenEffect = new PotionEffect(PotionEffectType.REGENERATION, REGEN_DURATION_TICKS, REGEN_AMPLIFIER, false, false, true);
                     player.addPotionEffect(regenEffect);
+
                     if (!player.hasPotionEffect(PotionEffectType.REGENERATION)) {
                         player.sendMessage("§a§You feel the holy energy rejuvenating you...");
                     }
@@ -199,6 +244,11 @@ public class BeaconManager {
         }
     }
 
+    /**
+     * Create an item display for the beacon.
+     *
+     * @param beacon a beacon of any alignment.
+     */
     public void createBeaconDisplay(BeaconSite beacon) {
         if (beacon != null && beacon.getLocation() != null) {
             Location displayLoc = beacon.getLocation().clone();
@@ -206,15 +256,18 @@ public class BeaconManager {
             ItemStack pumpkinItem = new ItemStack(Material.CARVED_PUMPKIN);
             ItemMeta meta = pumpkinItem.getItemMeta();
             String expectedCMD = this.getCustomModelDataForState(beacon.getState());
+
             if (meta != null) {
                 meta.setDisplayName("§6Beacon: " + beacon.getName());
                 pumpkinItem.setItemMeta(meta);
             }
 
             pumpkinItem.setData(DataComponentTypes.CUSTOM_MODEL_DATA, (CustomModelData)CustomModelData.customModelData().addString(expectedCMD).build());
-            ItemDisplay display = (ItemDisplay)displayLoc.getWorld().spawn(displayLoc, ItemDisplay.class);
+
+            ItemDisplay display = displayLoc.getWorld().spawn(displayLoc, ItemDisplay.class);
             display.setItemStack(pumpkinItem);
             display.setPersistent(true);
+
             Transformation transform = new Transformation(new Vector3f(0.0F, 0.0F, 0.0F), new AxisAngle4f(0.0F, 0.0F, 1.0F, 0.0F), new Vector3f(1.0F, 1.0F, 1.0F), new AxisAngle4f(0.0F, 0.0F, 1.0F, 0.0F));
             display.setTransformation(transform);
 
@@ -225,8 +278,13 @@ public class BeaconManager {
         }
     }
 
+    /**
+     * Update the item display for the beacon.
+     *
+     * @param beacon a beacon of any alignment.
+     */
     public void updateBeaconDisplay(BeaconSite beacon) {
-        ItemDisplay display = (ItemDisplay)this.beaconDisplays.get(beacon.getName().toLowerCase());
+        ItemDisplay display = this.beaconDisplays.get(beacon.getName().toLowerCase());
         if (display != null && display.isValid()) {
             ItemStack pumpkinItem = new ItemStack(Material.CARVED_PUMPKIN);
             ItemMeta meta = pumpkinItem.getItemMeta();
@@ -239,18 +297,25 @@ public class BeaconManager {
 
             pumpkinItem.setData(DataComponentTypes.CUSTOM_MODEL_DATA, (CustomModelData)CustomModelData.customModelData().addString(expectedCMD).build());
             display.setItemStack(pumpkinItem);
+
         } else {
             this.createBeaconDisplay(beacon);
         }
     }
 
+    /**
+     * Remove a beacon's item display.
+     *
+     * @param beaconName the name of the beacon being removed.
+     * @param fallbackLocation the location of the beacon.
+     */
     public void removeBeaconDisplay(String beaconName, Location fallbackLocation) {
         if (fallbackLocation != null && fallbackLocation.getWorld() != null) {
             fallbackLocation.getWorld().loadChunk(fallbackLocation.getBlockX() >> 4, fallbackLocation.getBlockZ() >> 4);
             this.plugin.getLogger().fine("Loaded chunk for beacon removal: " + beaconName);
         }
 
-        ItemDisplay display = (ItemDisplay)this.beaconDisplays.get(beaconName.toLowerCase());
+        ItemDisplay display = this.beaconDisplays.get(beaconName.toLowerCase());
         if (display != null && display.isValid()) {
             display.remove();
             this.beaconDisplays.remove(beaconName.toLowerCase());
@@ -270,23 +335,26 @@ public class BeaconManager {
                 this.plugin.getLogger().info("Removed " + removed + " item displays near beacon: " + beaconName);
             }
         }
-
     }
 
+    /**
+     * Retrieve model data for the beacon alignments.
+     *
+     * @param state the current beacon alignment.
+     * @return A 3-digit string code:<br>{@code "664"} for holy beacons, {@code "665"} for neutral beacons, {@code "666"} for evil beacons, {@code "668"} for cured beacons,
+     */
     private String getCustomModelDataForState(BeaconSite.BeaconState state) {
-        switch (state) {
-            case HOLY:
-                return "664";
-            case DESECRATED:
-                return "666";
-            case PERMANENTLY_DESECRATED:
-                return "668";
-            case NEUTRAL:
-            default:
-                return "665";
-        }
+        return switch (state) {
+            case HOLY -> "664";
+            case DESECRATED -> "666";
+            case PERMANENTLY_DESECRATED -> "668";
+            default -> "665";   // NEUTRAL also falls within default
+        };
     }
 
+    /**
+     * Recreate the beacon item displays.
+     */
     public void recreateAllDisplays() {
         this.plugin.getLogger().info("Recreating item displays for " + this.beacons.size() + " beacons...");
         this.forceLoadBeaconChunks();
@@ -302,6 +370,9 @@ public class BeaconManager {
         }, 1L);
     }
 
+    /**
+     * Clear the beacon displays.
+     */
     public void cleanupAllDisplays() {
         for(ItemDisplay display : this.beaconDisplays.values()) {
             if (display != null && display.isValid()) {
@@ -314,11 +385,15 @@ public class BeaconManager {
         this.plugin.getLogger().info("Cleaned up all beacon displays using both methods");
     }
 
+    /**
+     * Remove all item displays near beacons.
+     */
     private void aggressiveCleanupItemDisplays() {
         int totalRemoved = 0;
 
         for(BeaconSite beacon : this.beacons.values()) {
             Location location = beacon.getLocation();
+
             if (location != null && location.getWorld() != null) {
                 for(Entity entity : location.getWorld().getNearbyEntities(location, 5.0, 5.0, 5.0)) {
                     if (entity instanceof ItemDisplay) {
@@ -332,9 +407,11 @@ public class BeaconManager {
         if (totalRemoved > 0) {
             this.plugin.getLogger().info("AGGRESSIVE CLEANUP: Removed " + totalRemoved + " item displays at beacon locations");
         }
-
     }
 
+    /**
+     * Refresh all the beacon item displays.
+     */
     public void forceRefreshAllDisplays() {
         int refreshed = 0;
 
@@ -346,9 +423,13 @@ public class BeaconManager {
         this.plugin.getLogger().info("Force refreshed " + refreshed + " beacon displays");
     }
 
+    /**
+     * Remove and recreate all the beacon displays.
+     */
     public void validateDisplays() {
         this.aggressiveCleanupItemDisplays();
         this.beaconDisplays.clear();
+
         this.plugin.getServer().getScheduler().runTaskLater(this.plugin, () -> {
             int created = 0;
 
@@ -361,12 +442,19 @@ public class BeaconManager {
         }, 1L);
     }
 
+    /**
+     * Retrieve an analysis on a beacon's item display.
+     *
+     * @param beaconName the beacon's name.
+     * @return A description of the issue with the item display.
+     */
     public String getBeaconDisplayDebugInfo(String beaconName) {
         BeaconSite beacon = this.getBeacon(beaconName);
+
         if (beacon == null) {
             return null;
         } else {
-            ItemDisplay display = (ItemDisplay)this.beaconDisplays.get(beaconName.toLowerCase());
+            ItemDisplay display = this.beaconDisplays.get(beaconName.toLowerCase());
             StringBuilder info = new StringBuilder();
             info.append("§e").append(beacon.getName()).append("§7:\n");
             info.append("  §7Beacon State: §f").append(beacon.getState().getDisplayName()).append("\n");
@@ -407,6 +495,12 @@ public class BeaconManager {
         }
     }
 
+    /**
+     * Retrieve the nearest holy beacon within regeneration range to the location.
+     *
+     * @param location a player's location.
+     * @return The {@code BeaconSite} of the nearest beacon within a set distance.
+     */
     public BeaconSite getNearestHolyBeacon(Location location) {
         if (location != null && location.getWorld() != null) {
             BeaconSite nearestHolyBeacon = null;
@@ -415,9 +509,11 @@ public class BeaconManager {
             for(BeaconSite beacon : this.beacons.values()) {
                 if (beacon.getState() == BeaconState.HOLY) {
                     Location beaconLoc = beacon.getLocation();
+
                     if (beaconLoc != null && beaconLoc.getWorld().equals(location.getWorld())) {
                         double distance = beaconLoc.distance(location);
-                        if (distance <= 25 && distance < nearestDistance) {
+
+                        if (distance <= HOLY_REGENERATION_RANGE && distance < nearestDistance) {
                             nearestHolyBeacon = beacon;
                             nearestDistance = distance;
                         }
@@ -431,6 +527,13 @@ public class BeaconManager {
         }
     }
 
+    /**
+     * Retrieve the nearest holy beacon within the provided range to the location.
+     *
+     * @param location a player's location.
+     * @param maxRange the distance to search within.
+     * @return The {@code BeaconSite} of the nearest beacon within the given distance.
+     */
     public BeaconSite getNearestHolyBeacon(Location location, double maxRange) {
         if (location != null && location.getWorld() != null) {
             BeaconSite nearestHolyBeacon = null;
@@ -439,8 +542,10 @@ public class BeaconManager {
             for(BeaconSite beacon : this.beacons.values()) {
                 if (beacon.getState() == BeaconState.HOLY) {
                     Location beaconLoc = beacon.getLocation();
+
                     if (beaconLoc != null && beaconLoc.getWorld().equals(location.getWorld())) {
                         double distance = beaconLoc.distance(location);
+
                         if (distance <= maxRange && distance < nearestDistance) {
                             nearestHolyBeacon = beacon;
                             nearestDistance = distance;
@@ -455,42 +560,70 @@ public class BeaconManager {
         }
     }
 
+    /**
+     * Determine if a location is within the regeneration range of a holy beacon.
+     *
+     * @param location a player's location.
+     * @return {@code true} if the location is within range of a holy beacon.
+     */
     public boolean isInHolyRegenerationZone(Location location) {
         return this.getNearestHolyBeacon(location) != null;
     }
 
+    /**
+     * Show all passive beacon-affiliated particles to indicate the suppression and conversion circles.
+     */
     private void showAllConversionAndSuppressionCircles() {
         for(BeaconSite beacon : this.beacons.values()) {
             Location particleLoc = beacon.getParticleLocation();
+
             if (particleLoc != null && particleLoc.getWorld() != null) {
                 this.showConversionRangeCircle(beacon, particleLoc);
+
                 if (beacon.getState() == BeaconState.HOLY) {
                     this.showSuppressionRangeCircle(beacon, particleLoc);
                 }
             }
         }
-
     }
 
+    /**
+     * Add a new beacon to the world.
+     *
+     * @param name the new beacon name.
+     * @param location the new beacon location.
+     * @return {@code true} if the beacon was created.
+     */
     public boolean addBeacon(String name, Location location) {
         if (this.beacons.containsKey(name.toLowerCase())) {
             return false;
+
         } else if (location != null && location.getWorld() != null) {
             BeaconSite beacon = new BeaconSite(name, location);
             this.beacons.put(name.toLowerCase(), beacon);
             this.createBeaconDisplay(beacon);
             this.saveBeacons();
+
             this.plugin.getLogger().info("Added new beacon: " + name + " at " + location.getWorld().getName() + " (" + location.getBlockX() + ", " + location.getBlockY() + ", " + location.getBlockZ() + ")");
             return true;
+
         } else {
             return false;
         }
     }
 
+    /**
+     * Remove a beacon from the world.
+     *
+     * @param name the beacon's name.
+     * @return {@code true} if the beacon was removed.
+     */
     public boolean removeBeacon(String name) {
-        BeaconSite removed = (BeaconSite)this.beacons.remove(name.toLowerCase());
+        BeaconSite removed = this.beacons.remove(name.toLowerCase());
+
         if (removed != null) {
             Location beaconLoc = removed.getLocation();
+
             if (beaconLoc != null) {
                 beaconLoc.getBlock().setType(Material.AIR);
             }
@@ -504,43 +637,84 @@ public class BeaconManager {
         }
     }
 
+    /**
+     * Retrieve the beacon using its name.
+     *
+     * @param name the beacon's name.
+     * @return The {@code BeaconSite} of the beacon.
+     */
     public BeaconSite getBeacon(String name) {
-        return (BeaconSite)this.beacons.get(name.toLowerCase());
+        return this.beacons.get(name.toLowerCase());
     }
 
+    /**
+     * Retrieve the beacons used by the game.
+     *
+     * @return The {@code Collection} of beacons in the plugin.
+     */
     public Collection<BeaconSite> getAllBeacons() {
         return this.beacons.values();
     }
 
+    /**
+     * Retrieve the list of evil beacons.
+     *
+     * @return The {@code List} of desecrated beacons.
+     */
     public List<BeaconSite> getDesecratedBeacons() {
         return (List)this.beacons.values().stream().filter((beacon) -> beacon.getState() == BeaconState.DESECRATED).collect(Collectors.toList());
     }
 
+    /**
+     * Retrieve the list of evil and purified beacons.
+     *
+     * @return The {@code List} of desecrated and permanently desecrated beacons.
+     */
     public List<BeaconSite> getAllEvilBeacons() {
         return (List)this.beacons.values().stream().filter((beacon) -> beacon.getState() == BeaconState.DESECRATED || beacon.getState() == BeaconState.PERMANENTLY_DESECRATED).collect(Collectors.toList());
     }
 
+    /**
+     * Retrieve the list of holy beacons.
+     *
+     * @return The {@code List} of holy beacons.
+     */
     public List<BeaconSite> getHolyBeacons() {
         return (List)this.beacons.values().stream().filter((beacon) -> beacon.getState() == BeaconState.HOLY).collect(Collectors.toList());
     }
 
+    /**
+     * Retrieve the list of neutral beacons.
+     *
+     * @return The {@code List} of neutral beacons.
+     */
     public List<BeaconSite> getNeutralBeacons() {
         return (List)this.beacons.values().stream().filter((beacon) -> beacon.getState() == BeaconState.NEUTRAL).collect(Collectors.toList());
     }
 
+    /**
+     * Instantly convert a beacon into a holy alignment.
+     *
+     * @param name the beacon to convert.
+     * @return {@code true} if the beacon was converted.
+     */
     public boolean setBeaconHoly(String name) {
-        BeaconSite beacon = (BeaconSite)this.beacons.get(name.toLowerCase());
+        BeaconSite beacon = this.beacons.get(name.toLowerCase());
 
         if (beacon != null) {
             this.cancelPendingNeutralBroadcast(name.toLowerCase());
+
             beacon.setState(BeaconState.HOLY);
             beacon.setLastChangedBy("Admin command");
             beacon.setConversionCooldownUntil(0L);
+
             this.updateBeaconDisplay(beacon);
             this.saveBeacons();
+
             this.plugin.getLogger().info("Set beacon '" + name + "' as holy (cooldown cleared)");
             this.triggerFirstBeaconConvertedEffects(beacon, false);
             this.plugin.getBeaconMajorityManager().updateBeaconMajorityBonuses();
+
             this.broadcastBeaconGainToTeam(beacon, BeaconState.HOLY);
             this.checkAndBroadcastCompleteControl();
             this.checkAndDisableEternalNight();
@@ -550,6 +724,9 @@ public class BeaconManager {
         }
     }
 
+    /**
+     * Remove the complete evil control final stand effects.
+     */
     private void checkAndDisableEternalNight() {
         if (this.plugin.getSessionManager().isVampiresEternalNightActive()) {
             int evilCount = this.getAllEvilBeacons().size();
@@ -571,10 +748,15 @@ public class BeaconManager {
                     player.playSound(player.getLocation(), Sound.BLOCK_BEACON_POWER_SELECT, SoundCategory.MASTER, 1.0F, 1.0F);
                 }
             }
-
         }
     }
 
+    /**
+     * Announce to the server that the first beacon has been converted.
+     *
+     * @param beacon the beacon that was first converted.
+     * @param isDesecration {@code true} if a vampire converted the first beacon.
+     */
     public void triggerFirstBeaconConvertedEffects(BeaconSite beacon, boolean isDesecration) {
         if (!this.plugin.getSessionManager().isFirstBeaconConvertedTriggered()) {
             this.plugin.getSessionManager().setFirstBeaconConvertedTriggered(true);
@@ -584,6 +766,7 @@ public class BeaconManager {
             if (isDesecration) {
                 nearMessage = "\n§4A cold dread washes over you as the beacon's light twists into something sinister. The air grows heavy with malice... \n§7But just as suddenly, you feel a faint warmth stirring within, as if a force of light is rising to oppose the darkness. Perhaps there is still hope...\n";
                 farMessage = "§4A dark beacon has been desecrated somewhere amongst the land, you feel its corrupted presence seep through the earth. \n§7But just as soon after, a faint warmth touches your heart, like a force of good is awakening to fight back. Probably just your imagination...\n";
+
             } else {
                 nearMessage = "\n§6The beacons soft light warms your heart, filling you with peace. \n§7But just as soon as it activates, the air around you seems to thicken, like a dark presence is moving to snuff out the light... Have you awoken an evil force? Perhaps it is just superstition...\n";
                 farMessage = "§6A holy beacon has been activated somewhere amongst the land, you feel its divine presence radiate through the earth. \n§7But just as soon after, a chill runs through your spine, like a strange dark force is moving in to snuff the light. Probably just your nerves...\n";
@@ -604,41 +787,62 @@ public class BeaconManager {
         }
     }
 
+    /**
+     * Instantly convert a beacon into an evil alignment.
+     *
+     * @param name the beacon to convert.
+     * @return {@code true} if the beacon was converted.
+     */
     public boolean setBeaconDesecrated(String name) {
-        BeaconSite beacon = (BeaconSite)this.beacons.get(name.toLowerCase());
+        BeaconSite beacon = this.beacons.get(name.toLowerCase());
 
         if (beacon != null) {
             this.cancelPendingNeutralBroadcast(name.toLowerCase());
             beacon.setState(BeaconState.DESECRATED);
             beacon.setLastChangedBy("Admin command");
-            beacon.setConversionCooldownUntil(0L);
 
+            beacon.setConversionCooldownUntil(0L);
             this.updateBeaconDisplay(beacon);
             this.saveBeacons();
+
             this.plugin.getLogger().info("Set beacon '" + name + "' as desecrated (cooldown cleared)");
             this.plugin.getBeaconMajorityManager().updateBeaconMajorityBonuses();
-            this.broadcastBeaconGainToTeam(beacon, BeaconState.DESECRATED);
 
+            this.broadcastBeaconGainToTeam(beacon, BeaconState.DESECRATED);
             this.checkAndBroadcastCompleteControl();
             this.checkAndDisableHumansFinalStand();
-
             return true;
+
         } else {
             return false;
         }
     }
 
+    /**
+     * Instantly convert a beacon into a neutral alignment.
+     *
+     * @param name the beacon to convert.
+     * @return {@code true} if the beacon was converted.
+     */
     public boolean setBeaconNeutral(String name) {
         return this.setBeaconNeutral(name, false);
     }
 
+    /**
+     * Instantly convert a beacon into a neutral alignment.
+     *
+     * @param name the beacon to convert.
+     * @param silent {@code true} if no notification should send to the server.
+     * @return {@code true} if the beacon was converted.
+     */
     public boolean setBeaconNeutral(String name, boolean silent) {
-        BeaconSite beacon = (BeaconSite)this.beacons.get(name.toLowerCase());
+        BeaconSite beacon = this.beacons.get(name.toLowerCase());
 
         if (beacon != null) {
             BeaconSite.BeaconState previousState = beacon.getState();
             beacon.setState(BeaconState.NEUTRAL);
             beacon.setConversionCooldownUntil(0L);
+
             this.updateBeaconDisplay(beacon);
             this.saveBeacons();
             this.plugin.getLogger().info("Set beacon '" + name + "' as neutral (cooldown cleared)");
@@ -656,11 +860,12 @@ public class BeaconManager {
         }
     }
 
+    /**
+     * Remove the complete holy control final stand effects.
+     */
     private void checkAndDisableHumansFinalStand() {
         if (this.plugin.getSessionManager().isHumansFinalStandActive()) {
-            int holyCount = this.getHolyBeacons().size(), totalBeacons = this.getAllBeacons().size();
-
-            if (holyCount < totalBeacons) {
+            if (this.getHolyBeacons().size() < this.getAllBeacons().size()) {
                 this.plugin.getLogger().info("HUMANS FINAL STAND ENDED - Not all beacons are holy anymore!");
 
                 for(Player player : Bukkit.getOnlinePlayers()) {
@@ -680,24 +885,42 @@ public class BeaconManager {
         }
     }
 
+    /**
+     * Begin generating particles around beacons.
+     */
     private void startParticleTask() {
         this.particleTask = this.plugin.getServer().getScheduler().runTaskTimer(this.plugin, () -> this.showBeaconParticles(), 0L, 40L);
         this.plugin.getLogger().fine("Started beacon particle task");
     }
 
+    /**
+     * Generate the team alignment particles around the beacons.
+     */
     private void showBeaconParticles() {
         for(BeaconSite beacon : this.beacons.values()) {
             Location particleLoc = beacon.getParticleLocation();
+
             if (particleLoc != null && particleLoc.getWorld() != null && beacon.shouldShowParticles()) {
                 this.showParticleEffect(beacon, particleLoc);
             }
         }
     }
 
+    /**
+     * Retrieve all beacon names from the game.
+     *
+     * @return A {@code Set} of beacon names.
+     */
     public Set<String> getBeaconNames() {
-        return new HashSet(this.beacons.keySet());
+        return new HashSet<>(this.beacons.keySet());
     }
 
+    /**
+     * Create particles based on the beacon's alignment.
+     *
+     * @param beacon the beacon where particles are generated.
+     * @param location THe location of the particles.
+     */
     private void showParticleEffect(BeaconSite beacon, Location location) {
         try {
             switch (beacon.getState()) {
@@ -706,6 +929,7 @@ public class BeaconManager {
                     break;
                 case DESECRATED:
                     this.showDesecratedParticles(location);
+                    break;
                 case PERMANENTLY_DESECRATED:
                 case NEUTRAL:
             }
@@ -714,6 +938,11 @@ public class BeaconManager {
         }
     }
 
+    /**
+     * Create holy particles around a location.
+     *
+     * @param location the center of the particle spawns.
+     */
     private void showHolyParticles(Location location) {
         double radius = 1.5;
 
@@ -724,12 +953,18 @@ public class BeaconManager {
         }
 
         location.getWorld().spawnParticle(Particle.ENCHANT, location, 5, 0.5, 0.5, 0.5, 0.5);
+
         if (Math.random() < 0.3) {
             location.getWorld().spawnParticle(Particle.END_ROD, location, 3, 0.3, 0.3, 0.3, 0.1);
         }
 
     }
 
+    /**
+     * Create evil particles around a location.
+     *
+     * @param location the center of the particle spawns.
+     */
     private void showDesecratedParticles(Location location) {
         location.getWorld().spawnParticle(Particle.LARGE_SMOKE, location, 3, 0.3, 0.1, 0.3, 0.02);
         double radius = 1.2;
@@ -751,10 +986,16 @@ public class BeaconManager {
         }
     }
 
+    /**
+     * Create particles to indicate the beacon's conversion range.
+     *
+     * @param beacon the beacon to circle.
+     * @param center the location of the beacon.
+     */
     private void showConversionRangeCircle(BeaconSite beacon, Location center) {
         if (center != null && center.getWorld() != null) {
             int circlePoints = 24;
-            double radius = 3.0;
+            double radius = BEACON_CONVERSION_RANGE;
             long time = System.currentTimeMillis();
 
             int currentPointIndex = (int)(time / 50L % (long)circlePoints);
@@ -763,6 +1004,7 @@ public class BeaconManager {
             angle += rotationOffset;
             double x = Math.cos(angle) * radius;
             double z = Math.sin(angle) * radius;
+
             Location circlePoint = center.clone().add(x, -1.2, z);
             this.showConversionRangeParticle(beacon.getState(), circlePoint);
         } else {
@@ -770,26 +1012,40 @@ public class BeaconManager {
         }
     }
 
+    /**
+     * Create particles to indicate the beacon's vampiric suppression range.
+     *
+     * @param beacon the beacon to circle.
+     * @param center the location of the beacon.
+     */
     private void showSuppressionRangeCircle(BeaconSite beacon, Location center) {
         if (center != null && center.getWorld() != null) {
             int circlePoints = 48;
-            double radius = 25.0;
+            double radius = HOLY_SUPPRESSION_RANGE;
             long time = System.currentTimeMillis();
+
             int currentPointIndex = (int)(time / 50L % (long)circlePoints);
             double angle = (Math.PI * 2D) * currentPointIndex / (double)circlePoints;
             double rotationOffset = time / 12000.0 % (Math.PI * 2D);
             angle += rotationOffset;
-            double x = Math.cos(angle) * radius;
-            double z = Math.sin(angle) * radius;
+            double x = Math.cos(angle) * radius, z = Math.sin(angle) * radius;
+
             Location circlePoint = center.clone().add(x, 0.0, z);
             Location highestPoint = this.plugin.getWorld().getHighestBlockAt(circlePoint).getLocation();
             highestPoint.add(0.0, 1.2, 0.0);
             this.showSuppressionRangeParticle(highestPoint);
+
         } else {
             this.plugin.getLogger().fine("Invalid center location for beacon: " + beacon.getName());
         }
     }
 
+    /**
+     * Find the highest block at a location.
+     *
+     * @param location the location to check.
+     * @return The {@code Location} of the lowest block of surface air.
+     */
     private Location findHighestBlock(Location location) {
         if (location != null && location.getWorld() != null) {
             Location highest = location.clone();
@@ -799,6 +1055,7 @@ public class BeaconManager {
             for(int y = maxY; y >= minY; --y) {
                 highest.setY(y);
                 Material blockType = highest.getBlock().getType();
+
                 if (blockType.isSolid() && blockType != Material.AIR) {
                     return highest.clone().add(0.0, 1.5, 0.0);
                 }
@@ -810,6 +1067,12 @@ public class BeaconManager {
         }
     }
 
+    /**
+     * Spawn a team-aligned particle for the beacon's conversion range.
+     *
+     * @param state the beacon's team alignment.
+     * @param location the beacon's location.
+     */
     private void showConversionRangeParticle(BeaconSite.BeaconState state, Location location) {
         if (location != null && location.getWorld() != null) {
             try {
@@ -826,10 +1089,14 @@ public class BeaconManager {
             } catch (Exception e) {
                 this.plugin.getLogger().warning("Failed to show conversion range particle for beacon : " + e.getMessage());
             }
-
         }
     }
 
+    /**
+     * Spawn a particle for the beacon's suppression range.
+     *
+     * @param location
+     */
     private void showSuppressionRangeParticle(Location location) {
         if (location != null && location.getWorld() != null) {
             try {
@@ -837,15 +1104,21 @@ public class BeaconManager {
             } catch (Exception e) {
                 this.plugin.getLogger().warning("Failed to show suppression range particle: " + e.getMessage());
             }
-
         }
     }
 
+    /**
+     * Return the highest solid block within 5 vertical blocks of the location.
+     *
+     * @param location a location.
+     * @return A location of the first solid block at or under (within 5 blocks) the location.
+     */
     private Location findGroundLevel(Location location) {
         Location ground = location.clone();
 
         for(int y = 0; y >= -5; --y) {
             ground.setY(location.getY() + y);
+
             if (ground.getBlock().getType().isSolid()) {
                 return ground.add(0.0, 1.2, 0.0);
             }
@@ -854,11 +1127,19 @@ public class BeaconManager {
         return location.clone().add(0.0, 0.5, 0.0);
     }
 
+    /**
+     * Retrieve all beacons within the provided distance.
+     *
+     * @param location a player's location.
+     * @param range the distance to search within.
+     * @return A {@code List} of beacons within range of the location.
+     */
     public List<BeaconSite> getBeaconsInRange(Location location, double range) {
-        List<BeaconSite> nearby = new ArrayList();
+        List<BeaconSite> nearby = new ArrayList<>();
 
         for(BeaconSite beacon : this.beacons.values()) {
             Location beaconLoc = beacon.getLocation();
+
             if (beaconLoc != null && beaconLoc.getWorld().equals(location.getWorld()) && beaconLoc.distance(location) <= range) {
                 nearby.add(beacon);
             }
@@ -867,6 +1148,12 @@ public class BeaconManager {
         return nearby;
     }
 
+    /**
+     * Determine if the location is inside the vampiric suppression range of a holy beacon.
+     *
+     * @param location a player's location.
+     * @return A {@code BeaconSite} of the closest holy beacon to the location.
+     */
     public BeaconSite checkHolySuppression(Location location) {
         if (location != null && location.getWorld() != null) {
             BeaconSite closestHolyBeacon = null;
@@ -875,9 +1162,11 @@ public class BeaconManager {
             for(BeaconSite beacon : this.beacons.values()) {
                 if (beacon.getState() == BeaconState.HOLY) {
                     Location beaconLoc = beacon.getLocation();
+
                     if (beaconLoc != null && beaconLoc.getWorld().equals(location.getWorld())) {
                         double distance = beaconLoc.distance(location);
-                        if (distance <= 25.0 && distance < closestDistance) {
+
+                        if (distance <= HOLY_SUPPRESSION_RANGE && distance < closestDistance) {
                             closestHolyBeacon = beacon;
                             closestDistance = distance;
                         }
@@ -891,19 +1180,25 @@ public class BeaconManager {
         }
     }
 
+    /**
+     * Retrieve all beacon names with an icon indicating their alignment.
+     *
+     * @return A {@code List} of beacon names.
+     */
     public List<String> getBeaconList() {
-        List<String> list = new ArrayList();
+        List<String> list = new ArrayList<>();
         if (this.beacons.isEmpty()) {
             list.add("§7No beacons configured.");
             return list;
+
         } else {
             list.add("§6§l=== BEACON SITES ===");
             list.add("§7Total: §e" + this.beacons.size() + " beacons");
             list.add("");
-            Map<BeaconSite.BeaconState, List<BeaconSite>> grouped = new HashMap();
+            Map<BeaconSite.BeaconState, List<BeaconSite>> grouped = new HashMap<>();
 
             for(BeaconSite.BeaconState state : BeaconState.values()) {
-                grouped.put(state, new ArrayList());
+                grouped.put(state, new ArrayList<>());
             }
 
             for(BeaconSite beacon : this.beacons.values()) {
@@ -912,8 +1207,10 @@ public class BeaconManager {
 
             for(BeaconSite.BeaconState state : BeaconState.values()) {
                 List<BeaconSite> stateBeacons = (List)grouped.get(state);
+
                 if (!stateBeacons.isEmpty()) {
                     String icon = "";
+
                     switch (state) {
                         case HOLY:
                             icon = "✦ ";
@@ -921,10 +1218,12 @@ public class BeaconManager {
                         case DESECRATED:
                             icon = "☠ ";
                         case PERMANENTLY_DESECRATED:
-                        default:
                             break;
                         case NEUTRAL:
                             icon = "◯ ";
+                            break;
+                        default:
+                            break;
                     }
 
                     list.add(state.getColorCode() + "§l" + icon + state.getDisplayName() + " Beacons: §r§7(" + stateBeacons.size() + ")");
@@ -941,6 +1240,9 @@ public class BeaconManager {
         }
     }
 
+    /**
+     * Write the current condition of the beacons into the file.
+     */
     public void saveBeacons() {
         synchronized(this) {
             try {
@@ -1017,10 +1319,12 @@ public class BeaconManager {
                 this.plugin.getLogger().severe("Data file path: " + this.dataFile.getAbsolutePath());
                 this.plugin.getLogger().severe("Can write to parent directory: " + this.dataFile.getParentFile().canWrite());
             }
-
         }
     }
 
+    /**
+     * Create the default Oakhurst beacon setup.
+     */
     private void createDefaultBeacons() {
         this.beacons.clear();
 
@@ -1069,6 +1373,9 @@ public class BeaconManager {
         }
     }
 
+    /**
+     * Load the beacon setup into the active plugin game.
+     */
     public void loadBeacons() {
         if (!this.dataFile.exists()) {
             this.plugin.getLogger().info("No beacons file found, creating default beacons...");
@@ -1093,6 +1400,7 @@ public class BeaconManager {
 
                     debugReader.close();
                     String fileContent = content.toString().trim();
+
                     if (fileContent.isEmpty()) {
                         this.plugin.getLogger().severe("Beacons file is empty!");
                         if (!backupFile.exists()) {
@@ -1134,16 +1442,19 @@ public class BeaconManager {
 
                         this.beacons.clear();
                         this.beacons.putAll(loadedBeacons);
+
                         this.plugin.getServer().getScheduler().runTaskLater(this.plugin, () -> {
                             this.recreateAllDisplays();
                             this.validateDisplays();
                         }, 10L);
+
                         this.plugin.getLogger().info("Loaded " + this.beacons.size() + " beacons from file.");
                         return;
                     }
 
                     this.plugin.getLogger().severe("Gson returned null when parsing beacons file!");
                 }
+
                 return;
 
             } catch (IOException e) {
@@ -1170,15 +1481,20 @@ public class BeaconManager {
                 this.plugin.getLogger().severe("Unexpected error loading beacons: " + e.getMessage());
                 e.printStackTrace();
             }
-
         }
     }
 
+    /**
+     * Load the beacons from the file.
+     */
     public void reloadBeacons() {
         this.loadBeacons();
         this.plugin.getLogger().info("Reloaded beacons from file.");
     }
 
+    /**
+     * Convert the cooldown value from a system counter into a session timer value.
+     */
     private void migrateBeaconCooldownsToSessionTime() {
         this.plugin.getLogger().info("Migrating existing beacon cooldowns from system time to session time...");
         long currentSystemTime = System.currentTimeMillis();
@@ -1187,6 +1503,7 @@ public class BeaconManager {
 
         for(BeaconSite beacon : this.beacons.values()) {
             long systemCooldownUntil = beacon.getConversionCooldownUntil();
+
             if (systemCooldownUntil > currentSystemTime) {
                 long remainingSystemTime = systemCooldownUntil - currentSystemTime;
                 long newSessionCooldownUntil = currentSessionTime + remainingSystemTime / 2L;
@@ -1196,28 +1513,38 @@ public class BeaconManager {
         }
 
         this.plugin.getLogger().info("Migrated " + migratedBeacons + " beacon cooldowns to session time");
+
         if (migratedBeacons > 0) {
             this.saveBeacons();
         }
-
     }
 
+    /**
+     * Count how many beacons are in each alignment.
+     *
+     * @return A {@code Map} of Beacon states to the number of beacons in that state.
+     */
     public Map<BeaconSite.BeaconState, Integer> getStateStats() {
-        Map<BeaconSite.BeaconState, Integer> stats = new HashMap();
+        Map<BeaconSite.BeaconState, Integer> stats = new HashMap<>();
 
+        // Set the number of each alignment to 0
         for(BeaconSite.BeaconState state : BeaconState.values()) {
             stats.put(state, 0);
         }
 
+        // Increment the alignment's counter when a beacon is found to match it
         for(BeaconSite beacon : this.beacons.values()) {
-            stats.put(beacon.getState(), (Integer)stats.get(beacon.getState()) + 1);
+            stats.put(beacon.getState(), stats.get(beacon.getState()) + 1);
         }
 
         return stats;
     }
 
+    /**
+     * Ensure that all beacons have a location attached.
+     */
     public void validateBeacons() {
-        List<String> invalidBeacons = new ArrayList();
+        List<String> invalidBeacons = new ArrayList<>();
 
         for(Map.Entry<String, BeaconSite> entry : this.beacons.entrySet()) {
             if (((BeaconSite)entry.getValue()).getLocation() == null) {
@@ -1229,14 +1556,17 @@ public class BeaconManager {
             this.plugin.getLogger().warning("Found " + invalidBeacons.size() + " beacons with invalid worlds:");
 
             for(String name : invalidBeacons) {
-                this.plugin.getLogger().warning("  - " + name + " (world: " + ((BeaconSite)this.beacons.get(name)).getWorldName() + ")");
+                this.plugin.getLogger().warning("  - " + name + " (world: " + (this.beacons.get(name)).getWorldName() + ")");
             }
         }
-
     }
 
+    /**
+     * Clean up the numerous maintenance and particle tasks before shutting down the manager.
+     */
     public void shutdown() {
         this.cleanupAllDisplays();
+
         if (this.cooldownTrackingTask != null) {
             this.cooldownTrackingTask.cancel();
             this.cooldownTrackingTask = null;
@@ -1285,11 +1615,18 @@ public class BeaconManager {
         this.plugin.getLogger().info("BeaconManager shutdown - displays cleaned up and data saved.");
     }
 
+    /**
+     * Alert the server that a beacon has become neutral after a delay.
+     *
+     * @param beacon the converted beacon.
+     * @param previousState the beacon's previous alignment.
+     */
     public void broadcastNeutralConversionToAll(BeaconSite beacon, BeaconSite.BeaconState previousState) {
         String beaconKey = beacon.getName().toLowerCase();
         this.cancelPendingNeutralBroadcast(beaconKey);
         int delaySeconds = this.plugin.getConfigManager().getBeaconNeutralAnnouncementDelaySeconds();
         long delayTicks = (long)delaySeconds * 20L;
+
         BukkitTask task = this.plugin.getServer().getScheduler().runTaskLater(this.plugin, () -> {
             if (beacon.getState() == BeaconState.NEUTRAL) {
                 String message;
@@ -1308,20 +1645,33 @@ public class BeaconManager {
 
             this.pendingNeutralBroadcasts.remove(beaconKey);
         }, delayTicks);
+
         this.pendingNeutralBroadcasts.put(beaconKey, task);
     }
 
+    /**
+     * Cancel the scheduled alert about a beacon becoming neutral.
+     *
+     * @param beaconKey an identifier key of the converted beacon.
+     */
     public void cancelPendingNeutralBroadcast(String beaconKey) {
-        BukkitTask existingTask = (BukkitTask)this.pendingNeutralBroadcasts.remove(beaconKey.toLowerCase());
+        BukkitTask existingTask = this.pendingNeutralBroadcasts.remove(beaconKey.toLowerCase());
+
         if (existingTask != null) {
             existingTask.cancel();
             this.plugin.getLogger().fine("Cancelled pending neutral broadcast for beacon: " + beaconKey);
         }
-
     }
 
+    /**
+     * Alert the server that a beacon has been converted onto a team's side.
+     *
+     * @param beacon the converted beacon.
+     * @param newState the beacon's new alignment.
+     */
     private void broadcastBeaconGainToTeam(BeaconSite beacon, BeaconSite.BeaconState newState) {
         String message;
+
         if (newState == BeaconState.HOLY) {
             message = "§aBeacon §e" + beacon.getName() + " §ahas been blessed with divine energy!";
         } else {
@@ -1335,9 +1685,11 @@ public class BeaconManager {
         for(Player player : this.plugin.getServer().getOnlinePlayers()) {
             player.sendMessage(message);
         }
-
     }
 
+    /**
+     * Alert the server that all beacons are aligned to one team.
+     */
     public void checkAndBroadcastCompleteControl() {
         if (!this.beacons.isEmpty()) {
             boolean allDesecrated = true;
@@ -1411,7 +1763,6 @@ public class BeaconManager {
                     }
                 }
             }
-
         }
     }
 }

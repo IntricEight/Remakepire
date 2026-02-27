@@ -11,15 +11,22 @@ import frostvein.sampires.remakepire.RemakepirePlugin;
 public class VampireTexturePackManager {
     private final RemakepirePlugin plugin;
     private final VampireManager vampireManager;
+
     private static final String VAMPIRE_TEXTURE_PACK_URL = "https://download.mc-packs.net/pack/e139890dd34f56724efcd5becb476999651ca43c.zip";
     private static final String VAMPIRE_TEXTURE_PACK_SHA1_STRING = "e139890dd34f56724efcd5becb476999651ca43c";
     private static final String VAMPIRE_TEXTURE_PACK_PROMPT = "§5VampireSMP Vampire Pack\n§7This pack enhances your vampire experience!";
     private static final String HUMAN_TEXTURE_PACK_URL = "https://download.mc-packs.net/pack/b1fbd00667c6ad35c11967a385184aa336d605e1.zip";
     private static final String HUMAN_TEXTURE_PACK_SHA1_STRING = "b1fbd00667c6ad35c11967a385184aa336d605e1";
     private static final String HUMAN_TEXTURE_PACK_PROMPT = "§aVampireSMP Human Pack\n§7This pack enhances your human experience!";
-    private final Set<UUID> playersWithVampireTexturePack = new HashSet();
-    private final Set<UUID> playersWithHumanTexturePack = new HashSet();
 
+    private final Set<UUID> playersWithVampireTexturePack = new HashSet<>();
+    private final Set<UUID> playersWithHumanTexturePack = new HashSet<>();
+
+    /**
+     * Create an instance of the Vampire Texture manager.
+     *
+     * @param plugin the host plugin object.
+     */
     public VampireTexturePackManager(RemakepirePlugin plugin) {
         this.plugin = plugin;
         this.vampireManager = plugin.getVampireManager();
@@ -28,9 +35,9 @@ public class VampireTexturePackManager {
 
     public void applyVampireTexturePack(Player player, String reason) {
         try {
-            byte[] sha1Bytes = hexStringToByteArray("e139890dd34f56724efcd5becb476999651ca43c");
+            byte[] sha1Bytes = hexStringToByteArray(VAMPIRE_TEXTURE_PACK_SHA1_STRING);
             UUID packId = UUID.randomUUID();
-            player.addResourcePack(packId, "https://download.mc-packs.net/pack/e139890dd34f56724efcd5becb476999651ca43c.zip", sha1Bytes, "§5VampireSMP Vampire Pack\n§7This pack enhances your vampire experience!", true);
+            player.addResourcePack(packId, VAMPIRE_TEXTURE_PACK_URL, sha1Bytes, VAMPIRE_TEXTURE_PACK_PROMPT, true);
             this.playersWithVampireTexturePack.add(player.getUniqueId());
             player.sendMessage("§7Applying vampire texture pack...");
 
@@ -76,9 +83,9 @@ public class VampireTexturePackManager {
 
     public void applyHumanTexturePack(Player player, String reason) {
         try {
-            byte[] sha1Bytes = hexStringToByteArray("b1fbd00667c6ad35c11967a385184aa336d605e1");
+            byte[] sha1Bytes = hexStringToByteArray(HUMAN_TEXTURE_PACK_SHA1_STRING);
             UUID packId = UUID.randomUUID();
-            player.addResourcePack(packId, "https://download.mc-packs.net/pack/b1fbd00667c6ad35c11967a385184aa336d605e1.zip", sha1Bytes, "§aVampireSMP Human Pack\n§7This pack enhances your human experience!", true);
+            player.addResourcePack(packId, HUMAN_TEXTURE_PACK_URL, sha1Bytes, HUMAN_TEXTURE_PACK_PROMPT, true);
 
             this.playersWithHumanTexturePack.add(player.getUniqueId());
             this.playersWithVampireTexturePack.remove(player.getUniqueId());
@@ -90,7 +97,6 @@ public class VampireTexturePackManager {
             e.printStackTrace();
             player.sendMessage("§cFailed to apply texture pack. Check server logs for details.");
         }
-
     }
 
     public void applyHumanTexturePackDelayed(Player player, long delayTicks, String reason) {
@@ -98,7 +104,6 @@ public class VampireTexturePackManager {
             if (player.isOnline()) {
                 this.applyHumanTexturePack(player, reason + " (delayed)");
             }
-
         }, delayTicks);
     }
 
@@ -106,6 +111,11 @@ public class VampireTexturePackManager {
         return this.playersWithHumanTexturePack.contains(player.getUniqueId());
     }
 
+    /**
+     *
+     *
+     * @param player a player leaving the world.
+     */
     public void onPlayerQuit(Player player) {
         this.playersWithVampireTexturePack.remove(player.getUniqueId());
         this.playersWithHumanTexturePack.remove(player.getUniqueId());
@@ -138,7 +148,6 @@ public class VampireTexturePackManager {
         if (applied > 0) {
             this.plugin.getLogger().info("Ensured vampire texture pack for " + applied + " online vampires");
         }
-
     }
 
     private static byte[] hexStringToByteArray(String s) {

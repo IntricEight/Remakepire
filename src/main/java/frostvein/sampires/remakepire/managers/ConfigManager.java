@@ -12,6 +12,11 @@ public class ConfigManager {
     private final JavaPlugin plugin;
     private FileConfiguration config;
 
+    /**
+     * Create an instance of the Config manager.
+     *
+     * @param plugin the host plugin object.
+     */
     public ConfigManager(JavaPlugin plugin) {
         this.plugin = plugin;
         this.loadConfig();
@@ -29,7 +34,7 @@ public class ConfigManager {
 
     public List<Location> getTomeChestLocations() {
         List<String> locationStrings = this.config.getStringList("tome-chests.locations");
-        List<Location> locations = new ArrayList();
+        List<Location> locations = new ArrayList<>();
         World world = this.plugin.getServer().getWorld("world");
 
         if (world == null) {
@@ -40,10 +45,12 @@ public class ConfigManager {
             for(String locString : locationStrings) {
                 try {
                     String[] parts = locString.split(",");
+
                     if (parts.length == 3) {
                         int x = Integer.parseInt(parts[0].trim());
                         int y = Integer.parseInt(parts[1].trim());
                         int z = Integer.parseInt(parts[2].trim());
+
                         locations.add(new Location(world, x, y, z));
                     }
                 } catch (NumberFormatException e) {
@@ -58,6 +65,7 @@ public class ConfigManager {
     public boolean addTomeChestLocation(Location location) {
         List<String> locations = this.config.getStringList("tome-chests.locations");
         String locationString = String.format("%d,%d,%d", location.getBlockX(), location.getBlockY(), location.getBlockZ());
+
         if (locations.contains(locationString)) {
             return false;
         } else {
@@ -71,6 +79,7 @@ public class ConfigManager {
     public boolean removeTomeChestLocation(Location location) {
         List<String> locations = this.config.getStringList("tome-chests.locations");
         String locationString = String.format("%d,%d,%d", location.getBlockX(), location.getBlockY(), location.getBlockZ());
+
         if (!locations.contains(locationString)) {
             return false;
         } else {
@@ -321,15 +330,15 @@ public class ConfigManager {
     }
 
     public List<String> validateConfiguredLocations(BeaconManager beaconManager) {
-        List<String> warnings = new ArrayList();
-        double townX = this.getOakhurstTownCenterX();
-        double townZ = this.getOakhurstTownCenterZ();
+        List<String> warnings = new ArrayList<>();
+        double townX = this.getOakhurstTownCenterX(), townZ = this.getOakhurstTownCenterZ();
 
         if (!this.isLocationWithinBorder(townX, townZ)) {
             warnings.add("Town center (" + (int)townX + ", " + (int)townZ + ")");
         }
 
         World world = this.plugin.getServer().getWorld("world");
+
         if (world != null) {
             Location vampireSpawn = this.getVampireRespawnLocation(world);
             if (!this.isLocationWithinBorder(vampireSpawn.getX(), vampireSpawn.getZ())) {

@@ -69,12 +69,17 @@ public class InitGameManager {
     private final RemakepirePlugin plugin;
     private static final double BORDER_BUFFER = 50.0;
     private static final String COMMAND_PREFIX = "/pow_init_internal_";
-    private final Map<UUID, InitState> adminStates = new HashMap();
-    private final Map<UUID, InitData> adminData = new HashMap();
-    private final Map<UUID, Boolean> guiRefreshInProgress = new HashMap();
+    private final Map<UUID, InitState> adminStates = new HashMap<>();
+    private final Map<UUID, InitData> adminData = new HashMap<>();
+    private final Map<UUID, Boolean> guiRefreshInProgress = new HashMap<>();
     private static final int PLAYERS_PER_PAGE = 45;
     private static final int INVENTORY_SIZE = 54;
 
+    /**
+     * Create an instance of the Initialize Game manager.
+     *
+     * @param plugin the host plugin object.
+     */
     public InitGameManager(RemakepirePlugin plugin) {
         this.plugin = plugin;
     }
@@ -184,12 +189,12 @@ public class InitGameManager {
 
         } else {
             InitData data = (InitData)this.adminData.get(admin.getUniqueId());
-            int totalPages = (int)Math.ceil(playerCount / 45.0);
+            int totalPages = (int)Math.ceil((double) playerCount / PLAYERS_PER_PAGE);
             int currentPage = Math.min(data.currentPage, totalPages - 1);
             data.currentPage = currentPage;
-            int startIndex = currentPage * 45;
-            int endIndex = Math.min(startIndex + 45, playerCount);
-            Inventory inventory = Bukkit.createInventory((InventoryHolder)null, 54, "§4§lSelect Vampires");
+            int startIndex = currentPage * PLAYERS_PER_PAGE;
+            int endIndex = Math.min(startIndex + PLAYERS_PER_PAGE, playerCount);
+            Inventory inventory = Bukkit.createInventory(null, INVENTORY_SIZE, "§4§lSelect Vampires");
             int slot = 0;
 
             for(int i = startIndex; i < endIndex; ++i) {
@@ -204,7 +209,7 @@ public class InitGameManager {
                     meta.setDisplayName("§a" + player.getName() + " - Human");
                 }
 
-                List<String> lore = new ArrayList();
+                List<String> lore = new ArrayList<>();
                 lore.add("§7Click to toggle");
                 meta.setLore(lore);
                 item.setItemMeta(meta);
@@ -216,7 +221,7 @@ public class InitGameManager {
                 ItemStack prevButton = new ItemStack(Material.ARROW);
                 ItemMeta prevMeta = prevButton.getItemMeta();
                 prevMeta.setDisplayName("§e« Previous Page");
-                List<String> prevLore = new ArrayList();
+                List<String> prevLore = new ArrayList<>();
                 prevLore.add("§7Go to page " + currentPage);
                 prevMeta.setLore(prevLore);
                 prevButton.setItemMeta(prevMeta);
@@ -226,7 +231,7 @@ public class InitGameManager {
             ItemStack pageIndicator = new ItemStack(Material.PAPER);
             ItemMeta pageMeta = pageIndicator.getItemMeta();
             pageMeta.setDisplayName("§fPage " + (currentPage + 1) + " of " + totalPages);
-            List<String> pageLore = new ArrayList();
+            List<String> pageLore = new ArrayList<>();
             pageLore.add("§7" + playerCount + " players total");
             pageLore.add("§7" + data.selectedVampires.size() + " selected as vampires");
             pageMeta.setLore(pageLore);
@@ -237,7 +242,7 @@ public class InitGameManager {
                 ItemStack nextButton = new ItemStack(Material.ARROW);
                 ItemMeta nextMeta = nextButton.getItemMeta();
                 nextMeta.setDisplayName("§eNext Page »");
-                List<String> nextLore = new ArrayList();
+                List<String> nextLore = new ArrayList<>();
                 nextLore.add("§7Go to page " + (currentPage + 2));
                 nextMeta.setLore(nextLore);
                 nextButton.setItemMeta(nextMeta);
@@ -247,7 +252,7 @@ public class InitGameManager {
             ItemStack confirmButton = new ItemStack(Material.LIME_CONCRETE);
             ItemMeta confirmMeta = confirmButton.getItemMeta();
             confirmMeta.setDisplayName("§a§lCONFIRM SELECTION");
-            List<String> confirmLore = new ArrayList();
+            List<String> confirmLore = new ArrayList<>();
             confirmLore.add("§7Click to proceed with these selections");
             confirmLore.add("§7Selected: §e" + data.selectedVampires.size() + " vampires");
             confirmMeta.setLore(confirmLore);
@@ -260,7 +265,7 @@ public class InitGameManager {
 
     public void handlePageChange(Player admin, int delta) {
         UUID adminId = admin.getUniqueId();
-        InitData data = (InitData)this.adminData.get(adminId);
+        InitData data = this.adminData.get(adminId);
         if (data != null) {
             data.currentPage += delta;
             this.guiRefreshInProgress.put(adminId, true);
@@ -270,11 +275,14 @@ public class InitGameManager {
 
     public void handlePlayerToggle(Player admin, String playerName) {
         UUID adminId = admin.getUniqueId();
-        InitData data = (InitData)this.adminData.get(adminId);
+        InitData data = this.adminData.get(adminId);
+
         if (data != null && data.mode == InitGameManager.InitData.VampireMode.SELECTED) {
             Player targetPlayer = Bukkit.getPlayer(playerName);
+
             if (targetPlayer != null) {
                 UUID targetId = targetPlayer.getUniqueId();
+
                 if (data.selectedVampires.contains(targetId)) {
                     data.selectedVampires.remove(targetId);
                 } else {
@@ -290,6 +298,7 @@ public class InitGameManager {
     public void handleGUIConfirmation(Player admin) {
         UUID adminId = admin.getUniqueId();
         InitData data = (InitData)this.adminData.get(adminId);
+
         if (data != null && data.mode == InitGameManager.InitData.VampireMode.SELECTED) {
             this.adminStates.put(adminId, InitGameManager.InitState.AWAITING_FINAL_CONFIRM);
             admin.closeInventory();
@@ -299,6 +308,7 @@ public class InitGameManager {
 
     public boolean handleMinVampiresInput(Player admin, String input) {
         UUID adminId = admin.getUniqueId();
+
         if (this.adminStates.get(adminId) != InitGameManager.InitState.AWAITING_MIN_VAMPIRES) {
             return false;
         } else {
@@ -310,7 +320,7 @@ public class InitGameManager {
                     return true;
 
                 } else {
-                    InitData data = (InitData)this.adminData.get(adminId);
+                    InitData data = this.adminData.get(adminId);
                     data.minVampires = min;
                     this.adminStates.put(adminId, InitGameManager.InitState.AWAITING_MAX_VAMPIRES);
                     admin.sendMessage("§a✓ Minimum vampires set to: §e" + min);
@@ -337,7 +347,7 @@ public class InitGameManager {
             return false;
 
         } else {
-            InitData data = (InitData)this.adminData.get(adminId);
+            InitData data = this.adminData.get(adminId);
 
             try {
                 int max = Integer.parseInt(input.trim());
@@ -363,7 +373,8 @@ public class InitGameManager {
 
     private void showFinalConfirmation(Player admin) {
         UUID adminId = admin.getUniqueId();
-        InitData data = (InitData)this.adminData.get(adminId);
+        InitData data = this.adminData.get(adminId);
+
         admin.sendMessage("");
         admin.sendMessage("§a§l========================================");
         admin.sendMessage("§a§lFINAL CONFIRMATION");
@@ -401,7 +412,7 @@ public class InitGameManager {
             admin.sendMessage("§cError: Invalid initialization state.");
 
         } else {
-            InitData data = (InitData)this.adminData.get(adminId);
+            InitData data = this.adminData.get(adminId);
             admin.sendMessage("");
             admin.sendMessage("§6§l========================================");
             admin.sendMessage("§6§lINITIALIZING GAME...");
@@ -415,9 +426,10 @@ public class InitGameManager {
             } else {
                 admin.sendMessage("§7[1/9] Neutralizing beacons...");
 
-                for(BeaconSite beacon : this.plugin.getBeaconManager().getAllBeacons()) {
+                for (BeaconSite beacon : this.plugin.getBeaconManager().getAllBeacons()) {
                     this.plugin.getBeaconManager().setBeaconNeutral(beacon.getName(), true);
                     Location beaconLoc = beacon.getLocation();
+
                     if (beaconLoc != null && beaconLoc.getWorld() != null) {
                         beaconLoc.getBlock().setType(Material.BARRIER);
                     }
@@ -433,10 +445,12 @@ public class InitGameManager {
                 admin.sendMessage("§7[3/9] Resetting player data...");
 
                 Collection<? extends Player> onlinePlayers = Bukkit.getOnlinePlayers();
+
                 for(Player player : onlinePlayers) {
                     for(String tag : new HashSet<>(player.getScoreboardTags())) {
                         player.removeScoreboardTag(tag);
                     }
+
                     player.getInventory().clear();
                 }
 
@@ -469,6 +483,7 @@ public class InitGameManager {
 
                 try {
                     Objective deathObjective = mainScoreboard.getObjective("vsmp_death");
+
                     if (deathObjective != null) {
                         for(Player player : onlinePlayers) {
                             deathObjective.getScore(player.getName()).setScore(0);
@@ -483,6 +498,7 @@ public class InitGameManager {
                 admin.sendMessage("§7[4/9] Priming new session and incrementing game ID...");
                 this.plugin.getSessionManager().primeNewSession();
                 this.plugin.getSessionManager().incrementGameID();
+
                 admin.sendMessage("§7[4.5/9] Resetting game state flags...");
                 this.plugin.getConfig().set("first_beacon_converted", false);
                 this.plugin.getConfig().set("humans_own_all_beacons", false);
@@ -491,9 +507,11 @@ public class InitGameManager {
                 this.plugin.getConfig().set("fourth_book_has_spawned", false);
                 this.plugin.getConfig().set("fourth_book_spawn_enabled", false);
                 this.plugin.saveConfig();
+
                 admin.sendMessage("§7[4.6/9] Clearing sire mappings...");
                 this.plugin.getSireManager().clearAllSireMappings();
                 admin.sendMessage("§7[4.7/9] Stopping vampire tracking...");
+
                 if (this.plugin.getVampireTrackingManager() != null) {
                     this.plugin.getVampireTrackingManager().stopAllTracking();
                 }
@@ -501,6 +519,7 @@ public class InitGameManager {
                 admin.sendMessage("§7[4.8/9] Clearing permadeath preferences...");
                 this.plugin.getPermadeathManager().clearAllPermadeathModes();
                 admin.sendMessage("§7[5/9] Setting world time and border...");
+
                 world.setFullTime(1L);
                 world.getWorldBorder().setSize(900000.0);
                 Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "gamerule playersNetherPortalDefaultDelay 80");
@@ -521,6 +540,7 @@ public class InitGameManager {
                     }
 
                     Location teleportLoc = this.getRandomTeleportLocation(world);
+
                     if (teleportLoc != null) {
                         player.teleport(teleportLoc);
                     } else {
@@ -530,10 +550,11 @@ public class InitGameManager {
 
                 admin.sendMessage("§7[8/9] Assigning vampires...");
 
-                List<Player> playersToConvert = new ArrayList();
+                List<Player> playersToConvert = new ArrayList<>();
+
                 if (data.mode == InitGameManager.InitData.VampireMode.RANDOM) {
                     int vampireCount = ThreadLocalRandom.current().nextInt(data.minVampires, data.maxVampires + 1);
-                    List<Player> availablePlayers = new ArrayList(onlinePlayers);
+                    List<Player> availablePlayers = new ArrayList<>(onlinePlayers);
                     Collections.shuffle(availablePlayers);
                     vampireCount = Math.min(vampireCount, availablePlayers.size());
                     playersToConvert = availablePlayers.subList(0, vampireCount);
@@ -546,7 +567,7 @@ public class InitGameManager {
                     }
                 }
 
-                Set<UUID> vampireIds = new HashSet();
+                Set<UUID> vampireIds = new HashSet<>();
 
                 for(Player player : playersToConvert) {
                     this.plugin.getVampireManager().setPlayerAsVampire(player, 1);
@@ -588,6 +609,7 @@ public class InitGameManager {
                 admin.sendMessage("§7[9/11] Starting session...");
                 this.plugin.getSessionManager().startSession();
                 admin.sendMessage("§7[10/11] Distributing tomes to chests...");
+
                 if (this.plugin.getTomeDistributionManager().getTomeLocations().isEmpty()) {
                     admin.sendMessage("§e  → No tome chest locations configured, skipping tome distribution");
                 } else {
@@ -621,9 +643,11 @@ public class InitGameManager {
     private Location getRandomTeleportLocation(World world) {
         int maxAttempts = 50;
         ConfigManager config = this.plugin.getConfigManager();
+
         double townCenterX = config.getOakhurstTownCenterX();
         double townCenterZ = config.getOakhurstTownCenterZ();
         double teleportRadius = config.getOakhurstTeleportRadius();
+
         double minX = config.getOakhurstMinX();
         double maxX = config.getOakhurstMaxX();
         double minZ = config.getOakhurstMinZ();
@@ -638,7 +662,7 @@ public class InitGameManager {
             if (!(x < minX + 50.0) && !(x > maxX - 50.0) && !(z < minZ + 50.0) && !(z > maxZ - 50.0)) {
                 Location loc = new Location(world, x, (double)(world.getHighestBlockYAt((int)x, (int)z) + 1), z);
 
-                if (loc.getY() > 0.0 && loc.getY() < world.getMaxHeight()) {
+                if (loc.getY() > 0 && loc.getY() < world.getMaxHeight()) {
                     return loc;
                 }
             }
@@ -655,15 +679,15 @@ public class InitGameManager {
     }
 
     public boolean isInternalCommand(String command) {
-        return command.startsWith("/pow_init_internal_");
+        return command.startsWith(COMMAND_PREFIX);
     }
 
     public boolean handleInternalCommand(Player admin, String command) {
-        if (!command.startsWith("/pow_init_internal_")) {
+        if (!command.startsWith(COMMAND_PREFIX)) {
             return false;
 
         } else {
-            switch (command.substring("/pow_init_internal_".length())) {
+            switch (command.substring(COMMAND_PREFIX.length())) {
                 case "confirm1":
                     this.handleFirstConfirmation(admin);
                     return true;
@@ -687,7 +711,7 @@ public class InitGameManager {
     }
 
     public InitState getState(UUID adminId) {
-        return (InitState)this.adminStates.getOrDefault(adminId, InitGameManager.InitState.IDLE);
+        return this.adminStates.getOrDefault(adminId, InitGameManager.InitState.IDLE);
     }
 
     public boolean isPlayerSelectionGUI(String title) {
@@ -695,7 +719,7 @@ public class InitGameManager {
     }
 
     public boolean isGUIRefreshInProgress(UUID adminId) {
-        return (Boolean)this.guiRefreshInProgress.getOrDefault(adminId, false);
+        return this.guiRefreshInProgress.getOrDefault(adminId, false);
     }
 
     public static enum InitState {
@@ -711,7 +735,7 @@ public class InitGameManager {
         VampireMode mode;
         int minVampires;
         int maxVampires;
-        Set<UUID> selectedVampires = new HashSet();
+        Set<UUID> selectedVampires = new HashSet<>();
         int currentPage = 0;
 
         public static enum VampireMode {

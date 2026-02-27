@@ -145,7 +145,6 @@ public class WayOfTheLumberjackTomeAbility extends TomeAbility implements Listen
         } catch (IOException e) {
             this.plugin.getLogger().warning("WayOfTheLumberjack: Failed to save placed logs file: " + e.getMessage());
         }
-
     }
 
     /**
