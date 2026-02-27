@@ -109,7 +109,7 @@ public final class RemakepirePlugin extends JavaPlugin {
     public void onEnable() {
         this.saveDefaultConfig();
         this.configManager = new ConfigManager(this);
-        this.world = Bukkit.getWorld("world");
+        this.world = Bukkit.getWorld(WORLD_NAME);
         this.initializeCastTeam();
         this.initializeVampireCastTeam();
         this.sessionManager = new SessionManager(this);
@@ -146,6 +146,7 @@ public final class RemakepirePlugin extends JavaPlugin {
         this.vampireTurningManager = new VampireTurningManager(this);
         this.sireManager = new VampireSireManager(this);
         this.forcedCureChoiceManager = new ForcedCureChoiceManager(this);
+
         this.initGameManager = new InitGameManager(this);
         this.getServer().getPluginManager().registerEvents(this.damageSuppressionListener, this);
         this.getServer().getPluginManager().registerEvents(this.deathHandler, this);
@@ -166,10 +167,12 @@ public final class RemakepirePlugin extends JavaPlugin {
         this.getServer().getPluginManager().registerEvents(new InteractionListener(this, this.sessionManager), this);
         this.getServer().getPluginManager().registerEvents(new BatTransformationListener(this), this);
         this.getServer().getPluginManager().registerEvents(new ExperienceBottleListener(this), this);
+
         this.cureBookReadingListener = new CureBookReadingListener(this);
         this.getServer().getPluginManager().registerEvents(this.cureBookReadingListener, this);
         this.getServer().getPluginManager().registerEvents(new TomeListener(this), this);
         this.getServer().getPluginManager().registerEvents(new BeetrootHarvestListener(this), this);
+
         this.tomeVampireRestrictionListener = new TomeVampireRestrictionListener(this);
         this.getServer().getPluginManager().registerEvents(this.tomeVampireRestrictionListener, this);
         this.getServer().getPluginManager().registerEvents(this.endermanRemovalListener, this);
@@ -179,8 +182,10 @@ public final class RemakepirePlugin extends JavaPlugin {
         this.getServer().getPluginManager().registerEvents(new InitGameListener(this), this);
         this.bloodMoonAttributeListener = new BloodMoonAttributeListener(this);
         this.getServer().getPluginManager().registerEvents(this.bloodMoonAttributeListener, this);
+
         BrigadierCommands brigadierCommands = new BrigadierCommands(this);
         brigadierCommands.registerAll();
+
         this.initializeDeathScoreboard();
         this.effectManager.startEffectTask();
         this.beaconManager.validateBeacons();
@@ -300,6 +305,7 @@ public final class RemakepirePlugin extends JavaPlugin {
         try {
             Scoreboard mainScoreboard = Bukkit.getScoreboardManager().getMainScoreboard();
             Team existingTeam = mainScoreboard.getTeam("CastTeam");
+
             if (existingTeam != null) {
                 this.castTeam = existingTeam;
                 this.getLogger().info("Found existing CastTeam, updating settings...");
@@ -311,7 +317,9 @@ public final class RemakepirePlugin extends JavaPlugin {
             this.castTeam.setNameTagVisibility(NameTagVisibility.NEVER);
             this.castTeam.setDisplayName("§6Human Team");
             this.castTeam.setCanSeeFriendlyInvisibles(false);
+
             this.getLogger().info("CastTeam initialized successfully with hidden name tags.");
+
         } catch (Exception e) {
             this.getLogger().severe("Failed to initialize CastTeam: " + e.getMessage());
             e.printStackTrace();
@@ -324,8 +332,10 @@ public final class RemakepirePlugin extends JavaPlugin {
             Scoreboard mainScoreboard = Bukkit.getScoreboardManager().getMainScoreboard();
             String objectiveName = "vsmp_death";
             Objective existingObjective = mainScoreboard.getObjective(objectiveName);
+
             if (existingObjective != null) {
                 String criteria = existingObjective.getCriteria();
+
                 if ("deathCount".equals(criteria)) {
                     this.getLogger().info("Migrating death scoreboard from 'deathCount' to 'dummy' criteria...");
                     existingObjective.unregister();
@@ -342,13 +352,13 @@ public final class RemakepirePlugin extends JavaPlugin {
             this.getLogger().severe("Failed to initialize death scoreboard: " + e.getMessage());
             e.printStackTrace();
         }
-
     }
 
     private void initializeVampireCastTeam() {
         try {
             Scoreboard mainScoreboard = Bukkit.getScoreboardManager().getMainScoreboard();
             Team existingTeam = mainScoreboard.getTeam("VampireCastTeam");
+
             if (existingTeam != null) {
                 this.vampireCastTeam = existingTeam;
                 this.getLogger().info("Found existing VampireCastTeam, updating settings...");
@@ -360,12 +370,13 @@ public final class RemakepirePlugin extends JavaPlugin {
             this.vampireCastTeam.setNameTagVisibility(NameTagVisibility.NEVER);
             this.vampireCastTeam.setCanSeeFriendlyInvisibles(false);
             this.vampireCastTeam.setDisplayName("§4Vampire Team");
+
             this.getLogger().info("VampireCastTeam initialized successfully with hidden name tags.");
+
         } catch (Exception e) {
             this.getLogger().severe("Failed to initialize VampireCastTeam: " + e.getMessage());
             e.printStackTrace();
         }
-
     }
 
     private void initVampireRespawnLocation() {

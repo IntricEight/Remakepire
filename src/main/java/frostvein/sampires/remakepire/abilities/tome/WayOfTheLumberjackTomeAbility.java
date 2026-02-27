@@ -61,7 +61,7 @@ public class WayOfTheLumberjackTomeAbility extends TomeAbility implements Listen
     /**
      * Track the placed blocks to prevent abuse of this ability.
      *
-     * @param event the block placing event by the player.
+     * @param event a block being placed.
      */
     @EventHandler
     public void onBlockPlace(BlockPlaceEvent event) {
@@ -77,7 +77,7 @@ public class WayOfTheLumberjackTomeAbility extends TomeAbility implements Listen
     /**
      * Roll the extra crop chance when breaking relevant blocks.
      *
-     * @param event the block breaking event by the player.
+     * @param event a block being broken.
      */
     @EventHandler
     public void onBlockBreak(BlockBreakEvent event) {

@@ -27,20 +27,33 @@ public class TomeListener implements Listener {
     private final VampireManager vampireManager;
     private final TomeManager tomeManager;
 
+    /**
+     * Create an instance of the Tome listener.
+     *
+     * @param plugin the host plugin object.
+     */
     public TomeListener(RemakepirePlugin plugin) {
         this.plugin = plugin;
         this.vampireManager = plugin.getVampireManager();
         this.tomeManager = plugin.getTomeManager();
     }
 
+    /**
+     * Grant human players tome and cure abilities when using the respective books.
+     *
+     * @param event a player interacts with an object.
+     */
     @EventHandler
     public void onPlayerInteract(PlayerInteractEvent event) {
         Player player = event.getPlayer();
         ItemStack item = event.getItem();
         Action action = event.getAction();
+
         if (action == Action.RIGHT_CLICK_AIR || action == Action.RIGHT_CLICK_BLOCK) {
             if (action == Action.RIGHT_CLICK_BLOCK && event.getClickedBlock() != null) {
                 Material blockType = event.getClickedBlock().getType();
+
+                // Allow players to open containers while holding a tome book
                 if (blockType == Material.CHEST || blockType == Material.TRAPPED_CHEST || blockType == Material.BARREL || blockType == Material.ENDER_CHEST || blockType == Material.SHULKER_BOX || blockType.name().contains("SHULKER_BOX") || blockType == Material.CRAFTING_TABLE || blockType == Material.FURNACE || blockType == Material.BLAST_FURNACE || blockType == Material.SMOKER || blockType == Material.BREWING_STAND || blockType == Material.ANVIL || blockType == Material.CHIPPED_ANVIL || blockType == Material.DAMAGED_ANVIL || blockType == Material.ENCHANTING_TABLE || blockType == Material.GRINDSTONE || blockType == Material.STONECUTTER || blockType == Material.LOOM || blockType == Material.CARTOGRAPHY_TABLE || blockType == Material.SMITHING_TABLE || blockType == Material.LECTERN || blockType == Material.HOPPER || blockType == Material.DROPPER || blockType == Material.DISPENSER) {
                     return;
                 }
@@ -48,12 +61,15 @@ public class TomeListener implements Listener {
 
             if (item != null && item.getType() == Material.WRITTEN_BOOK) {
                 BookMeta bookMeta = (BookMeta)item.getItemMeta();
+
                 if (bookMeta != null && bookMeta.hasTitle()) {
                     String tomeTitle = bookMeta.getTitle();
                     this.plugin.getLogger().info("Player " + player.getName() + " using tome with title: '" + tomeTitle + "'");
 
                     int cureBookNumber = CureBookReadingListener.getAuthenticCureBookNumber(item, this.plugin);
+
                     if (cureBookNumber > 0) {
+                        // Prevent the player from reading the fourth cure book if the rest of the trinity has not been read
                         if (cureBookNumber == 4 && !CureBookReadingListener.hasReadAllCureBooks(player)) {
                             event.setCancelled(true);
                             ItemStack obscuredBook = new ItemStack(Material.WRITTEN_BOOK);
@@ -62,7 +78,7 @@ public class TomeListener implements Listener {
                             if (obscuredMeta != null) {
                                 obscuredMeta.setTitle("The Retribution 4/3");
                                 obscuredMeta.setAuthor("§4A vengeful hand...");
-                                obscuredMeta.setPages(new String[]{"§8§oThe words within this tome are beyond your comprehension...\n\n§7Perhaps you must first complete the Trinity of Restoration."});
+                                obscuredMeta.setPages("§8§oThe words within this tome are beyond your comprehension...\n\n§7Perhaps you must first complete the Trinity of Restoration.");
                                 obscuredBook.setItemMeta(obscuredMeta);
                             }
 
@@ -72,9 +88,11 @@ public class TomeListener implements Listener {
                         }
                     } else if (!this.tomeManager.isValidAbility(tomeTitle)) {
                         this.plugin.getLogger().info("Invalid tome ability: '" + tomeTitle + "'");
+
                     } else if (!this.vampireManager.isHuman(player)) {
                         event.setCancelled(true);
                         player.sendMessage("§cThe ancient knowledge within this tome is beyond your vampiric comprehension...");
+
                     } else if (!this.plugin.getSessionManager().isSessionActive()) {
                         event.setCancelled(true);
                         player.sendMessage("§cThe tome's magic lies dormant... It can only be absorbed during an active session.");
@@ -116,7 +134,7 @@ public class TomeListener implements Listener {
                                 if (item.getAmount() > 1) {
                                     item.setAmount(item.getAmount() - 1);
                                 } else {
-                                    player.getInventory().setItemInMainHand((ItemStack)null);
+                                    player.getInventory().setItemInMainHand(null);
                                 }
 
                                 player.playSound(player, "minecraft:ambient.crimson_forest.mood", 1.0F, 1.0F);
@@ -128,22 +146,32 @@ public class TomeListener implements Listener {
         }
     }
 
+    /**
+     * Control interactions with the tome selection UI.
+     *
+     * @param event a player clicks inside an inventory menu.
+     */
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
         if (event.getView().getTitle() != null && event.getView().getTitle().equals("§6§lSelect Tome Abilities")) {
             event.setCancelled(true);
-            if (event.getWhoClicked() instanceof Player) {
-                Player admin = (Player)event.getWhoClicked();
+
+            if (event.getWhoClicked() instanceof Player admin) {
                 ItemStack clickedItem = event.getCurrentItem();
+
                 if (clickedItem != null && clickedItem.getType() == Material.WRITTEN_BOOK) {
                     UUID targetUUID = this.tomeManager.getTomeSelectionTarget(admin.getUniqueId());
+
                     if (targetUUID == null) {
                         admin.sendMessage("§cError: Could not find target player for this selection.");
                         admin.closeInventory();
+
                     } else {
                         Player target = Bukkit.getPlayer(targetUUID);
+
                         if (target != null && target.isOnline()) {
                             ItemMeta meta = clickedItem.getItemMeta();
+
                             if (meta != null && meta.getDisplayName() != null) {
                                 if (meta.hasLore()) {
                                     for(String line : meta.getLore()) {
@@ -166,11 +194,13 @@ public class TomeListener implements Listener {
                                 }
 
                                 String abilityName = cleanName.replace(" ", "").toLowerCase();
+
                                 if (this.tomeManager.hasAbility(target, abilityName)) {
                                     this.tomeManager.removeAbility(target, abilityName);
                                     admin.sendMessage("§cRemoved §f" + cleanName + " §cfrom §e" + target.getName());
                                     target.sendMessage("§cThe tome ability §f" + cleanName + " §chas been removed from you.");
                                     target.playSound(target.getLocation(), Sound.BLOCK_FIRE_EXTINGUISH, 1.0F, 1.0F);
+
                                 } else {
                                     this.tomeManager.forceGrantAbility(target, abilityName);
                                     admin.sendMessage("§aGranted §f" + cleanName + " §ato §e" + target.getName());
@@ -190,8 +220,16 @@ public class TomeListener implements Listener {
         }
     }
 
+    /**
+     * Give or remove the tome from the human player's access,
+     *
+     * @param admin the player managing the tome selection.
+     * @param target the player earning or losing tomes.
+     * @param tag the book's name.
+     */
     private void handleCureBookClick(Player admin, Player target, String tag) {
         boolean hasTag = target.getScoreboardTags().contains(tag);
+
         String friendlyName = switch (tag) {
             case "CureBook1Read" -> "Cure Book 1 (The Remedy)";
             case "CureBook2Read" -> "Cure Book 2 (The Cure)";
@@ -216,17 +254,21 @@ public class TomeListener implements Listener {
         this.tomeManager.openTomeSelectionGUI(admin, target);
     }
 
+    /**
+     * Close the tome selection UI.
+     *
+     * @param event a player closes an inventory window.
+     */
     @EventHandler
     public void onInventoryClose(InventoryCloseEvent event) {
-        if (event.getView().getTitle() != null && event.getView().getTitle().equals("§6§lSelect Tome Abilities")) {
-            if (event.getPlayer() instanceof Player) {
-                Player player = (Player)event.getPlayer();
+        event.getView().getTitle();
 
+        if (event.getView().getTitle().equals("§6§lSelect Tome Abilities")) {
+            if (event.getPlayer() instanceof Player player) {
                 Bukkit.getScheduler().runTaskLater(this.plugin, () -> {
                     if (player.getOpenInventory() == null || player.getOpenInventory().getTitle() == null || !player.getOpenInventory().getTitle().equals("§6§lSelect Tome Abilities")) {
                         this.tomeManager.removeTomeSelectionTarget(player.getUniqueId());
                     }
-
                 }, 1L);
             }
         }

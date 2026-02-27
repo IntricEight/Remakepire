@@ -19,27 +19,41 @@ public class ExperienceBottleListener implements Listener {
     private final VampireManager vampireManager;
     private final ThirstManager thirstManager;
 
+    /**
+     * Create an instance of the Experience Bottle listener.
+     *
+     * @param plugin the host plugin object.
+     */
     public ExperienceBottleListener(RemakepirePlugin plugin) {
         this.plugin = plugin;
         this.vampireManager = plugin.getVampireManager();
         this.thirstManager = plugin.getThirstManager();
     }
 
+    /**
+     *
+     *
+     * @param event a player interacts with an object.
+     */
     @EventHandler
     public void onPlayerInteract(PlayerInteractEvent event) {
         Player player = event.getPlayer();
         ItemStack item = event.getItem();
+
         if (item != null && item.getType() == Material.EXPERIENCE_BOTTLE) {
             if (this.vampireManager.isVampire(player) || this.vampireManager.isHuman(player)) {
                 Action action = event.getAction();
+
                 if (action == Action.RIGHT_CLICK_AIR || action == Action.RIGHT_CLICK_BLOCK) {
                     if (this.vampireManager.isHuman(player)) {
                         event.setCancelled(true);
                         player.sendMessage("§cYou recoil at the sight of thick crimson blood rolling across the inside of the bottle... Who would collect something like this?");
+
                     } else {
                         event.setCancelled(true);
                         PlayerInventory inventory = player.getInventory();
                         ItemStack heldItem = inventory.getItemInMainHand();
+
                         if (heldItem.getType() == Material.EXPERIENCE_BOTTLE) {
                             if (heldItem.getAmount() > 1) {
                                 heldItem.setAmount(heldItem.getAmount() - 1);
@@ -49,7 +63,7 @@ public class ExperienceBottleListener implements Listener {
 
                             ItemStack glassBottle = new ItemStack(Material.GLASS_BOTTLE, 1);
                             if (inventory.firstEmpty() != -1) {
-                                inventory.addItem(new ItemStack[]{glassBottle});
+                                inventory.addItem(glassBottle);
                             } else {
                                 player.getWorld().dropItemNaturally(player.getLocation(), glassBottle);
                             }
@@ -58,7 +72,6 @@ public class ExperienceBottleListener implements Listener {
                             this.thirstManager.quenchThirst(player, experienceGained);
                             player.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent("§cYou drain the essence from the bottle, satisfying your vampiric thirst..."));
                         }
-
                     }
                 }
             }

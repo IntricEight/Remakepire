@@ -36,6 +36,7 @@ public class DeathHandler implements Listener {
      * Create an instance of the Death Handler listener.
      *
      * @param plugin the host plugin object.
+     * @param vampireManager the manager for generic vampire traits.
      */
     public DeathHandler(RemakepirePlugin plugin, VampireManager vampireManager) {
         this.plugin = plugin;

@@ -45,7 +45,7 @@ public class WayOfTheLandTomeAbility extends TomeAbility implements Listener {
     /**
      * Roll the extra crop chance when breaking relevant blocks.
      *
-     * @param event the block breaking event by the player.
+     * @param event a block being broken.
      */
     @EventHandler
     public void onBlockBreak(BlockBreakEvent event) {

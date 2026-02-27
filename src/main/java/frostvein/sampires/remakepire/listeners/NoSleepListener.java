@@ -9,6 +9,11 @@ import frostvein.sampires.remakepire.RemakepirePlugin;
 public class NoSleepListener implements Listener {
     RemakepirePlugin plugin;
 
+    /**
+     * Create an instance of the No Sleep (sleep prevention) listener.
+     *
+     * @param plugin the host plugin object.
+     */
     public NoSleepListener(RemakepirePlugin plugin) {
         this.plugin = plugin;
     }
@@ -16,6 +21,7 @@ public class NoSleepListener implements Listener {
     @EventHandler
     public void onPlayerBedEnter(PlayerBedEnterEvent event) {
         Player player = event.getPlayer();
+
         if (this.plugin.getVampireManager().isVampire(player)) {
             player.sendMessage("§cYou close your eyes... And are left disappointed. Once again, you find it impossible to fall asleep.");
         } else if (!this.plugin.getVampireManager().isVampire(player)) {

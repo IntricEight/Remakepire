@@ -89,7 +89,7 @@ public class HolyWordTomeAbility extends TomeAbility implements Listener {
     /**
      * Prevent paralyzed players from receiving damage.
      *
-     * @param event the damage event from the player.
+     * @param event an entity receives damage.
      */
     @EventHandler(
             priority = EventPriority.HIGHEST
@@ -108,7 +108,7 @@ public class HolyWordTomeAbility extends TomeAbility implements Listener {
     /**
      * Prevent paralyzed players from moving.
      *
-     * @param event the movement event from the player.
+     * @param event a player moving.
      */
     @EventHandler
     public void onPlayerMove(PlayerMoveEvent event) {
