@@ -90,6 +90,10 @@ public class ConfigManager {
         }
     }
 
+    public int getRaiseUndeadCooldown() {
+        return this.config.getInt("abilities.vampire.raise-undead-cooldown", 600);
+    }
+
     public int getVampireBatCooldown() {
         return this.config.getInt("abilities.vampire.bat-cooldown", 900);
     }

@@ -480,6 +480,10 @@ public final class RemakepirePlugin extends JavaPlugin {
         return this.beaconMajorityManager;
     }
 
+    public MobTeamManager getMobTeamManager() {
+        return this.mobTeamManager;
+    }
+
     public TomeVampireRestrictionListener getTomeVampireRestrictionListener() {
         return this.tomeVampireRestrictionListener;
     }

@@ -23,6 +23,7 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 import frostvein.sampires.remakepire.RemakepirePlugin;
+import frostvein.sampires.remakepire.abilities.RaiseUndeadAbility;
 import frostvein.sampires.remakepire.abilities.BatAbility;
 import frostvein.sampires.remakepire.abilities.BeaconTeleportAbility;
 import frostvein.sampires.remakepire.abilities.InvisibilityAbility;
@@ -91,6 +92,7 @@ public class VampireAbilityManager {
     }
 
     private void registerAbilities() {
+        this.registerAbility(new RaiseUndeadAbility());
         this.registerAbility(new LungeAbility());
         this.registerAbility(new InvisibilityAbility());
         this.registerAbility(new StormCallAbility());
