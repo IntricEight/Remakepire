@@ -167,9 +167,9 @@ public class DeathHandler implements Listener {
             player.sendMessage("§cThe last defender of humanity has fallen...");
 
             if (allBeaconsDesecrated) {
-                player.sendMessage("§cDarkness reigns supreme over Oakhurst. You are free.");
+                player.sendMessage("§cDarkness reigns supreme over Frostvein.");
             } else {
-                player.sendMessage("§cNow only the beacons lie between you and freedom.");
+                player.sendMessage("§cBut the blizzard still rages on...");
             }
 
             player.sendMessage("");
@@ -196,13 +196,13 @@ public class DeathHandler implements Listener {
             player.sendMessage("§aThe last creature of darkness has fallen...");
 
             if (anyPermanentlyCorrupted) {
-                player.sendMessage("§7But a beacon of light has been permanently corrupted.");
-                player.sendMessage("§7The creatures of the night have been vanquished, but you are stuck in Oakhurst, forever.");
+                player.sendMessage("§7But the blizzard still rages on...");
+                player.sendMessage("§7You must break your tether to the beacons...");
 
             } else if (allBeaconsHoly) {
-                player.sendMessage("§aLight reigns supreme over Oakhurst. You are free.");
+                player.sendMessage("§aLight reigns supreme over Frostvein.");
             } else {
-                player.sendMessage("§7Now only the beacons lie between you and freedom.");
+                player.sendMessage("§7But the blizzard still rages on...");
             }
 
             player.sendMessage("");
