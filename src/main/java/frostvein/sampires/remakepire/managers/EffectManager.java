@@ -197,7 +197,7 @@ public class EffectManager {
     }
 
     private void applyEternalNightDarkness(Player player) {
-        PotionEffect darkness = new PotionEffect(PotionEffectType.DARKNESS, 100, 0, false, false, true);
+        PotionEffect darkness = new PotionEffect(PotionEffectType.MINING_FATIGUE, 100, 0, false, false, true);
         player.addPotionEffect(darkness);
     }
 
