@@ -31,6 +31,9 @@ public class BloodMoonManager {
         }).runTaskTimer(this.plugin, 0L, 20L);
     }
 
+    /**
+     * Begin or end the blood moon depending on the time of day and moon phase
+     */
     private void checkTimeAndMoon() {
         long time = this.plugin.getWorld().getTime();
         long fullTime = this.plugin.getWorld().getFullTime();
@@ -46,6 +49,11 @@ public class BloodMoonManager {
         }
     }
 
+    /**
+     * Begin applying blood moon buffs
+     *
+     * @param world the world hosting the plugin interactions.
+     */
     private void startBloodMoon(World world) {
         if (!this.isBloodMoonActive) {
             this.isBloodMoonActive = true;
@@ -60,6 +68,9 @@ public class BloodMoonManager {
         }
     }
 
+    /**
+     *
+     */
     private void endBloodMoon() {
         if (this.isBloodMoonActive) {
             this.isBloodMoonActive = false;
