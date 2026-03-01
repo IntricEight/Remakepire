@@ -58,7 +58,7 @@ public class HolyWordTomeAbility extends TomeAbility implements Listener {
                         target.sendMessage("§cYou are frozen by divine power!");
                         target.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, PARALYSIS_DURATION, 255, false, false));
                         UUID targetId = target.getUniqueId();
-                        BukkitTask paralysisTask = Bukkit.getScheduler().runTaskLater(this.plugin, () -> this.paralyzedPlayers.remove(targetId), (long)(PARALYSIS_DURATION * 20));
+                        BukkitTask paralysisTask = Bukkit.getScheduler().runTaskLater(this.plugin, () -> this.paralyzedPlayers.remove(targetId), PARALYSIS_DURATION);
 
                         this.paralyzedPlayers.put(targetId, paralysisTask);
                         target.getWorld().playSound(target.getLocation(), "minecraft:entity.zombie_villager.cure", 0.8F, 2.0F);
@@ -68,6 +68,7 @@ public class HolyWordTomeAbility extends TomeAbility implements Listener {
                                 target.sendMessage("§7The divine paralysis fades... You can move again.");
                             }
                         }, PARALYSIS_DURATION);
+
                         ++stage2And3Paralyzed;
                     }
                 }
