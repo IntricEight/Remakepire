@@ -67,7 +67,7 @@ public class HolyWordTomeAbility extends TomeAbility implements Listener {
                             if (target.isOnline()) {
                                 target.sendMessage("§7The divine paralysis fades... You can move again.");
                             }
-                        }, (long)(PARALYSIS_DURATION * 20));
+                        }, PARALYSIS_DURATION);
                         ++stage2And3Paralyzed;
                     }
                 }

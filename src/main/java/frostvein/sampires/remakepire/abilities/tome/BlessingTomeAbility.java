@@ -42,7 +42,7 @@ public class BlessingTomeAbility extends TomeAbility {
 
                     // Check if the player's inventory has room for the holy water
                     if (inventory.firstEmpty() != -1) {
-                        inventory.addItem(new ItemStack[]{splashWater});
+                        inventory.addItem(splashWater);
                     } else {
                         player.getWorld().dropItemNaturally(player.getLocation(), splashWater);
                         player.sendMessage("§7Your inventory is full. The holy water was dropped at your feet.");

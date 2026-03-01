@@ -50,7 +50,7 @@ public class BloodMoonManager {
     }
 
     /**
-     * Begin applying blood moon buffs
+     * Begin applying blood moon buffs.
      *
      * @param world the world hosting the plugin interactions.
      */
@@ -69,7 +69,7 @@ public class BloodMoonManager {
     }
 
     /**
-     *
+     * Stop applying the blood moon buffs.
      */
     private void endBloodMoon() {
         if (this.isBloodMoonActive) {
@@ -85,6 +85,11 @@ public class BloodMoonManager {
         }
     }
 
+    /**
+     * Announce to the server that a blood moon is beginning.
+     *
+     * @param world the world hosting the plugin interactions.
+     */
     private void announceBloodMoon(World world) {
         world.getPlayers().forEach((player) -> {
             player.sendMessage("§c§lA blood moon rises...");
@@ -92,11 +97,13 @@ public class BloodMoonManager {
         });
     }
 
+    /**
+     * Mark the vampires who gain bonuses from the blood moon event.
+     */
     private void applyVampireBuffs() {
         if (this.isBloodMoonActive) {
             for(Player player : Bukkit.getOnlinePlayers()) {
                 if (this.plugin.getVampireManager().isVampireStage2(player) || this.plugin.getVampireManager().isVampireStage3(player)) {
-
                     if (this.canPlayerSeeSky(player)) {
                         player.addPotionEffect(new PotionEffect(PotionEffectType.UNLUCK, 240, 0, false, false), false);
 
@@ -113,32 +120,59 @@ public class BloodMoonManager {
         }
     }
 
+    /**
+     * Determine if the player is vertically exposed to the open sky.
+     *
+     * @param player the player whose access is being checked.
+     * @return {@code true} if the player has no solid blocks above their head.
+     */
     private boolean canPlayerSeeSky(Player player) {
         Block highestBlock = player.getWorld().getHighestBlockAt(player.getLocation());
         return player.getLocation().getBlockY() >= highestBlock.getY();
     }
 
+    /**
+     * Retrieve if there is an active blood moon.
+     *
+     * @return {@code true} if the blood moon is active.
+     */
     public boolean isActive() {
         return this.isBloodMoonActive;
     }
 
+    /**
+     * Begin a blood moon.
+     */
     public void forceStart() {
         if (!this.isBloodMoonActive) {
             this.startBloodMoon(this.plugin.getWorld());
         }
-
     }
 
+    /**
+     * Cancel the blood moon.
+     */
     public void forceStop() {
         if (this.isBloodMoonActive) {
             this.endBloodMoon();
         }
     }
 
+    /**
+     * Retrieve the current moon phase.
+     *
+     * @return The name of the current moon phase.
+     */
     public String getCurrentMoonPhase() {
         return this.getMoonPhaseName(this.plugin.getWorld().getFullTime());
     }
 
+    /**
+     * Determine what phase the moon is in.
+     *
+     * @param fullTime the extended time of the world cycle.
+     * @return The name of the moon phase which matches the full time.
+     */
     private String getMoonPhaseName(long fullTime) {
         long moonCycle = fullTime % 192000L;
 
@@ -159,6 +193,9 @@ public class BloodMoonManager {
         }
     }
 
+    /**
+     * Remove the vampire blood moon buffs before shutting down the manager.
+     */
     public void shutdown() {
         if (this.vampireBuffTask != null && !this.vampireBuffTask.isCancelled()) {
             this.vampireBuffTask.cancel();

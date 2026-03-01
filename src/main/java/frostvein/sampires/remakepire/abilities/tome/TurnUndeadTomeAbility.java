@@ -73,7 +73,6 @@ public class TurnUndeadTomeAbility extends TomeAbility {
         if (regularCastTeam != null) {
             regularCastTeam.addEntry(player.getName());
         }
-
     }
 
     /**
