@@ -54,7 +54,7 @@ public abstract class VampireAbility {
 
         } else {
             int playerStage = vampireManager.getVampireStage(player);
-            return playerStage < this.getMinimumStage() ? false : this.canUseAdditionalRequirements(player, vampireManager);
+            return playerStage >= this.getMinimumStage() && this.canUseAdditionalRequirements(player, vampireManager);
         }
     }
 

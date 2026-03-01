@@ -738,7 +738,7 @@ public class BeaconManager {
 
                 for(Player player : Bukkit.getOnlinePlayers()) {
                     if (this.plugin.getVampireManager().isHuman(player)) {
-                        player.removePotionEffect(PotionEffectType.DARKNESS);
+                        player.removePotionEffect(PotionEffectType.MINING_FATIGUE);
                     }
 
                     player.sendMessage("§6A beacon has been reclaimed by the light... The eternal darkness recedes.");
@@ -1749,14 +1749,14 @@ public class BeaconManager {
                             player.sendTitle("§c§lDEFEAT", "§7The light has prevailed", 20, 100, 40);
                             player.sendMessage("");
                             player.sendMessage("§cAll beacons shine with divine light...");
-                            player.sendMessage("§cLight reigns supreme over Oakhurst. You have lost.");
+                            player.sendMessage("§cLight reigns supreme over Frostvein. You have lost.");
                             player.sendMessage("");
                             player.playSound(player.getLocation(), Sound.BLOCK_BEACON_ACTIVATE, SoundCategory.MASTER, 1.0F, 1.0F);
                         } else {
                             player.sendTitle("§a§lVICTORY", "§eThe darkness has been vanquished", 20, 100, 40);
                             player.sendMessage("");
                             player.sendMessage("§aAll beacons shine with divine light...");
-                            player.sendMessage("§aLight reigns supreme over Oakhurst. You are free.");
+                            player.sendMessage("§aLight reigns supreme over Frostvein. And yet, the storm rages on.");
                             player.sendMessage("");
                             player.playSound(player.getLocation(), Sound.BLOCK_BEACON_ACTIVATE, SoundCategory.MASTER, 1.0F, 1.0F);
                         }

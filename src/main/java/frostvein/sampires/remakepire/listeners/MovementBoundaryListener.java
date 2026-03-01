@@ -60,24 +60,10 @@ implements Listener {
         boolean canLeave = false;
         String leaveMessage = null;
 
-        if (player.getScoreboardTags().contains("CuredVampire")) {
+        // TODO: At present, there is no feature that applies this tag, so we will be using commands. In a final release version of this, make sure to implement this tag's attachment automatically.
+        if (player.getScoreboardTags().contains("killer")) {
             canLeave = true;
-            leaveMessage = "§6You are leaving Oakhurst...\n§eThe familiar lands fade behind you as you venture beyond the border.";
-
-        } else if (!this.plugin.getVampireManager().isHuman(player)) {
-            if (this.areAllBeaconsDesecrated() && !this.anySurvivalModeHumansExist()) {
-                canLeave = true;
-                leaveMessage = "§4You are free of your chains, creature of the night...";
-
-            } else if (this.areAllBeaconsDesecrated()) {
-                canLeave = false;
-            }
-        } else if (this.areAllBeaconsHoly() && !this.anySurvivalModeVampiresExist()) {
-            canLeave = true;
-            leaveMessage = "§aYou are free... Finally free...";
-
-        } else if (this.areAllBeaconsHoly()) {
-            canLeave = false;
+            leaveMessage = "§6You are leaving Frostvein...\n§eThe snowfall stops for you... You are free...";
         }
 
         if (canLeave && wasInsideBoundary && isOutsideBoundary) {
@@ -96,7 +82,7 @@ implements Listener {
 
             if (!player.getScoreboardTags().contains("informed_boundary")) {
                 player.addScoreboardTag("informed_boundary");
-                String blockedMessage = !this.plugin.getVampireManager().isHuman(player) ? (this.areAllBeaconsDesecrated() ? "§4But while humans remain... Hope still stands..." : "§cYou feel a force tying you to Oakhurst... You may not leave while an enemy's beacon remains... But one that has embraced darkness, and yet has found strength to return to the light... Could escape...") : (this.areAllBeaconsHoly() ? "§aBut while evil creatures still walk Oakhurst, your job is not yet finished..." : "§cYou feel a force tying you to Oakhurst... You may not leave while an enemy's beacon remains... But one that has embraced darkness, and yet has found strength to return to the light... Could escape...");
+                String blockedMessage = !this.plugin.getVampireManager().isHuman(player) ? (this.areAllBeaconsDesecrated() ? "§4The blizzard still hungers more... Your job is not finished..." : "§cYou recoil at the harsh bite of the blizzard touching your skin... You feel a icy cold burn start to bloom through your body...") : (this.areAllBeaconsHoly() ? "§aThe blizzard still hungers more... Your job is not finished..." : "§cYou recoil at the harsh bite of the blizzard touching your skin... You feel a icy cold burn start to bloom through your body...");
                 player.sendMessage(blockedMessage);
             }
         }

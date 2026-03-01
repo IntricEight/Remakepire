@@ -54,7 +54,7 @@ public class MobTeamManager {
         }
     }
 
-    private void assignMobsToVampireTeam() {
+    public void assignMobsToVampireTeam() {
         Team vampireTeam = this.plugin.getVampireCastTeam();
 
         if (vampireTeam == null) {
