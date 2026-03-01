@@ -35,9 +35,9 @@ public class ShoulderBargeTomeAbility extends TomeAbility {
     private static final double DAMAGE_TO_MOBS = 20.0;
     // Controls how frequently a target can be barged into (in ticks)
     private static final long TARGET_COOLDOWN_MS = 3000L;
-    private final Map<UUID, BukkitTask> chargingPlayers = new HashMap();
-    private final Map<UUID, Set<UUID>> chargeHitEntities = new HashMap();
-    private final Map<UUID, Long> recentlyBargedEntities = new HashMap();
+    private final Map<UUID, BukkitTask> chargingPlayers = new HashMap<>();
+    private final Map<UUID, Set<UUID>> chargeHitEntities = new HashMap<>();
+    private final Map<UUID, Long> recentlyBargedEntities = new HashMap<>();
 
     /**
      * Create an instance of the Shoulder Barge tome ability.
@@ -69,7 +69,7 @@ public class ShoulderBargeTomeAbility extends TomeAbility {
             final UUID playerId = player.getUniqueId();
 
             synchronized(this.chargeHitEntities) {
-                this.chargeHitEntities.put(playerId, new HashSet());
+                this.chargeHitEntities.put(playerId, new HashSet<>());
             }
 
             BukkitRunnable collisionTask = new BukkitRunnable() {
@@ -94,7 +94,7 @@ public class ShoulderBargeTomeAbility extends TomeAbility {
                 }
 
                 collisionTask.cancel();
-            }, (long)CHARGE_DURATION);
+            }, CHARGE_DURATION);
 
             this.chargingPlayers.put(playerId, chargeTask);
             return true;
@@ -117,6 +117,7 @@ public class ShoulderBargeTomeAbility extends TomeAbility {
         if (hitEntities != null) {
             for(Entity entity : player.getNearbyEntities(1.5, 2.0, 1.5)) {
                 UUID entityId = entity.getUniqueId();
+
                 synchronized(hitEntities) {
                     if (hitEntities.contains(entityId)) {
                         continue;
@@ -125,7 +126,8 @@ public class ShoulderBargeTomeAbility extends TomeAbility {
 
                 if (!entity.equals(player)) {
                     synchronized(this.recentlyBargedEntities) {
-                        Long lastBargeTime = (Long)this.recentlyBargedEntities.get(entityId);
+                        Long lastBargeTime = this.recentlyBargedEntities.get(entityId);
+
                         if (lastBargeTime != null && System.currentTimeMillis() - lastBargeTime < TARGET_COOLDOWN_MS) {
                             continue;
                         }
@@ -201,7 +203,7 @@ public class ShoulderBargeTomeAbility extends TomeAbility {
         long currentTime = System.currentTimeMillis();
 
         synchronized(this.recentlyBargedEntities) {
-            this.recentlyBargedEntities.entrySet().removeIf((entry) -> currentTime - (Long)entry.getValue() > TARGET_COOLDOWN_MS);
+            this.recentlyBargedEntities.entrySet().removeIf((entry) -> currentTime - entry.getValue() > TARGET_COOLDOWN_MS);
         }
     }
 

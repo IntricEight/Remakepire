@@ -22,16 +22,27 @@ public class ConfigManager {
         this.loadConfig();
     }
 
+    /**
+     * Retrieve the plugin configuration from the file.
+     */
     public void loadConfig() {
         this.plugin.saveDefaultConfig();
         this.plugin.reloadConfig();
         this.config = this.plugin.getConfig();
     }
 
+    /**
+     * Save the plugin configuration into the file.
+     */
     public void saveConfig() {
         this.plugin.saveConfig();
     }
 
+    /**
+     * Retrieve the locations of all the tome chests from the config.
+     *
+     * @return A {@code List} of chest {@code Locations}.
+     */
     public List<Location> getTomeChestLocations() {
         List<String> locationStrings = this.config.getStringList("tome-chests.locations");
         List<Location> locations = new ArrayList<>();
@@ -62,6 +73,12 @@ public class ConfigManager {
         }
     }
 
+    /**
+     * Add a new tome chest to the config.
+     *
+     * @param location the new tome chest's location.
+     * @return {@code true} if a new tome chest was added to the config.
+     */
     public boolean addTomeChestLocation(Location location) {
         List<String> locations = this.config.getStringList("tome-chests.locations");
         String locationString = String.format("%d,%d,%d", location.getBlockX(), location.getBlockY(), location.getBlockZ());
@@ -76,6 +93,12 @@ public class ConfigManager {
         }
     }
 
+    /**
+     * Remove a tome chest from the config.
+     *
+     * @param location the tome chest's location.
+     * @return {@code true} if the tome chest was removed from the config.
+     */
     public boolean removeTomeChestLocation(Location location) {
         List<String> locations = this.config.getStringList("tome-chests.locations");
         String locationString = String.format("%d,%d,%d", location.getBlockX(), location.getBlockY(), location.getBlockZ());
@@ -94,103 +117,231 @@ public class ConfigManager {
         return this.config.getInt("abilities.vampire.raise-undead-cooldown", 600);
     }
 
+    /**
+     * Retrieve the cooldown on the vampire ability Bat Transformation.
+     *
+     * @return the seconds between ability uses.
+     */
     public int getVampireBatCooldown() {
         return this.config.getInt("abilities.vampire.bat-cooldown", 900);
     }
 
+    /**
+     * Retrieve the cooldown on the vampire ability Vampiric Lunge.
+     *
+     * @return the seconds between ability uses.
+     */
     public int getVampireLungeCooldown() {
         return this.config.getInt("abilities.vampire.lunge-cooldown", 45);
     }
 
+    /**
+     * Retrieve the cooldown on the vampire ability Vampiric Vanish.
+     *
+     * @return the seconds between ability uses.
+     */
     public int getVampireVanishCooldown() {
         return this.config.getInt("abilities.vampire.vanish-cooldown", 420);
     }
 
+    /**
+     * Retrieve the cooldown on the vampire ability Storm Call.
+     *
+     * @return the seconds between ability uses.
+     */
     public int getVampireStormCallCooldown() {
         return this.config.getInt("abilities.vampire.storm-call-cooldown", 7200);
     }
 
+    /**
+     * Retrieve the cooldown on the vampire ability Beacon Teleport.
+     *
+     * @return the seconds between ability uses.
+     */
     public int getVampireBeaconTeleportCooldown() {
         return this.config.getInt("abilities.vampire.beacon-teleport-cooldown", 300);
     }
 
+    /**
+     * Retrieve the cooldown on the vampire ability Vampire Vision.
+     *
+     * @return the seconds between ability uses.
+     */
     public int getVampireVisionCooldown() {
         return this.config.getInt("abilities.vampire.vampire-vision-cooldown", 1);
     }
 
+    /**
+     * Retrieve the cooldown on the tome ability Blessing.
+     *
+     * @return the seconds between ability uses.
+     */
     public int getTomeBlessingCooldown() {
         return this.config.getInt("abilities.tome.blessing-cooldown", 7200);
     }
 
+    /**
+     * Retrieve the cooldown on the tome ability Banish Undead.
+     *
+     * @return the seconds between ability uses.
+     */
     public int getTomeBanishUndeadCooldown() {
         return this.config.getInt("abilities.tome.banish-undead-cooldown", 900);
     }
 
+    /**
+     * Retrieve the cooldown on the tome ability Holy Word.
+     *
+     * @return the seconds between ability uses.
+     */
     public int getTomeHolyWordCooldown() {
         return this.config.getInt("abilities.tome.holy-word-cooldown", 600);
     }
 
+    /**
+     * Retrieve the cooldown on the tome ability Enlightened Eye.
+     *
+     * @return the seconds between ability uses.
+     */
     public int getTomeEnlightenedEyeCooldown() {
         return this.config.getInt("abilities.tome.enlightened-eye-cooldown", 900);
     }
 
+    /**
+     * Retrieve the cooldown on the tome ability Lantern Thrash.
+     *
+     * @return the seconds between ability uses.
+     */
     public int getTomeLanternThrashCooldown() {
         return this.config.getInt("abilities.tome.lantern-thrash-cooldown", 300);
     }
 
+    /**
+     * Retrieve the cooldown on the tome ability Prayer of Faith.
+     *
+     * @return the seconds between ability uses.
+     */
     public int getTomePrayerOfFaithCooldown() {
         return this.config.getInt("abilities.tome.prayer-of-faith-cooldown", 900);
     }
 
+    /**
+     * Retrieve the cooldown on the tome ability Rallying Cry.
+     *
+     * @return the seconds between ability uses.
+     */
     public int getTomeRallyingCryCooldown() {
         return this.config.getInt("abilities.tome.rallying-cry-cooldown", 1200);
     }
 
+    /**
+     * Retrieve the cooldown on the tome ability Shoulder Barge.
+     *
+     * @return the seconds between ability uses.
+     */
     public int getTomeShoulderBargeCooldown() {
         return this.config.getInt("abilities.tome.shoulder-barge-cooldown", 300);
     }
 
+    /**
+     * Retrieve the cooldown on the tome ability Turn Undead.
+     *
+     * @return the seconds between ability uses.
+     */
     public int getTomeTurnUndeadCooldown() {
         return this.config.getInt("abilities.tome.turn-undead-cooldown", 1800);
     }
 
+
+    /**
+     * Retrieve the cooldown on the tome ability Uncanny Direction.
+     *
+     * @return the seconds between ability uses.
+     */
     public int getTomeUncannyDirectionCooldown() {
         return this.config.getInt("abilities.tome.uncanny-direction-cooldown", 30);
     }
 
+
+    /**
+     * Retrieve the cooldown on the tome ability Unnatural Haste.
+     *
+     * @return the seconds between ability uses.
+     */
     public int getTomeUnnaturalHasteCooldown() {
         return this.config.getInt("abilities.tome.unnatural-haste-cooldown", 900);
     }
 
+    /**
+     * Retrieve the cooldown on the tome ability Way of the Land.
+     *
+     * @return the seconds between ability uses.
+     */
     public int getTomeWayOfTheLandCooldown() {
         return this.config.getInt("abilities.tome.way-of-the-land-cooldown", 600);
     }
 
+    /**
+     * Retrieve the cooldown on the tome ability Way of the Lumberjack.
+     *
+     * @return the seconds between ability uses.
+     */
     public int getTomeWayOfTheLumberjackCooldown() {
         return this.config.getInt("abilities.tome.way-of-the-lumberjack-cooldown", 600);
     }
 
+    /**
+     * Retrieve the cooldown on the tome ability Way of the Prospector.
+     *
+     * @return the seconds between ability uses.
+     */
     public int getTomeWayOfTheProspectorCooldown() {
         return this.config.getInt("abilities.tome.way-of-the-prospector-cooldown", 600);
     }
 
+
+    /**
+     * Retrieve the cooldown on the tome ability Stop the Bleeding.
+     *
+     * @return the seconds between ability uses.
+     */
     public int getTomeStopTheBleedingCooldown() {
         return this.config.getInt("abilities.tome.stop-the-bleeding-cooldown", 7200);
     }
 
+    /**
+     * Retrieve the time it takes for a vampire's thirst bar to fully deplete.
+     *
+     * @return the minutes it takes to run out of blood.
+     */
     public int getThirstDepletionMinutes() {
         return this.config.getInt("thirst.depletion-minutes", 120);
     }
 
+    /**
+     * Retrieve the maximum amount of blood a vampire can drain through drinking.
+     *
+     * @return the points of blood that each vampire can gain.
+     */
     public int getMaxFeedingThirstPerSession() {
         return this.config.getInt("thirst.max-feeding-per-session", 60);
     }
 
+    /**
+     * The baseline complete beacon conversion time for a single player.
+     *
+     * @return the seconds it takes to convert a beacon from one side's alignment into the others.
+     */
     public long getBeaconConversionTimeMs() {
         long seconds = this.config.getLong("beacons.conversion-time-seconds", 300L);
         return seconds * 1000L;
     }
 
+    /**
+     *
+     *
+     * @return
+     */
     public long getBeaconConversionCooldownMs() {
         long minutes = this.config.getLong("beacons.conversion-cooldown-minutes", 60L);
         return minutes * 60L * 1000L;
