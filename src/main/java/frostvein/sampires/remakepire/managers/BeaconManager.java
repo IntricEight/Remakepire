@@ -738,7 +738,7 @@ public class BeaconManager {
 
                 for(Player player : Bukkit.getOnlinePlayers()) {
                     if (this.plugin.getVampireManager().isHuman(player)) {
-                        player.removePotionEffect(PotionEffectType.MINING_FATIGUE);
+                        player.removePotionEffect(PotionEffectType.DARKNESS);
                     }
 
                     player.sendMessage("§6A beacon has been reclaimed by the light... The eternal darkness recedes.");

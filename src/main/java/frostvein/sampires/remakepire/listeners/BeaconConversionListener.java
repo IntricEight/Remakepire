@@ -506,7 +506,7 @@ public class BeaconConversionListener implements Listener {
         // Blind all humans while the final stand is active
         for(Player player : this.plugin.getServer().getOnlinePlayers()) {
             if (this.vampireManager.isHuman(player) && player.getGameMode() == GameMode.SURVIVAL) {
-                player.addPotionEffect(new PotionEffect(PotionEffectType.MINING_FATIGUE, -1, 0, false, false, true));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.DARKNESS, -1, 0, false, false, true));
             }
         }
 
@@ -528,7 +528,7 @@ public class BeaconConversionListener implements Listener {
         // Remove the mining fatigue effect from humans
         for(Player player : this.plugin.getServer().getOnlinePlayers()) {
             if (this.vampireManager.isHuman(player)) {
-                player.removePotionEffect(PotionEffectType.MINING_FATIGUE);
+                player.removePotionEffect(PotionEffectType.DARKNESS);
             }
         }
 

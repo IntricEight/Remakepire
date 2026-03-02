@@ -328,9 +328,9 @@ public class ConfigManager {
     }
 
     /**
-     * The baseline complete beacon conversion time for a single player.
+     * Retrieve the baseline complete beacon conversion time for a single player.
      *
-     * @return the seconds it takes to convert a beacon from one side's alignment into the others.
+     * @return the milliseconds it takes to convert a beacon from one side's alignment into the others.
      */
     public long getBeaconConversionTimeMs() {
         long seconds = this.config.getLong("beacons.conversion-time-seconds", 300L);
@@ -338,83 +338,174 @@ public class ConfigManager {
     }
 
     /**
+     * Retrieve the cooldown between beacon conversions.
      *
-     *
-     * @return
+     * @return the milliseconds it takes to convert a beacon from one side's alignment into the others.
      */
     public long getBeaconConversionCooldownMs() {
         long minutes = this.config.getLong("beacons.conversion-cooldown-minutes", 60L);
         return minutes * 60L * 1000L;
     }
 
+    /**
+     * Retrieve the conversion speed multiplier that humans get.
+     *
+     * @return A {@code double} multiplier for the conversion speed.
+     */
     public double getBeaconHumanSpeedMultiplier() {
         return this.config.getDouble("beacons.human-speed-multiplier", 1.5);
     }
 
+    /**
+     * Retrieve the conversion speed multiplier that humans get during a darkness final stand.
+     *
+     * @return A {@code double} multiplier for the conversion speed.
+     */
     public double getBeaconFinalStandMultiplier() {
         return this.config.getDouble("beacons.final-stand-multiplier", 6.0);
     }
 
+    /**
+     * Retrieve the seconds after a beacon comes neutral until a server-wide alert will be given.
+     *
+     * @return The seconds between the conversion and message.
+     */
     public int getBeaconNeutralAnnouncementDelaySeconds() {
         return this.config.getInt("beacons.neutral-announcement-delay-seconds", 60);
     }
 
+    /**
+     * Retrieve the minimum number of seconds where garlic can activate after consumption.
+     *
+     * @return The seconds until the garlic effect could activate.
+     */
     public int getGarlicProcessingTimeMin() {
         return this.config.getInt("garlic.processing-time-min-seconds", 480);
     }
 
+    /**
+     * Retrieve the maximum number of seconds where garlic can activate after consumption.
+     *
+     * @return The seconds until the garlic effect has to activate.
+     */
     public int getGarlicProcessingTimeMax() {
         return this.config.getInt("garlic.processing-time-max-seconds", 720);
     }
 
+    /**
+     * Retrieve the minimum number of seconds that garlic will stay in effect.
+     *
+     * @return The seconds until the garlic effect could wear off.
+     */
     public int getGarlicImmunityDurationMin() {
         return this.config.getInt("garlic.immunity-duration-min-seconds", 480);
     }
 
+    /**
+     * Retrieve the maximum number of seconds that garlic will stay in effect.
+     *
+     * @return The seconds until the garlic effect has to wear off.
+     */
     public int getGarlicImmunityDurationMax() {
         return this.config.getInt("garlic.immunity-duration-max-seconds", 600);
     }
 
+    /**
+     * Retrieve if passive mobs will be automatically spawned each morning.
+     *
+     * @return {@code true} if passive mobs will be spawned without admin intervention.
+     */
     public boolean isPassiveMobAutoSpawnEnabled() {
         return this.config.getBoolean("passive-mob-spawning.auto-spawn-enabled", true);
     }
 
+    /**
+     * Retrieve the minimum number of passive mobs that will be spawned with each morning.
+     *
+     * @return The lowest number of passive mobs that will spawn.
+     */
     public int getPassiveMobMinimumThreshold() {
         return this.config.getInt("passive-mob-spawning.minimum-animal-threshold", 40);
     }
 
+    /**
+     * Retrieve the number of passive mobs spawns that will be attempted each morning.
+     *
+     * @return The highest number of passive mobs that will spawn.
+     */
     public int getPassiveMobSpawnCount() {
         return this.config.getInt("passive-mob-spawning.spawn-count", 80);
     }
 
+    /**
+     * Retrieve the highest stage that a vampire can be on and get permakilled.
+     *
+     * @return The highest permadeath-enabled vampire stage.
+     */
     public int getPermadeathMinimumStage() {
         return this.config.getInt("combat.permadeath-minimum-stage", 1);
     }
 
+    /**
+     * Retrieve the ticks cooldown between wooden stake uses. 20 ticks is 1 second.
+     *
+     * @return The cooldown between wooden stake uses (in ticks).
+     */
     public int getWoodenStakeCooldownTicks() {
         return this.config.getInt("combat.wooden-stake-cooldown-ticks", 80);
     }
 
+    /**
+     * Retrieve whether the first three cure books can spawn in tome chests.
+     *
+     * @return {@code true} if cure books can spawn in tome chests.
+     */
     public boolean isCureBooksEnabled() {
         return this.config.getBoolean("cure_books_enabled", true);
     }
 
+    /**
+     * Retrieve the chance that a tome chest's contents will be replaced by a cure book.
+     *
+     * @return The percentage chance of a cure book appearing in tome chests each cycle.
+     */
     public double getCureBooksSpawnChance() {
         return this.config.getDouble("cure_books_spawn_chance", 0.3);
     }
 
+    /**
+     * Retrieve how far a vampire can be from a beacon until a cure stops working.
+     *
+     * @return The maximum distance (in blocks) that a vampire can be from a beacon while being cured.
+     */
     public double getCureBeaconDistance() {
         return this.config.getDouble("cure.cure-distance", 25.0);
     }
 
+    /**
+     * Retrieve whether messages that players send will be blocked until they confirm otherwise.
+     *
+     * @return {@code true} if the message will be blocked.
+     */
     public boolean isFirstMessageBlockingEnabled() {
         return this.config.getBoolean("chat.first-message-blocking-enabled", true);
     }
 
+    /**
+     * Retrieve the message and prompt that appears when a user sends a blocked message.
+     *
+     * @return The message to stop the player from messaging others.
+     */
     public String getFirstMessageBlockedMessage() {
         return this.config.getString("chat.first-message-blocked-message", "&eIt looks like you've attempted to send a message! Vampire SMP is geared to revolve around immersion, consider finding the person you need to speak to, or messaging them on discord. If you still need to send your chat message, [Click Here]&e. This prevention message will not appear again until your next log on if you do choose to send your message via the blue text.");
     }
 
+    /**
+     * Retrieve the default location where vampires will respawn after dying.
+     *
+     * @param world the world hosting the plugin interactions.
+     * @return A {@code Location} where vampires will respawn.
+     */
     public Location getVampireRespawnLocation(World world) {
         String locationStr = this.config.getString("vampire.respawn-location", "40,101,-113");
         String[] parts = locationStr.split(",");
@@ -431,55 +522,122 @@ public class ConfigManager {
         }
     }
 
+    /**
+     * Set a new respawn location for the vampires.
+     *
+     * @param locationStr The coordinates of a location.
+     */
     public void setVampireRespawnLocation(String locationStr) {
         this.config.set("vampire.respawn-location", locationStr);
         this.plugin.saveConfig();
     }
 
+    /**
+     * Retrieve the X coordinate of the main settlement's location.
+     *
+     * @return The X coordinate of town's center.
+     */
     public double getOakhurstTownCenterX() {
         return this.config.getDouble("oakhurst.town-center-x", 79.0);
     }
 
+    /**
+     * Retrieve the Z coordinate of the main settlement's location.
+     *
+     * @return The Z coordinate of town's center.
+     */
     public double getOakhurstTownCenterZ() {
         return this.config.getDouble("oakhurst.town-center-z", 440.0);
     }
 
+    /**
+     * Retrieve the maximum distance from the main settlement where players can spawn on game init.
+     *
+     * @return The distance around town where players can spawn.
+     */
     public double getOakhurstTeleportRadius() {
         return this.config.getDouble("oakhurst.teleport-radius", 400.0);
     }
 
+    /**
+     * Retrieve the X coordinate of the game border's center.
+     *
+     * @return The X coordinate of the border's center.
+     */
     public double getOakhurstBorderCenterX() {
         return this.config.getDouble("oakhurst.border.center-x", 50.0);
     }
 
+    /**
+     * Retrieve the Z coordinate of the game border's center.
+     *
+     * @return The Z coordinate of the border's center.
+     */
     public double getOakhurstBorderCenterZ() {
         return this.config.getDouble("oakhurst.border.center-z", 50.0);
     }
 
+    /**
+     * Retrieve the length of the game border.
+     *
+     * @return The diameter of the game area (in blocks).
+     */
     public double getOakhurstBorderDiameter() {
         return this.config.getDouble("oakhurst.border.diameter", 1098.0);
     }
 
+    /**
+     * Retrieve the radius of the game border.
+     *
+     * @return The radius of the game area (in blocks).
+     */
     public double getOakhurstBorderRadius() {
         return this.getOakhurstBorderDiameter() / 2.0;
     }
 
+    /**
+     * Determine the smallest X coordinate that is within the game border.
+     *
+     * @return The X coordinate of the western border.
+     */
     public double getOakhurstMinX() {
         return this.getOakhurstBorderCenterX() - this.getOakhurstBorderRadius();
     }
 
+    /**
+     * Determine the largest X coordinate that is within the game border.
+     *
+     * @return The X coordinate of the eastern border.
+     */
     public double getOakhurstMaxX() {
         return this.getOakhurstBorderCenterX() + this.getOakhurstBorderRadius();
     }
 
+    /**
+     * Determine the smallest Z coordinate that is within the game border.
+     *
+     * @return The Z coordinate of the southern border.
+     */
     public double getOakhurstMinZ() {
         return this.getOakhurstBorderCenterZ() - this.getOakhurstBorderRadius();
     }
 
+    /**
+     * Determine the largest Z coordinate that is within the game border.
+     *
+     * @return The Z coordinate of the northern border.
+     */
     public double getOakhurstMaxZ() {
         return this.getOakhurstBorderCenterZ() + this.getOakhurstBorderRadius();
     }
 
+    /**
+     * Determine if a location is within the game border.
+     *
+     * @param x the X coordinate of the location.
+     * @param z the Z coordinate of the location.
+     * @return {@code true} if the location is inside the game border region.
+     */
     public boolean isLocationWithinBorder(double x, double z) {
         return x >= this.getOakhurstMinX() && x <= this.getOakhurstMaxX() && z >= this.getOakhurstMinZ() && z <= this.getOakhurstMaxZ();
     }
