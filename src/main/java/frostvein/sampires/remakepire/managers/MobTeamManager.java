@@ -108,16 +108,16 @@ public class MobTeamManager {
     }
 
     /**
-     * Assign mobs
+     * Assign existing mobs to the vampire team.
      */
     public void assignMobsNow() {
         this.assignMobsToVampireTeam();
     }
 
     /**
+     * Retrieve the number of mobs on the vampire team.
      *
-     *
-     * @return The number of players on the vampire team.
+     * @return The number of players and mobs on the vampire team.
      */
     public int getVampireMobCount() {
         Team vampireTeam = this.plugin.getVampireCastTeam();
@@ -125,7 +125,7 @@ public class MobTeamManager {
     }
 
     /**
-     *
+     * Remove all entities from the vampire team.
      */
     public void clearVampireMobs() {
         Team vampireTeam = this.plugin.getVampireCastTeam();
@@ -143,6 +143,9 @@ public class MobTeamManager {
         }
     }
 
+    /**
+     * Stop adding mobs to the vampires' team before shutting down the manager.
+     */
     public void shutdown() {
         this.stopMobTeamTask();
     }
