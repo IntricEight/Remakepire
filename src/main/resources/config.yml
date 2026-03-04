@@ -69,8 +69,6 @@ tome-chests:
 # 20 ticks = 1 second
 abilities:
   vampire:
-    # Summon Undead cooldown (default: 600 seconds = 10 minutes)
-    raise-undead-cooldown: 600
     # Bat transformation cooldown (default: 900 seconds = 15 minutes)
     bat-cooldown: 900
     # Lunge attack cooldown (default: 45 seconds)

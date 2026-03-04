@@ -32,6 +32,9 @@ public class MobTeamManager {
         this.startMobTeamTask();
     }
 
+    /**
+     * Begin routinely assigning certain mob types to the vampire's team.
+     */
     public void startMobTeamTask() {
         if (this.mobTeamTask != null) {
             this.mobTeamTask.cancel();
@@ -46,6 +49,9 @@ public class MobTeamManager {
         this.plugin.getLogger().info("MobTeamManager: Started mob team assignment task (every 10 seconds)");
     }
 
+    /**
+     * Stop assigning the chosen mob types to the vampire team.
+     */
     public void stopMobTeamTask() {
         if (this.mobTeamTask != null) {
             this.mobTeamTask.cancel();
@@ -54,7 +60,10 @@ public class MobTeamManager {
         }
     }
 
-    public void assignMobsToVampireTeam() {
+    /**
+     * Assign certain mob types to the vampire team, which stops them from being hostile toward higher level vampires.
+     */
+    private void assignMobsToVampireTeam() {
         Team vampireTeam = this.plugin.getVampireCastTeam();
 
         if (vampireTeam == null) {
@@ -82,6 +91,12 @@ public class MobTeamManager {
         }
     }
 
+    /**
+     * Determine if an entity is in the list of mob types that will join the vampires' team.
+     *
+     * @param entity the entity being checked.
+     * @return {@code true} if the entity is going to align with the vampire players.
+     */
     private boolean isTargetMob(Entity entity) {
         for(Class<? extends Entity> mobType : this.vampireMobTypes) {
             if (mobType.isInstance(entity)) {
@@ -92,15 +107,26 @@ public class MobTeamManager {
         return false;
     }
 
+    /**
+     * Assign mobs
+     */
     public void assignMobsNow() {
         this.assignMobsToVampireTeam();
     }
 
+    /**
+     *
+     *
+     * @return The number of players on the vampire team.
+     */
     public int getVampireMobCount() {
         Team vampireTeam = this.plugin.getVampireCastTeam();
         return vampireTeam == null ? 0 : vampireTeam.getSize();
     }
 
+    /**
+     *
+     */
     public void clearVampireMobs() {
         Team vampireTeam = this.plugin.getVampireCastTeam();
 

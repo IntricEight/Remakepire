@@ -41,6 +41,11 @@ public class HolyWaterEffectManager implements Listener {
         plugin.getLogger().info("HolyWaterEffectManager initialized and event listener registered!");
     }
 
+    /**
+     * Apply the effects of holy water to players who are hit by the potion.
+     *
+     * @param event a splash potion hits a surface.
+     */
     @EventHandler
     public void onPotionSplash(PotionSplashEvent event) {
         if (event instanceof WaterBottleSplashEvent waterEvent) {
@@ -69,6 +74,11 @@ public class HolyWaterEffectManager implements Listener {
         }
     }
 
+    /**
+     * Determine if the entity should be effected by holy water.
+     *
+     * @param entity the entity hit by the holy water.
+     */
     private void processHolyWaterHit(LivingEntity entity) {
         if (entity instanceof Player player) {
             if (this.vampireManager.isVampire(player) && (this.vampireManager.isVampireStage2(player) || this.vampireManager.isVampireStage3(player))) {
@@ -77,6 +87,12 @@ public class HolyWaterEffectManager implements Listener {
         }
     }
 
+    /**
+     * Determine if a potion is a splash bottle of water.
+     *
+     * @param item the item being checked.
+     * @return {@code true} if the item does not have potion metadata or is an effectless potion.
+     */
     private boolean isWaterSplashBottle(ItemStack item) {
         if (item == null) {
             return false;
@@ -103,9 +119,14 @@ public class HolyWaterEffectManager implements Listener {
         }
     }
 
+    /**
+     * Disable the vampire's powers and regeneration and play the notification effect.
+     *
+     * @param vampire the player whose powers will be suppressed.
+     */
     public void applyHolyWaterEffect(Player vampire) {
         UUID vampireId = vampire.getUniqueId();
-        BukkitTask existingTask = (BukkitTask)this.disabledVampires.get(vampireId);
+        BukkitTask existingTask = this.disabledVampires.get(vampireId);
 
         if (existingTask != null && !existingTask.isCancelled()) {
             existingTask.cancel();
@@ -121,13 +142,24 @@ public class HolyWaterEffectManager implements Listener {
         this.plugin.getLogger().info("Applied holy water effect to vampire: " + vampire.getName());
     }
 
+    /**
+     * Remove the effects of holy water from the vampire.
+     *
+     * @param vampire the player who had been suppressed by holy water.
+     */
     private void removeHolyWaterEffect(Player vampire) {
         this.removeHolyWaterEffect(vampire, true);
     }
 
+    /**
+     * Remove the effects of holy water from the vampire.
+     *
+     * @param vampire the player who had been suppressed by holy water.
+     * @param notify {@code true} if the vampire should be notified that the effect has worn off.
+     */
     public void removeHolyWaterEffect(Player vampire, boolean notify) {
         UUID vampireId = vampire.getUniqueId();
-        BukkitTask task = (BukkitTask)this.disabledVampires.remove(vampireId);
+        BukkitTask task = this.disabledVampires.remove(vampireId);
 
         if (task != null && !task.isCancelled()) {
             task.cancel();
@@ -140,16 +172,32 @@ public class HolyWaterEffectManager implements Listener {
         this.plugin.getLogger().info("Removed holy water effect from vampire: " + vampire.getName());
     }
 
+    /**
+     * Retrieve if the player currently has their abilities disabled by holy water.
+     *
+     * @param vampire the player being checked.
+     * @return {@code true} if the vampire's abilities are disabled.
+     */
     public boolean isAbilitiesDisabled(Player vampire) {
         return this.disabledVampires.containsKey(vampire.getUniqueId());
     }
 
+    /**
+     * Retrieve the time remaining until the holy water suppression wears off.
+     *
+     * @param vampire the player whose remaining time is being checked.
+     * @return the milliseconds until the vampire's abilities are enabled.
+     */
     public long getRemainingDisableTime(Player vampire) {
-        UUID vampireId = vampire.getUniqueId();
-        BukkitTask task = (BukkitTask)this.disabledVampires.get(vampireId);
+        BukkitTask task = this.disabledVampires.get(vampire.getUniqueId());
         return task == null ? 0L : Math.max(0L, (long)DISABLE_DURATION - System.currentTimeMillis() / 1000L % (long)DISABLE_DURATION);
     }
 
+    /**
+     * Inform the vampire that their abilities have been disabled by holy water.
+     *
+     * @param vampire the player whose abilities are disabled.
+     */
     private void notifyVampireDisabled(Player vampire) {
         vampire.sendMessage("§cThe holy water sears your vampiric essence!");
         vampire.sendMessage("§cYour abilities and blood regeneration have been disabled for " + (int)(DISABLE_DURATION / 60.0) + " minutes.");
@@ -159,15 +207,28 @@ public class HolyWaterEffectManager implements Listener {
         vampire.playSound(vampire, Sound.ENTITY_WITCH_HURT, SoundCategory.MASTER, 0.8F, 1.5F);
     }
 
+    /**
+     * Inform the vampire that the holy water has worn off and their abilities have been enabled.
+     *
+     * @param vampire the player whose abilities are enable.
+     */
     private void notifyVampireEnabled(Player vampire) {
         vampire.sendMessage("§cYou feel your dark powers flowing through you once more.");
         vampire.playSound(vampire, Sound.BLOCK_BEACON_ACTIVATE, SoundCategory.MASTER, 0.5F, 0.8F);
     }
 
+    /**
+     * Retrieve the number of vampires affected by holy water.
+     *
+     * @return The number of disabled vampires.
+     */
     public int getDisabledVampireCount() {
         return this.disabledVampires.size();
     }
 
+    /**
+     * Clear the holy water ability suppression from all vampires.
+     */
     public void clearAllEffects() {
         for(Map.Entry<UUID, BukkitTask> entry : this.disabledVampires.entrySet()) {
             UUID vampireId = (UUID)entry.getKey();
@@ -189,6 +250,9 @@ public class HolyWaterEffectManager implements Listener {
         this.plugin.getLogger().info("Cleared holy water effects from " + cleared + " vampires");
     }
 
+    /**
+     * Remove the holy water ability suppression from all vampires before shutting down the manager.
+     */
     public void shutdown() {
         for(BukkitTask task : this.disabledVampires.values()) {
             if (task != null && !task.isCancelled()) {

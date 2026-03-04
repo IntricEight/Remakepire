@@ -113,10 +113,6 @@ public class ConfigManager {
         }
     }
 
-    public int getRaiseUndeadCooldown() {
-        return this.config.getInt("abilities.vampire.raise-undead-cooldown", 600);
-    }
-
     /**
      * Retrieve the cooldown on the vampire ability Bat Transformation.
      *

@@ -72,8 +72,7 @@ public class InitGameManager {
     private final Map<UUID, InitState> adminStates = new HashMap<>();
     private final Map<UUID, InitData> adminData = new HashMap<>();
     private final Map<UUID, Boolean> guiRefreshInProgress = new HashMap<>();
-    private static final int PLAYERS_PER_PAGE = 45;
-    private static final int INVENTORY_SIZE = 54;
+    private static final int PLAYERS_PER_PAGE = 45, INVENTORY_SIZE = 54;
 
     /**
      * Create an instance of the Initialize Game manager.
@@ -84,6 +83,11 @@ public class InitGameManager {
         this.plugin = plugin;
     }
 
+    /**
+     * Begin a new game of Vampires.
+     *
+     * @param admin the player running the initialization command.
+     */
     public void startInitialization(Player admin) {
         UUID adminId = admin.getUniqueId();
         this.adminStates.put(adminId, InitGameManager.InitState.AWAITING_FIRST_CONFIRM);
@@ -104,7 +108,7 @@ public class InitGameManager {
 
         TextComponent confirmMessage = new TextComponent("§7Are you sure? ");
         TextComponent clickableText = new TextComponent("§e§n[CLICK HERE TO CONTINUE]");
-        clickableText.setClickEvent(new ClickEvent(Action.RUN_COMMAND, "/pow_init_internal_confirm1"));
+        clickableText.setClickEvent(new ClickEvent(Action.RUN_COMMAND, COMMAND_PREFIX + "confirm1"));
         clickableText.setHoverEvent(new HoverEvent(net.md_5.bungee.api.chat.HoverEvent.Action.SHOW_TEXT, (new ComponentBuilder("§7Click to proceed with initialization")).create()));
         confirmMessage.addExtra(clickableText);
 
@@ -114,8 +118,14 @@ public class InitGameManager {
         admin.sendMessage("§c§l========================================");
     }
 
+    /**
+     * Prompt the admin on the method of choosing vampires.
+     *
+     * @param admin the player running the initialization command.
+     */
     public void handleFirstConfirmation(Player admin) {
         UUID adminId = admin.getUniqueId();
+
         if (this.adminStates.get(adminId) != InitGameManager.InitState.AWAITING_FIRST_CONFIRM) {
             admin.sendMessage("§cError: Invalid initialization state.");
 
@@ -131,11 +141,13 @@ public class InitGameManager {
             admin.sendMessage("");
 
             TextComponent randomButton = new TextComponent("§a§l[RANDOM] ");
-            randomButton.setClickEvent(new ClickEvent(Action.RUN_COMMAND, "/pow_init_internal_mode_random"));
+            randomButton.setClickEvent(new ClickEvent(Action.RUN_COMMAND, COMMAND_PREFIX + "mode_random"));
             randomButton.setHoverEvent(new HoverEvent(net.md_5.bungee.api.chat.HoverEvent.Action.SHOW_TEXT, (new ComponentBuilder("§7Randomly select vampires from online players")).create()));
+
             TextComponent selectedButton = new TextComponent("§b§l[SELECTED]");
-            selectedButton.setClickEvent(new ClickEvent(Action.RUN_COMMAND, "/pow_init_internal_mode_selected"));
+            selectedButton.setClickEvent(new ClickEvent(Action.RUN_COMMAND, COMMAND_PREFIX + "mode_selected"));
             selectedButton.setHoverEvent(new HoverEvent(net.md_5.bungee.api.chat.HoverEvent.Action.SHOW_TEXT, (new ComponentBuilder("§7Manually choose which players become vampires")).create()));
+
             TextComponent buttonMessage = new TextComponent("");
             buttonMessage.addExtra(randomButton);
             buttonMessage.addExtra(selectedButton);
@@ -145,6 +157,11 @@ public class InitGameManager {
         }
     }
 
+    /**
+     * Set the game initialization to randomize the vampire selection and prompt the admin for the minimum number of starting vampires.
+     *
+     * @param admin the player running the initialization command.
+     */
     public void handleRandomMode(Player admin) {
         UUID adminId = admin.getUniqueId();
 
@@ -152,7 +169,7 @@ public class InitGameManager {
             admin.sendMessage("§cError: Invalid initialization state.");
 
         } else {
-            InitData data = (InitData)this.adminData.get(adminId);
+            InitData data = this.adminData.get(adminId);
             data.mode = InitGameManager.InitData.VampireMode.RANDOM;
             this.adminStates.put(adminId, InitGameManager.InitState.AWAITING_MIN_VAMPIRES);
 
@@ -166,6 +183,11 @@ public class InitGameManager {
         }
     }
 
+    /**
+     * Set the game initialization to allow the admin to choose the starting vampire.
+     *
+     * @param admin the player running the initialization command.
+     */
     public void handleSelectedMode(Player admin) {
         UUID adminId = admin.getUniqueId();
 
@@ -173,14 +195,19 @@ public class InitGameManager {
             admin.sendMessage("§cError: Invalid initialization state.");
 
         } else {
-            InitData data = (InitData)this.adminData.get(adminId);
+            InitData data = this.adminData.get(adminId);
             data.mode = InitGameManager.InitData.VampireMode.SELECTED;
             this.openPlayerSelectionGUI(admin);
         }
     }
 
+    /**
+     * Create the inventory menu for the admin to select the starting vampires from.
+     *
+     * @param admin the player running the initialization command.
+     */
     public void openPlayerSelectionGUI(Player admin) {
-        List<Player> onlinePlayers = new ArrayList(Bukkit.getOnlinePlayers());
+        List<Player> onlinePlayers = new ArrayList<>(Bukkit.getOnlinePlayers());
         int playerCount = onlinePlayers.size();
 
         if (playerCount == 0) {
@@ -188,17 +215,14 @@ public class InitGameManager {
             this.cancelInitialization(admin);
 
         } else {
-            InitData data = (InitData)this.adminData.get(admin.getUniqueId());
-            int totalPages = (int)Math.ceil((double) playerCount / PLAYERS_PER_PAGE);
-            int currentPage = Math.min(data.currentPage, totalPages - 1);
+            InitData data = this.adminData.get(admin.getUniqueId());
+            int totalPages = (int)Math.ceil((double) playerCount / PLAYERS_PER_PAGE), currentPage = Math.min(data.currentPage, totalPages - 1);
             data.currentPage = currentPage;
-            int startIndex = currentPage * PLAYERS_PER_PAGE;
-            int endIndex = Math.min(startIndex + PLAYERS_PER_PAGE, playerCount);
+            int slot = 0, startIndex = currentPage * PLAYERS_PER_PAGE, endIndex = Math.min(startIndex + PLAYERS_PER_PAGE, playerCount);
             Inventory inventory = Bukkit.createInventory(null, INVENTORY_SIZE, "§4§lSelect Vampires");
-            int slot = 0;
 
             for(int i = startIndex; i < endIndex; ++i) {
-                Player player = (Player)onlinePlayers.get(i);
+                Player player = onlinePlayers.get(i);
                 boolean isVampire = data.selectedVampires.contains(player.getUniqueId());
                 ItemStack item = new ItemStack(isVampire ? Material.EXPERIENCE_BOTTLE : Material.GLASS_BOTTLE);
                 ItemMeta meta = item.getItemMeta();
@@ -263,9 +287,16 @@ public class InitGameManager {
         }
     }
 
+    /**
+     * Refresh the selection GUI and navigate the admin between pages.
+     *
+     * @param admin the player running the initialization command.
+     * @param delta the change in page index.
+     */
     public void handlePageChange(Player admin, int delta) {
         UUID adminId = admin.getUniqueId();
         InitData data = this.adminData.get(adminId);
+
         if (data != null) {
             data.currentPage += delta;
             this.guiRefreshInProgress.put(adminId, true);
@@ -273,6 +304,12 @@ public class InitGameManager {
         }
     }
 
+    /**
+     * Add or remove the selected player from the list of starting vampires.
+     *
+     * @param admin the player running the initialization command.
+     * @param playerName the player being added or removed from the list.
+     */
     public void handlePlayerToggle(Player admin, String playerName) {
         UUID adminId = admin.getUniqueId();
         InitData data = this.adminData.get(adminId);
@@ -295,9 +332,14 @@ public class InitGameManager {
         }
     }
 
+    /**
+     * Prompt the admin with a confirmation once the vampires are selected.
+     *
+     * @param admin the player running the initialization command.
+     */
     public void handleGUIConfirmation(Player admin) {
         UUID adminId = admin.getUniqueId();
-        InitData data = (InitData)this.adminData.get(adminId);
+        InitData data = this.adminData.get(adminId);
 
         if (data != null && data.mode == InitGameManager.InitData.VampireMode.SELECTED) {
             this.adminStates.put(adminId, InitGameManager.InitState.AWAITING_FINAL_CONFIRM);
@@ -306,6 +348,13 @@ public class InitGameManager {
         }
     }
 
+    /**
+     * Set the minimum number of initialization vampires and prompt the admin for the maximum number of starting vampires.
+     *
+     * @param admin the player running the initialization command.
+     * @param input the minimum number of vampires.
+     * @return {@code true} if the initialization command state was waiting for the minimum vampires input.
+     */
     public boolean handleMinVampiresInput(Player admin, String input) {
         UUID adminId = admin.getUniqueId();
 
@@ -340,6 +389,13 @@ public class InitGameManager {
         }
     }
 
+    /**
+     * Set the maximum number of initialization vampires.
+     *
+     * @param admin the player running the initialization command.
+     * @param input the maximum number of vampires.
+     * @return {@code true} if the initialization command state was waiting for the maximum vampires input.
+     */
     public boolean handleMaxVampiresInput(Player admin, String input) {
         UUID adminId = admin.getUniqueId();
 
@@ -371,6 +427,11 @@ public class InitGameManager {
         }
     }
 
+    /**
+     * Show the admin their starting choices and prompt them to begin the game.
+     *
+     * @param admin the player running the initialization command.
+     */
     private void showFinalConfirmation(Player admin) {
         UUID adminId = admin.getUniqueId();
         InitData data = this.adminData.get(adminId);
@@ -397,7 +458,7 @@ public class InitGameManager {
 
         TextComponent confirmMessage = new TextComponent("§7Ready to begin? ");
         TextComponent clickableText = new TextComponent("§a§l§n[START GAME]");
-        clickableText.setClickEvent(new ClickEvent(Action.RUN_COMMAND, "/pow_init_internal_execute"));
+        clickableText.setClickEvent(new ClickEvent(Action.RUN_COMMAND, COMMAND_PREFIX + "execute"));
         clickableText.setHoverEvent(new HoverEvent(net.md_5.bungee.api.chat.HoverEvent.Action.SHOW_TEXT, (new ComponentBuilder("§7Click to initialize the game")).create()));
         confirmMessage.addExtra(clickableText);
 
@@ -405,6 +466,11 @@ public class InitGameManager {
         admin.sendMessage("§a§l========================================");
     }
 
+    /**
+     * Activate the new Vampires game and reset the game state.
+     *
+     * @param admin the player running the initialization command.
+     */
     public void executeInitialization(Player admin) {
         UUID adminId = admin.getUniqueId();
 
@@ -640,6 +706,12 @@ public class InitGameManager {
         }
     }
 
+    /**
+     * Determine a random location with the config boundaries where players can spawn when a game begins.
+     *
+     * @param world the world hosting the plugin interactions.
+     * @return A location to spawn a player at.
+     */
     private Location getRandomTeleportLocation(World world) {
         int maxAttempts = 50;
         ConfigManager config = this.plugin.getConfigManager();
@@ -659,7 +731,7 @@ public class InitGameManager {
             double x = townCenterX + distance * Math.cos(angle);
             double z = townCenterZ + distance * Math.sin(angle);
 
-            if (!(x < minX + 50.0) && !(x > maxX - 50.0) && !(z < minZ + 50.0) && !(z > maxZ - 50.0)) {
+            if (!(x < minX + BORDER_BUFFER) && !(x > maxX - BORDER_BUFFER) && !(z < minZ + BORDER_BUFFER) && !(z > maxZ - BORDER_BUFFER)) {
                 Location loc = new Location(world, x, (double)(world.getHighestBlockYAt((int)x, (int)z) + 1), z);
 
                 if (loc.getY() > 0 && loc.getY() < world.getMaxHeight()) {
@@ -671,6 +743,11 @@ public class InitGameManager {
         return new Location(world, townCenterX, world.getHighestBlockYAt((int)townCenterX, (int)townCenterZ) + 1, townCenterZ);
     }
 
+    /**
+     * Cancel the new game initialization process.
+     *
+     * @param admin the player running the initialization command.
+     */
     public void cancelInitialization(Player admin) {
         UUID adminId = admin.getUniqueId();
         this.adminStates.remove(adminId);
@@ -678,10 +755,23 @@ public class InitGameManager {
         admin.sendMessage("§cGame initialization cancelled.");
     }
 
+    /**
+     * Retrieve if a command is an internal init command from this plugin.
+     *
+     * @param command the command being checked.
+     * @return {@code true} if the command starts with "/pow_init_internal_"
+     */
     public boolean isInternalCommand(String command) {
         return command.startsWith(COMMAND_PREFIX);
     }
 
+    /**
+     * Execute the internal initialization commands from the plugin as the game initialization process progresses.
+     *
+     * @param admin the player running the initialization command.
+     * @param command the command being run.
+     * @return {@code true} if a command was executed.
+     */
     public boolean handleInternalCommand(Player admin, String command) {
         if (!command.startsWith(COMMAND_PREFIX)) {
             return false;
@@ -706,18 +796,42 @@ public class InitGameManager {
         }
     }
 
+    /**
+     * Retrieve if the admin is currently initializing a new Vampires game.
+     *
+     * @param adminId the id of the player running the initialization command.
+     * @return {@code true} if the admin is in the process of initializing a game.
+     */
     public boolean isInInitialization(UUID adminId) {
         return this.adminStates.containsKey(adminId);
     }
 
+    /**
+     * Retrieve the current progress of the initializing process.
+     *
+     * @param adminId the id of the player running the initialization command.
+     * @return The current state of the initiation process.
+     */
     public InitState getState(UUID adminId) {
         return this.adminStates.getOrDefault(adminId, InitGameManager.InitState.IDLE);
     }
 
+    /**
+     * Retrieve if the player is manually selecting the starting vampires.
+     *
+     * @param title the name of the current event.
+     * @return {@code true} if the current event has the admin manually selecting vampires.
+     */
     public boolean isPlayerSelectionGUI(String title) {
         return title.equals("§4§lSelect Vampires");
     }
 
+    /**
+     * Retrieve if the selection GUI is currently refreshing pages.
+     *
+     * @param adminId the id of the player running the initialization command.
+     * @return {@code true} if the selection menu is reloading.
+     */
     public boolean isGUIRefreshInProgress(UUID adminId) {
         return this.guiRefreshInProgress.getOrDefault(adminId, false);
     }
