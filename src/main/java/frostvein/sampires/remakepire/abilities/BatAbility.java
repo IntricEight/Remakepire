@@ -16,7 +16,7 @@ public class BatAbility extends VampireAbility {
     }
 
     public String getDescription() {
-        return "Transform into a vulnerable bat to fly freely. Use again to transform back. Duration: 2 minutes. WARNING: If your bat dies, you die!";
+        return "Transform into a vulnerable slime to travel freely. Use again to transform back. Duration: 2 minutes. WARNING: If your true form dies, you die!";
     }
 
     public int getCooldownSeconds(RemakepirePlugin plugin) {
@@ -30,8 +30,8 @@ public class BatAbility extends VampireAbility {
     public boolean execute(Player player, VampireManager vampireManager, RemakepirePlugin plugin) {
         if (plugin.getBatTransformationManager().isInBatForm(player)) {
             if (plugin.getBatTransformationManager().transformToHuman(player)) {
-                player.sendMessage("§6You transform back into your vampiric form.");
-                player.playSound(player, Sound.ENTITY_BAT_TAKEOFF, SoundCategory.MASTER, 0.8F, 0.8F);
+                player.sendMessage("§6You transform back into your humanoid form.");
+                player.playSound(player, Sound.ENTITY_SLIME_JUMP_SMALL, SoundCategory.MASTER, 0.8F, 0.8F);
                 return true;
 
             } else {
@@ -40,21 +40,21 @@ public class BatAbility extends VampireAbility {
             }
         } else {
             if (plugin.getBatTransformationManager().transformToBat(player)) {
-                player.sendMessage("§cIn a flurry of wings, you transform into a bat");
-                player.sendMessage("§cBe warned, if you die in bat form, your human form dies too");
+                player.sendMessage("§cYou shed your human frame and return to a small amorphous blob, you can now sneak into vents and through small gaps.");
+                player.sendMessage("§cBe warned, if you die in your true form, your human form dies too");
                 player.sendMessage("§7Use §e/pow vability bat §7again to transform back early.");
 
-                player.playSound(player, Sound.ENTITY_BAT_AMBIENT, SoundCategory.MASTER, 1.0F, 1.2F);
+                player.playSound(player, Sound.ENTITY_SLIME_SQUISH, SoundCategory.MASTER, 1.0F, 1.2F);
                 return true;
 
             } else {
-                player.sendMessage("§cFailed to transform into bat form.");
+                player.sendMessage("§cFailed to transform into your blob form.");
                 return false;
             }
         }
     }
 
     protected String getAdditionalRequirementMessage(Player player, VampireManager vampireManager) {
-        return "Your vampiric powers are not strong enough for transformation!";
+        return "Your alien powers are not strong enough for transformation!";
     }
 }

@@ -67,7 +67,7 @@ public class VampireCraftBlocker implements Listener {
 
             if (!player.getScoreboardTags().contains("informed_enchanting_items")) {
                 player.addScoreboardTag("informed_enchanting_items");
-                player.sendMessage("§cThe ancient magics resist your vampiric essence... You cannot channel enchantments.");
+                player.sendMessage("§cThe ancient magics resist your alien essence... You cannot channel enchantments.");
             }
         }
     }

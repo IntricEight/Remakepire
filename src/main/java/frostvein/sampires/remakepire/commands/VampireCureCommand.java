@@ -77,8 +77,8 @@ public class VampireCureCommand implements CommandExecutor {
                         String sireName = this.sireManager.getSire(player);
 
                         if (sireName != null && !this.sireManager.isSireDead(player)) {
-                            player.sendMessage("§4The curse cannot be broken while your sire, " + sireName + ", still walks the world in mortal form...");
-                            player.sendMessage("§4Only through your maker's true death can you find release.");
+                            player.sendMessage("§3The curse cannot be broken while your sire, " + sireName + ", still walks the world in mortal form...");
+                            player.sendMessage("§3Only through your maker's true death can you find release.");
                             return true;
 
                         } else {
@@ -143,7 +143,7 @@ public class VampireCureCommand implements CommandExecutor {
         for(Player onlinePlayer : Bukkit.getOnlinePlayers()) {
             if (!onlinePlayer.equals(player)) {
                 if (this.vampireManager.isVampire(onlinePlayer)) {
-                    onlinePlayer.sendMessage("§4A disturbance ripples through the darkness... One of your kind has abandoned the gift of immortality...");
+                    onlinePlayer.sendMessage("§3A disturbance ripples through the darkness... One of your kind has abandoned the gift of immortality...");
                 } else {
                     onlinePlayer.sendMessage("§aA beacon of holy light flickers and dims... A vampire has been cured, but at great cost to the sacred site.");
                 }
@@ -195,7 +195,7 @@ public class VampireCureCommand implements CommandExecutor {
         this.plugin.getLogger().info("VAMPIRES ETERNAL NIGHT TRIGGERED - All beacons are now evil!");
 
         for(Player player : this.plugin.getServer().getOnlinePlayers()) {
-            player.sendTitle("§4§lETERNAL NIGHT FALLS", "§cThe darkness consumes all hope", 20, 100, 40);
+            player.sendTitle("§3§lETERNAL NIGHT FALLS", "§cThe darkness consumes all hope", 20, 100, 40);
             player.sendMessage("§c All beacons now pulse with unholy energy.");
             player.playSound(player.getLocation(), Sound.ENTITY_WITHER_SPAWN, SoundCategory.MASTER, 1.0F, 0.5F);
         }

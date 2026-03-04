@@ -317,18 +317,18 @@ public class VampireManager {
         target.addScoreboardTag("ImmuneToThirst");
         target.setRespawnLocation(this.plugin.getVampireRespawnLocation());
         this.applyTurningEffects(target);
-        target.sendTitle("§4§lTURNED", "", 10, 60, 20);
+        target.sendTitle("§3§lINFECTED", "", 10, 60, 20);
 
         if (turner != null) {
-            turner.sendTitle("§4§lNEW BLOOD", "", 10, 60, 20);
+            turner.sendTitle("§3§lNEW MIMIC", "", 10, 60, 20);
             turner.playSound(turner.getLocation(), Sound.ENTITY_ZOMBIE_VILLAGER_CURE, 0.5F, 1.2F);
         }
 
         Bukkit.getScheduler().runTaskLater(this.plugin, () -> {
             if (target.isOnline() && this.isVampire(target)) {
                 target.removeScoreboardTag("ImmuneToThirst");
-                target.sendMessage("§4§lThe Thirst Awakens");
-                target.sendMessage("§cYour first feeling as a vampire, is the need to feed... Your thirst will now start depleting over time.");
+                target.sendMessage("§3§lThe Thirst Awakens");
+                target.sendMessage("§cYour first feeling as a new Mimic, is the need to feed... Your thirst will now start depleting over time.");
                 target.playSound(target, Sound.AMBIENT_SOUL_SAND_VALLEY_MOOD, SoundCategory.MASTER, 1.0F, 1.2F);
             }
 
@@ -345,43 +345,44 @@ public class VampireManager {
     }
 
     private void sendTurningMessages(Player target, Player turner) {
-        target.sendMessage("§4THE TURNING");
+        target.sendMessage("§3THE INFECTION");
         target.sendMessage("");
 
         if (turner != null) {
-            target.sendMessage("§cThe bite of " + turner.getName() + " courses through your veins...");
+            target.sendMessage("§bThe bite of " + turner.getName() + " courses through your veins...");
         } else {
-            target.sendMessage("§cDark forces flow through your veins...");
+            target.sendMessage("§bDark forces flow through your veins...");
         }
 
-        target.sendMessage("§cYour heart slows... then stops...");
-        target.sendMessage("§cDarkness consumes your vision...");
+        target.sendMessage("§bYour heart rate increases, then stops suddenly. ");
+        target.sendMessage("§bDarkness consumes your vision...");
         target.sendMessage("");
-        target.sendMessage("§cYou awaken... different. Changed. Cursed.");
-        target.sendMessage("§cYou are now a Stage 1 vampire.");
+        target.sendMessage("§bYou are lost, Dead and gone...");
+        target.sendMessage("§bYou have been replaced by the Alien Virus.");
+        target.sendMessage("§bYou are now a Stage 1 Mimic.");
         target.sendMessage("");
 
-        TextComponent prefixText = new TextComponent("§7When you are ready to accept your new self, ");
-        TextComponent clickableText = new TextComponent("§e§n[CLICK HERE]");
-        clickableText.setClickEvent(new ClickEvent(Action.RUN_COMMAND, "/pow texture"));
-        clickableText.setHoverEvent(new HoverEvent(net.md_5.bungee.api.chat.HoverEvent.Action.SHOW_TEXT, (new ComponentBuilder("§7Click to apply the Creature Of The Night texture pack")).create()));
-        TextComponent suffixText = new TextComponent("§7 to have the Creature Of The Night texture pack applied.");
-        TextComponent fullMessage = new TextComponent("");
-
-        fullMessage.addExtra(prefixText);
-        fullMessage.addExtra(clickableText);
-        fullMessage.addExtra(suffixText);
-
-        target.spigot().sendMessage(fullMessage);
+//        TextComponent prefixText = new TextComponent("§7When you are ready to accept your new self, ");
+//        TextComponent clickableText = new TextComponent("§e§n[CLICK HERE]");
+//        clickableText.setClickEvent(new ClickEvent(Action.RUN_COMMAND, "/pow texture"));
+//        clickableText.setHoverEvent(new HoverEvent(net.md_5.bungee.api.chat.HoverEvent.Action.SHOW_TEXT, (new ComponentBuilder("§7Click to apply the Creature Of The Night texture pack")).create()));
+//        TextComponent suffixText = new TextComponent("§7 to have the Creature Of The Night texture pack applied.");
+//        TextComponent fullMessage = new TextComponent("");
+//
+//        fullMessage.addExtra(prefixText);
+//        fullMessage.addExtra(clickableText);
+//        fullMessage.addExtra(suffixText);
+//
+//        target.spigot().sendMessage(fullMessage);
         target.sendMessage("");
     }
 
     public void reduceVampireStage(Player player) {
         if (player.getScoreboardTags().contains(VAMPIRE_STAGE3_TAG)) {
             this.setPlayerAsVampire(player, 2);
-            player.sendMessage("§6Your vampire power has diminished. You are now Stage 2.");
+            player.sendMessage("§6Your alien abilities have diminished. You are now Stage 2.");
             this.plugin.getVampireAbilityManager().clearAllCooldowns(player);
-            player.sendMessage("§dThough your essence grows weaker, your abilities cooldowns are renewed once more");
+            player.sendMessage("§dThough your powers weaken, your cooldowns are renewed once more.");
             if (this.plugin.getHolyWaterEffectManager() != null && this.plugin.getHolyWaterEffectManager().isAbilitiesDisabled(player)) {
                 this.plugin.getHolyWaterEffectManager().removeHolyWaterEffect(player, true);
                 player.sendMessage("§aThe holy water's grip on you has been shattered by your demotion.");
@@ -390,9 +391,9 @@ public class VampireManager {
             this.applyDemotionEffectsToNearbyHumans(player);
         } else if (player.getScoreboardTags().contains(VAMPIRE_STAGE2_TAG)) {
             this.setPlayerAsVampire(player, 1);
-            player.sendMessage("§6Your vampire power has diminished. You are now Stage 1.");
+            player.sendMessage("§6Your alien abilities have diminished. You are now Stage 1.");
             this.plugin.getVampireAbilityManager().clearAllCooldowns(player);
-            player.sendMessage("§dThough your essence grows weaker, your abilities cooldowns are renewed once more");
+            player.sendMessage("§dThough your powers weaken, your cooldowns are renewed once more.");
             if (this.plugin.getHolyWaterEffectManager() != null && this.plugin.getHolyWaterEffectManager().isAbilitiesDisabled(player)) {
                 this.plugin.getHolyWaterEffectManager().removeHolyWaterEffect(player, true);
                 player.sendMessage("§aThe holy water's grip on you has been shattered by your demotion.");
@@ -422,13 +423,14 @@ public class VampireManager {
     public void killVampirePermanently(Player player) {
         this.removeAllVampireTags(player);
         player.addScoreboardTag(HUMAN_TAG);
+
         this.plugin.getServer().getScheduler().runTaskLater(this.plugin, () -> {
             player.setGameMode(GameMode.SPECTATOR);
             player.sendTitle("§4§lFINAL DEATH", "§7Your journey has ended", 10, 100, 30);
             player.sendMessage("");
             player.sendMessage("§4§lPERMANENTLY KILLED");
             player.sendMessage("");
-            player.sendMessage("§7Your soul has been released from this mortal realm.");
+            player.sendMessage("§7Your soul is free of the Mimic virus. You are no longer bound this mortal realm.");
             player.sendMessage("§7You are now in spectator mode.");
             player.sendMessage("");
             player.sendMessage("§8Watch over the remaining survivors...");
@@ -484,9 +486,9 @@ public class VampireManager {
         if (this.isVampire(player)) {
             this.setPlayerAsVampire(player, 1);
             player.addScoreboardTag(PROMOTION_BAN_TAG);
-            player.sendMessage("§4§lDEATH PENALTY");
-            player.sendMessage("§c§lYour death has cursed you with weakness.");
-            player.sendMessage("§c§lYou cannot grow stronger until the next session begins...");
+            player.sendMessage("§3§lDEATH PENALTY");
+            player.sendMessage("§c§lYour defeat has weakened you significantly.");
+            player.sendMessage("§c§lIt will be many days before you can recover your strength...");
         }
     }
 

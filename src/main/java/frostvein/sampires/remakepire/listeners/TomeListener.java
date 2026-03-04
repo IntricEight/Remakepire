@@ -91,7 +91,7 @@ public class TomeListener implements Listener {
 
                     } else if (!this.vampireManager.isHuman(player)) {
                         event.setCancelled(true);
-                        player.sendMessage("§cThe ancient knowledge within this tome is beyond your vampiric comprehension...");
+                        player.sendMessage("§cThe ancient knowledge within this tome is beyond your alien comprehension...");
 
                     } else if (!this.plugin.getSessionManager().isSessionActive()) {
                         event.setCancelled(true);

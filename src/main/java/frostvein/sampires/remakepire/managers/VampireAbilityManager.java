@@ -199,7 +199,7 @@ public class VampireAbilityManager {
 
         } else if (this.plugin.getHolyWaterEffectManager().isAbilitiesDisabled(player)) {
             long remainingTime = this.plugin.getHolyWaterEffectManager().getRemainingDisableTime(player);
-            player.sendMessage("§4§lHOLY WATER EFFECT ACTIVE");
+            player.sendMessage("§3§lHOLY WATER EFFECT ACTIVE");
             player.sendMessage("§cYour abilities are disabled by holy water!");
             player.sendMessage("§cAbilities will return in approximately " + (remainingTime / 60L + 1L) + " minute(s).");
             return false;

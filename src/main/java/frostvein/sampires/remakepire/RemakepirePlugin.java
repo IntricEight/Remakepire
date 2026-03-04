@@ -381,7 +381,7 @@ public final class RemakepirePlugin extends JavaPlugin {
 
     private void initVampireRespawnLocation() {
         this.vampireRespawnLocation = this.configManager.getVampireRespawnLocation(this.getWorld());
-        this.getLogger().info("Vampire respawn location set to: " + this.vampireRespawnLocation.getBlockX() + ", " + this.vampireRespawnLocation.getBlockY() + ", " + this.vampireRespawnLocation.getBlockZ());
+        this.getLogger().info("Mimic respawn location set to: " + this.vampireRespawnLocation.getBlockX() + ", " + this.vampireRespawnLocation.getBlockY() + ", " + this.vampireRespawnLocation.getBlockZ());
     }
 
     public Location getVampireRespawnLocation() {

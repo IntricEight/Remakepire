@@ -7,7 +7,7 @@ import org.bukkit.potion.PotionEffectType;
 import frostvein.sampires.remakepire.RemakepirePlugin;
 
 public class RallyingCryTomeAbility extends TomeAbility {
-    // Controls the size of the ability
+    // Controls the size of the ability (in blocks)
     private static final int EFFECT_RADIUS = 20;
     // Controls the duration of the ability
     private static final int STRENGTH_DURATION = 600;

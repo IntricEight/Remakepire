@@ -18,14 +18,19 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.SoundCategory;
-import org.bukkit.entity.Bat;
+//import org.bukkit.entity.Bat;
+import org.bukkit.attribute.Attribute;
+import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Slime;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 import frostvein.sampires.remakepire.RemakepirePlugin;
+import org.bukkit.scoreboard.Scoreboard;
+import org.bukkit.scoreboard.Team;
 
 public class BatTransformationManager {
     private final RemakepirePlugin plugin;
@@ -111,8 +116,8 @@ public class BatTransformationManager {
 
                 if (player != null && player.isOnline()) {
                     this.forceTransformToHuman(player, batData);
-                    player.sendMessage("§6Your bat transformation has expired.");
-                    player.sendMessage("§7You transform back into your vampiric form.");
+                    player.sendMessage("§6Your slime form transformation has expired.");
+                    player.sendMessage("§7You transform back into your humanoid form.");
                     player.playSound(player, Sound.ENTITY_BAT_TAKEOFF, SoundCategory.MASTER, 0.8F, 0.8F);
                 }
 
@@ -225,7 +230,7 @@ public class BatTransformationManager {
      * @param bat a bat entity.
      * @return The player who is controlling the bat.
      */
-    public Player getPlayerFromBat(Bat bat) {
+    public Player getPlayerFromBat(Slime bat) {
         if (bat.getCustomName() != null && bat.getCustomName().startsWith("Â§8")) {
             String playerName = bat.getCustomName().substring(2);
             return Bukkit.getPlayer(playerName);
@@ -260,11 +265,18 @@ public class BatTransformationManager {
                 player.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, -1, 0, false, false));
                 player.setAllowFlight(true);
                 player.setFlying(true);
-                final Bat bat = (Bat)player.getWorld().spawn(player.getLocation(), Bat.class);
+                // Try to shrink the player's height to one block? (0.4)
+                player.getAttribute(Attribute.SCALE).setBaseValue(0.4);
 
-                for(int i = 0; i < 10; ++i) {
-                    player.getWorld().spawn(player.getLocation(), Bat.class);
-                }
+                // We are keeping the variable name "bat", deal with it
+                final Slime bat = (Slime)player.getWorld().spawn(player.getLocation(), Slime.class);
+                bat.setSize(1);
+                bat.setCollidable(false);
+
+                // Spawn the bats around the player when they transform
+//                for(int i = 0; i < 10; ++i) {
+//                    player.getWorld().spawn(player.getLocation(), Bat.class);
+//                }
 
                 bat.setCustomName("Â§8" + player.getName());
                 bat.setCustomNameVisible(false);
@@ -340,6 +352,7 @@ public class BatTransformationManager {
         try {
             player.removeScoreboardTag(BAT_FORM_TAG);
             this.restorePlayerArmor(player);
+            player.getAttribute(Attribute.SCALE).setBaseValue(1.0);
             player.removePotionEffect(PotionEffectType.INVISIBILITY);
             player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW_FALLING, SLOW_FALLING_DURATION, 0, false, false));
 
@@ -577,7 +590,7 @@ public class BatTransformationManager {
     private static class BatData {
         public final long startTime;
         public final long endTime;
-        public Bat batEntity;
+        public Slime batEntity;
         public BukkitTask transformationTask;
         public Location lastValidLocation;
 

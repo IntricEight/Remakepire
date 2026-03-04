@@ -764,8 +764,8 @@ public class BeaconManager {
             String nearMessage, farMessage;
 
             if (isDesecration) {
-                nearMessage = "\n§4A cold dread washes over you as the beacon's light twists into something sinister. The air grows heavy with malice... \n§7But just as suddenly, you feel a faint warmth stirring within, as if a force of light is rising to oppose the darkness. Perhaps there is still hope...\n";
-                farMessage = "§4A dark beacon has been desecrated somewhere amongst the land, you feel its corrupted presence seep through the earth. \n§7But just as soon after, a faint warmth touches your heart, like a force of good is awakening to fight back. Probably just your imagination...\n";
+                nearMessage = "\n§3A cold dread washes over you as the beacon's light twists into something sinister. The air grows heavy with malice... \n§7But just as suddenly, you feel a faint warmth stirring within, as if a force of light is rising to oppose the darkness. Perhaps there is still hope...\n";
+                farMessage = "§3A dark beacon has been desecrated somewhere amongst the land, you feel its corrupted presence seep through the earth. \n§7But just as soon after, a faint warmth touches your heart, like a force of good is awakening to fight back. Probably just your imagination...\n";
 
             } else {
                 nearMessage = "\n§6The beacons soft light warms your heart, filling you with peace. \n§7But just as soon as it activates, the air around you seems to thicken, like a dark presence is moving to snuff out the light... Have you awoken an evil force? Perhaps it is just superstition...\n";
@@ -873,7 +873,7 @@ public class BeaconManager {
                         player.getAttribute(Attribute.MAX_HEALTH).setBaseValue(20.0);
                     }
 
-                    player.sendMessage("§4A beacon has fallen to darkness... The humans' final stand wavers.");
+                    player.sendMessage("§3A beacon has fallen to darkness... The humans' final stand wavers.");
                 }
 
                 for(Player player : Bukkit.getOnlinePlayers()) {

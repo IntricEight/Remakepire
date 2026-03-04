@@ -32,7 +32,7 @@ public class VampireAbilityCommand implements CommandExecutor, TabCompleter {
 
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage("§cOnly players can use vampire abilities.");
+            sender.sendMessage("§bOnly players can use vampire abilities.");
             return true;
 
         } else if (args.length == 0) {
@@ -50,11 +50,11 @@ public class VampireAbilityCommand implements CommandExecutor, TabCompleter {
                 return true;
 
             } else if (!this.plugin.getVampireManager().isVampire(player)) {
-                player.sendMessage("§cOnly vampires can use vampire abilities.");
+                player.sendMessage("§bOnly vampires can use vampire abilities.");
                 return true;
 
             } else if (player.getGameMode() == GameMode.SPECTATOR) {
-                player.sendMessage("§cYou cannot use vampire abilities while in spectator mode.");
+                player.sendMessage("§bYou cannot use vampire abilities while in spectator mode.");
                 return true;
 
             } else {
@@ -116,21 +116,21 @@ public class VampireAbilityCommand implements CommandExecutor, TabCompleter {
 
     private void listAbilities(Player player) {
         if (!this.plugin.getVampireManager().isVampire(player)) {
-            player.sendMessage("§cYou must be a vampire to see abilities.");
+            player.sendMessage("§bYou must be a vampire to see abilities.");
         } else {
             List<VampireAbility> availableAbilities = this.abilityManager.getAvailableAbilities(player);
             int playerStage = this.plugin.getVampireManager().getVampireStage(player);
 
             if (availableAbilities.isEmpty()) {
-                player.sendMessage("§cNo abilities available for Stage " + playerStage + " vampires.");
+                player.sendMessage("§bNo abilities available for Stage " + playerStage + " vampires.");
                 player.sendMessage("§7Use '/pow vability all' to see what abilities you could unlock.");
             } else {
-                player.sendMessage("§4§l=== YOUR VAMPIRE ABILITIES ===");
+                player.sendMessage("§3§l=== YOUR VAMPIRE ABILITIES ===");
                 player.sendMessage("§7Your Stage: §e" + playerStage);
                 BeaconSite suppressingBeacon = this.beaconManager.checkHolySuppression(player.getLocation());
 
                 if (suppressingBeacon != null) {
-                    player.sendMessage("§c SUPPRESSED by holy beacon: §f" + suppressingBeacon.getName());
+                    player.sendMessage("§b SUPPRESSED by holy beacon: §f" + suppressingBeacon.getName());
                 }
 
                 player.sendMessage("");
@@ -146,15 +146,15 @@ public class VampireAbilityCommand implements CommandExecutor, TabCompleter {
 
     private void listAllAbilities(Player player) {
         if (!this.plugin.getVampireManager().isVampire(player)) {
-            player.sendMessage("§cYou must be a vampire to see abilities.");
+            player.sendMessage("§bYou must be a vampire to see abilities.");
 
         } else {
-            player.sendMessage("§4§l=== ALL VAMPIRE ABILITIES ===");
+            player.sendMessage("§3§l=== ALL VAMPIRE ABILITIES ===");
             player.sendMessage("§7Your Stage: §e" + this.plugin.getVampireManager().getVampireStage(player));
             BeaconSite suppressingBeacon = this.beaconManager.checkHolySuppression(player.getLocation());
 
             if (suppressingBeacon != null) {
-                player.sendMessage("§c SUPPRESSED by holy beacon: §f" + suppressingBeacon.getName());
+                player.sendMessage("§b SUPPRESSED by holy beacon: §f" + suppressingBeacon.getName());
             }
 
             player.sendMessage("");
@@ -183,14 +183,14 @@ public class VampireAbilityCommand implements CommandExecutor, TabCompleter {
                 if (this.abilityManager.isOnGlobalCooldown(ability.getName())) {
                     long remaining = this.abilityManager.getRemainingGlobalCooldown(ability.getName());
                     String globalInfo = this.abilityManager.getGlobalCooldownInfo(ability.getName());
-                    status = " §c(Global Cooldown: " + VampireAbilityManager.formatTime(remaining) + ")";
+                    status = " §b(Global Cooldown: " + VampireAbilityManager.formatTime(remaining) + ")";
 
                     if (globalInfo != null) {
                         String[] parts = globalInfo.split("\\(last used by ");
 
                         if (parts.length > 1) {
                             String lastUser = parts[1].replace(")", "");
-                            status = " §c(Global: " + VampireAbilityManager.formatTime(remaining) + " - " + lastUser + ")";
+                            status = " §b(Global: " + VampireAbilityManager.formatTime(remaining) + " - " + lastUser + ")";
                         }
                     }
                 } else {
@@ -199,18 +199,18 @@ public class VampireAbilityCommand implements CommandExecutor, TabCompleter {
 
             } else if (this.abilityManager.isOnCooldown(player, ability.getName())) {
                 long remaining = this.abilityManager.getRemainingCooldown(player, ability.getName());
-                status = " §c(Cooldown: " + VampireAbilityManager.formatTime(remaining) + ")";
+                status = " §b(Cooldown: " + VampireAbilityManager.formatTime(remaining) + ")";
 
             } else {
                 status = " §a(Ready)";
             }
 
         } else if (suppressed && canUse) {
-            status = " §c(SUPPRESSED by Holy Power)";
+            status = " §b(SUPPRESSED by Holy Power)";
             nameColor = "§8";
 
         } else {
-            status = " §c(Locked - Requires Stage " + ability.getMinimumStage() + ")";
+            status = " §b(Locked - Requires Stage " + ability.getMinimumStage() + ")";
         }
 
         player.sendMessage(nameColor + ability.getDisplayName() + status);
@@ -218,7 +218,7 @@ public class VampireAbilityCommand implements CommandExecutor, TabCompleter {
         String cooldownInfo = "  §7Required Stage: §e" + ability.getMinimumStage() + " §7| Cooldown: §e" + VampireAbilityManager.formatTime((long)ability.getCooldownSeconds(this.plugin));
 
         if (ability instanceof StormCallAbility) {
-            cooldownInfo = cooldownInfo + " §c(Global)";
+            cooldownInfo = cooldownInfo + " §b(Global)";
         }
 
         player.sendMessage(cooldownInfo);

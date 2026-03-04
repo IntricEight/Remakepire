@@ -88,10 +88,10 @@ public class IronWeaknessListener implements Listener {
 
         materials.add(Material.IRON_INGOT);
         materials.add(Material.IRON_NUGGET);
-        materials.add(Material.RAW_IRON);
-        materials.add(Material.IRON_BLOCK);
-        materials.add(Material.NETHERITE_BLOCK);    // The block that replaces placed silver blocks to provide the increased breaking time.
-        materials.add(Material.RAW_IRON_BLOCK);
+//        materials.add(Material.RAW_IRON);
+//        materials.add(Material.IRON_BLOCK);
+//        materials.add(Material.NETHERITE_BLOCK);    // The block that replaces placed silver blocks to provide the increased breaking time.
+//        materials.add(Material.RAW_IRON_BLOCK);
         materials.add(Material.IRON_SWORD);
         materials.add(Material.IRON_PICKAXE);
         materials.add(Material.IRON_AXE);
@@ -102,8 +102,8 @@ public class IronWeaknessListener implements Listener {
         materials.add(Material.IRON_LEGGINGS);
         materials.add(Material.IRON_BOOTS);
         materials.add(Material.IRON_HORSE_ARMOR);
-        materials.add(Material.IRON_DOOR);
-        materials.add(Material.IRON_TRAPDOOR);
+//        materials.add(Material.IRON_DOOR);
+//        materials.add(Material.IRON_TRAPDOOR);
 
         return materials;
     }
@@ -153,7 +153,7 @@ public class IronWeaknessListener implements Listener {
                 }
 
                 if (foundIronItems) {
-                    player.sendMessage("§cSilver in your pocket begins to burn your skin through the cloth. You involuntarily drop it to protect yourself");
+                    player.sendMessage("§bIron in your pocket begins to burn your skin through the cloth. You involuntarily drop it to protect yourself.");
                 }
             }
         }
@@ -214,7 +214,7 @@ public class IronWeaknessListener implements Listener {
 
                     if (!player.getScoreboardTags().contains("informed_pickup_item")) {
                         player.addScoreboardTag("informed_pickup_item");
-                        player.sendMessage("§cThe silver you have tried to pick up burns your fingers as you touch it... Best leave it alone...");
+                        player.sendMessage("§bThe iron you have tried to pick up burns your fingers as you touch it... Best leave it alone...");
                     }
                 }
             }

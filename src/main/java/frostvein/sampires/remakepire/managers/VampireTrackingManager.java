@@ -66,7 +66,7 @@ public class VampireTrackingManager {
                     double distance = Math.sqrt(deltaX * deltaX + deltaZ * deltaZ);
 
                     String direction = this.getRelativeDirection(deltaX, deltaZ, vampireLocation.getYaw());
-                    String message = String.format("§4New Vampire: §f%s §7(§f%.0f blocks§7)", direction, distance);
+                    String message = String.format("§3New Mimic: §7(§f%.0f blocks§7)", distance);
 
                     this.plugin.getSessionManager().sendActionBar(vampire, message);
                 }

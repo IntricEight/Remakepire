@@ -103,13 +103,13 @@ public class VampireFeedingManager implements Listener {
             session.phase = VampireFeedingManager.FeedingPhase.ACTIVE_FEEDING;
             this.plugin.getSessionManager().sendActionBar(vampire, "");
             if (this.vampireManager.isHuman(target)) {
-                vampire.sendMessage("§4§lYou begin feeding on " + target.getName() + "!");
-                target.sendMessage("§c§lYou feel a vampire draining your life force!");
-                target.sendMessage("§7Move away or break the vampire's crouch to escape!");
+                vampire.sendMessage("§3§lYou begin feeding on " + target.getName() + "!");
+                target.sendMessage("§c§lYou feel a alien draining your life force!");
+                target.sendMessage("§7Move away or break the vampire's grip to escape!");
             } else {
-                vampire.sendMessage("§4§lYou begin siphoning from " + target.getName() + "!");
-                target.sendMessage("§c§lYou feel another vampire siphoning your essence!");
-                target.sendMessage("§7Move away or break the vampire's crouch to escape!");
+                vampire.sendMessage("§3§lYou begin siphoning from " + target.getName() + "!");
+                target.sendMessage("§c§lYou feel another alien siphoning your essence!");
+                target.sendMessage("§7Move away or break the alien's crouch to escape!");
             }
 
             vampire.getWorld().playSound(vampire.getLocation(), Sound.ENTITY_WITCH_DRINK, SoundCategory.PLAYERS, 1.0F, 0.8F);
@@ -144,20 +144,20 @@ public class VampireFeedingManager implements Listener {
             this.thirstManager.modifyQuench(vampire, thirstToGive);
             this.sessionFeedingThirst.put(vampireId, currentSessionThirst + thirstToGive);
 
-            this.plugin.getSessionManager().sendActionBar(vampire, "§4Feeding...");
+            this.plugin.getSessionManager().sendActionBar(vampire, "§3Feeding...");
             this.plugin.getSessionManager().sendActionBar(target, "§cYour life force is being drained...");
 
         } else {
             if (target.getExp() <= 0.1F) {
-                vampire.sendMessage("§cThe vampiric essence has become too low to continue siphoning from.");
+                vampire.sendMessage("§cThe alien essence has become too low to continue siphoning from.");
                 this.cancelFeedingSession(session);
                 return;
             }
 
             this.thirstManager.modifyQuench(target, -1 * THIRST_GAIN_PER_SECOND);
             this.thirstManager.modifyQuench(vampire, THIRST_GAIN_PER_SECOND);
-            this.plugin.getSessionManager().sendActionBar(vampire, "§4Siphoning...");
-            this.plugin.getSessionManager().sendActionBar(target, "§cYour vampiric essence is being siphoned...");
+            this.plugin.getSessionManager().sendActionBar(vampire, "§3Siphoning...");
+            this.plugin.getSessionManager().sendActionBar(target, "§cYour alien essence is being siphoned...");
         }
 
         float pitch = session.highPitch ? 0.8F : 0.6F;
@@ -167,7 +167,7 @@ public class VampireFeedingManager implements Listener {
 
     private void handleFeedingDeath(FeedingSession session, Player vampire, Player target) {
         if (this.plugin.getPermadeathManager().hasAbsolutePermadeathEnabled(target)) {
-            vampire.sendMessage("§4You watch the light of " + target.getName() + "'s eyes fade, and extinguish. Lost forever.");
+            vampire.sendMessage("§3You watch the light of " + target.getName() + "'s eyes fade, and extinguish. Lost forever.");
             target.sendMessage("§7The world grows dim, blurry, you feel a darkness reach out, offering you one last chance to live, as a creature of the night... But you refuse... And slip under the veil of the afterlife.");
             target.addScoreboardTag("PermadeathChosen");
             target.setHealth(0.0);
@@ -280,7 +280,7 @@ public class VampireFeedingManager implements Listener {
 
                                 if ((isHuman || isVampire) && inRange) {
                                     if (isVampire && nearbyPlayer.getExp() <= 0.1F) {
-                                        vampire.sendMessage("§cThe vampiric essence has become too low to continue siphoning from.");
+                                        vampire.sendMessage("§cThe alien essence has become too low to continue siphoning from.");
                                         return;
                                     }
 
@@ -309,7 +309,7 @@ public class VampireFeedingManager implements Listener {
         Player target = Bukkit.getPlayer(session.targetId);
 
         if (target != null && target.isOnline() && session.phase == VampireFeedingManager.FeedingPhase.ACTIVE_FEEDING) {
-            target.sendMessage("§aYou no longer feel a vampire draining your life force");
+            target.sendMessage("§aYou no longer feel an alien draining your life force");
         }
 
         this.activeSessions.remove(session.vampireId);

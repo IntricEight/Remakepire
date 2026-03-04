@@ -21,9 +21,9 @@ public class ToggleTurningCommand implements CommandExecutor {
 
             } else {
                 if (this.plugin.getVampireTurningManager().toggleTurning(player)) {
-                    player.sendMessage("§aVampire turning enabled. You will now turn humans into vampires when you kill them.");
+                    player.sendMessage("§aMimic Infection enabled. You will now turn humans into Mimics when you kill them.");
                 } else {
-                    player.sendMessage("§cVampire turning disabled. Humans will die normally when you kill them.");
+                    player.sendMessage("§cMimic Infection disabled. Humans will die normally when you kill them.");
                 }
 
                 return true;

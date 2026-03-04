@@ -50,7 +50,7 @@ public class ForcedVampireCureCommand implements CommandExecutor {
             return true;
 
         } else if (args.length < 1) {
-            caster.sendMessage("§cYou must specify the name of the vampire to sanctify.");
+            caster.sendMessage("§bYou must specify the name of the vampire to sanctify.");
             caster.sendMessage("§7Usage: /hoc-vinculum-tibi-dirumpo-mala-creatura <player-name>");
             return true;
 
@@ -63,7 +63,7 @@ public class ForcedVampireCureCommand implements CommandExecutor {
                 return true;
 
             } else if (target.equals(caster)) {
-                caster.sendMessage("§cYou cannot use these holy words upon yourself. The ritual must be performed by another.");
+                caster.sendMessage("§bYou cannot use these holy words upon yourself. The ritual must be performed by another.");
                 return true;
 
             } else if (!this.vampireManager.isVampire(target)) {

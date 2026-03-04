@@ -132,7 +132,7 @@ public class FourthBookRevealListener implements Listener {
         this.markAsRevealed();
 
         player.sendMessage("§8§o[As you open the chest, an unfamiliar book suddenly materializes within...]");
-        player.sendMessage("§4§o[The smell of old blood emanates from its pages...]");
+        player.sendMessage("§3§o[The smell of old blood emanates from its pages...]");
 
         this.plugin.getLogger().info("FOURTH BOOK REVEALED: " + player.getName() + " opened tome chest at " + chest.getLocation().getBlockX() + ", " + chest.getLocation().getBlockY() + ", " + chest.getLocation().getBlockZ());
     }

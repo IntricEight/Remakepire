@@ -379,7 +379,7 @@ public class BeaconConversionListener implements Listener {
             if (newState == BeaconState.HOLY) {
                 player.sendMessage("§aBeacon §e" + beacon.getName() + " §ahas been blessed with divine energy.");
             } else if (newState == BeaconState.DESECRATED) {
-                player.sendMessage("§4Beacon §e" + beacon.getName() + " §4has been consumed by dark forces.");
+                player.sendMessage("§3Beacon §e" + beacon.getName() + " §3has been consumed by dark forces.");
             }
         }
     }
@@ -476,7 +476,7 @@ public class BeaconConversionListener implements Listener {
         this.plugin.getLogger().info("HUMANS FINAL STAND ENDED - A vampire has converted a beacon!");
 
         for(Player player : this.plugin.getServer().getOnlinePlayers()) {
-            player.sendTitle("§4§lFINAL STAND BROKEN", "§cDarkness pushes back against the light", 20, 80, 20);
+            player.sendTitle("§3§lFINAL STAND BROKEN", "§cDarkness pushes back against the light", 20, 80, 20);
             player.sendMessage("§cA vampire has broken through the holy defenses.");
             player.playSound(player.getLocation(), Sound.ENTITY_WITHER_SPAWN, SoundCategory.MASTER, 1.0F, 0.5F);
         }
@@ -498,7 +498,7 @@ public class BeaconConversionListener implements Listener {
         this.plugin.getLogger().info("VAMPIRES ETERNAL NIGHT TRIGGERED - All 7 beacons are desecrated!");
 
         for(Player player : this.plugin.getServer().getOnlinePlayers()) {
-            player.sendTitle("§4§lETERNAL NIGHT FALLS", "§cThe darkness consumes all hope", 20, 100, 40);
+            player.sendTitle("§3§lETERNAL NIGHT FALLS", "§cThe darkness consumes all hope", 20, 100, 40);
             player.sendMessage("§c All beacons now pulse with unholy energy.");
             player.playSound(player.getLocation(), Sound.ENTITY_WITHER_SPAWN, SoundCategory.MASTER, 1.0F, 0.5F);
         }
@@ -604,7 +604,7 @@ public class BeaconConversionListener implements Listener {
         private void createBossBar() {
             String beaconName = this.beacon.getName();
             BarColor color = this.isVampireConversion ? BarColor.RED : BarColor.WHITE;
-            String title = this.isVampireConversion ? "§4Desecrating Beacon: §f" + beaconName : "§fConsecrating Beacon: §f" + beaconName;
+            String title = this.isVampireConversion ? "§3Desecrating Beacon: §f" + beaconName : "§fConsecrating Beacon: §f" + beaconName;
 
             this.bossBar = BeaconConversionListener.this.plugin.getServer().createBossBar(title, color, BarStyle.SOLID, new BarFlag[0]);
             this.bossBar.setProgress(this.neutralStageComplete ? 0.5 : 0.0);
@@ -625,7 +625,7 @@ public class BeaconConversionListener implements Listener {
                 this.bossBar.setColor(BarColor.YELLOW);
 
             } else if (this.isVampireConversion) {
-                title = "§4Desecrating Beacon: §f" + beaconName + " §4(" + (int)(progress * 100) + "%)";
+                title = "§3Desecrating Beacon: §f" + beaconName + " §4(" + (int)(progress * 100) + "%)";
                 this.bossBar.setColor(BarColor.RED);
 
             } else {

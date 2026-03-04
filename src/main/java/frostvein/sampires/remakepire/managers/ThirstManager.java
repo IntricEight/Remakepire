@@ -238,9 +238,9 @@ public class ThirstManager {
 
     public void promoteVampire(Player vampire) {
         if (this.vampireManager.hasPromotionBan(vampire)) {
-            vampire.sendMessage("§4§lPROMOTION DENIED");
-            vampire.sendMessage("§c§lThe curse of death still lingers upon you...");
-            vampire.sendMessage("§c§lYou cannot grow stronger until the next session begins.");
+            vampire.sendMessage("§3§lPROMOTION DENIED");
+            vampire.sendMessage("§b§lThe curse of death still lingers upon you...");
+            vampire.sendMessage("§b§lYou cannot grow stronger until the next session begins.");
             vampire.setExp(0.99F);
 
         } else {
@@ -251,8 +251,8 @@ public class ThirstManager {
                 int stageCap = this.vampireManager.getStageCap(vampire);
 
                 if (newStage > stageCap) {
-                    vampire.sendMessage("§4§lPROMOTION DENIED");
-                    vampire.sendMessage("§c§lThe weakness of your starvation still haunts you...");
+                    vampire.sendMessage("§3§lPROMOTION DENIED");
+                    vampire.sendMessage("§b§lThe weakness of your starvation still haunts you...");
                     vampire.sendMessage("§c§lYou cannot reach Stage " + newStage + " until the next session begins.");
                     vampire.setExp(0.99F);
                     return;
@@ -263,10 +263,10 @@ public class ThirstManager {
             this.giveThirstImmunity(vampire);
             vampire.setExp(0.25F);
 
-            vampire.sendMessage("§4§lASCENSION");
-            vampire.sendMessage("§cThe crimson blood coats the inside of your throat, your pupils dilate as your tension eases.");
-            vampire.sendMessage("§cYour thirst is quenched, you are stronger, for now...");
-            vampire.sendMessage("§5You are now a Stage " + newStage + " vampire.");
+            vampire.sendMessage("§3§lEVOLUTION");
+            vampire.sendMessage("§bWith sufficient biomass acquired, your form enhances, your powers grow and you become more alert, more aggressive.");
+            vampire.sendMessage("§bBut also less subtle...");
+            vampire.sendMessage("§5You are now a Stage " + newStage + " Mimic.");
             vampire.playSound(vampire, Sound.ENTITY_ZOMBIE_VILLAGER_CURE, SoundCategory.MASTER, 1.0F, 0.5F);
         }
     }
@@ -278,7 +278,7 @@ public class ThirstManager {
             if (fromStarvation) {
                 int newStage = currentStage - 1;
                 this.vampireManager.setStageCap(vampire, newStage);
-                vampire.sendMessage("§4§lYou cannot return to Stage " + currentStage + " until the next session begins.");
+                vampire.sendMessage("§3§lYou cannot return to Stage " + currentStage + " until the next session begins.");
             }
 
             this.vampireManager.reduceVampireStage(vampire);
@@ -286,13 +286,13 @@ public class ThirstManager {
             vampire.setExp(0.5F);
 
             if (fromStarvation) {
-                vampire.sendMessage("§4§lWEAKENING");
-                vampire.sendMessage("§c§lThe pain of hunger stabs through your stomach like a knife.");
-                vampire.sendMessage("§c§lYou feel weaker. Closer to death than ever before... Be careful, spawn.");
+                vampire.sendMessage("§3§lWEAKENING");
+                vampire.sendMessage("§b§lYour injuries ache, you feel weaker, closer to annihilation.");
+                vampire.sendMessage("§b§lRemain alert, Mimic.");
 
             } else {
-                vampire.sendMessage("§4§lDEATH'S EMBRACE");
-                vampire.sendMessage("§c§lThe world fades to grey, and you awake within your coffin.");
+                vampire.sendMessage("§3§lDEATH'S EMBRACE");
+                vampire.sendMessage("§b§lThe world fades to grey, and you awake with the station.");
             }
 
             vampire.playSound(vampire, Sound.AMBIENT_SOUL_SAND_VALLEY_MOOD, SoundCategory.MASTER, 1.0F, 1.0F);
@@ -324,9 +324,9 @@ public class ThirstManager {
                         player.removeScoreboardTag(THIRST_IMMUNITY_TAG);
 
                         if (this.vampireManager.isVampire(player)) {
-                            player.sendMessage("§4§lIMMUNITY EXPIRED");
-                            player.sendMessage("§cThe stabbing pain in your gut tells you everything you need to know...");
-                            player.sendMessage("§cThe time to feed is approaching...");
+                            player.sendMessage("§3§lIMMUNITY EXPIRED");
+                            player.sendMessage("§bYour Alien hunger rears inside you.");
+                            player.sendMessage("§bThe time to hunt approaches...");
                             player.playSound(player, Sound.AMBIENT_SOUL_SAND_VALLEY_MOOD, SoundCategory.MASTER, 1.0F, 1.0F);
                         }
                     }

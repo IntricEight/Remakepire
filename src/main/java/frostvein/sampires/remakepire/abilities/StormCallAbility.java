@@ -103,8 +103,8 @@ public class StormCallAbility extends VampireAbility {
      * @param caster the player using the ability.
      */
     private void broadcastStormArrival(World world, Player caster) {
-        String message = "§8§lDark clouds gather across the sky...";
-        String casterMessage = "§7§o A vampire has called upon an ancient storm...";
+        String message = "§8§lRushing water sounds throughout the ship.";
+        String casterMessage = "§7§o A Mimic has broken the sprinkler system...";
 
         for(Player player : world.getPlayers()) {
             player.sendMessage(message);

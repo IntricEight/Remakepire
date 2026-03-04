@@ -50,7 +50,7 @@ public class BlockListener implements Listener {
 
             if (this.plugin.getBatTransformationManager().isInBatForm(player)) {
                 event.setCancelled(true);
-                player.sendMessage("§cYou cannot break blocks while in bat form");
+                player.sendMessage("§cYou cannot break blocks while in your shrunken form");
 
             } else if (event.getBlock().getType() == Material.BEACON) {
                 event.setCancelled(true);
@@ -83,7 +83,7 @@ public class BlockListener implements Listener {
 
         } else if (this.plugin.getBatTransformationManager().isInBatForm(player)) {
             event.setCancelled(true);
-            player.sendMessage("§cYou cannot place blocks while in bat form");
+            player.sendMessage("§cYou cannot place blocks while in your shrunken form");
 
         } else {
             if (event.getBlock().getLocation().distance(this.plugin.getVampireRespawnLocation()) < 3) {
@@ -96,9 +96,9 @@ public class BlockListener implements Listener {
                 player.sendMessage("§cWarning: This is the vampire spawn point, placing blocks here may cause issues for you and your fellow thralls.");
             }
 
-            if (event.getBlock().getType() == Material.IRON_BLOCK) {
-                event.getBlock().setType(Material.NETHERITE_BLOCK);
-            }
+//            if (event.getBlock().getType() == Material.IRON_BLOCK) {
+//                event.getBlock().setType(Material.NETHERITE_BLOCK);
+//            }
         }
     }
 }

@@ -70,7 +70,7 @@ public class ExperienceBottleListener implements Listener {
 
                             int experienceGained = 8;
                             this.thirstManager.quenchThirst(player, experienceGained);
-                            player.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent("§cYou drain the essence from the bottle, satisfying your vampiric thirst..."));
+                            player.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent("§cYou drain the essence from the bottle, empowering your alien abilities..."));
                         }
                     }
                 }

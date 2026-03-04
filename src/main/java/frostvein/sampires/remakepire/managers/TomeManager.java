@@ -149,7 +149,7 @@ public class TomeManager {
 
     public boolean useAbility(Player player, String abilityName) {
         if (!this.vampireManager.isHuman(player)) {
-            player.sendMessage("§cOnly humans can use tome abilities.");
+            player.sendMessage("§bOnly humans can use tome abilities.");
             return false;
 
         } else if (!this.hasAbility(player, abilityName)) {

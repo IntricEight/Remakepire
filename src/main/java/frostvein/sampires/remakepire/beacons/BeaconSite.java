@@ -472,7 +472,7 @@ public class BeaconSite {
     public enum BeaconState {
         NEUTRAL("Neutral", "§7"),
         HOLY("Holy", "§f"),
-        DESECRATED("Desecrated", "§4"),
+        DESECRATED("Desecrated", "§3"),
         PERMANENTLY_DESECRATED("Corrupted", "§8");
 
         private final String displayName;

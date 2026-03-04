@@ -1,6 +1,7 @@
 package frostvein.sampires.remakepire.listeners;
 
-import org.bukkit.entity.Bat;
+//import org.bukkit.entity.Bat;
+import org.bukkit.entity.Slime;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -68,7 +69,7 @@ public class BatTransformationListener implements Listener {
             priority = EventPriority.HIGH
     )
     public void onEntityDeath(EntityDeathEvent event) {
-        if (event.getEntity() instanceof Bat bat) {
+        if (event.getEntity() instanceof Slime bat) {
             if (bat.getCustomName() != null && bat.getCustomName().startsWith("§8")) {
                 Player player = this.batManager.getPlayerFromBat(bat);
                 if (player != null && player.isOnline() && this.batManager.isInBatForm(player)) {
@@ -93,12 +94,12 @@ public class BatTransformationListener implements Listener {
             priority = EventPriority.HIGH
     )
     public void onEntityDamageByEntity(EntityDamageByEntityEvent event) {
-        if (event.getEntity() instanceof Bat bat) {
+        if (event.getEntity() instanceof Slime bat) {
             if (bat.getCustomName() != null && bat.getCustomName().startsWith("§8")) {
                 Player transformedPlayer = this.batManager.getPlayerFromBat(bat);
 
                 if (transformedPlayer != null && transformedPlayer.isOnline()) {
-                    transformedPlayer.sendMessage("§c You have taken damage while in bat form, be careful...");
+                    transformedPlayer.sendMessage("§b You have taken damage while in your true form, be careful...");
 
                     double health = bat.getHealth() - event.getFinalDamage();
                     double maxHealth = bat.getMaxHealth();
@@ -129,13 +130,13 @@ public class BatTransformationListener implements Listener {
     )
     public void onEntityDamage(EntityDamageEvent event) {
         if (!event.isCancelled()) {
-            if (event.getEntity() instanceof Bat bat) {
+            if (event.getEntity() instanceof Slime bat) {
                 if (bat.getCustomName() != null && bat.getCustomName().startsWith("§8")) {
                     Player transformedPlayer = this.batManager.getPlayerFromBat(bat);
 
                     if (transformedPlayer != null && transformedPlayer.isOnline() && !(event instanceof EntityDamageByEntityEvent)) {
                         String damageType = event.getCause().name().toLowerCase().replace("_", " ");
-                        transformedPlayer.sendMessage("§c You have taken damage while in bat form, be careful...");
+                        transformedPlayer.sendMessage("§c You have taken damage while in your natural form, be careful...");
                         double health = bat.getHealth() - event.getFinalDamage();
                         double maxHealth = bat.getMaxHealth();
 
@@ -145,7 +146,7 @@ public class BatTransformationListener implements Listener {
                             transformedPlayer.sendMessage("§7Remaining Health: " + healthColor + String.format("%.1f", health) + "§7/" + String.format("%.1f", maxHealth));
 
                         } else {
-                            transformedPlayer.sendMessage("§cYour bat forms life force, and your own, are growing thin.");
+                            transformedPlayer.sendMessage("§bYour natural form's life force is growing thin.");
                         }
                     }
                 }
@@ -202,7 +203,7 @@ public class BatTransformationListener implements Listener {
 
         if (this.batManager.isInBatForm(player)) {
             event.setCancelled(true);
-            player.sendMessage("§cYou cannot use a fishing rod while in bat form.");
+            player.sendMessage("§bYou cannot use a fishing rod while in slime form.");
         }
     }
 
@@ -218,7 +219,7 @@ public class BatTransformationListener implements Listener {
         if (event.getEntity() instanceof Player player) {
             if (this.batManager.isInBatForm(player)) {
                 event.setCancelled(true);
-                player.sendMessage("§cYou cannot shoot a bow while in bat form.");
+                player.sendMessage("§bYou cannot shoot a bow while in slime form.");
             }
         }
     }

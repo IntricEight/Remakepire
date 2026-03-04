@@ -186,7 +186,7 @@ public class CombatListener implements Listener {
                         // Create the effect of the one-time use stake
                         if (weapon != null && weapon.getType() == Material.WOODEN_SWORD) {
                             attacker.getInventory().setItemInMainHand(new ItemStack(Material.AIR));
-                            attacker.sendMessage("§cYour wooden stake breaks apart on impact.");
+                            attacker.sendMessage("§bYour electro zapper breaks on impact.");
                             attacker.getWorld().playSound(attacker.getLocation(), Sound.ENTITY_ITEM_BREAK, SoundCategory.PLAYERS, 1.0F, 1.0F);
                             attacker.setCooldown(Material.WOODEN_SWORD, this.plugin.getConfigManager().getWoodenStakeCooldownTicks());
                         }
@@ -204,14 +204,14 @@ public class CombatListener implements Listener {
                             victim.getWorld().playSound(victim.getLocation(), Sound.ENTITY_PLAYER_HURT, 1.0F, 1.0F);
 
                             attacker.getInventory().setItemInMainHand(new ItemStack(Material.AIR));
-                            attacker.sendMessage("§cYour wooden stake breaks apart on impact.");
+                            attacker.sendMessage("§bYour electro zapper breaks on impact.");
                             attacker.getWorld().playSound(attacker.getLocation(), Sound.ENTITY_ITEM_BREAK, SoundCategory.PLAYERS, 1.0F, 1.0F);
                             attacker.setCooldown(Material.WOODEN_SWORD, this.plugin.getConfigManager().getWoodenStakeCooldownTicks());
 
                         } else {
                             if (weaponCheck != null && weaponCheck.getType() == Material.WOODEN_SWORD && this.vampireManager.isHuman(victim)) {
                                 attacker.getInventory().setItemInMainHand(new ItemStack(Material.AIR));
-                                attacker.sendMessage("§cYour wooden stake breaks apart on impact.");
+                                attacker.sendMessage("§bYour electro zapper breaks on impact.");
                                 attacker.getWorld().playSound(attacker.getLocation(), Sound.ENTITY_ITEM_BREAK, SoundCategory.PLAYERS, 1.0F, 1.0F);
                                 attacker.setCooldown(Material.WOODEN_SWORD, this.plugin.getConfigManager().getWoodenStakeCooldownTicks());
                             }
@@ -297,8 +297,8 @@ public class CombatListener implements Listener {
                                     // Apply the effects of turning a cured vampire
                                     if (victim.getScoreboardTags().contains("CuredVampire")) {
                                         event.setCancelled(true);
-                                        attacker.sendMessage("§4You taste the blood of " + victim.getName() + ", but it rejects your curse...");
-                                        attacker.sendMessage("§4They have been cleansed by holy power - their soul slips beyond your grasp, lost forever.");
+                                        attacker.sendMessage("§3You tear open the flesh of " + victim.getName() + ", but they somehow rejects your curse...");
+                                        attacker.sendMessage("§3They have been cleansed by holy power - their soul slips beyond your grasp, lost forever.");
                                         victim.sendMessage("§7The darkness reaches for you again, but the holy blessing protects your soul...");
                                         victim.sendMessage("§7Your past as a creature of the night cannot reclaim you. You slip into eternal peace...");
                                         victim.addScoreboardTag("PermadeathChosen");
@@ -312,7 +312,7 @@ public class CombatListener implements Listener {
                                     // Apply the effects of a chosen permadeath on death
                                     if (this.plugin.getPermadeathManager().hasPermadeathEnabled(victim)) {
                                         event.setCancelled(true);
-                                        attacker.sendMessage("§4You watch the light of " + victim.getName() + "'s eyes fade, and extinguish. Lost forever.");
+                                        attacker.sendMessage("§3You watch the light of " + victim.getName() + "'s eyes fade, and extinguish. Lost forever.");
                                         victim.sendMessage("§7The world grows dim, blurry, you feel a darkness reach out, offering you one last chance to live, as a creature of the night... But you refuse... And slip under the veil of the afterlife.");
                                         victim.addScoreboardTag("PermadeathChosen");
 
@@ -343,11 +343,11 @@ public class CombatListener implements Listener {
                                     }, 5L);
 
                                     victim.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 200, 1, false, false));
-                                    attacker.sendMessage("§5You have turned " + victim.getName() + " into a vampire.");
+                                    attacker.sendMessage("§5You have infected " + victim.getName() + " and turned them into a Mimic.");
                                     int killThirst = this.plugin.getThirstManager().getKillThirstReward(attacker, victim);
                                     this.plugin.getThirstManager().modifyQuench(attacker, killThirst, true);
 
-                                    attacker.sendMessage("§cThe taste of fresh blood coats your throat as you feed, you have successfully turned " + victim.getName() + " into a creature of the night");
+                                    attacker.sendMessage("§cThe blood of " + victim.getName() + " coats your hands, you have successfully infected " + victim.getName() + " with the Mimic virus.");
                                     attacker.playSound(attacker, Sound.ENTITY_ZOMBIE_VILLAGER_CURE, SoundCategory.MASTER, 1.0F, 0.7F);
                                     if (this.plugin.getVampireTrackingManager() != null) {
                                         this.plugin.getVampireTrackingManager().startTrackingNewVampire(victim);
@@ -599,7 +599,7 @@ public class CombatListener implements Listener {
 
             if (newDamage >= maxDurability) {
                 attacker.getInventory().setItemInMainHand(new ItemStack(Material.AIR));
-                attacker.sendMessage("§cYour wooden stake breaks apart on impact.");
+                attacker.sendMessage("§bYour electro zapper breaks on impact.");
                 attacker.getWorld().playSound(attacker.getLocation(), Sound.ENTITY_ITEM_BREAK, SoundCategory.PLAYERS, 1.0F, 1.0F);
                 attacker.setCooldown(Material.WOODEN_SWORD, this.plugin.getConfigManager().getWoodenStakeCooldownTicks());
 

@@ -169,7 +169,7 @@ public class DeathHandler implements Listener {
             if (allBeaconsDesecrated) {
                 player.sendMessage("§cDarkness reigns supreme over Frostvein.");
             } else {
-                player.sendMessage("§cBut the blizzard still rages on...");
+                player.sendMessage("§cSurely this plague won’t spread any further?");
             }
 
             player.sendMessage("");
@@ -298,7 +298,7 @@ public class DeathHandler implements Listener {
 
             if (victimStage <= woodenStakeThreshold && killedWithWoodenWeapon) {
                 victim.addScoreboardTag("PermaKilled");
-                killer.sendMessage("§4You have permanently killed the vampire " + victim.getName() + "!");
+                killer.sendMessage("§3You have permanently killed the Mimic " + victim.getName() + "!");
                 this.createVampireDeathEffects(victim.getLocation());
                 this.broadcastPermaKill(victim, killer);
                 this.plugin.getLogger().info("PERMA-KILL: Applied PermaKilled tag to " + victim.getName() + " (Stage " + victimStage + ", Threshold: " + woodenStakeThreshold + ")");
@@ -317,8 +317,8 @@ public class DeathHandler implements Listener {
      * @param killer the player who killed the victim.
      */
     private void broadcastPermaKill(Player victim, Player killer) {
-        String vampireMessage = "§4You feel a dark soul ripped from its human coil, somebody has slayed a member of your monsterous family...";
-        String humanMessage = "§aYou feel the realm has been purged of an evil spirit... Someone has successfully killed a vampire. Permanently.";
+        String vampireMessage = "§4You hear one of your fellow Mimic’s cries echo through the station. One of your siblings has been exterminated... Permanently.";
+        String humanMessage = "§aYou hear the cries of an alien creature. Someone has successfully exterminated a Mimic... Permanently.";
 
         for(Player player : Bukkit.getOnlinePlayers()) {
             if (!player.getUniqueId().equals(victim.getUniqueId())) {

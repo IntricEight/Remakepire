@@ -33,7 +33,7 @@ public class HolyWordTomeAbility extends TomeAbility implements Listener {
      * @param plugin the host plugin object.
      */
     public HolyWordTomeAbility(RemakepirePlugin plugin) {
-        super(plugin, "HolyWord", new String[]{"You speak a word of divine power,", "paralysing all vampires within a " + RADIUS + " block radius for " + (PARALYSIS_DURATION / 20) + " seconds", "(Vampires are impervious to all damage while frozen)."}, plugin.getConfigManager().getTomeHolyWordCooldown());
+        super(plugin, "HolyWord", new String[]{"You speak a word of divine power,", "paralysing all Mimics within a " + RADIUS + " block radius for " + (PARALYSIS_DURATION / 20) + " seconds", "(Mimics are impervious to all damage while frozen)."}, plugin.getConfigManager().getTomeHolyWordCooldown());
         Bukkit.getPluginManager().registerEvents(this, plugin);
     }
 
@@ -45,8 +45,7 @@ public class HolyWordTomeAbility extends TomeAbility implements Listener {
         } else {
             VampireManager vampireManager = this.plugin.getVampireManager();
             List<Player> nearbyPlayers = player.getWorld().getPlayers();
-            int stage1Affected = 0;
-            int stage2And3Paralyzed = 0;
+            int stage1Affected = 0, stage2And3Paralyzed = 0;
 
             for(Player target : nearbyPlayers) {
                 if (!target.equals(player) && !(target.getLocation().distance(player.getLocation()) > RADIUS)) {
@@ -96,8 +95,7 @@ public class HolyWordTomeAbility extends TomeAbility implements Listener {
             priority = EventPriority.HIGHEST
     )
     public void onEntityDamage(EntityDamageEvent event) {
-        if (event.getEntity() instanceof Player) {
-            Player player = (Player)event.getEntity();
+        if (event.getEntity() instanceof Player player) {
             UUID playerId = player.getUniqueId();
 
             if (this.paralyzedPlayers.containsKey(playerId)) {

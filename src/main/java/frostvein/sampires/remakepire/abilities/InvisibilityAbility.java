@@ -20,7 +20,7 @@ public class InvisibilityAbility extends VampireAbility {
     }
 
     public String getDescription() {
-        return "Become invisible to enemies for a short time. Duration increases with vampire stage.";
+        return "Become invisible to enemies for a short time. Duration increases with Mimic stage.";
     }
 
     public int getCooldownSeconds(RemakepirePlugin plugin) {

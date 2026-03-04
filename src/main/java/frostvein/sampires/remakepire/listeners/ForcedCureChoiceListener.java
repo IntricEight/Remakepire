@@ -71,7 +71,7 @@ public class ForcedCureChoiceListener implements Listener {
             if (event.getPlayer() instanceof Player player) {
                 if (this.plugin.getForcedCureChoiceManager().hasPendingCure(player)) {
                     player.sendMessage("");
-                    player.sendMessage("§4This is a decision you cannot run from monster.");
+                    player.sendMessage("§3This is a decision you cannot run from monster.");
                     player.sendMessage("§7The spirits have come knocking, and they are joined by death.");
                     player.sendMessage("§7Say your peace, and when you ready to make your decision,");
 
@@ -99,7 +99,7 @@ public class ForcedCureChoiceListener implements Listener {
             this.plugin.getServer().getScheduler().runTaskLater(this.plugin, () -> {
                 if (player.isOnline() && this.plugin.getForcedCureChoiceManager().hasPendingCure(player)) {
                     player.sendMessage("");
-                    player.sendMessage("§4This is a decision you cannot run from monster.");
+                    player.sendMessage("§3This is a decision you cannot run from monster.");
                     player.sendMessage("§7The spirits have come knocking, and they are joined by death.");
                     player.sendMessage("§7Say your peace, and when you ready to make your decision,");
 

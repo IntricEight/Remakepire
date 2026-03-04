@@ -97,13 +97,13 @@ public class InitGameManager {
         admin.sendMessage("§c§lWARNING: GAME INITIALIZATION");
         admin.sendMessage("§c§l========================================");
         admin.sendMessage("");
-        admin.sendMessage("§7You are about to start a §lbrand new game§7 of Vampires.");
+        admin.sendMessage("§7You are about to start a §lbrand new game§7 of The THING - Cleopatra's Station.");
         admin.sendMessage("§7This will:");
         admin.sendMessage("§7  • Reset all player tags and inventories");
         admin.sendMessage("§7  • Neutralize all beacons");
         admin.sendMessage("§7  • Reset the session");
         admin.sendMessage("§7  • Teleport all online players");
-        admin.sendMessage("§7  • Assign new vampires");
+        admin.sendMessage("§7  • Assign new Mimics");
         admin.sendMessage("");
 
         TextComponent confirmMessage = new TextComponent("§7Are you sure? ");
@@ -134,7 +134,7 @@ public class InitGameManager {
 
             admin.sendMessage("");
             admin.sendMessage("§6§l========================================");
-            admin.sendMessage("§6How would you like to assign vampires?");
+            admin.sendMessage("§6How would you like to assign Mimics?");
             admin.sendMessage("§6§l========================================");
             admin.sendMessage("");
             admin.sendMessage("§7Type §e/pow admin init cancel §7to cancel.");
@@ -175,7 +175,7 @@ public class InitGameManager {
 
             admin.sendMessage("");
             admin.sendMessage("§e§l========================================");
-            admin.sendMessage("§eWhat should the §lminimum§e number of starting vampires be?");
+            admin.sendMessage("§eWhat should the §lminimum§e number of starting Mimics be?");
             admin.sendMessage("§7Please type a number in chat (must be 0 or more).");
             admin.sendMessage("§7Type §e/pow admin init cancel §7to cancel.");
             admin.sendMessage("§e§l========================================");

@@ -207,7 +207,7 @@ public class BeetrootManager {
      */
     public void handleBeetrootConsumption(Player player) {
         if (!this.vampireManager.isHuman(player)) {
-            player.sendMessage("§c§lThe garlic burns your throat and causes you to retch...");
+            player.sendMessage("§b§lThe garlic burns your throat and causes you to retch...");
             player.addPotionEffect(new PotionEffect(PotionEffectType.NAUSEA, NAUSEA_DURATION, NAUSEA_AMPLIFIER, false, false));
 
         } else if (player.getScoreboardTags().contains(BEETROOT_USED_TAG)) {

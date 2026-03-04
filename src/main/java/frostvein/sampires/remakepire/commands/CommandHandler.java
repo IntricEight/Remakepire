@@ -338,7 +338,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         if (newState) {
             sender.sendMessage("§aOne Human Left mode ACTIVATED: Humans no longer have beacon cooldowns");
         } else {
-            sender.sendMessage("§cOne Human Left mode DEACTIVATED: Normal beacon cooldowns restored for all players");
+            sender.sendMessage("§bOne Human Left mode DEACTIVATED: Normal beacon cooldowns restored for all players");
         }
 
         return true;
@@ -351,7 +351,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                     int newTicks = Integer.parseInt(args[1]);
 
                     if (newTicks < 1) {
-                        sender.sendMessage("§cInterval must be at least 1 tick.");
+                        sender.sendMessage("§bInterval must be at least 1 tick.");
                         return true;
 
                     } else {
@@ -366,7 +366,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                     return true;
                 }
             } else {
-                sender.sendMessage("§cUsage: /pow admin vampirehealthcheck [get|set] [ticks]");
+                sender.sendMessage("§bUsage: /pow admin vampirehealthcheck [get|set] [ticks]");
                 sender.sendMessage("§7- /pow admin vampirehealthcheck get §8- Show current interval");
                 sender.sendMessage("§7- /pow admin vampirehealthcheck set <ticks> §8- Set new interval");
                 sender.sendMessage("§7Current: §e" + this.sessionManager.getVampireHealthCheckTicks() + " ticks");
@@ -527,9 +527,9 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                         this.applyVampireNightVision(target);
                         target.setExp(0.5F);
 
-                        sender.sendMessage("§5" + target.getName() + " is now a Stage 1 vampire.");
-                        target.sendMessage("§5You have been set as a Stage 1 vampire.");
-                        this.sendVampireTexturePackPrompt(target);
+                        sender.sendMessage("§5" + target.getName() + " is now a Stage 1 Mimic.");
+                        target.sendMessage("§5You have been set as a Stage 1 Mimic.");
+//                        this.sendVampireTexturePackPrompt(target);
                         break;
                     case "2":
                         this.vampireManager.setPlayerAsVampire(target, 2, true);
@@ -543,9 +543,9 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                         this.applyVampireNightVision(target);
                         target.setExp(0.5F);
 
-                        sender.sendMessage("§5" + target.getName() + " is now a Stage 2 vampire.");
-                        target.sendMessage("§5You have been set as a Stage 2 vampire.");
-                        this.sendVampireTexturePackPrompt(target);
+                        sender.sendMessage("§5" + target.getName() + " is now a Stage 2 Mimic.");
+                        target.sendMessage("§5You have been set as a Stage 2 Mimic.");
+//                        this.sendVampireTexturePackPrompt(target);
                         break;
                     case "3":
                         this.vampireManager.setPlayerAsVampire(target, 3, true);
@@ -559,9 +559,9 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                         this.applyVampireNightVision(target);
                         target.setExp(0.5F);
 
-                        sender.sendMessage("§5" + target.getName() + " is now a Stage 3 vampire.");
-                        target.sendMessage("§5You have been set as a Stage 3 vampire.");
-                        this.sendVampireTexturePackPrompt(target);
+                        sender.sendMessage("§5" + target.getName() + " is now a Stage 3 Mimic.");
+                        target.sendMessage("§5You have been set as a Stage 3 Mimic.");
+//                        this.sendVampireTexturePackPrompt(target);
                         break;
                     case "turn":
                         return this.handleTurnCommand(sender, target, args);
@@ -1642,11 +1642,11 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
     }
 
     private void sendVampireTexturePackPrompt(Player player) {
-        TextComponent textureMessage = new TextComponent("§7Apply the vampire texture pack: ");
-        TextComponent clickableText = new TextComponent("§c§n[CLICK HERE]");
-        clickableText.setClickEvent(new ClickEvent(Action.RUN_COMMAND, "/pow texture vampire"));
-        clickableText.setHoverEvent(new HoverEvent(net.md_5.bungee.api.chat.HoverEvent.Action.SHOW_TEXT, (new ComponentBuilder("§7Click to apply the vampire texture pack")).create()));
-        textureMessage.addExtra(clickableText);
-        player.spigot().sendMessage(textureMessage);
+//        TextComponent textureMessage = new TextComponent("§7Apply the vampire texture pack: ");
+//        TextComponent clickableText = new TextComponent("§c§n[CLICK HERE]");
+//        clickableText.setClickEvent(new ClickEvent(Action.RUN_COMMAND, "/pow texture vampire"));
+//        clickableText.setHoverEvent(new HoverEvent(net.md_5.bungee.api.chat.HoverEvent.Action.SHOW_TEXT, (new ComponentBuilder("§7Click to apply the vampire texture pack")).create()));
+//        textureMessage.addExtra(clickableText);
+//        player.spigot().sendMessage(textureMessage);
     }
 }

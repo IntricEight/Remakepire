@@ -139,7 +139,7 @@ public class HolyWaterEffectManager implements Listener {
         BukkitTask enableTask = Bukkit.getScheduler().runTaskLater(this.plugin, () -> this.removeHolyWaterEffect(vampire),  (long)(DISABLE_DURATION * 20));
 
         this.disabledVampires.put(vampireId, enableTask);
-        this.plugin.getLogger().info("Applied holy water effect to vampire: " + vampire.getName());
+        this.plugin.getLogger().info("Applied holy water effect to Mimic: " + vampire.getName());
     }
 
     /**
@@ -169,7 +169,7 @@ public class HolyWaterEffectManager implements Listener {
             this.notifyVampireEnabled(vampire);
         }
 
-        this.plugin.getLogger().info("Removed holy water effect from vampire: " + vampire.getName());
+        this.plugin.getLogger().info("Removed holy water effect from Mimic: " + vampire.getName());
     }
 
     /**
@@ -199,8 +199,8 @@ public class HolyWaterEffectManager implements Listener {
      * @param vampire the player whose abilities are disabled.
      */
     private void notifyVampireDisabled(Player vampire) {
-        vampire.sendMessage("§cThe holy water sears your vampiric essence!");
-        vampire.sendMessage("§cYour abilities and blood regeneration have been disabled for " + (int)(DISABLE_DURATION / 60.0) + " minutes.");
+        vampire.sendMessage("§cThe holy water sears your alien essence!");
+        vampire.sendMessage("§cYour abilities and regeneration have been disabled for " + (int)(DISABLE_DURATION / 60.0) + " minutes.");
 
         vampire.playSound(vampire, Sound.ENTITY_GENERIC_HURT, SoundCategory.MASTER, 1.0F, 0.8F);
         vampire.playSound(vampire, Sound.BLOCK_FIRE_EXTINGUISH, SoundCategory.MASTER, 1.0F, 1.2F);
@@ -213,7 +213,7 @@ public class HolyWaterEffectManager implements Listener {
      * @param vampire the player whose abilities are enable.
      */
     private void notifyVampireEnabled(Player vampire) {
-        vampire.sendMessage("§cYou feel your dark powers flowing through you once more.");
+        vampire.sendMessage("§cYou feel your alien powers flowing through you once more.");
         vampire.playSound(vampire, Sound.BLOCK_BEACON_ACTIVATE, SoundCategory.MASTER, 0.5F, 0.8F);
     }
 
@@ -241,13 +241,13 @@ public class HolyWaterEffectManager implements Listener {
             Player vampire = Bukkit.getPlayer(vampireId);
 
             if (vampire != null && vampire.isOnline()) {
-                vampire.sendMessage("§aAn admin has restored your vampiric abilities.");
+                vampire.sendMessage("§aAn admin has restored your alien abilities.");
             }
         }
 
         int cleared = this.disabledVampires.size();
         this.disabledVampires.clear();
-        this.plugin.getLogger().info("Cleared holy water effects from " + cleared + " vampires");
+        this.plugin.getLogger().info("Cleared holy water effects from " + cleared + " Mimics");
     }
 
     /**

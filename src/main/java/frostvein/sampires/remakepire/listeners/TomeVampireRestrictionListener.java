@@ -76,7 +76,7 @@ public class TomeVampireRestrictionListener implements Listener {
 
                 if (this.isTome(currentItem) || this.isTome(cursorItem)) {
                     event.setCancelled(true);
-                    player.sendMessage("§4§lThe tome sears your flesh! You cannot touch such holy artifacts!");
+                    player.sendMessage("§3§lThe tome sears your flesh! You cannot touch such holy artifacts!");
                     Bukkit.getScheduler().runTask(this.plugin, () -> player.updateInventory());
                 }
             }

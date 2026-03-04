@@ -17,7 +17,7 @@ public class LungeAbility extends VampireAbility {
     }
 
     public String getDescription() {
-        return "Launch yourself forward and upward with supernatural force. Power increases with vampire stage.";
+        return "Launch yourself forward and upward with supernatural force. Power increases with Mimic stage.";
     }
 
     public int getCooldownSeconds(RemakepirePlugin plugin) {
@@ -62,7 +62,7 @@ public class LungeAbility extends VampireAbility {
      * @param stage the vampire stage of the ability user.
      */
     private void sendLungeMessage(Player player, int stage) {
-        player.sendMessage("§c§lYou leap forward with vampiric strength.");
+        player.sendMessage("§b§lYou leap forward with unnatural strength.");
     }
 
     /**

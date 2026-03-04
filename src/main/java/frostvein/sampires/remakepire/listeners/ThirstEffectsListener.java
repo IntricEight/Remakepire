@@ -103,7 +103,7 @@ public class ThirstEffectsListener implements Listener {
 
             vampire.playSound(vampire.getLocation(), Sound.ENTITY_GENERIC_EAT, SoundCategory.PLAYERS, 1.0F, 1.0F);
             this.thirstManager.quenchThirst(vampire, 4);
-            this.plugin.getSessionManager().sendActionBar(vampire, "§cThe raw flesh satisfies your vampiric hunger...");
+            this.plugin.getSessionManager().sendActionBar(vampire, "§cThe raw flesh satisfies your alien hunger...");
         }
     }
 

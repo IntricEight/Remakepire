@@ -32,11 +32,11 @@ public class VampireVisionAbility extends VampireAbility {
         boolean hasNightVision = player.hasPotionEffect(PotionEffectType.NIGHT_VISION);
         if (hasNightVision) {
             player.removePotionEffect(PotionEffectType.NIGHT_VISION);
-            player.sendMessage("§8Your supernatural vision fades... The world returns to natural darkness.");
+            player.sendMessage("§8Your alien vision fades... The world returns to natural darkness.");
         } else {
             PotionEffect nightVision = new PotionEffect(PotionEffectType.NIGHT_VISION, -1, 0, false, false, false);
             player.addPotionEffect(nightVision);
-            player.sendMessage("§5Your vampiric eyes pierce through the darkness...");
+            player.sendMessage("§5Your enhanced eyes pierce through the darkness...");
         }
 
         player.playSound(player.getLocation(), Sound.BLOCK_LODESTONE_PLACE, 0.5F, 1.0F);

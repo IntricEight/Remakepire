@@ -42,7 +42,7 @@ public class BeaconTeleportListener implements Listener {
      */
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
-        if (event.getView().getTitle().equals("§4Desecrated Beacon Network")) {
+        if (event.getView().getTitle().equals("§3Desecrated Beacon Network")) {
             event.setCancelled(true);
 
             if (event.getWhoClicked() instanceof Player) {
