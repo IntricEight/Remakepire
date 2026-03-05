@@ -50,7 +50,7 @@ public class TexturePackCommand implements CommandExecutor {
             }
 
             if (!this.plugin.getVampireManager().isVampire(player)) {
-                player.sendMessage("§cOnly vampires can apply the vampire texture pack.");
+                player.sendMessage("§cOnly Mimics can apply the Mimic texture pack.");
                 player.sendMessage("§7Use §e/pow texture human §7to apply the human texture pack.");
                 return true;
 

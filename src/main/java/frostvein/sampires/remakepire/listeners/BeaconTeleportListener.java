@@ -65,7 +65,7 @@ public class BeaconTeleportListener implements Listener {
                             player.closeInventory();
 
                         } else if (!this.plugin.getVampireManager().isVampire(player)) {
-                            player.sendMessage("§cOnly vampires can use beacon travel.");
+                            player.sendMessage("§cOnly Mimics can use beacon travel.");
                             player.closeInventory();
 
                         } else {

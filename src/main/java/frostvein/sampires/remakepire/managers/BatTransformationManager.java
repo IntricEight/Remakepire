@@ -118,7 +118,7 @@ public class BatTransformationManager {
                     this.forceTransformToHuman(player, batData);
                     player.sendMessage("§6Your slime form transformation has expired.");
                     player.sendMessage("§7You transform back into your humanoid form.");
-                    player.playSound(player, Sound.ENTITY_BAT_TAKEOFF, SoundCategory.MASTER, 0.8F, 0.8F);
+                    player.playSound(player, Sound.ENTITY_SLIME_JUMP_SMALL, SoundCategory.MASTER, 0.8F, 0.8F);
                 }
 
                 this.cleanupBatData(batData);
@@ -180,6 +180,8 @@ public class BatTransformationManager {
     public void handleBatDeath(Player player, BatData batData) {
         player.removeScoreboardTag(BAT_FORM_TAG);
         this.restorePlayerArmor(player);
+        // Return the player to their normal height
+        player.getAttribute(Attribute.SCALE).setBaseValue(1);
         player.removePotionEffect(PotionEffectType.INVISIBILITY);
 
         // Make sure to only disable these if bat form is the only way the player can use them
@@ -210,6 +212,8 @@ public class BatTransformationManager {
             } else {
                 player.removeScoreboardTag(BAT_FORM_TAG);
                 this.restorePlayerArmor(player);
+                // Return the player to their normal height
+                player.getAttribute(Attribute.SCALE).setBaseValue(1);
                 player.removePotionEffect(PotionEffectType.INVISIBILITY);
 
                 // Make sure to only disable these if bat form is the only way the player can use them
@@ -265,13 +269,20 @@ public class BatTransformationManager {
                 player.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, -1, 0, false, false));
                 player.setAllowFlight(true);
                 player.setFlying(true);
-                // Try to shrink the player's height to one block? (0.4)
+                // Try to shrink the player's height to one block?
                 player.getAttribute(Attribute.SCALE).setBaseValue(0.4);
 
                 // We are keeping the variable name "bat", deal with it
                 final Slime bat = (Slime)player.getWorld().spawn(player.getLocation(), Slime.class);
                 bat.setSize(1);
-                bat.setCollidable(false);
+                bat.setAI(false);
+                bat.clearLootTable();
+
+                final double newSlimeHealth = 10.0;     // 10 health = 5 hearts
+                AttributeInstance maxHealth = bat.getAttribute(Attribute.MAX_HEALTH);
+                maxHealth.setBaseValue(newSlimeHealth);
+                bat.setHealth(newSlimeHealth);
+                bat.setInvulnerable(true);
 
                 // Spawn the bats around the player when they transform
 //                for(int i = 0; i < 10; ++i) {
@@ -352,7 +363,8 @@ public class BatTransformationManager {
         try {
             player.removeScoreboardTag(BAT_FORM_TAG);
             this.restorePlayerArmor(player);
-            player.getAttribute(Attribute.SCALE).setBaseValue(1.0);
+            // Return the player to their normal height
+            player.getAttribute(Attribute.SCALE).setBaseValue(1);
             player.removePotionEffect(PotionEffectType.INVISIBILITY);
             player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW_FALLING, SLOW_FALLING_DURATION, 0, false, false));
 
@@ -570,6 +582,8 @@ public class BatTransformationManager {
             if (this.isInBatForm(player)) {
                 player.removeScoreboardTag(BAT_FORM_TAG);
                 this.restorePlayerArmor(player);
+                // Return the player to their normal height
+                player.getAttribute(Attribute.SCALE).setBaseValue(1);
                 player.removePotionEffect(PotionEffectType.INVISIBILITY);
 
                 if (player.getGameMode() != GameMode.CREATIVE && player.getGameMode() != GameMode.SPECTATOR) {

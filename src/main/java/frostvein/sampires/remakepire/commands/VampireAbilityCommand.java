@@ -32,7 +32,7 @@ public class VampireAbilityCommand implements CommandExecutor, TabCompleter {
 
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage("§bOnly players can use vampire abilities.");
+            sender.sendMessage("§bOnly players can use alien abilities.");
             return true;
 
         } else if (args.length == 0) {
@@ -50,11 +50,11 @@ public class VampireAbilityCommand implements CommandExecutor, TabCompleter {
                 return true;
 
             } else if (!this.plugin.getVampireManager().isVampire(player)) {
-                player.sendMessage("§bOnly vampires can use vampire abilities.");
+                player.sendMessage("§bOnly Mimics can use alien abilities.");
                 return true;
 
             } else if (player.getGameMode() == GameMode.SPECTATOR) {
-                player.sendMessage("§bYou cannot use vampire abilities while in spectator mode.");
+                player.sendMessage("§bYou cannot use alien abilities while in spectator mode.");
                 return true;
 
             } else {
@@ -97,7 +97,7 @@ public class VampireAbilityCommand implements CommandExecutor, TabCompleter {
     }
 
     private void sendHelpMessage(Player player) {
-        player.sendMessage("§6§l=== VAMPIRE ABILITIES ===");
+        player.sendMessage("§6§l=== MIMIC ABILITIES ===");
         player.sendMessage("§e/pow vability list §7- Show your available abilities");
         player.sendMessage("§e/pow vability all §7- Show all abilities (including locked ones)");
         player.sendMessage("§e/pow vability <ability> §7- Use an ability");
@@ -116,16 +116,16 @@ public class VampireAbilityCommand implements CommandExecutor, TabCompleter {
 
     private void listAbilities(Player player) {
         if (!this.plugin.getVampireManager().isVampire(player)) {
-            player.sendMessage("§bYou must be a vampire to see abilities.");
+            player.sendMessage("§bYou must be a mimic to see alien abilities.");
         } else {
             List<VampireAbility> availableAbilities = this.abilityManager.getAvailableAbilities(player);
             int playerStage = this.plugin.getVampireManager().getVampireStage(player);
 
             if (availableAbilities.isEmpty()) {
-                player.sendMessage("§bNo abilities available for Stage " + playerStage + " vampires.");
+                player.sendMessage("§bNo abilities available for Stage " + playerStage + " Mimics.");
                 player.sendMessage("§7Use '/pow vability all' to see what abilities you could unlock.");
             } else {
-                player.sendMessage("§3§l=== YOUR VAMPIRE ABILITIES ===");
+                player.sendMessage("§3§l=== YOUR MIMIC ABILITIES ===");
                 player.sendMessage("§7Your Stage: §e" + playerStage);
                 BeaconSite suppressingBeacon = this.beaconManager.checkHolySuppression(player.getLocation());
 
@@ -146,10 +146,10 @@ public class VampireAbilityCommand implements CommandExecutor, TabCompleter {
 
     private void listAllAbilities(Player player) {
         if (!this.plugin.getVampireManager().isVampire(player)) {
-            player.sendMessage("§bYou must be a vampire to see abilities.");
+            player.sendMessage("§bYou must be a mimic to see alien abilities.");
 
         } else {
-            player.sendMessage("§3§l=== ALL VAMPIRE ABILITIES ===");
+            player.sendMessage("§3§l=== ALL MIMIC ABILITIES ===");
             player.sendMessage("§7Your Stage: §e" + this.plugin.getVampireManager().getVampireStage(player));
             BeaconSite suppressingBeacon = this.beaconManager.checkHolySuppression(player.getLocation());
 
@@ -177,7 +177,7 @@ public class VampireAbilityCommand implements CommandExecutor, TabCompleter {
         if (canUse && !suppressed) {
             if (ability.getName().equals("bat") && this.plugin.getBatTransformationManager().isInBatForm(player)) {
                 int remainingTime = this.plugin.getBatTransformationManager().getRemainingTime(player);
-                status = " §a(In Bat Form - " + VampireAbilityManager.formatTime((long)remainingTime) + " remaining)";
+                status = " §a(In your True Form - " + VampireAbilityManager.formatTime((long)remainingTime) + " remaining)";
 
             } else if (ability instanceof StormCallAbility) {
                 if (this.abilityManager.isOnGlobalCooldown(ability.getName())) {

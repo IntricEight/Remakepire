@@ -16,7 +16,7 @@ public class ToggleTurningCommand implements CommandExecutor {
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (sender instanceof Player player) {
             if (!this.plugin.getVampireManager().isVampire(player)) {
-                player.sendMessage("§cOnly vampires can use this command.");
+                player.sendMessage("§cOnly Mimics can use this command.");
                 return true;
 
             } else {

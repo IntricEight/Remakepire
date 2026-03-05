@@ -186,11 +186,11 @@ public class VampireAbilityManager {
 
     public boolean useAbility(Player player, String abilityName) {
         if (!this.vampireManager.isVampire(player)) {
-            player.sendMessage("§cOnly vampires can use abilities.");
+            player.sendMessage("§cOnly mimics can use alien abilities.");
             return false;
 
         } else if (player.getGameMode() == GameMode.SPECTATOR) {
-            player.sendMessage("§cYou cannot use vampire abilities while in spectator mode.");
+            player.sendMessage("§cYou cannot use alien abilities while in spectator mode.");
             return false;
 
         } else if (!this.sessionManager.isSessionActive()) {
@@ -235,7 +235,7 @@ public class VampireAbilityManager {
 
                             player.sendMessage("§c§l GLOBAL ABILITY COOLDOWN");
                             player.sendMessage("§c" + ability.getDisplayName() + " was recently used by " + data.lastUserName + ".");
-                            player.sendMessage("§cIt will be available to all vampires in " + formatTime(remainingSeconds) + ".");
+                            player.sendMessage("§cIt will be available to all Mimics in " + formatTime(remainingSeconds) + ".");
 
                             return false;
                         }

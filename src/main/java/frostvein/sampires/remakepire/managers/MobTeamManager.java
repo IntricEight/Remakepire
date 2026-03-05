@@ -10,6 +10,7 @@ import org.bukkit.entity.Skeleton;
 import org.bukkit.entity.Spider;
 import org.bukkit.entity.Witch;
 import org.bukkit.entity.Zombie;
+import org.bukkit.entity.Slime;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.scoreboard.Team;
@@ -18,7 +19,7 @@ import frostvein.sampires.remakepire.RemakepirePlugin;
 public class MobTeamManager {
     private final RemakepirePlugin plugin;
     private BukkitTask mobTeamTask;
-    private final List<Class<? extends Entity>> vampireMobTypes = Arrays.asList(Zombie.class, Skeleton.class, Creeper.class, Drowned.class, Husk.class, Spider.class, Witch.class);
+    private final List<Class<? extends Entity>> vampireMobTypes = Arrays.asList(Zombie.class, Skeleton.class, Creeper.class, Drowned.class, Husk.class, Spider.class, Witch.class, Slime.class);
     // Controls how frequently mobs are assigned to the vampire team
     private final long assignmentIntervals = 200L;
 

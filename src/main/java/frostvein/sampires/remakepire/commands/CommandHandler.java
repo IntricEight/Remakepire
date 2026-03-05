@@ -952,7 +952,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
 
     private boolean handleTurnCommand(CommandSender sender, Player target, String[] args) {
         if (!this.vampireManager.isHuman(target)) {
-            sender.sendMessage("§c" + target.getName() + " is not human. Only humans can be turned into vampires.");
+            sender.sendMessage("§c" + target.getName() + " is not human. Only humans can be turned into Mimics.");
             return true;
         } else {
             Player turner = null;
@@ -965,7 +965,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                 }
 
                 if (!this.vampireManager.isVampire(turner)) {
-                    sender.sendMessage("§c" + turner.getName() + " is not a vampire. Only vampires can turn humans.");
+                    sender.sendMessage("§c" + turner.getName() + " is not a Mimic. Only Mimics can turn humans.");
                     return true;
                 }
             }

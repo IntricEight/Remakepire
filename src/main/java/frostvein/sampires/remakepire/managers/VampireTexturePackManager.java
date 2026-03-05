@@ -34,23 +34,22 @@ public class VampireTexturePackManager {
     }
 
     public void applyVampireTexturePack(Player player, String reason) {
-        try {
-            byte[] sha1Bytes = hexStringToByteArray(VAMPIRE_TEXTURE_PACK_SHA1_STRING);
-            UUID packId = UUID.randomUUID();
-            player.addResourcePack(packId, VAMPIRE_TEXTURE_PACK_URL, sha1Bytes, VAMPIRE_TEXTURE_PACK_PROMPT, true);
+//        try {
+//            byte[] sha1Bytes = hexStringToByteArray(VAMPIRE_TEXTURE_PACK_SHA1_STRING);
+//            UUID packId = UUID.randomUUID();
+//            player.addResourcePack(packId, VAMPIRE_TEXTURE_PACK_URL, sha1Bytes, VAMPIRE_TEXTURE_PACK_PROMPT, true);
             this.playersWithVampireTexturePack.add(player.getUniqueId());
-            player.sendMessage("§7Applying vampire texture pack...");
-
-            this.plugin.getLogger().info("Sent vampire texture pack request to " + player.getName() + " - " + reason);
-            this.plugin.getLogger().info("Pack URL: https://download.mc-packs.net/pack/e139890dd34f56724efcd5becb476999651ca43c.zip");
-            this.plugin.getLogger().info("Pack SHA1: e139890dd34f56724efcd5becb476999651ca43c");
-
-        } catch (Exception e) {
-            this.plugin.getLogger().severe("Failed to apply vampire texture pack to " + player.getName() + ": " + e.getMessage());
-            e.printStackTrace();
-            player.sendMessage("§cFailed to apply texture pack. Check server logs for details.");
-        }
-
+//            player.sendMessage("§7Applying vampire texture pack...");
+//
+//            this.plugin.getLogger().info("Sent vampire texture pack request to " + player.getName() + " - " + reason);
+//            this.plugin.getLogger().info("Pack URL: https://download.mc-packs.net/pack/e139890dd34f56724efcd5becb476999651ca43c.zip");
+//            this.plugin.getLogger().info("Pack SHA1: e139890dd34f56724efcd5becb476999651ca43c");
+//
+//        } catch (Exception e) {
+//            this.plugin.getLogger().severe("Failed to apply vampire texture pack to " + player.getName() + ": " + e.getMessage());
+//            e.printStackTrace();
+//            player.sendMessage("§cFailed to apply texture pack. Check server logs for details.");
+//        }
     }
 
     public void applyVampireTexturePackDelayed(Player player, long delayTicks, String reason) {
@@ -126,7 +125,7 @@ public class VampireTexturePackManager {
     }
 
     public void manualApplication(Player player) {
-        this.applyVampireTexturePack(player, "admin command");
+//        this.applyVampireTexturePack(player, "admin command");
     }
 
     public void forceApplyVampireTexturePack(Player player, String reason) {

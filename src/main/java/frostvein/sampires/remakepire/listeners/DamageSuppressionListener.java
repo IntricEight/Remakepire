@@ -1,6 +1,7 @@
 package frostvein.sampires.remakepire.listeners;
 
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Slime;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -28,7 +29,12 @@ public class DamageSuppressionListener implements Listener {
             priority = EventPriority.HIGHEST
     )
     public void onEntityDamage(EntityDamageEvent event) {
-        if (event.getEntity() instanceof Player) {
+        // Cancel fall damage on the slime enemies
+        if (event.getEntity() instanceof Slime slime) {
+            if (event.getCause() == EntityDamageEvent.DamageCause.FALL) {
+                event.setCancelled(true);
+            }
+        } else if (event.getEntity() instanceof Player) {
             try {
                 int suppressionScore = this.plugin.getConfig().getInt("damage_suppression", 50);
 

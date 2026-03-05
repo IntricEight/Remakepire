@@ -49,7 +49,7 @@ public class VampireCureCommand implements CommandExecutor {
             return true;
 
         } else if (!this.vampireManager.isVampire(player)) {
-            player.sendMessage("§cOnly vampires can use this cure ritual.");
+            player.sendMessage("§cOnly Mimics can use this cure ritual.");
             return true;
 
         } else {
