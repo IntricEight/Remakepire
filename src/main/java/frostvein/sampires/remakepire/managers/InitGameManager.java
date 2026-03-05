@@ -666,7 +666,7 @@ public class InitGameManager {
                         player.sendTitle("§e§lHuman", "", 10, 100, 20);
                         player.sendMessage("");
                         player.sendMessage("§e§l========================================");
-                        player.sendMessage("§7Welcome to Frostvein. Survive, consecrate beacons, find tomes, and above all: Escape the blizzard.");
+                        player.sendMessage("§7Welcome to Oakhurst. Survive, consecrate beacons, find tomes, and above all: Fear the night.");
                         player.sendMessage("§e§l========================================");
                         player.sendMessage("");
                     }

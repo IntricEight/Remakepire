@@ -21,7 +21,7 @@ public class StormCallAbility extends VampireAbility {
     }
 
     public String getDescription() {
-        return "Summon dark clouds to shroud the world in snow for " + (int)(DURATION / 60) + " minutes. Only the most vampires can command the very skies.";
+        return "Summon dark clouds to shroud the world in rain for " + (int)(DURATION / 60) + " minutes. Only the most powerful vampires can command the very skies.";
     }
 
     public int getCooldownSeconds(RemakepirePlugin plugin) {
