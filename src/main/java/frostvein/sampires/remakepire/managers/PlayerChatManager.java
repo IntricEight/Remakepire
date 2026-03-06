@@ -28,14 +28,29 @@ public class PlayerChatManager implements Listener {
         this.plugin = plugin;
     }
 
+    /**
+     * Retrieve the held messages.
+     *
+     * @return A {@code Map} of messages the players have attempted to send.
+     */
     public Map<Player, String> getPendingMessages() {
         return this.pendingMessages;
     }
 
+    /**
+     * Remove the pending messages sent by the player.
+     *
+     * @param player the player who has sent messages.
+     */
     public void removePlayersPendingMessages(Player player) {
         this.pendingMessages.remove(player);
     }
 
+    /**
+     * Queue up messages sent until a player chooses to let them through.
+     *
+     * @param event a player sends a chat message.
+     */
     @EventHandler(
             ignoreCancelled = true
     )
@@ -56,6 +71,12 @@ public class PlayerChatManager implements Listener {
         }
     }
 
+    /**
+     * Warn the user about the risks of sending their message, but provide them with a prompt to send it through.
+     *
+     * @param player the player who sent the message.
+     * @param originalMessage the message the player was trying to send.
+     */
     private void sendPreventionMessage(Player player, String originalMessage) {
         String configMessage = this.plugin.getConfigManager().getFirstMessageBlockedMessage();
         String translatedMessage = ChatColor.translateAlternateColorCodes('&', configMessage);
@@ -78,6 +99,11 @@ public class PlayerChatManager implements Listener {
         }
     }
 
+    /**
+     * Release the message that had been held back.
+     *
+     * @param player the player attempting to send a message.
+     */
     public void handleSendPendingMessage(Player player) {
         String pendingMessage = this.pendingMessages.get(player);
 

@@ -33,10 +33,22 @@ public class PermadeathManager {
         this.migrateOldData();
     }
 
+    /**
+     * Retrieve the player's permadeath preference.
+     *
+     * @param player a player who could die.
+     * @return The player's active permadeath setting.
+     */
     public PermadeathMode getPermadeathMode(Player player) {
         return this.permadeathModes.getOrDefault(player.getUniqueId(), PermadeathManager.PermadeathMode.OFF);
     }
 
+    /**
+     * Set the player's permadeath preference.
+     *
+     * @param player the player whose preference is being updated.
+     * @param mode the new permadeath setting.
+     */
     public void setPermadeathMode(Player player, PermadeathMode mode) {
         UUID playerId = player.getUniqueId();
         this.permadeathModes.put(playerId, mode);
@@ -44,31 +56,59 @@ public class PermadeathManager {
         this.plugin.getLogger().info("Player " + player.getName() + " permadeath mode set to: " + String.valueOf(mode));
     }
 
+    /**
+     * Check if the player has turned on either active permadeath setting.
+     *
+     * @param player the player being checked.
+     * @return {@code true} if the player can permanently die before their lives are used up.
+     */
     public boolean hasPermadeathEnabled(Player player) {
         PermadeathMode mode = this.getPermadeathMode(player);
         return mode == PermadeathManager.PermadeathMode.ON || mode == PermadeathManager.PermadeathMode.ABSOLUTE;
     }
 
+    /**
+     * Check if the player has selected absolute permadeath, which does not require the vampire to attempt to turn them.
+     *
+     * @param player the player being checked.
+     * @return {@code true} if the player will permanently die whenever a vampire kills them.
+     */
     public boolean hasAbsolutePermadeathEnabled(Player player) {
         return this.getPermadeathMode(player) == PermadeathManager.PermadeathMode.ABSOLUTE;
     }
 
+    /**
+     * Remove the player's recorded permadeath preference.
+     *
+     * @param player the player being removed.
+     */
     public void removePlayer(Player player) {
         UUID playerId = player.getUniqueId();
         this.permadeathModes.remove(playerId);
         this.savePermadeathData();
     }
 
+    /**
+     * Retrieve how many players have permadeath on in some way.
+     *
+     * @return The number of players who can permanently die before their lives are used up.
+     */
     public int getPermadeathCount() {
         return (int)this.permadeathModes.values().stream().filter((mode) -> mode == PermadeathManager.PermadeathMode.ON || mode == PermadeathManager.PermadeathMode.ABSOLUTE).count();
     }
 
+    /**
+     * Clear all recorded permadeath preferences.
+     */
     public void clearAllPermadeathModes() {
         this.permadeathModes.clear();
         this.savePermadeathData();
         this.plugin.getLogger().info("PermadeathManager: Cleared all permadeath modes");
     }
 
+    /**
+     * Load the permadeath preferences in from the file.
+     */
     private void loadPermadeathData() {
         if (!this.dataFile.exists()) {
             this.plugin.getLogger().info("PermadeathManager: No existing permadeath data file found, starting fresh.");
@@ -97,6 +137,9 @@ public class PermadeathManager {
         }
     }
 
+    /**
+     * Migrate data in from the old permadeath files.
+     */
     private void migrateOldData() {
         File oldPermadeathFile = new File(this.plugin.getDataFolder(), "permadeath_preferences.json");
         File oldAbsoluteFile = new File(this.plugin.getDataFolder(), "absolute_permadeath_preferences.json");
@@ -177,6 +220,9 @@ public class PermadeathManager {
         }
     }
 
+    /**
+     * Save the current permadeath preferences before shutting down the manager.
+     */
     public void shutdown() {
         this.savePermadeathData();
         this.plugin.getLogger().info("PermadeathManager: Shutdown complete");

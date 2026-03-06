@@ -58,6 +58,9 @@ public class PassiveMobSpawningManager {
         }
     }
 
+    /**
+     * Prevent passive mobs from spawning within bodies of water, underground, or in the dead forest.
+     */
     private void initializeBiomeBlacklist() {
         this.blacklistedBiomes.add(Biome.OCEAN);
         this.blacklistedBiomes.add(Biome.DEEP_OCEAN);
@@ -85,6 +88,9 @@ public class PassiveMobSpawningManager {
         this.plugin.getLogger().info("PassiveMobSpawningManager: Blacklisted " + this.blacklistedBiomes.size() + " biomes");
     }
 
+    /**
+     * Attempt to spawn passive mobs in valid locations around the game map.
+     */
     public void spawnPassiveMobs() {
         World world = this.plugin.getWorld();
 
@@ -132,9 +138,16 @@ public class PassiveMobSpawningManager {
         }
     }
 
+    /**
+     * Collect a list of locations where passive mobs can spawn.
+     *
+     * @param world the world hosting the plugin interactions.
+     * @param loadedChunks the active chunks around the players.
+     * @return A {@code List} of up to 500 locations that passive mobs could spawn at.
+     */
     private List<Location> findValidSpawnLocations(World world, Chunk[] loadedChunks) {
         List<Location> validLocations = new ArrayList<>();
-        int maxLocationsToCheck = 500;
+        final int maxLocationsToCheck = 500;
         int locationsChecked = 0;
         List<Chunk> chunkList = Arrays.asList(loadedChunks);
         Collections.shuffle(chunkList, this.random);
@@ -163,10 +176,15 @@ public class PassiveMobSpawningManager {
         return validLocations;
     }
 
+    /**
+     * Determine if a location is a valid spawn point for a passive mob.
+     *
+     * @param location A location to check.
+     * @return {@code true} if the location and its biome are both valid.
+     */
     private boolean isValidSpawnLocation(Location location) {
-        Block blockBelow = location.getBlock().getRelative(0, -1, 0);
         Block blockAt = location.getBlock();
-        Block blockAbove = location.getBlock().getRelative(0, 1, 0);
+        Block blockBelow = blockAt.getRelative(0, -1, 0), blockAbove = blockAt.getRelative(0, 1, 0);
 
         if (blockBelow.getType() != Material.GRASS_BLOCK) {
             return false;
@@ -182,6 +200,11 @@ public class PassiveMobSpawningManager {
         }
     }
 
+    /**
+     * Choose a random mob from the mobTypeWeights list.
+     *
+     * @return The entity name of a random valid passive mob.
+     */
     private EntityType selectRandomMobType() {
         int roll = this.random.nextInt(100);
         int cumulative = 0;
@@ -197,23 +220,43 @@ public class PassiveMobSpawningManager {
         return EntityType.COW;
     }
 
+    /**
+     * Convert a location into a string of its coordinates
+     *
+     * @param location a location to convert
+     * @return The {@code String} of the location's coordinates.
+     */
     private String locationToString(Location location) {
         return String.format("(%d, %d, %d)", location.getBlockX(), location.getBlockY(), location.getBlockZ());
     }
 
+    /**
+     * Retrieve the maximum number of mobs the plugin will attempt to spawn.
+     *
+     * @return The number of mobs that will be spawned.
+     */
     public int getMobsPerCycle() {
         return this.configManager.getPassiveMobSpawnCount();
     }
 
+    /**
+     * Attempt to spawn passive mobs inside the border.
+     */
     public void triggerSpawning() {
         this.spawnPassiveMobs();
     }
 
+    /**
+     * Begin regularly checking each morning if there are enough passive mobs spawned in the game boundaries.
+     */
     private void startAutoSpawnTask() {
         this.autoSpawnTask = this.plugin.getServer().getScheduler().runTaskTimer(this.plugin, () -> this.checkAndSpawnIfNeeded(), 20L, 20L);
         this.plugin.getLogger().info("PassiveMobSpawningManager: Started automatic morning spawn task (checks every second)");
     }
 
+    /**
+     * Check if enough passive mobs are inside the loaded game chunks in the morning.
+     */
     private void checkAndSpawnIfNeeded() {
         World world = this.plugin.getWorld();
 
@@ -231,6 +274,7 @@ public class PassiveMobSpawningManager {
                     this.plugin.getLogger().info("PassiveMobSpawningManager: Animal count below threshold, spawning animals...");
                     this.spawnPassiveMobs();
                     this.lastDaySpawned = currentDay;
+
                 } else {
                     this.plugin.getLogger().info("PassiveMobSpawningManager: Animal count sufficient, skipping spawn");
                     this.lastDaySpawned = currentDay;
@@ -239,6 +283,12 @@ public class PassiveMobSpawningManager {
         }
     }
 
+    /**
+     * Count the number of passive mobs found within the loaded chunks.
+     *
+     * @param world the world hosting the plugin interactions.
+     * @return The number of passive mobs.
+     */
     private int countPassiveAnimalsInLoadedChunks(World world) {
         int count = 0;
         Chunk[] loadedChunks = world.getLoadedChunks();
@@ -246,6 +296,7 @@ public class PassiveMobSpawningManager {
         for(Chunk chunk : loadedChunks) {
             for(Entity entity : chunk.getEntities()) {
                 EntityType type = entity.getType();
+
                 if (type == EntityType.COW || type == EntityType.PIG || type == EntityType.SHEEP || type == EntityType.CHICKEN) {
                     ++count;
                 }
@@ -255,6 +306,9 @@ public class PassiveMobSpawningManager {
         return count;
     }
 
+    /**
+     * Stop checking and spawning passive animals before shutting down the manager.
+     */
     public void shutdown() {
         if (this.autoSpawnTask != null) {
             this.autoSpawnTask.cancel();
