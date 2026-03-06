@@ -115,7 +115,7 @@ public class CombatListener implements Listener {
                     if (this.vampireManager.isVampire(victim)) {
                         if (this.plugin.getBatTransformationManager().isInBatForm(victim)) {
                             this.plugin.getBatTransformationManager().transformToHuman(victim);
-                            victim.sendMessage("§cYou were hit and forced out of bat form.");
+                            victim.sendMessage("§cYou were hit and forced back into your disguise.");
 
                         } else if (victim.hasPotionEffect(PotionEffectType.INVISIBILITY)) {
                             if (this.vampireAbilityManager.trackInvisibilityAttack(victim)) {
