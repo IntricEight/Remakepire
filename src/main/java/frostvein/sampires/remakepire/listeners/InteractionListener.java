@@ -60,7 +60,7 @@ public class InteractionListener implements Listener {
         if (this.plugin.getVampireManager().isVampire(player)) {
             if (this.plugin.getBatTransformationManager().isInBatForm(player)) {
                 event.setCancelled(true);
-                player.sendMessage("§cYou cannot interact with anything while you are in your bat form.");
+//                player.sendMessage("§cYou cannot interact with anything while you are in your bat form.");
 
             } else if (itemInHand != null && itemInHand.getType() != Material.AIR && FEEDING_ITEMS.contains(itemInHand.getType())) {
                 if (!(targetEntity instanceof Player)) {
