@@ -67,6 +67,11 @@ public class SessionManager {
         this.startActionBarTask();
     }
 
+    /**
+     * Execute a plugin command through the console.
+     *
+     * @param command the command to execute.
+     */
     public void executeServerCommand(String command) {
         try {
             Bukkit.getScheduler().runTask(this.plugin, () -> {
@@ -78,14 +83,23 @@ public class SessionManager {
         }
     }
 
+    /**
+     * Freeze the game ticks.
+     */
     private void freezeTick() {
         this.executeServerCommand("tick freeze");
     }
 
+    /**
+     * Resume the game ticks.
+     */
     private void unfreezeTick() {
         this.executeServerCommand("tick unfreeze");
     }
 
+    /**
+     * Freeze the players' food levels while a session is inactive.
+     */
     private void startSaturationTask() {
         (new BukkitRunnable() {
             public void run() {
@@ -106,6 +120,9 @@ public class SessionManager {
         }).runTaskTimer(this.plugin, 0L, 80L);
     }
 
+    /**
+     * Continually display the current session status when the session is not in an active game.
+     */
     private void startActionBarTask() {
         (new BukkitRunnable() {
             public void run() {
@@ -116,6 +133,9 @@ public class SessionManager {
         }).runTaskTimer(this.plugin, 0L, 20L);
     }
 
+    /**
+     * Display the current session status when the session is not in an active game.
+     */
     private void updateActionBarForAllPlayers() {
         String message = this.getSessionStatusMessage();
 
@@ -124,6 +144,12 @@ public class SessionManager {
         }
     }
 
+    /**
+     * Update the words above the player's hotbar.
+     *
+     * @param player the player who is receiving the message.
+     * @param message the message to be placed above the hotbar.
+     */
     public void sendActionBar(Player player, String message) {
         try {
             player.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(message));
@@ -136,6 +162,11 @@ public class SessionManager {
         }
     }
 
+    /**
+     * Retrieve a status message from the current state of the session.
+     *
+     * @return A description of the session state.
+     */
     private String getSessionStatusMessage() {
         return switch (this.getSessionState()) {
             case BEFORE_SESSION -> "§e§lSession is primed and ready to start";
@@ -146,12 +177,18 @@ public class SessionManager {
         };
     }
 
+    /**
+     * Apply an extreme saturation effect to all players.
+     */
     private void applySaturationToAllPlayers() {
         for(Player player : Bukkit.getOnlinePlayers()) {
             player.addPotionEffect(new PotionEffect(PotionEffectType.SATURATION, 100, 100, false, false));
         }
     }
 
+    /**
+     * Fill the food and saturation bars of all players.
+     */
     private void setAllPlayersMaxFood() {
         for(Player player : Bukkit.getOnlinePlayers()) {
             player.setFoodLevel(20);
@@ -159,6 +196,9 @@ public class SessionManager {
         }
     }
 
+    /**
+     * Record the levels of the food and saturation bars for all players.
+     */
     private void capturePausedFoodLevels() {
         this.pausedFoodLevels.clear();
         this.pausedSaturationLevels.clear();
@@ -171,13 +211,16 @@ public class SessionManager {
         this.plugin.getLogger().info("Captured food levels for " + this.pausedFoodLevels.size() + " players when session was paused");
     }
 
+    /**
+     * Restore the food and saturation levels of all players to their last recorded values.
+     */
     private void restorePausedFoodLevels() {
         for(Player player : Bukkit.getOnlinePlayers()) {
             UUID playerId = player.getUniqueId();
 
             if (this.pausedFoodLevels.containsKey(playerId)) {
-                int pausedFood = (Integer)this.pausedFoodLevels.get(playerId);
-                float pausedSaturation = (Float)this.pausedSaturationLevels.get(playerId);
+                int pausedFood = this.pausedFoodLevels.get(playerId);
+                float pausedSaturation = this.pausedSaturationLevels.get(playerId);
                 player.setFoodLevel(pausedFood);
                 player.setSaturation(pausedSaturation);
             }
@@ -196,37 +239,77 @@ public class SessionManager {
         return this.gameIDObjective;
     }
 
+    /**
+     * Retrieve whether the first beacon of the game has been converted yet.
+     *
+     * @return {@code true} if the first beacon has been converted since the game was initialized.
+     */
     public boolean isFirstBeaconConvertedTriggered() {
         return this.plugin.getConfig().getBoolean("first_beacon_converted", false);
     }
 
+    /**
+     * Set whether the first beacon has been converted since the game was initialized.
+     *
+     * @param triggered {@code true} when the first beacon of the game has been converted.
+     */
     public void setFirstBeaconConvertedTriggered(boolean triggered) {
         this.plugin.getConfig().set("first_beacon_converted", triggered);
         this.plugin.saveConfig();
     }
 
+    /**
+     * Retrieve whether all of the beacons are holy aligned.
+     *
+     * @return {@code true} if the human team controls all beacons.
+     */
     public boolean areHumansOwningAllBeacons() {
         return this.plugin.getConfig().getBoolean("humans_own_all_beacons", false);
     }
 
+    /**
+     * Set whether the human team controls all beacons.
+     *
+     * @param active {@code true} if all of the beacons are holy aligned.
+     */
     public void setHumansOwningAllBeacons(boolean active) {
         this.plugin.getConfig().set("humans_own_all_beacons", active);
         this.plugin.saveConfig();
     }
 
+    /**
+     * Retrieve whether all of the beacons are darkness aligned.
+     *
+     * @return {@code true} if the vampire team controls all beacons.
+     */
     public boolean areVampiresOwningAllBeacons() {
         return this.plugin.getConfig().getBoolean("vampires_own_all_beacons", false);
     }
 
+    /**
+     * Set whether the vampire team controls all beacons.
+     *
+     * @param active {@code true} if all of the beacons are darkness aligned.
+     */
     public void setVampiresOwningAllBeacons(boolean active) {
         this.plugin.getConfig().set("vampires_own_all_beacons", active);
         this.plugin.saveConfig();
     }
 
+    /**
+     * Check if the holy control final stand is active.
+     *
+     * @return {@code true} if the human team controls all beacons.
+     */
     public boolean isHumansFinalStandActive() {
         return this.areHumansOwningAllBeacons();
     }
 
+    /**
+     * Set whether the holy control final stand is active.
+     *
+     * @param active {@code true} when the human team controls all beacons.
+     */
     public void setHumansFinalStandActive(boolean active) {
         this.setHumansOwningAllBeacons(active);
     }
