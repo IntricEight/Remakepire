@@ -104,7 +104,7 @@ public class WayOfTheLumberjackTomeAbility extends TomeAbility implements Listen
     /**
      * Convert a {@code Location} into a {@code String} format.
      *
-     * @param location the location to be converted.
+     * @param location a location to convert.
      * @return A {@code String} of the location's coordinates.
      */
     private String locationToString(Location location) {

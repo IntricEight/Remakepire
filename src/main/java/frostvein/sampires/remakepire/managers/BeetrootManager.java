@@ -111,12 +111,12 @@ public class BeetrootManager {
     private void saveTimerData() {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(this.beetrootFile))) {
             for(Map.Entry<UUID, Integer> entry : this.processingTimers.entrySet()) {
-                writer.write(((UUID)entry.getKey()).toString() + ":processing:" + String.valueOf(entry.getValue()));
+                writer.write((entry.getKey()).toString() + ":processing:" + String.valueOf(entry.getValue()));
                 writer.newLine();
             }
 
             for(Map.Entry<UUID, Integer> entry : this.immunityTimers.entrySet()) {
-                writer.write(((UUID)entry.getKey()).toString() + ":immunity:" + String.valueOf(entry.getValue()));
+                writer.write((entry.getKey()).toString() + ":immunity:" + String.valueOf(entry.getValue()));
                 writer.newLine();
             }
         } catch (IOException e) {
@@ -148,10 +148,10 @@ public class BeetrootManager {
         Set<UUID> processingToRemove = new HashSet<>();
 
         for(Map.Entry<UUID, Integer> entry : this.processingTimers.entrySet()) {
-            UUID playerId = (UUID)entry.getKey();
+            UUID playerId = entry.getKey();
 
             if (onlinePlayers.contains(playerId)) {
-                int timeLeft = (Integer)entry.getValue() - 1;
+                int timeLeft = entry.getValue() - 1;
 
                 if (timeLeft <= 0) {
                     processingToRemove.add(playerId);
@@ -173,10 +173,10 @@ public class BeetrootManager {
         Set<UUID> immunityToRemove = new HashSet<>();
 
         for(Map.Entry<UUID, Integer> entry : this.immunityTimers.entrySet()) {
-            UUID playerId = (UUID)entry.getKey();
+            UUID playerId = entry.getKey();
 
             if (onlinePlayers.contains(playerId)) {
-                int timeLeft = (Integer)entry.getValue() - 1;
+                int timeLeft = entry.getValue() - 1;
 
                 if (timeLeft <= 0) {
                     immunityToRemove.add(playerId);

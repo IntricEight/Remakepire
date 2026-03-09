@@ -1249,12 +1249,12 @@ public class BeaconManager {
                 this.plugin.getLogger().fine("Saving " + this.beacons.size() + " beacons to file...");
 
                 for(Map.Entry<String, BeaconSite> entry : this.beacons.entrySet()) {
-                    BeaconSite beacon = (BeaconSite)entry.getValue();
+                    BeaconSite beacon = entry.getValue();
 
                     if (beacon == null) {
-                        this.plugin.getLogger().severe("Found null beacon with key: " + (String)entry.getKey());
+                        this.plugin.getLogger().severe("Found null beacon with key: " + entry.getKey());
                     } else if (beacon.getName() == null || beacon.getWorldName() == null) {
-                        this.plugin.getLogger().severe("Found beacon with null fields: " + (String)entry.getKey());
+                        this.plugin.getLogger().severe("Found beacon with null fields: " + entry.getKey());
                     }
                 }
 
@@ -1428,14 +1428,14 @@ public class BeaconManager {
                         int validBeacons = 0, invalidBeacons = 0;
 
                         for(Map.Entry<String, BeaconSite> entry : loadedBeacons.entrySet()) {
-                            BeaconSite beacon = (BeaconSite)entry.getValue();
+                            BeaconSite beacon = entry.getValue();
                             if (beacon == null) {
-                                this.plugin.getLogger().warning("Beacon with key '" + (String)entry.getKey() + "' is null");
+                                this.plugin.getLogger().warning("Beacon with key '" + entry.getKey() + "' is null");
                                 ++invalidBeacons;
                             } else if (beacon.getName() != null && beacon.getWorldName() != null) {
                                 ++validBeacons;
                             } else {
-                                this.plugin.getLogger().warning("Beacon '" + (String)entry.getKey() + "' has null fields");
+                                this.plugin.getLogger().warning("Beacon '" + entry.getKey() + "' has null fields");
                                 ++invalidBeacons;
                             }
                         }
@@ -1547,8 +1547,8 @@ public class BeaconManager {
         List<String> invalidBeacons = new ArrayList<>();
 
         for(Map.Entry<String, BeaconSite> entry : this.beacons.entrySet()) {
-            if (((BeaconSite)entry.getValue()).getLocation() == null) {
-                invalidBeacons.add((String)entry.getKey());
+            if ((entry.getValue()).getLocation() == null) {
+                invalidBeacons.add(entry.getKey());
             }
         }
 

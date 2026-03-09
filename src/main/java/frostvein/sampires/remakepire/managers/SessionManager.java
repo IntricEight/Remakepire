@@ -249,7 +249,7 @@ public class SessionManager {
     }
 
     /**
-     * Set whether the first beacon has been converted since the game was initialized.
+     * Update the config on whether the first beacon has been converted since the game was initialized.
      *
      * @param triggered {@code true} when the first beacon of the game has been converted.
      */
@@ -268,7 +268,7 @@ public class SessionManager {
     }
 
     /**
-     * Set whether the human team controls all beacons.
+     * Update the config on whether the human team controls all beacons.
      *
      * @param active {@code true} if all of the beacons are holy aligned.
      */
@@ -287,7 +287,7 @@ public class SessionManager {
     }
 
     /**
-     * Set whether the vampire team controls all beacons.
+     * Update the config on whether the vampire team controls all beacons.
      *
      * @param active {@code true} if all of the beacons are darkness aligned.
      */
@@ -314,32 +314,65 @@ public class SessionManager {
         this.setHumansOwningAllBeacons(active);
     }
 
+    /**
+     * Retrieve whether there is a single human remaining in the game.
+     *
+     * @return {@code true} if only one human remains alive.
+     */
     public boolean isOneHumanLeftActive() {
         return this.plugin.getConfig().getBoolean("one_human_left", false);
     }
 
+    /**
+     * Update the config on whether only one human remains alive.
+     *
+     * @param active {@code true} if there is a single human remaining in the game.
+     */
     public void setOneHumanLeftActive(boolean active) {
         this.plugin.getConfig().set("one_human_left", active);
         this.plugin.saveConfig();
     }
 
+    /**
+     * Check if the darkness control final stand is active.
+     *
+     * @return {@code true} if the vampire team controls all beacons.
+     */
     public boolean isVampiresEternalNightActive() {
         return this.areVampiresOwningAllBeacons();
     }
 
+    /**
+     * Set whether the darkness control final stand is active.
+     *
+     * @param active {@code true} when the vampire team controls all beacons.
+     */
     public void setVampiresEternalNightActive(boolean active) {
         this.setVampiresOwningAllBeacons(active);
     }
 
+    /**
+     * Retrieve the speed at which vampires regenerate health.
+     *
+     * @return The number of ticks it takes for each health point regeneration.
+     */
     public int getVampireHealthCheckTicks() {
         return this.plugin.getConfig().getInt("vampire_health_check_ticks", 9);
     }
 
+    /**
+     * Update the config on how quickly vampires regenerate health.
+     *
+     * @param ticks the number of ticks between each health point recovery.
+     */
     public void setVampireHealthCheckTicks(int ticks) {
         this.plugin.getConfig().set("vampire_health_check_ticks", Math.max(1, ticks));
         this.plugin.saveConfig();
     }
 
+    /**
+     *
+     */
     public void incrementSessionID() {
         this.sessionIDObjective.getScore("session_id_holder").setScore(this.sessionIDObjective.getScore("session_id_holder").getScore() + 1);
         this.updateAllPlayersSessionIDs();
@@ -391,10 +424,18 @@ public class SessionManager {
         return this.trackingSessionTime && this.isSessionActive() ? this.totalSessionTime + (System.currentTimeMillis() - this.currentPhaseStartTime) : this.totalSessionTime;
     }
 
+    /**
+     * Convert the sesion time into seconds.
+     *
+     * @return A whole number of seconds.
+     */
     public long getSessionTimeSeconds() {
         return this.getSessionTime() / 1000L;
     }
 
+    /**
+     * Begin tracking the system time.
+     */
     private void startTrackingSessionTime() {
         if (!this.trackingSessionTime) {
             this.currentPhaseStartTime = System.currentTimeMillis();
@@ -403,6 +444,9 @@ public class SessionManager {
         }
     }
 
+    /**
+     * Stop tracking the system time and record the time since the current game phase began.
+     */
     private void stopTrackingSessionTime() {
         if (this.trackingSessionTime) {
             long phaseTime = System.currentTimeMillis() - this.currentPhaseStartTime;
@@ -430,6 +474,9 @@ public class SessionManager {
         this.plugin.getLogger().info("Updated game IDs for all online players to: " + game_id);
     }
 
+    /**
+     * Begin a new session and reset the multitude of timers and cooldowns.
+     */
     public void startSession() {
         Score sessionScore = this.sessionObjective.getScore("state");
         sessionScore.setScore(IN_SESSION);
@@ -453,6 +500,9 @@ public class SessionManager {
         this.broadcastMessage("§a§lSESSION STARTED! §aThe SMP session has begun. Good luck!");
     }
 
+    /**
+     * Resume the current Vampires game session.
+     */
     public void resumeSession() {
         Score sessionScore = this.sessionObjective.getScore("state");
         sessionScore.setScore(IN_SESSION);
@@ -464,6 +514,9 @@ public class SessionManager {
         this.broadcastMessage("§a§lSESSION RESUMED! §aThe SMP session has been resumed.");
     }
 
+    /**
+     * Freeze the current Vampires game session.
+     */
     public void pauseSession() {
         this.capturePausedFoodLevels();
         this.stopTrackingSessionTime();
@@ -475,6 +528,9 @@ public class SessionManager {
         this.broadcastMessage("§e§lSESSION PAUSED! §eThe session has been temporarily paused.");
     }
 
+    /**
+     * End the current Vampires game session.
+     */
     public void endSession() {
         this.stopTrackingSessionTime();
         Score sessionScore = this.sessionObjective.getScore("state");
@@ -487,6 +543,9 @@ public class SessionManager {
         this.broadcastMessage("§c§lSESSION ENDED! §cThe SMP session has concluded. See you next time!");
     }
 
+    /**
+     * Prime the Vampires game to begin a new session.
+     */
     public void primeNewSession() {
         Score sessionScore = this.sessionObjective.getScore("state");
         sessionScore.setScore(BEFORE_SESSION);
@@ -506,6 +565,9 @@ public class SessionManager {
         this.broadcastMessage("§c§lSESSION PRIMED! §cThe SMP session state has been primed for the next session!");
     }
 
+    /**
+     * Set the new Vampires game session into build mode before the proper session start.
+     */
     public void preStartSession() {
         Score sessionScore = this.sessionObjective.getScore("state");
         sessionScore.setScore(PRE_SESSION);
@@ -514,6 +576,9 @@ public class SessionManager {
         this.broadcastMessage("§b§lBUILDING MODE ENABLED! §bInteractions are now enabled. Use '/pow admin session start' to begin the full session.");
     }
 
+    /**
+     * Skip the world's daylight cycle to the next morning.
+     */
     private void setTimeToNextMorning() {
         World world = this.plugin.getWorld();
         long currentTime = world.getTime();
@@ -529,6 +594,9 @@ public class SessionManager {
         }
     }
 
+    /**
+     * Set the Minecraft gamerules of the session.
+     */
     private void setInSessionRules() {
         World world = this.plugin.getWorld();
 
@@ -545,6 +613,9 @@ public class SessionManager {
         world.setGameRule(GameRule.DO_IMMEDIATE_RESPAWN, true);
     }
 
+    /**
+     * Turn off the Minecraft gamerules of the session.
+     */
     private void setOutOfSessionRules() {
         World world = this.plugin.getWorld();
 
@@ -561,12 +632,20 @@ public class SessionManager {
         world.setGameRule(GameRule.DO_IMMEDIATE_RESPAWN, false);
     }
 
+    /**
+     * Reset the tags of all online players.
+     */
     private void resetPlayers() {
         for(Player player : Bukkit.getOnlinePlayers()) {
             this.resetPlayer(player);
         }
     }
 
+    /**
+     * Reset the health and tags of the player.
+     *
+     * @param player the player being reset.
+     */
     public void resetPlayer(Player player) {
         if (player.getGameMode() == GameMode.SPECTATOR) {
             player.setGameMode(GameMode.SURVIVAL);
@@ -600,19 +679,39 @@ public class SessionManager {
         }
     }
 
+    /**
+     * Check if the session is currently active.
+     *
+     * @return {@code true} if the game state is IN_SESSION.
+     */
     public boolean isSessionActive() {
         return this.getSessionState() == IN_SESSION;
     }
 
+    /**
+     * Check if the session is in an inactive state.
+     *
+     * @return {@code true} if the game state is BEFORE_SESSION, PAUSED, or AFTER_SESSION.
+     */
     public boolean isOutOfSession() {
         int state = this.getSessionState();
         return state == BEFORE_SESSION || state == PAUSED || state == AFTER_SESSION;
     }
 
+    /**
+     * Check if the session is primed for starting.
+     *
+     * @return {@code true} if the game state is PRE_SESSION.
+     */
     public boolean isPreSession() {
         return this.getSessionState() == PRE_SESSION;
     }
 
+    /**
+     * Broadcast the provided message to the server.
+     *
+     * @param message the message to broadcast.
+     */
     private void broadcastMessage(String message) {
         Bukkit.broadcastMessage(message);
     }

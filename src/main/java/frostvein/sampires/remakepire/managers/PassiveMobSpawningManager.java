@@ -210,10 +210,10 @@ public class PassiveMobSpawningManager {
         int cumulative = 0;
 
         for(Map.Entry<EntityType, Integer> entry : this.mobTypeWeights.entrySet()) {
-            cumulative += (Integer)entry.getValue();
+            cumulative += entry.getValue();
 
             if (roll < cumulative) {
-                return (EntityType)entry.getKey();
+                return entry.getKey();
             }
         }
 
@@ -221,9 +221,9 @@ public class PassiveMobSpawningManager {
     }
 
     /**
-     * Convert a location into a string of its coordinates
+     * Convert a {@code Location} into a {@code String} format.
      *
-     * @param location a location to convert
+     * @param location a location to convert.
      * @return The {@code String} of the location's coordinates.
      */
     private String locationToString(Location location) {

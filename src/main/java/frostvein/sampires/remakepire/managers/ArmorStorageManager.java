@@ -65,6 +65,13 @@ public class ArmorStorageManager {
 
     }
 
+    /**
+     *
+     *
+     * @param playerId
+     * @param player
+     * @return
+     */
     public boolean storeAndClearPlayerArmor(UUID playerId, Player player) {
         try {
             ItemStack[] currentArmor = player.getInventory().getArmorContents();
@@ -142,6 +149,9 @@ public class ArmorStorageManager {
         }
     }
 
+    /**
+     * Save the armor of any active bat players into the file.
+     */
     private void saveArmorData() {
         try {
             if (this.storageFile.exists() && this.storageFile.length() > 0L) {
@@ -155,7 +165,7 @@ public class ArmorStorageManager {
             Map<String, StoredArmor> dataToSave = new HashMap<>();
 
             for(Map.Entry<UUID, StoredArmor> entry : this.armorCache.entrySet()) {
-                dataToSave.put(((UUID)entry.getKey()).toString(), (StoredArmor)entry.getValue());
+                dataToSave.put((entry.getKey()).toString(), entry.getValue());
             }
 
             try (FileWriter writer = new FileWriter(this.storageFile)) {
@@ -176,7 +186,7 @@ public class ArmorStorageManager {
         long maxAge = 604800000L;
 
         this.armorCache.entrySet().removeIf((entry) -> {
-            boolean expired = currentTime - ((StoredArmor)entry.getValue()).timestamp > maxAge;
+            boolean expired = currentTime - (entry.getValue()).timestamp > maxAge;
             if (expired) {
                 this.plugin.getLogger().info("ArmorStorageManager: Removed expired armor storage for player " + String.valueOf(entry.getKey()));
             }

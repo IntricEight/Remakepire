@@ -32,16 +32,16 @@ public class VampireManager {
     private BukkitTask levelValidationTask;
     private final Map<UUID, Long> levelChangeInProgress = new HashMap<>();
     private final Map<UUID, Long> lastLevelChange = new HashMap<>();
+    private final Map<UUID, Double> lungingPlayers = new HashMap<>();
+    private final Map<UUID, Long> lungeTimestamps = new HashMap<>();
+    private final Map<UUID, Integer> stageCaps = new HashMap<>();
     private static final long LEVEL_CHANGE_COOLDOWN = 5000L;
     private static final long LEVEL_CHANGE_TIMEOUT = 10000L;
-    private final Map<UUID, Integer> stageCaps = new HashMap<>();
     public static final String HUMAN_TAG = "human";
     public static final String VAMPIRE_STAGE1_TAG = "vampire_stage1";
     public static final String VAMPIRE_STAGE2_TAG = "vampire_stage2";
     public static final String VAMPIRE_STAGE3_TAG = "vampire_stage3";
     public static final String PROMOTION_BAN_TAG = "promotion_ban";
-    private final Map<UUID, Double> lungingPlayers = new HashMap<>();
-    private final Map<UUID, Long> lungeTimestamps = new HashMap<>();
     private static final long PROTECTION_DURATION = 10000L;
     private final NamespacedKey SUN_WEAKNESS_SPEED_KEY;
     private final NamespacedKey VAMPIRE_SAFE_FALL_KEY;
@@ -59,6 +59,11 @@ public class VampireManager {
         this.VAMPIRE_SAFE_FALL_KEY = new NamespacedKey(plugin, "vampire_safe_fall");
     }
 
+    /**
+     *
+     *
+     * @param player
+     */
     public void addFallProtection(Player player) {
         this.lungingPlayers.put(player.getUniqueId(), player.getLocation().getY() - 5.0);
         this.lungeTimestamps.put(player.getUniqueId(), System.currentTimeMillis());
@@ -150,26 +155,6 @@ public class VampireManager {
     }
 
     private void removeVampireAttributeModifiers(Player player) {
-
-        // TODO: Decompilation Fixing, remove comments once success is confirmed
-
-//        AttributeInstance safeFallAttr;
-//        AttributeInstance speedAttr = player.getAttribute(Attribute.MOVEMENT_SPEED);
-//
-//        UUID sunWeaknessSpeedUUID = UUID.fromString("b8c2a3d4-5e6f-7890-a1b2-c3d4e5f67890");
-//        UUID vampireSafeFallUUID = UUID.fromString("c9d1e2f3-6a7b-8901-2345-6789abcdef01");
-//
-//        if (speedAttr != null) {
-//            speedAttr.getModifiers().stream().filter(modifier -> modifier.getUniqueId().equals(sunWeaknessSpeedUUID)).forEach(arg_0 -> ((AttributeInstance)speedAttr).removeModifier(arg_0));
-//        }
-//
-//        if ((safeFallAttr = player.getAttribute(Attribute.SAFE_FALL_DISTANCE)) != null) {
-//            safeFallAttr.getModifiers().stream().filter(modifier -> modifier.getUniqueId().equals(vampireSafeFallUUID)).forEach(arg_0 -> ((AttributeInstance)safeFallAttr).removeModifier(arg_0));
-//        }
-
-//        final NamespacedKey SUN_WEAKNESS_SPEED_KEY = new NamespacedKey(plugin, "sun_weakness_speed");
-//        final NamespacedKey VAMPIRE_SAFE_FALL_KEY = new NamespacedKey(plugin, "vampire_safe_fall");
-
         AttributeInstance speedAttr = player.getAttribute(Attribute.MOVEMENT_SPEED);
         if (speedAttr != null) {
             speedAttr.getModifiers().stream().filter(modifier -> SUN_WEAKNESS_SPEED_KEY.equals(modifier.getKey()))
@@ -203,7 +188,6 @@ public class VampireManager {
             this.plugin.getLogger().severe("Failed to add player " + player.getName() + " to CastTeam: " + e.getMessage());
             e.printStackTrace();
         }
-
     }
 
     public void setPlayerAsVampire(Player player, int stage) {
@@ -212,6 +196,7 @@ public class VampireManager {
 
     public void setPlayerAsVampire(Player player, int stage, boolean adminOverride) {
         UUID playerId = player.getUniqueId();
+
         if (!adminOverride && this.hasPromotionBan(player) && stage > 1) {
             stage = 1;
         }

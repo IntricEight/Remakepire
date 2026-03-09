@@ -120,12 +120,12 @@ public class PermadeathManager {
                 if (rawData != null) {
                     for(Map.Entry<String, String> entry : rawData.entrySet()) {
                         try {
-                            UUID playerId = UUID.fromString((String)entry.getKey());
-                            PermadeathMode mode = PermadeathManager.PermadeathMode.valueOf((String)entry.getValue());
+                            UUID playerId = UUID.fromString(entry.getKey());
+                            PermadeathMode mode = PermadeathManager.PermadeathMode.valueOf(entry.getValue());
                             this.permadeathModes.put(playerId, mode);
 
                         } catch (IllegalArgumentException e) {
-                            this.plugin.getLogger().warning("PermadeathManager: Invalid data in file: " + (String)entry.getKey() + " = " + (String)entry.getValue());
+                            this.plugin.getLogger().warning("PermadeathManager: Invalid data in file: " + entry.getKey() + " = " + entry.getValue());
                         }
                     }
 
@@ -154,7 +154,7 @@ public class PermadeathManager {
                 if (oldData != null) {
                     for(Map.Entry<String, Boolean> entry : oldData.entrySet()) {
                         try {
-                            UUID playerId = UUID.fromString((String)entry.getKey());
+                            UUID playerId = UUID.fromString(entry.getKey());
 
                             if (entry.getValue() && !this.permadeathModes.containsKey(playerId)) {
                                 this.permadeathModes.put(playerId, PermadeathManager.PermadeathMode.ON);
@@ -177,7 +177,7 @@ public class PermadeathManager {
                 if (oldData != null) {
                     for(Map.Entry<String, Boolean> entry : oldData.entrySet()) {
                         try {
-                            UUID playerId = UUID.fromString((String)entry.getKey());
+                            UUID playerId = UUID.fromString(entry.getKey());
                             if (entry.getValue()) {
                                 this.permadeathModes.put(playerId, PermadeathManager.PermadeathMode.ABSOLUTE);
                             }
@@ -198,7 +198,7 @@ public class PermadeathManager {
     }
 
     /**
-     * Save the playerbase's permadeath preferences inside a file.
+     * Save the playerbase's permadeath preferences into the file.
      */
     private void savePermadeathData() {
         try {
@@ -209,7 +209,7 @@ public class PermadeathManager {
             Map<String, String> rawData = new HashMap<>();
 
             for(Map.Entry<UUID, PermadeathMode> entry : this.permadeathModes.entrySet()) {
-                rawData.put(((UUID)entry.getKey()).toString(), ((PermadeathMode)entry.getValue()).name());
+                rawData.put((entry.getKey()).toString(), (entry.getValue()).name());
             }
 
             try (FileWriter writer = new FileWriter(this.dataFile)) {

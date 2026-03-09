@@ -27,7 +27,7 @@ public class TomeDistributionManager {
     private int distributionCount = 4;
     private List<Location> tomeLocations = new ArrayList<>();
     private final String[] tomeTypes = new String[]{"BanishUndead", "Blessing", "EnlightenedEye", "HolyWord", "LanternThrash", "PrayerOfFaith", "RallyingCry", "ShoulderBarge", "TurnUndead", "UncannyDirection", "UnnaturalHaste", "WayOfTheLand", "WayOfTheLumberjack", "WayOfTheProspector"};
-    private final Enchantment[] enchantmentTypes;
+    private final Enchantment[] enchantmentTypes = new Enchantment[]{Enchantment.EFFICIENCY, Enchantment.PROTECTION, Enchantment.FEATHER_FALLING, Enchantment.KNOCKBACK, Enchantment.SWEEPING_EDGE};
 
     /**
      * Create an instance of the Armor Storage manager.
@@ -37,13 +37,15 @@ public class TomeDistributionManager {
      */
     public TomeDistributionManager(RemakepirePlugin plugin, ConfigManager configManager) {
         this.plugin = plugin;
-        this.enchantmentTypes = new Enchantment[]{Enchantment.EFFICIENCY, Enchantment.PROTECTION, Enchantment.FEATHER_FALLING, Enchantment.KNOCKBACK, Enchantment.SWEEPING_EDGE};
         this.configManager = configManager;
         this.random = new Random();
         this.initializeTomeLocations();
         this.startDistributionTask();
     }
 
+    /**
+     * Load the list of tome chest locations in from the config.
+     */
     private void initializeTomeLocations() {
         this.tomeLocations = this.configManager.getTomeChestLocations();
 
@@ -54,11 +56,17 @@ public class TomeDistributionManager {
         }
     }
 
+    /**
+     * Begin distributing tomes to the chest locations each time a full day passes.
+     */
     private void startDistributionTask() {
         this.distributionTask = Bukkit.getScheduler().runTaskTimer(this.plugin, this::distributeTomes, 0L, 24000L);
         this.plugin.getLogger().info("TomeDistributionManager: Started daily tome distribution task");
     }
 
+    /**
+     * Distribute a random (weighted) tome, cure, or enchanted book to each tome location.
+     */
     public void distributeTomes() {
         if (this.tomeLocations.isEmpty()) {
             this.plugin.getLogger().warning("TomeDistributionManager: No tome locations available for distribution");
@@ -92,9 +100,13 @@ public class TomeDistributionManager {
         }
     }
 
+    /**
+     * Clear the contents of all tome chests.
+     */
     private void clearAllTomeChests() {
         for(Location location : this.tomeLocations) {
             Block block = location.getBlock();
+
             if (block.getType() == Material.CHEST) {
                 Chest chest = (Chest)block.getState();
                 chest.getInventory().clear();
@@ -102,6 +114,11 @@ public class TomeDistributionManager {
         }
     }
 
+    /**
+     * Shuffle the tome chest locations and trim the list down to the distribution count.
+     *
+     * @return A {@code List} of {@code distributionCount} tome chest locations.
+     */
     private List<Location> selectRandomLocations() {
         List<Location> availableLocations = new ArrayList<>(this.tomeLocations);
         Collections.shuffle(availableLocations, this.random);
@@ -109,10 +126,21 @@ public class TomeDistributionManager {
         return availableLocations.subList(0, locationsToSelect);
     }
 
+    /**
+     * Retrieve a random tome ability from the list of abilities.
+     *
+     * @return The name of a tome ability.
+     */
     private String getRandomTomeType() {
         return this.tomeTypes[this.random.nextInt(this.tomeTypes.length)];
     }
 
+    /**
+     * Add the tome ability book to the tome chest.
+     *
+     * @param location the tome chest location.
+     * @param tomeType the tome ability name.
+     */
     private void distributeTomeToLocation(Location location, String tomeType) {
         Block block = location.getBlock();
         if (block.getType() != Material.CHEST) {
@@ -121,12 +149,17 @@ public class TomeDistributionManager {
         }
 
         Chest chest = (Chest)block.getState();
-        ItemStack tome = this.createTomeItem(tomeType);
-        Inventory chestInventory = chest.getInventory();
-        chestInventory.addItem(new ItemStack[]{tome});
+        chest.getInventory().addItem(this.createTomeItem(tomeType));
+
         this.plugin.getLogger().info("TomeDistributionManager: Added " + tomeType + " tome to chest at " + this.locationToString(location));
     }
 
+    /**
+     * Create the tome ability book for the tome ability.
+     *
+     * @param tomeType the tome ability name.
+     * @return A book that will grant a human player the tome ability when used.
+     */
     private ItemStack createTomeItem(String tomeType) {
         ItemStack tome = new ItemStack(Material.WRITTEN_BOOK);
         BookMeta bookMeta = (BookMeta)tome.getItemMeta();
@@ -173,6 +206,11 @@ public class TomeDistributionManager {
         return tome;
     }
 
+    /**
+     * Retrieve a random enchantment book from the list of valid enchantments.
+     *
+     * @return An enchanted book.
+     */
     private ItemStack createRandomEnchantmentBook() {
         ItemStack enchantedBook = new ItemStack(Material.ENCHANTED_BOOK);
         EnchantmentStorageMeta meta = (EnchantmentStorageMeta)enchantedBook.getItemMeta();
@@ -187,6 +225,11 @@ public class TomeDistributionManager {
         return enchantedBook;
     }
 
+    /**
+     * Add a random enchantment book to the tome chest.
+     *
+     * @param location the tome chest location.
+     */
     private void addEnchantmentBookToLocation(Location location) {
         Block block = location.getBlock();
 
@@ -196,12 +239,16 @@ public class TomeDistributionManager {
         }
 
         Chest chest = (Chest)block.getState();
-        ItemStack enchantmentBook = this.createRandomEnchantmentBook();
-        Inventory chestInventory = chest.getInventory();
-        chestInventory.addItem(enchantmentBook);
+        chest.getInventory().addItem(this.createRandomEnchantmentBook());
+
         this.plugin.getLogger().info("TomeDistributionManager: Added enchantment book to chest at " + this.locationToString(location));
     }
 
+    /**
+     * Replace the tome chest's content with one of the cure books.
+     *
+     * @param location the tome chest location.
+     */
     private void replaceCureBookAtLocation(Location location) {
         Block block = location.getBlock();
 
@@ -215,12 +262,17 @@ public class TomeDistributionManager {
         chestInventory.clear();
         ItemStack cureBook = this.createRandomCureBook();
         chestInventory.addItem(cureBook);
+
         this.plugin.getLogger().info("TomeDistributionManager: Replaced chest contents with cure book (" + cureBook.getItemMeta().getDisplayName() + ") at " + this.locationToString(location));
     }
 
+    /**
+     * Create one of the three basic cure books.
+     *
+     * @return The cure book 1/3, 2/3, or 3/3.
+     */
     private ItemStack createRandomCureBook() {
-        int bookChoice = this.random.nextInt(3);
-        int bookNumber = bookChoice + 1;
+        int bookChoice = this.random.nextInt(3), bookNumber = bookChoice + 1;
         ItemStack book = new ItemStack(Material.WRITTEN_BOOK);
         BookMeta bookMeta = (BookMeta)book.getItemMeta();
 
@@ -256,19 +308,41 @@ public class TomeDistributionManager {
         return book;
     }
 
+    /**
+     * Convert a {@code Location} into a {@code String} format.
+     *
+     * @param location a location to convert.
+     * @return A {@code String} of the location's coordinates.
+     */
     private String locationToString(Location location) {
         return String.format("(%d, %d, %d)", location.getBlockX(), location.getBlockY(), location.getBlockZ());
     }
 
+    /**
+     * Retrieve the number of tome ability books that will be spawned.
+     *
+     * @return The number of tome chests to fill with ability books.
+     */
     public int getDistributionCount() {
         return this.distributionCount;
     }
 
+    /**
+     * Set the number of tome chests to fill with ability books.
+     *
+     * @param count the number of tome ability books to spawn in the tome chests.
+     */
     public void setDistributionCount(int count) {
         this.distributionCount = Math.max(1, Math.min(count, this.tomeLocations.size()));
         this.plugin.getLogger().info("TomeDistributionManager: Distribution count set to " + this.distributionCount);
     }
 
+    /**
+     * Add a new tome chest.
+     *
+     * @param location the new tome chest's location.
+     * @return {@code true} if the new tome chest was successfully added.
+     */
     public boolean addTomeLocation(Location location) {
         if (this.configManager.addTomeChestLocation(location)) {
             this.tomeLocations = this.configManager.getTomeChestLocations();
@@ -281,6 +355,12 @@ public class TomeDistributionManager {
         }
     }
 
+    /**
+     * Remove a tome chest.
+     *
+     * @param location the tome chest's location.
+     * @return {@code true} if the tome chest was successfully removed.
+     */
     public boolean removeTomeLocation(Location location) {
         if (this.configManager.removeTomeChestLocation(location)) {
             this.tomeLocations = this.configManager.getTomeChestLocations();
@@ -293,10 +373,18 @@ public class TomeDistributionManager {
         }
     }
 
+    /**
+     * Retrieve the tome chest locations.
+     *
+     * @return A {@code List} of locations.
+     */
     public List<Location> getTomeLocations() {
         return new ArrayList<>(this.tomeLocations);
     }
 
+    /**
+     * Generate the tome, enchantment, and cure books into the tome chests.
+     */
     public void triggerDistribution() {
         this.distributeTomes();
     }

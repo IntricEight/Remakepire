@@ -57,7 +57,7 @@ public class PrayerOfFaithTomeAbility extends TomeAbility {
      * @param player the player who cast the ability.
      */
     public static void cancelPrayer(Player player) {
-        PrayerSession session = (PrayerSession)activePrayers.remove(player.getUniqueId());
+        PrayerSession session = activePrayers.remove(player.getUniqueId());
 
         if (session != null) {
             session.cancel();

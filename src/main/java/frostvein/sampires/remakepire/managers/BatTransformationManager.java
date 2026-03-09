@@ -103,8 +103,8 @@ public class BatTransformationManager {
 
         while(iterator.hasNext()) {
             Map.Entry<UUID, BatData> entry = (Map.Entry)iterator.next();
-            UUID playerId = (UUID)entry.getKey();
-            BatData batData = (BatData)entry.getValue();
+            UUID playerId = entry.getKey();
+            BatData batData = entry.getValue();
 
             if (batData.isExpired()) {
                 Player player = Bukkit.getPlayer(playerId);
@@ -128,8 +128,8 @@ public class BatTransformationManager {
      */
     private void updateBatActionBars() {
         for(Map.Entry<UUID, BatData> entry : this.activeBats.entrySet()) {
-            UUID playerId = (UUID)entry.getKey();
-            BatData batData = (BatData)entry.getValue();
+            UUID playerId = entry.getKey();
+            BatData batData = entry.getValue();
             Player player = Bukkit.getPlayer(playerId);
 
             if (player != null && player.isOnline()) {
@@ -149,8 +149,8 @@ public class BatTransformationManager {
 
         while(iterator.hasNext()) {
             Map.Entry<UUID, BatData> entry = (Map.Entry)iterator.next();
-            UUID playerId = (UUID)entry.getKey();
-            BatData batData = (BatData)entry.getValue();
+            UUID playerId = entry.getKey();
+            BatData batData = entry.getValue();
 
             if (batData.batEntity != null && !batData.batEntity.isValid()) {
                 Player player = Bukkit.getPlayer(playerId);
@@ -523,13 +523,13 @@ public class BatTransformationManager {
     }
 
     /**
-     * Save the list of active bat forms within the file.
+     * Save the list of active bat forms into the file.
      */
     private void saveBatStates() {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(this.batStateFile))) {
             for(Map.Entry<UUID, BatData> entry : this.activeBats.entrySet()) {
-                UUID playerId = (UUID)entry.getKey();
-                BatData batData = (BatData)entry.getValue();
+                UUID playerId = entry.getKey();
+                BatData batData = entry.getValue();
 
                 if (!batData.isExpired()) {
                     writer.write(playerId.toString() + ":" + batData.startTime);

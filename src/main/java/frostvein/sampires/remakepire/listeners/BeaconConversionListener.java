@@ -133,13 +133,13 @@ public class BeaconConversionListener implements Listener {
 
         while(iterator.hasNext()) {
             Map.Entry<String, ConversionData> entry = (Map.Entry)iterator.next();
-            ConversionData data = (ConversionData)entry.getValue();
+            ConversionData data = entry.getValue();
 
             if (data.getConverters().contains(player.getUniqueId())) {
                 data.removeConverter(player.getUniqueId());
 
                 if (data.getConverters().isEmpty()) {
-                    this.cancelConversion((String)entry.getKey(), data);
+                    this.cancelConversion(entry.getKey(), data);
                     iterator.remove();
 
                 } else {
@@ -156,8 +156,8 @@ public class BeaconConversionListener implements Listener {
      */
     private void checkPlayerProximityToConversions(Player player) {
         for(Map.Entry<String, ConversionData> entry : this.activeConversions.entrySet()) {
-            ConversionData data = (ConversionData)entry.getValue();
-            BeaconSite beacon = this.beaconManager.getBeacon((String)entry.getKey());
+            ConversionData data = entry.getValue();
+            BeaconSite beacon = this.beaconManager.getBeacon(entry.getKey());
 
             if (beacon != null) {
                 if (data.getConverters().contains(player.getUniqueId())) {
@@ -171,7 +171,7 @@ public class BeaconConversionListener implements Listener {
 
                 // Check if a player on the opposite team can interfere with the conversion
                 if (this.checkForEnemyInterference(player, beacon, data)) {
-                    this.cancelConversion((String)entry.getKey(), data);
+                    this.cancelConversion(entry.getKey(), data);
                     this.activeConversions.remove(entry.getKey());
                     break;
                 }

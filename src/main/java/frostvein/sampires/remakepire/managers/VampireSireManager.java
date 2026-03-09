@@ -136,7 +136,7 @@ public class VampireSireManager {
                 Map<String, String> rawData = (Map)this.gson.fromJson(reader, type);
                 if (rawData != null) {
                     for(Map.Entry<String, String> entry : rawData.entrySet()) {
-                        this.sireMap.put(((String)entry.getKey()).toLowerCase(), (String)entry.getValue());
+                        this.sireMap.put((entry.getKey()).toLowerCase(), entry.getValue());
                     }
 
                     this.plugin.getLogger().info("VampireSireManager: Loaded " + this.sireMap.size() + " sire mappings from file");
@@ -148,7 +148,7 @@ public class VampireSireManager {
     }
 
     /**
-     * Write the sire relationships into the file.
+     * Record the sire relationships into the file.
      */
     private void saveSireMappings() {
         try {

@@ -231,8 +231,8 @@ public class HolyWaterEffectManager implements Listener {
      */
     public void clearAllEffects() {
         for(Map.Entry<UUID, BukkitTask> entry : this.disabledVampires.entrySet()) {
-            UUID vampireId = (UUID)entry.getKey();
-            BukkitTask task = (BukkitTask)entry.getValue();
+            UUID vampireId = entry.getKey();
+            BukkitTask task = entry.getValue();
 
             if (task != null && !task.isCancelled()) {
                 task.cancel();

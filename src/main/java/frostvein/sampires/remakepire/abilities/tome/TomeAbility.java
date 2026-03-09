@@ -245,8 +245,8 @@ public abstract class TomeAbility {
         String playerPrefix = String.valueOf(playerId) + ":";
 
         cooldownNotificationTasks.entrySet().removeIf((entry) -> {
-            if (((String)entry.getKey()).startsWith(playerPrefix)) {
-                BukkitTask task = (BukkitTask)entry.getValue();
+            if ((entry.getKey()).startsWith(playerPrefix)) {
+                BukkitTask task = entry.getValue();
                 if (task != null && !task.isCancelled()) {
                     task.cancel();
                 }

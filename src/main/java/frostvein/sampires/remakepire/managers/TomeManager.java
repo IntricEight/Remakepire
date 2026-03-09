@@ -12,7 +12,6 @@ import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import frostvein.sampires.remakepire.RemakepirePlugin;
@@ -36,11 +35,11 @@ import frostvein.sampires.remakepire.abilities.tome.WayOfTheProspectorTomeAbilit
 public class TomeManager {
     private final RemakepirePlugin plugin;
     private final VampireManager vampireManager;
-    private final Map<String, TomeAbility> registeredAbilities;
+    private final Map<String, TomeAbility> abilities;
     private final Map<UUID, Integer> playerTomeUsageSession = new HashMap<>();
+    private final Map<UUID, UUID> tomeSelectionTargets = new HashMap<>();
     public static final String TOME_TAG_PREFIX = "tome_ability_";
     public static final String TOME_SELECTION_GUI_TITLE = "§6§lSelect Tome Abilities";
-    private final Map<UUID, UUID> tomeSelectionTargets = new HashMap<>();
 
     /**
      * Create an instance of the Tome manager.
@@ -50,10 +49,13 @@ public class TomeManager {
     public TomeManager(RemakepirePlugin plugin) {
         this.plugin = plugin;
         this.vampireManager = plugin.getVampireManager();
-        this.registeredAbilities = new HashMap<>();
+        this.abilities = new HashMap<>();
         this.registerTomeAbilities();
     }
 
+    /**
+     * List all human tome abilities into an abilities {@code Map}.
+     */
     private void registerTomeAbilities() {
         this.registerAbility(new RallyingCryTomeAbility(this.plugin));
         this.registerAbility(new LanternThrashTomeAbility(this.plugin));
@@ -71,22 +73,46 @@ public class TomeManager {
         this.registerAbility(new WayOfTheProspectorTomeAbility(this.plugin));
         this.registerAbility(new StopTheBleedingTomeAbility(this.plugin));
 
-        this.plugin.getLogger().info("TomeManager initialized - registered " + this.registeredAbilities.size() + " tome abilities");
+        this.plugin.getLogger().info("TomeManager initialized - registered " + this.abilities.size() + " tome abilities");
     }
 
+    /**
+     * Add a new ability to the list of tome abilities.
+     *
+     * @param ability the ability to add.
+     */
     public void registerAbility(TomeAbility ability) {
-        this.registeredAbilities.put(ability.getName().toLowerCase(), ability);
+        this.abilities.put(ability.getName().toLowerCase(), ability);
         this.plugin.getLogger().info("Registered tome ability: " + ability.getName());
     }
 
+    /**
+     * Retrieve an ability using its name.
+     *
+     * @param abilityName the name of the ability to retrieve.
+     * @return The tome ability.
+     */
     public TomeAbility getAbility(String abilityName) {
-        return (TomeAbility)this.registeredAbilities.get(abilityName.toLowerCase());
+        return this.abilities.get(abilityName.toLowerCase());
     }
 
+    /**
+     * Check if an ability has been registered.
+     *
+     * @param abilityName the name of the ability.
+     * @return {@code true} if the ability is within the abilities {@code Map}.
+     */
     public boolean isValidAbility(String abilityName) {
-        return this.registeredAbilities.containsKey(abilityName.toLowerCase());
+        return this.abilities.containsKey(abilityName.toLowerCase());
     }
 
+    /**
+     * Attempt to enable the player to use the tome ability.
+     *
+     * @param player the player gaining an ability.
+     * @param abilityName the name of the ability being granted.
+     * @return {@code true} if the player gains the ability.
+     */
     public boolean grantAbility(Player player, String abilityName) {
         if (!this.vampireManager.isHuman(player)) {
             return false;
@@ -111,11 +137,24 @@ public class TomeManager {
         }
     }
 
+    /**
+     * Check if the player has access to the tome ability.
+     *
+     * @param player the player being checked.
+     * @param abilityName the name of the ability.
+     * @return {@code true} if the player has access to the ability.
+     */
     public boolean hasAbility(Player player, String abilityName) {
         String tag = TOME_TAG_PREFIX + abilityName.toLowerCase();
         return player.getScoreboardTags().contains(tag);
     }
 
+    /**
+     * Retrieve a set of the player's current abilities.
+     *
+     * @param player the player being checked.
+     * @return The {@code Set} of abilities the player has consumed.
+     */
     public Set<String> getPlayerAbilities(Player player) {
         Set<String> abilities = new HashSet<>();
 
@@ -129,6 +168,11 @@ public class TomeManager {
         return abilities;
     }
 
+    /**
+     * Remove the player's access to all tome abilities.
+     *
+     * @param player the player losing their abilities.
+     */
     public void removeAllAbilities(Player player) {
         Set<String> tagsToRemove = new HashSet<>();
 
@@ -147,6 +191,13 @@ public class TomeManager {
         }
     }
 
+    /**
+     * Attempt to use the tome ability.
+     *
+     * @param player the player who cast the ability.
+     * @param abilityName the name of the ability.
+     * @return {@code true} if the ability was successfully used.
+     */
     public boolean useAbility(Player player, String abilityName) {
         if (!this.vampireManager.isHuman(player)) {
             player.sendMessage("§cOnly humans can use tome abilities.");
@@ -168,10 +219,16 @@ public class TomeManager {
         }
     }
 
+    /**
+     * Provide the admin with a GUI to grant or remove tome abilities from the target.
+     *
+     * @param admin the player selecting tome abilities.
+     * @param target the player receiving tome abilities.
+     */
     public void openTomeSelectionGUI(Player admin, Player target) {
         this.tomeSelectionTargets.put(admin.getUniqueId(), target.getUniqueId());
         Inventory gui = Bukkit.createInventory(null, 54, TOME_SELECTION_GUI_TITLE);
-        List<String> abilityNames = new ArrayList<>(this.registeredAbilities.keySet());
+        List<String> abilityNames = new ArrayList<>(this.abilities.keySet());
         abilityNames.sort(String::compareToIgnoreCase);
         int slot = 0;
 
@@ -180,7 +237,7 @@ public class TomeManager {
                 break;
             }
 
-            TomeAbility ability = this.registeredAbilities.get(abilityName);
+            TomeAbility ability = this.abilities.get(abilityName);
             ItemStack book = new ItemStack(Material.WRITTEN_BOOK);
             ItemMeta meta = book.getItemMeta();
 
@@ -225,6 +282,16 @@ public class TomeManager {
         admin.sendMessage("§6Select tome abilities to grant to §e" + target.getName());
     }
 
+    /**
+     * Add the provided tome book to a GUI menu.
+     *
+     * @param gui the interactive menu.
+     * @param target the player being given the cure book.
+     * @param slot the desired inventory slot in the menu.
+     * @param tag the cure book's tag.
+     * @param displayName the cure book's title in the GUI menu.
+     * @param bookTitle the cure book's lore title.
+     */
     private void addCureBookToGUI(Inventory gui, Player target, int slot, String tag, String displayName, String bookTitle) {
         ItemStack book = new ItemStack(Material.WRITTEN_BOOK);
         ItemMeta meta = book.getItemMeta();
@@ -256,6 +323,12 @@ public class TomeManager {
         gui.setItem(slot, book);
     }
 
+    /**
+     * Format the ability's name into separated words and capitalization.
+     *
+     * @param abilityName the name of the ability.
+     * @return The formatted ability name.
+     */
     private String formatAbilityName(String abilityName) {
         StringBuilder result = new StringBuilder();
         boolean capitalizeNext = true;
@@ -283,14 +356,31 @@ public class TomeManager {
         return result.toString();
     }
 
+    /**
+     *
+     *
+     * @param adminUUID
+     * @return
+     */
     public UUID getTomeSelectionTarget(UUID adminUUID) {
-        return (UUID)this.tomeSelectionTargets.get(adminUUID);
+        return this.tomeSelectionTargets.get(adminUUID);
     }
 
+    /**
+     *
+     *
+     * @param adminUUID
+     */
     public void removeTomeSelectionTarget(UUID adminUUID) {
         this.tomeSelectionTargets.remove(adminUUID);
     }
 
+    /**
+     *
+     *
+     * @param player
+     * @param abilityName the name of the ability.
+     */
     public void forceGrantAbility(Player player, String abilityName) {
         String normalizedName = abilityName.toLowerCase();
 
@@ -301,6 +391,12 @@ public class TomeManager {
         }
     }
 
+    /**
+     *
+     *
+     * @param player
+     * @param abilityName the name of the ability.
+     */
     public void removeAbility(Player player, String abilityName) {
         String normalizedName = abilityName.toLowerCase();
         String tag = TOME_TAG_PREFIX + normalizedName;
@@ -309,7 +405,7 @@ public class TomeManager {
     }
 
     public Set<String> getAllAbilityNames() {
-        return new HashSet<>(this.registeredAbilities.keySet());
+        return new HashSet<>(this.abilities.keySet());
     }
 
     public void shutdown() {
@@ -338,6 +434,12 @@ public class TomeManager {
         this.plugin.getLogger().info("TomeManager shutdown complete");
     }
 
+    /**
+     * Determine if the player used a tome ability book in the current session.
+     *
+     * @param player the player being checked.
+     * @return {@code true} if the player has absorbed an ability this session.
+     */
     private boolean hasUsedTomeThisSession(Player player) {
         UUID playerUUID = player.getUniqueId();
 
