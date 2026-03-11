@@ -27,7 +27,7 @@ public class StopTheBleedingTomeAbility extends TomeAbility {
     private static final int PARTICLE_INTERVAL_TICKS = 20;
     private static final String ACTIVE_TAG = "stopthebleeding_active";
     private static final String USED_TAG = "stopthebleeding_used_session";
-    private final Map<UUID, HealingSession> activeHealingSessions = new HashMap();
+    private final Map<UUID, HealingSession> activeHealingSessions = new HashMap<>();
 
     /**
      * Create an instance of the Stop the Bleeding tome ability.
@@ -107,7 +107,7 @@ public class StopTheBleedingTomeAbility extends TomeAbility {
      */
     private void cancelHealing(Player healer, String reason) {
         UUID healerId = healer.getUniqueId();
-        HealingSession session = (HealingSession)this.activeHealingSessions.remove(healerId);
+        HealingSession session = this.activeHealingSessions.remove(healerId);
 
         if (session != null) {
             session.cancel();
@@ -130,7 +130,7 @@ public class StopTheBleedingTomeAbility extends TomeAbility {
      */
     private void completeHealing(Player healer, Player target) {
         UUID healerId = healer.getUniqueId();
-        HealingSession session = (HealingSession)this.activeHealingSessions.remove(healerId);
+        HealingSession session = this.activeHealingSessions.remove(healerId);
 
         if (session != null) {
             session.cancel();
@@ -257,14 +257,11 @@ public class StopTheBleedingTomeAbility extends TomeAbility {
     }
 
     private class HealingSession {
-        private final Player healer;
-        private final Player target;
-        private final UUID healerUUID;
-        private final UUID targetUUID;
+        private final Player healer, target;
+        private final UUID healerUUID, targetUUID;
         private final boolean isSelfHeal;
-        private int ticksRemaining;
+        private int ticksRemaining, particleCounter;
         private BukkitTask task;
-        private int particleCounter;
 
         /**
          * Create an instance of the healing session.

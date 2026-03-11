@@ -42,7 +42,7 @@ public class LanternThrashTomeAbility extends TomeAbility {
 
         } else {
             Location playerLoc = player.getLocation();
-            double playerYaw = Math.toRadians((double)(playerLoc.getYaw() + 90.0F));
+            double playerYaw = Math.toRadians((playerLoc.getYaw() + 90.0F));
 
             List<Location> fireLocations = this.calculateFireLocations(playerLoc);
             this.sortLocationsByAngle(fireLocations, playerLoc, playerYaw);

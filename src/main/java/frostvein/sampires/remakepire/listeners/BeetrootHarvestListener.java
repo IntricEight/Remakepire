@@ -98,13 +98,15 @@ public class BeetrootHarvestListener implements Listener {
      * @param tool the tool used to harvest the beetroot plant.
      */
     private void dropBeetrootSeeds(Location location, ItemStack tool) {
-        int baseSeeds = this.random.nextInt(4), fortuneLevel = 0;
+        final int baseSeeds = this.random.nextInt(4);
+        int fortuneLevel = 0;
 
         if (tool != null && tool.containsEnchantment(Enchantment.FORTUNE)) {
             fortuneLevel = tool.getEnchantmentLevel(Enchantment.FORTUNE);
         }
 
-        int maxSeeds = 3 + fortuneLevel, totalSeeds = this.random.nextInt(maxSeeds + 1);
+        final int maxSeeds = 3 + fortuneLevel;
+        int totalSeeds = this.random.nextInt(maxSeeds + 1);
         totalSeeds = Math.max(baseSeeds, totalSeeds);
 
         if (totalSeeds > 0) {

@@ -51,8 +51,7 @@ public class BanishUndeadTomeAbility extends TomeAbility {
 
             // Search and kill all undead entities within a (RADIUS * 2)^3 cube
             for(Entity entity : player.getNearbyEntities(RADIUS, RADIUS, RADIUS)) {
-                if (this.isUndeadMob(entity) && entity instanceof LivingEntity) {
-                    LivingEntity livingEntity = (LivingEntity)entity;
+                if (this.isUndeadMob(entity) && entity instanceof LivingEntity livingEntity) {
                     livingEntity.setHealth(0);
                     ++mobsKilled;
                 }

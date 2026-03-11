@@ -156,7 +156,7 @@ public class PrayerOfFaithTomeAbility extends TomeAbility {
          *
          * @param original the player's original location.
          * @param current the player's current location.
-         * @return {@code true} if the {@code original} and {@code current} locations are not the same.
+         * @return {@code true} if the original and current locations are not the same.
          */
         private boolean hasPlayerMoved(Location original, Location current) {
             return Math.abs(original.getX() - current.getX()) > 0.1 || Math.abs(original.getY() - current.getY()) > 0.1 || Math.abs(original.getZ() - current.getZ()) > 0.1;

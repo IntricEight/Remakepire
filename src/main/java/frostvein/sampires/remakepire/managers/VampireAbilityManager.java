@@ -721,10 +721,10 @@ public class VampireAbilityManager {
     }
 
     /**
+     * Update how many times the player has been hit whilst invisible.
      *
-     *
-     * @param player
-     * @return
+     * @param player the invisible vampire.
+     * @return {@code true} if the player's invisibility has been removed.
      */
     public boolean trackInvisibilityAttack(Player player) {
         UUID playerId = player.getUniqueId();
@@ -740,26 +740,26 @@ public class VampireAbilityManager {
     }
 
     /**
+     * Clear the player's counter on hits taken while they were invisible.
      *
-     *
-     * @param player
+     * @param player the vampire who was invisible.
      */
     public void clearInvisibilityAttackCount(Player player) {
         this.invisibilityAttackCounts.remove(player.getUniqueId());
     }
 
     /**
+     * Retrieve how many hits the invisible vampire has taken.
      *
-     *
-     * @param player
-     * @return
+     * @param player the invisible vampire.
+     * @return The number of hits taken.
      */
     public int getInvisibilityAttackCount(Player player) {
-        return (Integer)this.invisibilityAttackCounts.getOrDefault(player.getUniqueId(), 0);
+        return this.invisibilityAttackCounts.getOrDefault(player.getUniqueId(), 0);
     }
 
     /**
-     *
+     * Stop updating players on the cooldowns before shutting down the manager.
      */
     public void shutdown() {
         if (this.cooldownTask != null) {
@@ -778,9 +778,9 @@ public class VampireAbilityManager {
         /**
          * Create an instance of the global vampire abilities cooldown record.
          *
-         * @param endTime
-         * @param lastUserName
-         * @param lastUserUUID
+         * @param endTime the time when the ability will become usable again.
+         * @param lastUserName the name of the player who last used the global ability.
+         * @param lastUserUUID the UUID of the player who last used the global ability.
          */
         public GlobalCooldownData(long endTime, String lastUserName, UUID lastUserUUID) {
             this.endTime = endTime;

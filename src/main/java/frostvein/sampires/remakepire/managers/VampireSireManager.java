@@ -35,14 +35,32 @@ public class VampireSireManager {
         plugin.getLogger().info("VampireSireManager initialized with " + this.sireMap.size() + " sire mappings");
     }
 
+    /**
+     * Add a sire relation to the game sire mappings.
+     *
+     * @param vampireName the fledgling vampire's name.
+     * @param sireName the vampire sire's name.
+     */
     private void putSire(String vampireName, String sireName) {
         this.sireMap.put(vampireName.toLowerCase(), sireName);
     }
 
+    /**
+     * Retrieve the sire of the vampire.
+     *
+     * @param vampire the vampire whose sire is being retrieved.
+     * @return The name of the vampire's sire.
+     */
     public String getSire(Player vampire) {
         return this.sireMap.get(vampire.getName().toLowerCase());
     }
 
+    /**
+     * Determine if the vampire's sire is dead.
+     *
+     * @param vampire the vampire whose sire's survival is being checked.
+     * @return {@code true} if the vampire's sire is dead.
+     */
     public boolean isSireDead(Player vampire) {
         String sireName = this.getSire(vampire);
 
@@ -50,19 +68,31 @@ public class VampireSireManager {
             return true;
         } else {
             Player sire = Bukkit.getPlayer(sireName);
+
             if (sire == null) {
                 return true;
             } else {
-                GameMode sireGameMode = sire.getGameMode();
-                return sireGameMode == GameMode.SPECTATOR;
+                return sire.getGameMode() == GameMode.SPECTATOR;
             }
         }
     }
 
+    /**
+     * Check if the vampire can be cured.
+     *
+     * @param vampire the vampire being cured.
+     * @return {@code true} if the vampire is curable.
+     */
     public boolean canBeCured(Player vampire) {
         return this.isSireDead(vampire);
     }
 
+    /**
+     * Retrieve the survival status of the vampire's sire.
+     *
+     * @param vampire the vampire whose sire's survival is being checked.
+     * @return The gamemode or offline status of the sire.
+     */
     public String getSireStatus(Player vampire) {
         String sireName = this.getSire(vampire);
 
@@ -80,25 +110,47 @@ public class VampireSireManager {
         }
     }
 
+    /**
+     * Add a sire relation to the sire mappings.
+     *
+     * @param vampireName the fledgling vampire's name.
+     * @param sireName the vampire sire's name.
+     */
     public void setSire(String vampireName, String sireName) {
         this.sireMap.put(vampireName.toLowerCase(), sireName);
         this.saveSireMappings();
+
         this.plugin.getLogger().info("Sire mapping added: " + vampireName + " -> " + sireName);
     }
 
+    /**
+     * Remove a sire relation from the sire mappings.
+     *
+     * @param vampireName the fledgling vampire's name.
+     */
     public void removeSire(String vampireName) {
         this.sireMap.remove(vampireName.toLowerCase());
         this.saveSireMappings();
+
         this.plugin.getLogger().info("Sire mapping removed for: " + vampireName);
     }
 
+    /**
+     * Retrieve all current sire mappings.
+     *
+     * @return A {@code Map} of fledgling and vampire names.
+     */
     public Map<String, String> getAllSireMappings() {
         return new HashMap<>(this.sireMap);
     }
 
+    /**
+     * Remove all sire mappings.
+     */
     public void clearAllSireMappings() {
         this.sireMap.clear();
         this.saveSireMappings();
+
         this.plugin.getLogger().info("VampireSireManager: Cleared all sire mappings");
     }
 
@@ -131,9 +183,9 @@ public class VampireSireManager {
             this.sireMap.putAll(exampleMap);
         } else {
             try (FileReader reader = new FileReader(this.dataFile)) {
-                Type type = (new TypeToken<Map<String, String>>() {
-                }).getType();
+                Type type = (new TypeToken<Map<String, String>>() {}).getType();
                 Map<String, String> rawData = (Map)this.gson.fromJson(reader, type);
+
                 if (rawData != null) {
                     for(Map.Entry<String, String> entry : rawData.entrySet()) {
                         this.sireMap.put((entry.getKey()).toLowerCase(), entry.getValue());
@@ -166,6 +218,9 @@ public class VampireSireManager {
         }
     }
 
+    /**
+     * Save the sire mappings to file before shutting down the manager.
+     */
     public void shutdown() {
         this.saveSireMappings();
         this.plugin.getLogger().info("VampireSireManager: Shutdown complete");

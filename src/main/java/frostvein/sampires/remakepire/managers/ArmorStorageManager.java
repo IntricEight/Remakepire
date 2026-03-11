@@ -22,8 +22,7 @@ import frostvein.sampires.remakepire.utils.OptionalTypeAdapter;
 public class ArmorStorageManager {
     private final RemakepirePlugin plugin;
     private final Gson gson;
-    private final File storageFile;
-    private final File backupFile;
+    private final File storageFile, backupFile;
     private final Map<UUID, StoredArmor> armorCache = new ConcurrentHashMap<>();
 
     /**
@@ -66,11 +65,11 @@ public class ArmorStorageManager {
     }
 
     /**
+     * Store the player's armor into the cache.
      *
-     *
-     * @param playerId
-     * @param player
-     * @return
+     * @param playerId the UUID of the player who owns the armor.
+     * @param player the player who owns the armor.
+     * @return {@code true} if armor was saved into the cache.
      */
     public boolean storeAndClearPlayerArmor(UUID playerId, Player player) {
         try {
@@ -101,15 +100,32 @@ public class ArmorStorageManager {
         }
     }
 
+    /**
+     * Retrieve the player's armor information from the cache.
+     *
+     * @param playerId the UUID of the player who has armor stored in the file.
+     * @return The info on each armor piece the player owned.
+     */
     public StoredArmor getStoredArmor(UUID playerId) {
         return this.armorCache.get(playerId);
     }
 
+    /**
+     * Check if the player has any armor logged within the cache.
+     *
+     * @param playerId the UUID of the player who might have stored armor.
+     * @return {@code true} if the player has armor stored away.
+     */
     public boolean hasStoredArmor(UUID playerId) {
         StoredArmor stored = this.armorCache.get(playerId);
         return stored != null && stored.hasAnyArmor();
     }
 
+    /**
+     * Clear the player's entry in the armor cache.
+     *
+     * @param playerId the UUID of the player who might have stored armor.
+     */
     public void clearStoredArmor(UUID playerId) {
         if (this.armorCache.remove(playerId) != null) {
             this.saveArmorData();
@@ -117,6 +133,9 @@ public class ArmorStorageManager {
         }
     }
 
+    /**
+     * Load the cached armor sets from the file.
+     */
     private void loadArmorData() {
         File fileToLoad = this.storageFile;
 
@@ -150,7 +169,7 @@ public class ArmorStorageManager {
     }
 
     /**
-     * Save the armor of any active bat players into the file.
+     * Save the players' armor in the current cache into the file.
      */
     private void saveArmorData() {
         try {
@@ -177,21 +196,30 @@ public class ArmorStorageManager {
         }
     }
 
+    /**
+     * Determine if the file exists and is sufficiently sized.
+     *
+     * @param file the file being checked.
+     * @return {@code true} if the file exists and is longer than 2.
+     */
     private boolean isFileValid(File file) {
         return file.exists() && file.length() > 2L;
     }
 
+    /**
+     * Clear old entries from the armor cache.
+     */
     public void cleanupExpiredEntries() {
         long currentTime = System.currentTimeMillis();
-        long maxAge = 604800000L;
+        final long maxAge = 604800000L;
 
         this.armorCache.entrySet().removeIf((entry) -> {
-            boolean expired = currentTime - (entry.getValue()).timestamp > maxAge;
-            if (expired) {
+            if (currentTime - (entry.getValue()).timestamp > maxAge) {
                 this.plugin.getLogger().info("ArmorStorageManager: Removed expired armor storage for player " + String.valueOf(entry.getKey()));
+                return true;
             }
 
-            return expired;
+            return false;
         });
 
         if (!this.armorCache.isEmpty()) {
@@ -199,22 +227,35 @@ public class ArmorStorageManager {
         }
     }
 
+    /**
+     * Retrieve the armor cache.
+     *
+     * @return A {@code Map} of all the players' stored armor.
+     */
     public Map<UUID, StoredArmor> getAllStoredArmor() {
         return new HashMap<>(this.armorCache);
     }
 
+    /**
+     * Save the armor cache into the file before shutting down the manager.
+     */
     public void shutdown() {
         this.saveArmorData();
         this.plugin.getLogger().info("ArmorStorageManager: Shutdown complete, " + this.armorCache.size() + " armor sets saved");
     }
 
     public static class StoredArmor {
-        public final ItemStack helmet;
-        public final ItemStack chestplate;
-        public final ItemStack leggings;
-        public final ItemStack boots;
+        public final ItemStack helmet, chestplate, leggings, boots;
         public final long timestamp;
 
+        /**
+         * Create an instance of an armor set alongside its storage timestamp.
+         *
+         * @param helmet the helmet to store.
+         * @param chestplate the chestplate to store.
+         * @param leggings the leggings to store.
+         * @param boots the boots to store.
+         */
         public StoredArmor(ItemStack helmet, ItemStack chestplate, ItemStack leggings, ItemStack boots) {
             this.helmet = helmet != null ? helmet.clone() : null;
             this.chestplate = chestplate != null ? chestplate.clone() : null;
@@ -223,10 +264,20 @@ public class ArmorStorageManager {
             this.timestamp = System.currentTimeMillis();
         }
 
+        /**
+         * Check if any armor is being stored.
+         *
+         * @return {@code true} if all the armor slots are empty.
+         */
         public boolean hasAnyArmor() {
             return this.helmet != null || this.chestplate != null || this.leggings != null || this.boots != null;
         }
 
+        /**
+         * Retrieve the armor being stored.
+         *
+         * @return An {@code ItemStack} array with the armor in reverse indices. Helmet = 3, chestplate = 2, leggings = 1, and boots = 0.
+         */
         public ItemStack[] getArmorContents() {
             return new ItemStack[]{this.boots, this.leggings, this.chestplate, this.helmet};
         }

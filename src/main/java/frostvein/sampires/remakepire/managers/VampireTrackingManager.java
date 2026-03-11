@@ -18,11 +18,21 @@ public class VampireTrackingManager {
     private static final int TRACKING_DURATION_SECONDS = 120;
     private static final int UPDATE_INTERVAL_TICKS = 4;
 
+    /**
+     * Create an instance of the New Vampire Tracking manager.
+     *
+     * @param plugin the host plugin object.
+     */
     public VampireTrackingManager(RemakepirePlugin plugin) {
         this.plugin = plugin;
         this.vampireManager = plugin.getVampireManager();
     }
 
+    /**
+     * Begin directing the other vampires in the direction of the new fledgling.
+     *
+     * @param newVampire the newly turned player.
+     */
     public void startTrackingNewVampire(Player newVampire) {
         if (newVampire != null && newVampire.isOnline()) {
             final UUID newVampireId = newVampire.getUniqueId();
@@ -53,6 +63,11 @@ public class VampireTrackingManager {
         }
     }
 
+    /**
+     * Direct the other vampires in the direction of the new fledgling.
+     *
+     * @param trackedVampire the newly turned player.
+     */
     private void updateTrackingForAllVampires(Player trackedVampire) {
         if (this.mostRecentVampireId == null || trackedVampire.getUniqueId().equals(this.mostRecentVampireId)) {
             Location trackedLocation = trackedVampire.getLocation();
@@ -74,15 +89,24 @@ public class VampireTrackingManager {
         }
     }
 
+    /**
+     * Determine the direction between the player and a target set of coordinates.
+     *
+     * @param deltaX the difference between the player's X coordinate and the target's.
+     * @param deltaZ the difference between the player's Y coordinate and the target's.
+     * @param playerYaw the angle that the player is looking.
+     * @return A Unicode value of the direction.
+     */
     private String getRelativeDirection(double deltaX, double deltaZ, float playerYaw) {
         double targetAngle = Math.atan2(deltaX, -deltaZ);
         double targetDegrees = Math.toDegrees(targetAngle);
 
+        // Normalize the degrees
         if (targetDegrees < 0) {
             targetDegrees += 360.0;
         }
 
-        double playerFacing = (double)((playerYaw + 180.0F) % 360.0F);
+        double playerFacing = ((playerYaw + 180.0F) % 360.0F);
         if (playerFacing < 0) {
             playerFacing += 360.0;
         }
@@ -109,14 +133,23 @@ public class VampireTrackingManager {
         }
     }
 
+    /**
+     * Stop tracking the newly turned vampire.
+     *
+     * @param vampireId the UUID of the new vampire.
+     */
     public void stopTracking(UUID vampireId) {
-        BukkitTask task = (BukkitTask)this.activeTrackingSessions.remove(vampireId);
+        BukkitTask task = this.activeTrackingSessions.remove(vampireId);
+
         if (task != null) {
             task.cancel();
             this.plugin.getLogger().info("Stopped vampire tracking for " + String.valueOf(vampireId));
         }
     }
 
+    /**
+     * Stop tracking all newly turned vampires.
+     */
     public void stopAllTracking() {
         for(BukkitTask task : this.activeTrackingSessions.values()) {
             task.cancel();
@@ -126,14 +159,28 @@ public class VampireTrackingManager {
         this.plugin.getLogger().info("Stopped all vampire tracking sessions");
     }
 
+    /**
+     * Retrieve the number of vampires being tracked.
+     *
+     * @return The number of ongoing trackers.
+     */
     public int getActiveTrackingCount() {
         return this.activeTrackingSessions.size();
     }
 
+    /**
+     * Retrieve whether the player is being tracked by other vampires.
+     *
+     * @param vampireId the UUID of a player.
+     * @return {@code true} if the vampire is being tracked.
+     */
     public boolean isBeingTracked(UUID vampireId) {
         return this.activeTrackingSessions.containsKey(vampireId);
     }
 
+    /**
+     * Stop tracking any new vampires before shutting down the manager.
+     */
     public void shutdown() {
         this.stopAllTracking();
         this.plugin.getLogger().info("VampireTrackingManager shutdown complete");

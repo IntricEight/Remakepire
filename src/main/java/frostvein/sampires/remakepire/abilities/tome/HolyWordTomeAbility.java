@@ -25,7 +25,7 @@ public class HolyWordTomeAbility extends TomeAbility implements Listener {
     private static final int RADIUS = 20;
     // Controls the duration of the ability (in ticks)
     private static final int PARALYSIS_DURATION = 300;
-    private final Map<UUID, BukkitTask> paralyzedPlayers = new HashMap();
+    private final Map<UUID, BukkitTask> paralyzedPlayers = new HashMap<>();
 
     /**
      * Create an instance of the Holy Word tome ability.
@@ -96,8 +96,7 @@ public class HolyWordTomeAbility extends TomeAbility implements Listener {
             priority = EventPriority.HIGHEST
     )
     public void onEntityDamage(EntityDamageEvent event) {
-        if (event.getEntity() instanceof Player) {
-            Player player = (Player)event.getEntity();
+        if (event.getEntity() instanceof Player player) {
             UUID playerId = player.getUniqueId();
 
             if (this.paralyzedPlayers.containsKey(playerId)) {

@@ -134,6 +134,7 @@ public class ShoulderBargeTomeAbility extends TomeAbility {
                     }
 
                     this.handleCollision(player, entity);
+
                     synchronized(hitEntities) {
                         hitEntities.add(entityId);
                     }

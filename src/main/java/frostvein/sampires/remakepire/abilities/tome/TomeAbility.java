@@ -133,7 +133,7 @@ public abstract class TomeAbility {
         Map<String, Long> cooldowns = (Map)playerCooldowns.get(playerId);
 
         if (cooldowns != null && cooldowns.containsKey(this.name)) {
-            long cooldownEnd = (Long)cooldowns.get(this.name);
+            long cooldownEnd = cooldowns.get(this.name);
             return System.currentTimeMillis() < cooldownEnd;
 
         } else {
@@ -152,7 +152,7 @@ public abstract class TomeAbility {
         Map<String, Long> cooldowns = (Map)playerCooldowns.get(playerId);
 
         if (cooldowns != null && cooldowns.containsKey(this.name)) {
-            long cooldownEnd = (Long)cooldowns.get(this.name);
+            long cooldownEnd = cooldowns.get(this.name);
             long remaining = cooldownEnd - System.currentTimeMillis();
             return Math.max(0L, remaining / 1000L);
 
@@ -183,7 +183,7 @@ public abstract class TomeAbility {
      */
     private void scheduleCooldownNotification(Player player, int cooldownSeconds) {
         String taskKey = String.valueOf(player.getUniqueId()) + ":" + this.name;
-        BukkitTask existingTask = (BukkitTask)cooldownNotificationTasks.get(taskKey);
+        BukkitTask existingTask = cooldownNotificationTasks.get(taskKey);
 
         if (existingTask != null && !existingTask.isCancelled()) {
             existingTask.cancel();
@@ -226,7 +226,7 @@ public abstract class TomeAbility {
         }
 
         String taskKey = String.valueOf(playerId) + ":" + abilityName;
-        BukkitTask task = (BukkitTask)cooldownNotificationTasks.get(taskKey);
+        BukkitTask task = cooldownNotificationTasks.get(taskKey);
 
         if (task != null && !task.isCancelled()) {
             task.cancel();
