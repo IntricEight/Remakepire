@@ -25,7 +25,7 @@ public class HolyWordTomeAbility extends TomeAbility implements Listener {
     private static final int RADIUS = 20;
     // Controls the duration of the ability (in ticks)
     private static final int PARALYSIS_DURATION = 300;
-    private final Map<UUID, BukkitTask> paralyzedPlayers = new HashMap();
+    private final Map<UUID, BukkitTask> paralyzedPlayers = new HashMap<>();
 
     /**
      * Create an instance of the Holy Word tome ability.
@@ -45,8 +45,7 @@ public class HolyWordTomeAbility extends TomeAbility implements Listener {
         } else {
             VampireManager vampireManager = this.plugin.getVampireManager();
             List<Player> nearbyPlayers = player.getWorld().getPlayers();
-            int stage1Affected = 0;
-            int stage2And3Paralyzed = 0;
+            int stage1Affected = 0, stage2And3Paralyzed = 0;
 
             for(Player target : nearbyPlayers) {
                 if (!target.equals(player) && !(target.getLocation().distance(player.getLocation()) > RADIUS)) {
@@ -96,8 +95,7 @@ public class HolyWordTomeAbility extends TomeAbility implements Listener {
             priority = EventPriority.HIGHEST
     )
     public void onEntityDamage(EntityDamageEvent event) {
-        if (event.getEntity() instanceof Player) {
-            Player player = (Player)event.getEntity();
+        if (event.getEntity() instanceof Player player) {
             UUID playerId = player.getUniqueId();
 
             if (this.paralyzedPlayers.containsKey(playerId)) {
@@ -118,6 +116,7 @@ public class HolyWordTomeAbility extends TomeAbility implements Listener {
 
         if (this.paralyzedPlayers.containsKey(playerId) && (event.getFrom().getX() != event.getTo().getX() || event.getFrom().getY() != event.getTo().getY() || event.getFrom().getZ() != event.getTo().getZ())) {
             event.setCancelled(true);
+
             if (System.currentTimeMillis() % 3000L < 50L) {
                 player.sendMessage("§4You are frozen by divine power and cannot move!");
             }
@@ -155,6 +154,7 @@ public class HolyWordTomeAbility extends TomeAbility implements Listener {
     private void createHolyLightRings(Player player) {
         final Location center = player.getLocation().add(0.0, 0.5, 0.0);
         long delayBetweenRings = 8L;
+
         (new BukkitRunnable() {
             int ringCount = 0;
             final int maxRings = 3;

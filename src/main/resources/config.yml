@@ -177,6 +177,14 @@ garlic:
   immunity-duration-max-seconds: 600
 
 # ============================================================================
+# CURE SYSTEM
+# ============================================================================
+cure:
+  # The maximum distance from a holy beacon that vampires can be cured at.
+  # Default: 25 blocks (cuboid around the beacon)
+  cure-distance: 10
+
+# ============================================================================
 # PASSIVE MOB SPAWNING SYSTEM
 # ============================================================================
 passive-mob-spawning:
