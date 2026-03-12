@@ -297,9 +297,9 @@ public class BeaconSite {
     }
 
     /**
-     * Rename the beacon's world name. Does not change the name of the world itself.
+     * Rename the beacon's world name. Does not change the name of the world itself, just what the beacon records the name as.
      *
-     * @param worldName the new name.
+     * @param worldName the world's new name.
      */
     public void setWorldName(String worldName) {
         this.worldName = worldName;

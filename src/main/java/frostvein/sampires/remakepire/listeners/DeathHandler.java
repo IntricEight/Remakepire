@@ -27,19 +27,38 @@ import frostvein.sampires.remakepire.managers.VampireManager;
 public class DeathHandler implements Listener {
     private final RemakepirePlugin plugin;
     private final VampireManager vampireManager;
-    private final Map<UUID, Material> lastWeaponUsed = new HashMap();
-    private final Map<UUID, UUID> woodenStakeKills = new HashMap();
+    private final Map<UUID, Material> lastWeaponUsed = new HashMap<>();
+    private final Map<UUID, UUID> woodenStakeKills = new HashMap<>();
 
+    // TODO: Remove wooden axes from having special effects on vampires. It's really inconsistent where they are applied and where they are not, so it doesn't seem intentional.
+
+    /**
+     * Create an instance of the Death Handler listener.
+     *
+     * @param plugin the host plugin object.
+     * @param vampireManager the manager for generic vampire traits.
+     */
     public DeathHandler(RemakepirePlugin plugin, VampireManager vampireManager) {
         this.plugin = plugin;
         this.vampireManager = vampireManager;
     }
 
+    /**
+     * Log the victim within the register of staked individuals.
+     *
+     * @param victim the player who has been killed.
+     * @param killer the player who staked the victim.
+     */
     public void registerWoodenStakeKill(Player victim, Player killer) {
         this.woodenStakeKills.put(victim.getUniqueId(), killer.getUniqueId());
         this.plugin.getLogger().info("DEBUG: Registered wooden stake kill - Victim: " + victim.getName() + ", Killer: " + killer.getName());
     }
 
+    /**
+     * Update the player tags and update the death counters when players respawn.
+     *
+     * @param event a player has respawned.
+     */
     @EventHandler
     public void onPlayerPostRespawn(PlayerRespawnEvent event) {
         Player player = event.getPlayer();
@@ -64,8 +83,10 @@ public class DeathHandler implements Listener {
                 try {
                     Scoreboard mainScoreboard = Bukkit.getScoreboardManager().getMainScoreboard();
                     Objective deathObjective = mainScoreboard.getObjective("vsmp_death");
+
                     if (deathObjective != null) {
                         int currentDeaths = deathObjective.getScore(player.getName()).getScore();
+
                         if (currentDeaths > 5) {
                             deathObjective.getScore(player.getName()).setScore(5);
                             this.plugin.getLogger().info("Capped death count for " + player.getName() + " at 5 (was " + currentDeaths + ")");
@@ -93,9 +114,17 @@ public class DeathHandler implements Listener {
                 player.teleport(this.plugin.getVampireRespawnLocation());
             }
         }, 7L);
+
         this.plugin.getServer().getScheduler().runTaskLater(this.plugin, () -> checkAndAnnounceTeamElimination(this.plugin, wasHuman, wasVampire), 10L);
     }
 
+    /**
+     * Determine if a team has been eliminated from the game.
+     *
+     * @param plugin the host plugin object.
+     * @param affectedWasHuman {@code true} if the killed player was a human.
+     * @param affectedWasVampire {@code true} if the killed player was a vampire.
+     */
     public static void checkAndAnnounceTeamElimination(RemakepirePlugin plugin, boolean affectedWasHuman, boolean affectedWasVampire) {
         if (plugin.getSessionManager().isSessionActive()) {
             VampireManager vampireManager = plugin.getVampireManager();
@@ -120,12 +149,14 @@ public class DeathHandler implements Listener {
         }
     }
 
-    public static void checkAndAnnounceTeamElimination(RemakepirePlugin plugin) {
-        checkAndAnnounceTeamElimination(plugin, false, false);
-    }
-
+    /**
+     * Announce the elimination of the human team.
+     *
+     * @param plugin the host plugin object.
+     */
     private static void announceAllHumansDeadStatic(RemakepirePlugin plugin) {
         plugin.getLogger().info("ALL HUMANS ELIMINATED");
+
         int totalBeacons = plugin.getBeaconManager().getAllBeacons().size();
         int evilBeacons = plugin.getBeaconManager().getAllEvilBeacons().size();
         boolean allBeaconsDesecrated = totalBeacons > 0 && evilBeacons == totalBeacons;
@@ -146,8 +177,14 @@ public class DeathHandler implements Listener {
         }
     }
 
+    /**
+     * Announce the elimination of the vampire team.
+     *
+     * @param plugin the host plugin object.
+     */
     private static void announceHumansWinStatic(RemakepirePlugin plugin) {
         plugin.getLogger().info("ALL VAMPIRES ELIMINATED");
+
         int totalBeacons = plugin.getBeaconManager().getAllBeacons().size();
         int holyBeacons = plugin.getBeaconManager().getHolyBeacons().size();
         boolean allBeaconsHoly = totalBeacons > 0 && holyBeacons == totalBeacons;
@@ -157,9 +194,11 @@ public class DeathHandler implements Listener {
             player.sendTitle("§aThe last vampire has fallen.", "", 20, 100, 40);
             player.sendMessage("");
             player.sendMessage("§aThe last creature of darkness has fallen...");
+
             if (anyPermanentlyCorrupted) {
                 player.sendMessage("§7But a beacon of light has been permanently corrupted.");
                 player.sendMessage("§7The creatures of the night have been vanquished, but you are stuck in Oakhurst, forever.");
+
             } else if (allBeaconsHoly) {
                 player.sendMessage("§aLight reigns supreme over Oakhurst. You are free.");
             } else {
@@ -169,29 +208,38 @@ public class DeathHandler implements Listener {
             player.sendMessage("");
             player.playSound(player.getLocation(), Sound.BLOCK_BEACON_ACTIVATE, SoundCategory.MASTER, 1.0F, 1.0F);
         }
-
     }
 
+    /**
+     * Record the last weapon used on a player by another player.
+     *
+     * @param event an entity being damaged by another entity.
+     */
     @EventHandler
     public void onEntityDamage(EntityDamageByEntityEvent event) {
-        if (event.getEntity() instanceof Player && event.getDamager() instanceof Player) {
-            Player victim = (Player)event.getEntity();
-            Player attacker = (Player)event.getDamager();
+        if (event.getEntity() instanceof Player victim && event.getDamager() instanceof Player attacker) {
             ItemStack weapon = attacker.getInventory().getItemInMainHand();
+
             if (weapon != null) {
                 this.lastWeaponUsed.put(victim.getUniqueId(), weapon.getType());
             }
-
         }
     }
 
+    /**
+     * Handle the death counter and apply the promotion ban on a player's death.
+     *
+     * @param event a player dies.
+     */
     @EventHandler
     public void onPlayerDeath(PlayerDeathEvent event) {
         Player victim = event.getEntity();
         Player killer = victim.getKiller();
-        UUID trackedKillerUUID = (UUID)this.woodenStakeKills.remove(victim.getUniqueId());
+        UUID trackedKillerUUID = this.woodenStakeKills.remove(victim.getUniqueId());
+
         if (trackedKillerUUID != null && killer == null) {
             Player trackedKiller = this.plugin.getServer().getPlayer(trackedKillerUUID);
+
             if (trackedKiller != null) {
                 killer = trackedKiller;
                 this.plugin.getLogger().info("DEBUG: Retrieved tracked wooden stake killer: " + killer.getName() + " for victim: " + victim.getName());
@@ -202,6 +250,7 @@ public class DeathHandler implements Listener {
             try {
                 Scoreboard mainScoreboard = Bukkit.getScoreboardManager().getMainScoreboard();
                 Objective deathObjective = mainScoreboard.getObjective("vsmp_death");
+
                 if (deathObjective != null) {
                     int currentDeaths = deathObjective.getScore(victim.getName()).getScore();
                     deathObjective.getScore(victim.getName()).setScore(currentDeaths + 1);
@@ -219,13 +268,21 @@ public class DeathHandler implements Listener {
         }
     }
 
+    /**
+     * Check if the weapon used a stake, and whether it would have a permanent effect on the victim.
+     *
+     * @param victim the player who was killed.
+     * @param killer the player who killed the victim.
+     * @param event a player dies.
+     */
     private void handlePvPDeath(Player victim, Player killer, PlayerDeathEvent event) {
         ItemStack weapon = killer.getInventory().getItemInMainHand();
         boolean killedWithWoodenWeapon = this.isWoodenWeapon(weapon);
-        Material lastWeapon = (Material)this.lastWeaponUsed.get(victim.getUniqueId());
+        Material lastWeapon = this.lastWeaponUsed.get(victim.getUniqueId());
 
         if (!killedWithWoodenWeapon && lastWeapon != null) {
             killedWithWoodenWeapon = lastWeapon == Material.WOODEN_SWORD || lastWeapon == Material.WOODEN_AXE;
+
             if (killedWithWoodenWeapon) {
                 this.plugin.getLogger().info("DEBUG: Using tracked last weapon: " + String.valueOf(lastWeapon) + " (current weapon broke/dropped)");
             }
@@ -245,6 +302,7 @@ public class DeathHandler implements Listener {
                 this.createVampireDeathEffects(victim.getLocation());
                 this.broadcastPermaKill(victim, killer);
                 this.plugin.getLogger().info("PERMA-KILL: Applied PermaKilled tag to " + victim.getName() + " (Stage " + victimStage + ", Threshold: " + woodenStakeThreshold + ")");
+
             } else {
                 victim.addScoreboardTag("PromotionBanPending");
                 this.plugin.getLogger().info("PROMOTION BAN: Applied PromotionBanPending tag to " + victim.getName() + " (Stage " + victimStage + ", Threshold: " + woodenStakeThreshold + ")");
@@ -252,9 +310,15 @@ public class DeathHandler implements Listener {
         }
     }
 
+    /**
+     * Alert the server that a vampire has been permanently.
+     *
+     * @param victim the player who was killed.
+     * @param killer the player who killed the victim.
+     */
     private void broadcastPermaKill(Player victim, Player killer) {
         String vampireMessage = "§4You feel a dark soul ripped from its human coil, somebody has slayed a member of your monsterous family...";
-        String humanMessage = "§aYou feel the realm has been purged of an evil spirit... Someone has succesfully killed a vampire. Permanently.";
+        String humanMessage = "§aYou feel the realm has been purged of an evil spirit... Someone has successfully killed a vampire. Permanently.";
 
         for(Player player : Bukkit.getOnlinePlayers()) {
             if (!player.getUniqueId().equals(victim.getUniqueId())) {
@@ -270,10 +334,17 @@ public class DeathHandler implements Listener {
         this.plugin.getLogger().info("PERMA-KILL: " + victim.getName() + " was permanently killed by " + killerType + " " + killer.getName());
     }
 
+    /**
+     * Determine if the item is a wooden weapon.
+     *
+     * @param item the item to check.
+     * @return {@code true} if the item is a wooden sword or axe.
+     */
     private boolean isWoodenWeapon(ItemStack item) {
         if (item == null) {
             this.plugin.getLogger().info("DEBUG: Weapon is null");
             return false;
+
         } else {
             Material type = item.getType();
             boolean isWooden = type == Material.WOODEN_SWORD || type == Material.WOODEN_AXE;
@@ -282,6 +353,11 @@ public class DeathHandler implements Listener {
         }
     }
 
+    /**
+     * Create the particle and sound effects around a vampire's final death.
+     *
+     * @param deathLocation the location where the vampire was staked.
+     */
     private void createVampireDeathEffects(Location deathLocation) {
         if (deathLocation.getWorld() != null) {
             Location centerLoc = deathLocation.clone().add(0.0, 1.0, 0.0);

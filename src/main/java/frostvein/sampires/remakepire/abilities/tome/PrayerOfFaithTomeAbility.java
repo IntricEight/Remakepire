@@ -19,7 +19,7 @@ public class PrayerOfFaithTomeAbility extends TomeAbility {
     private static final int ABSORPTION_DURATION = 12000;
     // Controls the intensity of the ability
     private static final int ABSORPTION_AMPLIFIER = 2;
-    private static final Map<UUID, PrayerSession> activePrayers = new HashMap();
+    private static final Map<UUID, PrayerSession> activePrayers = new HashMap<>();
 
     /**
      * Create an instance of the Prayer of Faith tome ability.
@@ -57,7 +57,7 @@ public class PrayerOfFaithTomeAbility extends TomeAbility {
      * @param player the player who cast the ability.
      */
     public static void cancelPrayer(Player player) {
-        PrayerSession session = (PrayerSession)activePrayers.remove(player.getUniqueId());
+        PrayerSession session = activePrayers.remove(player.getUniqueId());
 
         if (session != null) {
             session.cancel();
@@ -156,7 +156,7 @@ public class PrayerOfFaithTomeAbility extends TomeAbility {
          *
          * @param original the player's original location.
          * @param current the player's current location.
-         * @return {@code true} if the {@code original} and {@code current} locations are not the same.
+         * @return {@code true} if the original and current locations are not the same.
          */
         private boolean hasPlayerMoved(Location original, Location current) {
             return Math.abs(original.getX() - current.getX()) > 0.1 || Math.abs(original.getY() - current.getY()) > 0.1 || Math.abs(original.getZ() - current.getZ()) > 0.1;

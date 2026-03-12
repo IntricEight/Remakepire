@@ -21,12 +21,19 @@ import frostvein.sampires.remakepire.managers.VampireManager;
 public class BloodMoonAttributeListener implements Listener {
     private final RemakepirePlugin plugin;
     private final VampireManager vampireManager;
-    private final Map<UUID, Boolean> playersWithBloodMoonAttributes = new HashMap();
-    private final Map<UUID, AttributeModifier> speedModifiers = new HashMap();
-    private final Map<UUID, AttributeModifier> strengthModifiers = new HashMap();
+    private final Map<UUID, Boolean> playersWithBloodMoonAttributes = new HashMap<>();
+    private final Map<UUID, AttributeModifier> speedModifiers = new HashMap<>();
+    private final Map<UUID, AttributeModifier> strengthModifiers = new HashMap<>();
+    // Controls the additional speed vampires receive.
     private static final double SPEED_MODIFIER = 0.3;
+    // Controls the additional strength vampires receive.
     private static final double STRENGTH_MODIFIER = 0.15;
 
+    /**
+     * Create an instance of the Blood Moon Attribute listener.
+     *
+     * @param plugin the host plugin object.
+     */
     public BloodMoonAttributeListener(RemakepirePlugin plugin) {
         this.plugin = plugin;
         this.vampireManager = plugin.getVampireManager();
@@ -34,9 +41,15 @@ public class BloodMoonAttributeListener implements Listener {
         plugin.getLogger().info("BloodMoonAttributeListener initialized");
     }
 
+    /**
+     *
+     *
+     * @param event a potion effect changes.
+     */
     @EventHandler
     public void onPotionEffectChange(EntityPotionEffectEvent event) {
         Entity entity = event.getEntity();
+
         if (entity instanceof Player player) {
             if (this.vampireManager.isVampireStage2(player) || this.vampireManager.isVampireStage3(player)) {
                 if (event.getNewEffect() != null && event.getNewEffect().getType() == PotionEffectType.UNLUCK) {
@@ -45,22 +58,26 @@ public class BloodMoonAttributeListener implements Listener {
                     this.removeBloodMoonAttributes(player);
                 }
 
-                if (!this.vampireManager.isVampireStage2(player) && !this.vampireManager.isVampireStage3(player) && (Boolean)this.playersWithBloodMoonAttributes.getOrDefault(player.getUniqueId(), false)) {
+                if (!this.vampireManager.isVampireStage2(player) && !this.vampireManager.isVampireStage3(player) && this.playersWithBloodMoonAttributes.getOrDefault(player.getUniqueId(), false)) {
                     this.removeBloodMoonAttributes(player);
                 }
-
             }
         }
     }
 
+    /**
+     * Apply the bonuses to vampires during a blood moon.
+     *
+     * @param player the player being given bonuses from the blood moon.
+     */
     private void applyBloodMoonAttributes(Player player) {
         UUID playerId = player.getUniqueId();
 
-        if (!(Boolean)this.playersWithBloodMoonAttributes.getOrDefault(playerId, false)) {
+        if (!this.playersWithBloodMoonAttributes.getOrDefault(playerId, false)) {
             AttributeInstance speedAttribute = player.getAttribute(Attribute.MOVEMENT_SPEED);
 
             if (speedAttribute != null) {
-                AttributeModifier speedModifier = new AttributeModifier("BloodMoon_Speed", 0.3, Operation.MULTIPLY_SCALAR_1);
+                AttributeModifier speedModifier = new AttributeModifier("BloodMoon_Speed", SPEED_MODIFIER, Operation.MULTIPLY_SCALAR_1);
                 speedAttribute.addModifier(speedModifier);
                 this.speedModifiers.put(playerId, speedModifier);
             }
@@ -68,7 +85,7 @@ public class BloodMoonAttributeListener implements Listener {
             AttributeInstance strengthAttribute = player.getAttribute(Attribute.ATTACK_DAMAGE);
 
             if (strengthAttribute != null) {
-                AttributeModifier strengthModifier = new AttributeModifier("BloodMoon_Strength", 0.15, Operation.MULTIPLY_SCALAR_1);
+                AttributeModifier strengthModifier = new AttributeModifier("BloodMoon_Strength", STRENGTH_MODIFIER, Operation.MULTIPLY_SCALAR_1);
                 strengthAttribute.addModifier(strengthModifier);
                 this.strengthModifiers.put(playerId, strengthModifier);
             }
@@ -78,19 +95,24 @@ public class BloodMoonAttributeListener implements Listener {
         }
     }
 
+    /**
+     * Remove the bonuses from vampires after a blood moon.
+     *
+     * @param player the player who had bonuses from the blood moon.
+     */
     private void removeBloodMoonAttributes(Player player) {
         UUID playerId = player.getUniqueId();
 
         if (this.playersWithBloodMoonAttributes.getOrDefault(playerId, false)) {
             AttributeInstance speedAttribute = player.getAttribute(Attribute.MOVEMENT_SPEED);
-            AttributeModifier speedModifier = (AttributeModifier)this.speedModifiers.remove(playerId);
+            AttributeModifier speedModifier = this.speedModifiers.remove(playerId);
 
             if (speedAttribute != null && speedModifier != null) {
                 speedAttribute.removeModifier(speedModifier);
             }
 
             AttributeInstance strengthAttribute = player.getAttribute(Attribute.ATTACK_DAMAGE);
-            AttributeModifier strengthModifier = (AttributeModifier)this.strengthModifiers.remove(playerId);
+            AttributeModifier strengthModifier = this.strengthModifiers.remove(playerId);
 
             if (strengthAttribute != null && strengthModifier != null) {
                 strengthAttribute.removeModifier(strengthModifier);
@@ -101,6 +123,11 @@ public class BloodMoonAttributeListener implements Listener {
         }
     }
 
+    /**
+     * Remove the bonuses from vampires when they quit the game during a blood moon.
+     *
+     * @param event a player leaving the world.
+     */
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
         Player player = event.getPlayer();
@@ -110,18 +137,28 @@ public class BloodMoonAttributeListener implements Listener {
             this.removeBloodMoonAttributes(player);
             this.plugin.getLogger().info("Cleaned up blood moon attributes for quitting player: " + player.getName());
         }
-
     }
 
+    /**
+     * Remove the blood moon's bonuses from vampires.
+     *
+     * @param player the player who had bonuses from the blood moon.
+     */
     public void forceRemoveBloodMoonAttributes(Player player) {
         this.removeBloodMoonAttributes(player);
     }
 
+    /**
+     * Clean up the effects of the blood moon when the server is shut down.
+     *
+     * @param player the player who joined the game.
+     */
     public void forceCleanupOnJoin(Player player) {
         try {
             UUID playerId = player.getUniqueId();
-            int removedCount = 0;
             AttributeInstance speedAttribute = player.getAttribute(Attribute.MOVEMENT_SPEED);
+            AttributeInstance strengthAttribute = player.getAttribute(Attribute.ATTACK_DAMAGE);
+            int removedCount = 0;
 
             if (speedAttribute != null) {
                 double baseSpeed = speedAttribute.getBaseValue();
@@ -133,7 +170,6 @@ public class BloodMoonAttributeListener implements Listener {
                 }
             }
 
-            AttributeInstance strengthAttribute = player.getAttribute(Attribute.ATTACK_DAMAGE);
             if (strengthAttribute != null) {
                 for(AttributeModifier mod : strengthAttribute.getModifiers().stream().filter((modx) -> modx.getName().contains("BloodMoon") || modx.getName().contains("Vampire")).toList()) {
                     strengthAttribute.removeModifier(mod);
@@ -152,17 +188,18 @@ public class BloodMoonAttributeListener implements Listener {
             } else {
                 this.plugin.getLogger().info("No suspicious attribute modifiers found for: " + player.getName());
             }
-
         } catch (Exception e) {
             this.plugin.getLogger().warning("Error during aggressive cleanup of attributes for " + player.getName() + ": " + e.getMessage());
             e.printStackTrace();
         }
-
     }
 
+    /**
+     * Remove the blood moon effects before shutting down the listener.
+     */
     public void shutdown() {
         for(Player player : Bukkit.getOnlinePlayers()) {
-            if ((Boolean)this.playersWithBloodMoonAttributes.getOrDefault(player.getUniqueId(), false)) {
+            if (this.playersWithBloodMoonAttributes.getOrDefault(player.getUniqueId(), false)) {
                 this.removeBloodMoonAttributes(player);
             }
         }

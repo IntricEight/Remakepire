@@ -25,12 +25,24 @@ import frostvein.sampires.remakepire.listeners.DeathHandler;
 
 public class ForcedCureChoiceManager {
     private final RemakepirePlugin plugin;
-    private final Map<UUID, ForcedCureData> pendingCures = new HashMap();
+    private final Map<UUID, ForcedCureData> pendingCures = new HashMap<>();
 
+    /**
+     * Create an instance of the Force Cure Choice manager.
+     *
+     * @param plugin the host plugin object.
+     */
     public ForcedCureChoiceManager(RemakepirePlugin plugin) {
         this.plugin = plugin;
     }
 
+    /**
+     * Freeze the target and begin the force cure process.
+     *
+     * @param caster the player forcing the cure.
+     * @param target the player who must make the decision.
+     * @param holyBeacon the beacon being used for the cure.
+     */
     public void openChoiceGUI(Player caster, Player target, BeaconSite holyBeacon) {
         boolean hadFlight = target.getAllowFlight();
         boolean wasInvulnerable = target.isInvulnerable();
@@ -38,20 +50,32 @@ public class ForcedCureChoiceManager {
         this.applyEffectsAndOpenGUI(target);
     }
 
+    /**
+     * Reopen the forced cure choice GUI for the target.
+     *
+     * @param target the player who must make the decision.
+     */
     public void reopenChoiceGUI(Player target) {
-        ForcedCureData data = (ForcedCureData)this.pendingCures.get(target.getUniqueId());
+        ForcedCureData data = this.pendingCures.get(target.getUniqueId());
+
         if (data != null) {
             this.applyEffectsAndOpenGUI(target);
         }
     }
 
+    /**
+     * Open up the forced cure choice GUI for the target.
+     *
+     * @param target the player who must make the decision.
+     */
     private void applyEffectsAndOpenGUI(Player target) {
         target.setAllowFlight(true);
         target.setFlying(true);
         target.setInvulnerable(true);
-        Inventory gui = Bukkit.createInventory((InventoryHolder)null, 27, "§4§lYour Fate Awaits...");
+        Inventory gui = Bukkit.createInventory(null, 27, "§4§lYour Fate Awaits...");
         ItemStack humanityButton = new ItemStack(Material.PLAYER_HEAD);
         ItemMeta humanityMeta = humanityButton.getItemMeta();
+
         if (humanityMeta != null) {
             humanityMeta.setDisplayName("§a§lReturn to Humanity");
             humanityMeta.setLore(Arrays.asList("§7The holy words have broken your curse.", "§7You can feel your humanity returning...", "", "§eClick to accept your return to mortality."));
@@ -60,6 +84,7 @@ public class ForcedCureChoiceManager {
 
         ItemStack deathButton = new ItemStack(Material.SKELETON_SKULL);
         ItemMeta deathMeta = deathButton.getItemMeta();
+
         if (deathMeta != null) {
             deathMeta.setDisplayName("§4§lFinally Accept Death");
             deathMeta.setLore(Arrays.asList("§7You have lived too long as a creature", "§7of darkness. Perhaps it is time to rest...", "", "§c§lWARNING: This will result in permadeath!", "§eClick to embrace the eternal sleep."));
@@ -69,6 +94,7 @@ public class ForcedCureChoiceManager {
         gui.setItem(11, humanityButton);
         gui.setItem(15, deathButton);
         target.openInventory(gui);
+
         target.sendMessage("");
         target.sendMessage("§4§l§m                                                    ");
         target.sendMessage("§4§lHOLY WORDS PIERCE YOUR SOUL");
@@ -78,24 +104,48 @@ public class ForcedCureChoiceManager {
         target.sendMessage("");
     }
 
+    /**
+     * Retrieve if the target must make a choice on whether to be cured or killed.
+     *
+     * @param player the player who must make the cure decision.
+     * @return {@code true} if the target has an active cure choice.
+     */
     public boolean hasPendingCure(Player player) {
         return this.pendingCures.containsKey(player.getUniqueId());
     }
 
+    /**
+     * Retrieve the data about a cure choice in progress.
+     *
+     * @param player the player who must make the cure decision.
+     * @return The target's cure decision data.
+     */
     public ForcedCureData getPendingCure(Player player) {
-        return (ForcedCureData)this.pendingCures.get(player.getUniqueId());
+        return this.pendingCures.get(player.getUniqueId());
     }
 
+    /**
+     * Remove the pending cure choice's information from the active cure choices.
+     *
+     * @param player the player who no longer needs to make a cure decision.
+     */
     public void removePendingCure(Player player) {
         this.pendingCures.remove(player.getUniqueId());
     }
 
+    /**
+     * Handle the player's decision to be cured.
+     *
+     * @param target the player who must make the decision.
+     */
     public void handleHumanityChoice(Player target) {
-        ForcedCureData data = (ForcedCureData)this.pendingCures.get(target.getUniqueId());
+        ForcedCureData data = this.pendingCures.get(target.getUniqueId());
+
         if (data != null) {
             target.closeInventory();
             target.setInvulnerable(data.wasInvulnerableBefore);
             target.setAllowFlight(data.hadFlightBefore);
+
             if (!data.hadFlightBefore) {
                 target.setFlying(false);
             }
@@ -107,12 +157,19 @@ public class ForcedCureChoiceManager {
         }
     }
 
+    /**
+     * Handle the player's decision to die.
+     *
+     * @param target the player who must make the decision.
+     */
     public void handleDeathChoice(Player target) {
-        ForcedCureData data = (ForcedCureData)this.pendingCures.get(target.getUniqueId());
+        ForcedCureData data = this.pendingCures.get(target.getUniqueId());
+
         if (data != null) {
             target.closeInventory();
             target.setInvulnerable(data.wasInvulnerableBefore);
             target.setAllowFlight(data.hadFlightBefore);
+
             if (!data.hadFlightBefore) {
                 target.setFlying(false);
             }
@@ -124,6 +181,13 @@ public class ForcedCureChoiceManager {
         }
     }
 
+    /**
+     * Cure the target of vampirism forcefully.
+     *
+     * @param caster the player forcing the cure.
+     * @param target the player who must make the decision.
+     * @param holyBeacon the beacon being used for the cure.
+     */
     private void performCure(Player caster, Player target, BeaconSite holyBeacon) {
         caster.sendMessage("§6" + target.getName() + " has chosen to return to humanity...");
         caster.sendMessage("§7The creature of darkness accepts their redemption...");
@@ -152,9 +216,11 @@ public class ForcedCureChoiceManager {
 
         Location targetLoc = target.getLocation();
         Location beaconLoc = holyBeacon.getLocation();
+
         target.getWorld().spawnParticle(Particle.SOUL, targetLoc, 100, 1.0, 2.0, 1.0, 0.1);
         target.getWorld().spawnParticle(Particle.EXPLOSION_EMITTER, targetLoc, 1, 0.5, 1.0, 0.5, 0.0);
         target.getWorld().spawnParticle(Particle.EXPLOSION_EMITTER, targetLoc, 5, 1.0, 1.0, 1.0, 0.0);
+
         target.getWorld().playSound(targetLoc, Sound.BLOCK_BELL_USE, SoundCategory.MASTER, 1.5F, 0.8F);
         target.getWorld().playSound(targetLoc, Sound.BLOCK_GLASS_BREAK, SoundCategory.MASTER, 1.0F, 1.0F);
         target.getWorld().playSound(targetLoc, Sound.AMBIENT_SOUL_SAND_VALLEY_MOOD, SoundCategory.MASTER, 1.0F, 1.5F);
@@ -179,6 +245,9 @@ public class ForcedCureChoiceManager {
         DeathHandler.checkAndAnnounceTeamElimination(this.plugin, false, true);
     }
 
+    /**
+     * Activate the darkness control final stand scenario.
+     */
     private void checkIfAllBeaconsEvil() {
         int evilCount = this.plugin.getBeaconManager().getAllEvilBeacons().size();
         int totalBeacons = this.plugin.getBeaconManager().getAllBeacons().size();
@@ -188,6 +257,9 @@ public class ForcedCureChoiceManager {
         }
     }
 
+    /**
+     * Announce the Eternal Night final stand and apply a blinding effect to players.
+     */
     private void triggerVampiresEternalNight() {
         this.plugin.getLogger().info("VAMPIRES ETERNAL NIGHT TRIGGERED - All beacons are now evil!");
 
@@ -206,6 +278,13 @@ public class ForcedCureChoiceManager {
         this.plugin.getSessionManager().setVampiresEternalNightActive(true);
     }
 
+    /**
+     * Perform the visual and message effects of a vampire permadeath.
+     *
+     * @param caster the player forcing the cure.
+     * @param target the player who must make the decision.
+     * @param holyBeacon the beacon being used for the cure.
+     */
     private void performPermadeath(Player caster, Player target, BeaconSite holyBeacon) {
         caster.sendMessage("§4" + target.getName() + " has refused redemption...");
         caster.sendMessage("§7The creature chooses death over humanity...");
@@ -237,6 +316,11 @@ public class ForcedCureChoiceManager {
         DeathHandler.checkAndAnnounceTeamElimination(this.plugin, false, true);
     }
 
+    /**
+     * Create the particle effects of a vampire permadeath.
+     *
+     * @param deathLocation the center of the particle effects.
+     */
     private void createVampireDeathEffects(Location deathLocation) {
         if (deathLocation.getWorld() != null) {
             Location centerLoc = deathLocation.clone().add(0.0, 1.0, 0.0);
@@ -259,17 +343,27 @@ public class ForcedCureChoiceManager {
         }
     }
 
+    /**
+     * Clear the list of pending cures before shutting down the manager.
+     */
     public void shutdown() {
         this.pendingCures.clear();
     }
 
     public static class ForcedCureData {
-        public final UUID casterUUID;
-        public final UUID targetUUID;
+        public final UUID casterUUID, targetUUID;
         public final BeaconSite holyBeacon;
-        public final boolean hadFlightBefore;
-        public final boolean wasInvulnerableBefore;
+        public final boolean hadFlightBefore, wasInvulnerableBefore;
 
+        /**
+         * Create an instance of the forced cure's data record.
+         *
+         * @param casterUUID the UUID of the player forcing the cure.
+         * @param targetUUID the UUID of the player who must make the decision.
+         * @param holyBeacon the beacon being used for the cure.
+         * @param hadFlightBefore {@code true} if the playr
+         * @param wasInvulnerableBefore {@code true} if
+         */
         public ForcedCureData(UUID casterUUID, UUID targetUUID, BeaconSite holyBeacon, boolean hadFlightBefore, boolean wasInvulnerableBefore) {
             this.casterUUID = casterUUID;
             this.targetUUID = targetUUID;
@@ -278,10 +372,20 @@ public class ForcedCureChoiceManager {
             this.wasInvulnerableBefore = wasInvulnerableBefore;
         }
 
+        /**
+         * Retrieve the UUID of the player forcing the cure.
+         *
+         * @return A UUID of the caster.
+         */
         public Player getCaster() {
             return Bukkit.getPlayer(this.casterUUID);
         }
 
+        /**
+         * Retrieve the UUID of the player who must make the decision.
+         *
+         * @return A UUID of the target.
+         */
         public Player getTarget() {
             return Bukkit.getPlayer(this.targetUUID);
         }

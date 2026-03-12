@@ -57,12 +57,13 @@ public class UncannyDirectionTomeAbility extends TomeAbility {
      * @param deltaX the difference between the player's X coordinate and the target's.
      * @param deltaZ the difference between the player's Y coordinate and the target's.
      * @param playerYaw the angle that the player is looking.
-     * @return
+     * @return A Unicode value of the direction.
      */
     private String getRelativeDirection(double deltaX, double deltaZ, float playerYaw) {
         double targetAngle = Math.atan2(deltaX, -deltaZ);
         double targetDegrees = Math.toDegrees(targetAngle);
 
+        // Normalize the degrees
         if (targetDegrees < 0) {
             targetDegrees += 360;
         }

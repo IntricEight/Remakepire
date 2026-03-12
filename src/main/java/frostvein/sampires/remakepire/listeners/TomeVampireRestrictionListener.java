@@ -24,6 +24,11 @@ public class TomeVampireRestrictionListener implements Listener {
     private final VampireManager vampireManager;
     private final TomeManager tomeManager;
 
+    /**
+     * Create an instance of the Tome Vampire Restriction listener.
+     *
+     * @param plugin the host plugin object.
+     */
     public TomeVampireRestrictionListener(RemakepirePlugin plugin) {
         this.plugin = plugin;
         this.vampireManager = plugin.getVampireManager();
@@ -31,27 +36,39 @@ public class TomeVampireRestrictionListener implements Listener {
         this.startTomeCheckTask();
     }
 
+    /**
+     * Prevent higher vampires from picking up holy tomes.
+     *
+     * @param event an entity picks up an item.
+     */
     @EventHandler(
             priority = EventPriority.HIGH
     )
     public void onTomePickup(EntityPickupItemEvent event) {
         LivingEntity entity = event.getEntity();
+
         if (entity instanceof Player player) {
             if (this.isRestrictedVampire(player)) {
                 ItemStack item = event.getItem().getItemStack();
+
                 if (this.isTome(item)) {
                     event.setCancelled(true);
                 }
-
             }
         }
     }
 
+    /**
+     * Prevent higher vampires from taking holy tomes from other inventories.
+     *
+     * @param event a player clicks inside an inventory menu.
+     */
     @EventHandler(
             priority = EventPriority.HIGH
     )
     public void onInventoryClick(InventoryClickEvent event) {
         HumanEntity entity = event.getWhoClicked();
+
         if (entity instanceof Player player) {
             if (this.isRestrictedVampire(player)) {
                 ItemStack currentItem = event.getCurrentItem();
@@ -62,11 +79,13 @@ public class TomeVampireRestrictionListener implements Listener {
                     player.sendMessage("§4§lThe tome sears your flesh! You cannot touch such holy artifacts!");
                     Bukkit.getScheduler().runTask(this.plugin, () -> player.updateInventory());
                 }
-
             }
         }
     }
 
+    /**
+     * Begin regularly checking if a vampire has tomes in their inventory.
+     */
     private void startTomeCheckTask() {
         (new BukkitRunnable() {
             public void run() {
@@ -75,11 +94,15 @@ public class TomeVampireRestrictionListener implements Listener {
                         TomeVampireRestrictionListener.this.checkAndDropTomes(player);
                     }
                 }
-
             }
         }).runTaskTimer(this.plugin, 20L, 20L);
     }
 
+    /**
+     * Drop any holy tomes within the vampire's inventory.
+     *
+     * @param player the vampire whose inventory is being checked.
+     */
     private void checkAndDropTomes(Player player) {
         boolean foundTome = false;
 
@@ -104,19 +127,35 @@ public class TomeVampireRestrictionListener implements Listener {
         if (foundTome) {
             player.sendMessage("§cYour dark nature cannot bear to hold such holy knowledge...");
         }
-
     }
 
+    /**
+     * Determine if the player should be prevented from interacting with tomes.
+     *
+     * @param player the player attempting to interact with a tome.
+     * @return {@code true} if the player is a higher vampire.
+     */
     private boolean isRestrictedVampire(Player player) {
         return this.vampireManager.isVampireStage2(player) || this.vampireManager.isVampireStage3(player);
     }
 
+    /**
+     * Force higher vampires to drop any tomes that they are holding.
+     *
+     * @param player the player being checked.
+     */
     public void forceDropTomesForPlayer(Player player) {
         if (this.isRestrictedVampire(player)) {
             this.checkAndDropTomes(player);
         }
     }
 
+    /**
+     * Determine if an item is a holy tome that grants abilities.
+     *
+     * @param item the item being checked.
+     * @return {@code true} if the item is a tome book.
+     */
     private boolean isTome(ItemStack item) {
         if (item == null) {
             return false;
@@ -127,12 +166,10 @@ public class TomeVampireRestrictionListener implements Listener {
         } else {
             ItemMeta meta = item.getItemMeta();
 
-            if (meta == null) {
-                return false;
-
-            } else {
+            if (meta != null) {
                 if (meta.hasDisplayName()) {
                     String displayName = meta.getDisplayName();
+
                     if (displayName.startsWith("§6Tome of ")) {
                         return true;
                     }
@@ -142,7 +179,7 @@ public class TomeVampireRestrictionListener implements Listener {
                     List<String> lore = meta.getLore();
 
                     if (lore != null) {
-                        for(String line : lore) {
+                        for (String line : lore) {
                             if (line.contains("Tome Type: ")) {
                                 return true;
                             }
@@ -150,17 +187,15 @@ public class TomeVampireRestrictionListener implements Listener {
                     }
                 }
 
-                if (item.getType() == Material.WRITTEN_BOOK && meta instanceof BookMeta) {
-                    BookMeta bookMeta = (BookMeta)meta;
-
+                if (item.getType() == Material.WRITTEN_BOOK && meta instanceof BookMeta bookMeta) {
                     if (bookMeta.hasTitle()) {
                         String title = bookMeta.getTitle();
                         return this.tomeManager.isValidAbility(title);
                     }
                 }
-
-                return false;
             }
+
+            return false;
         }
     }
 }

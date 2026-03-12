@@ -10,7 +10,7 @@ damage_suppression: 50
 # Controls how often vampire health is checked and regenerated (in ticks)
 # 20 ticks = 1 second
 # Default: 9 ticks (0.45 seconds)
-vampire_health_check_ticks: 9
+vampire_health_check_ticks: 12
 
 # Fourth Cure Book Configuration
 # Controls whether "The Retribution 4/3" book should spawn in tome chests
@@ -20,7 +20,7 @@ fourth_book_spawn_enabled: false
 # Cure Books in Tome Chests
 # Controls whether cure books (1/3, 2/3, 3/3) should spawn in tome chest distribution
 # Default: true (enabled)
-cure_books_enabled: true
+cure_books_enabled: false
 
 # Chance for a cure book to spawn in remaining empty chests (0.0 to 1.0)
 # Default: 0.3 (30% chance)
@@ -37,7 +37,11 @@ chat:
 
   # The message shown when a player's first chat message is blocked
   # Use [Click Here] to add a clickable link that sends the message - if omitted, no link is shown
-  first-message-blocked-message: "&eIt looks like you've attempted to send a message! Vampire SMP is geared to revolve around immersion, consider finding the person you need to speak to, or messaging them on discord. If you still need to send your chat message, [Click Here]&e. This prevention message will not appear again until your next log on if you do choose to send your message via the blue text."
+  first-message-blocked-message: '&eIt looks like you''ve attempted to send a message!
+    Vampire SMP is geared to revolve around immersion, consider finding the person
+    you need to speak to, or messaging them on discord. If you still need to send
+    your chat message, [Click Here]&e. This prevention message will not appear again
+    until your next log on if you do choose to send your message via the blue text.'
 
 # ============================================================================
 # TOME CHEST LOCATIONS
@@ -46,15 +50,17 @@ chat:
 # Format: "x,y,z" - Use /pow admin addtomechest to add new locations in-game
 tome-chests:
   locations:
-    - "202,61,-305"
-    - "416,45,-109"
-    - "504,139,398"
-    - "494,125,593"
-    - "153,99,128"
-    - "-19,104,100"
-    - "-125,71,421"
-    - "76,80,407"
-    - "397, 82, 364"
+    - -1141,59,-764
+    - -560,110,-343
+    - -684,125,-670
+    - -817,78,-380
+    - -508,75,-66
+    - -998,77,-1286
+    - -893,83,-908
+    - -1514,91,-625
+    - -1437,101,-302
+    - -1095,-11,-1028
+    - -630,256,-1168
 
 # ============================================================================
 # VAMPIRE ABILITY COOLDOWNS
@@ -126,7 +132,7 @@ thirst:
 vampire:
   # Respawn location for vampire players (x,y,z coordinates)
   # Default: 40,101,-113 (the vampire crypt)
-  respawn-location: "40,101,-113"
+  respawn-location: -1102, -2, -987
 
 # ============================================================================
 # BEACON SYSTEM
@@ -169,6 +175,12 @@ garlic:
   immunity-duration-max-seconds: 600
 
 # ============================================================================
+# CURE SYSTEM
+# ============================================================================
+cure:
+  cure-distance: 25
+
+# ============================================================================
 # PASSIVE MOB SPAWNING SYSTEM
 # ============================================================================
 passive-mob-spawning:
@@ -179,11 +191,11 @@ passive-mob-spawning:
   # Minimum number of passive animals required before spawning is skipped
   # If animal count is below this threshold, spawning will occur
   # Default: 40
-  minimum-animal-threshold: 40
+  minimum-animal-threshold: 60
 
   # Number of animals to spawn per cycle (morning auto-spawn or /pow admin spawnanimals)
   # Default: 80
-  spawn-count: 80
+  spawn-count: 100
 
 # ============================================================================
 # COMBAT & PERMADEATH SYSTEM
@@ -206,8 +218,8 @@ combat:
 oakhurst:
   # Town center (the main settlement location)
   # Used for teleportation and direction-based abilities like Uncanny Direction
-  town-center-x: 79
-  town-center-z: 440
+  town-center-x: -1032
+  town-center-z: -150
 
   # Teleport radius - how far from town center players can be randomly teleported
   # Default: 400 blocks
@@ -217,11 +229,11 @@ oakhurst:
   # The border is defined by a center point and diameter (total width)
   border:
     # Center of the playable area
-    center-x: 50
-    center-z: 50
+    center-x: -1024
+    center-z: -714
     # Total width/height of the playable area (creates a square area)
     # With center at 50 and diameter 1098: boundaries are -499 to 599
-    diameter: 1098
+    diameter: 1500
 
 # ============================================================================
 # INTERNAL STATE TRACKING - DO NOT MODIFY

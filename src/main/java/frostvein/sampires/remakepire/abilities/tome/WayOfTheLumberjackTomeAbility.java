@@ -61,7 +61,7 @@ public class WayOfTheLumberjackTomeAbility extends TomeAbility implements Listen
     /**
      * Track the placed blocks to prevent abuse of this ability.
      *
-     * @param event the block placing event by the player.
+     * @param event a block being placed.
      */
     @EventHandler
     public void onBlockPlace(BlockPlaceEvent event) {
@@ -77,7 +77,7 @@ public class WayOfTheLumberjackTomeAbility extends TomeAbility implements Listen
     /**
      * Roll the extra crop chance when breaking relevant blocks.
      *
-     * @param event the block breaking event by the player.
+     * @param event a block being broken.
      */
     @EventHandler
     public void onBlockBreak(BlockBreakEvent event) {
@@ -104,7 +104,7 @@ public class WayOfTheLumberjackTomeAbility extends TomeAbility implements Listen
     /**
      * Convert a {@code Location} into a {@code String} format.
      *
-     * @param location the location to be converted.
+     * @param location a location to convert.
      * @return A {@code String} of the location's coordinates.
      */
     private String locationToString(Location location) {
@@ -145,7 +145,6 @@ public class WayOfTheLumberjackTomeAbility extends TomeAbility implements Listen
         } catch (IOException e) {
             this.plugin.getLogger().warning("WayOfTheLumberjack: Failed to save placed logs file: " + e.getMessage());
         }
-
     }
 
     /**

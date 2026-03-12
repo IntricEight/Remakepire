@@ -12,8 +12,6 @@ import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonToken;
 import com.google.gson.stream.JsonWriter;
 
-// TODO: Significant changes to file were made in fixing. If a problem is detected to come from here, check the originals to revert file version
-
 public class OptionalTypeAdapter implements TypeAdapterFactory {
     @Override
     public <T> TypeAdapter<T> create(Gson gson, TypeToken<T> typeToken) {

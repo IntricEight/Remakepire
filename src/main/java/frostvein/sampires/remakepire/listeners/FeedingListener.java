@@ -20,42 +20,63 @@ public class FeedingListener implements Listener {
     private final VampireManager vampireManager;
     private final ThirstManager thirstManager;
 
+    /**
+     * Create an instance of the vampire Feeding listener.
+     *
+     * @param plugin the host plugin object.
+     */
     public FeedingListener(RemakepirePlugin plugin) {
         this.plugin = plugin;
         this.vampireManager = plugin.getVampireManager();
         this.thirstManager = plugin.getThirstManager();
     }
 
+    /**
+     * Provide vampires with blood when they kill a valid entity, and prevent xp from spawning.
+     *
+     * @param event an entity dying.
+     */
     @EventHandler(
             priority = EventPriority.HIGH
     )
     public void onEntityDeath(EntityDeathEvent event) {
         if (this.plugin.getSessionManager().isSessionActive()) {
             Entity deadEntity = event.getEntity();
+
             if (!(deadEntity instanceof Player)) {
                 Player killer = ((LivingEntity)deadEntity).getKiller();
+
                 if (killer != null && this.vampireManager.isVampire(killer)) {
                     int experienceDropped = event.getDroppedExp();
                     event.setDroppedExp(0);
+
                     if (this.thirstManager.isThirstQuencher(deadEntity.getType())) {
                         boolean bottleFilled = this.tryFillBottleWithBlood(killer);
+
                         if (!bottleFilled) {
                             this.thirstManager.handleEntityKill(killer, deadEntity.getType(), experienceDropped);
+
                             if (experienceDropped > 0 && !killer.getScoreboardTags().contains("informed_successful_feeding")) {
                                 killer.addScoreboardTag("informed_successful_feeding");
                                 killer.sendMessage("§cYou taste the metallic essence of life...");
                             }
                         }
-
                     }
                 }
             }
         }
     }
 
+    /**
+     * Attempt to fill a bottle with crimson blood from an animal.
+     *
+     * @param killer the player attempting to fill a bottle.
+     * @return {@code true} if the bottle was filled.
+     */
     private boolean tryFillBottleWithBlood(Player killer) {
         PlayerInventory inventory = killer.getInventory();
         ItemStack offhandItem = inventory.getItemInOffHand();
+
         if (offhandItem != null && offhandItem.getType() == Material.GLASS_BOTTLE) {
             if (offhandItem.getAmount() > 1) {
                 offhandItem.setAmount(offhandItem.getAmount() - 1);
@@ -65,7 +86,7 @@ public class FeedingListener implements Listener {
 
             ItemStack experienceBottle = new ItemStack(Material.EXPERIENCE_BOTTLE, 1);
             if (inventory.firstEmpty() != -1) {
-                inventory.addItem(new ItemStack[]{experienceBottle});
+                inventory.addItem(experienceBottle);
             } else {
                 killer.getWorld().dropItemNaturally(killer.getLocation(), experienceBottle);
             }
@@ -77,20 +98,32 @@ public class FeedingListener implements Listener {
         }
     }
 
+    /**
+     * Prevent vampires from gaining blood through regular xp gain.
+     *
+     * @param event a player's xp level changes.
+     */
     @EventHandler(
             priority = EventPriority.LOWEST
     )
     public void onPlayerExpChange(PlayerExpChangeEvent event) {
         Player player = event.getPlayer();
+
         if (this.vampireManager.isVampire(player)) {
             event.setAmount(0);
+
             if (event.getAmount() > 0 && Math.random() < 0.1) {
                 player.sendMessage("§8Such mundane activities no longer sustain your cursed existence...");
             }
         }
-
     }
 
-    private void handleSpecialExperienceSource(Player vampire, int amount, String source) {
-    }
+    /**
+     * Handle any unexpected or special methods of gaining experience points.
+     *
+     * @param vampire the player generating the xp.
+     * @param amount the amount of xp.
+     * @param source the source of the xp.
+     */
+    private void handleSpecialExperienceSource(Player vampire, int amount, String source) {}
 }

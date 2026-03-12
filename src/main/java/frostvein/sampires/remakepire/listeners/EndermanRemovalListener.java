@@ -16,12 +16,22 @@ public class EndermanRemovalListener implements Listener {
     private final RemakepirePlugin plugin;
     private final AtomicBoolean endermanRemovalEnabled;
 
+    /**
+     * Create an instance of the Enderman Removal listener.
+     *
+     * @param plugin the host plugin object.
+     */
     public EndermanRemovalListener(RemakepirePlugin plugin) {
         this.plugin = plugin;
         this.endermanRemovalEnabled = new AtomicBoolean(true);
         plugin.getLogger().info("EndermanRemovalListener initialized - Enderman removal is ENABLED");
     }
 
+    /**
+     * Prevent an enderman from spawning in the world.
+     *
+     * @param event a non-player entity spawns.
+     */
     @EventHandler(
             priority = EventPriority.HIGHEST
     )
@@ -31,10 +41,14 @@ public class EndermanRemovalListener implements Listener {
                 event.setCancelled(true);
                 this.plugin.getLogger().info("Prevented Enderman spawn at " + event.getLocation().getBlockX() + ", " + event.getLocation().getBlockY() + ", " + event.getLocation().getBlockZ() + " (Reason: " + String.valueOf(event.getSpawnReason()) + ")");
             }
-
         }
     }
 
+    /**
+     * Prevent entities from spawning in new chunks.
+     *
+     * @param event a chunk loads.
+     */
     @EventHandler(
             priority = EventPriority.MONITOR
     )
@@ -53,15 +67,30 @@ public class EndermanRemovalListener implements Listener {
         }
     }
 
+    /**
+     * Retrieve if Endermen should be removed from the game world.
+     *
+     * @return {@code true} if Endermen spawning is prevented.
+     */
     public boolean isEndermanRemovalEnabled() {
         return this.endermanRemovalEnabled.get();
     }
 
+    /**
+     * Choose if Endermen should be removed from the game world.
+     *
+     * @param enabled should Endermen spawning be prevented.
+     */
     public void setEndermanRemovalEnabled(boolean enabled) {
         this.endermanRemovalEnabled.set(enabled);
         this.plugin.getLogger().info("Enderman removal " + (enabled ? "ENABLED" : "DISABLED"));
     }
 
+    /**
+     * Remove all Endermen from the game world.
+     *
+     * @return the number of Endermen removed.
+     */
     public int removeAllEndermen() {
         int totalRemoved = 0;
 
@@ -80,6 +109,9 @@ public class EndermanRemovalListener implements Listener {
         return totalRemoved;
     }
 
+    /**
+     * Notify the log that this listener is shut down.
+     */
     public void shutdown() {
         this.plugin.getLogger().info("EndermanRemovalListener shutdown");
     }

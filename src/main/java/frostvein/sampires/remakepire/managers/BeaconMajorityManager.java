@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import org.bukkit.Bukkit;
+import org.bukkit.NamespacedKey;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.attribute.AttributeModifier;
@@ -17,19 +18,34 @@ public class BeaconMajorityManager {
     private final RemakepirePlugin plugin;
     private final VampireManager vampireManager;
     private final BeaconManager beaconManager;
-    private final Map<UUID, AttributeModifier> healthModifiers = new HashMap();
+    private final Map<UUID, AttributeModifier> healthModifiers = new HashMap<>();
     private static final UUID VAMPIRE_MAJORITY_HEALTH_UUID = UUID.fromString("a1b2c3d4-5e6f-7890-1234-567890abcdef");
     private static final UUID HUMAN_MAJORITY_HEALTH_UUID = UUID.fromString("f1e2d3c4-b5a6-9870-4321-fedcba098765");
     private static final UUID DEATH_PENALTY_HEALTH_UUID = UUID.fromString("d1e2a3d4-b5e6-7890-abcd-1234567890ef");
+//    private final NamespacedKey VAMPIRE_MAJORITY_HEALTH_KEY;
+//    private final NamespacedKey HUMAN_MAJORITY_HEALTH_KEY;
+//    private final NamespacedKey DEATH_PENALTY_HEALTH_KEY;
     private int currentVampireBonus = 0;
     private int currentHumanBonus = 0;
 
+    /**
+     * Create an instance of the Beacon Majority manager.
+     *
+     * @param plugin the host plugin object.
+     */
     public BeaconMajorityManager(RemakepirePlugin plugin) {
         this.plugin = plugin;
         this.vampireManager = plugin.getVampireManager();
         this.beaconManager = plugin.getBeaconManager();
+
+//        this.VAMPIRE_MAJORITY_HEALTH_KEY = new NamespacedKey(plugin, "vampire_majority_health");
+//        this.HUMAN_MAJORITY_HEALTH_KEY = new NamespacedKey(plugin, "human_majority_health");
+//        this.DEATH_PENALTY_HEALTH_KEY = new NamespacedKey(plugin, "death_penalty_health");
     }
 
+    /**
+     * Grant and remove bonuses from teams as beacons change hands.
+     */
     public void updateBeaconMajorityBonuses() {
         if (!this.plugin.getSessionManager().isSessionActive()) {
             this.plugin.getLogger().fine("Session not active, skipping beacon majority bonus update");
@@ -54,10 +70,14 @@ public class BeaconMajorityManager {
             } else {
                 this.removeAllBonuses();
             }
-
         }
     }
 
+    /**
+     * Give humans extra hearts.
+     *
+     * @param bonusHearts the extra hearts to give.
+     */
     private void applyBonusToHumans(int bonusHearts) {
         this.currentHumanBonus = bonusHearts;
         this.currentVampireBonus = 0;
@@ -69,9 +89,13 @@ public class BeaconMajorityManager {
                 this.applyDeathPenalty(player);
             }
         }
-
     }
 
+    /**
+     * Give vampires extra hearts.
+     *
+     * @param bonusHearts the extra hearts to give.
+     */
     private void applyBonusToVampires(int bonusHearts) {
         this.currentVampireBonus = bonusHearts;
         this.currentHumanBonus = 0;
@@ -82,9 +106,11 @@ public class BeaconMajorityManager {
                 this.applyHealthModifier(player, healthBonus, VAMPIRE_MAJORITY_HEALTH_UUID, "Beacon Majority (Vampire)");
             }
         }
-
     }
 
+    /**
+     * Remove extra hearts from humans.
+     */
     private void removeBonusFromHumans() {
         this.currentHumanBonus = 0;
 
@@ -96,6 +122,9 @@ public class BeaconMajorityManager {
         }
     }
 
+    /**
+     * Remove extra hearts from vampires.
+     */
     private void removeBonusFromVampires() {
         this.currentVampireBonus = 0;
 
@@ -106,19 +135,31 @@ public class BeaconMajorityManager {
         }
     }
 
+    /**
+     * Remove extra hearts from both teams.
+     */
     private void removeAllBonuses() {
         this.currentVampireBonus = 0;
         this.currentHumanBonus = 0;
 
         for(Player player : Bukkit.getOnlinePlayers()) {
-            this.removeHealthModifier(player, VAMPIRE_MAJORITY_HEALTH_UUID);
             this.removeHealthModifier(player, HUMAN_MAJORITY_HEALTH_UUID);
+            this.removeHealthModifier(player, VAMPIRE_MAJORITY_HEALTH_UUID);
+
             if (this.vampireManager.isHuman(player)) {
                 this.applyDeathPenalty(player);
             }
         }
     }
 
+    /**
+     * Apply extra maximum hearts to the player.
+     *
+     * @param player the player getting extra hearts.
+     * @param healthBonus the health points to add.
+     * @param modifierUUID the UUID of the team's health modifier.
+     * @param name the reason for the health modifier change.
+     */
     private void applyHealthModifier(Player player, double healthBonus, UUID modifierUUID, String name) {
         AttributeInstance healthAttribute = player.getAttribute(Attribute.MAX_HEALTH);
         if (healthAttribute != null) {
@@ -134,10 +175,16 @@ public class BeaconMajorityManager {
                 player.setHealth(player.getMaxHealth());
             }
 
-            this.plugin.getLogger().fine("Applied +" + healthBonus / 2.0 + " hearts bonus to " + player.getName());
+            this.plugin.getLogger().fine("Applied +" + healthBonus / 2 + " hearts bonus to " + player.getName());
         }
     }
 
+    /**
+     * Remove the extra hearts from the player.
+     *
+     * @param player the player losing the extra hearts.
+     * @param modifierUUID the UUID of the team's health modifier
+     */
     private void removeHealthModifier(Player player, UUID modifierUUID) {
         AttributeInstance healthAttribute = player.getAttribute(Attribute.MAX_HEALTH);
 
@@ -157,6 +204,11 @@ public class BeaconMajorityManager {
         }
     }
 
+    /**
+     * Apply the health bonus to players.
+     *
+     * @param player the player gaining bonus hearts.
+     */
     public void applyBonusesToPlayer(Player player) {
         if (this.plugin.getSessionManager().isSessionActive()) {
             if (this.vampireManager.isVampire(player) && this.currentVampireBonus > 0) {
@@ -171,16 +223,25 @@ public class BeaconMajorityManager {
 
                 this.applyDeathPenalty(player);
             }
-
         }
     }
 
+    /**
+     * Remove the health bonus from players.
+     *
+     * @param player the player losing their bonus hearts.
+     */
     public void removeBonusesFromPlayer(Player player) {
         this.removeHealthModifier(player, VAMPIRE_MAJORITY_HEALTH_UUID);
         this.removeHealthModifier(player, HUMAN_MAJORITY_HEALTH_UUID);
         this.removeHealthModifier(player, DEATH_PENALTY_HEALTH_UUID);
     }
 
+    /**
+     * Reduce the player's maximum hearts based on their death penalty.
+     *
+     * @param player the player who is losing hearts.
+     */
     private void applyDeathPenalty(Player player) {
         if (this.vampireManager.isHuman(player)) {
             int deathCount = this.getPlayerDeathCount(player);
@@ -193,10 +254,15 @@ public class BeaconMajorityManager {
             } else {
                 this.removeHealthModifier(player, DEATH_PENALTY_HEALTH_UUID);
             }
-
         }
     }
 
+    /**
+     * Retrieve the death count for the player.
+     *
+     * @param player the player that is being evaluated.
+     * @return The number of uncured deaths the player has experienced.
+     */
     private int getPlayerDeathCount(Player player) {
         try {
             Scoreboard mainScoreboard = Bukkit.getScoreboardManager().getMainScoreboard();
@@ -212,6 +278,11 @@ public class BeaconMajorityManager {
         return 0;
     }
 
+    /**
+     * Retrieve the status description of the beacon alignments and health bonuses.
+     *
+     * @return A description of the beacon majority status.
+     */
     public String getBonusStatus() {
         int holyBeacons = this.beaconManager.getHolyBeacons().size();
         int evilBeacons = this.beaconManager.getAllEvilBeacons().size();
@@ -233,6 +304,9 @@ public class BeaconMajorityManager {
         return status;
     }
 
+    /**
+     * Remove the health modifiers before shutting down the manager.
+     */
     public void shutdown() {
         for(Player player : Bukkit.getOnlinePlayers()) {
             this.removeBonusesFromPlayer(player);
@@ -241,6 +315,7 @@ public class BeaconMajorityManager {
         this.healthModifiers.clear();
         this.currentVampireBonus = 0;
         this.currentHumanBonus = 0;
+
         this.plugin.getLogger().info("BeaconMajorityManager shutdown - all health bonuses removed");
     }
 }

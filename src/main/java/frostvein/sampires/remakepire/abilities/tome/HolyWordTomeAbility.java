@@ -25,7 +25,7 @@ public class HolyWordTomeAbility extends TomeAbility implements Listener {
     private static final int RADIUS = 20;
     // Controls the duration of the ability (in ticks)
     private static final int PARALYSIS_DURATION = 300;
-    private final Map<UUID, BukkitTask> paralyzedPlayers = new HashMap();
+    private final Map<UUID, BukkitTask> paralyzedPlayers = new HashMap<>();
 
     /**
      * Create an instance of the Holy Word tome ability.
@@ -58,7 +58,7 @@ public class HolyWordTomeAbility extends TomeAbility implements Listener {
                         target.sendMessage("§cYou are frozen by divine power!");
                         target.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, PARALYSIS_DURATION, 255, false, false));
                         UUID targetId = target.getUniqueId();
-                        BukkitTask paralysisTask = Bukkit.getScheduler().runTaskLater(this.plugin, () -> this.paralyzedPlayers.remove(targetId), (long)(PARALYSIS_DURATION * 20));
+                        BukkitTask paralysisTask = Bukkit.getScheduler().runTaskLater(this.plugin, () -> this.paralyzedPlayers.remove(targetId), PARALYSIS_DURATION);
 
                         this.paralyzedPlayers.put(targetId, paralysisTask);
                         target.getWorld().playSound(target.getLocation(), "minecraft:entity.zombie_villager.cure", 0.8F, 2.0F);
@@ -67,7 +67,8 @@ public class HolyWordTomeAbility extends TomeAbility implements Listener {
                             if (target.isOnline()) {
                                 target.sendMessage("§7The divine paralysis fades... You can move again.");
                             }
-                        }, (long)(PARALYSIS_DURATION * 20));
+                        }, PARALYSIS_DURATION);
+
                         ++stage2And3Paralyzed;
                     }
                 }
@@ -89,14 +90,13 @@ public class HolyWordTomeAbility extends TomeAbility implements Listener {
     /**
      * Prevent paralyzed players from receiving damage.
      *
-     * @param event the damage event from the player.
+     * @param event an entity receives damage.
      */
     @EventHandler(
             priority = EventPriority.HIGHEST
     )
     public void onEntityDamage(EntityDamageEvent event) {
-        if (event.getEntity() instanceof Player) {
-            Player player = (Player)event.getEntity();
+        if (event.getEntity() instanceof Player player) {
             UUID playerId = player.getUniqueId();
 
             if (this.paralyzedPlayers.containsKey(playerId)) {
@@ -108,7 +108,7 @@ public class HolyWordTomeAbility extends TomeAbility implements Listener {
     /**
      * Prevent paralyzed players from moving.
      *
-     * @param event the movement event from the player.
+     * @param event a player moving.
      */
     @EventHandler
     public void onPlayerMove(PlayerMoveEvent event) {

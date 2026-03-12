@@ -16,18 +16,29 @@ public class BeetrootListener implements Listener {
     private final BeetrootManager beetrootManager;
     private final SessionManager sessionManager;
 
+    /**
+     * Create an instance of the Beetroot "garlic" listener.
+     *
+     * @param plugin the host plugin object.
+     */
     public BeetrootListener(RemakepirePlugin plugin) {
         this.plugin = plugin;
         this.beetrootManager = plugin.getBeetrootManager();
         this.sessionManager = plugin.getSessionManager();
     }
 
+    /**
+     * Handle the effects of eating garlic when beetroot is eaten.
+     *
+     * @param event a player consumes an item.
+     */
     @EventHandler(
             priority = EventPriority.NORMAL
     )
     public void onPlayerItemConsume(PlayerItemConsumeEvent event) {
         Player player = event.getPlayer();
         ItemStack item = event.getItem();
+
         if (this.sessionManager.isSessionActive()) {
             if (item.getType() == Material.BEETROOT) {
                 this.beetrootManager.handleBeetrootConsumption(player);

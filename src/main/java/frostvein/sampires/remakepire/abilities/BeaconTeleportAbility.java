@@ -65,7 +65,7 @@ public class BeaconTeleportAbility extends VampireAbility {
     }
 
     /**
-     * Provide the user with a GUI for the beacon teleportation.
+     * Provide the player with a GUI for the beacon teleportation.
      *
      * @param player the player using the ability.
      * @param desecratedBeacons a list of corrupted beacons for teleportation.

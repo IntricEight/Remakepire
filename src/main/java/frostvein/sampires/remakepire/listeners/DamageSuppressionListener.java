@@ -10,10 +10,20 @@ import frostvein.sampires.remakepire.RemakepirePlugin;
 public class DamageSuppressionListener implements Listener {
     private final RemakepirePlugin plugin;
 
+    /**
+     * Create an instance of the Damage Suppression listener.
+     *
+     * @param plugin the host plugin object.
+     */
     public DamageSuppressionListener(RemakepirePlugin plugin) {
         this.plugin = plugin;
     }
 
+    /**
+     * Decrease the damage dealt to an entity with the plugin damage suppression value.
+     *
+     * @param event an entity receives damage.
+     */
     @EventHandler(
             priority = EventPriority.HIGHEST
     )
@@ -21,11 +31,11 @@ public class DamageSuppressionListener implements Listener {
         if (event.getEntity() instanceof Player) {
             try {
                 int suppressionScore = this.plugin.getConfig().getInt("damage_suppression", 50);
+
                 if (suppressionScore > 0) {
                     double suppressionPercentage = suppressionScore / 100.0;
                     double originalDamage = event.getDamage();
-                    double suppressedDamage = originalDamage * (1.0 - suppressionPercentage);
-                    event.setDamage(suppressedDamage);
+                    event.setDamage(originalDamage * (1.0 - suppressionPercentage));
                 }
             } catch (Exception e) {
                 this.plugin.getLogger().warning("Failed to read damage suppression from config: " + e.getMessage());

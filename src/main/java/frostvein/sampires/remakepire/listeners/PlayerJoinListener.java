@@ -19,6 +19,13 @@ public class PlayerJoinListener implements Listener {
     private final EffectManager effectManager;
     private final BeetrootManager beetrootManager;
 
+    /**
+     * Create an instance of the Player Join listener.
+     *
+     * @param plugin the host plugin object.
+     * @param vampireManager the manager for generic vampire traits.
+     * @param effectManager the manager for global vampire effects.
+     */
     public PlayerJoinListener(RemakepirePlugin plugin, VampireManager vampireManager, EffectManager effectManager) {
         this.plugin = plugin;
         this.vampireManager = vampireManager;
@@ -26,15 +33,22 @@ public class PlayerJoinListener implements Listener {
         this.beetrootManager = plugin.getBeetrootManager();
     }
 
+    /**
+     * Apply the current game status effects to a joining player.
+     *
+     * @param event a player joining the world.
+     */
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
         this.addPlayerToCastTeam(player);
         TurnUndeadTomeAbility.cleanupHumanOnVampireCastTeam(this.plugin, player);
+
         this.vampireManager.initializeNewPlayer(player);
         this.vampireManager.ensureVampireTagConsistency(player);
         this.effectManager.applyJoinEffects(player);
         this.beetrootManager.restorePlayerState(player);
+
         this.plugin.getBeaconMajorityManager().applyBonusesToPlayer(player);
         if (this.plugin.getVampireTexturePackManager() != null && (this.vampireManager.isVampire(player) || player.getScoreboardTags().contains("CuredVampire"))) {
             this.plugin.getVampireTexturePackManager().onVampireLogin(player);
@@ -45,6 +59,7 @@ public class PlayerJoinListener implements Listener {
         }
 
         String sessionStatus = this.getSessionStatusMessage();
+
         player.sendMessage("§7" + sessionStatus);
         if (!this.plugin.getSessionManager().playerReturningToGame(player)) {
             player.sendMessage("§cA new game has been initialized since you last played. Resetting your stats accordingly.");
@@ -52,8 +67,10 @@ public class PlayerJoinListener implements Listener {
             this.plugin.getSessionManager().getGameIDObjective().getScore(player.getName()).setScore(this.plugin.getSessionManager().getGameIDObjective().getScore("game_id_holder").getScore());
             this.plugin.getSessionManager().getSessionIDObjective().getScore(player.getName()).setScore(this.plugin.getSessionManager().getSessionIDObjective().getScore("session_id_holder").getScore());
             this.plugin.getVampireManager().clearPromotionBan(player);
+
         } else if (this.plugin.getSessionManager().playerReturningToSession(player)) {
             player.sendMessage("You have rejoined a session");
+
         } else {
             player.sendMessage("The previous session you were in has passed, resetting your stats accordingly");
             this.plugin.getSessionManager().resetPlayer(player);
@@ -62,8 +79,10 @@ public class PlayerJoinListener implements Listener {
         }
 
         this.plugin.getPlayerChatManager().removePlayersPendingMessages(player);
+
         if (player.isOp() || player.hasPermission("vampiresmp.admin")) {
             List<String> warnings = this.plugin.getConfigManager().validateConfiguredLocations(this.plugin.getBeaconManager());
+
             if (!warnings.isEmpty()) {
                 player.sendMessage("");
                 player.sendMessage("§c§l[CONFIG WARNING] §eThe following locations are outside the border:");
@@ -78,9 +97,14 @@ public class PlayerJoinListener implements Listener {
             }
         }
 
-        event.setJoinMessage((String)null);
+        event.setJoinMessage(null);
     }
 
+    /**
+     * Clear a player's effects when quitting the game.
+     *
+     * @param event a player leaving the world.
+     */
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
         Player player = event.getPlayer();
@@ -97,16 +121,23 @@ public class PlayerJoinListener implements Listener {
 
         this.plugin.getPlayerChatManager().removePlayersPendingMessages(player);
         this.plugin.getBeaconMajorityManager().removeBonusesFromPlayer(player);
+
         if (this.plugin.getVampireTexturePackManager() != null) {
             this.plugin.getVampireTexturePackManager().onPlayerQuit(player);
         }
 
-        event.setQuitMessage((String)null);
+        event.setQuitMessage(null);
     }
 
+    /**
+     * Assign a player to one of the cast teams.
+     *
+     * @param player the player joining a team.
+     */
     private void addPlayerToCastTeam(Player player) {
         try {
             Team teamToJoin;
+
             if (this.plugin.getVampireManager().isIronAffected(player)) {
                 teamToJoin = this.plugin.getVampireCastTeam();
             } else {
@@ -127,24 +158,21 @@ public class PlayerJoinListener implements Listener {
             this.plugin.getLogger().severe("Failed to add player " + player.getName() + " to CastTeam: " + e.getMessage());
             e.printStackTrace();
         }
-
     }
 
+    /**
+     * Retrieve a description of the current session status.
+     *
+     * @return A status message about the session.
+     */
     private String getSessionStatusMessage() {
         int sessionState = this.plugin.getSessionManager().getSessionState();
-        switch (sessionState) {
-            case 0 -> {
-                return "The server is currently out of session. PvP, block breaking, and time are disabled.";
-            }
-            case 1 -> {
-                return "A session is currently active! Be careful out there.";
-            }
-            case 2 -> {
-                return "The session is currently paused. PvP, block breaking, and time are disabled.";
-            }
-            default -> {
-                return "Session status unknown.";
-            }
-        }
+
+        return switch (sessionState) {
+            case 0 -> "The server is currently out of session. PvP, block breaking, and time are disabled.";
+            case 1 -> "A session is currently active! Be careful out there.";
+            case 2 -> "The session is currently paused. PvP, block breaking, and time are disabled.";
+            default -> "Session status unknown.";
+        };
     }
 }
