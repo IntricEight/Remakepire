@@ -106,11 +106,14 @@ public final class RemakepirePlugin extends JavaPlugin {
     private Team vampireCastTeam;
     private Location vampireRespawnLocation;
 
+    /**
+     * Enable the Remakepires plugin on the server.
+     */
     public void onEnable() {
         this.saveDefaultConfig();
         this.configManager = new ConfigManager(this);
         this.world = Bukkit.getWorld(WORLD_NAME);
-        this.initializeCastTeam();
+        this.initializeHumanCastTeam();
         this.initializeVampireCastTeam();
         this.sessionManager = new SessionManager(this);
         this.sessionManager.initializeScoreboard();
@@ -194,6 +197,9 @@ public final class RemakepirePlugin extends JavaPlugin {
         this.getLogger().info("VampireSMP Plugin has been enabled!");
     }
 
+    /**
+     * Disable the Remakepires plugin on the server.
+     */
     public void onDisable() {
         if (this.effectManager != null) {
             this.effectManager.stopEffectTask();
@@ -301,7 +307,10 @@ public final class RemakepirePlugin extends JavaPlugin {
         this.getLogger().info("VampireSMP Plugin has been disabled!");
     }
 
-    private void initializeCastTeam() {
+    /**
+     * Create the human team for players to be assigned to.
+     */
+    private void initializeHumanCastTeam() {
         try {
             Scoreboard mainScoreboard = Bukkit.getScoreboardManager().getMainScoreboard();
             Team existingTeam = mainScoreboard.getTeam("CastTeam");
@@ -324,9 +333,11 @@ public final class RemakepirePlugin extends JavaPlugin {
             this.getLogger().severe("Failed to initialize CastTeam: " + e.getMessage());
             e.printStackTrace();
         }
-
     }
 
+    /**
+     * Create the scoreboard for tracking each player's death counter.
+     */
     private void initializeDeathScoreboard() {
         try {
             Scoreboard mainScoreboard = Bukkit.getScoreboardManager().getMainScoreboard();
@@ -354,6 +365,9 @@ public final class RemakepirePlugin extends JavaPlugin {
         }
     }
 
+    /**
+     * Create the vampire team for players to be assigned to.
+     */
     private void initializeVampireCastTeam() {
         try {
             Scoreboard mainScoreboard = Bukkit.getScoreboardManager().getMainScoreboard();
@@ -379,29 +393,59 @@ public final class RemakepirePlugin extends JavaPlugin {
         }
     }
 
+    /**
+     * Set up the vampire team's respawn location.
+     */
     private void initVampireRespawnLocation() {
         this.vampireRespawnLocation = this.configManager.getVampireRespawnLocation(this.getWorld());
         this.getLogger().info("Vampire respawn location set to: " + this.vampireRespawnLocation.getBlockX() + ", " + this.vampireRespawnLocation.getBlockY() + ", " + this.vampireRespawnLocation.getBlockZ());
     }
 
+    /**
+     * Retrieve the vampire respawn location.
+     *
+     * @return The {@code Location} where vampires respawn after death.
+     */
     public Location getVampireRespawnLocation() {
         return this.vampireRespawnLocation;
     }
 
+    /**
+     * Set up the vampire team's respawn location.
+     */
     public void reloadVampireRespawnLocation() {
         this.initVampireRespawnLocation();
     }
 
-    public BatTransformationManager getBatTransformationManager() {
-        return this.batTransformationManager;
+    /**
+     * Retrieve the team of human players.
+     *
+     * @return The human {@code Team}.
+     */
+    public Team getCastTeam() {
+        return this.castTeam;
     }
 
+    /**
+     * Retrieve the team of vampire players.
+     *
+     * @return The vampire {@code Team}.
+     */
     public Team getVampireCastTeam() {
         return this.vampireCastTeam;
     }
 
+    /**
+     * Retrieve the game world.
+     *
+     * @return The world being used by the server.
+     */
     public World getWorld() {
         return this.world;
+    }
+
+    public BatTransformationManager getBatTransformationManager() {
+        return this.batTransformationManager;
     }
 
     public BeetrootManager getBeetrootManager() {
@@ -456,8 +500,16 @@ public final class RemakepirePlugin extends JavaPlugin {
         return this.thirstManager;
     }
 
+    public FeedingListener getFeedingListener() {
+        return this.feedingListener;
+    }
+
     public VampireFeedingManager getVampireFeedingManager() {
         return this.vampireFeedingManager;
+    }
+
+    public ThirstEffectsListener getThirstEffectsListener() {
+        return this.thirstEffectsListener;
     }
 
     public TomeManager getTomeManager() {
@@ -530,9 +582,5 @@ public final class RemakepirePlugin extends JavaPlugin {
 
     public CureBookReadingListener getCureBookReadingListener() {
         return this.cureBookReadingListener;
-    }
-
-    public Team getCastTeam() {
-        return this.castTeam;
     }
 }
