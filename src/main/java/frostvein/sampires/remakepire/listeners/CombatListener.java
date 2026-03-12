@@ -111,6 +111,7 @@ public class CombatListener implements Listener {
 
                 // Cancel vampire forms after the vampire is hit
                 Entity shouldRemoveInvisibility = event.getEntity();
+
                 if (shouldRemoveInvisibility instanceof Player victim) {
                     if (this.vampireManager.isVampire(victim)) {
                         if (this.plugin.getBatTransformationManager().isInBatForm(victim)) {

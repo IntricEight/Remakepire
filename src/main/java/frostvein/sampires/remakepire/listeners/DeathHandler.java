@@ -131,21 +131,22 @@ public class DeathHandler implements Listener {
             int aliveHumans = 0;
             int aliveVampires = 0;
 
-            for(Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-                if (onlinePlayer.getGameMode() == GameMode.SURVIVAL) {
-                    if (vampireManager.isHuman(onlinePlayer)) {
-                        ++aliveHumans;
-                    } else if (vampireManager.isVampire(onlinePlayer)) {
-                        ++aliveVampires;
-                    }
-                }
-            }
-
-            if (aliveHumans == 0 && affectedWasHuman) {
-                announceAllHumansDeadStatic(plugin);
-            } else if (aliveVampires == 0 && affectedWasVampire) {
-                announceHumansWinStatic(plugin);
-            }
+            // TODO: Figure out why Team Defeat announcements are being made incorrectly
+//            for(Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+//                if (onlinePlayer.getGameMode() == GameMode.SURVIVAL) {
+//                    if (vampireManager.isHuman(onlinePlayer)) {
+//                        ++aliveHumans;
+//                    } else if (vampireManager.isVampire(onlinePlayer)) {
+//                        ++aliveVampires;
+//                    }
+//                }
+//            }
+//
+//            if (aliveHumans == 0 && affectedWasHuman) {
+//                announceAllHumansDeadStatic(plugin);
+//            } else if (aliveVampires == 0 && affectedWasVampire) {
+//                announceHumansWinStatic(plugin);
+//            }
         }
     }
 
@@ -161,20 +162,21 @@ public class DeathHandler implements Listener {
         int evilBeacons = plugin.getBeaconManager().getAllEvilBeacons().size();
         boolean allBeaconsDesecrated = totalBeacons > 0 && evilBeacons == totalBeacons;
 
-        for(Player player : Bukkit.getOnlinePlayers()) {
-            player.sendTitle("§cThe last human has fallen.", "", 20, 100, 40);
-            player.sendMessage("");
-            player.sendMessage("§cThe last defender of humanity has fallen...");
-
-            if (allBeaconsDesecrated) {
-                player.sendMessage("§cDarkness reigns supreme over Frostvein.");
-            } else {
-                player.sendMessage("§cSurely this plague won’t spread any further?");
-            }
-
-            player.sendMessage("");
-            player.playSound(player.getLocation(), Sound.ENTITY_WITHER_SPAWN, SoundCategory.MASTER, 1.0F, 0.5F);
-        }
+        // TODO: Figure out why the All Humans Dead server message appears whenever any human dies.
+//        for(Player player : Bukkit.getOnlinePlayers()) {
+//            player.sendTitle("§cThe last human has fallen.", "", 20, 100, 40);
+//            player.sendMessage("");
+//            player.sendMessage("§cThe last defender of humanity has fallen...");
+//
+//            if (allBeaconsDesecrated) {
+//                player.sendMessage("§cDarkness reigns supreme over Frostvein.");
+//            } else {
+//                player.sendMessage("§cSurely this plague won’t spread any further?");
+//            }
+//
+//            player.sendMessage("");
+//            player.playSound(player.getLocation(), Sound.ENTITY_WITHER_SPAWN, SoundCategory.MASTER, 1.0F, 0.5F);
+//        }
     }
 
     /**
@@ -190,24 +192,25 @@ public class DeathHandler implements Listener {
         boolean allBeaconsHoly = totalBeacons > 0 && holyBeacons == totalBeacons;
         boolean anyPermanentlyCorrupted = plugin.getBeaconManager().getAllBeacons().stream().anyMatch((beacon) -> beacon.getState() == BeaconState.PERMANENTLY_DESECRATED);
 
-        for(Player player : Bukkit.getOnlinePlayers()) {
-            player.sendTitle("§aThe last vampire has fallen.", "", 20, 100, 40);
-            player.sendMessage("");
-            player.sendMessage("§aThe last creature of darkness has fallen...");
-
-            if (anyPermanentlyCorrupted) {
-                player.sendMessage("§7But the blizzard still rages on...");
-                player.sendMessage("§7You must break your tether to the beacons...");
-
-            } else if (allBeaconsHoly) {
-                player.sendMessage("§aLight reigns supreme over Frostvein.");
-            } else {
-                player.sendMessage("§7But the blizzard still rages on...");
-            }
-
-            player.sendMessage("");
-            player.playSound(player.getLocation(), Sound.BLOCK_BEACON_ACTIVATE, SoundCategory.MASTER, 1.0F, 1.0F);
-        }
+        // TODO: Figure out why the All Vampires Dead server message appears whenever any mimic dies.
+//        for(Player player : Bukkit.getOnlinePlayers()) {
+//            player.sendTitle("§aThe last mimic has fallen.", "", 20, 100, 40);
+//            player.sendMessage("");
+//            player.sendMessage("§aThe final abomination of science has faded...");
+//
+//            if (anyPermanentlyCorrupted) {
+//                player.sendMessage("§7But the blizzard still rages on...");
+//                player.sendMessage("§7You must break your tether to the beacons...");
+//
+//            } else if (allBeaconsHoly) {
+//                player.sendMessage("§aLight reigns supreme over Frostvein.");
+//            } else {
+//                player.sendMessage("§7But the blizzard still rages on...");
+//            }
+//
+//            player.sendMessage("");
+//            player.playSound(player.getLocation(), Sound.BLOCK_BEACON_ACTIVATE, SoundCategory.MASTER, 1.0F, 1.0F);
+//        }
     }
 
     /**
