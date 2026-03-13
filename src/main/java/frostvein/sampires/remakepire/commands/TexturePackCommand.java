@@ -27,24 +27,24 @@ public class TexturePackCommand implements CommandExecutor {
 
                 if (player.hasPermission("vampiresmp.admin")) {
                     if (subCommand.equals("all")) {
-//                        this.texturePackManager.ensureAllVampiresHaveTexturePack();
-//                        player.sendMessage("§aApplied vampire texture pack to all online vampires.");
+                        this.texturePackManager.ensureAllVampiresHaveTexturePack();
+                        player.sendMessage("§aApplied Mimic texture pack to all online Mimics.");
                         return true;
                     }
 
                     if (subCommand.equals("force")) {
-//                        this.texturePackManager.forceApplyVampireTexturePack(player, "admin force command");
+                        this.texturePackManager.forceApplyVampireTexturePack(player, "admin force command");
                         return true;
                     }
                 }
 
                 if (subCommand.equals("vampire")) {
-//                    this.texturePackManager.applyVampireTexturePack(player, "manual command");
+                    this.texturePackManager.applyVampireTexturePack(player, "manual command");
                     return true;
                 }
 
                 if (subCommand.equals("human")) {
-//                    this.texturePackManager.applyHumanTexturePack(player, "manual command");
+                    this.texturePackManager.applyHumanTexturePack(player, "manual command");
                     return true;
                 }
             }

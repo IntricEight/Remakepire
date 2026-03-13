@@ -640,25 +640,25 @@ public class InitGameManager {
                     vampireIds.add(player.getUniqueId());
 
                     player.setExp(0.5F);
-                    player.sendTitle("§4§lVampire", "", 10, 100, 20);
+                    player.sendTitle("§4§lMimic", "", 10, 100, 20);
                     player.sendMessage("");
                     player.sendMessage("§4§l========================================");
-                    player.sendMessage("§cYou are a creature of the night, and it is time to feed.");
+                    player.sendMessage("§cYou are a Mimic, an abomination of science. Your purpose: To escape, and spread throughout the galaxy.");
                     player.sendMessage("");
-                    player.sendMessage("§7What to do: Turn other humans by 'killing' them when no one is looking. As a level 1 vampire, there are very few ways you can be found out, but still be cautious. You cannot help turn beacons, eating food is bad but stomachable for now, only attack during the night. Press \"k\" to customize your vampire ability keybinds.");
+                    player.sendMessage("§7What to do: Turn other humans by 'killing' them when no one is looking. As a level 1 Mimic, there are very few ways you can be found out, but still be cautious. You cannot help turn beacons, and the food that human's consume is bad but stomachable for now. Press \"k\" to customize your Mimic ability keybinds.");
                     player.sendMessage("§4§l========================================");
                     player.sendMessage("");
 
-                    TextComponent textureMessage = new TextComponent("§7Apply the vampire texture pack: ");
+                    TextComponent textureMessage = new TextComponent("§7Apply the Mimic texture pack: ");
                     TextComponent clickableText = new TextComponent("§c§n[CLICK HERE]");
                     clickableText.setClickEvent(new ClickEvent(Action.RUN_COMMAND, "/pow texture vampire"));
-                    clickableText.setHoverEvent(new HoverEvent(net.md_5.bungee.api.chat.HoverEvent.Action.SHOW_TEXT, (new ComponentBuilder("§7Click to apply the vampire texture pack")).create()));
+                    clickableText.setHoverEvent(new HoverEvent(net.md_5.bungee.api.chat.HoverEvent.Action.SHOW_TEXT, (new ComponentBuilder("§7Click to apply the Mimic texture pack")).create()));
                     textureMessage.addExtra(clickableText);
 
                     player.spigot().sendMessage(textureMessage);
                 }
 
-                admin.sendMessage("§7  → Converted " + playersToConvert.size() + " players to vampires");
+                admin.sendMessage("§7  → Converted " + playersToConvert.size() + " players to Mimics");
 
                 for(Player player : onlinePlayers) {
                     if (!vampireIds.contains(player.getUniqueId())) {
@@ -666,7 +666,7 @@ public class InitGameManager {
                         player.sendTitle("§e§lHuman", "", 10, 100, 20);
                         player.sendMessage("");
                         player.sendMessage("§e§l========================================");
-                        player.sendMessage("§7Welcome to Frostvein. Survive, consecrate beacons, find tomes, and above all: Escape the blizzard.");
+                        player.sendMessage("§7Welcome to Cleopatra's Station. As a crew member, do your part to keep this station operational.");
                         player.sendMessage("§e§l========================================");
                         player.sendMessage("");
                     }
@@ -697,7 +697,7 @@ public class InitGameManager {
                 admin.sendMessage("§a§lGAME INITIALIZED SUCCESSFULLY.");
                 admin.sendMessage("§a§l========================================");
                 admin.sendMessage("§7Players: §e" + onlinePlayers.size());
-                admin.sendMessage("§7Vampires: §c" + playersToConvert.size());
+                admin.sendMessage("§7Mimics: §c" + playersToConvert.size());
                 admin.sendMessage("§7Humans: §a" + (onlinePlayers.size() - playersToConvert.size()));
                 admin.sendMessage("§a§l========================================");
                 this.adminStates.remove(adminId);

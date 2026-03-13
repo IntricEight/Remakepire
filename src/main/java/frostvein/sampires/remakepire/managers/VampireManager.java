@@ -143,33 +143,13 @@ public class VampireManager {
         this.plugin.getBeaconMajorityManager().applyBonusesToPlayer(player);
         player.setLevel(0);
         player.setExp(0.0F);
+
         if (this.plugin.getVampireTexturePackManager() != null) {
             this.plugin.getVampireTexturePackManager().onPlayerBecomeHuman(player);
         }
-
     }
 
     private void removeVampireAttributeModifiers(Player player) {
-
-        // TODO: Decompilation Fixing, remove comments once success is confirmed
-
-//        AttributeInstance safeFallAttr;
-//        AttributeInstance speedAttr = player.getAttribute(Attribute.MOVEMENT_SPEED);
-//
-//        UUID sunWeaknessSpeedUUID = UUID.fromString("b8c2a3d4-5e6f-7890-a1b2-c3d4e5f67890");
-//        UUID vampireSafeFallUUID = UUID.fromString("c9d1e2f3-6a7b-8901-2345-6789abcdef01");
-//
-//        if (speedAttr != null) {
-//            speedAttr.getModifiers().stream().filter(modifier -> modifier.getUniqueId().equals(sunWeaknessSpeedUUID)).forEach(arg_0 -> ((AttributeInstance)speedAttr).removeModifier(arg_0));
-//        }
-//
-//        if ((safeFallAttr = player.getAttribute(Attribute.SAFE_FALL_DISTANCE)) != null) {
-//            safeFallAttr.getModifiers().stream().filter(modifier -> modifier.getUniqueId().equals(vampireSafeFallUUID)).forEach(arg_0 -> ((AttributeInstance)safeFallAttr).removeModifier(arg_0));
-//        }
-
-//        final NamespacedKey SUN_WEAKNESS_SPEED_KEY = new NamespacedKey(plugin, "sun_weakness_speed");
-//        final NamespacedKey VAMPIRE_SAFE_FALL_KEY = new NamespacedKey(plugin, "vampire_safe_fall");
-
         AttributeInstance speedAttr = player.getAttribute(Attribute.MOVEMENT_SPEED);
         if (speedAttr != null) {
             speedAttr.getModifiers().stream().filter(modifier -> SUN_WEAKNESS_SPEED_KEY.equals(modifier.getKey()))
@@ -362,18 +342,18 @@ public class VampireManager {
         target.sendMessage("§bYou are now a Stage 1 Mimic.");
         target.sendMessage("");
 
-//        TextComponent prefixText = new TextComponent("§7When you are ready to accept your new self, ");
-//        TextComponent clickableText = new TextComponent("§e§n[CLICK HERE]");
-//        clickableText.setClickEvent(new ClickEvent(Action.RUN_COMMAND, "/pow texture"));
-//        clickableText.setHoverEvent(new HoverEvent(net.md_5.bungee.api.chat.HoverEvent.Action.SHOW_TEXT, (new ComponentBuilder("§7Click to apply the Creature Of The Night texture pack")).create()));
-//        TextComponent suffixText = new TextComponent("§7 to have the Creature Of The Night texture pack applied.");
-//        TextComponent fullMessage = new TextComponent("");
-//
-//        fullMessage.addExtra(prefixText);
-//        fullMessage.addExtra(clickableText);
-//        fullMessage.addExtra(suffixText);
-//
-//        target.spigot().sendMessage(fullMessage);
+        TextComponent prefixText = new TextComponent("§7When you are ready to begin your new mission, ");
+        TextComponent clickableText = new TextComponent("§e§n[CLICK HERE]");
+        clickableText.setClickEvent(new ClickEvent(Action.RUN_COMMAND, "/pow texture"));
+        clickableText.setHoverEvent(new HoverEvent(net.md_5.bungee.api.chat.HoverEvent.Action.SHOW_TEXT, (new ComponentBuilder("§7Click to apply the Cleo's Alien Virus texture pack")).create()));
+        TextComponent suffixText = new TextComponent("§7 to have the Cleo's Alien Virus texture pack applied.");
+        TextComponent fullMessage = new TextComponent("");
+
+        fullMessage.addExtra(prefixText);
+        fullMessage.addExtra(clickableText);
+        fullMessage.addExtra(suffixText);
+
+        target.spigot().sendMessage(fullMessage);
         target.sendMessage("");
     }
 
@@ -411,7 +391,7 @@ public class VampireManager {
                 double distance = nearbyPlayer.getLocation().distance(vampireLocation);
 
                 if (distance <= 10) {
-                    nearbyPlayer.sendMessage("§8You feel a darkness lunge out at you, a vampire near you has lost a piece of their essence and grown weaker...");
+                    nearbyPlayer.sendMessage("§8You feel a darkness lunge out at you, a Mimic near you has been greatly harmed and grows weaker...");
                     nearbyPlayer.playSound(nearbyPlayer.getLocation(), Sound.ENTITY_WARDEN_HEARTBEAT, SoundCategory.MASTER, 1.0F, 0.8F);
                     Vector direction = nearbyPlayer.getLocation().toVector().subtract(vampireLocation.toVector()).normalize();
                     nearbyPlayer.setVelocity(direction.multiply(2.4));
