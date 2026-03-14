@@ -1,4 +1,4 @@
-# Remakepires - A Deecompiled Copy of the Vampires SMP Plugin
+# Remakepires - A Decompiled Copy of the Vampires SMP Plugin
 ###### Credit to POW Creation for the original plugin.
 
 This plugin is a recreation of the Vampires SMP plugin from POW Creation's Vampires series. <br/>
