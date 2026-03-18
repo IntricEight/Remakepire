@@ -146,7 +146,7 @@ public class ArmorStorageManager {
 
         try (FileReader reader = new FileReader(fileToLoad)) {
             Type mapType = (new TypeToken<Map<String, StoredArmor>>() {}).getType();
-            Map<String, StoredArmor> loadedData = (Map)this.gson.fromJson(reader, mapType);
+            Map<String, StoredArmor> loadedData = this.gson.fromJson(reader, mapType);
             if (loadedData != null) {
                 for(Map.Entry<String, StoredArmor> entry : loadedData.entrySet()) {
                     try {

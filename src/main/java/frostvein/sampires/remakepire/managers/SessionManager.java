@@ -27,14 +27,9 @@ public class SessionManager {
     private final Map<UUID, Float> pausedSaturationLevels = new HashMap<>();
 
     private Objective sessionObjective, sessionIDObjective, gameIDObjective;
-    public static final int BEFORE_SESSION = 0;
-    public static final int IN_SESSION = 1;
-    public static final int PAUSED = 2;
-    public static final int AFTER_SESSION = 3;
-    public static final int PRE_SESSION = 4;
+    public static final int BEFORE_SESSION = 0, IN_SESSION = 1, PAUSED = 2, AFTER_SESSION = 3, PRE_SESSION = 4;
 
-    private long totalSessionTime = 0L;
-    private long currentPhaseStartTime = 0L;
+    private long totalSessionTime = 0L, currentPhaseStartTime = 0L;
     private boolean trackingSessionTime = false;
 
     public static final String INFORMED_IRON_BLOCK_REPEL = "informed_iron_block_reply";
@@ -497,6 +492,8 @@ public class SessionManager {
         this.startTrackingSessionTime();
         this.unfreezeTick();
         this.plugin.getBeaconMajorityManager().updateBeaconMajorityBonuses();
+        this.plugin.getTomeDistributionManager().startDistributionTask();
+
         this.broadcastMessage("§a§lSESSION STARTED! §aThe SMP session has begun. Good luck!");
     }
 
@@ -511,6 +508,8 @@ public class SessionManager {
         this.unfreezeTick();
 
         this.plugin.getBeaconMajorityManager().updateBeaconMajorityBonuses();
+        this.plugin.getTomeDistributionManager().startDistributionTask();
+
         this.broadcastMessage("§a§lSESSION RESUMED! §aThe SMP session has been resumed.");
     }
 
@@ -525,6 +524,8 @@ public class SessionManager {
         sessionScore.setScore(PAUSED);
         this.setOutOfSessionRules();
         this.freezeTick();
+        this.plugin.getTomeDistributionManager().stopDistributionTask();
+
         this.broadcastMessage("§e§lSESSION PAUSED! §eThe session has been temporarily paused.");
     }
 
@@ -540,6 +541,8 @@ public class SessionManager {
         this.setAllPlayersMaxFood();
         this.plugin.getVampireAbilityManager().clearAllCooldownsForNewSession();
         this.freezeTick();
+        this.plugin.getTomeDistributionManager().stopDistributionTask();
+
         this.broadcastMessage("§c§lSESSION ENDED! §cThe SMP session has concluded. See you next time!");
     }
 
@@ -562,6 +565,8 @@ public class SessionManager {
 
         this.setAllPlayersMaxFood();
         this.freezeTick();
+        this.plugin.getTomeDistributionManager().stopDistributionTask();
+
         this.broadcastMessage("§c§lSESSION PRIMED! §cThe SMP session state has been primed for the next session!");
     }
 

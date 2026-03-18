@@ -184,7 +184,7 @@ public class VampireSireManager {
         } else {
             try (FileReader reader = new FileReader(this.dataFile)) {
                 Type type = (new TypeToken<Map<String, String>>() {}).getType();
-                Map<String, String> rawData = (Map)this.gson.fromJson(reader, type);
+                Map<String, String> rawData = this.gson.fromJson(reader, type);
 
                 if (rawData != null) {
                     for(Map.Entry<String, String> entry : rawData.entrySet()) {

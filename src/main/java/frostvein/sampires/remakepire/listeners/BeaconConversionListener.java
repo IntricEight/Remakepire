@@ -43,7 +43,7 @@ public class BeaconConversionListener implements Listener {
     private final long BASE_CONVERSION_TIME;
     // Controls how frequently the beacon is checked for progress or cancellation (in ticks).
     private static final long CONVERSION_TICK_INTERVAL = 20L;
-    // Controls the distance you can interact with beacons from (in blocks)
+    // Controls the distance you can interact with beacons from (in blocks).
     private static final double BEACON_INTERACTION_RANGE = 3.0;
 
     /**
@@ -132,7 +132,7 @@ public class BeaconConversionListener implements Listener {
         Iterator<Map.Entry<String, ConversionData>> iterator = this.activeConversions.entrySet().iterator();
 
         while(iterator.hasNext()) {
-            Map.Entry<String, ConversionData> entry = (Map.Entry)iterator.next();
+            Map.Entry<String, ConversionData> entry = iterator.next();
             ConversionData data = entry.getValue();
 
             if (data.getConverters().contains(player.getUniqueId())) {

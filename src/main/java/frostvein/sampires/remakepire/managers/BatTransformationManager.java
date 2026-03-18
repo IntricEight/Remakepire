@@ -102,7 +102,7 @@ public class BatTransformationManager {
         Iterator<Map.Entry<UUID, BatData>> iterator = this.activeBats.entrySet().iterator();
 
         while(iterator.hasNext()) {
-            Map.Entry<UUID, BatData> entry = (Map.Entry)iterator.next();
+            Map.Entry<UUID, BatData> entry = iterator.next();
             UUID playerId = entry.getKey();
             BatData batData = entry.getValue();
 
@@ -148,7 +148,7 @@ public class BatTransformationManager {
         Iterator<Map.Entry<UUID, BatData>> iterator = this.activeBats.entrySet().iterator();
 
         while(iterator.hasNext()) {
-            Map.Entry<UUID, BatData> entry = (Map.Entry)iterator.next();
+            Map.Entry<UUID, BatData> entry = iterator.next();
             UUID playerId = entry.getKey();
             BatData batData = entry.getValue();
 

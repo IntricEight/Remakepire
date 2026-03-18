@@ -51,12 +51,7 @@ public class BeaconManager {
     private final Map<String, BeaconSite> beacons;
     private final File dataFile;
     private final Gson gson;
-    private BukkitTask particleTask;
-    private BukkitTask conversionCircleParticleTask;
-    private BukkitTask autoSaveTask;
-    private BukkitTask holyRegenTask;
-    private BukkitTask cooldownTrackingTask;
-    private BukkitTask beaconMaintenanceTask;
+    private BukkitTask particleTask, conversionCircleParticleTask, autoSaveTask, holyRegenTask, cooldownTrackingTask, beaconMaintenanceTask;
     // Controls the radius from a beacon that players can be while effecting it
     public static final double BEACON_CONVERSION_RANGE = 3.0;
     // Controls the radius from a holy beacon where vampires cannot use their abilities
@@ -1423,7 +1418,7 @@ public class BeaconManager {
 
                     Type type = (new TypeToken<Map<String, BeaconSite>>() {
                     }).getType();
-                    Map<String, BeaconSite> loadedBeacons = (Map)this.gson.fromJson(fileContent, type);
+                    Map<String, BeaconSite> loadedBeacons = this.gson.fromJson(fileContent, type);
                     if (loadedBeacons != null) {
                         int validBeacons = 0, invalidBeacons = 0;
 
@@ -1692,8 +1687,7 @@ public class BeaconManager {
      */
     public void checkAndBroadcastCompleteControl() {
         if (!this.beacons.isEmpty()) {
-            boolean allDesecrated = true;
-            boolean allHoly = true;
+            boolean allDesecrated = true, allHoly = true;
 
             for(BeaconSite beacon : this.beacons.values()) {
                 if (beacon.getState() != BeaconState.DESECRATED && beacon.getState() != BeaconState.PERMANENTLY_DESECRATED) {
@@ -1749,17 +1743,16 @@ public class BeaconManager {
                             player.sendTitle("§c§lDEFEAT", "§7The light has prevailed", 20, 100, 40);
                             player.sendMessage("");
                             player.sendMessage("§cAll beacons shine with divine light...");
-                            player.sendMessage("§cLight reigns supreme over Frostvein. You have lost.");
-                            player.sendMessage("");
-                            player.playSound(player.getLocation(), Sound.BLOCK_BEACON_ACTIVATE, SoundCategory.MASTER, 1.0F, 1.0F);
+                            player.sendMessage("§cLight reigns supreme over Oakhurst. You have lost.");
                         } else {
                             player.sendTitle("§a§lVICTORY", "§eThe darkness has been vanquished", 20, 100, 40);
                             player.sendMessage("");
                             player.sendMessage("§aAll beacons shine with divine light...");
-                            player.sendMessage("§aLight reigns supreme over Frostvein. And yet, the storm rages on.");
-                            player.sendMessage("");
-                            player.playSound(player.getLocation(), Sound.BLOCK_BEACON_ACTIVATE, SoundCategory.MASTER, 1.0F, 1.0F);
+                            player.sendMessage("§aLight reigns supreme over Oakhurst. You are free.");
                         }
+
+                        player.sendMessage("");
+                        player.playSound(player.getLocation(), Sound.BLOCK_BEACON_ACTIVATE, SoundCategory.MASTER, 1.0F, 1.0F);
                     }
                 }
             }

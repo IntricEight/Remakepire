@@ -110,17 +110,25 @@ implements Listener {
      */
     private boolean areAllBeaconsDesecrated() {
         Collection<BeaconSite> beacons = this.plugin.getBeaconManager().getAllBeacons();
+        boolean skipCorrupted = !this.plugin.getConfigManager().doCorruptedBeaconsTrapHumans();
+        int beaconsChecked = 0;
 
         if (beacons.isEmpty()) {
             return false;
         }
 
         for (BeaconSite beacon : beacons) {
+            // If this beacon is corrupted, skip over it if the config setting doesn't want it counted
+            if (skipCorrupted && beacon.getState() == BeaconSite.BeaconState.PERMANENTLY_DESECRATED) continue;
+
+            // Count the number of non-corrupted beacons (if skipping) counted to ensure we don't falsely tag when all beacons are destroyed.
+            ++beaconsChecked;
+
             if (beacon.getState() == BeaconSite.BeaconState.DESECRATED || beacon.getState() == BeaconSite.BeaconState.PERMANENTLY_DESECRATED) continue;
             return false;
         }
 
-        return true;
+        return beaconsChecked > 0;
     }
 
     /**
@@ -130,16 +138,25 @@ implements Listener {
      */
     private boolean areAllBeaconsHoly() {
         Collection<BeaconSite> beacons = this.plugin.getBeaconManager().getAllBeacons();
+        boolean skipCorrupted = !this.plugin.getConfigManager().doCorruptedBeaconsTrapHumans();
+        int beaconsChecked = 0;
+
         if (beacons.isEmpty()) {
             return false;
         }
 
         for (BeaconSite beacon : beacons) {
+            // If this beacon is corrupted, skip over it if the config setting doesn't want it counted
+            if (skipCorrupted && beacon.getState() == BeaconSite.BeaconState.PERMANENTLY_DESECRATED) continue;
+
+            // Count the number of non-corrupted beacons (if skipping) counted to ensure we don't falsely tag when all beacons are destroyed.
+            ++beaconsChecked;
+
             if (beacon.getState() == BeaconSite.BeaconState.HOLY) continue;
             return false;
         }
 
-        return true;
+        return beaconsChecked > 0;
     }
 
     /**

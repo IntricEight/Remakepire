@@ -115,7 +115,7 @@ public class PermadeathManager {
         } else {
             try (FileReader reader = new FileReader(this.dataFile)) {
                 Type type = (new TypeToken<Map<String, String>>() {}).getType();
-                Map<String, String> rawData = (Map)this.gson.fromJson(reader, type);
+                Map<String, String> rawData = this.gson.fromJson(reader, type);
 
                 if (rawData != null) {
                     for(Map.Entry<String, String> entry : rawData.entrySet()) {
@@ -149,7 +149,7 @@ public class PermadeathManager {
         if (oldPermadeathFile.exists()) {
             try (FileReader reader = new FileReader(oldPermadeathFile)) {
                 Type type = (new TypeToken<Map<String, Boolean>>() {}).getType();
-                Map<String, Boolean> oldData = (Map)this.gson.fromJson(reader, type);
+                Map<String, Boolean> oldData = this.gson.fromJson(reader, type);
 
                 if (oldData != null) {
                     for(Map.Entry<String, Boolean> entry : oldData.entrySet()) {
@@ -172,7 +172,7 @@ public class PermadeathManager {
         if (oldAbsoluteFile.exists()) {
             try (FileReader reader = new FileReader(oldAbsoluteFile)) {
                 Type type = (new TypeToken<Map<String, Boolean>>() {}).getType();
-                Map<String, Boolean> oldData = (Map)this.gson.fromJson(reader, type);
+                Map<String, Boolean> oldData = this.gson.fromJson(reader, type);
 
                 if (oldData != null) {
                     for(Map.Entry<String, Boolean> entry : oldData.entrySet()) {

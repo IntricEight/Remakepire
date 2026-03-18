@@ -40,7 +40,6 @@ public class TomeDistributionManager {
         this.configManager = configManager;
         this.random = new Random();
         this.initializeTomeLocations();
-        this.startDistributionTask();
     }
 
     /**
@@ -59,16 +58,34 @@ public class TomeDistributionManager {
     /**
      * Begin distributing tomes to the chest locations each time a full day passes.
      */
-    private void startDistributionTask() {
-        this.distributionTask = Bukkit.getScheduler().runTaskTimer(this.plugin, this::distributeTomes, 0L, 24000L);
+    public void startDistributionTask() {
+        long intervalTicks = this.configManager.getTomeDistributionIntervalTicks();
+
+        this.stopDistributionTask();
+        this.distributionTask = Bukkit.getScheduler().runTaskTimer(this.plugin, this::distributeTomes, 0L, intervalTicks);
+
         this.plugin.getLogger().info("TomeDistributionManager: Started daily tome distribution task");
+    }
+
+    /**
+     * Stop distributing tomes to the chest locations.
+     */
+    public void stopDistributionTask() {
+        if (this.distributionTask != null) {
+            this.distributionTask.cancel();
+            this.distributionTask = null;
+
+            this.plugin.getLogger().info("TomeDistributionManager: Stopped tome distribution task");
+        }
     }
 
     /**
      * Distribute a random (weighted) tome, cure, or enchanted book to each tome location.
      */
     public void distributeTomes() {
-        if (this.tomeLocations.isEmpty()) {
+        if (this.plugin.getSessionManager().getSessionState() != SessionManager.IN_SESSION) {
+            this.plugin.getLogger().warning("TomeDistributionManager: Tomes may not be distributed outside of session");
+        } else if (this.tomeLocations.isEmpty()) {
             this.plugin.getLogger().warning("TomeDistributionManager: No tome locations available for distribution");
         } else {
             this.clearAllTomeChests();

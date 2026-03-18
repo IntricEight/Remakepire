@@ -122,14 +122,22 @@ public class DeathHandler implements Listener {
      * Determine if a team has been eliminated from the game.
      *
      * @param plugin the host plugin object.
+     */
+    public static void checkAndAnnounceTeamElimination(RemakepirePlugin plugin) {
+        DeathHandler.checkAndAnnounceTeamElimination(plugin, false, false);
+    }
+
+    /**
+     * Determine if a team has been eliminated from the game.
+     *
+     * @param plugin the host plugin object.
      * @param affectedWasHuman {@code true} if the killed player was a human.
      * @param affectedWasVampire {@code true} if the killed player was a vampire.
      */
     public static void checkAndAnnounceTeamElimination(RemakepirePlugin plugin, boolean affectedWasHuman, boolean affectedWasVampire) {
         if (plugin.getSessionManager().isSessionActive()) {
             VampireManager vampireManager = plugin.getVampireManager();
-            int aliveHumans = 0;
-            int aliveVampires = 0;
+            int aliveHumans = 0, aliveVampires = 0;
 
             for(Player onlinePlayer : Bukkit.getOnlinePlayers()) {
                 if (onlinePlayer.getGameMode() == GameMode.SURVIVAL) {
@@ -189,6 +197,7 @@ public class DeathHandler implements Listener {
         int holyBeacons = plugin.getBeaconManager().getHolyBeacons().size();
         boolean allBeaconsHoly = totalBeacons > 0 && holyBeacons == totalBeacons;
         boolean anyPermanentlyCorrupted = plugin.getBeaconManager().getAllBeacons().stream().anyMatch((beacon) -> beacon.getState() == BeaconState.PERMANENTLY_DESECRATED);
+        boolean trappedWhenPermanentlyCorrupted = plugin.getConfigManager().doCorruptedBeaconsTrapHumans();
 
         for(Player player : Bukkit.getOnlinePlayers()) {
             player.sendTitle("§aThe last vampire has fallen.", "", 20, 100, 40);
@@ -197,8 +206,12 @@ public class DeathHandler implements Listener {
 
             if (anyPermanentlyCorrupted) {
                 player.sendMessage("§7But a beacon of light has been permanently corrupted.");
-                player.sendMessage("§7The creatures of the night have been vanquished, but you are stuck in Oakhurst, forever.");
 
+                if (trappedWhenPermanentlyCorrupted) {
+                    player.sendMessage("§7The creatures of the night have been vanquished, but you are stuck in Oakhurst, forever.");
+                } else {
+                    player.sendMessage("§7The creatures of the night have been vanquished, but does freedom await you?");
+                }
             } else if (allBeaconsHoly) {
                 player.sendMessage("§aLight reigns supreme over Oakhurst. You are free.");
             } else {

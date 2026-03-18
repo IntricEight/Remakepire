@@ -136,11 +136,11 @@ public class VampireAbilityManager {
             Player player = Bukkit.getPlayer(playerId);
 
             if (player != null && player.isOnline()) {
-                Map<String, Long> playerCooldowns = (Map)this.abilityCooldowns.get(playerId);
+                Map<String, Long> playerCooldowns = this.abilityCooldowns.get(playerId);
                 Iterator<Map.Entry<String, Long>> iterator = playerCooldowns.entrySet().iterator();
 
                 while(iterator.hasNext()) {
-                    Map.Entry<String, Long> entry = (Map.Entry)iterator.next();
+                    Map.Entry<String, Long> entry = iterator.next();
                     String abilityName = entry.getKey();
                     long cooldownEnd = entry.getValue();
 
@@ -165,7 +165,7 @@ public class VampireAbilityManager {
         Iterator<Map.Entry<String, GlobalCooldownData>> iterator = this.globalCooldowns.entrySet().iterator();
 
         while(iterator.hasNext()) {
-            Map.Entry<String, GlobalCooldownData> entry = (Map.Entry)iterator.next();
+            Map.Entry<String, GlobalCooldownData> entry = iterator.next();
             String abilityName = entry.getKey();
             GlobalCooldownData data = entry.getValue();
 
@@ -352,7 +352,7 @@ public class VampireAbilityManager {
      */
     public boolean isOnCooldown(Player player, String abilityName) {
         UUID playerId = player.getUniqueId();
-        Map<String, Long> playerCooldowns = (Map)this.abilityCooldowns.get(playerId);
+        Map<String, Long> playerCooldowns = this.abilityCooldowns.get(playerId);
 
         if (playerCooldowns == null) {
             return false;
@@ -396,7 +396,7 @@ public class VampireAbilityManager {
      */
     public long getRemainingCooldown(Player player, String abilityName) {
         UUID playerId = player.getUniqueId();
-        Map<String, Long> playerCooldowns = (Map)this.abilityCooldowns.get(playerId);
+        Map<String, Long> playerCooldowns = this.abilityCooldowns.get(playerId);
 
         if (playerCooldowns == null) {
             return 0L;
@@ -442,7 +442,7 @@ public class VampireAbilityManager {
     private void setCooldown(Player player, String abilityName, int cooldownSeconds) {
         UUID playerId = player.getUniqueId();
         long cooldownEnd = this.sessionManager.getSessionTimeSeconds() + (long)cooldownSeconds;
-        ((Map)this.abilityCooldowns.computeIfAbsent(playerId, (k) -> new HashMap())).put(abilityName.toLowerCase(), cooldownEnd);
+        (this.abilityCooldowns.computeIfAbsent(playerId, (k) -> new HashMap<>())).put(abilityName.toLowerCase(), cooldownEnd);
     }
 
     /**
@@ -465,7 +465,7 @@ public class VampireAbilityManager {
      */
     public void clearAllCooldowns(Player player) {
         UUID playerId = player.getUniqueId();
-        Map<String, Long> playerCooldowns = (Map)this.abilityCooldowns.get(playerId);
+        Map<String, Long> playerCooldowns = this.abilityCooldowns.get(playerId);
 
         if (playerCooldowns != null) {
             int clearedCount = playerCooldowns.size();
@@ -595,7 +595,7 @@ public class VampireAbilityManager {
                                 String abilityName = parts[1];
                                 long cooldownEnd = Long.parseLong(parts[2]);
 
-                                ((Map)this.abilityCooldowns.computeIfAbsent(playerId, (k) -> new HashMap())).put(abilityName, cooldownEnd);
+                                (this.abilityCooldowns.computeIfAbsent(playerId, (k) -> new HashMap<>())).put(abilityName, cooldownEnd);
                                 ++loadedCount;
 
                             } catch (IllegalArgumentException e) {

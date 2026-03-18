@@ -371,6 +371,15 @@ public class ConfigManager {
     }
 
     /**
+     * Retrieve whether humans are allowed to achieve the victory condition if a vampire has been cured.
+     *
+     * @return {@code true} if curing a vampire and corrupting a beacon traps the humans inside the border.
+     */
+    public boolean doCorruptedBeaconsTrapHumans() {
+        return this.config.getBoolean("beacons.corrupted-beacons-trap-humans", true);
+    }
+
+    /**
      * Retrieve the minimum number of seconds where garlic can activate after consumption.
      *
      * @return The seconds until the garlic effect could activate.
@@ -467,6 +476,16 @@ public class ConfigManager {
      */
     public double getCureBooksSpawnChance() {
         return this.config.getDouble("cure_books_spawn_chance", 0.3);
+    }
+
+    /**
+     * Retrieve the ticks between tome book distribution cycles.
+     *
+     * @return The number of ticks after which tome chests will be refilled.
+     */
+    public long getTomeDistributionIntervalTicks() {
+        int minutes = this.config.getInt("tome-distribution-interval-minutes", 20);
+        return (long)minutes * 60L * 20L;
     }
 
     /**
