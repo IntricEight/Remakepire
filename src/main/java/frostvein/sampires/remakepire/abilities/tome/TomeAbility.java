@@ -16,8 +16,8 @@ public abstract class TomeAbility {
     protected final String name;
     protected final String[] descriptionLines;
     protected final int cooldownSeconds;
-    private static final Map<UUID, Map<String, Long>> playerCooldowns = new HashMap();
-    private static final Map<String, BukkitTask> cooldownNotificationTasks = new HashMap();
+    private static final Map<UUID, Map<String, Long>> playerCooldowns = new HashMap<>();
+    private static final Map<String, BukkitTask> cooldownNotificationTasks = new HashMap<>();
 
     /**
      * Create an instance of a Tome Ability.
@@ -130,7 +130,7 @@ public abstract class TomeAbility {
      */
     protected boolean isOnCooldown(Player player) {
         UUID playerId = player.getUniqueId();
-        Map<String, Long> cooldowns = (Map)playerCooldowns.get(playerId);
+        Map<String, Long> cooldowns = playerCooldowns.get(playerId);
 
         if (cooldowns != null && cooldowns.containsKey(this.name)) {
             long cooldownEnd = cooldowns.get(this.name);
@@ -149,7 +149,7 @@ public abstract class TomeAbility {
      */
     protected long getRemainingCooldown(Player player) {
         UUID playerId = player.getUniqueId();
-        Map<String, Long> cooldowns = (Map)playerCooldowns.get(playerId);
+        Map<String, Long> cooldowns = playerCooldowns.get(playerId);
 
         if (cooldowns != null && cooldowns.containsKey(this.name)) {
             long cooldownEnd = cooldowns.get(this.name);
@@ -168,7 +168,7 @@ public abstract class TomeAbility {
      */
     protected void setCooldown(Player player) {
         UUID playerId = player.getUniqueId();
-        Map<String, Long> cooldowns = (Map)playerCooldowns.computeIfAbsent(playerId, (k) -> new HashMap());
+        Map<String, Long> cooldowns = playerCooldowns.computeIfAbsent(playerId, (k) -> new HashMap<>());
 
         long cooldownEnd = System.currentTimeMillis() + (long)this.cooldownSeconds * 1000L;
         cooldowns.put(this.name, cooldownEnd);
@@ -219,7 +219,7 @@ public abstract class TomeAbility {
      */
     public static void clearCooldown(Player player, String abilityName) {
         UUID playerId = player.getUniqueId();
-        Map<String, Long> cooldowns = (Map)playerCooldowns.get(playerId);
+        Map<String, Long> cooldowns = playerCooldowns.get(playerId);
 
         if (cooldowns != null) {
             cooldowns.remove(abilityName);

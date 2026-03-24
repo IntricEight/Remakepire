@@ -171,7 +171,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
 
                 target.getActivePotionEffects().forEach((effect) -> target.removePotionEffect(effect.getType()));
                 AttributeInstance healthAttribute = target.getAttribute(Attribute.MAX_HEALTH);
-                healthAttribute.getModifiers().forEach(arg_0 -> ((AttributeInstance)healthAttribute).removeModifier(arg_0));
+                healthAttribute.getModifiers().forEach(arg_0 -> healthAttribute.removeModifier(arg_0));
                 healthAttribute.setBaseValue(20.0);
                 target.setHealth(healthAttribute.getValue());
                 target.setFoodLevel(20);
@@ -194,7 +194,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                 sender.sendMessage("§aPlayer " + target.getName() + " has been fully reset to a fresh state.");
                 target.sendMessage("§aYou have been reset to a fresh state by an administrator.");
                 target.sendMessage("§All vampire status, abilities, cooldowns, and death count have been cleared." + (clearInventory ? " Your inventory has also been cleared." : ""));
-                this.plugin.getLogger().info("Admin " + sender.getName() + " reset player " + target.getName() + " to fresh state");
+                this.plugin.logInfo("Admin " + sender.getName() + " reset player " + target.getName() + " to fresh state");
 
                 return true;
             }
@@ -232,7 +232,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         this.plugin.reloadVampireRespawnLocation();
 
         sender.sendMessage("§aVampire spawn location set to: §e" + locationStr);
-        this.plugin.getLogger().info("Admin " + sender.getName() + " set vampire spawn to " + locationStr);
+        this.plugin.logInfo("Admin " + sender.getName() + " set vampire spawn to " + locationStr);
 
         return true;
     }
@@ -289,7 +289,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                 }
 
                 sender.sendMessage("§aReset all vampire ability cooldowns for §e" + playersAffected + " §aonline players.");
-                this.plugin.getLogger().info("Admin " + sender.getName() + " reset cooldowns for " + playersAffected + " players");
+                this.plugin.logInfo("Admin " + sender.getName() + " reset cooldowns for " + playersAffected + " players");
 
                 return true;
             }
@@ -320,7 +320,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
             sender.sendMessage("§aReset all tome ability cooldowns for §e" + humansAffected + " §ahuman players.");
         }
 
-        this.plugin.getLogger().info("Admin " + sender.getName() + " reset tome cooldowns for " + humansAffected + " human players");
+        this.plugin.logInfo("Admin " + sender.getName() + " reset tome cooldowns for " + humansAffected + " human players");
         return true;
     }
 
@@ -388,7 +388,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                 player.playSound(player.getLocation(), "crimson:crimson.sound.crimson_warning_2", SoundCategory.MASTER, 1.0F, 1.0F);
             }
 
-            this.plugin.getLogger().info("Second warning sound played for all online players");
+            this.plugin.logInfo("Second warning sound played for all online players");
         }, 6000L);
 
         return true;
@@ -766,8 +766,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                 return true;
 
             } else {
-                if (sender instanceof Player) {
-                    Player player = (Player)sender;
+                if (sender instanceof Player player) {
                     Location beaconLoc = beacon.getLocation();
 
                     if (beaconLoc != null && beaconLoc.getWorld() != null) {
@@ -819,12 +818,13 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         Map<BeaconSite.BeaconState, Integer> stateStats = this.beaconManager.getStateStats();
         sender.sendMessage("§6§l=== BEACON STATISTICS ===");
         int total = stateStats.values().stream().mapToInt(Integer::intValue).sum();
+
         sender.sendMessage("§7Total Beacons: §e" + total);
         sender.sendMessage("");
         sender.sendMessage("§f§l=== SPIRITUAL INFLUENCE ===");
 
         for(BeaconSite.BeaconState state : BeaconState.values()) {
-            int count = (Integer)stateStats.get(state);
+            int count = stateStats.get(state);
             double percentage = total > 0 ? count * 100.0 / (double)total : 0;
             String icon = "";
 
@@ -949,6 +949,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
             return true;
         } else {
             Player turner = null;
+
             if (args.length >= 3) {
                 turner = Bukkit.getPlayer(args[2]);
 
@@ -994,6 +995,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                     if (args.length >= 3) {
                         try {
                             amount = Integer.parseInt(args[2]);
+
                             if (amount < 1 || amount > 64) {
                                 sender.sendMessage("§cAmount must be between 1 and 64.");
                                 return true;
@@ -1015,7 +1017,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                         bookMeta.setAuthor("§6A source unknown...");
 
                         if (ability != null) {
-                            List<String> lore = new ArrayList();
+                            List<String> lore = new ArrayList<>();
                             String[] descriptionLines = ability.getDescriptionLines();
 
                             for(String line : descriptionLines) {
@@ -1027,7 +1029,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                             bookMeta.setLore(lore);
                         }
 
-                        List<String> pages = new ArrayList();
+                        List<String> pages = new ArrayList<>();
                         StringBuilder pageContent = new StringBuilder();
                         pageContent.append("§5§lANCIENT KNOWLEDGE§r\n\n");
                         pageContent.append("§8The secrets of ").append(abilityName).append(" are contained within these pages.\n\n");
@@ -1053,7 +1055,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                         target.sendMessage("§eA mysterious tome appears at your feet...");
 
                     } else {
-                        target.getInventory().addItem(new ItemStack[]{tome});
+                        target.getInventory().addItem(tome);
                         target.sendMessage("§eA mysterious tome has appeared in your inventory...");
                     }
 
@@ -1065,7 +1067,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
     }
 
     private boolean handleSelectTomesCommand(CommandSender sender, String[] args) {
-        if (!(sender instanceof Player)) {
+        if (!(sender instanceof Player admin)) {
             sender.sendMessage("§cThis command can only be used by players.");
             return true;
 
@@ -1074,7 +1076,6 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
             return true;
 
         } else {
-            Player admin = (Player)sender;
             Player target = Bukkit.getPlayer(args[0]);
 
             if (target == null) {
@@ -1120,7 +1121,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                     target.sendMessage("§5An ancient tome appears at your feet...");
 
                 } else {
-                    target.getInventory().addItem(new ItemStack[]{book});
+                    target.getInventory().addItem(book);
                     target.sendMessage("§5An ancient tome has appeared in your inventory...");
                 }
 
@@ -1139,25 +1140,25 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                 case 1:
                     meta.setTitle("The Remedy 1/3");
                     meta.setAuthor("§5An ancient scholar");
-                    meta.setPages(new String[]{"§5§lTHE REMEDY§r\n§8Part I of III\n\n§7In the darkest hours, when the cursed blood burns within your veins, know that salvation exists.\n\n§7The ancients spoke of a trinity of knowledge...", "§7...that when combined, can sever the unholy bond between mortal and monster.\n\n§7This is the first piece of that forbidden wisdom.\n\n§8Read on, seeker of the light..."});
+                    meta.setPages("§5§lTHE REMEDY§r\n§8Part I of III\n\n§7In the darkest hours, when the cursed blood burns within your veins, know that salvation exists.\n\n§7The ancients spoke of a trinity of knowledge...", "§7...that when combined, can sever the unholy bond between mortal and monster.\n\n§7This is the first piece of that forbidden wisdom.\n\n§8Read on, seeker of the light...");
                     break;
                 case 2:
                     meta.setTitle("The Cure 2/3");
                     meta.setAuthor("§5An ancient scholar");
-                    meta.setPages(new String[]{"§5§lTHE CURE§r\n§8Part II of III\n\n§7The second fragment reveals the nature of the curse itself.\n\n§7Born of darkness, sustained by blood, the vampire's existence is a perversion of nature's order...", "§7...yet within this perversion lies the key to its undoing.\n\n§7Holy water, blessed by the righteous, weakens the bond.\n\n§8Continue your search, truth-seeker..."});
+                    meta.setPages("§5§lTHE CURE§r\n§8Part II of III\n\n§7The second fragment reveals the nature of the curse itself.\n\n§7Born of darkness, sustained by blood, the vampire's existence is a perversion of nature's order...", "§7...yet within this perversion lies the key to its undoing.\n\n§7Holy water, blessed by the righteous, weakens the bond.\n\n§8Continue your search, truth-seeker...");
                     break;
                 case 3:
                     meta.setTitle("The Absolution 3/3");
                     meta.setAuthor("§5An ancient scholar");
-                    meta.setPages(new String[]{"§5§lTHE ABSOLUTION§r\n§8Part III of III\n\n§7The final piece completes the trinity.\n\n§7With all three fragments of knowledge, the words of power are revealed:\n\n§6voluntate-mea-hoc-nefandum-vinculum-abicio", "§7Stand near a holy beacon, with holy water upon your person, beneath the light of day.\n\n§7Speak the words, and be free of the curse forevermore.\n\n§8May the light guide your path."});
+                    meta.setPages("§5§lTHE ABSOLUTION§r\n§8Part III of III\n\n§7The final piece completes the trinity.\n\n§7With all three fragments of knowledge, the words of power are revealed:\n\n§6voluntate-mea-hoc-nefandum-vinculum-abicio", "§7Stand near a holy beacon, with holy water upon your person, beneath the light of day.\n\n§7Speak the words, and be free of the curse forevermore.\n\n§8May the light guide your path.");
                     break;
                 case 4:
                     meta.setTitle("The Retribution 4/3");
                     meta.setAuthor("§4A vengeful spirit");
-                    meta.setPages(new String[]{"§4§lTHE RETRIBUTION§r\n§8The Fourth Tome\n\n§7This knowledge was never meant to be found.\n\n§7While the trinity speaks of self-salvation, this tome reveals darker words - words of forced redemption...", "§7...or forced damnation.\n\n§4hoc-vinculum-tibi-dirumpo-mala-creatura\n\n§7With these words, you may force the choice upon another creature of the night.\n\n§8Use this power wisely, for it carries great consequence."});
+                    meta.setPages("§4§lTHE RETRIBUTION§r\n§8The Fourth Tome\n\n§7This knowledge was never meant to be found.\n\n§7While the trinity speaks of self-salvation, this tome reveals darker words - words of forced redemption...", "§7...or forced damnation.\n\n§4hoc-vinculum-tibi-dirumpo-mala-creatura\n\n§7With these words, you may force the choice upon another creature of the night.\n\n§8Use this power wisely, for it carries great consequence.");
             }
 
-            List<String> lore = new ArrayList();
+            List<String> lore = new ArrayList<>();
             lore.add("§5An ancient tome of forbidden knowledge");
             lore.add("§7Part " + bookNum + " of the cure series");
             lore.add("");
@@ -1215,9 +1216,8 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
             return true;
 
         } else {
-            Location playerLocation = player.getLocation();
+            Location playerLocation = player.getLocation(), nearestLocation = null;
             List<Location> tomeLocations = this.plugin.getTomeDistributionManager().getTomeLocations();
-            Location nearestLocation = null;
             double nearestDistance = Double.MAX_VALUE;
 
             for(Location loc : tomeLocations) {
@@ -1272,16 +1272,15 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                 boolean hasChest = loc.getWorld() != null && loc.getBlock().getType() == Material.CHEST;
                 String chestStatus = hasChest ? "§a✔" : "§c✖";
                 String tpCommand = String.format("/tp %d %d %d", loc.getBlockX(), loc.getBlockY(), loc.getBlockZ());
-                TextComponent indexPart = new TextComponent(String.format("§7%d. ", index));
 
+                TextComponent indexPart = new TextComponent(String.format("§7%d. ", index));
                 TextComponent coordsPart = new TextComponent(String.format("§e%d, %d, %d", loc.getBlockX(), loc.getBlockY(), loc.getBlockZ()));
                 coordsPart.setClickEvent(new ClickEvent(Action.RUN_COMMAND, tpCommand));
                 coordsPart.setHoverEvent(new HoverEvent(net.md_5.bungee.api.chat.HoverEvent.Action.SHOW_TEXT, (new ComponentBuilder("§aClick to teleport to this location")).create()));
                 TextComponent statusPart = new TextComponent(String.format(" §7(chest: %s§7)", chestStatus));
 
-                if (sender instanceof Player) {
-                    Player player = (Player)sender;
-                    player.spigot().sendMessage(new BaseComponent[]{indexPart, coordsPart, statusPart});
+                if (sender instanceof Player player) {
+                    player.spigot().sendMessage(indexPart, coordsPart, statusPart);
 
                 } else {
                     sender.sendMessage(String.format("§7%d. §e%d, %d, %d §7(chest: %s§7)", index, loc.getBlockX(), loc.getBlockY(), loc.getBlockZ(), chestStatus));
@@ -1315,7 +1314,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                 }
 
                 sender.sendMessage("§aCleared blood moon buffs for §e" + playersAffected + " §aonline players.");
-                this.plugin.getLogger().info("Admin " + sender.getName() + " cleared blood moon buffs for all players");
+                this.plugin.logInfo("Admin " + sender.getName() + " cleared blood moon buffs for all players");
 
             } else {
                 Player targetPlayer = Bukkit.getPlayer(target);
@@ -1328,7 +1327,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                 this.plugin.getBloodMoonAttributeListener().forceRemoveBloodMoonAttributes(targetPlayer);
                 sender.sendMessage("§aCleared blood moon buffs for §e" + targetPlayer.getName() + "§a.");
                 targetPlayer.sendMessage("§aAn admin has cleared your blood moon buffs.");
-                this.plugin.getLogger().info("Admin " + sender.getName() + " cleared blood moon buffs for " + targetPlayer.getName());
+                this.plugin.logInfo("Admin " + sender.getName() + " cleared blood moon buffs for " + targetPlayer.getName());
             }
 
             return true;
@@ -1358,7 +1357,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                 }
 
                 sender.sendMessage("§aAggressively cleaned attribute modifiers for §e" + playersAffected + " §aonline players.");
-                this.plugin.getLogger().info("Admin " + sender.getName() + " fixed attributes for all players");
+                this.plugin.logInfo("Admin " + sender.getName() + " fixed attributes for all players");
 
             } else {
                 Player targetPlayer = Bukkit.getPlayer(target);
@@ -1370,7 +1369,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
 
                 this.plugin.getBloodMoonAttributeListener().forceCleanupOnJoin(targetPlayer);
                 sender.sendMessage("§aAggressively cleaned attribute modifiers for §e" + targetPlayer.getName() + "§a.");
-                this.plugin.getLogger().info("Admin " + sender.getName() + " fixed attributes for " + targetPlayer.getName());
+                this.plugin.logInfo("Admin " + sender.getName() + " fixed attributes for " + targetPlayer.getName());
             }
 
             return true;
@@ -1390,14 +1389,14 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                 case "all":
                     int removedCount = this.plugin.getEndermanRemovalListener().removeAllEndermen();
                     sender.sendMessage("§aRemoved §e" + removedCount + " §aendermen from all loaded chunks.");
-                    this.plugin.getLogger().info("Admin " + sender.getName() + " removed " + removedCount + " endermen");
+                    this.plugin.logInfo("Admin " + sender.getName() + " removed " + removedCount + " endermen");
                     break;
                 case "toggle":
                     boolean currentStatus = this.plugin.getEndermanRemovalListener().isEndermanRemovalEnabled();
                     this.plugin.getEndermanRemovalListener().setEndermanRemovalEnabled(!currentStatus);
                     String newStatus = !currentStatus ? "ENABLED" : "DISABLED";
                     sender.sendMessage("§aEnderman removal is now §e" + newStatus + "§a.");
-                    this.plugin.getLogger().info("Admin " + sender.getName() + " toggled enderman removal to " + newStatus);
+                    this.plugin.logInfo("Admin " + sender.getName() + " toggled enderman removal to " + newStatus);
                     break;
                 case "status":
                     String statusMessage = this.plugin.getEndermanRemovalListener().isEndermanRemovalEnabled() ? "§aENABLED" : "§cDISABLED";
@@ -1443,7 +1442,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
 
                             sender.sendMessage("§aDamage suppression set to §e" + percentage + "%");
                             sender.sendMessage("§7Changes are active immediately (no server restart required)");
-                            this.plugin.getLogger().info("Admin " + sender.getName() + " set damage suppression to " + percentage + "%");
+                            this.plugin.logInfo("Admin " + sender.getName() + " set damage suppression to " + percentage + "%");
                             break;
                         }
 
@@ -1478,7 +1477,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
             } else {
                 Random random = new Random();
 
-                List<ItemStack> starterItems = new ArrayList();
+                List<ItemStack> starterItems = new ArrayList<>();
                 starterItems.add(new ItemStack(Material.COOKED_CHICKEN, 1 + random.nextInt(4)));
                 starterItems.add(new ItemStack(Material.COOKED_SALMON, 1 + random.nextInt(4)));
                 starterItems.add(new ItemStack(Material.BREAD, 1 + random.nextInt(4)));
@@ -1522,10 +1521,10 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
 
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         if (!sender.hasPermission("vampiresmp.admin")) {
-            return new ArrayList();
+            return new ArrayList<>();
 
         } else {
-            List<String> completions = new ArrayList();
+            List<String> completions = new ArrayList<>();
 
             if (command.getName().equalsIgnoreCase("session")) {
                 if (args.length == 1) {
@@ -1637,8 +1636,10 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
     private void sendVampireTexturePackPrompt(Player player) {
         TextComponent textureMessage = new TextComponent("§7Apply the vampire texture pack: ");
         TextComponent clickableText = new TextComponent("§c§n[CLICK HERE]");
+
         clickableText.setClickEvent(new ClickEvent(Action.RUN_COMMAND, "/pow texture vampire"));
         clickableText.setHoverEvent(new HoverEvent(net.md_5.bungee.api.chat.HoverEvent.Action.SHOW_TEXT, (new ComponentBuilder("§7Click to apply the vampire texture pack")).create()));
+
         textureMessage.addExtra(clickableText);
         player.spigot().sendMessage(textureMessage);
     }

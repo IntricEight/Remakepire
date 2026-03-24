@@ -842,7 +842,7 @@ public class InitGameManager {
         AWAITING_MODE_SELECTION,
         AWAITING_MIN_VAMPIRES,
         AWAITING_MAX_VAMPIRES,
-        AWAITING_FINAL_CONFIRM;
+        AWAITING_FINAL_CONFIRM
     }
 
     public static class InitData {
@@ -854,7 +854,7 @@ public class InitGameManager {
 
         public static enum VampireMode {
             RANDOM,
-            SELECTED;
+            SELECTED
         }
     }
 }

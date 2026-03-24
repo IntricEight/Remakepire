@@ -64,7 +64,7 @@ public class TomeListener implements Listener {
 
                 if (bookMeta != null && bookMeta.hasTitle()) {
                     String tomeTitle = bookMeta.getTitle();
-                    this.plugin.getLogger().info("Player " + player.getName() + " using tome with title: '" + tomeTitle + "'");
+                    this.plugin.logInfo("Player " + player.getName() + " using tome with title: '" + tomeTitle + "'");
 
                     int cureBookNumber = CureBookReadingListener.getAuthenticCureBookNumber(item, this.plugin);
 
@@ -87,7 +87,7 @@ public class TomeListener implements Listener {
                             this.plugin.getCureBookReadingListener().onCureBookRead(player, cureBookNumber);
                         }
                     } else if (!this.tomeManager.isValidAbility(tomeTitle)) {
-                        this.plugin.getLogger().info("Invalid tome ability: '" + tomeTitle + "'");
+                        this.plugin.logInfo("Invalid tome ability: '" + tomeTitle + "'");
 
                     } else if (!this.vampireManager.isHuman(player)) {
                         event.setCancelled(true);
@@ -98,17 +98,17 @@ public class TomeListener implements Listener {
                         player.sendMessage("§cThe tome's magic lies dormant... It can only be absorbed during an active session.");
 
                     } else {
-                        this.plugin.getLogger().info("Valid tome ability: '" + tomeTitle + "'");
+                        this.plugin.logInfo("Valid tome ability: '" + tomeTitle + "'");
                         event.setCancelled(true);
 
                         if (this.tomeManager.hasAbility(player, tomeTitle)) {
-                            this.plugin.getLogger().info("Player " + player.getName() + " already has ability: '" + tomeTitle + "'");
+                            this.plugin.logInfo("Player " + player.getName() + " already has ability: '" + tomeTitle + "'");
                             player.sendMessage("§7The words seem familiar and hold no new secrets for you.");
 
                         } else {
-                            this.plugin.getLogger().info("Attempting to grant ability '" + tomeTitle + "' to player " + player.getName());
+                            this.plugin.logInfo("Attempting to grant ability '" + tomeTitle + "' to player " + player.getName());
                             boolean success = this.tomeManager.grantAbility(player, tomeTitle);
-                            this.plugin.getLogger().info("Grant result: " + success);
+                            this.plugin.logInfo("Grant result: " + success);
 
                             if (success) {
                                 player.sendMessage("\n§6§lTOME LEARNT");

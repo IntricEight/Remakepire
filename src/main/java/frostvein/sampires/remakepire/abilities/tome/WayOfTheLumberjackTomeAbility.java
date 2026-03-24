@@ -118,11 +118,11 @@ public class WayOfTheLumberjackTomeAbility extends TomeAbility implements Listen
         if (this.placedLogsFile.exists()) {
             try (FileReader reader = new FileReader(this.placedLogsFile)) {
                 Type setType = (new TypeToken<HashSet<String>>() {}).getType();
-                Set<String> loaded = (Set)this.gson.fromJson(reader, setType);
+                Set<String> loaded = this.gson.fromJson(reader, setType);
 
                 if (loaded != null) {
                     this.placedLogs = loaded;
-                    this.plugin.getLogger().info("WayOfTheLumberjack: Loaded " + this.placedLogs.size() + " placed log locations");
+                    this.plugin.logInfo("WayOfTheLumberjack: Loaded " + this.placedLogs.size() + " placed log locations");
                 }
             } catch (IOException e) {
                 this.plugin.getLogger().warning("WayOfTheLumberjack: Failed to load placed logs file: " + e.getMessage());
@@ -152,6 +152,6 @@ public class WayOfTheLumberjackTomeAbility extends TomeAbility implements Listen
      */
     public void cleanup() {
         this.savePlacedLogs();
-        this.plugin.getLogger().info("WayOfTheLumberjack: Saved " + this.placedLogs.size() + " placed log locations on shutdown");
+        this.plugin.logInfo("WayOfTheLumberjack: Saved " + this.placedLogs.size() + " placed log locations on shutdown");
     }
 }

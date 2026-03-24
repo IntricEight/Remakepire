@@ -43,7 +43,7 @@ public class BeaconConversionListener implements Listener {
     private final long BASE_CONVERSION_TIME;
     // Controls how frequently the beacon is checked for progress or cancellation (in ticks).
     private static final long CONVERSION_TICK_INTERVAL = 20L;
-    // Controls the distance you can interact with beacons from (in blocks)
+    // Controls the distance you can interact with beacons from (in blocks).
     private static final double BEACON_INTERACTION_RANGE = 3.0;
 
     /**
@@ -132,7 +132,7 @@ public class BeaconConversionListener implements Listener {
         Iterator<Map.Entry<String, ConversionData>> iterator = this.activeConversions.entrySet().iterator();
 
         while(iterator.hasNext()) {
-            Map.Entry<String, ConversionData> entry = (Map.Entry)iterator.next();
+            Map.Entry<String, ConversionData> entry = iterator.next();
             ConversionData data = entry.getValue();
 
             if (data.getConverters().contains(player.getUniqueId())) {
@@ -417,7 +417,7 @@ public class BeaconConversionListener implements Listener {
         }
 
         this.activeConversions.clear();
-        this.plugin.getLogger().info("BeaconConversionListener shutdown - cleaned up " + conversionCount + " active conversions.");
+        this.plugin.logInfo("BeaconConversionListener shutdown - cleaned up " + conversionCount + " active conversions.");
     }
 
     /**
@@ -425,8 +425,7 @@ public class BeaconConversionListener implements Listener {
      */
     private void checkForFinalStand() {
         Map<BeaconSite.BeaconState, Integer> stateStats = this.beaconManager.getStateStats();
-        int holyCount = stateStats.get(BeaconState.HOLY);
-        int desecratedCount = stateStats.get(BeaconState.DESECRATED);
+        int holyCount = stateStats.get(BeaconState.HOLY), desecratedCount = stateStats.get(BeaconState.DESECRATED);
         int permanentlyDesecratedCount = stateStats.getOrDefault(BeaconState.PERMANENTLY_DESECRATED, 0);
         int totalEvilCount = desecratedCount + permanentlyDesecratedCount;
         int totalBeacons = this.beaconManager.getAllBeacons().size();
@@ -446,7 +445,7 @@ public class BeaconConversionListener implements Listener {
      * Trigger the complete holy control final stand scenario.
      */
     private void triggerHumansFinalStand() {
-        this.plugin.getLogger().info("HUMANS FINAL STAND TRIGGERED - All 7 beacons are holy!");
+        this.plugin.logInfo("HUMANS FINAL STAND TRIGGERED - All 7 beacons are holy!");
 
         // Alert all online players of the final stand
         for(Player player : this.plugin.getServer().getOnlinePlayers()) {
@@ -473,7 +472,7 @@ public class BeaconConversionListener implements Listener {
      * Disable the complete holy control final stand scenario.
      */
     private void disableHumansFinalStand() {
-        this.plugin.getLogger().info("HUMANS FINAL STAND ENDED - A vampire has converted a beacon!");
+        this.plugin.logInfo("HUMANS FINAL STAND ENDED - A vampire has converted a beacon!");
 
         for(Player player : this.plugin.getServer().getOnlinePlayers()) {
             player.sendTitle("§4§lFINAL STAND BROKEN", "§cDarkness pushes back against the light", 20, 80, 20);
@@ -495,7 +494,7 @@ public class BeaconConversionListener implements Listener {
      * Trigger the complete darkness control final stand scenario.
      */
     private void triggerVampiresEternalNight() {
-        this.plugin.getLogger().info("VAMPIRES ETERNAL NIGHT TRIGGERED - All 7 beacons are desecrated!");
+        this.plugin.logInfo("VAMPIRES ETERNAL NIGHT TRIGGERED - All 7 beacons are desecrated!");
 
         for(Player player : this.plugin.getServer().getOnlinePlayers()) {
             player.sendTitle("§4§lETERNAL NIGHT FALLS", "§cThe darkness consumes all hope", 20, 100, 40);
@@ -517,7 +516,7 @@ public class BeaconConversionListener implements Listener {
      * Disable the complete darkness control final stand scenario.
      */
     private void disableVampiresEternalNight() {
-        this.plugin.getLogger().info("VAMPIRES ETERNAL NIGHT ENDED - A human has sanctified a beacon!");
+        this.plugin.logInfo("VAMPIRES ETERNAL NIGHT ENDED - A human has sanctified a beacon!");
 
         for(Player player : this.plugin.getServer().getOnlinePlayers()) {
             player.sendTitle("§6§lLIGHT RETURNS", "§eA beacon shines with holy light once more", 20, 80, 20);
@@ -775,7 +774,7 @@ public class BeaconConversionListener implements Listener {
          * Convert the beacon into one of its captured states.
          */
         private void completeConversion() {
-            BeaconSite.BeaconState newState = this.isVampireConversion ? BeaconState.DESECRATED : BeaconState.HOLY;
+            BeaconState newState = this.isVampireConversion ? BeaconState.DESECRATED : BeaconState.HOLY;
             BeaconConversionListener.this.beaconManager.cancelPendingNeutralBroadcast(this.beacon.getName());
 
             long cooldownMs = BeaconConversionListener.this.plugin.getConfigManager().getBeaconConversionCooldownMs();
@@ -786,7 +785,9 @@ public class BeaconConversionListener implements Listener {
             BeaconConversionListener.this.plugin.getBeaconMajorityManager().updateBeaconMajorityBonuses();
 
             // Check if this conversion is the first in the game lifetime
-            BeaconConversionListener.this.beaconManager.triggerFirstBeaconConvertedEffects(this.beacon, this.isVampireConversion);
+            if (newState == BeaconSite.BeaconState.HOLY || newState == BeaconSite.BeaconState.DESECRATED) {
+                BeaconConversionListener.this.beaconManager.triggerFirstBeaconConvertedEffects(this.beacon, this.isVampireConversion);
+            }
 
             // Inform the players that a beacon has been given to a team
             BeaconConversionListener.this.broadcastBeaconGainToTeam(this.beacon, newState);

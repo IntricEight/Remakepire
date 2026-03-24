@@ -213,7 +213,7 @@ public class StopTheBleedingTomeAbility extends TomeAbility {
 
             if (deathObjective != null) {
                 deathObjective.getScore(player.getName()).setScore(score);
-                this.plugin.getLogger().info("Set death score for " + player.getName() + " to " + score);
+                this.plugin.logInfo("Set death score for " + player.getName() + " to " + score);
             }
         } catch (Exception e) {
             this.plugin.getLogger().warning("Failed to set death score for " + player.getName() + ": " + e.getMessage());
@@ -234,7 +234,7 @@ public class StopTheBleedingTomeAbility extends TomeAbility {
                 }
 
                 double maxHealth = player.getAttribute(Attribute.MAX_HEALTH).getValue();
-                this.plugin.getLogger().info("Updated max health for " + player.getName() + " to " + maxHealth);
+                this.plugin.logInfo("Updated max health for " + player.getName() + " to " + maxHealth);
             } catch (Exception e) {
                 this.plugin.getLogger().warning("Failed to update max health for " + player.getName() + ": " + e.getMessage());
             }

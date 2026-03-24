@@ -63,7 +63,7 @@ public class LanternThrashTomeAbility extends TomeAbility {
      * @return a {@code List} of block {@code Location}s that will be set on fire.
      */
     private List<Location> calculateFireLocations(Location playerLoc) {
-        List<Location> locations = new ArrayList();
+        List<Location> locations = new ArrayList<>();
         int playerX = playerLoc.getBlockX();
         int playerY = playerLoc.getBlockY();
         int playerZ = playerLoc.getBlockZ();

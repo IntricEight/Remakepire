@@ -111,7 +111,7 @@ public class ShoulderBargeTomeAbility extends TomeAbility {
         Set<UUID> hitEntities;
 
         synchronized(this.chargeHitEntities) {
-            hitEntities = (Set)this.chargeHitEntities.get(playerId);
+            hitEntities = this.chargeHitEntities.get(playerId);
         }
 
         if (hitEntities != null) {

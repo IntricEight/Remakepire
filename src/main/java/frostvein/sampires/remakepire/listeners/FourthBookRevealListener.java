@@ -33,7 +33,7 @@ public class FourthBookRevealListener implements Listener {
 
         if (plugin.getWorld() != null) {
             this.townChestLocation = new Location(plugin.getWorld(), 76.0, 80.0, 407.0);
-            plugin.getLogger().info("FourthBookRevealListener: Loaded " + this.tomeChestLocations.size() + " tome chest locations from config");
+            plugin.logInfo("FourthBookRevealListener: Loaded " + this.tomeChestLocations.size() + " tome chest locations from config");
         } else {
             this.townChestLocation = null;
             plugin.getLogger().warning("FourthBookRevealListener: World not found during initialization");
@@ -116,7 +116,7 @@ public class FourthBookRevealListener implements Listener {
     private void markAsRevealed() {
         this.plugin.getConfig().set("fourth_book_has_spawned", true);
         this.plugin.saveConfig();
-        this.plugin.getLogger().info("FourthBookRevealListener: Marked fourth book as revealed in config");
+        this.plugin.logInfo("FourthBookRevealListener: Marked fourth book as revealed in config");
     }
 
     /**
@@ -134,7 +134,7 @@ public class FourthBookRevealListener implements Listener {
         player.sendMessage("§8§o[As you open the chest, an unfamiliar book suddenly materializes within...]");
         player.sendMessage("§4§o[The smell of old blood emanates from its pages...]");
 
-        this.plugin.getLogger().info("FOURTH BOOK REVEALED: " + player.getName() + " opened tome chest at " + chest.getLocation().getBlockX() + ", " + chest.getLocation().getBlockY() + ", " + chest.getLocation().getBlockZ());
+        this.plugin.logInfo("FOURTH BOOK REVEALED: " + player.getName() + " opened tome chest at " + chest.getLocation().getBlockX() + ", " + chest.getLocation().getBlockY() + ", " + chest.getLocation().getBlockZ());
     }
 
     /**
@@ -149,7 +149,7 @@ public class FourthBookRevealListener implements Listener {
         if (bookMeta != null) {
             bookMeta.setTitle("The Retribution 4/3");
             bookMeta.setAuthor("§4A vengeful hand...");
-            bookMeta.setPages("§8§o[The writing in this book is unlike the previous three, it's is hurried and panic'd, the ink is smeared and the smell of blood rests faintly on the pages]§r\n\n§4The spirits are too lenient... Too soft...", "§0These disgusting, vial, works of evil could never be convinced to come back to the light...\n\n§0They must be dragged back to humanity, even if it's by, kicking and screaming.", "§0Give them a choice. Accept the light, or face eternal darkness.\n\n§0I will give them this choice, with these holy words:", "§7/§4hoc-vinculum-tibi-dirumpo-mala-creatura §7<§4Players-Name§7>");
+            bookMeta.setPages("§8§o[The writing in this book is unlike the previous three, it's is hurried and panicked, the ink is smeared and the smell of blood rests faintly on the pages]§r\n\n§4The spirits are too lenient... Too soft...", "§0These disgusting, vile, works of evil could never be convinced to come back to the light...\n\n§0They must be dragged back to humanity, even if it's by, kicking and screaming.", "§0Give them a choice. Accept the light, or face eternal darkness.\n\n§0I will give them this choice, with these holy words:", "§7/§4hoc-vinculum-tibi-dirumpo-mala-creatura §7<§4Players-Name§7>");
             book.setItemMeta(bookMeta);
         }
 

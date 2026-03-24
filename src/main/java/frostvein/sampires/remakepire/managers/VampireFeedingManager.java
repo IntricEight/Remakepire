@@ -49,7 +49,7 @@ public class VampireFeedingManager implements Listener {
 
         Bukkit.getPluginManager().registerEvents(this, plugin);
         this.startFeedingDetectionTask();
-        plugin.getLogger().info("VampireFeedingManager initialized");
+        plugin.logInfo("VampireFeedingManager initialized");
     }
 
     /**
@@ -284,7 +284,7 @@ public class VampireFeedingManager implements Listener {
             }
 
             this.cancelFeedingSession(session);
-            this.plugin.getLogger().info("Vampire " + vampire.getName() + " transformed " + target.getName() + " into a vampire through feeding");
+            this.plugin.logInfo("Vampire " + vampire.getName() + " transformed " + target.getName() + " into a vampire through feeding");
         }
     }
 
@@ -344,7 +344,7 @@ public class VampireFeedingManager implements Listener {
                                     }
 
                                     vampire.sendMessage("§7Stay crouched within range for " + VampireAbilityManager.formatTime(5L));
-                                    this.plugin.getLogger().info("Vampire " + vampire.getName() + " started feeding on " + nearbyPlayer.getName());
+                                    this.plugin.logInfo("Vampire " + vampire.getName() + " started feeding on " + nearbyPlayer.getName());
                                     return;
                                 }
                             }
@@ -481,7 +481,7 @@ public class VampireFeedingManager implements Listener {
      */
     public void resetSessionFeedingThirst() {
         this.sessionFeedingThirst.clear();
-        this.plugin.getLogger().info("Reset feeding thirst tracking for new session");
+        this.plugin.logInfo("Reset feeding thirst tracking for new session");
     }
 
     /**
@@ -513,7 +513,7 @@ public class VampireFeedingManager implements Listener {
 
         this.activeSessions.clear();
         this.sessionFeedingThirst.clear();
-        this.plugin.getLogger().info("VampireFeedingManager shutdown complete");
+        this.plugin.logInfo("VampireFeedingManager shutdown complete");
     }
 
     private static class FeedingSession {

@@ -50,19 +50,21 @@ public class InteractionListener implements Listener {
      */
     @EventHandler
     public void onPlayerInteractEntity(PlayerInteractEntityEvent event) {
-
-        // TODO: Prevent vampires from feeding animals with their off-hand
-
         Player player = event.getPlayer();
         Entity targetEntity = event.getRightClicked();
+
         ItemStack itemInHand = player.getInventory().getItemInMainHand();
+        ItemStack offHand = player.getInventory().getItemInOffHand();
+
+        boolean hasFoodInMainHand = itemInHand != null && itemInHand.getType() != Material.AIR && FEEDING_ITEMS.contains(itemInHand.getType());
+        boolean hasFoodInOffHand = offHand != null && offHand.getType() != Material.AIR && FEEDING_ITEMS.contains(offHand.getType());
 
         if (this.plugin.getVampireManager().isVampire(player)) {
             if (this.plugin.getBatTransformationManager().isInBatForm(player)) {
                 event.setCancelled(true);
                 player.sendMessage("§cYou cannot interact with anything while you are in your bat form.");
 
-            } else if (itemInHand != null && itemInHand.getType() != Material.AIR && FEEDING_ITEMS.contains(itemInHand.getType())) {
+            } else if (hasFoodInMainHand || hasFoodInOffHand) {
                 if (!(targetEntity instanceof Player)) {
                     if (this.isFeedableMob(targetEntity)) {
                         this.handleVampireFeedingAttempt(player, targetEntity, itemInHand, event);
@@ -91,7 +93,7 @@ public class InteractionListener implements Listener {
      * @param event a player interacts with an entity.
      */
     private void handleVampireFeedingAttempt(Player vampire, Entity mob, ItemStack foodItem, PlayerInteractEntityEvent event) {
-        this.plugin.getLogger().info("Vampire " + vampire.getName() + " attempted to feed " + String.valueOf(mob.getType()) + " with " + String.valueOf(foodItem.getType()));
+        this.plugin.logInfo("Vampire " + vampire.getName() + " attempted to feed " + String.valueOf(mob.getType()) + " with " + String.valueOf(foodItem.getType()));
 
         if (this.plugin.getVampireManager().isVampireStage1(vampire)) {
             vampire.sendMessage("§cThe animal tentatively eats from your hand, eyeing you suspiciously, as if it knows your true nature...");

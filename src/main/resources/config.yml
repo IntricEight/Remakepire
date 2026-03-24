@@ -62,6 +62,11 @@ tome-chests:
     - -1095,-11,-1028
     - -630,256,-1168
 
+# Tome Distribution Interval
+# How often tomes are distributed to chests (in minutes)
+# Default: 20 minutes
+tome-distribution-interval-minutes: 20
+
 # ============================================================================
 # VAMPIRE ABILITY COOLDOWNS
 # ============================================================================
@@ -126,6 +131,10 @@ thirst:
   # Default: 120 minutes (2 hours)
   depletion-minutes: 120
 
+  # Maximum thirst points a vampire can gain from feeding per session
+  # Default: 60
+  max-feeding-per-session: 60
+
 # ============================================================================
 # VAMPIRE RESPAWN LOCATION
 # ============================================================================
@@ -158,6 +167,11 @@ beacons:
   # Default: 60 seconds (beacon texture changes immediately, announcement is delayed)
   neutral-announcement-delay-seconds: 60
 
+  # Whether corrupted beacons trap humans by counting toward the total required to leave
+  # When true (default), corrupted beacons count as desecrated — humans can never reclaim them
+  # When false, corrupted beacons are excluded from the total for both sides
+  corrupted-beacons-trap-humans: true
+
 # ============================================================================
 # GARLIC (BEETROOT) SYSTEM
 # ============================================================================
@@ -173,6 +187,26 @@ garlic:
   immunity-duration-min-seconds: 480
   # Default: 600 seconds (10 minutes) maximum
   immunity-duration-max-seconds: 600
+
+# ============================================================================
+# LOGGING
+# ============================================================================
+# Disable non-essential (info-level) logging to reduce console noise
+# When true, only warnings and errors will appear in console
+# Default: false (all logging enabled)
+disable-nonessential-logging: false
+
+# ============================================================================
+# HOLY WATER SYSTEM
+# ============================================================================
+holy-water:
+  # Duration of the holy water disable effect on vampires (in seconds)
+  # Default: 120 seconds (2 minutes)
+  disable-duration-seconds: 120
+
+  # Session capping prevents players from creating more than one holy water each session.
+  # Default: true
+  holy-water-session-capped: true
 
 # ============================================================================
 # CURE SYSTEM

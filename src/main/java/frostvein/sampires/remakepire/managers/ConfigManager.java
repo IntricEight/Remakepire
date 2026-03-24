@@ -371,6 +371,15 @@ public class ConfigManager {
     }
 
     /**
+     * Retrieve whether humans are allowed to achieve the victory condition if a vampire has been cured.
+     *
+     * @return {@code true} if curing a vampire and corrupting a beacon traps the humans inside the border.
+     */
+    public boolean doCorruptedBeaconsTrapHumans() {
+        return this.config.getBoolean("beacons.corrupted-beacons-trap-humans", true);
+    }
+
+    /**
      * Retrieve the minimum number of seconds where garlic can activate after consumption.
      *
      * @return The seconds until the garlic effect could activate.
@@ -404,6 +413,33 @@ public class ConfigManager {
      */
     public int getGarlicImmunityDurationMax() {
         return this.config.getInt("garlic.immunity-duration-max-seconds", 600);
+    }
+
+    /**
+     * Retrieve whether the console logging should be reduced to only essential messages.
+     *
+     * @return {@code true} if logging should be reduced.
+     */
+    public boolean isNonEssentialLoggingDisabled() {
+        return this.config.getBoolean("disable-nonessential-logging", false);
+    }
+
+    /**
+     * Retrieve the duration that holy water disables vampire abilities.
+     *
+     * @return The number of seconds that holy water disables a vampire's abilities.
+     */
+    public int getHolyWaterDisableDurationSeconds() {
+        return this.config.getInt("holy-water.disable-duration-seconds", 120);
+    }
+
+    /**
+     * Retrieve whether players will be limited to creating one bottle of holy water per session.
+     *
+     * @return {@code true} if holy water has been session capped.
+     */
+    public boolean isHolyWaterSessionCapped() {
+        return this.config.getBoolean("holy-water.holy-water-session-capped", true);
     }
 
     /**
@@ -467,6 +503,16 @@ public class ConfigManager {
      */
     public double getCureBooksSpawnChance() {
         return this.config.getDouble("cure_books_spawn_chance", 0.3);
+    }
+
+    /**
+     * Retrieve the ticks between tome book distribution cycles.
+     *
+     * @return The number of ticks after which tome chests will be refilled.
+     */
+    public long getTomeDistributionIntervalTicks() {
+        int minutes = this.config.getInt("tome-distribution-interval-minutes", 20);
+        return (long)minutes * 60L * 20L;
     }
 
     /**

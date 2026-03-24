@@ -18,9 +18,9 @@ public class OptionalTypeAdapter implements TypeAdapterFactory {
         if (typeToken.getRawType() != Optional.class) return null;
 
         Type type = typeToken.getType();
-        Type wrappedType = ((ParameterizedType) type).getActualTypeArguments()[0];
+        Type wrappedType = ((ParameterizedType)type).getActualTypeArguments()[0];
 
-        final TypeAdapter<Object> wrappedAdapter = (TypeAdapter<Object>) gson.getAdapter(TypeToken.get(wrappedType));
+        final TypeAdapter<Object> wrappedAdapter = (TypeAdapter<Object>)gson.getAdapter(TypeToken.get(wrappedType));
 
         TypeAdapter<Optional<Object>> adapter = new TypeAdapter<>() {
             @Override

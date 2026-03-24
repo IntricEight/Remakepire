@@ -67,7 +67,7 @@ public class BatTransformationManager {
                 this.batStateFile.createNewFile();
             }
 
-            this.plugin.getLogger().info("Created bat transformation persistence file");
+            this.plugin.logInfo("Created bat transformation persistence file");
         } catch (IOException e) {
             this.plugin.getLogger().severe("Failed to create bat transformation file: " + e.getMessage());
             e.printStackTrace();
@@ -102,7 +102,7 @@ public class BatTransformationManager {
         Iterator<Map.Entry<UUID, BatData>> iterator = this.activeBats.entrySet().iterator();
 
         while(iterator.hasNext()) {
-            Map.Entry<UUID, BatData> entry = (Map.Entry)iterator.next();
+            Map.Entry<UUID, BatData> entry = iterator.next();
             UUID playerId = entry.getKey();
             BatData batData = entry.getValue();
 
@@ -148,7 +148,7 @@ public class BatTransformationManager {
         Iterator<Map.Entry<UUID, BatData>> iterator = this.activeBats.entrySet().iterator();
 
         while(iterator.hasNext()) {
-            Map.Entry<UUID, BatData> entry = (Map.Entry)iterator.next();
+            Map.Entry<UUID, BatData> entry = iterator.next();
             UUID playerId = entry.getKey();
             BatData batData = entry.getValue();
 
@@ -184,7 +184,7 @@ public class BatTransformationManager {
         }
 
         player.setHealth(0.0);
-        this.plugin.getLogger().info("Player " + player.getName() + " died because their bat form was destroyed");
+        this.plugin.logInfo("Player " + player.getName() + " died because their bat form was destroyed");
     }
 
     /**
@@ -251,9 +251,9 @@ public class BatTransformationManager {
                 batData.lastValidLocation = currentLoc;
 
                 if (this.armorStorageManager.storeAndClearPlayerArmor(player.getUniqueId(), player)) {
-                    this.plugin.getLogger().info("Successfully stored and cleared armor for player " + player.getName() + " during bat transformation");
+                    this.plugin.logInfo("Successfully stored and cleared armor for player " + player.getName() + " during bat transformation");
                 } else {
-                    this.plugin.getLogger().info("No armor to store for player " + player.getName() + " during bat transformation");
+                    this.plugin.logInfo("No armor to store for player " + player.getName() + " during bat transformation");
                 }
 
                 player.addScoreboardTag(BAT_FORM_TAG);
@@ -292,7 +292,7 @@ public class BatTransformationManager {
 
                 this.activeBats.put(player.getUniqueId(), batData);
                 this.saveBatStates();
-                this.plugin.getLogger().info("Player " + player.getName() + " transformed into bat form");
+                this.plugin.logInfo("Player " + player.getName() + " transformed into bat form");
                 return true;
 
             } catch (Exception e) {
@@ -324,7 +324,7 @@ public class BatTransformationManager {
                 this.forceTransformToHuman(player, batData);
                 this.activeBats.remove(player.getUniqueId());
                 this.saveBatStates();
-                this.plugin.getLogger().info("Player " + player.getName() + " transformed back to human form");
+                this.plugin.logInfo("Player " + player.getName() + " transformed back to human form");
                 return true;
             }
         }
@@ -366,7 +366,7 @@ public class BatTransformationManager {
 
         try {
             if (!this.armorStorageManager.hasStoredArmor(playerId)) {
-                this.plugin.getLogger().info("No stored armor found for player " + player.getName() + " - nothing to restore");
+                this.plugin.logInfo("No stored armor found for player " + player.getName() + " - nothing to restore");
                 return;
             }
 
@@ -417,7 +417,7 @@ public class BatTransformationManager {
                 }
             }
 
-            this.plugin.getLogger().info("Successfully restored " + restoredPieces + " armor pieces for player " + player.getName() + " after bat transformation");
+            this.plugin.logInfo("Successfully restored " + restoredPieces + " armor pieces for player " + player.getName() + " after bat transformation");
         } catch (Exception e) {
             this.plugin.getLogger().severe("Failed to restore armor for player " + player.getName() + ": " + e.getMessage());
             e.printStackTrace();
@@ -474,14 +474,14 @@ public class BatTransformationManager {
         UUID playerId = player.getUniqueId();
 
         if (this.armorStorageManager.hasStoredArmor(playerId)) {
-            this.plugin.getLogger().info("Found stored armor for player " + player.getName() + " on join - attempting restoration");
+            this.plugin.logInfo("Found stored armor for player " + player.getName() + " on join - attempting restoration");
             this.restorePlayerArmor(player);
         }
 
         if (this.isInBatForm(player)) {
             BatData batData = this.activeBats.get(player.getUniqueId());
             this.forceTransformToHuman(player, batData);
-            this.plugin.getLogger().info("Player " + player.getName() + " was forced back to human form upon joining (was in bat form when offline)");
+            this.plugin.logInfo("Player " + player.getName() + " was forced back to human form upon joining (was in bat form when offline)");
         }
     }
 
@@ -493,7 +493,7 @@ public class BatTransformationManager {
     public void handlePlayerQuit(Player player) {
         if (this.isInBatForm(player)) {
             this.transformToHuman(player);
-            this.plugin.getLogger().info("Player " + player.getName() + " exited bat form due to disconnect");
+            this.plugin.logInfo("Player " + player.getName() + " exited bat form due to disconnect");
         }
     }
 
@@ -505,7 +505,7 @@ public class BatTransformationManager {
             while(true) {
                 String line;
                 if ((line = reader.readLine()) == null) {
-                    this.plugin.getLogger().info("Loaded bat transformation states from file");
+                    this.plugin.logInfo("Loaded bat transformation states from file");
                     break;
                 }
 
@@ -571,7 +571,7 @@ public class BatTransformationManager {
         }
 
         this.saveBatStates();
-        this.plugin.getLogger().info("Bat transformation manager shutdown complete");
+        this.plugin.logInfo("Bat transformation manager shutdown complete");
     }
 
     private static class BatData {

@@ -14,15 +14,9 @@ import frostvein.sampires.remakepire.RemakepirePlugin;
 
 public class CureBookReadingListener implements Listener {
     private final RemakepirePlugin plugin;
-    public static final String TAG_CURE_BOOK_1 = "CureBook1Read";
-    public static final String TAG_CURE_BOOK_2 = "CureBook2Read";
-    public static final String TAG_CURE_BOOK_3 = "CureBook3Read";
-    public static final String TAG_CURE_BOOK_4 = "CureBook4Read";
+    public static final String TAG_CURE_BOOK_1 = "CureBook1Read", TAG_CURE_BOOK_2 = "CureBook2Read", TAG_CURE_BOOK_3 = "CureBook3Read", TAG_CURE_BOOK_4 = "CureBook4Read";
     public static final String CURE_BOOK_KEY = "vampiresmp_cure_book";
-    public static final int BOOK_NUM_REMEDY = 1;
-    public static final int BOOK_NUM_CURE = 2;
-    public static final int BOOK_NUM_ABSOLUTION = 3;
-    public static final int BOOK_NUM_RETRIBUTION = 4;
+    public static final int BOOK_NUM_REMEDY = 1, BOOK_NUM_CURE = 2, BOOK_NUM_ABSOLUTION = 3, BOOK_NUM_RETRIBUTION = 4;
 
     /**
      * Create an instance of the Cure Book Reading listener.
@@ -89,6 +83,7 @@ public class CureBookReadingListener implements Listener {
                         bookName = "The Remedy";
                         isNewTag = true;
                     }
+
                     break;
                 case BOOK_NUM_CURE:
                     if (!player.getScoreboardTags().contains(TAG_CURE_BOOK_2)) {
@@ -96,6 +91,7 @@ public class CureBookReadingListener implements Listener {
                         bookName = "The Cure";
                         isNewTag = true;
                     }
+
                     break;
                 case BOOK_NUM_ABSOLUTION:
                     if (!player.getScoreboardTags().contains(TAG_CURE_BOOK_3)) {
@@ -103,6 +99,7 @@ public class CureBookReadingListener implements Listener {
                         bookName = "The Absolution";
                         isNewTag = true;
                     }
+
                     break;
                 case BOOK_NUM_RETRIBUTION:
                     if (!hasReadAllCureBooks(player)) {
@@ -115,6 +112,7 @@ public class CureBookReadingListener implements Listener {
                         bookName = "The Retribution";
                         isNewTag = true;
                     }
+
                     break;
                 default:
                     return false;
@@ -123,7 +121,7 @@ public class CureBookReadingListener implements Listener {
             if (tagToAdd != null && isNewTag) {
                 player.addScoreboardTag(tagToAdd);
                 player.sendMessage("§8§o[You absorb the ancient knowledge within " + bookName + "...]");
-                this.plugin.getLogger().info("CURE BOOK READ: " + player.getName() + " read book #" + bookNumber);
+                this.plugin.logInfo("CURE BOOK READ: " + player.getName() + " read book #" + bookNumber);
 
                 if (bookNumber != BOOK_NUM_RETRIBUTION && hasReadAllCureBooks(player)) {
                     player.sendMessage("");
@@ -133,12 +131,12 @@ public class CureBookReadingListener implements Listener {
                     player.sendMessage("§7Stand near a holy beacon, with a bottle of holy water on your person, and in the light of day, say those words, and be free.");
                     player.sendMessage("");
 
-                    this.plugin.getLogger().info("CURE UNLOCKED: " + player.getName() + " has unlocked the /vol cure command");
+                    this.plugin.logInfo("CURE UNLOCKED: " + player.getName() + " has unlocked the /vol cure command");
 
                     if (!this.plugin.getConfig().getBoolean("fourth_book_spawn_enabled", false)) {
                         this.plugin.getConfig().set("fourth_book_spawn_enabled", true);
                         this.plugin.saveConfig();
-                        this.plugin.getLogger().info("FOURTH BOOK ENABLED: " + player.getName() + " completed the Trinity, the fourth book can now spawn");
+                        this.plugin.logInfo("FOURTH BOOK ENABLED: " + player.getName() + " completed the Trinity, the fourth book can now spawn");
                     }
                 }
 
@@ -149,7 +147,8 @@ public class CureBookReadingListener implements Listener {
                     player.sendMessage("§7/§4hoc-vinculum-tibi-dirumpo-mala-creatura §7<§4player§7>");
                     player.sendMessage("§7You and the creature must be within range of a holy beacon, hold a holy water on your person, and in the light of day, say those words, and give them the final choice.");
                     player.sendMessage("");
-                    this.plugin.getLogger().info("FORCE CURE UNLOCKED: " + player.getName() + " has unlocked the /hoc force cure command");
+
+                    this.plugin.logInfo("FORCE CURE UNLOCKED: " + player.getName() + " has unlocked the /hoc force cure command");
                 }
 
                 return true;

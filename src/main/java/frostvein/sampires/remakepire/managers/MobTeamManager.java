@@ -46,7 +46,7 @@ public class MobTeamManager {
             }
         }).runTaskTimer(this.plugin, 0L, assignmentIntervals);
 
-        this.plugin.getLogger().info("MobTeamManager: Started mob team assignment task (every 10 seconds)");
+        this.plugin.logInfo("MobTeamManager: Started mob team assignment task (every 10 seconds)");
     }
 
     /**
@@ -56,7 +56,7 @@ public class MobTeamManager {
         if (this.mobTeamTask != null) {
             this.mobTeamTask.cancel();
             this.mobTeamTask = null;
-            this.plugin.getLogger().info("MobTeamManager: Stopped mob team assignment task");
+            this.plugin.logInfo("MobTeamManager: Stopped mob team assignment task");
         }
     }
 
@@ -139,7 +139,7 @@ public class MobTeamManager {
                 vampireTeam.removeEntry(entry);
             }
 
-            this.plugin.getLogger().info("MobTeamManager: Removed " + removedCount + " entries from VampireCastTeam");
+            this.plugin.logInfo("MobTeamManager: Removed " + removedCount + " entries from VampireCastTeam");
         }
     }
 

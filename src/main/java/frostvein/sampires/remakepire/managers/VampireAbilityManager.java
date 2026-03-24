@@ -81,7 +81,7 @@ public class VampireAbilityManager {
                 this.globalCooldownFile.createNewFile();
             }
 
-            this.plugin.getLogger().info("Created ability cooldown persistence files");
+            this.plugin.logInfo("Created ability cooldown persistence files");
         } catch (IOException e) {
             this.plugin.getLogger().severe("Failed to create ability cooldown files: " + e.getMessage());
             e.printStackTrace();
@@ -100,7 +100,7 @@ public class VampireAbilityManager {
         this.registerAbility(new BatAbility());
         this.registerAbility(new VampireVisionAbility());
 
-        this.plugin.getLogger().info("Registered " + this.abilities.size() + " vampire abilities");
+        this.plugin.logInfo("Registered " + this.abilities.size() + " vampire abilities");
     }
 
     /**
@@ -110,7 +110,6 @@ public class VampireAbilityManager {
      */
     private void registerAbility(VampireAbility ability) {
         this.abilities.put(ability.getName().toLowerCase(), ability);
-        this.plugin.getLogger().info("Registered vampire ability: " + ability.getName());
     }
 
     /**
@@ -136,11 +135,11 @@ public class VampireAbilityManager {
             Player player = Bukkit.getPlayer(playerId);
 
             if (player != null && player.isOnline()) {
-                Map<String, Long> playerCooldowns = (Map)this.abilityCooldowns.get(playerId);
+                Map<String, Long> playerCooldowns = this.abilityCooldowns.get(playerId);
                 Iterator<Map.Entry<String, Long>> iterator = playerCooldowns.entrySet().iterator();
 
                 while(iterator.hasNext()) {
-                    Map.Entry<String, Long> entry = (Map.Entry)iterator.next();
+                    Map.Entry<String, Long> entry = iterator.next();
                     String abilityName = entry.getKey();
                     long cooldownEnd = entry.getValue();
 
@@ -165,7 +164,7 @@ public class VampireAbilityManager {
         Iterator<Map.Entry<String, GlobalCooldownData>> iterator = this.globalCooldowns.entrySet().iterator();
 
         while(iterator.hasNext()) {
-            Map.Entry<String, GlobalCooldownData> entry = (Map.Entry)iterator.next();
+            Map.Entry<String, GlobalCooldownData> entry = iterator.next();
             String abilityName = entry.getKey();
             GlobalCooldownData data = entry.getValue();
 
@@ -252,7 +251,7 @@ public class VampireAbilityManager {
                 return false;
 
             } else {
-                VampireAbility ability = (VampireAbility)this.abilities.get(abilityName.toLowerCase());
+                VampireAbility ability = this.abilities.get(abilityName.toLowerCase());
 
                 if (ability == null) {
                     player.sendMessage("§cUnknown ability: " + abilityName);
@@ -352,7 +351,7 @@ public class VampireAbilityManager {
      */
     public boolean isOnCooldown(Player player, String abilityName) {
         UUID playerId = player.getUniqueId();
-        Map<String, Long> playerCooldowns = (Map)this.abilityCooldowns.get(playerId);
+        Map<String, Long> playerCooldowns = this.abilityCooldowns.get(playerId);
 
         if (playerCooldowns == null) {
             return false;
@@ -396,7 +395,7 @@ public class VampireAbilityManager {
      */
     public long getRemainingCooldown(Player player, String abilityName) {
         UUID playerId = player.getUniqueId();
-        Map<String, Long> playerCooldowns = (Map)this.abilityCooldowns.get(playerId);
+        Map<String, Long> playerCooldowns = this.abilityCooldowns.get(playerId);
 
         if (playerCooldowns == null) {
             return 0L;
@@ -442,7 +441,7 @@ public class VampireAbilityManager {
     private void setCooldown(Player player, String abilityName, int cooldownSeconds) {
         UUID playerId = player.getUniqueId();
         long cooldownEnd = this.sessionManager.getSessionTimeSeconds() + (long)cooldownSeconds;
-        ((Map)this.abilityCooldowns.computeIfAbsent(playerId, (k) -> new HashMap())).put(abilityName.toLowerCase(), cooldownEnd);
+        (this.abilityCooldowns.computeIfAbsent(playerId, k -> new HashMap<>())).put(abilityName.toLowerCase(), cooldownEnd);
     }
 
     /**
@@ -465,13 +464,13 @@ public class VampireAbilityManager {
      */
     public void clearAllCooldowns(Player player) {
         UUID playerId = player.getUniqueId();
-        Map<String, Long> playerCooldowns = (Map)this.abilityCooldowns.get(playerId);
+        Map<String, Long> playerCooldowns = this.abilityCooldowns.get(playerId);
 
         if (playerCooldowns != null) {
             int clearedCount = playerCooldowns.size();
             playerCooldowns.clear();
             this.abilityCooldowns.remove(playerId);
-            this.plugin.getLogger().info("Cleared " + clearedCount + " personal cooldowns for player: " + player.getName());
+            this.plugin.logInfo("Cleared " + clearedCount + " personal cooldowns for player: " + player.getName());
         }
 
         this.saveCooldowns();
@@ -485,7 +484,7 @@ public class VampireAbilityManager {
             int clearedCount = this.globalCooldowns.size();
             List<String> clearedAbilities = new ArrayList<>(this.globalCooldowns.keySet());
             this.globalCooldowns.clear();
-            this.plugin.getLogger().info("Cleared " + clearedCount + " global cooldowns for abilities: " + String.join(", ", clearedAbilities));
+            this.plugin.logInfo("Cleared " + clearedCount + " global cooldowns for abilities: " + String.join(", ", clearedAbilities));
 
             for(String abilityName : clearedAbilities) {
                 this.notifyGlobalAbilityReady(abilityName);
@@ -512,7 +511,7 @@ public class VampireAbilityManager {
             this.globalCooldowns.clear();
         }
 
-        this.plugin.getLogger().info("NEW SESSION: Cleared " + clearedPersonal + " personal cooldowns and " + clearedGlobal + " global cooldowns for new session");
+        this.plugin.logInfo("NEW SESSION: Cleared " + clearedPersonal + " personal cooldowns and " + clearedGlobal + " global cooldowns for new session");
 
         this.saveCooldowns();
         this.saveGlobalCooldowns();
@@ -595,7 +594,7 @@ public class VampireAbilityManager {
                                 String abilityName = parts[1];
                                 long cooldownEnd = Long.parseLong(parts[2]);
 
-                                ((Map)this.abilityCooldowns.computeIfAbsent(playerId, (k) -> new HashMap())).put(abilityName, cooldownEnd);
+                                (this.abilityCooldowns.computeIfAbsent(playerId, k -> new HashMap<>())).put(abilityName, cooldownEnd);
                                 ++loadedCount;
 
                             } catch (IllegalArgumentException e) {
@@ -604,12 +603,12 @@ public class VampireAbilityManager {
                         }
                     }
 
-                    this.plugin.getLogger().info("Loaded " + loadedCount + " personal ability cooldowns from file (version 2)");
+                    this.plugin.logInfo("Loaded " + loadedCount + " personal ability cooldowns from file (version 2)");
                     return;
                 }
 
                 this.plugin.getLogger().warning("Personal cooldown file is missing version marker or outdated - clearing old cooldowns");
-                this.plugin.getLogger().info("Old cooldowns were likely using system time instead of session time");
+                this.plugin.logInfo("Old cooldowns were likely using system time instead of session time");
 
                 this.abilityCooldowns.clear();
                 this.saveCooldowns();
@@ -652,12 +651,12 @@ public class VampireAbilityManager {
                         }
                     }
 
-                    this.plugin.getLogger().info("Loaded " + loadedCount + " global ability cooldowns from file (version 2)");
+                    this.plugin.logInfo("Loaded " + loadedCount + " global ability cooldowns from file (version 2)");
                     return;
                 }
 
                 this.plugin.getLogger().warning("Global cooldown file is missing version marker or outdated - clearing old cooldowns");
-                this.plugin.getLogger().info("Old cooldowns were likely using system time instead of session time");
+                this.plugin.logInfo("Old cooldowns were likely using system time instead of session time");
 
                 this.globalCooldowns.clear();
                 this.saveGlobalCooldowns();

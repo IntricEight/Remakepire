@@ -98,7 +98,7 @@ public class BeaconTeleportAbility extends VampireAbility {
 
         if (meta != null) {
             meta.setDisplayName("§4§l" + beacon.getName());
-            List<String> lore = new ArrayList();
+            List<String> lore = new ArrayList<>();
 
             lore.add("§7Location: §f" + beacon.getLocation().getWorld().getName());
             lore.add("§7Coordinates: §f" + beacon.getLocation().getBlockX() + ", " + beacon.getLocation().getBlockY() + ", " + beacon.getLocation().getBlockZ());

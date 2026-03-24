@@ -25,8 +25,7 @@ import frostvein.sampires.remakepire.RemakepirePlugin;
 public class HolyWaterEffectManager implements Listener {
     private final RemakepirePlugin plugin;
     private final VampireManager vampireManager;
-    // Controls how long vampiric abilities are disabled (in seconds)
-    private static final int DISABLE_DURATION = 120;
+    private final ConfigManager configManager;
     private final Map<UUID, BukkitTask> disabledVampires = new HashMap<>();
 
     /**
@@ -37,8 +36,10 @@ public class HolyWaterEffectManager implements Listener {
     public HolyWaterEffectManager(RemakepirePlugin plugin) {
         this.plugin = plugin;
         this.vampireManager = plugin.getVampireManager();
+        this.configManager = plugin.getConfigManager();
+
         Bukkit.getPluginManager().registerEvents(this, plugin);
-        plugin.getLogger().info("HolyWaterEffectManager initialized and event listener registered!");
+        plugin.logInfo("HolyWaterEffectManager initialized and event listener registered!");
     }
 
     /**
@@ -50,7 +51,7 @@ public class HolyWaterEffectManager implements Listener {
     public void onPotionSplash(PotionSplashEvent event) {
         if (event instanceof WaterBottleSplashEvent waterEvent) {
             Location splashLocation = waterEvent.getPotion().getLocation();
-            double splashRadius = 4.0;
+            final double splashRadius = 4.0;
 
             for(Entity nearby : splashLocation.getWorld().getNearbyEntities(splashLocation, splashRadius, splashRadius, splashRadius)) {
                 if (nearby instanceof Player player) {
@@ -136,10 +137,10 @@ public class HolyWaterEffectManager implements Listener {
         vampire.getWorld().playSound(vampire.getLocation(), Sound.BLOCK_FIRE_EXTINGUISH, SoundCategory.MASTER, 1.0F, 1.0F);
 
         this.notifyVampireDisabled(vampire);
-        BukkitTask enableTask = Bukkit.getScheduler().runTaskLater(this.plugin, () -> this.removeHolyWaterEffect(vampire),  (long)(DISABLE_DURATION * 20));
+        BukkitTask enableTask = Bukkit.getScheduler().runTaskLater(this.plugin, () -> this.removeHolyWaterEffect(vampire),  this.configManager.getHolyWaterDisableDurationSeconds() * 20L);
 
         this.disabledVampires.put(vampireId, enableTask);
-        this.plugin.getLogger().info("Applied holy water effect to vampire: " + vampire.getName());
+        this.plugin.logInfo("Applied holy water effect to vampire: " + vampire.getName());
     }
 
     /**
@@ -169,7 +170,7 @@ public class HolyWaterEffectManager implements Listener {
             this.notifyVampireEnabled(vampire);
         }
 
-        this.plugin.getLogger().info("Removed holy water effect from vampire: " + vampire.getName());
+        this.plugin.logInfo("Removed holy water effect from vampire: " + vampire.getName());
     }
 
     /**
@@ -190,7 +191,9 @@ public class HolyWaterEffectManager implements Listener {
      */
     public long getRemainingDisableTime(Player vampire) {
         BukkitTask task = this.disabledVampires.get(vampire.getUniqueId());
-        return task == null ? 0L : Math.max(0L, (long)DISABLE_DURATION - System.currentTimeMillis() / 1000L % (long)DISABLE_DURATION);
+        final long duration = this.configManager.getHolyWaterDisableDurationSeconds();
+
+        return task == null ? 0L : Math.max(0L, duration - System.currentTimeMillis() / 1000L % duration);
     }
 
     /**
@@ -199,8 +202,15 @@ public class HolyWaterEffectManager implements Listener {
      * @param vampire the player whose abilities are disabled.
      */
     private void notifyVampireDisabled(Player vampire) {
+        int duration = this.configManager.getHolyWaterDisableDurationSeconds();
+
         vampire.sendMessage("§cThe holy water sears your vampiric essence!");
-        vampire.sendMessage("§cYour abilities and blood regeneration have been disabled for " + (int)(DISABLE_DURATION / 60.0) + " minutes.");
+
+        if (duration >= 60) {
+            vampire.sendMessage("§cYour abilities and blood regeneration have been disabled for " + duration / 60 + " minute" + (duration / 60 != 1 ? "s" : "") + ".");
+        } else {
+            vampire.sendMessage("§cYour abilities and blood regeneration have been disabled for " + duration + " second" + (duration != 1 ? "s" : "") + ".");
+        }
 
         vampire.playSound(vampire, Sound.ENTITY_GENERIC_HURT, SoundCategory.MASTER, 1.0F, 0.8F);
         vampire.playSound(vampire, Sound.BLOCK_FIRE_EXTINGUISH, SoundCategory.MASTER, 1.0F, 1.2F);
@@ -247,7 +257,7 @@ public class HolyWaterEffectManager implements Listener {
 
         int cleared = this.disabledVampires.size();
         this.disabledVampires.clear();
-        this.plugin.getLogger().info("Cleared holy water effects from " + cleared + " vampires");
+        this.plugin.logInfo("Cleared holy water effects from " + cleared + " vampires");
     }
 
     /**
@@ -261,6 +271,6 @@ public class HolyWaterEffectManager implements Listener {
         }
 
         this.disabledVampires.clear();
-        this.plugin.getLogger().info("HolyWaterEffectManager shutdown complete");
+        this.plugin.logInfo("HolyWaterEffectManager shutdown complete");
     }
 }

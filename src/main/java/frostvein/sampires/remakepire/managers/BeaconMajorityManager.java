@@ -25,8 +25,7 @@ public class BeaconMajorityManager {
 //    private final NamespacedKey VAMPIRE_MAJORITY_HEALTH_KEY;
 //    private final NamespacedKey HUMAN_MAJORITY_HEALTH_KEY;
 //    private final NamespacedKey DEATH_PENALTY_HEALTH_KEY;
-    private int currentVampireBonus = 0;
-    private int currentHumanBonus = 0;
+    private int currentVampireBonus = 0, currentHumanBonus = 0;
 
     /**
      * Create an instance of the Beacon Majority manager.
@@ -55,17 +54,17 @@ public class BeaconMajorityManager {
             int evilBeacons = this.beaconManager.getAllEvilBeacons().size();
             int difference = Math.abs(holyBeacons - evilBeacons);
 
-            this.plugin.getLogger().info("Beacon majority check: " + holyBeacons + " holy, " + evilBeacons + " evil (desecrated + permanently desecrated), difference: " + difference);
+            this.plugin.logInfo("Beacon majority check: " + holyBeacons + " holy, " + evilBeacons + " evil (desecrated + permanently desecrated), difference: " + difference);
 
             if (holyBeacons > evilBeacons) {
                 this.applyBonusToHumans(difference);
                 this.removeBonusFromVampires();
-                this.plugin.getLogger().info("Humans gain beacon majority bonus: +" + difference + " hearts");
+                this.plugin.logInfo("Humans gain beacon majority bonus: +" + difference + " hearts");
 
             } else if (evilBeacons > holyBeacons) {
                 this.applyBonusToVampires(difference);
                 this.removeBonusFromHumans();
-                this.plugin.getLogger().info("Vampires gain beacon majority bonus: +" + difference + " hearts");
+                this.plugin.logInfo("Vampires gain beacon majority bonus: +" + difference + " hearts");
 
             } else {
                 this.removeAllBonuses();
@@ -316,6 +315,6 @@ public class BeaconMajorityManager {
         this.currentVampireBonus = 0;
         this.currentHumanBonus = 0;
 
-        this.plugin.getLogger().info("BeaconMajorityManager shutdown - all health bonuses removed");
+        this.plugin.logInfo("BeaconMajorityManager shutdown - all health bonuses removed");
     }
 }

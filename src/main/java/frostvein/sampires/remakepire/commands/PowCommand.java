@@ -155,7 +155,7 @@ public class PowCommand implements CommandExecutor, TabCompleter {
     }
 
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
-        List<String> completions = new ArrayList();
+        List<String> completions = new ArrayList<>();
 
         if (args.length == 1) {
             List<String> subCommands = new ArrayList(Arrays.asList("vability", "tome", "beaconstatus", "permadeath", "toggle-turning", "help"));

@@ -43,7 +43,7 @@ public class StashThirdBookCommand implements CommandExecutor {
                 chestInventory.addItem(book);
                 sender.sendMessage("§aSuccessfully stashed 'The Absolution 3/3' in the chest at 76, 80, 407.");
 
-                this.plugin.getLogger().info(sender.getName() + " used /stash_third_book - placed The Absolution 3/3 at 76, 80, 407");
+                this.plugin.logInfo(sender.getName() + " used /stash_third_book - placed The Absolution 3/3 at 76, 80, 407");
                 return true;
             }
         }

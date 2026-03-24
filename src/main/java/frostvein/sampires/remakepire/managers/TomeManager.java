@@ -73,7 +73,7 @@ public class TomeManager {
         this.registerAbility(new WayOfTheProspectorTomeAbility(this.plugin));
         this.registerAbility(new StopTheBleedingTomeAbility(this.plugin));
 
-        this.plugin.getLogger().info("TomeManager initialized - registered " + this.abilities.size() + " tome abilities");
+        this.plugin.logInfo("TomeManager initialized - registered " + this.abilities.size() + " tome abilities");
     }
 
     /**
@@ -83,7 +83,7 @@ public class TomeManager {
      */
     public void registerAbility(TomeAbility ability) {
         this.abilities.put(ability.getName().toLowerCase(), ability);
-        this.plugin.getLogger().info("Registered tome ability: " + ability.getName());
+        this.plugin.logInfo("Registered tome ability: " + ability.getName());
     }
 
     /**
@@ -132,7 +132,7 @@ public class TomeManager {
                 this.playerTomeUsageSession.put(player.getUniqueId(), currentSessionId);
             }
 
-            this.plugin.getLogger().info("Granted tome ability '" + abilityName + "' to player " + player.getName());
+            this.plugin.logInfo("Granted tome ability '" + abilityName + "' to player " + player.getName());
             return true;
         }
     }
@@ -187,7 +187,7 @@ public class TomeManager {
         }
 
         if (!tagsToRemove.isEmpty()) {
-            this.plugin.getLogger().info("Removed " + tagsToRemove.size() + " tome abilities from " + player.getName() + " (converted to vampire)");
+            this.plugin.logInfo("Removed " + tagsToRemove.size() + " tome abilities from " + player.getName() + " (converted to vampire)");
         }
     }
 
@@ -387,7 +387,7 @@ public class TomeManager {
         if (this.isValidAbility(normalizedName)) {
             String tag = TOME_TAG_PREFIX + normalizedName;
             player.addScoreboardTag(tag);
-            this.plugin.getLogger().info("Admin force-granted tome ability '" + normalizedName + "' to player " + player.getName());
+            this.plugin.logInfo("Admin force-granted tome ability '" + normalizedName + "' to player " + player.getName());
         }
     }
 
@@ -401,7 +401,7 @@ public class TomeManager {
         String normalizedName = abilityName.toLowerCase();
         String tag = TOME_TAG_PREFIX + normalizedName;
         player.removeScoreboardTag(tag);
-        this.plugin.getLogger().info("Admin removed tome ability '" + normalizedName + "' from player " + player.getName());
+        this.plugin.logInfo("Admin removed tome ability '" + normalizedName + "' from player " + player.getName());
     }
 
     public Set<String> getAllAbilityNames() {
@@ -431,7 +431,7 @@ public class TomeManager {
 
         TomeAbility.cancelAllNotificationTasks();
         this.playerTomeUsageSession.clear();
-        this.plugin.getLogger().info("TomeManager shutdown complete");
+        this.plugin.logInfo("TomeManager shutdown complete");
     }
 
     /**
