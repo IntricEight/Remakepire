@@ -39,14 +39,14 @@ public class BrigadierCommands {
 
     public void registerAll() {
         this.plugin.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS, (event) -> {
-            Commands commands = (Commands)event.registrar();
+            Commands commands = event.registrar();
             this.registerPowCommand(commands);
 
             // Register the unique cure commands
             this.registerLatinCureCommand(commands);
             this.registerLatinForcedCureCommand(commands);
 
-            this.plugin.getLogger().info("All Brigadier commands registered successfully!");
+            this.plugin.logInfo("All Brigadier commands registered successfully!");
         });
     }
 
@@ -173,20 +173,22 @@ public class BrigadierCommands {
 
     private void registerLatinForcedCureCommand(Commands commands) {
         commands.register(((LiteralArgumentBuilder)Commands.literal("hoc-vinculum-tibi-dirumpo-mala-creatura").then(Commands.argument("player", StringArgumentType.word()).suggests((ctx, builder) -> this.suggestOnlinePlayers(builder)).executes((ctx) -> {
-            CommandSender sender = ((CommandSourceStack)ctx.getSource()).getSender();
+            CommandSender sender = (ctx.getSource()).getSender();
             String playerName = StringArgumentType.getString(ctx, "player");
-            this.forcedCureCommand.onCommand(sender, (Command)null, "hoc-vinculum-tibi-dirumpo-mala-creatura", new String[]{playerName});
+            this.forcedCureCommand.onCommand(sender, null, "hoc-vinculum-tibi-dirumpo-mala-creatura", new String[]{playerName});
             return 1;
         }))).build(), "Force a vampire back to humanity");
     }
 
     private int executePowCommand(CommandContext<CommandSourceStack> ctx, String... args) {
-        CommandSender sender = ((CommandSourceStack)ctx.getSource()).getSender();
+        CommandSender sender = (ctx.getSource()).getSender();
+
         Command dummyCommand = new BukkitCommand("pow") {
             public boolean execute(CommandSender sender, String commandLabel, String[] args) {
                 return false;
             }
         };
+
         this.powCommand.onCommand(sender, dummyCommand, "pow", args);
         return 1;
     }

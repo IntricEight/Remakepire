@@ -24,7 +24,7 @@ import frostvein.sampires.remakepire.managers.VampireAbilityManager;
 
 public class BeaconTeleportListener implements Listener {
     private final RemakepirePlugin plugin;
-    private final Map<UUID, ChannelingData> channelingPlayers = new HashMap();
+    private final Map<UUID, ChannelingData> channelingPlayers = new HashMap<>();
 
     /**
      * Create an instance of the Beacon Teleport listener.
@@ -45,8 +45,7 @@ public class BeaconTeleportListener implements Listener {
         if (event.getView().getTitle().equals("§4Desecrated Beacon Network")) {
             event.setCancelled(true);
 
-            if (event.getWhoClicked() instanceof Player) {
-                Player player = (Player)event.getWhoClicked();
+            if (event.getWhoClicked() instanceof Player player) {
                 ItemStack clickedItem = event.getCurrentItem();
 
                 if (clickedItem != null && clickedItem.getType() == Material.BEACON) {
@@ -110,7 +109,7 @@ public class BeaconTeleportListener implements Listener {
             final int totalTicks = 100;
 
             public void run() {
-                ChannelingData data = (ChannelingData)BeaconTeleportListener.this.channelingPlayers.get(playerId);
+                ChannelingData data = BeaconTeleportListener.this.channelingPlayers.get(playerId);
 
                 if (data == null) {
                     this.cancel();
@@ -125,10 +124,10 @@ public class BeaconTeleportListener implements Listener {
                         ++this.ticksElapsed;
 
                         if (this.ticksElapsed % 20 == 0) {
-                            int secondsRemaining = (100 - this.ticksElapsed) / 20;
+                            int secondsRemaining = (totalTicks - this.ticksElapsed) / 20;
 
                             if (secondsRemaining > 0) {
-                                player.sendMessage("§7Channeling... §e" + VampireAbilityManager.formatTime((long)secondsRemaining) + " remaining");
+                                player.sendMessage("§7Channeling... §e" + VampireAbilityManager.formatTime(secondsRemaining) + " remaining");
                                 player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 0.3F, 1.0F + (float)secondsRemaining * 0.1F);
                             }
                         }
@@ -139,7 +138,7 @@ public class BeaconTeleportListener implements Listener {
                             player.getWorld().spawnParticle(Particle.ENCHANT, particleLoc, 1, 0.3, 0.3, 0.3, 0.5);
                         }
 
-                        if (this.ticksElapsed >= 100) {
+                        if (this.ticksElapsed >= totalTicks) {
                             BeaconTeleportListener.this.completeChanneling(playerId);
                             this.cancel();
                         }
@@ -158,7 +157,7 @@ public class BeaconTeleportListener implements Listener {
      * @param sendMessage {@code true} if the player should be informed with a message.
      */
     private void cancelChanneling(UUID playerId, boolean sendMessage) {
-        ChannelingData data = (ChannelingData)this.channelingPlayers.remove(playerId);
+        ChannelingData data = this.channelingPlayers.remove(playerId);
 
         if (data != null) {
             data.channelingTask.cancel();
@@ -250,7 +249,7 @@ public class BeaconTeleportListener implements Listener {
             public void run() {
                 if (player.teleport(finalDestination)) {
                     if (BeaconTeleportListener.this.plugin.getVampireAbilityManager().applyCooldownForAbility(player, "beacontravel")) {
-                        BeaconTeleportListener.this.plugin.getLogger().info("Applied beacon travel cooldown for player: " + player.getName());
+                        BeaconTeleportListener.this.plugin.logInfo("Applied beacon travel cooldown for player: " + player.getName());
                     } else {
                         BeaconTeleportListener.this.plugin.getLogger().warning("Failed to apply beacon travel cooldown for player: " + player.getName());
                     }
@@ -262,7 +261,7 @@ public class BeaconTeleportListener implements Listener {
                     player.getWorld().spawnParticle(Particle.PORTAL, arrivalLoc, 30, 0.5, 1.0, 0.5, 0.8);
                     player.getWorld().spawnParticle(Particle.SOUL_FIRE_FLAME, arrivalLoc, 15, 0.4, 0.8, 0.4, 0.05);
 
-                    plugin.getLogger().info("Player " + player.getName() + " used beacon travel to beacon: " + beacon.getName());
+                    plugin.logInfo("Player " + player.getName() + " used beacon travel to beacon: " + beacon.getName());
 
                 } else {
                     player.sendMessage("§cBeacon travel failed. The destination may be unsafe or blocked.");

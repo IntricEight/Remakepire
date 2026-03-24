@@ -9,4 +9,4 @@ If you would like to add a new feature to the plugin, create a branch off of Mas
 ##### The Current Plugin branch: Documentation and Optimization
 This branch is the working location for updating Master with updates POW makes to the VampiresSMP plugin. This should be the only branch that is committed into Master.
 
-##### The current VSMP Plugin version updated: 1.0.4
+##### The current VSMP Plugin version updated: 1.0.6

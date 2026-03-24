@@ -32,7 +32,7 @@ public class VampireSireManager {
         this.gson = new Gson();
         this.loadSireMappings();
 
-        plugin.getLogger().info("VampireSireManager initialized with " + this.sireMap.size() + " sire mappings");
+        plugin.logInfo("VampireSireManager initialized with " + this.sireMap.size() + " sire mappings");
     }
 
     /**
@@ -120,7 +120,7 @@ public class VampireSireManager {
         this.sireMap.put(vampireName.toLowerCase(), sireName);
         this.saveSireMappings();
 
-        this.plugin.getLogger().info("Sire mapping added: " + vampireName + " -> " + sireName);
+        this.plugin.logInfo("Sire mapping added: " + vampireName + " -> " + sireName);
     }
 
     /**
@@ -132,7 +132,7 @@ public class VampireSireManager {
         this.sireMap.remove(vampireName.toLowerCase());
         this.saveSireMappings();
 
-        this.plugin.getLogger().info("Sire mapping removed for: " + vampireName);
+        this.plugin.logInfo("Sire mapping removed for: " + vampireName);
     }
 
     /**
@@ -151,7 +151,7 @@ public class VampireSireManager {
         this.sireMap.clear();
         this.saveSireMappings();
 
-        this.plugin.getLogger().info("VampireSireManager: Cleared all sire mappings");
+        this.plugin.logInfo("VampireSireManager: Cleared all sire mappings");
     }
 
     /**
@@ -159,9 +159,9 @@ public class VampireSireManager {
      */
     private void loadSireMappings() {
         if (!this.dataFile.exists()) {
-            this.plugin.getLogger().info("VampireSireManager: No existing sire mappings file found, starting fresh.");
-            this.plugin.getLogger().info("VampireSireManager: Edit plugins/VampireSMP/sire_mappings.json to add sire relationships.");
-            this.plugin.getLogger().info("VampireSireManager: Format: {\"Fledgling_Name\": \"Sire_Name\"}");
+            this.plugin.logInfo("VampireSireManager: No existing sire mappings file found, starting fresh.");
+            this.plugin.logInfo("VampireSireManager: Edit plugins/VampireSMP/sire_mappings.json to add sire relationships.");
+            this.plugin.logInfo("VampireSireManager: Format: {\"Fledgling_Name\": \"Sire_Name\"}");
 
             Map<String, String> exampleMap = new HashMap<>();
             exampleMap.put("Fledgling_Name", "Sire_Name");
@@ -175,7 +175,7 @@ public class VampireSireManager {
                     this.gson.toJson(exampleMap, writer);
                 }
 
-                this.plugin.getLogger().info("VampireSireManager: Created example sire_mappings.json file");
+                this.plugin.logInfo("VampireSireManager: Created example sire_mappings.json file");
             } catch (IOException e) {
                 this.plugin.getLogger().severe("VampireSireManager: Failed to create example file: " + e.getMessage());
             }
@@ -191,7 +191,7 @@ public class VampireSireManager {
                         this.sireMap.put((entry.getKey()).toLowerCase(), entry.getValue());
                     }
 
-                    this.plugin.getLogger().info("VampireSireManager: Loaded " + this.sireMap.size() + " sire mappings from file");
+                    this.plugin.logInfo("VampireSireManager: Loaded " + this.sireMap.size() + " sire mappings from file");
                 }
             } catch (IOException e) {
                 this.plugin.getLogger().severe("VampireSireManager: Failed to load sire mappings: " + e.getMessage());
@@ -212,7 +212,7 @@ public class VampireSireManager {
                 this.gson.toJson(this.sireMap, writer);
             }
 
-            this.plugin.getLogger().info("VampireSireManager: Saved " + this.sireMap.size() + " sire mappings to file");
+            this.plugin.logInfo("VampireSireManager: Saved " + this.sireMap.size() + " sire mappings to file");
         } catch (IOException e) {
             this.plugin.getLogger().severe("VampireSireManager: Failed to save sire mappings: " + e.getMessage());
         }
@@ -223,6 +223,6 @@ public class VampireSireManager {
      */
     public void shutdown() {
         this.saveSireMappings();
-        this.plugin.getLogger().info("VampireSireManager: Shutdown complete");
+        this.plugin.logInfo("VampireSireManager: Shutdown complete");
     }
 }

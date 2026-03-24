@@ -68,7 +68,7 @@ public class BeetrootManager {
         if (!this.beetrootFile.exists()) {
             try {
                 this.beetrootFile.createNewFile();
-                this.plugin.getLogger().info("Created beetroot timer persistence file");
+                this.plugin.logInfo("Created beetroot timer persistence file");
             } catch (IOException e) {
                 this.plugin.getLogger().severe("Failed to create beetroot timer file: " + e.getMessage());
                 e.printStackTrace();
@@ -132,7 +132,7 @@ public class BeetrootManager {
         this.beetrootTask = (new BukkitRunnable() {
             public void run() {
                 if (BeetrootManager.this.sessionManager.isSessionActive()) {
-                    Set<UUID> onlinePlayers = (Set)Bukkit.getOnlinePlayers().stream().map(OfflinePlayer::getUniqueId).collect(Collectors.toSet());
+                    Set<UUID> onlinePlayers = Bukkit.getOnlinePlayers().stream().map(OfflinePlayer::getUniqueId).collect(Collectors.toSet());
                     BeetrootManager.this.processTimersForOnlinePlayers(onlinePlayers);
                 }
             }
@@ -218,14 +218,13 @@ public class BeetrootManager {
             player.sendMessage("§eYou are already processing garlic substance...");
 
         } else if (player.getScoreboardTags().contains(BEETROOT_IMMUNITY_TAG)) {
-            player.sendMessage("§a§ou already have garlic immunity.");
+            player.sendMessage("§a§You already have garlic immunity.");
 
         } else {
             player.addScoreboardTag(BEETROOT_USED_TAG);
             player.addScoreboardTag(BEETROOT_PROCESSING_TAG);
 
-            int minProcessing = this.configManager.getGarlicProcessingTimeMin();
-            int maxProcessing = this.configManager.getGarlicProcessingTimeMax();
+            int minProcessing = this.configManager.getGarlicProcessingTimeMin(), maxProcessing = this.configManager.getGarlicProcessingTimeMax();
             int processingRange = maxProcessing - minProcessing;
             int processingSeconds = minProcessing + (new Random()).nextInt(processingRange + 1);
 
@@ -248,8 +247,7 @@ public class BeetrootManager {
         player.removeScoreboardTag(BEETROOT_PROCESSING_TAG);
         player.addScoreboardTag(BEETROOT_IMMUNITY_TAG);
 
-        int minImmunity = this.configManager.getGarlicImmunityDurationMin();
-        int maxImmunity = this.configManager.getGarlicImmunityDurationMax();
+        int minImmunity = this.configManager.getGarlicImmunityDurationMin(), maxImmunity = this.configManager.getGarlicImmunityDurationMax();
         int immunityRange = maxImmunity - minImmunity;
         int immunitySeconds = minImmunity + (new Random()).nextInt(immunityRange + 1);
 
@@ -272,6 +270,7 @@ public class BeetrootManager {
      */
     private void endImmunityPeriod(Player player) {
         player.removeScoreboardTag(BEETROOT_IMMUNITY_TAG);
+
         if (this.vampireManager.isHuman(player)) {
             player.sendMessage("§cYou imagine by now that the effects of the garlic have worn off...");
         }

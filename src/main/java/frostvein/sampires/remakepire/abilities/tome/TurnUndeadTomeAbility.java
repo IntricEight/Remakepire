@@ -94,7 +94,7 @@ public class TurnUndeadTomeAbility extends TomeAbility {
                 }
 
                 player.sendMessage("§7Your undead disguise has faded during your absence.");
-                plugin.getLogger().info("Moved human player " + player.getName() + " from VampireCastTeam to CastTeam (login cleanup)");
+                plugin.logInfo("Moved human player " + player.getName() + " from VampireCastTeam to CastTeam (login cleanup)");
             }
         }
     }

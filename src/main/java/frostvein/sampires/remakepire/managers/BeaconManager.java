@@ -101,7 +101,7 @@ public class BeaconManager {
             }
         }, 6000L, 6000L);
 
-        this.plugin.getLogger().info("Started beacon auto-save task (every 5 minutes)");
+        this.plugin.logInfo("Started beacon auto-save task (every 5 minutes)");
     }
 
     /**
@@ -109,7 +109,7 @@ public class BeaconManager {
      */
     private void startCooldownTrackingTask() {
         this.cooldownTrackingTask = this.plugin.getServer().getScheduler().runTaskTimer(this.plugin, () -> this.updateBeaconCooldowns(), 20L, 20L);
-        this.plugin.getLogger().info("Started beacon cooldown tracking task");
+        this.plugin.logInfo("Started beacon cooldown tracking task");
     }
 
     /**
@@ -122,7 +122,7 @@ public class BeaconManager {
             }
         }, 1200L, 1200L);
 
-        this.plugin.getLogger().info("Started beacon maintenance task (runs every minute during active sessions)");
+        this.plugin.logInfo("Started beacon maintenance task (runs every minute during active sessions)");
     }
 
     /**
@@ -196,7 +196,7 @@ public class BeaconManager {
             }
         }
 
-        this.plugin.getLogger().info("NEW SESSION: Cleared conversion cooldowns for " + clearedBeacons + " beacons");
+        this.plugin.logInfo("NEW SESSION: Cleared conversion cooldowns for " + clearedBeacons + " beacons");
 
         if (clearedBeacons > 0) {
             this.saveBeacons();
@@ -208,7 +208,7 @@ public class BeaconManager {
      */
     private void startConversionCircleParticleTask() {
         this.conversionCircleParticleTask = this.plugin.getServer().getScheduler().runTaskTimer(this.plugin, () -> this.showAllConversionAndSuppressionCircles(), 0L, 4L);
-        this.plugin.getLogger().info("Started conversion and suppression circle particle task (every 2 ticks)");
+        this.plugin.logInfo("Started conversion and suppression circle particle task (every 2 ticks)");
     }
 
     /**
@@ -216,7 +216,7 @@ public class BeaconManager {
      */
     private void startHolyRegenerationTask() {
         this.holyRegenTask = this.plugin.getServer().getScheduler().runTaskTimer(this.plugin, () -> this.applyHolyRegeneration(), 60L, 100L);
-        this.plugin.getLogger().info("Started holy beacon regeneration task for humans");
+        this.plugin.logInfo("Started holy beacon regeneration task for humans");
     }
 
     /**
@@ -267,7 +267,7 @@ public class BeaconManager {
             display.setTransformation(transform);
 
             this.beaconDisplays.put(beacon.getName().toLowerCase(), display);
-            this.plugin.getLogger().info("Created item display for beacon: " + beacon.getName());
+            this.plugin.logInfo("Created item display for beacon: " + beacon.getName());
         } else {
             this.plugin.getLogger().warning("Cannot create display for null beacon or location");
         }
@@ -314,7 +314,7 @@ public class BeaconManager {
         if (display != null && display.isValid()) {
             display.remove();
             this.beaconDisplays.remove(beaconName.toLowerCase());
-            this.plugin.getLogger().info("Removed item display for beacon: " + beaconName);
+            this.plugin.logInfo("Removed item display for beacon: " + beaconName);
 
         } else if (fallbackLocation != null && fallbackLocation.getWorld() != null) {
             int removed = 0;
@@ -327,7 +327,7 @@ public class BeaconManager {
             }
 
             if (removed > 0) {
-                this.plugin.getLogger().info("Removed " + removed + " item displays near beacon: " + beaconName);
+                this.plugin.logInfo("Removed " + removed + " item displays near beacon: " + beaconName);
             }
         }
     }
@@ -351,7 +351,7 @@ public class BeaconManager {
      * Recreate the beacon item displays.
      */
     public void recreateAllDisplays() {
-        this.plugin.getLogger().info("Recreating item displays for " + this.beacons.size() + " beacons...");
+        this.plugin.logInfo("Recreating item displays for " + this.beacons.size() + " beacons...");
         this.forceLoadBeaconChunks();
         this.aggressiveCleanupItemDisplays();
         this.beaconDisplays.clear();
@@ -361,7 +361,7 @@ public class BeaconManager {
                 this.createBeaconDisplay(beacon);
             }
 
-            this.plugin.getLogger().info("Finished recreating beacon displays after aggressive cleanup");
+            this.plugin.logInfo("Finished recreating beacon displays after aggressive cleanup");
         }, 1L);
     }
 
@@ -377,7 +377,7 @@ public class BeaconManager {
 
         this.beaconDisplays.clear();
         this.aggressiveCleanupItemDisplays();
-        this.plugin.getLogger().info("Cleaned up all beacon displays using both methods");
+        this.plugin.logInfo("Cleaned up all beacon displays using both methods");
     }
 
     /**
@@ -400,7 +400,7 @@ public class BeaconManager {
         }
 
         if (totalRemoved > 0) {
-            this.plugin.getLogger().info("AGGRESSIVE CLEANUP: Removed " + totalRemoved + " item displays at beacon locations");
+            this.plugin.logInfo("AGGRESSIVE CLEANUP: Removed " + totalRemoved + " item displays at beacon locations");
         }
     }
 
@@ -415,7 +415,7 @@ public class BeaconManager {
             ++refreshed;
         }
 
-        this.plugin.getLogger().info("Force refreshed " + refreshed + " beacon displays");
+        this.plugin.logInfo("Force refreshed " + refreshed + " beacon displays");
     }
 
     /**
@@ -433,7 +433,7 @@ public class BeaconManager {
                 ++created;
             }
 
-            this.plugin.getLogger().info("Display validation complete: AGGRESSIVE cleanup + " + created + " displays recreated");
+            this.plugin.logInfo("Display validation complete: AGGRESSIVE cleanup + " + created + " displays recreated");
         }, 1L);
     }
 
@@ -599,7 +599,7 @@ public class BeaconManager {
             this.createBeaconDisplay(beacon);
             this.saveBeacons();
 
-            this.plugin.getLogger().info("Added new beacon: " + name + " at " + location.getWorld().getName() + " (" + location.getBlockX() + ", " + location.getBlockY() + ", " + location.getBlockZ() + ")");
+            this.plugin.logInfo("Added new beacon: " + name + " at " + location.getWorld().getName() + " (" + location.getBlockX() + ", " + location.getBlockY() + ", " + location.getBlockZ() + ")");
             return true;
 
         } else {
@@ -625,7 +625,7 @@ public class BeaconManager {
 
             this.removeBeaconDisplay(name, removed.getLocation());
             this.saveBeacons();
-            this.plugin.getLogger().info("Removed beacon and cleaned up display: " + name);
+            this.plugin.logInfo("Removed beacon and cleaned up display: " + name);
             return true;
         } else {
             return false;
@@ -706,7 +706,7 @@ public class BeaconManager {
             this.updateBeaconDisplay(beacon);
             this.saveBeacons();
 
-            this.plugin.getLogger().info("Set beacon '" + name + "' as holy (cooldown cleared)");
+            this.plugin.logInfo("Set beacon '" + name + "' as holy (cooldown cleared)");
             this.triggerFirstBeaconConvertedEffects(beacon, false);
             this.plugin.getBeaconMajorityManager().updateBeaconMajorityBonuses();
 
@@ -728,7 +728,7 @@ public class BeaconManager {
             int totalBeacons = this.getAllBeacons().size();
 
             if (evilCount < totalBeacons) {
-                this.plugin.getLogger().info("ETERNAL NIGHT LIFTED - Not all beacons are evil anymore!");
+                this.plugin.logInfo("ETERNAL NIGHT LIFTED - Not all beacons are evil anymore!");
                 this.plugin.getSessionManager().setVampiresEternalNightActive(false);
 
                 for(Player player : Bukkit.getOnlinePlayers()) {
@@ -778,7 +778,7 @@ public class BeaconManager {
                 }
             }
 
-            this.plugin.getLogger().info("FIRST BEACON CONVERTED EFFECTS triggered for beacon: " + beacon.getName() + " (desecration: " + isDesecration + ")");
+            this.plugin.logInfo("FIRST BEACON CONVERTED EFFECTS triggered for beacon: " + beacon.getName() + " (desecration: " + isDesecration + ")");
         }
     }
 
@@ -800,7 +800,7 @@ public class BeaconManager {
             this.updateBeaconDisplay(beacon);
             this.saveBeacons();
 
-            this.plugin.getLogger().info("Set beacon '" + name + "' as desecrated (cooldown cleared)");
+            this.plugin.logInfo("Set beacon '" + name + "' as desecrated (cooldown cleared)");
             this.plugin.getBeaconMajorityManager().updateBeaconMajorityBonuses();
 
             this.broadcastBeaconGainToTeam(beacon, BeaconState.DESECRATED);
@@ -840,7 +840,7 @@ public class BeaconManager {
 
             this.updateBeaconDisplay(beacon);
             this.saveBeacons();
-            this.plugin.getLogger().info("Set beacon '" + name + "' as neutral (cooldown cleared)");
+            this.plugin.logInfo("Set beacon '" + name + "' as neutral (cooldown cleared)");
             this.plugin.getBeaconMajorityManager().updateBeaconMajorityBonuses();
 
             if (!silent) {
@@ -861,7 +861,7 @@ public class BeaconManager {
     private void checkAndDisableHumansFinalStand() {
         if (this.plugin.getSessionManager().isHumansFinalStandActive()) {
             if (this.getHolyBeacons().size() < this.getAllBeacons().size()) {
-                this.plugin.getLogger().info("HUMANS FINAL STAND ENDED - Not all beacons are holy anymore!");
+                this.plugin.logInfo("HUMANS FINAL STAND ENDED - Not all beacons are holy anymore!");
 
                 for(Player player : Bukkit.getOnlinePlayers()) {
                     if (this.plugin.getVampireManager().isVampire(player)) {
@@ -1373,14 +1373,14 @@ public class BeaconManager {
      */
     public void loadBeacons() {
         if (!this.dataFile.exists()) {
-            this.plugin.getLogger().info("No beacons file found, creating default beacons...");
+            this.plugin.logInfo("No beacons file found, creating default beacons...");
             this.createDefaultBeacons();
             this.saveBeacons();
-            this.plugin.getLogger().info("Created " + this.beacons.size() + " default beacons.");
+            this.plugin.logInfo("Created " + this.beacons.size() + " default beacons.");
 
         } else {
             File backupFile = new File(this.dataFile.getParent(), "beacons_backup.json");
-            this.plugin.getLogger().info("Loading beacons from file: " + this.dataFile.getAbsolutePath());
+            this.plugin.logInfo("Loading beacons from file: " + this.dataFile.getAbsolutePath());
 
             try {
                 try (FileReader reader = new FileReader(this.dataFile)) {
@@ -1402,11 +1402,11 @@ public class BeaconManager {
                             return;
                         }
 
-                        this.plugin.getLogger().info("Attempting to restore from backup file...");
+                        this.plugin.logInfo("Attempting to restore from backup file...");
 
                         try {
                             Files.copy(backupFile.toPath(), this.dataFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-                            this.plugin.getLogger().info("Restored from backup, retrying load...");
+                            this.plugin.logInfo("Restored from backup, retrying load...");
                             this.loadBeacons();
                             return;
 
@@ -1443,7 +1443,7 @@ public class BeaconManager {
                             this.validateDisplays();
                         }, 10L);
 
-                        this.plugin.getLogger().info("Loaded " + this.beacons.size() + " beacons from file.");
+                        this.plugin.logInfo("Loaded " + this.beacons.size() + " beacons from file.");
                         return;
                     }
 
@@ -1461,11 +1461,11 @@ public class BeaconManager {
                 e.printStackTrace();
 
                 if (backupFile.exists()) {
-                    this.plugin.getLogger().info("Attempting to restore from backup due to JSON corruption...");
+                    this.plugin.logInfo("Attempting to restore from backup due to JSON corruption...");
 
                     try {
                         Files.copy(backupFile.toPath(), this.dataFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-                        this.plugin.getLogger().info("Restored from backup, retrying load...");
+                        this.plugin.logInfo("Restored from backup, retrying load...");
                         this.loadBeacons();
 
                     } catch (Exception backupError) {
@@ -1484,14 +1484,14 @@ public class BeaconManager {
      */
     public void reloadBeacons() {
         this.loadBeacons();
-        this.plugin.getLogger().info("Reloaded beacons from file.");
+        this.plugin.logInfo("Reloaded beacons from file.");
     }
 
     /**
      * Convert the cooldown value from a system counter into a session timer value.
      */
     private void migrateBeaconCooldownsToSessionTime() {
-        this.plugin.getLogger().info("Migrating existing beacon cooldowns from system time to session time...");
+        this.plugin.logInfo("Migrating existing beacon cooldowns from system time to session time...");
         long currentSystemTime = System.currentTimeMillis();
         long currentSessionTime = this.plugin.getSessionManager().getSessionTime();
         int migratedBeacons = 0;
@@ -1507,7 +1507,7 @@ public class BeaconManager {
             }
         }
 
-        this.plugin.getLogger().info("Migrated " + migratedBeacons + " beacon cooldowns to session time");
+        this.plugin.logInfo("Migrated " + migratedBeacons + " beacon cooldowns to session time");
 
         if (migratedBeacons > 0) {
             this.saveBeacons();
@@ -1565,13 +1565,13 @@ public class BeaconManager {
         if (this.cooldownTrackingTask != null) {
             this.cooldownTrackingTask.cancel();
             this.cooldownTrackingTask = null;
-            this.plugin.getLogger().info("Stopped beacon cooldown tracking task");
+            this.plugin.logInfo("Stopped beacon cooldown tracking task");
         }
 
         if (this.beaconMaintenanceTask != null) {
             this.beaconMaintenanceTask.cancel();
             this.beaconMaintenanceTask = null;
-            this.plugin.getLogger().info("Stopped beacon maintenance task");
+            this.plugin.logInfo("Stopped beacon maintenance task");
         }
 
         if (this.autoSaveTask != null) {
@@ -1589,13 +1589,13 @@ public class BeaconManager {
         if (this.conversionCircleParticleTask != null) {
             this.conversionCircleParticleTask.cancel();
             this.conversionCircleParticleTask = null;
-            this.plugin.getLogger().info("Stopped conversion circle particle task");
+            this.plugin.logInfo("Stopped conversion circle particle task");
         }
 
         if (this.holyRegenTask != null) {
             this.holyRegenTask.cancel();
             this.holyRegenTask = null;
-            this.plugin.getLogger().info("Stopped holy beacon regeneration task");
+            this.plugin.logInfo("Stopped holy beacon regeneration task");
         }
 
         for(BukkitTask task : this.pendingNeutralBroadcasts.values()) {
@@ -1605,9 +1605,9 @@ public class BeaconManager {
         }
 
         this.pendingNeutralBroadcasts.clear();
-        this.plugin.getLogger().info("Cancelled all pending neutral broadcast messages");
+        this.plugin.logInfo("Cancelled all pending neutral broadcast messages");
         this.saveBeacons();
-        this.plugin.getLogger().info("BeaconManager shutdown - displays cleaned up and data saved.");
+        this.plugin.logInfo("BeaconManager shutdown - displays cleaned up and data saved.");
     }
 
     /**
@@ -1669,12 +1669,10 @@ public class BeaconManager {
 
         if (newState == BeaconState.HOLY) {
             message = "§aBeacon §e" + beacon.getName() + " §ahas been blessed with divine energy!";
-        } else {
-            if (newState != BeaconState.DESECRATED) {
-                return;
-            }
-
+        } else if (newState == BeaconState.DESECRATED) {
             message = "§4Beacon §e" + beacon.getName() + " §4has been consumed by dark forces!";
+        } else {
+            return;
         }
 
         for(Player player : this.plugin.getServer().getOnlinePlayers()) {

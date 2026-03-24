@@ -416,6 +416,33 @@ public class ConfigManager {
     }
 
     /**
+     * Retrieve whether the console logging should be reduced to only essential messages.
+     *
+     * @return {@code true} if logging should be reduced.
+     */
+    public boolean isNonEssentialLoggingDisabled() {
+        return this.config.getBoolean("disable-nonessential-logging", false);
+    }
+
+    /**
+     * Retrieve the duration that holy water disables vampire abilities.
+     *
+     * @return The number of seconds that holy water disables a vampire's abilities.
+     */
+    public int getHolyWaterDisableDurationSeconds() {
+        return this.config.getInt("holy-water.disable-duration-seconds", 120);
+    }
+
+    /**
+     * Retrieve whether players will be limited to creating one bottle of holy water per session.
+     *
+     * @return {@code true} if holy water has been session capped.
+     */
+    public boolean isHolyWaterSessionCapped() {
+        return this.config.getBoolean("holy-water.holy-water-session-capped", true);
+    }
+
+    /**
      * Retrieve if passive mobs will be automatically spawned each morning.
      *
      * @return {@code true} if passive mobs will be spawned without admin intervention.

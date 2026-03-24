@@ -194,7 +194,7 @@ public final class RemakepirePlugin extends JavaPlugin {
         this.beaconManager.validateBeacons();
         this.initVampireRespawnLocation();
         this.sessionManager.executeServerCommand("tick freeze");
-        this.getLogger().info("VampireSMP Plugin has been enabled!");
+        this.logInfo("VampireSMP Plugin has been enabled!");
     }
 
     /**
@@ -304,7 +304,18 @@ public final class RemakepirePlugin extends JavaPlugin {
             this.forcedCureChoiceManager.shutdown();
         }
 
-        this.getLogger().info("VampireSMP Plugin has been disabled!");
+        this.logInfo("VampireSMP Plugin has been disabled!");
+    }
+
+    /**
+     * Log the message to the console. The message may not appear if nonessential logging is disabled.
+     *
+     * @param message the message being sent to the log.
+     */
+    public void logInfo(String message) {
+        if (!this.getConfigManager().isNonEssentialLoggingDisabled()) {
+            this.getLogger().info(message);
+        }
     }
 
     /**
@@ -317,17 +328,17 @@ public final class RemakepirePlugin extends JavaPlugin {
 
             if (existingTeam != null) {
                 this.castTeam = existingTeam;
-                this.getLogger().info("Found existing CastTeam, updating settings...");
+                this.logInfo("Found existing CastTeam, updating settings...");
             } else {
                 this.castTeam = mainScoreboard.registerNewTeam("CastTeam");
-                this.getLogger().info("Created new CastTeam for name tag management.");
+                this.logInfo("Created new CastTeam for name tag management.");
             }
 
             this.castTeam.setNameTagVisibility(NameTagVisibility.NEVER);
             this.castTeam.setDisplayName("§6Human Team");
             this.castTeam.setCanSeeFriendlyInvisibles(false);
 
-            this.getLogger().info("CastTeam initialized successfully with hidden name tags.");
+            this.logInfo("CastTeam initialized successfully with hidden name tags.");
 
         } catch (Exception e) {
             this.getLogger().severe("Failed to initialize CastTeam: " + e.getMessage());
@@ -348,16 +359,16 @@ public final class RemakepirePlugin extends JavaPlugin {
                 String criteria = existingObjective.getCriteria();
 
                 if ("deathCount".equals(criteria)) {
-                    this.getLogger().info("Migrating death scoreboard from 'deathCount' to 'dummy' criteria...");
+                    this.logInfo("Migrating death scoreboard from 'deathCount' to 'dummy' criteria...");
                     existingObjective.unregister();
                     mainScoreboard.registerNewObjective(objectiveName, "dummy", "Deaths");
-                    this.getLogger().info("Migration complete - death scoreboard now uses 'dummy' criteria.");
+                    this.logInfo("Migration complete - death scoreboard now uses 'dummy' criteria.");
                 } else {
-                    this.getLogger().info("Found existing death scoreboard objective with correct criteria.");
+                    this.logInfo("Found existing death scoreboard objective with correct criteria.");
                 }
             } else {
                 mainScoreboard.registerNewObjective(objectiveName, "dummy", "Deaths");
-                this.getLogger().info("Created new death scoreboard objective with 'dummy' criteria.");
+                this.logInfo("Created new death scoreboard objective with 'dummy' criteria.");
             }
         } catch (Exception e) {
             this.getLogger().severe("Failed to initialize death scoreboard: " + e.getMessage());
@@ -375,17 +386,17 @@ public final class RemakepirePlugin extends JavaPlugin {
 
             if (existingTeam != null) {
                 this.vampireCastTeam = existingTeam;
-                this.getLogger().info("Found existing VampireCastTeam, updating settings...");
+                this.logInfo("Found existing VampireCastTeam, updating settings...");
             } else {
                 this.vampireCastTeam = mainScoreboard.registerNewTeam("VampireCastTeam");
-                this.getLogger().info("Created new VampireCastTeam for name tag management.");
+                this.logInfo("Created new VampireCastTeam for name tag management.");
             }
 
             this.vampireCastTeam.setNameTagVisibility(NameTagVisibility.NEVER);
             this.vampireCastTeam.setCanSeeFriendlyInvisibles(false);
             this.vampireCastTeam.setDisplayName("§4Vampire Team");
 
-            this.getLogger().info("VampireCastTeam initialized successfully with hidden name tags.");
+            this.logInfo("VampireCastTeam initialized successfully with hidden name tags.");
 
         } catch (Exception e) {
             this.getLogger().severe("Failed to initialize VampireCastTeam: " + e.getMessage());
@@ -398,7 +409,7 @@ public final class RemakepirePlugin extends JavaPlugin {
      */
     private void initVampireRespawnLocation() {
         this.vampireRespawnLocation = this.configManager.getVampireRespawnLocation(this.getWorld());
-        this.getLogger().info("Vampire respawn location set to: " + this.vampireRespawnLocation.getBlockX() + ", " + this.vampireRespawnLocation.getBlockY() + ", " + this.vampireRespawnLocation.getBlockZ());
+        this.logInfo("Vampire respawn location set to: " + this.vampireRespawnLocation.getBlockX() + ", " + this.vampireRespawnLocation.getBlockY() + ", " + this.vampireRespawnLocation.getBlockZ());
     }
 
     /**

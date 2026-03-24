@@ -51,7 +51,7 @@ public class TomeDistributionManager {
         if (this.tomeLocations.isEmpty()) {
             this.plugin.getLogger().warning("TomeDistributionManager: No tome locations found in config!");
         } else {
-            this.plugin.getLogger().info("TomeDistributionManager: Loaded " + this.tomeLocations.size() + " tome locations from config");
+            this.plugin.logInfo("TomeDistributionManager: Loaded " + this.tomeLocations.size() + " tome locations from config");
         }
     }
 
@@ -64,7 +64,7 @@ public class TomeDistributionManager {
         this.stopDistributionTask();
         this.distributionTask = Bukkit.getScheduler().runTaskTimer(this.plugin, this::distributeTomes, 0L, intervalTicks);
 
-        this.plugin.getLogger().info("TomeDistributionManager: Started daily tome distribution task");
+        this.plugin.logInfo("TomeDistributionManager: Started daily tome distribution task");
     }
 
     /**
@@ -75,7 +75,7 @@ public class TomeDistributionManager {
             this.distributionTask.cancel();
             this.distributionTask = null;
 
-            this.plugin.getLogger().info("TomeDistributionManager: Stopped tome distribution task");
+            this.plugin.logInfo("TomeDistributionManager: Stopped tome distribution task");
         }
     }
 
@@ -113,7 +113,7 @@ public class TomeDistributionManager {
                 cureBookAdded = true;
             }
 
-            this.plugin.getLogger().info("TomeDistributionManager: Distributed " + tomeSelectedLocations.size() + " tomes, " + emptyLocations.size() + " enchantment books" + (cureBookAdded ? ", and 1 cure book (replaced a chest)" : "") + " to chest locations");
+            this.plugin.logInfo("TomeDistributionManager: Distributed " + tomeSelectedLocations.size() + " tomes, " + emptyLocations.size() + " enchantment books" + (cureBookAdded ? ", and 1 cure book (replaced a chest)" : "") + " to chest locations");
         }
     }
 
@@ -162,13 +162,13 @@ public class TomeDistributionManager {
         Block block = location.getBlock();
         if (block.getType() != Material.CHEST) {
             block.setType(Material.CHEST);
-            this.plugin.getLogger().info("TomeDistributionManager: Created chest at " + this.locationToString(location));
+            this.plugin.logInfo("TomeDistributionManager: Created chest at " + this.locationToString(location));
         }
 
         Chest chest = (Chest)block.getState();
         chest.getInventory().addItem(this.createTomeItem(tomeType));
 
-        this.plugin.getLogger().info("TomeDistributionManager: Added " + tomeType + " tome to chest at " + this.locationToString(location));
+        this.plugin.logInfo("TomeDistributionManager: Added " + tomeType + " tome to chest at " + this.locationToString(location));
     }
 
     /**
@@ -252,13 +252,13 @@ public class TomeDistributionManager {
 
         if (block.getType() != Material.CHEST) {
             block.setType(Material.CHEST);
-            this.plugin.getLogger().info("TomeDistributionManager: Created chest at " + this.locationToString(location));
+            this.plugin.logInfo("TomeDistributionManager: Created chest at " + this.locationToString(location));
         }
 
         Chest chest = (Chest)block.getState();
         chest.getInventory().addItem(this.createRandomEnchantmentBook());
 
-        this.plugin.getLogger().info("TomeDistributionManager: Added enchantment book to chest at " + this.locationToString(location));
+        this.plugin.logInfo("TomeDistributionManager: Added enchantment book to chest at " + this.locationToString(location));
     }
 
     /**
@@ -271,7 +271,7 @@ public class TomeDistributionManager {
 
         if (block.getType() != Material.CHEST) {
             block.setType(Material.CHEST);
-            this.plugin.getLogger().info("TomeDistributionManager: Created chest at " + this.locationToString(location));
+            this.plugin.logInfo("TomeDistributionManager: Created chest at " + this.locationToString(location));
         }
 
         Chest chest = (Chest)block.getState();
@@ -280,7 +280,7 @@ public class TomeDistributionManager {
         ItemStack cureBook = this.createRandomCureBook();
         chestInventory.addItem(cureBook);
 
-        this.plugin.getLogger().info("TomeDistributionManager: Replaced chest contents with cure book (" + cureBook.getItemMeta().getDisplayName() + ") at " + this.locationToString(location));
+        this.plugin.logInfo("TomeDistributionManager: Replaced chest contents with cure book (" + cureBook.getItemMeta().getDisplayName() + ") at " + this.locationToString(location));
     }
 
     /**
@@ -351,7 +351,7 @@ public class TomeDistributionManager {
      */
     public void setDistributionCount(int count) {
         this.distributionCount = Math.max(1, Math.min(count, this.tomeLocations.size()));
-        this.plugin.getLogger().info("TomeDistributionManager: Distribution count set to " + this.distributionCount);
+        this.plugin.logInfo("TomeDistributionManager: Distribution count set to " + this.distributionCount);
     }
 
     /**
@@ -363,7 +363,7 @@ public class TomeDistributionManager {
     public boolean addTomeLocation(Location location) {
         if (this.configManager.addTomeChestLocation(location)) {
             this.tomeLocations = this.configManager.getTomeChestLocations();
-            this.plugin.getLogger().info("TomeDistributionManager: Added tome location at " + this.locationToString(location));
+            this.plugin.logInfo("TomeDistributionManager: Added tome location at " + this.locationToString(location));
             return true;
 
         } else {
@@ -381,7 +381,7 @@ public class TomeDistributionManager {
     public boolean removeTomeLocation(Location location) {
         if (this.configManager.removeTomeChestLocation(location)) {
             this.tomeLocations = this.configManager.getTomeChestLocations();
-            this.plugin.getLogger().info("TomeDistributionManager: Removed tome location at " + this.locationToString(location));
+            this.plugin.logInfo("TomeDistributionManager: Removed tome location at " + this.locationToString(location));
             return true;
 
         } else {
@@ -412,6 +412,6 @@ public class TomeDistributionManager {
             this.distributionTask = null;
         }
 
-        this.plugin.getLogger().info("TomeDistributionManager: Shutdown complete");
+        this.plugin.logInfo("TomeDistributionManager: Shutdown complete");
     }
 }

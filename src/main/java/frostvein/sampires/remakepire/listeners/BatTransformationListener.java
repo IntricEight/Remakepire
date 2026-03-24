@@ -71,6 +71,7 @@ public class BatTransformationListener implements Listener {
         if (event.getEntity() instanceof Bat bat) {
             if (bat.getCustomName() != null && bat.getCustomName().startsWith("§8")) {
                 Player player = this.batManager.getPlayerFromBat(bat);
+
                 if (player != null && player.isOnline() && this.batManager.isInBatForm(player)) {
                     this.plugin.getServer().getScheduler().runTask(this.plugin, () -> {
                         if (player.isOnline()) {
@@ -78,7 +79,7 @@ public class BatTransformationListener implements Listener {
                         }
                     });
 
-                    this.plugin.getLogger().info("Bat entity for player " + player.getName() + " was killed - triggering player death");
+                    this.plugin.logInfo("Bat entity for player " + player.getName() + " was killed - triggering player death");
                 }
             }
         }
@@ -103,8 +104,8 @@ public class BatTransformationListener implements Listener {
                     double health = bat.getHealth() - event.getFinalDamage();
                     double maxHealth = bat.getMaxHealth();
                     double healthPercent = health / maxHealth * 100.0;
-
                     String healthColor;
+
                     if (healthPercent > 60) {
                         healthColor = "§a";
                     } else if (healthPercent > 30) {
@@ -163,6 +164,7 @@ public class BatTransformationListener implements Listener {
     )
     public void onGameModeChange(PlayerGameModeChangeEvent event) {
         Player player = event.getPlayer();
+
         if (this.batManager.isInBatForm(player)) {
             this.plugin.getServer().getScheduler().runTaskLater(this.plugin, () -> {
                 if (player.isOnline() && this.batManager.isInBatForm(player)) {

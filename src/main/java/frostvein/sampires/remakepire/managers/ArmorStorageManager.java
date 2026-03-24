@@ -56,7 +56,7 @@ public class ArmorStorageManager {
                 }
             }
 
-            this.plugin.getLogger().info("ArmorStorageManager: Storage files initialized");
+            this.plugin.logInfo("ArmorStorageManager: Storage files initialized");
         } catch (IOException e) {
             this.plugin.getLogger().severe("ArmorStorageManager: Failed to initialize storage files: " + e.getMessage());
             e.printStackTrace();
@@ -87,10 +87,10 @@ public class ArmorStorageManager {
                 player.updateInventory();
 
                 this.saveArmorData();
-                this.plugin.getLogger().info("ArmorStorageManager: Stored and cleared armor for player " + player.getName());
+                this.plugin.logInfo("ArmorStorageManager: Stored and cleared armor for player " + player.getName());
                 return true;
             } else {
-                this.plugin.getLogger().info("ArmorStorageManager: No armor to store for player " + player.getName());
+                this.plugin.logInfo("ArmorStorageManager: No armor to store for player " + player.getName());
                 return false;
             }
         } catch (Exception e) {
@@ -129,7 +129,7 @@ public class ArmorStorageManager {
     public void clearStoredArmor(UUID playerId) {
         if (this.armorCache.remove(playerId) != null) {
             this.saveArmorData();
-            this.plugin.getLogger().info("ArmorStorageManager: Cleared stored armor for player " + String.valueOf(playerId));
+            this.plugin.logInfo("ArmorStorageManager: Cleared stored armor for player " + String.valueOf(playerId));
         }
     }
 
@@ -147,6 +147,7 @@ public class ArmorStorageManager {
         try (FileReader reader = new FileReader(fileToLoad)) {
             Type mapType = (new TypeToken<Map<String, StoredArmor>>() {}).getType();
             Map<String, StoredArmor> loadedData = this.gson.fromJson(reader, mapType);
+
             if (loadedData != null) {
                 for(Map.Entry<String, StoredArmor> entry : loadedData.entrySet()) {
                     try {
@@ -158,7 +159,7 @@ public class ArmorStorageManager {
                     }
                 }
 
-                this.plugin.getLogger().info("ArmorStorageManager: Loaded armor data for " + this.armorCache.size() + " players");
+                this.plugin.logInfo("ArmorStorageManager: Loaded armor data for " + this.armorCache.size() + " players");
             }
         } catch (IOException e) {
             this.plugin.getLogger().warning("ArmorStorageManager: Could not load armor storage file: " + e.getMessage());
@@ -215,7 +216,7 @@ public class ArmorStorageManager {
 
         this.armorCache.entrySet().removeIf((entry) -> {
             if (currentTime - (entry.getValue()).timestamp > maxAge) {
-                this.plugin.getLogger().info("ArmorStorageManager: Removed expired armor storage for player " + String.valueOf(entry.getKey()));
+                this.plugin.logInfo("ArmorStorageManager: Removed expired armor storage for player " + String.valueOf(entry.getKey()));
                 return true;
             }
 
@@ -241,7 +242,7 @@ public class ArmorStorageManager {
      */
     public void shutdown() {
         this.saveArmorData();
-        this.plugin.getLogger().info("ArmorStorageManager: Shutdown complete, " + this.armorCache.size() + " armor sets saved");
+        this.plugin.logInfo("ArmorStorageManager: Shutdown complete, " + this.armorCache.size() + " armor sets saved");
     }
 
     public static class StoredArmor {

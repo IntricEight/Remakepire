@@ -59,7 +59,7 @@ public class VampireTrackingManager {
             }).runTaskTimer(this.plugin, 0L, 4L);
 
             this.activeTrackingSessions.put(newVampireId, trackingTask);
-            this.plugin.getLogger().info("Started vampire tracking for " + newVampire.getName() + " (120s)");
+            this.plugin.logInfo("Started vampire tracking for " + newVampire.getName() + " (120s)");
         }
     }
 
@@ -143,7 +143,7 @@ public class VampireTrackingManager {
 
         if (task != null) {
             task.cancel();
-            this.plugin.getLogger().info("Stopped vampire tracking for " + String.valueOf(vampireId));
+            this.plugin.logInfo("Stopped vampire tracking for " + String.valueOf(vampireId));
         }
     }
 
@@ -156,7 +156,7 @@ public class VampireTrackingManager {
         }
 
         this.activeTrackingSessions.clear();
-        this.plugin.getLogger().info("Stopped all vampire tracking sessions");
+        this.plugin.logInfo("Stopped all vampire tracking sessions");
     }
 
     /**
@@ -183,6 +183,6 @@ public class VampireTrackingManager {
      */
     public void shutdown() {
         this.stopAllTracking();
-        this.plugin.getLogger().info("VampireTrackingManager shutdown complete");
+        this.plugin.logInfo("VampireTrackingManager shutdown complete");
     }
 }

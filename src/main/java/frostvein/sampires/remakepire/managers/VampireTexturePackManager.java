@@ -29,7 +29,7 @@ public class VampireTexturePackManager {
     public VampireTexturePackManager(RemakepirePlugin plugin) {
         this.plugin = plugin;
         this.vampireManager = plugin.getVampireManager();
-        plugin.getLogger().info("VampireTexturePackManager initialized");
+        plugin.logInfo("VampireTexturePackManager initialized");
     }
 
     /**
@@ -46,9 +46,9 @@ public class VampireTexturePackManager {
             this.playersWithVampireTexturePack.add(player.getUniqueId());
             player.sendMessage("§7Applying vampire texture pack...");
 
-            this.plugin.getLogger().info("Sent vampire texture pack request to " + player.getName() + " - " + reason);
-            this.plugin.getLogger().info("Pack URL: https://download.mc-packs.net/pack/e139890dd34f56724efcd5becb476999651ca43c.zip");
-            this.plugin.getLogger().info("Pack SHA1: e139890dd34f56724efcd5becb476999651ca43c");
+            this.plugin.logInfo("Sent vampire texture pack request to " + player.getName() + " - " + reason);
+            this.plugin.logInfo("Pack URL: https://download.mc-packs.net/pack/e139890dd34f56724efcd5becb476999651ca43c.zip");
+            this.plugin.logInfo("Pack SHA1: e139890dd34f56724efcd5becb476999651ca43c");
 
         } catch (Exception e) {
             this.plugin.getLogger().severe("Failed to apply vampire texture pack to " + player.getName() + ": " + e.getMessage());
@@ -74,11 +74,11 @@ public class VampireTexturePackManager {
                     this.plugin.getLogger().warning("Failed to apply delayed vampire texture pack to " + player.getName() + ": " + e.getMessage());
                 }
             } else if (player.isOnline()) {
-                this.plugin.getLogger().info("Skipped vampire texture pack for " + player.getName() + " - no longer a vampire (" + reason + ")");
+                this.plugin.logInfo("Skipped vampire texture pack for " + player.getName() + " - no longer a vampire (" + reason + ")");
             }
         }, delayTicks);
 
-        this.plugin.getLogger().info("Scheduled vampire texture pack for " + player.getName() + " in " + delayTicks / 20.0 + " seconds - " + reason);
+        this.plugin.logInfo("Scheduled vampire texture pack for " + player.getName() + " in " + delayTicks / 20.0 + " seconds - " + reason);
     }
 
     /**
@@ -87,7 +87,7 @@ public class VampireTexturePackManager {
      * @param player the player who became a vampire.
      */
     public void onVampireTransformation(Player player) {
-        this.plugin.getLogger().info("Vampire transformation completed for " + player.getName() + " - awaiting voluntary texture pack application");
+        this.plugin.logInfo("Vampire transformation completed for " + player.getName() + " - awaiting voluntary texture pack application");
     }
 
     /**
@@ -123,7 +123,7 @@ public class VampireTexturePackManager {
             this.playersWithHumanTexturePack.add(player.getUniqueId());
             this.playersWithVampireTexturePack.remove(player.getUniqueId());
             player.sendMessage("§7Applying human texture pack...");
-            this.plugin.getLogger().info("Sent human texture pack request to " + player.getName() + " - " + reason);
+            this.plugin.logInfo("Sent human texture pack request to " + player.getName() + " - " + reason);
 
         } catch (Exception e) {
             this.plugin.getLogger().severe("Failed to apply human texture pack to " + player.getName() + ": " + e.getMessage());
@@ -212,7 +212,7 @@ public class VampireTexturePackManager {
         }
 
         if (applied > 0) {
-            this.plugin.getLogger().info("Ensured vampire texture pack for " + applied + " online vampires");
+            this.plugin.logInfo("Ensured vampire texture pack for " + applied + " online vampires");
         }
     }
 
@@ -239,6 +239,6 @@ public class VampireTexturePackManager {
     public void shutdown() {
         this.playersWithVampireTexturePack.clear();
         this.playersWithHumanTexturePack.clear();
-        this.plugin.getLogger().info("VampireTexturePackManager shutdown complete");
+        this.plugin.logInfo("VampireTexturePackManager shutdown complete");
     }
 }

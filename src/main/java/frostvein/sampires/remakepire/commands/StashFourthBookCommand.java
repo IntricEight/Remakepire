@@ -59,7 +59,7 @@ public class StashFourthBookCommand implements CommandExecutor {
                     ItemStack book = this.createRetributionBook();
                     chestInventory.addItem(book);
                     sender.sendMessage("§aSuccessfully stashed 'The Retribution 4/3' in the chest at " + x + ", " + y + ", " + z + ".");
-                    this.plugin.getLogger().info(sender.getName() + " used /stash_fourth_book - placed The Retribution 4/3 at " + x + ", " + y + ", " + z);
+                    this.plugin.logInfo(sender.getName() + " used /stash_fourth_book - placed The Retribution 4/3 at " + x + ", " + y + ", " + z);
                     return true;
                 }
             }
@@ -73,7 +73,7 @@ public class StashFourthBookCommand implements CommandExecutor {
         if (bookMeta != null) {
             bookMeta.setTitle("The Retribution 4/3");
             bookMeta.setAuthor("§4A vengeful hand...");
-            bookMeta.setPages(new String[]{"§8§o[The writing in this book is unlike the previous three, it is hurried and panic'd, the ink is smeared and the smell of blood rests faintly on the pages]§r\n\n§0The spirits are too lenient... Too soft...", "§0These disgusting, vial, works of evil could never be convinced to come back to the light...\n\n§0They must be dragged back to humanity, kicking and screaming.", "§0They will have to choose. Accept the light, or face eternal darkness.\n\n§0I will give them this choice, with these holy words:", "§7/§4hoc-vinculum-tibi-dirumpo-mala-creatura §7<§4Players-Name§7>"});
+            bookMeta.setPages("§8§o[The writing in this book is unlike the previous three, it is hurried and panic'd, the ink is smeared and the smell of blood rests faintly on the pages]§r\n\n§0The spirits are too lenient... Too soft...", "§0These disgusting, vial, works of evil could never be convinced to come back to the light...\n\n§0They must be dragged back to humanity, kicking and screaming.", "§0They will have to choose. Accept the light, or face eternal darkness.\n\n§0I will give them this choice, with these holy words:", "§7/§4hoc-vinculum-tibi-dirumpo-mala-creatura §7<§4Players-Name§7>");
             book.setItemMeta(bookMeta);
         }
 

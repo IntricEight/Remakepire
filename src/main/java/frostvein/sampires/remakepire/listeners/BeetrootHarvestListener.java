@@ -81,7 +81,7 @@ public class BeetrootHarvestListener implements Listener {
             if (harvester != null) {
                 String command = "give " + harvester.getName() + " minecraft:beetroot[minecraft:food={can_always_eat:1b,nutrition:1,saturation:1.2}] " + quantity;
                 Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command);
-                this.plugin.getLogger().info("Gave " + quantity + " always-edible beetroot(s) to " + harvester.getName());
+                this.plugin.logInfo("Gave " + quantity + " always-edible beetroot(s) to " + harvester.getName());
 
             } else {
                 this.plugin.getLogger().warning("Harvesting player is null, cannot give beetroot");

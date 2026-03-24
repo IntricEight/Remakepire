@@ -21,11 +21,13 @@ public class BlessingTomeAbility extends TomeAbility {
     }
 
     protected boolean useAbility(Player player) {
+        boolean isSessionCapped = this.plugin.getConfigManager().isHolyWaterSessionCapped();
+
         if (!this.canUse(player)) {
             this.sendCannotUseMessage(player, "Only humans can use tome abilities!");
             return false;
 
-        } else if (player.getScoreboardTags().contains("blessing_used_session")) {
+        } else if (isSessionCapped && player.getScoreboardTags().contains("blessing_used_session")) {
             this.sendCannotUseMessage(player, "You have already used Blessing this session!");
             return false;
 
@@ -59,7 +61,9 @@ public class BlessingTomeAbility extends TomeAbility {
                 player.sendMessage("§7The blessed water can now be thrown as a splash potion.");
 
                 // Comment out the following line to remove the cap on holy water per session
-                player.addScoreboardTag("blessing_used_session");
+                if (isSessionCapped) {
+                    player.addScoreboardTag("blessing_used_session");
+                }
 
                 return true;
 
@@ -79,9 +83,14 @@ public class BlessingTomeAbility extends TomeAbility {
         ItemMeta meta = item.getItemMeta();
 
         if (meta instanceof PotionMeta potionMeta) {
+            int durationSeconds = this.plugin.getConfigManager().getHolyWaterDisableDurationSeconds();
+            String durationText = durationSeconds >= 60
+                    ? durationSeconds / 60 + " minute" + ((durationSeconds / 60) != 1 ? "s" : "")
+                    : durationSeconds + " second" + (durationSeconds != 1 ? "s" : "");
+
             potionMeta.setBasePotionType(PotionType.WATER);
             potionMeta.setDisplayName("§aHoly Water");
-            potionMeta.setLore(Arrays.asList("§7Throw this on an evil creature to disable their powers for 3 minutes!"));
+            potionMeta.setLore(Arrays.asList("§7Throw this on an evil creature to disable their powers for " + durationText + "!"));
             item.setItemMeta(potionMeta);
         }
     }

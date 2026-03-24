@@ -27,8 +27,7 @@ public class PassiveMobSpawningManager {
     private final Random random;
     private BukkitTask autoSpawnTask;
     private long lastDaySpawned = -1L;
-    private static final long MORNING_START = 0L;
-    private static final long MORNING_END = 100L;
+    private static final long MORNING_START = 0L, MORNING_END = 100L;
     private final Map<EntityType, Integer> mobTypeWeights = new LinkedHashMap<>();
     private final Set<Biome> blacklistedBiomes = new HashSet<>();
 
@@ -52,9 +51,9 @@ public class PassiveMobSpawningManager {
 
         if (configManager.isPassiveMobAutoSpawnEnabled()) {
             this.startAutoSpawnTask();
-            plugin.getLogger().info("PassiveMobSpawningManager: Initialized with automatic morning spawning (threshold: " + configManager.getPassiveMobMinimumThreshold() + " animals)");
+            plugin.logInfo("PassiveMobSpawningManager: Initialized with automatic morning spawning (threshold: " + configManager.getPassiveMobMinimumThreshold() + " animals)");
         } else {
-            plugin.getLogger().info("PassiveMobSpawningManager: Initialized (manual spawning only)");
+            plugin.logInfo("PassiveMobSpawningManager: Initialized (manual spawning only)");
         }
     }
 
@@ -85,7 +84,7 @@ public class PassiveMobSpawningManager {
         this.blacklistedBiomes.add(Biome.LUSH_CAVES);
         this.blacklistedBiomes.add(Biome.STONY_SHORE);
 
-        this.plugin.getLogger().info("PassiveMobSpawningManager: Blacklisted " + this.blacklistedBiomes.size() + " biomes");
+        this.plugin.logInfo("PassiveMobSpawningManager: Blacklisted " + this.blacklistedBiomes.size() + " biomes");
     }
 
     /**
@@ -132,7 +131,7 @@ public class PassiveMobSpawningManager {
                         report.append(entry.getValue()).append(" ").append(entry.getKey()).append(", ");
                     }
 
-                    this.plugin.getLogger().info(report.toString());
+                    this.plugin.logInfo(report.toString());
                 }
             }
         }
@@ -172,7 +171,7 @@ public class PassiveMobSpawningManager {
             }
         }
 
-        this.plugin.getLogger().info("PassiveMobSpawningManager: Found " + validLocations.size() + " valid spawn locations from " + locationsChecked + " checks");
+        this.plugin.logInfo("PassiveMobSpawningManager: Found " + validLocations.size() + " valid spawn locations from " + locationsChecked + " checks");
         return validLocations;
     }
 
@@ -206,7 +205,7 @@ public class PassiveMobSpawningManager {
      * @return The entity name of a random valid passive mob.
      */
     private EntityType selectRandomMobType() {
-        int roll = this.random.nextInt(100);
+        final int roll = this.random.nextInt(100);
         int cumulative = 0;
 
         for(Map.Entry<EntityType, Integer> entry : this.mobTypeWeights.entrySet()) {
@@ -251,7 +250,7 @@ public class PassiveMobSpawningManager {
      */
     private void startAutoSpawnTask() {
         this.autoSpawnTask = this.plugin.getServer().getScheduler().runTaskTimer(this.plugin, () -> this.checkAndSpawnIfNeeded(), 20L, 20L);
-        this.plugin.getLogger().info("PassiveMobSpawningManager: Started automatic morning spawn task (checks every second)");
+        this.plugin.logInfo("PassiveMobSpawningManager: Started automatic morning spawn task (checks every second)");
     }
 
     /**
@@ -268,15 +267,15 @@ public class PassiveMobSpawningManager {
             if (isMorning && currentDay != this.lastDaySpawned) {
                 int animalCount = this.countPassiveAnimalsInLoadedChunks(world);
                 int threshold = this.configManager.getPassiveMobMinimumThreshold();
-                this.plugin.getLogger().info("PassiveMobSpawningManager: Morning check - Found " + animalCount + " animals (threshold: " + threshold + ")");
+                this.plugin.logInfo("PassiveMobSpawningManager: Morning check - Found " + animalCount + " animals (threshold: " + threshold + ")");
 
                 if (animalCount < threshold) {
-                    this.plugin.getLogger().info("PassiveMobSpawningManager: Animal count below threshold, spawning animals...");
+                    this.plugin.logInfo("PassiveMobSpawningManager: Animal count below threshold, spawning animals...");
                     this.spawnPassiveMobs();
                     this.lastDaySpawned = currentDay;
 
                 } else {
-                    this.plugin.getLogger().info("PassiveMobSpawningManager: Animal count sufficient, skipping spawn");
+                    this.plugin.logInfo("PassiveMobSpawningManager: Animal count sufficient, skipping spawn");
                     this.lastDaySpawned = currentDay;
                 }
             }
@@ -313,9 +312,9 @@ public class PassiveMobSpawningManager {
         if (this.autoSpawnTask != null) {
             this.autoSpawnTask.cancel();
             this.autoSpawnTask = null;
-            this.plugin.getLogger().info("PassiveMobSpawningManager: Stopped auto-spawn task");
+            this.plugin.logInfo("PassiveMobSpawningManager: Stopped auto-spawn task");
         }
 
-        this.plugin.getLogger().info("PassiveMobSpawningManager: Shutdown complete");
+        this.plugin.logInfo("PassiveMobSpawningManager: Shutdown complete");
     }
 }

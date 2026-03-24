@@ -147,9 +147,9 @@ public class PlayerJoinListener implements Listener {
             if (teamToJoin != null) {
                 if (!teamToJoin.hasPlayer(player)) {
                     teamToJoin.addPlayer(player);
-                    this.plugin.getLogger().info("Added player " + player.getName() + " to CastTeam");
+                    this.plugin.logInfo("Added player " + player.getName() + " to CastTeam");
                 } else {
-                    this.plugin.getLogger().info("Player " + player.getName() + " is already on CastTeam");
+                    this.plugin.logInfo("Player " + player.getName() + " is already on CastTeam");
                 }
             } else {
                 this.plugin.getLogger().warning("CastTeam is null - cannot add player " + player.getName());

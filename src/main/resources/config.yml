@@ -189,6 +189,26 @@ garlic:
   immunity-duration-max-seconds: 600
 
 # ============================================================================
+# LOGGING
+# ============================================================================
+# Disable non-essential (info-level) logging to reduce console noise
+# When true, only warnings and errors will appear in console
+# Default: false (all logging enabled)
+disable-nonessential-logging: false
+
+# ============================================================================
+# HOLY WATER SYSTEM
+# ============================================================================
+holy-water:
+  # Duration of the holy water disable effect on vampires (in seconds)
+  # Default: 120 seconds (2 minutes)
+  disable-duration-seconds: 120
+
+  # Session capping prevents players from creating more than one holy water each session.
+  # Default: true
+  holy-water-session-capped: true
+
+# ============================================================================
 # CURE SYSTEM
 # ============================================================================
 cure:

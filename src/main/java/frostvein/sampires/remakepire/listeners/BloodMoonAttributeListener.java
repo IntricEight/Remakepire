@@ -38,7 +38,7 @@ public class BloodMoonAttributeListener implements Listener {
         this.plugin = plugin;
         this.vampireManager = plugin.getVampireManager();
         Bukkit.getPluginManager().registerEvents(this, plugin);
-        plugin.getLogger().info("BloodMoonAttributeListener initialized");
+        plugin.logInfo("BloodMoonAttributeListener initialized");
     }
 
     /**
@@ -91,7 +91,7 @@ public class BloodMoonAttributeListener implements Listener {
             }
 
             this.playersWithBloodMoonAttributes.put(playerId, true);
-            this.plugin.getLogger().info("Applied blood moon attributes to vampire: " + player.getName());
+            this.plugin.logInfo("Applied blood moon attributes to vampire: " + player.getName());
         }
     }
 
@@ -119,7 +119,7 @@ public class BloodMoonAttributeListener implements Listener {
             }
 
             this.playersWithBloodMoonAttributes.put(playerId, false);
-            this.plugin.getLogger().info("Removed blood moon attributes from vampire: " + player.getName());
+            this.plugin.logInfo("Removed blood moon attributes from vampire: " + player.getName());
         }
     }
 
@@ -135,7 +135,7 @@ public class BloodMoonAttributeListener implements Listener {
 
         if (this.playersWithBloodMoonAttributes.getOrDefault(playerId, false)) {
             this.removeBloodMoonAttributes(player);
-            this.plugin.getLogger().info("Cleaned up blood moon attributes for quitting player: " + player.getName());
+            this.plugin.logInfo("Cleaned up blood moon attributes for quitting player: " + player.getName());
         }
     }
 
@@ -161,11 +161,9 @@ public class BloodMoonAttributeListener implements Listener {
             int removedCount = 0;
 
             if (speedAttribute != null) {
-                double baseSpeed = speedAttribute.getBaseValue();
-
                 for(AttributeModifier mod : speedAttribute.getModifiers().stream().filter((modx) -> modx.getAmount() > 0.05 || modx.getName().contains("BloodMoon") || modx.getName().contains("Vampire")).toList()) {
                     speedAttribute.removeModifier(mod);
-                    this.plugin.getLogger().info("Removed speed modifier: " + mod.getName() + " (" + mod.getAmount() + ")");
+                    this.plugin.logInfo("Removed speed modifier: " + mod.getName() + " (" + mod.getAmount() + ")");
                     ++removedCount;
                 }
             }
@@ -173,7 +171,7 @@ public class BloodMoonAttributeListener implements Listener {
             if (strengthAttribute != null) {
                 for(AttributeModifier mod : strengthAttribute.getModifiers().stream().filter((modx) -> modx.getName().contains("BloodMoon") || modx.getName().contains("Vampire")).toList()) {
                     strengthAttribute.removeModifier(mod);
-                    this.plugin.getLogger().info("Removed strength modifier: " + mod.getName() + " (" + mod.getAmount() + ")");
+                    this.plugin.logInfo("Removed strength modifier: " + mod.getName() + " (" + mod.getAmount() + ")");
                     ++removedCount;
                 }
             }
@@ -183,10 +181,10 @@ public class BloodMoonAttributeListener implements Listener {
             this.strengthModifiers.remove(playerId);
 
             if (removedCount > 0) {
-                this.plugin.getLogger().info("AGGRESSIVE cleanup removed " + removedCount + " suspicious attribute modifiers from: " + player.getName());
+                this.plugin.logInfo("AGGRESSIVE cleanup removed " + removedCount + " suspicious attribute modifiers from: " + player.getName());
                 player.sendMessage("§aRemoved " + removedCount + " attribute modifiers that were causing speed/jump issues.");
             } else {
-                this.plugin.getLogger().info("No suspicious attribute modifiers found for: " + player.getName());
+                this.plugin.logInfo("No suspicious attribute modifiers found for: " + player.getName());
             }
         } catch (Exception e) {
             this.plugin.getLogger().warning("Error during aggressive cleanup of attributes for " + player.getName() + ": " + e.getMessage());
@@ -207,6 +205,6 @@ public class BloodMoonAttributeListener implements Listener {
         this.playersWithBloodMoonAttributes.clear();
         this.speedModifiers.clear();
         this.strengthModifiers.clear();
-        this.plugin.getLogger().info("BloodMoonAttributeListener shutdown complete");
+        this.plugin.logInfo("BloodMoonAttributeListener shutdown complete");
     }
 }

@@ -13,7 +13,6 @@ import org.bukkit.Sound;
 import org.bukkit.SoundCategory;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.potion.PotionEffect;
@@ -152,7 +151,7 @@ public class ForcedCureChoiceManager {
 
             this.removePendingCure(target);
             Player caster = data.getCaster();
-            this.plugin.getLogger().info("FORCED CURE CHOICE: " + target.getName() + " chose to return to humanity");
+            this.plugin.logInfo("FORCED CURE CHOICE: " + target.getName() + " chose to return to humanity");
             this.performCure(caster, target, data.holyBeacon);
         }
     }
@@ -176,7 +175,7 @@ public class ForcedCureChoiceManager {
 
             this.removePendingCure(target);
             Player caster = data.getCaster();
-            this.plugin.getLogger().info("FORCED CURE CHOICE: " + target.getName() + " chose permadeath over cure");
+            this.plugin.logInfo("FORCED CURE CHOICE: " + target.getName() + " chose permadeath over cure");
             this.performPermadeath(caster, target, data.holyBeacon);
         }
     }
@@ -261,7 +260,7 @@ public class ForcedCureChoiceManager {
      * Announce the Eternal Night final stand and apply a blinding effect to players.
      */
     private void triggerVampiresEternalNight() {
-        this.plugin.getLogger().info("VAMPIRES ETERNAL NIGHT TRIGGERED - All beacons are now evil!");
+        this.plugin.logInfo("VAMPIRES ETERNAL NIGHT TRIGGERED - All beacons are now evil!");
 
         for(Player player : Bukkit.getOnlinePlayers()) {
             player.sendTitle("§4§lETERNAL NIGHT FALLS", "§cThe darkness consumes all hope", 20, 100, 40);

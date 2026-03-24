@@ -64,7 +64,7 @@ public class InteractionListener implements Listener {
                 event.setCancelled(true);
                 player.sendMessage("§cYou cannot interact with anything while you are in your bat form.");
 
-            } else if (hasFoodInMainHand && hasFoodInOffHand) {
+            } else if (hasFoodInMainHand || hasFoodInOffHand) {
                 if (!(targetEntity instanceof Player)) {
                     if (this.isFeedableMob(targetEntity)) {
                         this.handleVampireFeedingAttempt(player, targetEntity, itemInHand, event);
@@ -93,7 +93,7 @@ public class InteractionListener implements Listener {
      * @param event a player interacts with an entity.
      */
     private void handleVampireFeedingAttempt(Player vampire, Entity mob, ItemStack foodItem, PlayerInteractEntityEvent event) {
-        this.plugin.getLogger().info("Vampire " + vampire.getName() + " attempted to feed " + String.valueOf(mob.getType()) + " with " + String.valueOf(foodItem.getType()));
+        this.plugin.logInfo("Vampire " + vampire.getName() + " attempted to feed " + String.valueOf(mob.getType()) + " with " + String.valueOf(foodItem.getType()));
 
         if (this.plugin.getVampireManager().isVampireStage1(vampire)) {
             vampire.sendMessage("§cThe animal tentatively eats from your hand, eyeing you suspiciously, as if it knows your true nature...");

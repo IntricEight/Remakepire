@@ -53,7 +53,7 @@ public class PermadeathManager {
         UUID playerId = player.getUniqueId();
         this.permadeathModes.put(playerId, mode);
         this.savePermadeathData();
-        this.plugin.getLogger().info("Player " + player.getName() + " permadeath mode set to: " + String.valueOf(mode));
+        this.plugin.logInfo("Player " + player.getName() + " permadeath mode set to: " + String.valueOf(mode));
     }
 
     /**
@@ -103,7 +103,7 @@ public class PermadeathManager {
     public void clearAllPermadeathModes() {
         this.permadeathModes.clear();
         this.savePermadeathData();
-        this.plugin.getLogger().info("PermadeathManager: Cleared all permadeath modes");
+        this.plugin.logInfo("PermadeathManager: Cleared all permadeath modes");
     }
 
     /**
@@ -111,7 +111,7 @@ public class PermadeathManager {
      */
     private void loadPermadeathData() {
         if (!this.dataFile.exists()) {
-            this.plugin.getLogger().info("PermadeathManager: No existing permadeath data file found, starting fresh.");
+            this.plugin.logInfo("PermadeathManager: No existing permadeath data file found, starting fresh.");
         } else {
             try (FileReader reader = new FileReader(this.dataFile)) {
                 Type type = (new TypeToken<Map<String, String>>() {}).getType();
@@ -129,7 +129,7 @@ public class PermadeathManager {
                         }
                     }
 
-                    this.plugin.getLogger().info("PermadeathManager: Loaded " + this.permadeathModes.size() + " permadeath preferences");
+                    this.plugin.logInfo("PermadeathManager: Loaded " + this.permadeathModes.size() + " permadeath preferences");
                 }
             } catch (IOException e) {
                 this.plugin.getLogger().severe("PermadeathManager: Failed to load permadeath data: " + e.getMessage());
@@ -193,7 +193,7 @@ public class PermadeathManager {
 
         if (migrated) {
             this.savePermadeathData();
-            this.plugin.getLogger().info("PermadeathManager: Migrated old permadeath data to new format");
+            this.plugin.logInfo("PermadeathManager: Migrated old permadeath data to new format");
         }
     }
 
@@ -225,7 +225,7 @@ public class PermadeathManager {
      */
     public void shutdown() {
         this.savePermadeathData();
-        this.plugin.getLogger().info("PermadeathManager: Shutdown complete");
+        this.plugin.logInfo("PermadeathManager: Shutdown complete");
     }
 
     public static enum PermadeathMode {

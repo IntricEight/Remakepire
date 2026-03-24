@@ -1,6 +1,5 @@
 package frostvein.sampires.remakepire.commands;
 
-import java.util.ListIterator;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -178,7 +177,7 @@ public class VampireCureCommand implements CommandExecutor {
             this.plugin.getVampireTurningManager().disableAllVampireTurning();
         }
 
-        this.plugin.getLogger().info("VAMPIRE CURE: " + player.getName() + " has been cured at beacon: " + holyBeacon.getName());
+        this.plugin.logInfo("VAMPIRE CURE: " + player.getName() + " has been cured at beacon: " + holyBeacon.getName());
         DeathHandler.checkAndAnnounceTeamElimination(this.plugin, false, true);
     }
 
@@ -192,7 +191,7 @@ public class VampireCureCommand implements CommandExecutor {
     }
 
     private void triggerVampiresEternalNight() {
-        this.plugin.getLogger().info("VAMPIRES ETERNAL NIGHT TRIGGERED - All beacons are now evil!");
+        this.plugin.logInfo("VAMPIRES ETERNAL NIGHT TRIGGERED - All beacons are now evil!");
 
         for(Player player : this.plugin.getServer().getOnlinePlayers()) {
             player.sendTitle("§4§lETERNAL NIGHT FALLS", "§cThe darkness consumes all hope", 20, 100, 40);

@@ -16,8 +16,8 @@ public abstract class TomeAbility {
     protected final String name;
     protected final String[] descriptionLines;
     protected final int cooldownSeconds;
-    private static final Map<UUID, Map<String, Long>> playerCooldowns = new HashMap();
-    private static final Map<String, BukkitTask> cooldownNotificationTasks = new HashMap();
+    private static final Map<UUID, Map<String, Long>> playerCooldowns = new HashMap<>();
+    private static final Map<String, BukkitTask> cooldownNotificationTasks = new HashMap<>();
 
     /**
      * Create an instance of a Tome Ability.

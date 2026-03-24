@@ -55,7 +55,7 @@ public class WeaponDropRemover implements Listener {
             }
 
             if (weaponsRemoved > 0) {
-                this.plugin.getLogger().info("Removed " + weaponsRemoved + " weapon(s) from " + String.valueOf(entity.getType()) + " drops");
+                this.plugin.logInfo("Removed " + weaponsRemoved + " weapon(s) from " + String.valueOf(entity.getType()) + " drops");
             }
         }
     }

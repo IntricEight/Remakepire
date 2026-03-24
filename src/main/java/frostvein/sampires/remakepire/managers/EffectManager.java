@@ -299,6 +299,6 @@ public class EffectManager {
         }
 
         this.lastTrialOmenApplied.clear();
-        this.plugin.getLogger().info("EffectManager shutdown - cleaned up vampire modifiers");
+        this.plugin.logInfo("EffectManager shutdown - cleaned up vampire modifiers");
     }
 }

@@ -25,10 +25,8 @@ public class SessionManager {
     private final RemakepirePlugin plugin;
     private final Map<UUID, Integer> pausedFoodLevels = new HashMap<>();
     private final Map<UUID, Float> pausedSaturationLevels = new HashMap<>();
-
     private Objective sessionObjective, sessionIDObjective, gameIDObjective;
     public static final int BEFORE_SESSION = 0, IN_SESSION = 1, PAUSED = 2, AFTER_SESSION = 3, PRE_SESSION = 4;
-
     private long totalSessionTime = 0L, currentPhaseStartTime = 0L;
     private boolean trackingSessionTime = false;
 
@@ -71,7 +69,7 @@ public class SessionManager {
         try {
             Bukkit.getScheduler().runTask(this.plugin, () -> {
                 Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command);
-                this.plugin.getLogger().info("Executed command: /" + command);
+                this.plugin.logInfo("Executed command: /" + command);
             });
         } catch (Exception e) {
             this.plugin.getLogger().warning("Failed to execute command: /" + command + " - " + e.getMessage());
@@ -108,7 +106,7 @@ public class SessionManager {
                     SessionManager.this.setAllPlayersMaxFood();
 
                 } else if (sessionState == PRE_SESSION) {
-                    SessionManager.this.plugin.getLogger().info("PRE_SESSION: Setting all players to max food and saturation");
+                    SessionManager.this.plugin.logInfo("PRE_SESSION: Setting all players to max food and saturation");
                     SessionManager.this.setAllPlayersMaxFood();
                 }
             }
@@ -165,10 +163,11 @@ public class SessionManager {
     private String getSessionStatusMessage() {
         return switch (this.getSessionState()) {
             case BEFORE_SESSION -> "§e§lSession is primed and ready to start";
+            case IN_SESSION -> "§7§lSession status unknown";
             case PAUSED -> "§6§lSession is currently paused";
             case AFTER_SESSION -> "§c§lSession has ended";
             case PRE_SESSION -> "§b§lBuilding Mode - interactions enabled";
-            default -> "§7§lSession status unknown";    // IN_SESSION is included in default
+            default -> "§7§lSession status unknown";
         };
     }
 
@@ -203,7 +202,7 @@ public class SessionManager {
             this.pausedSaturationLevels.put(player.getUniqueId(), player.getSaturation());
         }
 
-        this.plugin.getLogger().info("Captured food levels for " + this.pausedFoodLevels.size() + " players when session was paused");
+        this.plugin.logInfo("Captured food levels for " + this.pausedFoodLevels.size() + " players when session was paused");
     }
 
     /**
@@ -376,7 +375,7 @@ public class SessionManager {
     public void incrementGameID() {
         this.gameIDObjective.getScore("game_id_holder").setScore(this.gameIDObjective.getScore("game_id_holder").getScore() + 1);
         this.updateAllPlayersGameIDs();
-        this.plugin.getLogger().info("Game ID incremented to: " + this.gameIDObjective.getScore("game_id_holder").getScore());
+        this.plugin.logInfo("Game ID incremented to: " + this.gameIDObjective.getScore("game_id_holder").getScore());
     }
 
     public void initializeScoreboard() {
@@ -403,7 +402,7 @@ public class SessionManager {
 
         Bukkit.getScheduler().runTaskLater(this.plugin, () -> {
             this.setOutOfSessionRules();
-            this.plugin.getLogger().info("Server initialized in OUT OF SESSION mode - PvP, block breaking, and time cycles disabled.");
+            this.plugin.logInfo("Server initialized in OUT OF SESSION mode - PvP, block breaking, and time cycles disabled.");
         }, 20L);
     }
 
@@ -435,7 +434,7 @@ public class SessionManager {
         if (!this.trackingSessionTime) {
             this.currentPhaseStartTime = System.currentTimeMillis();
             this.trackingSessionTime = true;
-            this.plugin.getLogger().info("Started tracking session time. Total session time: " + this.totalSessionTime / 1000L + " seconds");
+            this.plugin.logInfo("Started tracking session time. Total session time: " + this.totalSessionTime / 1000L + " seconds");
         }
     }
 
@@ -447,7 +446,7 @@ public class SessionManager {
             long phaseTime = System.currentTimeMillis() - this.currentPhaseStartTime;
             this.totalSessionTime += phaseTime;
             this.trackingSessionTime = false;
-            this.plugin.getLogger().info("Stopped tracking session time. Added " + phaseTime / 1000L + " seconds. Total session time: " + this.totalSessionTime / 1000L + " seconds");
+            this.plugin.logInfo("Stopped tracking session time. Added " + phaseTime / 1000L + " seconds. Total session time: " + this.totalSessionTime / 1000L + " seconds");
         }
     }
 
@@ -466,7 +465,7 @@ public class SessionManager {
             this.gameIDObjective.getScore(player.getName()).setScore(game_id);
         }
 
-        this.plugin.getLogger().info("Updated game IDs for all online players to: " + game_id);
+        this.plugin.logInfo("Updated game IDs for all online players to: " + game_id);
     }
 
     /**
@@ -654,7 +653,7 @@ public class SessionManager {
     public void resetPlayer(Player player) {
         if (player.getGameMode() == GameMode.SPECTATOR) {
             player.setGameMode(GameMode.SURVIVAL);
-            this.plugin.getLogger().info("Reset " + player.getName() + " from spectator to survival mode (new game/session)");
+            this.plugin.logInfo("Reset " + player.getName() + " from spectator to survival mode (new game/session)");
         }
 
         player.getAttribute(Attribute.MAX_HEALTH).setBaseValue(20.0);

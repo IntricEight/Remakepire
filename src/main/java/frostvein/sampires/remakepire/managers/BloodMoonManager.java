@@ -57,7 +57,7 @@ public class BloodMoonManager {
     private void startBloodMoon(World world) {
         if (!this.isBloodMoonActive) {
             this.isBloodMoonActive = true;
-            this.plugin.getLogger().info("Blood moon started!");
+            this.plugin.logInfo("Blood moon started!");
             this.announceBloodMoon(world);
 
             this.vampireBuffTask = (new BukkitRunnable() {
@@ -74,7 +74,7 @@ public class BloodMoonManager {
     private void endBloodMoon() {
         if (this.isBloodMoonActive) {
             this.isBloodMoonActive = false;
-            this.plugin.getLogger().info("Blood moon ended!");
+            this.plugin.logInfo("Blood moon ended!");
 
             if (this.vampireBuffTask != null && !this.vampireBuffTask.isCancelled()) {
                 this.vampireBuffTask.cancel();

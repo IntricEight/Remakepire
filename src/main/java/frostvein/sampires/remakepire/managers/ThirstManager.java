@@ -109,7 +109,7 @@ public class ThirstManager {
         if (!this.immunityFile.exists()) {
             try {
                 this.immunityFile.createNewFile();
-                this.plugin.getLogger().info("Created thirst immunity persistence file");
+                this.plugin.logInfo("Created thirst immunity persistence file");
 
             } catch (IOException e) {
                 this.plugin.getLogger().severe("Failed to create thirst immunity file: " + e.getMessage());
@@ -129,6 +129,7 @@ public class ThirstManager {
         try (BufferedReader reader = new BufferedReader(new FileReader(this.immunityFile))) {
             while((line = reader.readLine()) != null) {
                 String[] parts = line.split(":");
+
                 if (parts.length == 2) {
                     UUID uuid = UUID.fromString(parts[0]);
                     int minutes = Integer.parseInt(parts[1]);
@@ -396,7 +397,7 @@ public class ThirstManager {
      * Update the list of players with thirst immunity and inform those whose immunity has expired.
      */
     private void updateImmunityTimers() {
-        Set<UUID> onlinePlayers = (Set)Bukkit.getOnlinePlayers().stream().map(OfflinePlayer::getUniqueId).collect(Collectors.toSet());
+        Set<UUID> onlinePlayers = Bukkit.getOnlinePlayers().stream().map(OfflinePlayer::getUniqueId).collect(Collectors.toSet());
         Set<UUID> toRemove = new HashSet<>();
 
         for(Map.Entry<UUID, Integer> entry : this.immunityTimers.entrySet()) {

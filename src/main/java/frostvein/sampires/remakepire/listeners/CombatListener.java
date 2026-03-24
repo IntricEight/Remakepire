@@ -339,7 +339,7 @@ public class CombatListener implements Listener {
 
                                         double maxHealth = victim.getAttribute(Attribute.MAX_HEALTH).getValue();
                                         victim.setHealth(maxHealth);
-                                        this.plugin.getLogger().info(victim.getName() + " turned into vampire with " + maxHealth + " HP (full health)");
+                                        this.plugin.logInfo(victim.getName() + " turned into vampire with " + maxHealth + " HP (full health)");
                                     }, 5L);
 
                                     victim.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 200, 1, false, false));

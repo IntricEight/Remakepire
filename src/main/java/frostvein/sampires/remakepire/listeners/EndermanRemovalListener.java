@@ -24,7 +24,7 @@ public class EndermanRemovalListener implements Listener {
     public EndermanRemovalListener(RemakepirePlugin plugin) {
         this.plugin = plugin;
         this.endermanRemovalEnabled = new AtomicBoolean(true);
-        plugin.getLogger().info("EndermanRemovalListener initialized - Enderman removal is ENABLED");
+        plugin.logInfo("EndermanRemovalListener initialized - Enderman removal is ENABLED");
     }
 
     /**
@@ -39,7 +39,7 @@ public class EndermanRemovalListener implements Listener {
         if (this.endermanRemovalEnabled.get()) {
             if (event.getEntityType() == EntityType.ENDERMAN) {
                 event.setCancelled(true);
-                this.plugin.getLogger().info("Prevented Enderman spawn at " + event.getLocation().getBlockX() + ", " + event.getLocation().getBlockY() + ", " + event.getLocation().getBlockZ() + " (Reason: " + String.valueOf(event.getSpawnReason()) + ")");
+                this.plugin.logInfo("Prevented Enderman spawn at " + event.getLocation().getBlockX() + ", " + event.getLocation().getBlockY() + ", " + event.getLocation().getBlockZ() + " (Reason: " + String.valueOf(event.getSpawnReason()) + ")");
             }
         }
     }
@@ -83,7 +83,7 @@ public class EndermanRemovalListener implements Listener {
      */
     public void setEndermanRemovalEnabled(boolean enabled) {
         this.endermanRemovalEnabled.set(enabled);
-        this.plugin.getLogger().info("Enderman removal " + (enabled ? "ENABLED" : "DISABLED"));
+        this.plugin.logInfo("Enderman removal " + (enabled ? "ENABLED" : "DISABLED"));
     }
 
     /**
@@ -105,7 +105,7 @@ public class EndermanRemovalListener implements Listener {
             }
         }
 
-        this.plugin.getLogger().info("Removed " + totalRemoved + " Endermen from all loaded chunks");
+        this.plugin.logInfo("Removed " + totalRemoved + " Endermen from all loaded chunks");
         return totalRemoved;
     }
 
@@ -113,6 +113,6 @@ public class EndermanRemovalListener implements Listener {
      * Notify the log that this listener is shut down.
      */
     public void shutdown() {
-        this.plugin.getLogger().info("EndermanRemovalListener shutdown");
+        this.plugin.logInfo("EndermanRemovalListener shutdown");
     }
 }

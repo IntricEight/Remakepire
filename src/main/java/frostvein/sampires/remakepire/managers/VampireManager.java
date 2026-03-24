@@ -30,10 +30,8 @@ import frostvein.sampires.remakepire.listeners.DeathHandler;
 public class VampireManager {
     private final RemakepirePlugin plugin;
     private BukkitTask levelValidationTask;
-    private final Map<UUID, Long> levelChangeInProgress = new HashMap<>();
-    private final Map<UUID, Long> lastLevelChange = new HashMap<>();
+    private final Map<UUID, Long> levelChangeInProgress = new HashMap<>(), lastLevelChange = new HashMap<>(), lungeTimestamps = new HashMap<>();
     private final Map<UUID, Double> lungingPlayers = new HashMap<>();
-    private final Map<UUID, Long> lungeTimestamps = new HashMap<>();
     private final Map<UUID, Integer> stageCaps = new HashMap<>();
     private static final long LEVEL_CHANGE_COOLDOWN = 5000L, LEVEL_CHANGE_TIMEOUT = 10000L, PROTECTION_DURATION = 10000L;
     public static final String HUMAN_TAG = "human";
@@ -57,7 +55,7 @@ public class VampireManager {
     /**
      * Protect lunging vampires from fall damage up to a certain distance from their starting height.
      *
-     * @param player
+     * @param player the vampire who lunged.
      */
     public void addFallProtection(Player player) {
         this.lungingPlayers.put(player.getUniqueId(), player.getLocation().getY() - 5.0);
@@ -340,7 +338,7 @@ public class VampireManager {
 
         if (turner != null && this.plugin.getSireManager() != null) {
             this.plugin.getSireManager().setSire(target.getName(), turner.getName());
-            this.plugin.getLogger().info("Sire mapping recorded: " + target.getName() + " -> " + turner.getName());
+            this.plugin.logInfo("Sire mapping recorded: " + target.getName() + " -> " + turner.getName());
         }
 
         target.setExp(0.5F);
@@ -654,7 +652,7 @@ public class VampireManager {
     public void setStageCap(Player player, int maxStage) {
         if (maxStage >= 1 && maxStage <= 3) {
             this.stageCaps.put(player.getUniqueId(), maxStage);
-            this.plugin.getLogger().info("Stage cap set for " + player.getName() + ": max stage " + maxStage);
+            this.plugin.logInfo("Stage cap set for " + player.getName() + ": max stage " + maxStage);
         }
     }
 
@@ -665,7 +663,7 @@ public class VampireManager {
      */
     public void clearStageCap(Player player) {
         this.stageCaps.remove(player.getUniqueId());
-        this.plugin.getLogger().info("Stage cap cleared for " + player.getName());
+        this.plugin.logInfo("Stage cap cleared for " + player.getName());
     }
 
     /**
@@ -673,7 +671,7 @@ public class VampireManager {
      */
     public void clearAllStageCaps() {
         this.stageCaps.clear();
-        this.plugin.getLogger().info("All stage caps cleared");
+        this.plugin.logInfo("All stage caps cleared");
     }
 
     /**
@@ -758,7 +756,7 @@ public class VampireManager {
             }
         }).runTaskTimer(this.plugin, 2400L, 2400L);
 
-        this.plugin.getLogger().info("VampireManager: Started level validation task (every 2 minutes)");
+        this.plugin.logInfo("VampireManager: Started level validation task (every 2 minutes)");
     }
 
     /**
@@ -805,7 +803,7 @@ public class VampireManager {
         if (this.levelValidationTask != null) {
             this.levelValidationTask.cancel();
             this.levelValidationTask = null;
-            this.plugin.getLogger().info("VampireManager: Stopped level validation task");
+            this.plugin.logInfo("VampireManager: Stopped level validation task");
         }
     }
 
@@ -876,6 +874,6 @@ public class VampireManager {
         this.lungingPlayers.clear();
         this.lungeTimestamps.clear();
         this.stageCaps.clear();
-        this.plugin.getLogger().info("VampireManager shutdown complete");
+        this.plugin.logInfo("VampireManager shutdown complete");
     }
 }
