@@ -47,7 +47,7 @@ public class PowCommand implements CommandExecutor, TabCompleter {
 
         } else {
             String subCommand = args[0].toLowerCase();
-            String[] subArgs = (String[])Arrays.copyOfRange(args, 1, args.length);
+            String[] subArgs = Arrays.copyOfRange(args, 1, args.length);
 
             switch (subCommand) {
                 case "admin":
@@ -100,7 +100,7 @@ public class PowCommand implements CommandExecutor, TabCompleter {
 
         } else {
             String adminSubCommand = args[0].toLowerCase();
-            String[] adminArgs = (String[])Arrays.copyOfRange(args, 1, args.length);
+            String[] adminArgs = Arrays.copyOfRange(args, 1, args.length);
 
             Command dummyCommand = new BukkitCommand(adminSubCommand) {
                 public boolean execute(CommandSender sender, String commandLabel, String[] args) {
@@ -158,16 +158,16 @@ public class PowCommand implements CommandExecutor, TabCompleter {
         List<String> completions = new ArrayList<>();
 
         if (args.length == 1) {
-            List<String> subCommands = new ArrayList(Arrays.asList("vability", "tome", "beaconstatus", "permadeath", "toggle-turning", "help"));
+            List<String> subCommands = new ArrayList<>(Arrays.asList("vability", "tome", "beaconstatus", "permadeath", "toggle-turning", "help"));
             if (sender.hasPermission("vampiresmp.admin")) {
                 subCommands.add(0, "admin");
             }
 
-            return (List)subCommands.stream().filter((s) -> s.startsWith(args[0].toLowerCase())).collect(Collectors.toList());
+            return subCommands.stream().filter((s) -> s.startsWith(args[0].toLowerCase())).collect(Collectors.toList());
 
         } else if (args.length == 2 && args[0].equalsIgnoreCase("permadeath")) {
             List<String> permadeathOptions = Arrays.asList("on", "off", "absolute");
-            return (List)permadeathOptions.stream().filter((s) -> s.startsWith(args[1].toLowerCase())).collect(Collectors.toList());
+            return permadeathOptions.stream().filter((s) -> s.startsWith(args[1].toLowerCase())).collect(Collectors.toList());
 
         } else {
             if (args.length >= 2 && args[0].equalsIgnoreCase("admin")) {
@@ -177,32 +177,32 @@ public class PowCommand implements CommandExecutor, TabCompleter {
 
                 if (args.length == 2) {
                     List<String> adminCommands = Arrays.asList("init", "session", "vampire", "beacon", "vampirecooldowns", "resettomecooldowns", "onehumanleft", "vampirehealthcheck", "break_warning", "givetome", "select_tomes", "give_cure_book", "distributetomes", "clearbloodmoonbuffs", "fixattributes", "removeendermen", "damagesuppression", "setupplayer", "spawnanimals", "addtomechest", "removetomechest", "listtomechests", "resetplayer", "set_vampire_spawn");
-                    return (List)adminCommands.stream().filter((s) -> s.startsWith(args[1].toLowerCase())).collect(Collectors.toList());
+                    return adminCommands.stream().filter((s) -> s.startsWith(args[1].toLowerCase())).collect(Collectors.toList());
                 }
 
                 if (args.length == 3 && args[1].equalsIgnoreCase("session")) {
                     List<String> sessionOptions = Arrays.asList("start", "pause", "end", "prime", "resume", "building");
-                    return (List)sessionOptions.stream().filter((s) -> s.startsWith(args[2].toLowerCase())).collect(Collectors.toList());
+                    return sessionOptions.stream().filter((s) -> s.startsWith(args[2].toLowerCase())).collect(Collectors.toList());
                 }
 
                 if (args.length == 3 && args[1].equalsIgnoreCase("vampire")) {
-                    return (List)Bukkit.getOnlinePlayers().stream().map(Player::getName).filter((s) -> s.toLowerCase().startsWith(args[2].toLowerCase())).collect(Collectors.toList());
+                    return Bukkit.getOnlinePlayers().stream().map(Player::getName).filter((s) -> s.toLowerCase().startsWith(args[2].toLowerCase())).collect(Collectors.toList());
                 }
 
                 if (args.length == 4 && args[1].equalsIgnoreCase("vampire")) {
                     List<String> vampireOptions = Arrays.asList("human", "1", "2", "3", "turn", "clearcap", "clearban");
-                    return (List)vampireOptions.stream().filter((s) -> s.startsWith(args[3].toLowerCase())).collect(Collectors.toList());
+                    return vampireOptions.stream().filter((s) -> s.startsWith(args[3].toLowerCase())).collect(Collectors.toList());
                 }
 
                 if (args.length == 3 && args[1].equalsIgnoreCase("beacon")) {
                     List<String> beaconOptions = Arrays.asList("add", "remove", "list", "info", "stats", "reload", "holy", "desecrated", "neutral", "validate", "fix", "refresh", "cleanup", "clearcooldowns", "debug");
-                    return (List)beaconOptions.stream().filter((s) -> s.startsWith(args[2].toLowerCase())).collect(Collectors.toList());
+                    return beaconOptions.stream().filter((s) -> s.startsWith(args[2].toLowerCase())).collect(Collectors.toList());
                 }
 
                 if (args.length == 4 && args[1].equalsIgnoreCase("beacon")) {
                     String subCommand = args[2].toLowerCase();
                     if (subCommand.equals("remove") || subCommand.equals("delete") || subCommand.equals("info") || subCommand.equals("holy") || subCommand.equals("desecrated") || subCommand.equals("neutral")) {
-                        return (List)this.plugin.getBeaconManager().getAllBeacons().stream().map((beacon) -> beacon.getName()).filter((s) -> s.toLowerCase().startsWith(args[3].toLowerCase())).collect(Collectors.toList());
+                        return this.plugin.getBeaconManager().getAllBeacons().stream().map((beacon) -> beacon.getName()).filter((s) -> s.toLowerCase().startsWith(args[3].toLowerCase())).collect(Collectors.toList());
                     }
 
                     if (subCommand.equals("add")) {
@@ -215,15 +215,15 @@ public class PowCommand implements CommandExecutor, TabCompleter {
                 }
 
                 if (args.length == 3 && args[1].equalsIgnoreCase("vampirecooldowns")) {
-                    return (List)Arrays.asList("reset", "clear").stream().filter((s) -> s.startsWith(args[2].toLowerCase())).collect(Collectors.toList());
+                    return Arrays.asList("reset", "clear").stream().filter((s) -> s.startsWith(args[2].toLowerCase())).collect(Collectors.toList());
                 }
 
                 if (args.length == 4 && args[1].equalsIgnoreCase("vampirecooldowns") && (args[2].equalsIgnoreCase("reset") || args[2].equalsIgnoreCase("clear"))) {
-                    return (List)Bukkit.getOnlinePlayers().stream().map(Player::getName).filter((s) -> s.toLowerCase().startsWith(args[3].toLowerCase())).collect(Collectors.toList());
+                    return Bukkit.getOnlinePlayers().stream().map(Player::getName).filter((s) -> s.toLowerCase().startsWith(args[3].toLowerCase())).collect(Collectors.toList());
                 }
 
                 if (args.length == 3 && args[1].equalsIgnoreCase("damagesuppression")) {
-                    return (List)Arrays.asList("get", "set").stream().filter((s) -> s.startsWith(args[2].toLowerCase())).collect(Collectors.toList());
+                    return Arrays.asList("get", "set").stream().filter((s) -> s.startsWith(args[2].toLowerCase())).collect(Collectors.toList());
                 }
 
                 if (args.length == 4 && args[1].equalsIgnoreCase("damagesuppression") && args[2].equalsIgnoreCase("set")) {
@@ -231,7 +231,7 @@ public class PowCommand implements CommandExecutor, TabCompleter {
                 }
 
                 if (args.length == 3 && args[1].equalsIgnoreCase("vampirehealthcheck")) {
-                    return (List)Arrays.asList("get", "set").stream().filter((s) -> s.startsWith(args[2].toLowerCase())).collect(Collectors.toList());
+                    return Arrays.asList("get", "set").stream().filter((s) -> s.startsWith(args[2].toLowerCase())).collect(Collectors.toList());
                 }
 
                 if (args.length == 4 && args[1].equalsIgnoreCase("vampirehealthcheck") && args[2].equalsIgnoreCase("set")) {
@@ -239,12 +239,12 @@ public class PowCommand implements CommandExecutor, TabCompleter {
                 }
 
                 if (args.length == 3 && args[1].equalsIgnoreCase("givetome")) {
-                    return (List)Bukkit.getOnlinePlayers().stream().map(Player::getName).filter((s) -> s.toLowerCase().startsWith(args[2].toLowerCase())).collect(Collectors.toList());
+                    return Bukkit.getOnlinePlayers().stream().map(Player::getName).filter((s) -> s.toLowerCase().startsWith(args[2].toLowerCase())).collect(Collectors.toList());
                 }
 
                 if (args.length == 4 && args[1].equalsIgnoreCase("givetome")) {
                     List<String> tomeAbilities = Arrays.asList("blessing", "banishundead", "holyword", "enlightenedeye", "lanternthrash", "prayeroffaith", "rallyingcry", "shoulderbarge", "turnundead", "uncannydirection", "unnaturalhaste", "wayoftheland", "wayofthelumberjack", "wayoftheprospector", "stopthebleeding");
-                    return (List)tomeAbilities.stream().filter((s) -> s.toLowerCase().startsWith(args[3].toLowerCase())).collect(Collectors.toList());
+                    return tomeAbilities.stream().filter((s) -> s.toLowerCase().startsWith(args[3].toLowerCase())).collect(Collectors.toList());
                 }
 
                 if (args.length == 5 && args[1].equalsIgnoreCase("givetome")) {
@@ -252,15 +252,15 @@ public class PowCommand implements CommandExecutor, TabCompleter {
                 }
 
                 if (args.length == 3 && args[1].equalsIgnoreCase("select_tomes")) {
-                    return (List)Bukkit.getOnlinePlayers().stream().map(Player::getName).filter((s) -> s.toLowerCase().startsWith(args[2].toLowerCase())).collect(Collectors.toList());
+                    return Bukkit.getOnlinePlayers().stream().map(Player::getName).filter((s) -> s.toLowerCase().startsWith(args[2].toLowerCase())).collect(Collectors.toList());
                 }
 
                 if (args.length == 3 && args[1].equalsIgnoreCase("give_cure_book")) {
-                    return (List)Bukkit.getOnlinePlayers().stream().map(Player::getName).filter((s) -> s.toLowerCase().startsWith(args[2].toLowerCase())).collect(Collectors.toList());
+                    return Bukkit.getOnlinePlayers().stream().map(Player::getName).filter((s) -> s.toLowerCase().startsWith(args[2].toLowerCase())).collect(Collectors.toList());
                 }
 
                 if (args.length == 4 && args[1].equalsIgnoreCase("give_cure_book")) {
-                    return (List)Arrays.asList("1", "2", "3", "4").stream().filter((s) -> s.startsWith(args[3])).collect(Collectors.toList());
+                    return Arrays.asList("1", "2", "3", "4").stream().filter((s) -> s.startsWith(args[3])).collect(Collectors.toList());
                 }
 
                 if (args.length == 3 && args[1].equalsIgnoreCase("clearbloodmoonbuffs")) {
@@ -268,44 +268,44 @@ public class PowCommand implements CommandExecutor, TabCompleter {
                     options.add("all");
                     Bukkit.getOnlinePlayers().forEach((p) -> options.add(p.getName()));
 
-                    return (List)options.stream().filter((s) -> s.toLowerCase().startsWith(args[2].toLowerCase())).collect(Collectors.toList());
+                    return options.stream().filter((s) -> s.toLowerCase().startsWith(args[2].toLowerCase())).collect(Collectors.toList());
                 }
 
                 if (args.length == 3 && args[1].equalsIgnoreCase("resetplayer")) {
-                    return (List)Bukkit.getOnlinePlayers().stream().map(Player::getName).filter((s) -> s.toLowerCase().startsWith(args[2].toLowerCase())).collect(Collectors.toList());
+                    return Bukkit.getOnlinePlayers().stream().map(Player::getName).filter((s) -> s.toLowerCase().startsWith(args[2].toLowerCase())).collect(Collectors.toList());
                 }
 
                 if (args.length == 4 && args[1].equalsIgnoreCase("resetplayer")) {
-                    return (List)Arrays.asList("true", "false").stream().filter((s) -> s.startsWith(args[3].toLowerCase())).collect(Collectors.toList());
+                    return Arrays.asList("true", "false").stream().filter((s) -> s.startsWith(args[3].toLowerCase())).collect(Collectors.toList());
                 }
 
                 if (args.length == 3 && args[1].equalsIgnoreCase("fixattributes")) {
                     List<String> options = new ArrayList<>();
                     options.add("all");
                     Bukkit.getOnlinePlayers().forEach((p) -> options.add(p.getName()));
-                    return (List)options.stream().filter((s) -> s.toLowerCase().startsWith(args[2].toLowerCase())).collect(Collectors.toList());
+                    return options.stream().filter((s) -> s.toLowerCase().startsWith(args[2].toLowerCase())).collect(Collectors.toList());
                 }
 
                 if (args.length == 3 && args[1].equalsIgnoreCase("removeendermen")) {
-                    return (List)Arrays.asList("all", "toggle", "status").stream().filter((s) -> s.startsWith(args[2].toLowerCase())).collect(Collectors.toList());
+                    return Arrays.asList("all", "toggle", "status").stream().filter((s) -> s.startsWith(args[2].toLowerCase())).collect(Collectors.toList());
                 }
 
                 if (args.length == 3 && args[1].equalsIgnoreCase("setupplayer")) {
-                    return (List)Bukkit.getOnlinePlayers().stream().map(Player::getName).filter((s) -> s.toLowerCase().startsWith(args[2].toLowerCase())).collect(Collectors.toList());
+                    return Bukkit.getOnlinePlayers().stream().map(Player::getName).filter((s) -> s.toLowerCase().startsWith(args[2].toLowerCase())).collect(Collectors.toList());
                 }
 
                 if (args.length == 3 && args[1].equalsIgnoreCase("resetplayer")) {
-                    return (List)Bukkit.getOnlinePlayers().stream().map(Player::getName).filter((s) -> s.toLowerCase().startsWith(args[2].toLowerCase())).collect(Collectors.toList());
+                    return Bukkit.getOnlinePlayers().stream().map(Player::getName).filter((s) -> s.toLowerCase().startsWith(args[2].toLowerCase())).collect(Collectors.toList());
                 }
 
                 if (args.length == 3 && args[1].equalsIgnoreCase("init")) {
-                    return (List)Arrays.asList("cancel").stream().filter((s) -> s.startsWith(args[2].toLowerCase())).collect(Collectors.toList());
+                    return Arrays.asList("cancel").stream().filter((s) -> s.startsWith(args[2].toLowerCase())).collect(Collectors.toList());
                 }
             }
 
             if (args.length == 2 && args[0].equalsIgnoreCase("vability")) {
                 List<String> abilities = Arrays.asList("list", "all", "bat", "lunge", "vanish", "stormcall", "beacontravel", "vision");
-                return (List)abilities.stream().filter((s) -> s.startsWith(args[1].toLowerCase())).collect(Collectors.toList());
+                return abilities.stream().filter((s) -> s.startsWith(args[1].toLowerCase())).collect(Collectors.toList());
 
             } else if (args.length == 2 && args[0].equalsIgnoreCase("tome")) {
                 if (!(sender instanceof Player player)) {
@@ -316,7 +316,7 @@ public class PowCommand implements CommandExecutor, TabCompleter {
                     completions.add("list");
                     completions.addAll(this.plugin.getTomeManager().getPlayerAbilities(player));
 
-                    return (List)completions.stream().filter((s) -> s.toLowerCase().startsWith(args[1].toLowerCase())).collect(Collectors.toList());
+                    return completions.stream().filter((s) -> s.toLowerCase().startsWith(args[1].toLowerCase())).collect(Collectors.toList());
                 }
             } else {
                 return completions;

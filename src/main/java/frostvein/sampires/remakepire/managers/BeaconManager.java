@@ -657,7 +657,7 @@ public class BeaconManager {
      * @return The {@code List} of desecrated beacons.
      */
     public List<BeaconSite> getDesecratedBeacons() {
-        return (List)this.beacons.values().stream().filter((beacon) -> beacon.getState() == BeaconState.DESECRATED).collect(Collectors.toList());
+        return this.beacons.values().stream().filter((beacon) -> beacon.getState() == BeaconState.DESECRATED).collect(Collectors.toList());
     }
 
     /**
@@ -666,7 +666,7 @@ public class BeaconManager {
      * @return The {@code List} of desecrated and permanently desecrated beacons.
      */
     public List<BeaconSite> getAllEvilBeacons() {
-        return (List)this.beacons.values().stream().filter((beacon) -> beacon.getState() == BeaconState.DESECRATED || beacon.getState() == BeaconState.PERMANENTLY_DESECRATED).collect(Collectors.toList());
+        return this.beacons.values().stream().filter((beacon) -> beacon.getState() == BeaconState.DESECRATED || beacon.getState() == BeaconState.PERMANENTLY_DESECRATED).collect(Collectors.toList());
     }
 
     /**
@@ -675,7 +675,7 @@ public class BeaconManager {
      * @return The {@code List} of holy beacons.
      */
     public List<BeaconSite> getHolyBeacons() {
-        return (List)this.beacons.values().stream().filter((beacon) -> beacon.getState() == BeaconState.HOLY).collect(Collectors.toList());
+        return this.beacons.values().stream().filter((beacon) -> beacon.getState() == BeaconState.HOLY).collect(Collectors.toList());
     }
 
     /**
@@ -684,7 +684,7 @@ public class BeaconManager {
      * @return The {@code List} of neutral beacons.
      */
     public List<BeaconSite> getNeutralBeacons() {
-        return (List)this.beacons.values().stream().filter((beacon) -> beacon.getState() == BeaconState.NEUTRAL).collect(Collectors.toList());
+        return this.beacons.values().stream().filter((beacon) -> beacon.getState() == BeaconState.NEUTRAL).collect(Collectors.toList());
     }
 
     /**
@@ -1197,11 +1197,11 @@ public class BeaconManager {
             }
 
             for(BeaconSite beacon : this.beacons.values()) {
-                ((List)grouped.get(beacon.getState())).add(beacon);
+                (grouped.get(beacon.getState())).add(beacon);
             }
 
             for(BeaconSite.BeaconState state : BeaconState.values()) {
-                List<BeaconSite> stateBeacons = (List)grouped.get(state);
+                List<BeaconSite> stateBeacons = grouped.get(state);
 
                 if (!stateBeacons.isEmpty()) {
                     String icon = "";
