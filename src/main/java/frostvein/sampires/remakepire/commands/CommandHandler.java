@@ -50,10 +50,10 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
     private final BeaconManager beaconManager;
     private final TomeManager tomeManager;
 
-    public CommandHandler(RemakepirePlugin plugin, SessionManager sessionManager, VampireManager vampireManager) {
+    public CommandHandler(RemakepirePlugin plugin) {
         this.plugin = plugin;
-        this.sessionManager = sessionManager;
-        this.vampireManager = vampireManager;
+        this.sessionManager = plugin.getSessionManager();
+        this.vampireManager = plugin.getVampireManager();
         this.thirstManager = plugin.getThirstManager();
         this.beaconManager = plugin.getBeaconManager();
         this.tomeManager = plugin.getTomeManager();
