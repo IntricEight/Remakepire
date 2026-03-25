@@ -28,7 +28,7 @@ public class PowCommand implements CommandExecutor, TabCompleter {
 
     public PowCommand(RemakepirePlugin plugin) {
         this.plugin = plugin;
-        this.adminHandler = new CommandHandler(plugin, plugin.getSessionManager(), plugin.getVampireManager());
+        this.adminHandler = new CommandHandler(plugin);
         this.abilityCommand = new VampireAbilityCommand(plugin);
         this.tomeCommand = new TomeAbilityCommand(plugin);
         this.forceCureCommand = new ForcedVampireCureCommand(plugin);
