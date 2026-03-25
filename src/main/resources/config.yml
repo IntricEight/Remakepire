@@ -204,7 +204,7 @@ holy-water:
   # Default: 120 seconds (2 minutes)
   disable-duration-seconds: 120
 
-  # Session capping prevents players from creating more than one holy water each session.
+  # Session capping prevents players from creating more than one holy water each session
   # Default: true
   holy-water-session-capped: true
 

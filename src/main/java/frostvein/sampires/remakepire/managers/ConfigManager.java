@@ -5,11 +5,11 @@ import java.util.List;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.plugin.java.JavaPlugin;
+import frostvein.sampires.remakepire.RemakepirePlugin;
 import frostvein.sampires.remakepire.beacons.BeaconSite;
 
 public class ConfigManager {
-    private final JavaPlugin plugin;
+    private final RemakepirePlugin plugin;
     private FileConfiguration config;
 
     /**
@@ -17,7 +17,7 @@ public class ConfigManager {
      *
      * @param plugin the host plugin object.
      */
-    public ConfigManager(JavaPlugin plugin) {
+    public ConfigManager(RemakepirePlugin plugin) {
         this.plugin = plugin;
         this.loadConfig();
     }
