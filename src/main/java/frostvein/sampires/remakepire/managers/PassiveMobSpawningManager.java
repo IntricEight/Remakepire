@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+
+import frostvein.sampires.remakepire.utils.ConversionAssistant;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -96,6 +98,7 @@ public class PassiveMobSpawningManager {
             this.plugin.getLogger().warning("PassiveMobSpawningManager: World 'world' not found");
         } else {
             Chunk[] loadedChunks = world.getLoadedChunks();
+            final ConversionAssistant conversionAssistant = new ConversionAssistant();
 
             if (loadedChunks.length == 0) {
                 this.plugin.getLogger().warning("PassiveMobSpawningManager: No loaded chunks found");
@@ -120,7 +123,7 @@ public class PassiveMobSpawningManager {
                             spawnCounts.put(mobType, spawnCounts.getOrDefault(mobType, 0) + 1);
 
                         } catch (Exception e) {
-                            this.plugin.getLogger().warning("PassiveMobSpawningManager: Failed to spawn " + String.valueOf(mobType) + " at " + this.locationToString(spawnLocation) + ": " + e.getMessage());
+                            this.plugin.getLogger().warning("PassiveMobSpawningManager: Failed to spawn " + String.valueOf(mobType) + " at " + conversionAssistant.locationToString(spawnLocation) + ": " + e.getMessage());
                         }
                     }
 
@@ -216,16 +219,6 @@ public class PassiveMobSpawningManager {
         }
 
         return EntityType.COW;
-    }
-
-    /**
-     * Convert a {@code Location} into a {@code String} format.
-     *
-     * @param location a location to convert.
-     * @return The {@code String} of the location's coordinates.
-     */
-    private String locationToString(Location location) {
-        return String.format("(%d, %d, %d)", location.getBlockX(), location.getBlockY(), location.getBlockZ());
     }
 
     /**

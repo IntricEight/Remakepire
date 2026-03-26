@@ -1,5 +1,6 @@
 package frostvein.sampires.remakepire.abilities.tome;
 
+import frostvein.sampires.remakepire.utils.ConversionAssistant;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -25,16 +26,16 @@ public class UncannyDirectionTomeAbility extends TomeAbility {
             final double townCenterZ = this.plugin.getConfigManager().getOakhurstTownCenterZ();
 
             (new BukkitRunnable() {
+                final ConversionAssistant conversionAssistant =  new ConversionAssistant();
                 int ticksRemaining = 140;
 
                 public void run() {
                     if (this.ticksRemaining > 0 && player.isOnline()) {
                         Location currentLocation = player.getLocation();
-                        double deltaX = townCenterX - currentLocation.getX();
-                        double deltaZ = townCenterZ - currentLocation.getZ();
+                        double deltaX = townCenterX - currentLocation.getX(), deltaZ = townCenterZ - currentLocation.getZ();
                         double distance = Math.sqrt(deltaX * deltaX + deltaZ * deltaZ);
 
-                        String direction = UncannyDirectionTomeAbility.this.getRelativeDirection(deltaX, deltaZ, currentLocation.getYaw());
+                        String direction = conversionAssistant.getRelativeDirection(deltaX, deltaZ, currentLocation.getYaw());
                         String actionBarMessage = String.format("§6Town Center: §f %s §7(§f%.0f blocks§7)", direction, distance);
                         UncannyDirectionTomeAbility.this.plugin.getSessionManager().sendActionBar(player, actionBarMessage);
                         this.ticksRemaining -= 4;
@@ -48,52 +49,6 @@ public class UncannyDirectionTomeAbility extends TomeAbility {
             this.plugin.getWorld().playSound(player.getLocation(), "minecraft:item.lodestone_compass.lock", 1.0F, 1.2F);
             this.sendSuccessMessage(player, "Your inner compass awakens, pointing you toward home...");
             return true;
-        }
-    }
-
-    /**
-     * Determine the direction between the player and a target set of coordinates.
-     *
-     * @param deltaX the difference between the player's X coordinate and the target's.
-     * @param deltaZ the difference between the player's Y coordinate and the target's.
-     * @param playerYaw the angle that the player is looking.
-     * @return A Unicode value of the direction.
-     */
-    private String getRelativeDirection(double deltaX, double deltaZ, float playerYaw) {
-        double targetAngle = Math.atan2(deltaX, -deltaZ);
-        double targetDegrees = Math.toDegrees(targetAngle);
-
-        // Normalize the degrees
-        if (targetDegrees < 0) {
-            targetDegrees += 360;
-        }
-
-        double playerFacing = (playerYaw + 180.0F) % 360.0F;
-
-        if (playerFacing < 0) {
-            playerFacing += 360;
-        }
-
-        double relativeAngle = (targetDegrees - playerFacing + 360) % 360.0;
-
-        if (!(relativeAngle >= 337.5) && !(relativeAngle < 22.5)) {
-            if (relativeAngle >= 22.5 && relativeAngle < 67.5) {
-                return "\ue00b";
-            } else if (relativeAngle >= 67.5 && relativeAngle < 112.5) {
-                return "\ue00c";
-            } else if (relativeAngle >= 112.5 && relativeAngle < 157.5) {
-                return "\ue00d";
-            } else if (relativeAngle >= 157.5 && relativeAngle < 202.5) {
-                return "\ue00e";
-            } else if (relativeAngle >= 202.5 && relativeAngle < 247.5) {
-                return "\ue00f";
-            } else if (relativeAngle >= 247.5 && relativeAngle < 292.5) {
-                return "\ue010";
-            } else {
-                return relativeAngle >= 292.5 && relativeAngle < 337.5 ? "\ue011" : "\ue00a";
-            }
-        } else {
-            return "\ue00a";
         }
     }
 }
