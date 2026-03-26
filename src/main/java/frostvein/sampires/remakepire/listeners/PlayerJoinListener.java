@@ -23,13 +23,11 @@ public class PlayerJoinListener implements Listener {
      * Create an instance of the Player Join listener.
      *
      * @param plugin the host plugin object.
-     * @param vampireManager the manager for generic vampire traits.
-     * @param effectManager the manager for global vampire effects.
      */
-    public PlayerJoinListener(RemakepirePlugin plugin, VampireManager vampireManager, EffectManager effectManager) {
+    public PlayerJoinListener(RemakepirePlugin plugin) {
         this.plugin = plugin;
-        this.vampireManager = vampireManager;
-        this.effectManager = effectManager;
+        this.vampireManager = plugin.getVampireManager();
+        this.effectManager = plugin.getEffectManager();
         this.beetrootManager = plugin.getBeetrootManager();
     }
 

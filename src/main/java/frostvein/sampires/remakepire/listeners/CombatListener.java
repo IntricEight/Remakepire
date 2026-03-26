@@ -40,11 +40,10 @@ public class CombatListener implements Listener {
      * Create an instance of the Combat listener.
      *
      * @param plugin the host plugin object.
-     * @param vampireManager the manager for generic vampire traits.
      */
-    public CombatListener(RemakepirePlugin plugin, VampireManager vampireManager) {
+    public CombatListener(RemakepirePlugin plugin) {
         this.plugin = plugin;
-        this.vampireManager = vampireManager;
+        this.vampireManager = plugin.getVampireManager();
         this.vampireAbilityManager = plugin.getVampireAbilityManager();
         this.beetrootManager = plugin.getBeetrootManager();
         this.random = new Random();

@@ -17,11 +17,10 @@ public class BlockListener implements Listener {
      * Create an instance of the Block listener.
      *
      * @param plugin the host plugin object.
-     * @param sessionManager the manager for the session states.
      */
-    public BlockListener(RemakepirePlugin plugin, SessionManager sessionManager) {
+    public BlockListener(RemakepirePlugin plugin) {
         this.plugin = plugin;
-        this.sessionManager = sessionManager;
+        this.sessionManager = plugin.getSessionManager();
     }
 
     /**

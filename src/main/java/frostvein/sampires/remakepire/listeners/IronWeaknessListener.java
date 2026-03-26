@@ -48,11 +48,10 @@ public class IronWeaknessListener implements Listener {
      * Create an instance of the Iron "silver" Weakness listener.
      *
      * @param plugin the host plugin object.
-     * @param vampireManager the manager for generic vampire traits.
      */
-    public IronWeaknessListener(RemakepirePlugin plugin, VampireManager vampireManager) {
+    public IronWeaknessListener(RemakepirePlugin plugin) {
         this.plugin = plugin;
-        this.vampireManager = vampireManager;
+        this.vampireManager = plugin.getVampireManager();
         this.ironMaterials = this.initializeIronMaterials();
         this.knockbackCooldowns = new HashMap<>();
 

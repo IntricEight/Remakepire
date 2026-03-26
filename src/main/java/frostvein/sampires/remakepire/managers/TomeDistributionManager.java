@@ -33,11 +33,10 @@ public class TomeDistributionManager {
      * Create an instance of the Armor Storage manager.
      *
      * @param plugin the host plugin object.
-     * @param configManager the manager for the config values.
      */
-    public TomeDistributionManager(RemakepirePlugin plugin, ConfigManager configManager) {
+    public TomeDistributionManager(RemakepirePlugin plugin) {
         this.plugin = plugin;
-        this.configManager = configManager;
+        this.configManager = plugin.getConfigManager();
         this.random = new Random();
         this.initializeTomeLocations();
     }

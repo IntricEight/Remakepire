@@ -40,11 +40,10 @@ public class ThirstManager {
      * Create an instance of the Armor Storage manager.
      *
      * @param plugin the host plugin object.
-     * @param configManager the manager for the config values.
      */
-    public ThirstManager(RemakepirePlugin plugin, ConfigManager configManager) {
+    public ThirstManager(RemakepirePlugin plugin) {
         this.plugin = plugin;
-        this.configManager = configManager;
+        this.configManager = plugin.getConfigManager();
         this.vampireManager = plugin.getVampireManager();
         this.sessionManager = plugin.getSessionManager();
         this.thirstQuenchers = this.initializeThirstQuenchers();

@@ -35,11 +35,10 @@ public class PassiveMobSpawningManager {
      * Create an instance of the Passive Mob Spawning manager.
      *
      * @param plugin the host plugin object.
-     * @param configManager the manager for the config values.
      */
-    public PassiveMobSpawningManager(RemakepirePlugin plugin, ConfigManager configManager) {
+    public PassiveMobSpawningManager(RemakepirePlugin plugin) {
         this.plugin = plugin;
-        this.configManager = configManager;
+        this.configManager = plugin.getConfigManager();
         this.random = new Random();
 
         this.mobTypeWeights.put(EntityType.COW, 30);

@@ -18,7 +18,6 @@ public class PowCommand implements CommandExecutor, TabCompleter {
     private final CommandHandler adminHandler;
     private final VampireAbilityCommand abilityCommand;
     private final TomeAbilityCommand tomeCommand;
-    private final ForcedVampireCureCommand forceCureCommand;
     private final ForcedCureReopenCommand forceCureReopenCommand;
     private final HolySitesCommand beaconStatusCommand;
     private final TexturePackCommand texturePackCommand;
@@ -31,7 +30,6 @@ public class PowCommand implements CommandExecutor, TabCompleter {
         this.adminHandler = new CommandHandler(plugin);
         this.abilityCommand = new VampireAbilityCommand(plugin);
         this.tomeCommand = new TomeAbilityCommand(plugin);
-        this.forceCureCommand = new ForcedVampireCureCommand(plugin);
         this.forceCureReopenCommand = new ForcedCureReopenCommand(plugin);
         this.beaconStatusCommand = new HolySitesCommand(plugin);
         this.texturePackCommand = new TexturePackCommand(plugin);

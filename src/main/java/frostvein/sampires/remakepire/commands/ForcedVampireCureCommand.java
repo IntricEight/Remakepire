@@ -1,6 +1,5 @@
 package frostvein.sampires.remakepire.commands;
 
-import java.util.ListIterator;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
