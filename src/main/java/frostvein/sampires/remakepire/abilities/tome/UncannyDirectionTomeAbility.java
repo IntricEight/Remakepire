@@ -1,10 +1,10 @@
 package frostvein.sampires.remakepire.abilities.tome;
 
-import frostvein.sampires.remakepire.utils.ConversionAssistant;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 import frostvein.sampires.remakepire.RemakepirePlugin;
+import frostvein.sampires.remakepire.utils.ConversionAssistant;
 
 public class UncannyDirectionTomeAbility extends TomeAbility {
     /**
