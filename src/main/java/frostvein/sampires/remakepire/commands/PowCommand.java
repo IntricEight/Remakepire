@@ -302,7 +302,7 @@ public class PowCommand implements CommandExecutor, TabCompleter {
             }
 
             if (args.length == 2 && args[0].equalsIgnoreCase("vability")) {
-                List<String> abilities = Arrays.asList("list", "all", "bat", "lunge", "vanish", "stormcall", "beacontravel", "vision");
+                List<String> abilities = Arrays.asList("list", "all", "raiseundead", "bat", "lunge", "vanish", "stormcall", "beacontravel", "vision");
                 return abilities.stream().filter((s) -> s.startsWith(args[1].toLowerCase())).collect(Collectors.toList());
 
             } else if (args.length == 2 && args[0].equalsIgnoreCase("tome")) {
