@@ -87,10 +87,10 @@ public class IronWeaknessListener implements Listener {
 
         materials.add(Material.IRON_INGOT);
         materials.add(Material.IRON_NUGGET);
-        materials.add(Material.RAW_IRON);
-        materials.add(Material.IRON_BLOCK);
-        materials.add(Material.NETHERITE_BLOCK);    // The block that replaces placed silver blocks to provide the increased breaking time.
-        materials.add(Material.RAW_IRON_BLOCK);
+//        materials.add(Material.RAW_IRON);
+//        materials.add(Material.IRON_BLOCK);
+//        materials.add(Material.NETHERITE_BLOCK);    // The block that replaces placed silver blocks to provide the increased breaking time.
+//        materials.add(Material.RAW_IRON_BLOCK);
         materials.add(Material.IRON_SWORD);
         materials.add(Material.IRON_PICKAXE);
         materials.add(Material.IRON_AXE);
@@ -101,8 +101,8 @@ public class IronWeaknessListener implements Listener {
         materials.add(Material.IRON_LEGGINGS);
         materials.add(Material.IRON_BOOTS);
         materials.add(Material.IRON_HORSE_ARMOR);
-        materials.add(Material.IRON_DOOR);
-        materials.add(Material.IRON_TRAPDOOR);
+//        materials.add(Material.IRON_DOOR);
+//        materials.add(Material.IRON_TRAPDOOR);
 
         return materials;
     }

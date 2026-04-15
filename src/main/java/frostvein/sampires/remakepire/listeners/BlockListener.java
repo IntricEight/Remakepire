@@ -95,9 +95,9 @@ public class BlockListener implements Listener {
                 player.sendMessage("§cWarning: This is the vampire spawn point, placing blocks here may cause issues for you and your fellow thralls.");
             }
 
-            if (event.getBlock().getType() == Material.IRON_BLOCK) {
-                event.getBlock().setType(Material.NETHERITE_BLOCK);
-            }
+//            if (event.getBlock().getType() == Material.IRON_BLOCK) {
+//                event.getBlock().setType(Material.NETHERITE_BLOCK);
+//            }
         }
     }
 }

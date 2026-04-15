@@ -187,7 +187,7 @@ public class PassiveMobSpawningManager {
         Block blockAt = location.getBlock();
         Block blockBelow = blockAt.getRelative(0, -1, 0), blockAbove = blockAt.getRelative(0, 1, 0);
 
-        if (blockBelow.getType() != Material.GRASS_BLOCK) {
+        if (blockBelow.getType() != Material.MOSS_BLOCK && blockBelow.getType() != Material.MOSS_CARPET && blockBelow.getType() != Material.GRASS_BLOCK) {
             return false;
         } else if (blockAt.getType().isAir() && blockAbove.getType().isAir()) {
             if (blockAt.getLightLevel() < 9) {

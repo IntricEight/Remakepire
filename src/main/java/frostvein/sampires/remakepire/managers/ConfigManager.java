@@ -333,6 +333,15 @@ public class ConfigManager {
     }
 
     /**
+     * Retrieve whether vampires will be prevented from leveling up after dropping down during the session.
+     *
+     * @return {@code true} if the vampire is prevented from leveling.
+     */
+    public boolean isVampireLevelingCapped() {
+        return this.config.getBoolean("combat.vampire-level-capping", true);
+    }
+
+    /**
      * Retrieve the baseline complete beacon conversion time for a single player.
      *
      * @return the milliseconds it takes to convert a beacon from one side's alignment into the others.

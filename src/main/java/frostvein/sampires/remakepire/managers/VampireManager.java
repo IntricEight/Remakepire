@@ -596,12 +596,21 @@ public class VampireManager {
      */
     public void applyPromotionBan(Player player) {
         if (this.isVampire(player)) {
+            // Force the player to return to the lowest level
             this.setPlayerAsVampire(player, 1);
-            player.addScoreboardTag(PROMOTION_BAN_TAG);
 
-            player.sendMessage("§4§lDEATH PENALTY");
-            player.sendMessage("§c§lYour death has cursed you with weakness.");
-            player.sendMessage("§c§lYou cannot grow stronger until the next session begins...");
+            // If vampire leveling is capped, inform the player of their new weakness
+            if (plugin.getConfigManager().isVampireLevelingCapped()) {
+                player.addScoreboardTag(PROMOTION_BAN_TAG);
+
+                player.sendMessage("§4§lDEATH PENALTY");
+                player.sendMessage("§c§lYour death has cursed you with weakness.");
+                player.sendMessage("§c§lYou cannot grow stronger until the next session begins...");
+            } else {
+                player.sendMessage("§4§lDEATH PENALTY");
+                player.sendMessage("§4§lYour death has sapped your blood, weakened you...");
+                player.sendMessage("§4§lAnd yet, your potential remains. Grow strong, creature of the night.");
+            }
         }
     }
 
@@ -651,8 +660,10 @@ public class VampireManager {
      */
     public void setStageCap(Player player, int maxStage) {
         if (maxStage >= 1 && maxStage <= 3) {
-            this.stageCaps.put(player.getUniqueId(), maxStage);
-            this.plugin.logInfo("Stage cap set for " + player.getName() + ": max stage " + maxStage);
+            if (plugin.getConfigManager().isVampireLevelingCapped()) {
+                this.stageCaps.put(player.getUniqueId(), maxStage);
+                this.plugin.logInfo("Stage cap set for " + player.getName() + ": max stage " + maxStage);
+            }
         }
     }
 
