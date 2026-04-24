@@ -18,7 +18,7 @@ chat:
     until your next log on if you do choose to send your message via the blue text.'
 
 # ============================================================================
-# TOME CHEST LOCATIONS
+# TOME CHEST SYSTEM
 # ============================================================================
 # List of coordinates where tome chests can spawn
 # Format: "x,y,z" - Use /pow admin addtomechest to add new locations in-game
@@ -40,6 +40,18 @@ tome-chests:
 # How often tomes are distributed to chests (in minutes)
 # Default: 20 minutes
 tome-distribution-interval-minutes: 20
+
+tome-absorption:
+  # Set if humans can only absorb a single tome ability book during a session
+  # If false, will use tome-absorption-interval-minutes to set a cooldown between tome absorptions
+  # Default: true
+  tome-absorption-capping: true
+
+  # Time between absorbing new tome abilities (in minutes)
+  # Allows humans to absorb multiple tomes during a session after a cooldown duration
+  # Only functions if tome-absorption-capping is set to false
+  # Default: 120 (2 hours)
+  tome-absorption-interval-minutes: 120
 
 # ============================================================================
 # VAMPIRE ABILITY COOLDOWNS

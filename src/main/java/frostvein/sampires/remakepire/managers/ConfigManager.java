@@ -306,6 +306,24 @@ public class ConfigManager {
     }
 
     /**
+     * Retrieve whether humans are limited to only a single tome each session.
+     *
+     * @return {@code true} if humans can only absorb a single tome ability during a session.
+     */
+    public boolean isTomeAbsorptionCapped() {
+        return this.config.getBoolean("tome-absorption.tome-absorption-capping", true);
+    }
+
+    /**
+     * Retrieve the cooldown time between when a human can gain new tome abilities.
+     *
+     * @return the minutes between tome absorptions.
+     */
+    public int getTomeAbsorptionIntervalMinutes() {
+        return this.config.getInt("tome-absorption.tome-absorption-interval-minutes", 120);
+    }
+
+    /**
      * Retrieve the time it takes for a vampire's thirst bar to fully deplete.
      *
      * @return the minutes it takes to run out of blood.
