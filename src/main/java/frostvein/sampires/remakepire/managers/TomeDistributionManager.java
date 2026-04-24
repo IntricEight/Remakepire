@@ -28,8 +28,11 @@ public class TomeDistributionManager {
     private final ConversionAssistant conversionAssistant;
     private int distributionCount = 4;
     private List<Location> tomeLocations = new ArrayList<>();
-    private final String[] tomeTypes = new String[]{"BanishUndead", "Blessing", "EnlightenedEye", "HolyWord", "LanternThrash", "PrayerOfFaith", "RallyingCry", "ShoulderBarge", "TurnUndead", "UncannyDirection", "UnnaturalHaste", "WayOfTheLand", "WayOfTheLumberjack", "WayOfTheProspector"};
+    private final String[] tomeTypes = new String[]{"BanishUndead", "Blessing", "EnlightenedEye", "HolyWord", "LanternThrash", "PrayerOfFaith", "RallyingCry", "ShoulderBarge", "TurnUndead", "UncannyDirection", "UnnaturalHaste"};
     private final Enchantment[] enchantmentTypes = new Enchantment[]{Enchantment.EFFICIENCY, Enchantment.PROTECTION, Enchantment.FEATHER_FALLING, Enchantment.KNOCKBACK, Enchantment.SWEEPING_EDGE};
+
+// ORIGINAL VALUES OF TOME DROP POOL
+//    private final String[] tomeTypes = new String[]{"BanishUndead", "Blessing", "EnlightenedEye", "HolyWord", "LanternThrash", "PrayerOfFaith", "RallyingCry", "ShoulderBarge", "TurnUndead", "UncannyDirection", "UnnaturalHaste", "WayOfTheLand", "WayOfTheLumberjack", "WayOfTheProspector"};
 
     /**
      * Create an instance of the Armor Storage manager.
@@ -91,19 +94,22 @@ public class TomeDistributionManager {
             this.plugin.getLogger().warning("TomeDistributionManager: No tome locations available for distribution");
         } else {
             this.clearAllTomeChests();
-            List<Location> tomeSelectedLocations = this.selectRandomLocations();
+//            List<Location> tomeSelectedLocations = this.selectRandomLocations();
+            // ONE-SHOT VARIANT - Don't randomize locations for tomes, just put a tome in everything
+            List<Location> tomeSelectedLocations = new ArrayList<>(this.tomeLocations);
 
             for(Location location : tomeSelectedLocations) {
                 String randomTome = this.getRandomTomeType();
                 this.distributeTomeToLocation(location, randomTome);
             }
 
-            List<Location> emptyLocations = new ArrayList<>(this.tomeLocations);
-            emptyLocations.removeAll(tomeSelectedLocations);
+            // Spawn enchanted books at any location where a tome book was not spawned
+//            List<Location> emptyLocations = new ArrayList<>(this.tomeLocations);
+//            emptyLocations.removeAll(tomeSelectedLocations);
 
-            for(Location location : emptyLocations) {
-                this.addEnchantmentBookToLocation(location);
-            }
+//            for(Location location : emptyLocations) {
+//                this.addEnchantmentBookToLocation(location);
+//            }
 
             boolean cureBooksEnabled = this.configManager.isCureBooksEnabled();
             double cureBooksSpawnChance = this.configManager.getCureBooksSpawnChance();
@@ -115,7 +121,8 @@ public class TomeDistributionManager {
                 cureBookAdded = true;
             }
 
-            this.plugin.logInfo("TomeDistributionManager: Distributed " + tomeSelectedLocations.size() + " tomes, " + emptyLocations.size() + " enchantment books" + (cureBookAdded ? ", and 1 cure book (replaced a chest)" : "") + " to chest locations");
+//            this.plugin.logInfo("TomeDistributionManager: Distributed " + tomeSelectedLocations.size() + " tomes, " + emptyLocations.size() + " enchantment books" + (cureBookAdded ? ", and 1 cure book (replaced a chest)" : "") + " to chest locations");
+            this.plugin.logInfo("TomeDistributionManager: Distributed " + tomeSelectedLocations.size() + " tomes" + (cureBookAdded ? " and 1 cure book (replaced a chest)" : "") + " to chest locations");
         }
     }
 
