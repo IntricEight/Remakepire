@@ -136,12 +136,18 @@ thirst:
   max-feeding-per-session: 60
 
 # ============================================================================
-# VAMPIRE RESPAWN LOCATION
+# VAMPIRE SETTINGS
 # ============================================================================
 vampire:
   # Respawn location for vampire players (x,y,z coordinates)
   # Default: 40,101,-113 (the vampire crypt)
   respawn-location: -1102, -2, -987
+
+  # Set if vampires are negatively affected by silver blocks
+  # When true, high-level vampires are repulsed and weakened by silver-based blocks
+  # Does not affect vampire aversion to silver items and damage
+  # Default: true
+  silver-weakness: true
 
 # ============================================================================
 # BEACON SYSTEM

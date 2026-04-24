@@ -488,6 +488,15 @@ public class ConfigManager {
     }
 
     /**
+     * Retrieve if vampires are weakened and repulsed by silver and adjacent blocks.
+     *
+     * @return {@code true} if silver-based blocks affect vampires.
+     */
+    public boolean isSilverBlockWeaknessActive() {
+        return this.config.getBoolean("vampire.silver-weakness", true);
+    }
+
+    /**
      * Retrieve the ticks cooldown between wooden stake uses. 20 ticks is 1 second.
      *
      * @return The cooldown between wooden stake uses (in ticks).
