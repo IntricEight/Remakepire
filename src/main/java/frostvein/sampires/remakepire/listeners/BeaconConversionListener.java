@@ -524,7 +524,7 @@ public class BeaconConversionListener implements Listener {
             player.playSound(player.getLocation(), Sound.BLOCK_BEACON_ACTIVATE, SoundCategory.MASTER, 1.0F, 1.2F);
         }
 
-        // Remove the mining fatigue effect from humans
+        // Remove the blindness effect from humans
         for(Player player : this.plugin.getServer().getOnlinePlayers()) {
             if (this.vampireManager.isHuman(player)) {
                 player.removePotionEffect(PotionEffectType.DARKNESS);
