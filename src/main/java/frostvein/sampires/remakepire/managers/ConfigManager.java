@@ -525,6 +525,24 @@ public class ConfigManager {
     }
 
     /**
+     * Retrieve how far a player can be from a beacon while converting it.
+     *
+     * @return The maximum distance (in blocks) that a player can be from a beacon and convert it.
+     */
+    public double getBeaconConversionDistance() {
+        return this.config.getDouble("beacons.distance.conversion-distance", 3.0);
+    }
+
+    /**
+     * Retrieve how far a vampire must be from a beacon before they can use their powers.
+     *
+     * @return The maximum distance (in blocks) that a vampire can be from a beacon and have their abilities suppressed.
+     */
+    public double getBeaconSuppressionDistance() {
+        return this.config.getDouble("beacons.distance.vampire-suppression-distance", 25.0);
+    }
+
+    /**
      * Retrieve how far a vampire can be from a beacon until a cure stops working.
      *
      * @return The maximum distance (in blocks) that a vampire can be from a beacon while being cured.

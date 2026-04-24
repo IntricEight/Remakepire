@@ -172,6 +172,16 @@ beacons:
   # When false, corrupted beacons are excluded from the total for both sides
   corrupted-beacons-trap-humans: true
 
+  distance:
+    # The maximum distance that a player can convert a beacon from (in blocks)
+    # Default: 3
+    conversion-distance: 3
+
+    # The distance that vampires need to be from a beacon to use their powers (in blocks)
+    # This is also the distance that humans receive regeneration within
+    # Default: 25
+    vampire-suppression-distance: 25
+
 # ============================================================================
 # GARLIC (BEETROOT) SYSTEM
 # ============================================================================
@@ -212,6 +222,8 @@ holy-water:
 # CURE SYSTEM
 # ============================================================================
 cure:
+  # The maximum distance that a vampire can be from a holy beacon and be cured (in blocks)
+  # Default: 25
   cure-distance: 25
 
 # ============================================================================

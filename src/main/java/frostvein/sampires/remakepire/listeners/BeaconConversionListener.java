@@ -41,10 +41,9 @@ public class BeaconConversionListener implements Listener {
     private final SessionManager sessionManager;
     private final Map<String, ConversionData> activeConversions;
     private final long BASE_CONVERSION_TIME;
+    private final double BEACON_CONVERSION_RANGE;
     // Controls how frequently the beacon is checked for progress or cancellation (in ticks).
     private static final long CONVERSION_TICK_INTERVAL = 20L;
-    // Controls the distance you can interact with beacons from (in blocks).
-    private static final double BEACON_INTERACTION_RANGE = 3.0;
 
     /**
      * Create an instance of the Beacon Conversion listener.
@@ -57,6 +56,8 @@ public class BeaconConversionListener implements Listener {
         this.vampireManager = plugin.getVampireManager();
         this.sessionManager = plugin.getSessionManager();
         this.activeConversions = new HashMap<>();
+
+        this.BEACON_CONVERSION_RANGE = plugin.getConfigManager().getBeaconConversionDistance();
         this.BASE_CONVERSION_TIME = plugin.getConfigManager().getBeaconConversionTimeMs();
     }
 
@@ -108,7 +109,7 @@ public class BeaconConversionListener implements Listener {
     private void handlePlayerStartCrouching(Player player) {
         if (this.vampireManager.isHuman(player) || this.vampireManager.isVampire(player)) {
             if (player.getGameMode() != GameMode.SPECTATOR) {
-                for(BeaconSite beacon : this.beaconManager.getBeaconsInRange(player.getLocation(), BEACON_INTERACTION_RANGE)) {
+                for(BeaconSite beacon : this.beaconManager.getBeaconsInRange(player.getLocation(), BEACON_CONVERSION_RANGE)) {
                     if (!this.sessionManager.isSessionActive()) {
                         player.sendMessage("§c⚠ Cannot convert beacons - no session is currently active.");
                         return;
@@ -163,7 +164,7 @@ public class BeaconConversionListener implements Listener {
                 if (data.getConverters().contains(player.getUniqueId())) {
                     Location beaconLoc = beacon.getLocation();
 
-                    if (beaconLoc == null || !beaconLoc.getWorld().equals(player.getWorld()) || beaconLoc.distance(player.getLocation()) > 3 || player.getGameMode() == GameMode.SPECTATOR) {
+                    if (beaconLoc == null || !beaconLoc.getWorld().equals(player.getWorld()) || beaconLoc.distance(player.getLocation()) > BEACON_CONVERSION_RANGE || player.getGameMode() == GameMode.SPECTATOR) {
                         this.handlePlayerStopCrouching(player);
                         break;
                     }
@@ -193,7 +194,7 @@ public class BeaconConversionListener implements Listener {
         } else {
             Location beaconLoc = beacon.getLocation();
 
-            if (beaconLoc != null && beaconLoc.getWorld().equals(player.getWorld()) && !(beaconLoc.distance(player.getLocation()) > BEACON_INTERACTION_RANGE)) {
+            if (beaconLoc != null && beaconLoc.getWorld().equals(player.getWorld()) && !(beaconLoc.distance(player.getLocation()) > BEACON_CONVERSION_RANGE)) {
                 if (data.getConverters().contains(player.getUniqueId())) {
                     return false;
                 } else {
@@ -245,7 +246,7 @@ public class BeaconConversionListener implements Listener {
                     } else if (!playerIsVampire && currentState == BeaconState.HOLY) {
                         return false;
                     } else {
-                        for(Player nearbyPlayer : this.getPlayersInRange(beacon.getLocation(), BEACON_INTERACTION_RANGE)) {
+                        for(Player nearbyPlayer : this.getPlayersInRange(beacon.getLocation(), BEACON_CONVERSION_RANGE)) {
                             if (!nearbyPlayer.equals(player)) {
                                 boolean nearbyIsVampire = this.vampireManager.isVampireStage2OrHigher(nearbyPlayer);
                                 boolean nearbyIsHuman = this.vampireManager.isHuman(nearbyPlayer);
@@ -823,7 +824,7 @@ public class BeaconConversionListener implements Listener {
             Location beaconLoc = this.beacon.getLocation();
 
             if (beaconLoc != null) {
-                for (Player player : BeaconConversionListener.this.getPlayersInRange(beaconLoc, BEACON_INTERACTION_RANGE)) {
+                for (Player player : BeaconConversionListener.this.getPlayersInRange(beaconLoc, BEACON_CONVERSION_RANGE)) {
                     if (!this.converters.contains(player.getUniqueId())) {
                         boolean playerIsVampire = BeaconConversionListener.this.vampireManager.isVampireStage2OrHigher(player);
                         boolean playerIsHuman = BeaconConversionListener.this.vampireManager.isHuman(player);
