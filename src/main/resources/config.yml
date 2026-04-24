@@ -1,31 +1,5 @@
 # VampireSMP Configuration File
 
-# Damage Suppression Configuration
-# Controls the percentage of damage reduction for all players
-# Valid values: 0-100 (0 = no suppression, 100 = no damage taken)
-# Default: 50 (50% damage reduction)
-damage_suppression: 50
-
-# Vampire Health Check Configuration
-# Controls how often vampire health is checked and regenerated (in ticks)
-# 20 ticks = 1 second
-# Default: 9 ticks (0.45 seconds)
-vampire_health_check_ticks: 12
-
-# Fourth Cure Book Configuration
-# Controls whether "The Retribution 4/3" book should spawn in tome chests
-# Default: false (disabled)
-fourth_book_spawn_enabled: false
-
-# Cure Books in Tome Chests
-# Controls whether cure books (1/3, 2/3, 3/3) should spawn in tome chest distribution
-# Default: true (enabled)
-cure_books_enabled: false
-
-# Chance for a cure book to spawn in remaining empty chests (0.0 to 1.0)
-# Default: 0.3 (30% chance)
-cure_books_spawn_chance: 0.3
-
 # ============================================================================
 # CHAT SYSTEM
 # ============================================================================
@@ -143,11 +117,22 @@ vampire:
   # Default: 40,101,-113 (the vampire crypt)
   respawn-location: -1102, -2, -987
 
+  # Set if vampires are stuck when they drop a level during the session
+  # Choose if vampires are prevented to regaining a blood level for the rest of the active session, or if they can raise and lower their level at will
+  # Default: true (Vampires cannot return to lost levels)
+  vampire-level-capping: true
+
   # Set if vampires are negatively affected by silver blocks
-  # When true, high-level vampires are repulsed and weakened by silver-based blocks
+  # When true (default), high-level vampires are repulsed and weakened by silver-based blocks
   # Does not affect vampire aversion to silver items and damage
   # Default: true
   silver-weakness: true
+
+# Vampire Health Check Configuration
+# Controls how often vampire health is checked and regenerated (in ticks)
+# 20 ticks = 1 second
+# Default: 9 ticks (0.45 seconds)
+vampire_health_check_ticks: 9
 
 # ============================================================================
 # BEACON SYSTEM
@@ -232,6 +217,20 @@ cure:
   # Default: 25
   cure-distance: 25
 
+# Fourth Cure Book Configuration
+# Controls whether "The Retribution 4/3" book should spawn in tome chests
+# Default: false (disabled)
+fourth_book_spawn_enabled: false
+
+# Cure Books in Tome Chests
+# Controls whether cure books (1/3, 2/3, 3/3) should spawn in tome chest distribution
+# Default: true (enabled)
+cure_books_enabled: false
+
+# Chance for a cure book to spawn in remaining empty chests (0.0 to 1.0)
+# Default: 0.3 (30% chance)
+cure_books_spawn_chance: 0.3
+
 # ============================================================================
 # PASSIVE MOB SPAWNING SYSTEM
 # ============================================================================
@@ -264,10 +263,11 @@ combat:
   # Default: 80 ticks (4 seconds)
   wooden-stake-cooldown-ticks: 80
 
-  # Set if vampires are stuck when they drop a level during the session
-  # Choose if vampires are prevented to regaining a blood level for the rest of the active session, or if they can raise and lower their level at will
-  # Default: true (Vampires cannot return to lost levels)
-  vampire-level-capping: true
+# Damage Suppression Configuration
+# Controls the percentage of damage reduction for all players
+# Valid values: 0-100 (0 = no suppression, 100 = no damage taken)
+# Default: 50 (50% damage reduction)
+damage_suppression: 50
 
 # ============================================================================
 # OAKHURST LOCATION SETTINGS

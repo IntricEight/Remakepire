@@ -329,7 +329,7 @@ public class ConfigManager {
      * @return {@code true} if the vampire is prevented from leveling.
      */
     public boolean isVampireLevelingCapped() {
-        return this.config.getBoolean("combat.vampire-level-capping", true);
+        return this.config.getBoolean("vampire.vampire-level-capping", true);
     }
 
     /**
@@ -492,7 +492,7 @@ public class ConfigManager {
      *
      * @return {@code true} if silver-based blocks affect vampires.
      */
-    public boolean isSilverBlockWeaknessActive() {
+    public boolean doSilverBlocksWeakenVampires() {
         return this.config.getBoolean("vampire.silver-weakness", true);
     }
 

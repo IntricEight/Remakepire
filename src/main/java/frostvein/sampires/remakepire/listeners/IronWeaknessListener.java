@@ -100,7 +100,7 @@ public class IronWeaknessListener implements Listener {
         materials.add(Material.IRON_HORSE_ARMOR);
 
         // Add the blocks to the materials list if vampires are to be affected by them
-        if (plugin.getConfigManager().isSilverBlockWeaknessActive()) {
+        if (plugin.getConfigManager().doSilverBlocksWeakenVampires()) {
             materials.add(Material.IRON_BLOCK);
             materials.add(Material.RAW_IRON_BLOCK);
             materials.add(Material.IRON_DOOR);

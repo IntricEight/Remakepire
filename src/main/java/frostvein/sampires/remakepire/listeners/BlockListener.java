@@ -96,7 +96,7 @@ public class BlockListener implements Listener {
             }
 
             // Only replace iron blocks with the more resistant alternative if vampires are affected by it
-            if (event.getBlock().getType() == Material.IRON_BLOCK && plugin.getConfigManager().isSilverBlockWeaknessActive()) {
+            if (event.getBlock().getType() == Material.IRON_BLOCK && plugin.getConfigManager().doSilverBlocksWeakenVampires()) {
                 event.getBlock().setType(Material.NETHERITE_BLOCK);
             }
         }
