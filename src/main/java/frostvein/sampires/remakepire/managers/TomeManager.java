@@ -377,28 +377,28 @@ public class TomeManager {
     }
 
     /**
+     * Retrieve the ID of the player being given tome abilities through the tome selection menu.
      *
-     *
-     * @param adminUUID
-     * @return
+     * @param adminUUID the UUID of the admin selecting tomes.
+     * @return the UUID of the player being granted a tome by the admin's tome selection panel.
      */
     public UUID getTomeSelectionTarget(UUID adminUUID) {
         return this.tomeSelectionTargets.get(adminUUID);
     }
 
     /**
+     * Remove a player from the list of those being gifted tome abilities.
      *
-     *
-     * @param adminUUID
+     * @param adminUUID the UUID of the admin selecting tomes.
      */
     public void removeTomeSelectionTarget(UUID adminUUID) {
         this.tomeSelectionTargets.remove(adminUUID);
     }
 
     /**
+     * Give the player the tome ability.
      *
-     *
-     * @param player
+     * @param player the player being given the ability.
      * @param abilityName the name of the ability.
      */
     public void forceGrantAbility(Player player, String abilityName) {
@@ -412,9 +412,9 @@ public class TomeManager {
     }
 
     /**
+     * Remove the tome ability from the player.
      *
-     *
-     * @param player
+     * @param player the player being stripped of the ability.
      * @param abilityName the name of the ability.
      */
     public void removeAbility(Player player, String abilityName) {
@@ -424,10 +424,18 @@ public class TomeManager {
         this.plugin.logInfo("Admin removed tome ability '" + normalizedName + "' from player " + player.getName());
     }
 
+    /**
+     * Retrieve a list of the tome abilities humans can acquire.
+     *
+     * @return a {@code Set} containing the name of all tome abilities.
+     */
     public Set<String> getAllAbilityNames() {
         return new HashSet<>(this.abilities.keySet());
     }
 
+    /**
+     * Clean up the tome ability records before shutting down the manager.
+     */
     public void shutdown() {
         TomeAbility shoulderBarge = this.getAbility("shoulderbarge");
         if (shoulderBarge instanceof ShoulderBargeTomeAbility) {
