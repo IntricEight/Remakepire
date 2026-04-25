@@ -29,15 +29,12 @@ public class BeetrootManager {
     private final VampireManager vampireManager;
     private final SessionManager sessionManager;
     private final ConfigManager configManager;
-    public static final String BEETROOT_USED_TAG = "beetroot_used_session";
-    public static final String BEETROOT_PROCESSING_TAG = "beetroot_processing";
-    public static final String BEETROOT_IMMUNITY_TAG = "beetroot_immunity";
+    public static final String BEETROOT_USED_TAG = "beetroot_used_session", BEETROOT_PROCESSING_TAG = "beetroot_processing", BEETROOT_IMMUNITY_TAG = "beetroot_immunity";
     // Controls the duration of vampire nausea when eating garlic
     private static final int NAUSEA_DURATION = 500;
     // Controls the intensity of vampire nausea when eating garlic
     private static final int NAUSEA_AMPLIFIER = 1;
-    private final Map<UUID, Integer> processingTimers = new HashMap<>();
-    private final Map<UUID, Integer> immunityTimers = new HashMap<>();
+    private final Map<UUID, Integer> processingTimers = new HashMap<>(), immunityTimers = new HashMap<>(), recoveryTimers = new HashMap<>();
     private File beetrootFile;
     private BukkitTask beetrootTask;
 
@@ -97,6 +94,8 @@ public class BeetrootManager {
                         this.processingTimers.put(uuid, seconds);
                     } else if ("immunity".equals(type)) {
                         this.immunityTimers.put(uuid, seconds);
+                    } else if ("recovering".equals(type)) {
+                        this.recoveryTimers.put(uuid, seconds);
                     }
                 }
             }
@@ -110,19 +109,23 @@ public class BeetrootManager {
      */
     private void saveTimerData() {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(this.beetrootFile))) {
-            for(Map.Entry<UUID, Integer> entry : this.processingTimers.entrySet()) {
-                writer.write((entry.getKey()).toString() + ":processing:" + String.valueOf(entry.getValue()));
+            for (Map.Entry<UUID, Integer> entry : this.processingTimers.entrySet()) {
+                writer.write((entry.getKey()).toString() + ":processing:" + entry.getValue());
                 writer.newLine();
             }
 
-            for(Map.Entry<UUID, Integer> entry : this.immunityTimers.entrySet()) {
-                writer.write((entry.getKey()).toString() + ":immunity:" + String.valueOf(entry.getValue()));
+            for (Map.Entry<UUID, Integer> entry : this.immunityTimers.entrySet()) {
+                writer.write((entry.getKey()).toString() + ":immunity:" + entry.getValue());
+                writer.newLine();
+            }
+
+            for (Map.Entry<UUID, Integer> entry : this.recoveryTimers.entrySet()) {
+                writer.write((entry.getKey()).toString() + ":recovering:" + entry.getValue());
                 writer.newLine();
             }
         } catch (IOException e) {
             this.plugin.getLogger().warning("Could not save beetroot timer data: " + e.getMessage());
         }
-
     }
 
     /**
@@ -145,8 +148,9 @@ public class BeetrootManager {
      * @param onlinePlayers identifiers for all online players.
      */
     private void processTimersForOnlinePlayers(Set<UUID> onlinePlayers) {
-        Set<UUID> processingToRemove = new HashSet<>();
+        Set<UUID> processingToRemove = new HashSet<>(), immunityToRemove = new HashSet<>(), recoveryToRemove = new HashSet<>();
 
+        // Handle the manual timers for activating the garlic immunity
         for(Map.Entry<UUID, Integer> entry : this.processingTimers.entrySet()) {
             UUID playerId = entry.getKey();
 
@@ -166,12 +170,12 @@ public class BeetrootManager {
             }
         }
 
+        // Remove any players whose processing timer has elapsed from the set of processing timers.
         for(UUID uuid : processingToRemove) {
             this.processingTimers.remove(uuid);
         }
 
-        Set<UUID> immunityToRemove = new HashSet<>();
-
+        // Handle the manual timers for the garlic immunity duration
         for(Map.Entry<UUID, Integer> entry : this.immunityTimers.entrySet()) {
             UUID playerId = entry.getKey();
 
@@ -183,7 +187,7 @@ public class BeetrootManager {
                     Player player = Bukkit.getPlayer(playerId);
 
                     if (player != null) {
-                        this.endImmunityPeriod(player);
+                        this.endImmunityPeriod(player); // This also starts the recovery sequence
                     }
                 } else {
                     this.immunityTimers.put(playerId, timeLeft);
@@ -191,11 +195,40 @@ public class BeetrootManager {
             }
         }
 
+        // Remove any players whose immunity timer has elapsed from the set of immunity timers
         for(UUID uuid : immunityToRemove) {
             this.immunityTimers.remove(uuid);
         }
 
-        if (!processingToRemove.isEmpty() || !immunityToRemove.isEmpty() || !this.processingTimers.isEmpty() || !this.immunityTimers.isEmpty()) {
+        // Handle the manual timers for the garlic recovery duration
+        for(Map.Entry<UUID, Integer> entry : this.recoveryTimers.entrySet()) {
+            UUID playerId = entry.getKey();
+
+            if (onlinePlayers.contains(playerId)) {
+                int timeLeft = entry.getValue() - 1;
+
+                if (timeLeft <= 0) {
+                    recoveryToRemove.add(playerId);
+                    Player player = Bukkit.getPlayer(playerId);
+
+                    if (player != null) {
+                        this.endRecoveryPeriod(player);
+                    }
+                } else {
+                    this.recoveryTimers.put(playerId, timeLeft);
+                }
+            }
+        }
+
+        // Remove any players whose recovery timer has elapsed from the set of recovery timers
+        for(UUID uuid : recoveryToRemove) {
+            this.recoveryTimers.remove(uuid);
+        }
+
+        // Save the current timer data into the backup file
+        if (!processingToRemove.isEmpty() || !immunityToRemove.isEmpty() || !recoveryToRemove.isEmpty()
+                || !this.processingTimers.isEmpty() || !this.immunityTimers.isEmpty() || !this.recoveryTimers.isEmpty())
+        {
             this.saveTimerData();
         }
     }
@@ -264,18 +297,42 @@ public class BeetrootManager {
     }
 
     /**
-     * Remove garlic immunity from the player.
+     * Remove garlic immunity from the player and begin the timer for their recovery.
      *
      * @param player the player who ate garlic.
      */
     private void endImmunityPeriod(Player player) {
         player.removeScoreboardTag(BEETROOT_IMMUNITY_TAG);
 
+        int minRecovery = this.configManager.getGarlicRecoveryDurationMin(), maxRecovery = this.configManager.getGarlicRecoveryDurationMax();
+        int recoveryRange = maxRecovery - minRecovery;
+        int recoverySeconds = minRecovery + (new Random()).nextInt(recoveryRange + 1);
+
+        UUID playerId = player.getUniqueId();
+        this.recoveryTimers.put(playerId, recoverySeconds);
+        this.saveTimerData();
+
         if (this.vampireManager.isHuman(player)) {
             player.sendMessage("§cYou imagine by now that the effects of the garlic have worn off...");
+            player.sendMessage("§cThe strain on your body is severe. You cannot handle more garlic for §4" + minRecovery / 60 + "-" + maxRecovery / 60 + " minutes§a.");
         }
 
         player.playSound(player, "iwie:creaking_deactivate", SoundCategory.PLAYERS, 1.0F, 1.0F);
+    }
+
+    /**
+     * Allow the player to begin the garlic cycle anew.
+     *
+     * @param player the player who ate garlic.
+     */
+    private void endRecoveryPeriod(Player player) {
+        player.removeScoreboardTag(BEETROOT_USED_TAG);
+
+        if (this.vampireManager.isHuman(player)) {
+            player.sendMessage("§aYour body seems to have recovered from the lingering effects of the garlic.");
+        }
+
+        player.playSound(player, Sound.BLOCK_BELL_USE, SoundCategory.PLAYERS, 0.8F, 0.6F);
     }
 
     /**

@@ -201,6 +201,12 @@ garlic:
   # Default: 600 seconds (10 minutes) maximum
   immunity-duration-max-seconds: 600
 
+  # Recovery duration range in seconds (how long until the garlic cycle resets)
+  # Default: 2100 seconds (35 minutes) minimum
+  recovery-duration-min-seconds: 2100
+  # Default: 2700 seconds (45 minutes) maximum
+  recovery-duration-max-seconds: 2700
+
 # ============================================================================
 # LOGGING
 # ============================================================================

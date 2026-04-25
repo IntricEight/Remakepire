@@ -443,6 +443,24 @@ public class ConfigManager {
     }
 
     /**
+     * Retrieve the minimum number of seconds until garlic can be used again.
+     *
+     * @return The seconds until the garlic effect could wear off.
+     */
+    public int getGarlicRecoveryDurationMin() {
+        return this.config.getInt("garlic.recovery-duration-min-seconds", 480);
+    }
+
+    /**
+     * Retrieve the maximum number of seconds until garlic can be used again.
+     *
+     * @return The seconds until the garlic effect has to wear off.
+     */
+    public int getGarlicRecoveryDurationMax() {
+        return this.config.getInt("garlic.recovery-duration-max-seconds", 600);
+    }
+
+    /**
      * Retrieve whether the console logging should be reduced to only essential messages.
      *
      * @return {@code true} if logging should be reduced.
