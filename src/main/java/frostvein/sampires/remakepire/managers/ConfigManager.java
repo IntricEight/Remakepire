@@ -448,7 +448,7 @@ public class ConfigManager {
      * @return The seconds until the garlic effect could wear off.
      */
     public int getGarlicRecoveryDurationMin() {
-        return this.config.getInt("garlic.recovery-duration-min-seconds", 480);
+        return this.config.getInt("garlic.recovery-duration-min-seconds", 2100);
     }
 
     /**
@@ -457,7 +457,7 @@ public class ConfigManager {
      * @return The seconds until the garlic effect has to wear off.
      */
     public int getGarlicRecoveryDurationMax() {
-        return this.config.getInt("garlic.recovery-duration-max-seconds", 600);
+        return this.config.getInt("garlic.recovery-duration-max-seconds", 2700);
     }
 
     /**
