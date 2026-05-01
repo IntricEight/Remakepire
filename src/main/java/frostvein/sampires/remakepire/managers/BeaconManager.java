@@ -1740,7 +1740,7 @@ public class BeaconManager {
                             player.sendTitle("§c§lDEFEAT", "§7The light has prevailed", 20, 100, 40);
                             player.sendMessage("");
                             player.sendMessage("§cAll beacons shine with divine light...");
-                            player.sendMessage("§cLight reigns supreme over Oakhurst. You have lost.");
+                                player.sendMessage("§cLight reigns supreme over Oakhurst. You have lost.");
                         } else {
                             player.sendTitle("§a§lVICTORY", "§eThe darkness has been vanquished", 20, 100, 40);
                             player.sendMessage("");

@@ -524,6 +524,15 @@ public class ConfigManager {
     }
 
     /**
+     * Retrieve if humans will die once their lives run out, or be kept alive until a vampire gets the final kill.
+     *
+     * @return {@code true} is humans will permanently die on their sixth death, regardless of its cause.
+     */
+    public boolean isLifeLimitEnforced() {
+        return this.config.getBoolean("combat.enforce-life-limit", false);
+    }
+
+    /**
      * Retrieve if vampires are weakened and repulsed by silver and adjacent blocks.
      *
      * @return {@code true} if silver-based blocks affect vampires.
