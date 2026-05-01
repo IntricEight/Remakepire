@@ -55,7 +55,6 @@ import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.potion.PotionEffect;
@@ -666,7 +665,7 @@ public class InitGameManager {
                         player.sendTitle("§e§lHuman", "", 10, 100, 20);
                         player.sendMessage("");
                         player.sendMessage("§e§l========================================");
-                        player.sendMessage("§7Welcome to Oakhurst. Survive, consecrate beacons, find tomes, and above all: Fear the night.");
+                        player.sendMessage("§7Welcome to " + plugin.getConfigManager().getTownName() + ". Survive, consecrate beacons, find tomes, and above all: Fear the night.");
                         player.sendMessage("§e§l========================================");
                         player.sendMessage("");
                     }
@@ -716,14 +715,14 @@ public class InitGameManager {
         int maxAttempts = 50;
         ConfigManager config = this.plugin.getConfigManager();
 
-        double townCenterX = config.getOakhurstTownCenterX();
-        double townCenterZ = config.getOakhurstTownCenterZ();
-        double teleportRadius = config.getOakhurstTeleportRadius();
+        double townCenterX = config.getTownCenterX();
+        double townCenterZ = config.getTownCenterZ();
+        double teleportRadius = config.getTeleportRadius();
 
-        double minX = config.getOakhurstMinX();
-        double maxX = config.getOakhurstMaxX();
-        double minZ = config.getOakhurstMinZ();
-        double maxZ = config.getOakhurstMaxZ();
+        double minX = config.getBorderMinX();
+        double maxX = config.getBorderMaxX();
+        double minZ = config.getBorderMinZ();
+        double maxZ = config.getBorderMaxZ();
 
         for(int attempt = 0; attempt < maxAttempts; ++attempt) {
             double angle = ThreadLocalRandom.current().nextDouble() * 2.0 * Math.PI;

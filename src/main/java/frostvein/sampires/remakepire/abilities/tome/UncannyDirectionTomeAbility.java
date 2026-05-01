@@ -22,8 +22,8 @@ public class UncannyDirectionTomeAbility extends TomeAbility {
             return false;
 
         } else {
-            final double townCenterX = this.plugin.getConfigManager().getOakhurstTownCenterX();
-            final double townCenterZ = this.plugin.getConfigManager().getOakhurstTownCenterZ();
+            final double townCenterX = this.plugin.getConfigManager().getTownCenterX();
+            final double townCenterZ = this.plugin.getConfigManager().getTownCenterZ();
 
             (new BukkitRunnable() {
                 final ConversionAssistant conversionAssistant =  new ConversionAssistant();

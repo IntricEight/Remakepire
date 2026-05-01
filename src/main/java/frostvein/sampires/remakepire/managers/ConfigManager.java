@@ -656,11 +656,20 @@ public class ConfigManager {
     }
 
     /**
+     * Retrieve the name of the game's primary town or location.
+     *
+     * @return The name of the town.
+     */
+    public String getTownName() {
+        return this.config.getString("oakhurst.town-name", "Oakhurst");
+    }
+
+    /**
      * Retrieve the X coordinate of the main settlement's location.
      *
      * @return The X coordinate of town's center.
      */
-    public double getOakhurstTownCenterX() {
+    public double getTownCenterX() {
         return this.config.getDouble("oakhurst.town-center-x", 79.0);
     }
 
@@ -669,7 +678,7 @@ public class ConfigManager {
      *
      * @return The Z coordinate of town's center.
      */
-    public double getOakhurstTownCenterZ() {
+    public double getTownCenterZ() {
         return this.config.getDouble("oakhurst.town-center-z", 440.0);
     }
 
@@ -678,7 +687,7 @@ public class ConfigManager {
      *
      * @return The distance around town where players can spawn.
      */
-    public double getOakhurstTeleportRadius() {
+    public double getTeleportRadius() {
         return this.config.getDouble("oakhurst.teleport-radius", 400.0);
     }
 
@@ -687,7 +696,7 @@ public class ConfigManager {
      *
      * @return The X coordinate of the border's center.
      */
-    public double getOakhurstBorderCenterX() {
+    public double getBorderCenterX() {
         return this.config.getDouble("oakhurst.border.center-x", 50.0);
     }
 
@@ -696,7 +705,7 @@ public class ConfigManager {
      *
      * @return The Z coordinate of the border's center.
      */
-    public double getOakhurstBorderCenterZ() {
+    public double getBorderCenterZ() {
         return this.config.getDouble("oakhurst.border.center-z", 50.0);
     }
 
@@ -705,7 +714,7 @@ public class ConfigManager {
      *
      * @return The diameter of the game area (in blocks).
      */
-    public double getOakhurstBorderDiameter() {
+    public double getBorderDiameter() {
         return this.config.getDouble("oakhurst.border.diameter", 1098.0);
     }
 
@@ -714,8 +723,8 @@ public class ConfigManager {
      *
      * @return The radius of the game area (in blocks).
      */
-    public double getOakhurstBorderRadius() {
-        return this.getOakhurstBorderDiameter() / 2.0;
+    public double getBorderRadius() {
+        return this.getBorderDiameter() / 2.0;
     }
 
     /**
@@ -723,8 +732,8 @@ public class ConfigManager {
      *
      * @return The X coordinate of the western border.
      */
-    public double getOakhurstMinX() {
-        return this.getOakhurstBorderCenterX() - this.getOakhurstBorderRadius();
+    public double getBorderMinX() {
+        return this.getBorderCenterX() - this.getBorderRadius();
     }
 
     /**
@@ -732,8 +741,8 @@ public class ConfigManager {
      *
      * @return The X coordinate of the eastern border.
      */
-    public double getOakhurstMaxX() {
-        return this.getOakhurstBorderCenterX() + this.getOakhurstBorderRadius();
+    public double getBorderMaxX() {
+        return this.getBorderCenterX() + this.getBorderRadius();
     }
 
     /**
@@ -741,8 +750,8 @@ public class ConfigManager {
      *
      * @return The Z coordinate of the southern border.
      */
-    public double getOakhurstMinZ() {
-        return this.getOakhurstBorderCenterZ() - this.getOakhurstBorderRadius();
+    public double getBorderMinZ() {
+        return this.getBorderCenterZ() - this.getBorderRadius();
     }
 
     /**
@@ -750,8 +759,8 @@ public class ConfigManager {
      *
      * @return The Z coordinate of the northern border.
      */
-    public double getOakhurstMaxZ() {
-        return this.getOakhurstBorderCenterZ() + this.getOakhurstBorderRadius();
+    public double getBorderMaxZ() {
+        return this.getBorderCenterZ() + this.getBorderRadius();
     }
 
     /**
@@ -762,12 +771,12 @@ public class ConfigManager {
      * @return {@code true} if the location is inside the game border region.
      */
     public boolean isLocationWithinBorder(double x, double z) {
-        return x >= this.getOakhurstMinX() && x <= this.getOakhurstMaxX() && z >= this.getOakhurstMinZ() && z <= this.getOakhurstMaxZ();
+        return x >= this.getBorderMinX() && x <= this.getBorderMaxX() && z >= this.getBorderMinZ() && z <= this.getBorderMaxZ();
     }
 
     public List<String> validateConfiguredLocations(BeaconManager beaconManager) {
         List<String> warnings = new ArrayList<>();
-        double townX = this.getOakhurstTownCenterX(), townZ = this.getOakhurstTownCenterZ();
+        double townX = this.getTownCenterX(), townZ = this.getTownCenterZ();
 
         if (!this.isLocationWithinBorder(townX, townZ)) {
             warnings.add("Town center (" + (int)townX + ", " + (int)townZ + ")");

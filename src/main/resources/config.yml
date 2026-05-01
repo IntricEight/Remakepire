@@ -293,9 +293,14 @@ combat:
 damage_suppression: 50
 
 # ============================================================================
-# OAKHURST LOCATION SETTINGS
+# TOWN LOCATION SETTINGS
 # ============================================================================
 oakhurst:
+  # Town name
+  # Used for all instances where the town's name is used
+  # Default: "Oakhurst"
+  town-name: "Oakhurst"
+
   # Town center (the main settlement location)
   # Used for teleportation and direction-based abilities like Uncanny Direction
   town-center-x: -1032

@@ -1735,17 +1735,20 @@ public class BeaconManager {
                         }
                     }
                 } else {
+                    String townName = plugin.getConfigManager().getTownName();
+
                     for(Player player : this.plugin.getServer().getOnlinePlayers()) {
                         if (this.plugin.getVampireManager().isVampire(player)) {
                             player.sendTitle("§c§lDEFEAT", "§7The light has prevailed", 20, 100, 40);
                             player.sendMessage("");
                             player.sendMessage("§cAll beacons shine with divine light...");
-                                player.sendMessage("§cLight reigns supreme over Oakhurst. You have lost.");
+                            player.sendMessage("§cLight reigns supreme over " + townName + ". You have lost.");
+
                         } else {
                             player.sendTitle("§a§lVICTORY", "§eThe darkness has been vanquished", 20, 100, 40);
                             player.sendMessage("");
                             player.sendMessage("§aAll beacons shine with divine light...");
-                            player.sendMessage("§aLight reigns supreme over Oakhurst. You are free.");
+                            player.sendMessage("§aLight reigns supreme over " + townName + ". You are free.");
                         }
 
                         player.sendMessage("");

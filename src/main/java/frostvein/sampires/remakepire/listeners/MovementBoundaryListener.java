@@ -13,6 +13,7 @@ import frostvein.sampires.remakepire.beacons.BeaconSite;
 public class MovementBoundaryListener
 implements Listener {
     private final RemakepirePlugin plugin;
+    private final String TOWN_NAME;
 
     /**
      * Create an instance of the Movement Boundary border listener.
@@ -21,6 +22,7 @@ implements Listener {
      */
     public MovementBoundaryListener(RemakepirePlugin plugin) {
         this.plugin = plugin;
+        this.TOWN_NAME = plugin.getConfigManager().getTownName();
     }
 
     /**
@@ -47,10 +49,10 @@ implements Listener {
             return;
         }
 
-        double minX = this.plugin.getConfigManager().getOakhurstMinX();
-        double maxX = this.plugin.getConfigManager().getOakhurstMaxX();
-        double minZ = this.plugin.getConfigManager().getOakhurstMinZ();
-        double maxZ = this.plugin.getConfigManager().getOakhurstMaxZ();
+        double minX = this.plugin.getConfigManager().getBorderMinX();
+        double maxX = this.plugin.getConfigManager().getBorderMaxX();
+        double minZ = this.plugin.getConfigManager().getBorderMinZ();
+        double maxZ = this.plugin.getConfigManager().getBorderMaxZ();
 
         double toX = to.getX(), toZ = to.getZ();
         double fromX = from.getX(), fromZ = from.getZ();
@@ -63,7 +65,7 @@ implements Listener {
 
         if (player.getScoreboardTags().contains("CuredVampire")) {
             canLeave = true;
-            leaveMessage = "§6You are leaving Oakhurst...\n§eThe familiar lands fade behind you as you venture beyond the border.";
+            leaveMessage = "§6You are leaving " + TOWN_NAME + "...\n§eThe familiar lands fade behind you as you venture beyond the border.";
 
         } else if (!this.plugin.getVampireManager().isHuman(player)) {
             if (this.areAllBeaconsDesecrated() && !this.anySurvivalModeHumansExist()) {
@@ -97,7 +99,7 @@ implements Listener {
 
             if (!player.getScoreboardTags().contains("informed_boundary")) {
                 player.addScoreboardTag("informed_boundary");
-                String blockedMessage = !this.plugin.getVampireManager().isHuman(player) ? (this.areAllBeaconsDesecrated() ? "§4But while humans remain... Hope still stands..." : "§cYou feel a force tying you to Oakhurst... You may not leave while an enemy's beacon remains... But one that has embraced darkness, and yet has found strength to return to the light... Could escape...") : (this.areAllBeaconsHoly() ? "§aBut while evil creatures still walk Oakhurst, your job is not yet finished..." : "§cYou feel a force tying you to Oakhurst... You may not leave while an enemy's beacon remains... But one that has embraced darkness, and yet has found strength to return to the light... Could escape...");
+                String blockedMessage = !this.plugin.getVampireManager().isHuman(player) ? (this.areAllBeaconsDesecrated() ? "§4But while humans remain... Hope still stands..." : "§cYou feel a force tying you to " + TOWN_NAME + "... You may not leave while an enemy's beacon remains... But one that has embraced darkness, and yet has found strength to return to the light... Could escape...") : (this.areAllBeaconsHoly() ? "§aBut while evil creatures still walk " + TOWN_NAME + ", your job is not yet finished..." : "§cYou feel a force tying you to " + TOWN_NAME + "... You may not leave while an enemy's beacon remains... But one that has embraced darkness, and yet has found strength to return to the light... Could escape...");
                 player.sendMessage(blockedMessage);
             }
         }
