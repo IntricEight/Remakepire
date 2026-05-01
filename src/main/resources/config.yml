@@ -5,7 +5,7 @@
 # ============================================================================
 chat:
   # Enable/disable the first message blocking feature for immersion
-  # When enabled, player's first chat message each session is intercepted with an immersion warning
+  # When enabled, each player's first chat message each session is intercepted with an immersion warning
   # Default: true (blocking enabled)
   first-message-blocking-enabled: true
 
