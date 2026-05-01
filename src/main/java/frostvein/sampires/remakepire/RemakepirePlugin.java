@@ -119,12 +119,12 @@ public final class RemakepirePlugin extends JavaPlugin {
         this.sessionManager.initializeScoreboard();
         this.sessionManager.startBackgroundTasks();
         this.vampireManager = new VampireManager(this);
-        this.thirstManager = new ThirstManager(this, this.configManager);
+        this.thirstManager = new ThirstManager(this);
         this.beaconManager = new BeaconManager(this);
         this.effectManager = new EffectManager(this);
-        this.deathHandler = new DeathHandler(this, this.vampireManager);
+        this.deathHandler = new DeathHandler(this);
         this.bloodMoonManager = new BloodMoonManager(this);
-        this.ironWeaknessListener = new IronWeaknessListener(this, this.vampireManager);
+        this.ironWeaknessListener = new IronWeaknessListener(this);
         this.feedingListener = new FeedingListener(this);
         this.thirstEffectsListener = new ThirstEffectsListener(this);
         this.thirstEffectsListener.startTasks();
@@ -139,13 +139,13 @@ public final class RemakepirePlugin extends JavaPlugin {
         this.holyWaterEffectManager = new HolyWaterEffectManager(this);
         this.vampireFeedingManager = new VampireFeedingManager(this);
         this.beaconMajorityManager = new BeaconMajorityManager(this);
-        this.tomeDistributionManager = new TomeDistributionManager(this, this.configManager);
+        this.tomeDistributionManager = new TomeDistributionManager(this);
         this.vampireTexturePackManager = new VampireTexturePackManager(this);
         this.endermanRemovalListener = new EndermanRemovalListener(this);
         this.damageSuppressionListener = new DamageSuppressionListener(this);
         this.vampireTrackingManager = new VampireTrackingManager(this);
         this.permadeathManager = new PermadeathManager(this);
-        this.passiveMobSpawningManager = new PassiveMobSpawningManager(this, this.configManager);
+        this.passiveMobSpawningManager = new PassiveMobSpawningManager(this);
         this.vampireTurningManager = new VampireTurningManager(this);
         this.sireManager = new VampireSireManager(this);
         this.forcedCureChoiceManager = new ForcedCureChoiceManager(this);
@@ -153,9 +153,9 @@ public final class RemakepirePlugin extends JavaPlugin {
         this.initGameManager = new InitGameManager(this);
         this.getServer().getPluginManager().registerEvents(this.damageSuppressionListener, this);
         this.getServer().getPluginManager().registerEvents(this.deathHandler, this);
-        this.getServer().getPluginManager().registerEvents(new CombatListener(this, this.vampireManager), this);
-        this.getServer().getPluginManager().registerEvents(new PlayerJoinListener(this, this.vampireManager, this.effectManager), this);
-        this.getServer().getPluginManager().registerEvents(new BlockListener(this, this.sessionManager), this);
+        this.getServer().getPluginManager().registerEvents(new CombatListener(this), this);
+        this.getServer().getPluginManager().registerEvents(new PlayerJoinListener(this), this);
+        this.getServer().getPluginManager().registerEvents(new BlockListener(this), this);
         this.getServer().getPluginManager().registerEvents(new VampireCraftBlocker(this), this);
         this.getServer().getPluginManager().registerEvents(this.ironWeaknessListener, this);
         this.getServer().getPluginManager().registerEvents(this.feedingListener, this);
@@ -167,7 +167,7 @@ public final class RemakepirePlugin extends JavaPlugin {
         this.getServer().getPluginManager().registerEvents(this.beaconTeleportListener, this);
         this.getServer().getPluginManager().registerEvents(new BeetrootListener(this), this);
         this.getServer().getPluginManager().registerEvents(new WeaponDropRemover(this), this);
-        this.getServer().getPluginManager().registerEvents(new InteractionListener(this, this.sessionManager), this);
+        this.getServer().getPluginManager().registerEvents(new InteractionListener(this), this);
         this.getServer().getPluginManager().registerEvents(new BatTransformationListener(this), this);
         this.getServer().getPluginManager().registerEvents(new ExperienceBottleListener(this), this);
 
@@ -180,7 +180,7 @@ public final class RemakepirePlugin extends JavaPlugin {
         this.getServer().getPluginManager().registerEvents(this.tomeVampireRestrictionListener, this);
         this.getServer().getPluginManager().registerEvents(this.endermanRemovalListener, this);
         this.getServer().getPluginManager().registerEvents(new MovementBoundaryListener(this), this);
-        this.getServer().getPluginManager().registerEvents(new FourthBookRevealListener(this, this.configManager), this);
+        this.getServer().getPluginManager().registerEvents(new FourthBookRevealListener(this), this);
         this.getServer().getPluginManager().registerEvents(new ForcedCureChoiceListener(this), this);
         this.getServer().getPluginManager().registerEvents(new InitGameListener(this), this);
         this.bloodMoonAttributeListener = new BloodMoonAttributeListener(this);

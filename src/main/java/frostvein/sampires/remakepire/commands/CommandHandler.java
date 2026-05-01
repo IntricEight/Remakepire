@@ -6,7 +6,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
@@ -38,7 +37,6 @@ import frostvein.sampires.remakepire.beacons.BeaconSite.BeaconState;
 import frostvein.sampires.remakepire.listeners.CureBookReadingListener;
 import frostvein.sampires.remakepire.managers.BeaconManager;
 import frostvein.sampires.remakepire.managers.SessionManager;
-import frostvein.sampires.remakepire.managers.ThirstManager;
 import frostvein.sampires.remakepire.managers.TomeManager;
 import frostvein.sampires.remakepire.managers.VampireManager;
 
@@ -46,7 +44,6 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
     private final RemakepirePlugin plugin;
     private final SessionManager sessionManager;
     private final VampireManager vampireManager;
-    private final ThirstManager thirstManager;
     private final BeaconManager beaconManager;
     private final TomeManager tomeManager;
 
@@ -54,7 +51,6 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         this.plugin = plugin;
         this.sessionManager = plugin.getSessionManager();
         this.vampireManager = plugin.getVampireManager();
-        this.thirstManager = plugin.getThirstManager();
         this.beaconManager = plugin.getBeaconManager();
         this.tomeManager = plugin.getTomeManager();
     }

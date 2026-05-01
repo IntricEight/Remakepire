@@ -33,9 +33,7 @@ public class HolySitesCommand implements CommandExecutor {
 
         } else {
             Map<BeaconSite.BeaconState, Integer> stateStats = this.beaconManager.getStateStats();
-            int holyCount = (Integer)stateStats.get(BeaconState.HOLY);
-            int desecratedCount = (Integer)stateStats.get(BeaconState.DESECRATED);
-            int neutral = (Integer)stateStats.get(BeaconState.NEUTRAL);
+            final int holyCount = stateStats.get(BeaconState.HOLY), desecratedCount = stateStats.get(BeaconState.DESECRATED), neutral = stateStats.get(BeaconState.NEUTRAL);
             int totalCount = holyCount + desecratedCount + neutral;
 
             // Modify the messages based on the player's alignment

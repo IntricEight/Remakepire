@@ -173,7 +173,7 @@ public class CureBookReadingListener implements Listener {
                 PersistentDataContainer pdc = bookMeta.getPersistentDataContainer();
                 NamespacedKey key = new NamespacedKey(plugin, CURE_BOOK_KEY);
 
-                return pdc.has(key, PersistentDataType.INTEGER) ? (Integer)pdc.get(key, PersistentDataType.INTEGER) : 0;
+                return pdc.has(key, PersistentDataType.INTEGER) ? pdc.get(key, PersistentDataType.INTEGER) : 0;
             }
         }
 

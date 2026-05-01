@@ -36,11 +36,10 @@ public class DeathHandler implements Listener {
      * Create an instance of the Death Handler listener.
      *
      * @param plugin the host plugin object.
-     * @param vampireManager the manager for generic vampire traits.
      */
-    public DeathHandler(RemakepirePlugin plugin, VampireManager vampireManager) {
+    public DeathHandler(RemakepirePlugin plugin) {
         this.plugin = plugin;
-        this.vampireManager = vampireManager;
+        this.vampireManager = plugin.getVampireManager();
     }
 
     /**
@@ -168,6 +167,7 @@ public class DeathHandler implements Listener {
         int totalBeacons = plugin.getBeaconManager().getAllBeacons().size();
         int evilBeacons = plugin.getBeaconManager().getAllEvilBeacons().size();
         boolean allBeaconsDesecrated = totalBeacons > 0 && evilBeacons == totalBeacons;
+        String townName = plugin.getConfigManager().getTownName();
 
         for(Player player : Bukkit.getOnlinePlayers()) {
             player.sendTitle("§cThe last human has fallen.", "", 20, 100, 40);
@@ -175,7 +175,7 @@ public class DeathHandler implements Listener {
             player.sendMessage("§cThe last defender of humanity has fallen...");
 
             if (allBeaconsDesecrated) {
-                player.sendMessage("§cDarkness reigns supreme over Oakhurst. You are free.");
+                player.sendMessage("§cDarkness reigns supreme over " + townName + ". You are free.");
             } else {
                 player.sendMessage("§cNow only the beacons lie between you and freedom.");
             }
@@ -198,6 +198,7 @@ public class DeathHandler implements Listener {
         boolean allBeaconsHoly = totalBeacons > 0 && holyBeacons == totalBeacons;
         boolean anyPermanentlyCorrupted = plugin.getBeaconManager().getAllBeacons().stream().anyMatch((beacon) -> beacon.getState() == BeaconState.PERMANENTLY_DESECRATED);
         boolean trappedWhenPermanentlyCorrupted = plugin.getConfigManager().doCorruptedBeaconsTrapHumans();
+        String townName = plugin.getConfigManager().getTownName();
 
         for(Player player : Bukkit.getOnlinePlayers()) {
             player.sendTitle("§aThe last vampire has fallen.", "", 20, 100, 40);
@@ -208,12 +209,12 @@ public class DeathHandler implements Listener {
                 player.sendMessage("§7But a beacon of light has been permanently corrupted.");
 
                 if (trappedWhenPermanentlyCorrupted) {
-                    player.sendMessage("§7The creatures of the night have been vanquished, but you are stuck in Oakhurst, forever.");
+                    player.sendMessage("§7The creatures of the night have been vanquished, but you are stuck in " + townName + ", forever.");
                 } else {
                     player.sendMessage("§7The creatures of the night have been vanquished, but does freedom await you?");
                 }
             } else if (allBeaconsHoly) {
-                player.sendMessage("§aLight reigns supreme over Oakhurst. You are free.");
+                player.sendMessage("§aLight reigns supreme over " + townName + ". You are free.");
             } else {
                 player.sendMessage("§7Now only the beacons lie between you and freedom.");
             }

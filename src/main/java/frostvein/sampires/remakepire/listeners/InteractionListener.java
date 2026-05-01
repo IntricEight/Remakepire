@@ -36,11 +36,10 @@ public class InteractionListener implements Listener {
      * Create an instance of the Interactions listener.
      *
      * @param plugin the host plugin object.
-     * @param sessionManager the manager for the session states.
      */
-    public InteractionListener(RemakepirePlugin plugin, SessionManager sessionManager) {
+    public InteractionListener(RemakepirePlugin plugin) {
         this.plugin = plugin;
-        this.sessionManager = sessionManager;
+        this.sessionManager = plugin.getSessionManager();
     }
 
     /**

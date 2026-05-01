@@ -52,12 +52,7 @@ public class BeaconManager {
     private final File dataFile;
     private final Gson gson;
     private BukkitTask particleTask, conversionCircleParticleTask, autoSaveTask, holyRegenTask, cooldownTrackingTask, beaconMaintenanceTask;
-    // Controls the radius from a beacon that players can be while effecting it
-    public static final double BEACON_CONVERSION_RANGE = 3.0;
-    // Controls the radius from a holy beacon where vampires cannot use their abilities
-    public static final double HOLY_SUPPRESSION_RANGE = 25.0;
-    // Controls the radius from a holy beacon where humans gain regeneration
-    public static final double HOLY_REGENERATION_RANGE = 25.0;
+    public final double BEACON_CONVERSION_RANGE, HOLY_SUPPRESSION_RANGE, HOLY_REGENERATION_RANGE;
     // Controls the duration of the holy beacon's regeneration
     private static final int REGEN_DURATION_TICKS = 100;
     // Controls the intensity of the regeneration
@@ -76,6 +71,10 @@ public class BeaconManager {
         this.beacons = new HashMap<>();
         this.dataFile = new File(plugin.getDataFolder(), "beacons.json");
         this.gson = (new GsonBuilder()).setPrettyPrinting().create();
+
+        this.BEACON_CONVERSION_RANGE = plugin.getConfigManager().getBeaconConversionDistance();
+        this.HOLY_SUPPRESSION_RANGE = plugin.getConfigManager().getBeaconSuppressionDistance();
+        this.HOLY_REGENERATION_RANGE = HOLY_SUPPRESSION_RANGE;
 
         if (!plugin.getDataFolder().exists()) {
             plugin.getDataFolder().mkdirs();
@@ -1736,17 +1735,20 @@ public class BeaconManager {
                         }
                     }
                 } else {
+                    String townName = plugin.getConfigManager().getTownName();
+
                     for(Player player : this.plugin.getServer().getOnlinePlayers()) {
                         if (this.plugin.getVampireManager().isVampire(player)) {
                             player.sendTitle("§c§lDEFEAT", "§7The light has prevailed", 20, 100, 40);
                             player.sendMessage("");
                             player.sendMessage("§cAll beacons shine with divine light...");
-                            player.sendMessage("§cLight reigns supreme over Oakhurst. You have lost.");
+                            player.sendMessage("§cLight reigns supreme over " + townName + ". You have lost.");
+
                         } else {
                             player.sendTitle("§a§lVICTORY", "§eThe darkness has been vanquished", 20, 100, 40);
                             player.sendMessage("");
                             player.sendMessage("§aAll beacons shine with divine light...");
-                            player.sendMessage("§aLight reigns supreme over Oakhurst. You are free.");
+                            player.sendMessage("§aLight reigns supreme over " + townName + ". You are free.");
                         }
 
                         player.sendMessage("");

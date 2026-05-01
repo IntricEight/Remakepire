@@ -48,11 +48,10 @@ public class IronWeaknessListener implements Listener {
      * Create an instance of the Iron "silver" Weakness listener.
      *
      * @param plugin the host plugin object.
-     * @param vampireManager the manager for generic vampire traits.
      */
-    public IronWeaknessListener(RemakepirePlugin plugin, VampireManager vampireManager) {
+    public IronWeaknessListener(RemakepirePlugin plugin) {
         this.plugin = plugin;
-        this.vampireManager = vampireManager;
+        this.vampireManager = plugin.getVampireManager();
         this.ironMaterials = this.initializeIronMaterials();
         this.knockbackCooldowns = new HashMap<>();
 
@@ -86,12 +85,9 @@ public class IronWeaknessListener implements Listener {
     private Set<Material> initializeIronMaterials() {
         Set<Material> materials = new HashSet<>();
 
+        materials.add(Material.RAW_IRON);
         materials.add(Material.IRON_INGOT);
         materials.add(Material.IRON_NUGGET);
-        materials.add(Material.RAW_IRON);
-        materials.add(Material.IRON_BLOCK);
-        materials.add(Material.NETHERITE_BLOCK);    // The block that replaces placed silver blocks to provide the increased breaking time.
-        materials.add(Material.RAW_IRON_BLOCK);
         materials.add(Material.IRON_SWORD);
         materials.add(Material.IRON_PICKAXE);
         materials.add(Material.IRON_AXE);
@@ -102,8 +98,16 @@ public class IronWeaknessListener implements Listener {
         materials.add(Material.IRON_LEGGINGS);
         materials.add(Material.IRON_BOOTS);
         materials.add(Material.IRON_HORSE_ARMOR);
-        materials.add(Material.IRON_DOOR);
-        materials.add(Material.IRON_TRAPDOOR);
+
+        // Add the blocks to the materials list if vampires are to be affected by them
+        if (plugin.getConfigManager().doSilverBlocksWeakenVampires()) {
+            materials.add(Material.IRON_BLOCK);
+            materials.add(Material.RAW_IRON_BLOCK);
+            materials.add(Material.IRON_DOOR);
+            materials.add(Material.IRON_TRAPDOOR);
+
+            materials.add(Material.NETHERITE_BLOCK);    // The block that replaces placed silver blocks to provide the increased breaking time.
+        }
 
         return materials;
     }

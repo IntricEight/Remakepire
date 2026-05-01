@@ -253,7 +253,7 @@ public class SessionManager {
     }
 
     /**
-     * Retrieve whether all of the beacons are holy aligned.
+     * Retrieve whether all the beacons are holy aligned.
      *
      * @return {@code true} if the human team controls all beacons.
      */
@@ -264,7 +264,7 @@ public class SessionManager {
     /**
      * Update the config on whether the human team controls all beacons.
      *
-     * @param active {@code true} if all of the beacons are holy aligned.
+     * @param active {@code true} if all the beacons are holy aligned.
      */
     public void setHumansOwningAllBeacons(boolean active) {
         this.plugin.getConfig().set("humans_own_all_beacons", active);
@@ -272,7 +272,7 @@ public class SessionManager {
     }
 
     /**
-     * Retrieve whether all of the beacons are darkness aligned.
+     * Retrieve whether all the beacons are darkness aligned.
      *
      * @return {@code true} if the vampire team controls all beacons.
      */
@@ -364,9 +364,6 @@ public class SessionManager {
         this.plugin.saveConfig();
     }
 
-    /**
-     *
-     */
     public void incrementSessionID() {
         this.sessionIDObjective.getScore("session_id_holder").setScore(this.sessionIDObjective.getScore("session_id_holder").getScore() + 1);
         this.updateAllPlayersSessionIDs();
@@ -419,7 +416,7 @@ public class SessionManager {
     }
 
     /**
-     * Convert the sesion time into seconds.
+     * Convert the session time into seconds.
      *
      * @return A whole number of seconds.
      */
@@ -615,6 +612,7 @@ public class SessionManager {
         world.setGameRule(GameRule.SHOW_DEATH_MESSAGES, false);
         world.setGameRule(GameRule.DO_INSOMNIA, false);
         world.setGameRule(GameRule.DO_IMMEDIATE_RESPAWN, true);
+        world.setGameRule(GameRule.DO_TRADER_SPAWNING, false);
     }
 
     /**

@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import org.bukkit.Bukkit;
+import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -38,6 +39,7 @@ public class TomeManager {
     private final Map<String, TomeAbility> abilities;
     private final Map<UUID, Integer> playerTomeUsageSession = new HashMap<>();
     private final Map<UUID, UUID> tomeSelectionTargets = new HashMap<>();
+    private final boolean TOME_CAP_ENABLED;
     public static final String TOME_TAG_PREFIX = "tome_ability_";
     public static final String TOME_SELECTION_GUI_TITLE = "§6§lSelect Tome Abilities";
 
@@ -49,6 +51,7 @@ public class TomeManager {
     public TomeManager(RemakepirePlugin plugin) {
         this.plugin = plugin;
         this.vampireManager = plugin.getVampireManager();
+        this.TOME_CAP_ENABLED = plugin.getConfigManager().isTomeAbsorptionCapped();
         this.abilities = new HashMap<>();
         this.registerTomeAbilities();
     }
@@ -121,7 +124,12 @@ public class TomeManager {
         } else if (this.hasAbility(player, abilityName)) {
             return false;
         } else if (player.getGameMode() != GameMode.CREATIVE && this.hasUsedTomeThisSession(player)) {
-            player.sendMessage("§cYou have already absorbed one tome this session. Your mind cannot handle more ancient knowledge.");
+            if (TOME_CAP_ENABLED) {
+                player.sendMessage("§cYou have already absorbed one tome this session. Your mind cannot handle more ancient knowledge.");
+            } else {
+                player.sendMessage("§cYour mind requires more time to recover from the ancient knowledge you absorbed.");
+            }
+
             return false;
         } else {
             String tag = TOME_TAG_PREFIX + abilityName.toLowerCase();
@@ -130,6 +138,18 @@ public class TomeManager {
             if (player.getGameMode() != GameMode.CREATIVE) {
                 int currentSessionId = this.plugin.getSessionManager().getSessionIDObjective().getScore("session_id_holder").getScore();
                 this.playerTomeUsageSession.put(player.getUniqueId(), currentSessionId);
+
+                // If players aren't being limited to one new tome ability each session, set a timer that allows the human to absorb a new tome after the duration
+                if (!TOME_CAP_ENABLED) {
+                    // Set a timer to remove the player from the tome prevention list after the timer elapses
+                    BukkitTask absorptionCooldonTask = Bukkit.getScheduler().runTaskLater(this.plugin, () -> {
+                        this.playerTomeUsageSession.remove(player.getUniqueId());
+
+                        if (player.isOnline()) {
+                            player.sendMessage("§aYour mind eases, recovered from the strain of ancient knowledge.");
+                        }
+                    }, (long)plugin.getConfigManager().getTomeAbsorptionIntervalMinutes() * 20 * 60);
+                }
             }
 
             this.plugin.logInfo("Granted tome ability '" + abilityName + "' to player " + player.getName());
@@ -357,28 +377,28 @@ public class TomeManager {
     }
 
     /**
+     * Retrieve the ID of the player being given tome abilities through the tome selection menu.
      *
-     *
-     * @param adminUUID
-     * @return
+     * @param adminUUID the UUID of the admin selecting tomes.
+     * @return the UUID of the player being granted a tome by the admin's tome selection panel.
      */
     public UUID getTomeSelectionTarget(UUID adminUUID) {
         return this.tomeSelectionTargets.get(adminUUID);
     }
 
     /**
+     * Remove a player from the list of those being gifted tome abilities.
      *
-     *
-     * @param adminUUID
+     * @param adminUUID the UUID of the admin selecting tomes.
      */
     public void removeTomeSelectionTarget(UUID adminUUID) {
         this.tomeSelectionTargets.remove(adminUUID);
     }
 
     /**
+     * Give the player the tome ability.
      *
-     *
-     * @param player
+     * @param player the player being given the ability.
      * @param abilityName the name of the ability.
      */
     public void forceGrantAbility(Player player, String abilityName) {
@@ -392,9 +412,9 @@ public class TomeManager {
     }
 
     /**
+     * Remove the tome ability from the player.
      *
-     *
-     * @param player
+     * @param player the player being stripped of the ability.
      * @param abilityName the name of the ability.
      */
     public void removeAbility(Player player, String abilityName) {
@@ -404,10 +424,18 @@ public class TomeManager {
         this.plugin.logInfo("Admin removed tome ability '" + normalizedName + "' from player " + player.getName());
     }
 
+    /**
+     * Retrieve a list of the tome abilities humans can acquire.
+     *
+     * @return a {@code Set} containing the name of all tome abilities.
+     */
     public Set<String> getAllAbilityNames() {
         return new HashSet<>(this.abilities.keySet());
     }
 
+    /**
+     * Clean up the tome ability records before shutting down the manager.
+     */
     public void shutdown() {
         TomeAbility shoulderBarge = this.getAbility("shoulderbarge");
         if (shoulderBarge instanceof ShoulderBargeTomeAbility) {

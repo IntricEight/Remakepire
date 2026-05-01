@@ -1,37 +1,11 @@
 # VampireSMP Configuration File
 
-# Damage Suppression Configuration
-# Controls the percentage of damage reduction for all players
-# Valid values: 0-100 (0 = no suppression, 100 = no damage taken)
-# Default: 50 (50% damage reduction)
-damage_suppression: 50
-
-# Vampire Health Check Configuration
-# Controls how often vampire health is checked and regenerated (in ticks)
-# 20 ticks = 1 second
-# Default: 9 ticks (0.45 seconds)
-vampire_health_check_ticks: 12
-
-# Fourth Cure Book Configuration
-# Controls whether "The Retribution 4/3" book should spawn in tome chests
-# Default: false (disabled)
-fourth_book_spawn_enabled: false
-
-# Cure Books in Tome Chests
-# Controls whether cure books (1/3, 2/3, 3/3) should spawn in tome chest distribution
-# Default: true (enabled)
-cure_books_enabled: false
-
-# Chance for a cure book to spawn in remaining empty chests (0.0 to 1.0)
-# Default: 0.3 (30% chance)
-cure_books_spawn_chance: 0.3
-
 # ============================================================================
 # CHAT SYSTEM
 # ============================================================================
 chat:
   # Enable/disable the first message blocking feature for immersion
-  # When enabled, player's first chat message each session is intercepted with an immersion warning
+  # When enabled, each player's first chat message each session is intercepted with an immersion warning
   # Default: true (blocking enabled)
   first-message-blocking-enabled: true
 
@@ -44,7 +18,7 @@ chat:
     until your next log on if you do choose to send your message via the blue text.'
 
 # ============================================================================
-# TOME CHEST LOCATIONS
+# TOME CHEST SYSTEM
 # ============================================================================
 # List of coordinates where tome chests can spawn
 # Format: "x,y,z" - Use /pow admin addtomechest to add new locations in-game
@@ -66,6 +40,18 @@ tome-chests:
 # How often tomes are distributed to chests (in minutes)
 # Default: 20 minutes
 tome-distribution-interval-minutes: 20
+
+tome-absorption:
+  # Set if humans can only absorb a single tome ability book during a session
+  # If false, will use tome-absorption-interval-minutes to set a cooldown between tome absorptions
+  # Default: true
+  tome-absorption-capping: true
+
+  # Time between absorbing new tome abilities (in minutes)
+  # Allows humans to absorb multiple tomes during a session after a cooldown duration
+  # Only functions if tome-absorption-capping is set to false
+  # Default: 120 (2 hours)
+  tome-absorption-interval-minutes: 120
 
 # ============================================================================
 # VAMPIRE ABILITY COOLDOWNS
@@ -136,12 +122,29 @@ thirst:
   max-feeding-per-session: 60
 
 # ============================================================================
-# VAMPIRE RESPAWN LOCATION
+# VAMPIRE SETTINGS
 # ============================================================================
 vampire:
   # Respawn location for vampire players (x,y,z coordinates)
   # Default: 40,101,-113 (the vampire crypt)
   respawn-location: -1102, -2, -987
+
+  # Set if vampires are stuck when they drop a level during the session
+  # Choose if vampires are prevented to regaining a blood level for the rest of the active session, or if they can raise and lower their level at will
+  # Default: true (Vampires cannot return to lost levels)
+  vampire-level-capping: true
+
+  # Set if vampires are negatively affected by silver blocks
+  # When true (default), high-level vampires are repulsed and weakened by silver-based blocks
+  # Does not affect vampire aversion to silver items and damage
+  # Default: true
+  silver-weakness: true
+
+# Vampire Health Check Configuration
+# Controls how often vampire health is checked and regenerated (in ticks)
+# 20 ticks = 1 second
+# Default: 9 ticks (0.45 seconds)
+vampire_health_check_ticks: 9
 
 # ============================================================================
 # BEACON SYSTEM
@@ -172,6 +175,16 @@ beacons:
   # When false, corrupted beacons are excluded from the total for both sides
   corrupted-beacons-trap-humans: true
 
+  distance:
+    # The maximum distance that a player can convert a beacon from (in blocks)
+    # Default: 3
+    conversion-distance: 3
+
+    # The distance that vampires need to be from a beacon to use their powers (in blocks)
+    # This is also the distance that humans receive regeneration within
+    # Default: 25
+    vampire-suppression-distance: 25
+
 # ============================================================================
 # GARLIC (BEETROOT) SYSTEM
 # ============================================================================
@@ -187,6 +200,12 @@ garlic:
   immunity-duration-min-seconds: 480
   # Default: 600 seconds (10 minutes) maximum
   immunity-duration-max-seconds: 600
+
+  # Recovery duration range in seconds (how long until the garlic cycle resets)
+  # Default: 2100 seconds (35 minutes) minimum
+  recovery-duration-min-seconds: 2100
+  # Default: 2700 seconds (45 minutes) maximum
+  recovery-duration-max-seconds: 2700
 
 # ============================================================================
 # LOGGING
@@ -212,7 +231,23 @@ holy-water:
 # CURE SYSTEM
 # ============================================================================
 cure:
+  # The maximum distance that a vampire can be from a holy beacon and be cured (in blocks)
+  # Default: 25
   cure-distance: 25
+
+# Fourth Cure Book Configuration
+# Controls whether "The Retribution 4/3" book should spawn in tome chests
+# Default: false (disabled)
+fourth_book_spawn_enabled: false
+
+# Cure Books in Tome Chests
+# Controls whether cure books (1/3, 2/3, 3/3) should spawn in tome chest distribution
+# Default: true (enabled)
+cure_books_enabled: false
+
+# Chance for a cure book to spawn in remaining empty chests (0.0 to 1.0)
+# Default: 0.3 (30% chance)
+cure_books_spawn_chance: 0.3
 
 # ============================================================================
 # PASSIVE MOB SPAWNING SYSTEM
@@ -241,15 +276,31 @@ combat:
   # Default: 1 (only Stage 1 vampires can be staked)
   permadeath-minimum-stage: 1
 
+  # Enable whether humans will be hard-capped to their 5 lives
+  # When false, only a vampire can permakill a human player on their last life
+  # Default: False (Extra dying is allowed)
+  enforce-life-limit: false
+
   # Wooden stake cooldown in ticks (20 ticks = 1 second)
   # This is the cooldown applied after using a wooden stake before another can be used
   # Default: 80 ticks (4 seconds)
   wooden-stake-cooldown-ticks: 80
 
+# Damage Suppression Configuration
+# Controls the percentage of damage reduction for all players
+# Valid values: 0-100 (0 = no suppression, 100 = no damage taken)
+# Default: 50 (50% damage reduction)
+damage_suppression: 50
+
 # ============================================================================
-# OAKHURST LOCATION SETTINGS
+# TOWN LOCATION SETTINGS
 # ============================================================================
 oakhurst:
+  # Town name
+  # Used for all instances where the town's name is used
+  # Default: "Oakhurst"
+  town-name: "Oakhurst"
+
   # Town center (the main settlement location)
   # Used for teleportation and direction-based abilities like Uncanny Direction
   town-center-x: -1032

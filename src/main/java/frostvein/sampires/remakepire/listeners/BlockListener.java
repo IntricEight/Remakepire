@@ -17,11 +17,10 @@ public class BlockListener implements Listener {
      * Create an instance of the Block listener.
      *
      * @param plugin the host plugin object.
-     * @param sessionManager the manager for the session states.
      */
-    public BlockListener(RemakepirePlugin plugin, SessionManager sessionManager) {
+    public BlockListener(RemakepirePlugin plugin) {
         this.plugin = plugin;
-        this.sessionManager = sessionManager;
+        this.sessionManager = plugin.getSessionManager();
     }
 
     /**
@@ -96,7 +95,8 @@ public class BlockListener implements Listener {
                 player.sendMessage("§cWarning: This is the vampire spawn point, placing blocks here may cause issues for you and your fellow thralls.");
             }
 
-            if (event.getBlock().getType() == Material.IRON_BLOCK) {
+            // Only replace iron blocks with the more resistant alternative if vampires are affected by it
+            if (event.getBlock().getType() == Material.IRON_BLOCK && plugin.getConfigManager().doSilverBlocksWeakenVampires()) {
                 event.getBlock().setType(Material.NETHERITE_BLOCK);
             }
         }

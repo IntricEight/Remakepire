@@ -24,11 +24,10 @@ public class FourthBookRevealListener implements Listener {
      * Create an instance of the Fourth Cure Book Reveal listener.
      *
      * @param plugin the host plugin object.
-     * @param configManager the manager for the config values.
      */
-    public FourthBookRevealListener(RemakepirePlugin plugin, ConfigManager configManager) {
+    public FourthBookRevealListener(RemakepirePlugin plugin) {
         this.plugin = plugin;
-        this.configManager = configManager;
+        this.configManager = plugin.getConfigManager();
         this.tomeChestLocations = configManager.getTomeChestLocations();
 
         if (plugin.getWorld() != null) {

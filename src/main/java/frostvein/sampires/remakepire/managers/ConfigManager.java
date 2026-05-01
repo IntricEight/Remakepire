@@ -306,6 +306,24 @@ public class ConfigManager {
     }
 
     /**
+     * Retrieve whether humans are limited to only a single tome each session.
+     *
+     * @return {@code true} if humans can only absorb a single tome ability during a session.
+     */
+    public boolean isTomeAbsorptionCapped() {
+        return this.config.getBoolean("tome-absorption.tome-absorption-capping", true);
+    }
+
+    /**
+     * Retrieve the cooldown time between when a human can gain new tome abilities.
+     *
+     * @return the minutes between tome absorptions.
+     */
+    public int getTomeAbsorptionIntervalMinutes() {
+        return this.config.getInt("tome-absorption.tome-absorption-interval-minutes", 120);
+    }
+
+    /**
      * Retrieve the time it takes for a vampire's thirst bar to fully deplete.
      *
      * @return the minutes it takes to run out of blood.
@@ -321,6 +339,15 @@ public class ConfigManager {
      */
     public int getMaxFeedingThirstPerSession() {
         return this.config.getInt("thirst.max-feeding-per-session", 60);
+    }
+
+    /**
+     * Retrieve whether vampires will be prevented from leveling up after dropping down during the session.
+     *
+     * @return {@code true} if the vampire is prevented from leveling.
+     */
+    public boolean isVampireLevelingCapped() {
+        return this.config.getBoolean("vampire.vampire-level-capping", true);
     }
 
     /**
@@ -416,6 +443,24 @@ public class ConfigManager {
     }
 
     /**
+     * Retrieve the minimum number of seconds until garlic can be used again.
+     *
+     * @return The seconds until the garlic effect could wear off.
+     */
+    public int getGarlicRecoveryDurationMin() {
+        return this.config.getInt("garlic.recovery-duration-min-seconds", 2100);
+    }
+
+    /**
+     * Retrieve the maximum number of seconds until garlic can be used again.
+     *
+     * @return The seconds until the garlic effect has to wear off.
+     */
+    public int getGarlicRecoveryDurationMax() {
+        return this.config.getInt("garlic.recovery-duration-max-seconds", 2700);
+    }
+
+    /**
      * Retrieve whether the console logging should be reduced to only essential messages.
      *
      * @return {@code true} if logging should be reduced.
@@ -479,6 +524,24 @@ public class ConfigManager {
     }
 
     /**
+     * Retrieve if humans will die once their lives run out, or be kept alive until a vampire gets the final kill.
+     *
+     * @return {@code true} is humans will permanently die on their sixth death, regardless of its cause.
+     */
+    public boolean isLifeLimitEnforced() {
+        return this.config.getBoolean("combat.enforce-life-limit", false);
+    }
+
+    /**
+     * Retrieve if vampires are weakened and repulsed by silver and adjacent blocks.
+     *
+     * @return {@code true} if silver-based blocks affect vampires.
+     */
+    public boolean doSilverBlocksWeakenVampires() {
+        return this.config.getBoolean("vampire.silver-weakness", true);
+    }
+
+    /**
      * Retrieve the ticks cooldown between wooden stake uses. 20 ticks is 1 second.
      *
      * @return The cooldown between wooden stake uses (in ticks).
@@ -513,6 +576,24 @@ public class ConfigManager {
     public long getTomeDistributionIntervalTicks() {
         int minutes = this.config.getInt("tome-distribution-interval-minutes", 20);
         return (long)minutes * 60L * 20L;
+    }
+
+    /**
+     * Retrieve how far a player can be from a beacon while converting it.
+     *
+     * @return The maximum distance (in blocks) that a player can be from a beacon and convert it.
+     */
+    public double getBeaconConversionDistance() {
+        return this.config.getDouble("beacons.distance.conversion-distance", 3.0);
+    }
+
+    /**
+     * Retrieve how far a vampire must be from a beacon before they can use their powers.
+     *
+     * @return The maximum distance (in blocks) that a vampire can be from a beacon and have their abilities suppressed.
+     */
+    public double getBeaconSuppressionDistance() {
+        return this.config.getDouble("beacons.distance.vampire-suppression-distance", 25.0);
     }
 
     /**
@@ -575,11 +656,20 @@ public class ConfigManager {
     }
 
     /**
+     * Retrieve the name of the game's primary town or location.
+     *
+     * @return The name of the town.
+     */
+    public String getTownName() {
+        return this.config.getString("oakhurst.town-name", "Oakhurst");
+    }
+
+    /**
      * Retrieve the X coordinate of the main settlement's location.
      *
      * @return The X coordinate of town's center.
      */
-    public double getOakhurstTownCenterX() {
+    public double getTownCenterX() {
         return this.config.getDouble("oakhurst.town-center-x", 79.0);
     }
 
@@ -588,7 +678,7 @@ public class ConfigManager {
      *
      * @return The Z coordinate of town's center.
      */
-    public double getOakhurstTownCenterZ() {
+    public double getTownCenterZ() {
         return this.config.getDouble("oakhurst.town-center-z", 440.0);
     }
 
@@ -597,7 +687,7 @@ public class ConfigManager {
      *
      * @return The distance around town where players can spawn.
      */
-    public double getOakhurstTeleportRadius() {
+    public double getTeleportRadius() {
         return this.config.getDouble("oakhurst.teleport-radius", 400.0);
     }
 
@@ -606,7 +696,7 @@ public class ConfigManager {
      *
      * @return The X coordinate of the border's center.
      */
-    public double getOakhurstBorderCenterX() {
+    public double getBorderCenterX() {
         return this.config.getDouble("oakhurst.border.center-x", 50.0);
     }
 
@@ -615,7 +705,7 @@ public class ConfigManager {
      *
      * @return The Z coordinate of the border's center.
      */
-    public double getOakhurstBorderCenterZ() {
+    public double getBorderCenterZ() {
         return this.config.getDouble("oakhurst.border.center-z", 50.0);
     }
 
@@ -624,7 +714,7 @@ public class ConfigManager {
      *
      * @return The diameter of the game area (in blocks).
      */
-    public double getOakhurstBorderDiameter() {
+    public double getBorderDiameter() {
         return this.config.getDouble("oakhurst.border.diameter", 1098.0);
     }
 
@@ -633,8 +723,8 @@ public class ConfigManager {
      *
      * @return The radius of the game area (in blocks).
      */
-    public double getOakhurstBorderRadius() {
-        return this.getOakhurstBorderDiameter() / 2.0;
+    public double getBorderRadius() {
+        return this.getBorderDiameter() / 2.0;
     }
 
     /**
@@ -642,8 +732,8 @@ public class ConfigManager {
      *
      * @return The X coordinate of the western border.
      */
-    public double getOakhurstMinX() {
-        return this.getOakhurstBorderCenterX() - this.getOakhurstBorderRadius();
+    public double getBorderMinX() {
+        return this.getBorderCenterX() - this.getBorderRadius();
     }
 
     /**
@@ -651,8 +741,8 @@ public class ConfigManager {
      *
      * @return The X coordinate of the eastern border.
      */
-    public double getOakhurstMaxX() {
-        return this.getOakhurstBorderCenterX() + this.getOakhurstBorderRadius();
+    public double getBorderMaxX() {
+        return this.getBorderCenterX() + this.getBorderRadius();
     }
 
     /**
@@ -660,8 +750,8 @@ public class ConfigManager {
      *
      * @return The Z coordinate of the southern border.
      */
-    public double getOakhurstMinZ() {
-        return this.getOakhurstBorderCenterZ() - this.getOakhurstBorderRadius();
+    public double getBorderMinZ() {
+        return this.getBorderCenterZ() - this.getBorderRadius();
     }
 
     /**
@@ -669,8 +759,8 @@ public class ConfigManager {
      *
      * @return The Z coordinate of the northern border.
      */
-    public double getOakhurstMaxZ() {
-        return this.getOakhurstBorderCenterZ() + this.getOakhurstBorderRadius();
+    public double getBorderMaxZ() {
+        return this.getBorderCenterZ() + this.getBorderRadius();
     }
 
     /**
@@ -681,12 +771,12 @@ public class ConfigManager {
      * @return {@code true} if the location is inside the game border region.
      */
     public boolean isLocationWithinBorder(double x, double z) {
-        return x >= this.getOakhurstMinX() && x <= this.getOakhurstMaxX() && z >= this.getOakhurstMinZ() && z <= this.getOakhurstMaxZ();
+        return x >= this.getBorderMinX() && x <= this.getBorderMaxX() && z >= this.getBorderMinZ() && z <= this.getBorderMaxZ();
     }
 
     public List<String> validateConfiguredLocations(BeaconManager beaconManager) {
         List<String> warnings = new ArrayList<>();
-        double townX = this.getOakhurstTownCenterX(), townZ = this.getOakhurstTownCenterZ();
+        double townX = this.getTownCenterX(), townZ = this.getTownCenterZ();
 
         if (!this.isLocationWithinBorder(townX, townZ)) {
             warnings.add("Town center (" + (int)townX + ", " + (int)townZ + ")");

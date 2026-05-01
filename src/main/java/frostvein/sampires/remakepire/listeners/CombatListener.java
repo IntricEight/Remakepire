@@ -35,16 +35,17 @@ public class CombatListener implements Listener {
     private final VampireAbilityManager vampireAbilityManager;
     private final BeetrootManager beetrootManager;
     private final Random random;
+    // Set the number of lives that humans have
+    private static final int humanLifeCount = 5;
 
     /**
      * Create an instance of the Combat listener.
      *
      * @param plugin the host plugin object.
-     * @param vampireManager the manager for generic vampire traits.
      */
-    public CombatListener(RemakepirePlugin plugin, VampireManager vampireManager) {
+    public CombatListener(RemakepirePlugin plugin) {
         this.plugin = plugin;
-        this.vampireManager = vampireManager;
+        this.vampireManager = plugin.getVampireManager();
         this.vampireAbilityManager = plugin.getVampireAbilityManager();
         this.beetrootManager = plugin.getBeetrootManager();
         this.random = new Random();
@@ -209,11 +210,39 @@ public class CombatListener implements Listener {
                             attacker.setCooldown(Material.WOODEN_SWORD, this.plugin.getConfigManager().getWoodenStakeCooldownTicks());
 
                         } else {
+                            // Create the stake breaking effect when used on a human
                             if (weaponCheck != null && weaponCheck.getType() == Material.WOODEN_SWORD && this.vampireManager.isHuman(victim)) {
                                 attacker.getInventory().setItemInMainHand(new ItemStack(Material.AIR));
                                 attacker.sendMessage("§cYour wooden stake breaks apart on impact.");
                                 attacker.getWorld().playSound(attacker.getLocation(), Sound.ENTITY_ITEM_BREAK, SoundCategory.PLAYERS, 1.0F, 1.0F);
                                 attacker.setCooldown(Material.WOODEN_SWORD, this.plugin.getConfigManager().getWoodenStakeCooldownTicks());
+                            }
+
+                            // If the config is set to allow non-vampire kill sources on humans, check if the human has ran out of lives
+                            if (plugin.getConfigManager().isLifeLimitEnforced() && victim.getHealth() - event.getFinalDamage() <= 0) {
+                                try {
+                                    Scoreboard mainScoreboard = Bukkit.getScoreboardManager().getMainScoreboard();
+                                    Objective deathObjective = mainScoreboard.getObjective("vsmp_death");
+
+                                    if (deathObjective != null) {
+                                        int deaths = deathObjective.getScore(victim.getName()).getScore();
+
+                                        // Only force the perma death if the human has run out of lives
+                                        if (deaths >= humanLifeCount) {
+                                            event.setCancelled(true);
+
+                                            attacker.sendMessage("§4You watch the light of " + victim.getName() + "'s eyes fade, and extinguish. Lost forever.");
+                                            victim.sendMessage("§7The world grows dim, blurry... the light which drew you back so many times beckons once more, but it seems fainter now, out of reach... You lose your grip, and slip under the veil of the afterlife.");
+
+                                            victim.addScoreboardTag("PermadeathChosen");
+
+                                            this.plugin.getServer().getScheduler().runTask(this.plugin, () -> victim.setHealth(0.0));
+                                            return;
+                                        }
+                                    }
+                                } catch (Exception e) {
+                                    this.plugin.getLogger().warning("Failed to check death count for " + victim.getName() + ": " + e.getMessage());
+                                }
                             }
 
                             if (this.vampireManager.isVampireStage1(attacker) && this.isSwordOrAxe(attackerWeapon)) {
@@ -269,7 +298,7 @@ public class CombatListener implements Listener {
 
                                             // Apply the effect of a chosen permadeath on death
                                             if (deathObjective != null) {
-                                                if (deathObjective.getScore(victim.getName()).getScore() >= 5) {
+                                                if (deathObjective.getScore(victim.getName()).getScore() >= humanLifeCount) {
                                                     attacker.sendMessage("§4You watch the light of " + victim.getName() + "'s eyes fade, and extinguish. Lost forever.");
                                                     victim.sendMessage("§7The world grows dim, blurry, you feel a darkness reach out, offering you one last chance to live, as a creature of the night... But you refuse... And slip under the veil of the afterlife.");
                                                     victim.addScoreboardTag("PermadeathChosen");
@@ -409,19 +438,18 @@ public class CombatListener implements Listener {
                 if (event.getCause() == DamageCause.SUFFOCATION && this.vampireManager.isVampire(player)) {
                     event.setCancelled(true);
                 } else {
-                    // Modify the fire damage dealt to vampires
                     if (this.vampireManager.isVampire(player)) {
                         EntityDamageEvent.DamageCause cause = event.getCause();
 
+                        // Modify the fire damage dealt to vampires
                         if (cause == DamageCause.FIRE || cause == DamageCause.FIRE_TICK || cause == DamageCause.LAVA) {
                             int vampireStage = this.vampireManager.getVampireStage(player);
                             double multiplier = this.getFireDamageMultiplier(vampireStage);
                             double newDamage = event.getDamage() * multiplier;
                             event.setDamage(newDamage);
                         }
-                    }
 
-                    if (this.vampireManager.isVampire(player)) {
+                        // Process the fire damage with the default response
                         if (event.getCause() == DamageCause.ENTITY_ATTACK) {
                             return;
                         }
@@ -435,6 +463,31 @@ public class CombatListener implements Listener {
                         if (player.getHealth() - event.getFinalDamage() <= 0.0) {
                             event.setCancelled(true);
                             player.setHealth(1.0);
+                        }
+                    } else if (this.vampireManager.isHuman(player)) {
+                        // If the config is set to allow non-vampire kill sources on humans, check if the human has ran out of lives
+                        if (plugin.getConfigManager().isLifeLimitEnforced() && player.getHealth() - event.getFinalDamage() <= 0) {
+                            try {
+                                Scoreboard mainScoreboard = Bukkit.getScoreboardManager().getMainScoreboard();
+                                Objective deathObjective = mainScoreboard.getObjective("vsmp_death");
+
+                                if (deathObjective != null) {
+                                    int deaths = deathObjective.getScore(player.getName()).getScore();
+
+                                    // Only force the perma death if the human has run out of lives
+                                    if (deaths >= humanLifeCount) {
+                                        event.setCancelled(true);
+
+                                        player.sendMessage("§7The world grows dim, blurry... the light which drew you back so many times beckons once more, but it seems fainter now, out of reach... You lose your grip, and slip under the veil of the afterlife.");
+
+                                        player.addScoreboardTag("PermadeathChosen");
+
+                                        this.plugin.getServer().getScheduler().runTask(this.plugin, () -> player.setHealth(0.0));
+                                    }
+                                }
+                            } catch (Exception e) {
+                                this.plugin.getLogger().warning("Failed to check death count for " + player.getName() + ": " + e.getMessage());
+                            }
                         }
                     }
                 }
