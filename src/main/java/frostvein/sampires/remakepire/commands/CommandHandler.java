@@ -106,6 +106,10 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
             return this.handleListTomeChestsCommand(sender, args);
         } else if (command.getName().equalsIgnoreCase("resetplayer")) {
             return this.handleResetPlayerCommand(sender, args);
+        } else if (command.getName().equalsIgnoreCase("config")) {
+            // Allow admins to change some elements within the configuration file without needing to restart the server
+            return this.handleConfigCommand(sender, args);
+
         } else {
             return command.getName().equalsIgnoreCase("set_vampire_spawn") ? this.handleSetVampireSpawnCommand(sender, args) : false;
         }
@@ -195,6 +199,61 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                 return true;
             }
         }
+    }
+
+    private boolean handleConfigCommand(CommandSender sender, String[] args) {
+        if (args.length < 2) {
+            sender.sendMessage("§cUsage: /pow admin config <configuration> <new setting>");
+            sender.sendMessage("§7  holywatercap <true/false> - Limit holy water creation");
+            sender.sendMessage("§7  newtomecap <true/false> - Limit new tome abilities absorbed");
+            sender.sendMessage("§7  vampirelevelcap <true/false> - Prevent vampires from returning to lost levels");
+            sender.sendMessage("§7  stakepermadeathstage <1/2/3> - Set stage that vampires can permadie on");
+            sender.sendMessage("§7  humanlifelimit <true/false> - Humans always die on their sixth death");
+            return true;
+
+        } else {
+            switch (args[0].toLowerCase()) {
+                case "holywatercap":
+                    sessionManager.setHolyWaterCapping(Boolean.parseBoolean(args[1]));
+                    break;
+
+                case "newtomecap":
+                    sessionManager.setTomeAbsorptionCapping(Boolean.parseBoolean(args[1]));
+                    break;
+
+                case "vampirelevelcap":
+                    boolean isCapping = Boolean.parseBoolean(args[1]);
+                    sessionManager.setVampireLevelCapping(isCapping);
+
+                    // Clear existing promotion and stage bans if capping is being disabled
+                    if (!isCapping) {
+                        plugin.getVampireManager().clearAllPromotionBans();
+                        plugin.getVampireManager().clearAllStageCaps();
+                    }
+
+                    break;
+
+                case "stakepermadeathstage":
+                    int stage = Integer.parseInt(args[1]);
+                    if (stage >= 1 && stage <= 3) {
+                        sessionManager.setStakePermadeathMinimumStage(stage);
+                    } else {
+                        sender.sendMessage("§cInvalid stage! Use 1, 2, or 3");
+                    }
+
+                    break;
+
+                case "humanlifelimit":
+                    sessionManager.setHumanLivesEnforced(Boolean.parseBoolean(args[1]));
+                    break;
+
+                default:
+                    sender.sendMessage("§cInvalid configuration. Use: holywatercap, newtomecap, vampirelevelcap, stakepermadeathstage, or humanlifelimit.");
+                    return true;
+            }
+        }
+
+        return true;
     }
 
     private boolean handleSetVampireSpawnCommand(CommandSender sender, String[] args) {
@@ -1529,19 +1588,32 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
 
             } else if (command.getName().equalsIgnoreCase("vampire")) {
                 if (args.length == 1) {
-                    for(Player player : Bukkit.getOnlinePlayers()) {
+                    for (Player player : Bukkit.getOnlinePlayers()) {
                         completions.add(player.getName());
                     }
                 } else if (args.length == 2) {
                     completions.addAll(Arrays.asList("human", "1", "2", "3", "turn", "clearcap", "clearban"));
 
                 } else if (args.length == 3 && args[1].equalsIgnoreCase("turn")) {
-                    for(Player player : Bukkit.getOnlinePlayers()) {
+                    for (Player player : Bukkit.getOnlinePlayers()) {
                         if (this.vampireManager.isVampire(player)) {
                             completions.add(player.getName());
                         }
                     }
                 }
+
+            } else if (command.getName().equalsIgnoreCase("config")) {
+                if (args.length == 1) {
+                    completions.addAll(Arrays.asList("holywatercap", "newtomecap", "vampirelevelcap", "stakepermadeathstage", "humanlifelimit"));
+
+                } else if (args.length == 2) {
+                    if (args[0].equals("stakepermadeathstage")) {
+                        completions.addAll(Arrays.asList("1", "2", "3"));
+                    } else {
+                        completions.addAll(Arrays.asList("true", "false"));
+                    }
+                }
+
             } else if (command.getName().equalsIgnoreCase("beacon")) {
                 if (args.length == 1) {
                     completions.addAll(Arrays.asList("add", "remove", "list", "info", "stats", "reload", "validate", "holy", "desecrated", "neutral", "fix", "refresh", "cleanup", "clearcooldowns", "debug"));

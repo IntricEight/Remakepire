@@ -174,7 +174,7 @@ public class PowCommand implements CommandExecutor, TabCompleter {
                 }
 
                 if (args.length == 2) {
-                    List<String> adminCommands = Arrays.asList("init", "session", "vampire", "beacon", "vampirecooldowns", "resettomecooldowns", "onehumanleft", "vampirehealthcheck", "break_warning", "givetome", "select_tomes", "give_cure_book", "distributetomes", "clearbloodmoonbuffs", "fixattributes", "removeendermen", "damagesuppression", "setupplayer", "spawnanimals", "addtomechest", "removetomechest", "listtomechests", "resetplayer", "set_vampire_spawn");
+                    List<String> adminCommands = Arrays.asList("init", "session", "vampire", "beacon", "vampirecooldowns", "resettomecooldowns", "onehumanleft", "vampirehealthcheck", "break_warning", "givetome", "select_tomes", "give_cure_book", "distributetomes", "clearbloodmoonbuffs", "fixattributes", "removeendermen", "damagesuppression", "setupplayer", "spawnanimals", "addtomechest", "removetomechest", "listtomechests", "resetplayer", "set_vampire_spawn", "config");
                     return adminCommands.stream().filter((s) -> s.startsWith(args[1].toLowerCase())).collect(Collectors.toList());
                 }
 
@@ -190,6 +190,21 @@ public class PowCommand implements CommandExecutor, TabCompleter {
                 if (args.length == 4 && args[1].equalsIgnoreCase("vampire")) {
                     List<String> vampireOptions = Arrays.asList("human", "1", "2", "3", "turn", "clearcap", "clearban");
                     return vampireOptions.stream().filter((s) -> s.startsWith(args[3].toLowerCase())).collect(Collectors.toList());
+                }
+
+                if (args.length == 4 && args[1].equalsIgnoreCase("config")) {
+                    String configName = args[2].toLowerCase();
+
+                    if (configName.equals("stakepermadeathstage")) {
+                        // Handle vampire permadeath setting with the valid numbers 1, 2 and 3
+                        List<String> stageOptions = Arrays.asList("1", "2", "3");
+                        return stageOptions.stream().filter((s) -> s.startsWith(args[3].toLowerCase())).collect(Collectors.toList());
+
+                    } else {
+                        // Handle config changing commands that accept a boolean
+                        List<String> booleanOptions = Arrays.asList("true", "false");
+                        return booleanOptions.stream().filter((s) -> s.startsWith(args[3].toLowerCase())).collect(Collectors.toList());
+                    }
                 }
 
                 if (args.length == 3 && args[1].equalsIgnoreCase("beacon")) {
@@ -299,6 +314,8 @@ public class PowCommand implements CommandExecutor, TabCompleter {
                 if (args.length == 3 && args[1].equalsIgnoreCase("init")) {
                     return Arrays.asList("cancel").stream().filter((s) -> s.startsWith(args[2].toLowerCase())).collect(Collectors.toList());
                 }
+
+
             }
 
             if (args.length == 2 && args[0].equalsIgnoreCase("vability")) {

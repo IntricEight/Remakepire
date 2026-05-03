@@ -364,6 +364,56 @@ public class SessionManager {
         this.plugin.saveConfig();
     }
 
+    /**
+     * Update the config on whether tome ability absorptions should be capped per session.
+     *
+     * @param capped {@code true} if tome absorption should be capped to one each session.
+     */
+    public void setTomeAbsorptionCapping(boolean capped) {
+        this.plugin.getConfig().set("tome-absorption.tome-absorption-capping", capped);
+        this.plugin.saveConfig();
+    }
+
+    /**
+     * Update the config on whether vampires can return to lost levels during a session.
+     *
+     * @param capped {@code true} if vampire levels should be restricted upon dropping a level.
+     */
+    public void setVampireLevelCapping(boolean capped) {
+        this.plugin.getConfig().set("vampire.vampire-level-capping", capped);
+        this.plugin.saveConfig();
+    }
+
+    /**
+     * Update the config on whether multiple bottles of holy water can be created in a single session
+     *
+     * @param capped {@code true} if only a single holy water can be mae by each player each session.
+     */
+    public void setHolyWaterCapping(boolean capped) {
+        this.plugin.getConfig().set("holy-water.holy-water-session-capped", capped);
+        this.plugin.saveConfig();
+    }
+
+    /**
+     * Update the config on when vampires can be permakilled.
+     *
+     * @param stage the highest stage that vampires can be permakilled at.
+     */
+    public void setStakePermadeathMinimumStage(int stage) {
+        this.plugin.getConfig().set("combat.permadeath-minimum-stage", Math.max(1, stage));
+        this.plugin.saveConfig();
+    }
+
+    /**
+     * Update the config on whether humans require a vampire to kill them to permanently die.
+     *
+     * @param capped {@code true} if humans will be permakilled on their sixth death, regardless of the cause.
+     */
+    public void setHumanLivesEnforced(boolean capped) {
+        this.plugin.getConfig().set("combat.enforce-life-limit", capped);
+        this.plugin.saveConfig();
+    }
+
     public void incrementSessionID() {
         this.sessionIDObjective.getScore("session_id_holder").setScore(this.sessionIDObjective.getScore("session_id_holder").getScore() + 1);
         this.updateAllPlayersSessionIDs();

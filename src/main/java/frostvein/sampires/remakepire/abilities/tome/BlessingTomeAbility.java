@@ -60,10 +60,7 @@ public class BlessingTomeAbility extends TomeAbility {
                 this.sendSuccessMessage(player, "Divine light flows through the water, blessing it into holy water!");
                 player.sendMessage("§7The blessed water can now be thrown as a splash potion.");
 
-                // Comment out the following line to remove the cap on holy water per session
-                if (isSessionCapped) {
-                    player.addScoreboardTag("blessing_used_session");
-                }
+                player.addScoreboardTag("blessing_used_session");
 
                 return true;
 
