@@ -82,7 +82,7 @@ public class HolyWaterEffectManager implements Listener {
      */
     private void processHolyWaterHit(LivingEntity entity) {
         if (entity instanceof Player player) {
-            if (this.vampireManager.isVampire(player) && (this.vampireManager.isVampireStage2(player) || this.vampireManager.isVampireStage3(player))) {
+            if (this.vampireManager.isVampire(player) && this.vampireManager.isVampireStage2OrHigher(player)) {
                 this.applyHolyWaterEffect(player);
             }
         }

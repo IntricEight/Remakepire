@@ -136,7 +136,7 @@ public class TomeVampireRestrictionListener implements Listener {
      * @return {@code true} if the player is a higher vampire.
      */
     private boolean isRestrictedVampire(Player player) {
-        return this.vampireManager.isVampireStage2(player) || this.vampireManager.isVampireStage3(player);
+        return this.vampireManager.isVampireStage2OrHigher(player);
     }
 
     /**

@@ -11,6 +11,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.block.Shelf;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.ThrownPotion;
 import org.bukkit.event.EventHandler;
@@ -21,6 +22,7 @@ import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.player.PlayerArmorStandManipulateEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.ItemStack;
@@ -113,55 +115,63 @@ public class IronWeaknessListener implements Listener {
     }
 
     /**
+     * Remove silver items from the inventory of a single higher vampire.
+     *
+     * @param player the player whose inventory is being scanned.
+     */
+    private void scanAndRemoveIronFromSingleInventory(Player player) {
+        if (this.vampireManager.isIronAffected(player)) {
+            PlayerInventory inventory = player.getInventory();
+            boolean foundIronItems = false;
+            List<String> droppedItems = new ArrayList<>();
+            ItemStack[] contents = inventory.getContents();
+
+            for(int i = 0; i < contents.length; ++i) {
+                ItemStack item = contents[i];
+                if (item != null && !item.getType().isAir() && this.ironMaterials.contains(item.getType())) {
+                    player.getWorld().dropItemNaturally(player.getLocation(), item);
+                    inventory.setItem(i, null);
+                    droppedItems.add(item.getAmount() + "x " + item.getType().name().replace("_", " ").toLowerCase());
+                    foundIronItems = true;
+                }
+            }
+
+            ItemStack[] armor = inventory.getArmorContents();
+
+            for(int i = 0; i < armor.length; ++i) {
+                ItemStack item = armor[i];
+
+                if (item != null && !item.getType().isAir() && this.ironMaterials.contains(item.getType())) {
+                    player.getWorld().dropItemNaturally(player.getLocation(), item);
+                    armor[i] = null;
+                    droppedItems.add(item.getAmount() + "x " + item.getType().name().replace("_", " ").toLowerCase());
+                    foundIronItems = true;
+                }
+            }
+
+            inventory.setArmorContents(armor);
+            ItemStack offhand = inventory.getItemInOffHand();
+
+            if (offhand != null && !offhand.getType().isAir() && this.ironMaterials.contains(offhand.getType())) {
+                player.getWorld().dropItemNaturally(player.getLocation(), offhand);
+                inventory.setItemInOffHand(null);
+                droppedItems.add(offhand.getAmount() + "x " + offhand.getType().name().replace("_", " ").toLowerCase());
+                foundIronItems = true;
+            }
+
+            if (foundIronItems) {
+                player.sendMessage("§cSilver in your pocket begins to burn your skin through the cloth. You involuntarily drop it to protect yourself");
+            }
+        }
+    }
+
+    /**
      * Remove silver items from the inventories of higher vampires.
      */
     private void scanAndRemoveIronFromInventories() {
         for(Player player : Bukkit.getOnlinePlayers()) {
-            if (this.vampireManager.isIronAffected(player)) {
-                PlayerInventory inventory = player.getInventory();
-                boolean foundIronItems = false;
-                List<String> droppedItems = new ArrayList<>();
-                ItemStack[] contents = inventory.getContents();
-
-                for(int i = 0; i < contents.length; ++i) {
-                    ItemStack item = contents[i];
-                    if (item != null && !item.getType().isAir() && this.ironMaterials.contains(item.getType())) {
-                        player.getWorld().dropItemNaturally(player.getLocation(), item);
-                        inventory.setItem(i, null);
-                        droppedItems.add(item.getAmount() + "x " + item.getType().name().replace("_", " ").toLowerCase());
-                        foundIronItems = true;
-                    }
-                }
-
-                ItemStack[] armor = inventory.getArmorContents();
-
-                for(int i = 0; i < armor.length; ++i) {
-                    ItemStack item = armor[i];
-
-                    if (item != null && !item.getType().isAir() && this.ironMaterials.contains(item.getType())) {
-                        player.getWorld().dropItemNaturally(player.getLocation(), item);
-                        armor[i] = null;
-                        droppedItems.add(item.getAmount() + "x " + item.getType().name().replace("_", " ").toLowerCase());
-                        foundIronItems = true;
-                    }
-                }
-
-                inventory.setArmorContents(armor);
-                ItemStack offhand = inventory.getItemInOffHand();
-
-                if (offhand != null && !offhand.getType().isAir() && this.ironMaterials.contains(offhand.getType())) {
-                    player.getWorld().dropItemNaturally(player.getLocation(), offhand);
-                    inventory.setItemInOffHand(null);
-                    droppedItems.add(offhand.getAmount() + "x " + offhand.getType().name().replace("_", " ").toLowerCase());
-                    foundIronItems = true;
-                }
-
-                if (foundIronItems) {
-                    player.sendMessage("§cSilver in your pocket begins to burn your skin through the cloth. You involuntarily drop it to protect yourself");
-                }
-            }
+            scanAndRemoveIronFromSingleInventory(player);
         }
-
     }
 
     /**
@@ -210,7 +220,7 @@ public class IronWeaknessListener implements Listener {
     )
     public void onItemPickup(EntityPickupItemEvent event) {
         if (event.getEntity() instanceof Player player) {
-            if (this.vampireManager.isVampireStage2(player) || this.vampireManager.isVampireStage3(player)) {
+            if (this.vampireManager.isVampireStage2OrHigher(player)) {
                 Material itemType = event.getItem().getItemStack().getType();
 
                 if (this.ironMaterials.contains(itemType)) {
@@ -220,6 +230,30 @@ public class IronWeaknessListener implements Listener {
                         player.addScoreboardTag("informed_pickup_item");
                         player.sendMessage("§cThe silver you have tried to pick up burns your fingers as you touch it... Best leave it alone...");
                     }
+                }
+            }
+        }
+    }
+
+    /**
+     * Prevent higher vampires from retrieving silver items from armor stands.
+     *
+     * @param event a player interacts with an armor stand.
+     */
+    @EventHandler(
+            priority = EventPriority.HIGH
+    )
+    public void onArmorStandManipulate(PlayerArmorStandManipulateEvent event) {
+        Player player = event.getPlayer();
+        Material armorStandItemType = event.getArmorStandItem().getType();
+
+        if (this.vampireManager.isVampireStage2OrHigher(player) && armorStandItemType != null) {
+            if (this.ironMaterials.contains(armorStandItemType)) {
+                event.setCancelled(true);
+
+                if (!player.getScoreboardTags().contains("informed_pickup_item")) {
+                    player.addScoreboardTag("informed_pickup_item");
+                    player.sendMessage("§cThe silver you have tried to pick up burns your fingers as you touch it... Best leave it alone...");
                 }
             }
         }
@@ -237,12 +271,25 @@ public class IronWeaknessListener implements Listener {
         Player player = event.getPlayer();
 
         if (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK) {
-            if (this.vampireManager.isVampireStage2(player) || this.vampireManager.isVampireStage3(player)) {
+            if (this.vampireManager.isVampireStage2OrHigher(player)) {
                 ItemStack item = event.getItem();
 
+
+                // Check if the player is taking an item from a shelf
+                if (event.getClickedBlock().getState() instanceof Shelf) {
+                    // Check if any iron items have entered the player's inventory after they have taken from the shelf
+                    Bukkit.getScheduler().runTaskLater(this.plugin, () -> {
+                        scanAndRemoveIronFromSingleInventory(player);
+                    }, 5L);
+
+                    return;
+                }
+
+                // Check if the player is attempting to throw a bottle of holy water
                 if (item != null && this.isHolyWater(item)) {
                     event.setCancelled(true);
                     player.sendMessage("§cThe Holy Water burns your hand as you try to throw it! You feel unable to bring yourself to use this item...");
+                    return;
                 }
             }
         }
@@ -259,7 +306,7 @@ public class IronWeaknessListener implements Listener {
     public void onProjectileLaunch(ProjectileLaunchEvent event) {
         if (event.getEntity() instanceof ThrownPotion potion) {
             if (potion.getShooter() instanceof Player player) {
-                if (this.vampireManager.isVampireStage2(player) || this.vampireManager.isVampireStage3(player)) {
+                if (this.vampireManager.isVampireStage2OrHigher(player)) {
                     ItemStack potionItem = potion.getItem();
 
                     if (this.isHolyWater(potionItem)) {

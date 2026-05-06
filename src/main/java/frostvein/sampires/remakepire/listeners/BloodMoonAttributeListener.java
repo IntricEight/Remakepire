@@ -51,14 +51,15 @@ public class BloodMoonAttributeListener implements Listener {
         Entity entity = event.getEntity();
 
         if (entity instanceof Player player) {
-            if (this.vampireManager.isVampireStage2(player) || this.vampireManager.isVampireStage3(player)) {
+            if (this.vampireManager.isVampireStage2OrHigher(player)) {
                 if (event.getNewEffect() != null && event.getNewEffect().getType() == PotionEffectType.UNLUCK) {
                     this.applyBloodMoonAttributes(player);
                 } else if (event.getOldEffect() != null && event.getOldEffect().getType() == PotionEffectType.UNLUCK) {
                     this.removeBloodMoonAttributes(player);
                 }
 
-                if (!this.vampireManager.isVampireStage2(player) && !this.vampireManager.isVampireStage3(player) && this.playersWithBloodMoonAttributes.getOrDefault(player.getUniqueId(), false)) {
+                // Remove the blood moon attributes from the player if they don't qualify for it
+                if (!this.vampireManager.isVampireStage2OrHigher(player) && this.playersWithBloodMoonAttributes.getOrDefault(player.getUniqueId(), false)) {
                     this.removeBloodMoonAttributes(player);
                 }
             }
