@@ -307,6 +307,11 @@ public class BrigadierCommands {
                         .then(Commands.literal("false").executes(ctx -> this.executePowCommand(ctx, "admin", "config", "new_vampire_tracking", "false")))
                 )
 
+                .then(Commands.literal("allow_vampire_mounts").executes(ctx -> this.executePowCommand(ctx, "admin", "config", "allow_vampire_mounts"))
+                        .then(Commands.literal("true").executes(ctx -> this.executePowCommand(ctx, "admin", "config", "allow_vampire_mounts", "true")))
+                        .then(Commands.literal("false").executes(ctx -> this.executePowCommand(ctx, "admin", "config", "allow_vampire_mounts", "false")))
+                )
+
                 .then(Commands.literal("cure_requires_dead_sire").executes(ctx -> this.executePowCommand(ctx, "admin", "config", "cure_requires_dead_sire"))
                         .then(Commands.literal("true").executes(ctx -> this.executePowCommand(ctx, "admin", "config", "cure_requires_dead_sire", "true")))
                         .then(Commands.literal("false").executes(ctx -> this.executePowCommand(ctx, "admin", "config", "cure_requires_dead_sire", "false")))

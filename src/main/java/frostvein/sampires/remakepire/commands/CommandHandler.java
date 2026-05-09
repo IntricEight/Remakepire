@@ -316,6 +316,11 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                     senderMessage += "new-vampire-tracking§r set to: " + Boolean.parseBoolean(args[1]);
                     break;
 
+                case "allow_vampire_mounts":
+                    sessionManager.setVampiresRideLivingMounts(Boolean.parseBoolean(args[1]));
+                    senderMessage += "allow-vampire-mounts§r set to: " + Boolean.parseBoolean(args[1]);
+                    break;
+
                 case "cure_requires_dead_sire":
                     sessionManager.setCureRequiresSireDeath(Boolean.parseBoolean(args[1]));
                     senderMessage += "sire-death-requirement§r set to: " + Boolean.parseBoolean(args[1]);

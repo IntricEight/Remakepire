@@ -560,6 +560,15 @@ public class ConfigManager {
     }
 
     /**
+     * Retrieve if vampires can mount living entities. Exceptions are made for undead mounts.
+     *
+     * @return {@code true} if vampires can mount any animal.
+     */
+    public boolean canVampiresRideLivingMounts() {
+        return this.config.getBoolean("vampire.allow-vampire-mounts", true);
+    }
+
+    /**
      * Retrieve the ticks cooldown between wooden stake uses. 20 ticks is 1 second.
      *
      * @return The cooldown between wooden stake uses (in ticks).

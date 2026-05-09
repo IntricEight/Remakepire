@@ -148,6 +148,11 @@ vampire:
   # Default: true
   silver-weakness: true
 
+  # Control if vampires can mount animals, such as pigs and horses
+  # Exceptions are made for undead mounts, such as skeleton horses
+  # Default: true (all mounts are allowed)
+  allow-vampire-mounts: true
+
 # Vampire Health Check Configuration
 # Controls how often vampire health is checked and regenerated (in ticks)
 # 20 ticks = 1 second
