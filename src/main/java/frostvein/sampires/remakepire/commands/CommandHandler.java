@@ -221,13 +221,6 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         */
 
         if (args.length < 2) {
-            sender.sendMessage("§cUsage: /pow admin config <configuration> <new setting>");
-            sender.sendMessage("§7  holywatercap <true/false> - Limit holy water creation");
-            sender.sendMessage("§7  newtomecap <true/false> - Limit new tome abilities absorbed");
-            sender.sendMessage("§7  vampirelevelcap <true/false> - Prevent vampires from returning to lost levels");
-            sender.sendMessage("§7  stakepermadeathstage <1/2/3> - Set stage that vampires can permadie on");
-            sender.sendMessage("§7  humanlifelimit <true/false> - Humans always die on their sixth death");
-            return true;
             switch (args[0].toLowerCase()) {
                 case "help":
                     sender.sendMessage("§aUsage: /pow admin config <configuration> <new setting>");
@@ -261,6 +254,10 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
 
                 case "new_vampire_tracking":
                     sender.sendMessage("§6new_vampire_tracking§r is currently: " + configManager.canTrackNewVampires());
+                    break;
+
+                case "allow_vampire_mounts":
+                    sender.sendMessage("§6allow_vampire_mounts§r is currently: " + configManager.canVampiresRideLivingMounts());
                     break;
 
                 case "cure_requires_dead_sire":
