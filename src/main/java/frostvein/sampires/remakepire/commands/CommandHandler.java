@@ -36,12 +36,14 @@ import frostvein.sampires.remakepire.beacons.BeaconSite;
 import frostvein.sampires.remakepire.beacons.BeaconSite.BeaconState;
 import frostvein.sampires.remakepire.listeners.CureBookReadingListener;
 import frostvein.sampires.remakepire.managers.BeaconManager;
+import frostvein.sampires.remakepire.managers.ConfigManager;
 import frostvein.sampires.remakepire.managers.SessionManager;
 import frostvein.sampires.remakepire.managers.TomeManager;
 import frostvein.sampires.remakepire.managers.VampireManager;
 
 public class CommandHandler implements CommandExecutor, TabCompleter {
     private final RemakepirePlugin plugin;
+    private final ConfigManager configManager;
     private final SessionManager sessionManager;
     private final VampireManager vampireManager;
     private final BeaconManager beaconManager;
@@ -49,6 +51,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
 
     public CommandHandler(RemakepirePlugin plugin) {
         this.plugin = plugin;
+        this.configManager = plugin.getConfigManager();
         this.sessionManager = plugin.getSessionManager();
         this.vampireManager = plugin.getVampireManager();
         this.beaconManager = plugin.getBeaconManager();
@@ -69,9 +72,9 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         } else if (command.getName().equalsIgnoreCase("beacon")) {
             return this.handleBeaconCommand(sender, args);
         } else if (command.getName().equalsIgnoreCase("vampirecooldowns")) {
-            return this.handleCooldownCommand(sender, args);
+            return this.handleVampireCooldownCommand(sender, args);
         } else if (command.getName().equalsIgnoreCase("resettomecooldowns")) {
-            return this.handleResetTomeCooldownsCommand(sender, args);
+            return this.handleResetTomeCooldownCommand(sender, args);
         } else if (command.getName().equalsIgnoreCase("onehumanleft")) {
             return this.handleOneHumanLeftCommand(sender, args);
         } else if (command.getName().equalsIgnoreCase("vampirehealthcheck")) {
@@ -201,6 +204,13 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         }
     }
 
+    /**
+     * Execute commands sent using the config admin options.
+     *
+     * @param sender the admin who entered the command.
+     * @param args the command arguments.
+     * @return {@code true}
+     */
     private boolean handleConfigCommand(CommandSender sender, String[] args) {
         if (args.length < 2) {
             sender.sendMessage("§cUsage: /pow admin config <configuration> <new setting>");
@@ -307,7 +317,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         }
     }
 
-    private boolean handleCooldownCommand(CommandSender sender, String[] args) {
+    private boolean handleVampireCooldownCommand(CommandSender sender, String[] args) {
         if (args.length == 0) {
             sender.sendMessage("§cUsage: /pow admin vampirecooldowns <reset|clear> [player]");
             sender.sendMessage("§7- /pow admin vampirecooldowns reset §8- Reset all cooldowns for all online players");
@@ -356,15 +366,29 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         this.plugin.getVampireAbilityManager().clearGlobalCooldowns();
     }
 
-    private boolean handleResetTomeCooldownsCommand(CommandSender sender, String[] args) {
+    private boolean handleResetTomeCooldownCommand(CommandSender sender, String[] args) {
         int humansAffected = 0;
 
-        for(Player player : Bukkit.getOnlinePlayers()) {
-            if (this.plugin.getVampireManager().isHuman(player)) {
-                TomeAbility.clearAllCooldowns(player);
-                player.removeScoreboardTag("blessing_used_session");
-                player.removeScoreboardTag("stopthebleeding_used_session");
-                player.sendMessage("§aYour tome ability cooldowns have been reset by an administrator.");
+        // Handle the cooldown command for individual players
+        if (args.length == 0) {
+            for(Player player : Bukkit.getOnlinePlayers()) {
+                if (this.plugin.getVampireManager().isHuman(player)) {
+                    TomeAbility.clearAllCooldowns(player);
+                    player.removeScoreboardTag("blessing_used_session");
+                    player.removeScoreboardTag("stopthebleeding_used_session");
+                    player.sendMessage("§aYour tome ability cooldowns have been reset by an administrator.");
+                    ++humansAffected;
+                }
+            }
+        } else {
+            // Handle the cooldown command for a single player
+            Player target = Bukkit.getPlayer(args[0]);
+
+            if (target != null && this.plugin.getVampireManager().isHuman(target)) {
+                TomeAbility.clearAllCooldowns(target);
+                target.removeScoreboardTag("blessing_used_session");
+                target.removeScoreboardTag("stopthebleeding_used_session");
+                target.sendMessage("§aYour tome ability cooldowns have been reset by an administrator.");
                 ++humansAffected;
             }
         }
@@ -400,37 +424,33 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
 
                     if (newTicks < 1) {
                         sender.sendMessage("§cInterval must be at least 1 tick.");
-                        return true;
-
                     } else {
                         this.sessionManager.setVampireHealthCheckTicks(newTicks);
                         double seconds = newTicks / 20.0;
                         sender.sendMessage("§aVampire Health Check Interval set to: §e" + newTicks + " ticks §7(" + seconds + " seconds)");
                         sender.sendMessage("§7Changes saved to config and take effect immediately");
-                        return true;
                     }
                 } catch (NumberFormatException e) {
                     sender.sendMessage("§cInvalid number: " + args[1]);
-                    return true;
                 }
             } else {
                 sender.sendMessage("§cUsage: /pow admin vampirehealthcheck [get|set] [ticks]");
                 sender.sendMessage("§7- /pow admin vampirehealthcheck get §8- Show current interval");
                 sender.sendMessage("§7- /pow admin vampirehealthcheck set <ticks> §8- Set new interval");
                 sender.sendMessage("§7Current: §e" + this.sessionManager.getVampireHealthCheckTicks() + " ticks");
-                return true;
             }
         } else {
             int currentTicks = this.sessionManager.getVampireHealthCheckTicks();
             sender.sendMessage("§aVampire Health Check Interval: §e" + currentTicks + " ticks §7(" + (currentTicks / 20) + " seconds)");
-            return true;
         }
+
+        return true;
     }
 
     private boolean handleBreakWarningCommand(CommandSender sender, String[] args) {
         sender.sendMessage("§ePlaying first warning sound for all players...");
 
-        // Send the first warning noisee (crows)
+        // Send the first warning noise (crows)
         for(Player player : Bukkit.getOnlinePlayers()) {
             player.playSound(player.getLocation(), "crimson:crimson.sound.crimson_warning_1", SoundCategory.MASTER, 1.0F, 1.0F);
         }

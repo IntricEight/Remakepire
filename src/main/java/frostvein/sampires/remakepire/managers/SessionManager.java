@@ -163,7 +163,7 @@ public class SessionManager {
     private String getSessionStatusMessage() {
         return switch (this.getSessionState()) {
             case BEFORE_SESSION -> "§e§lSession is primed and ready to start";
-            case IN_SESSION -> "§7§lSession status unknown";
+            case IN_SESSION -> "§7§lSession is currently active";
             case PAUSED -> "§6§lSession is currently paused";
             case AFTER_SESSION -> "§c§lSession has ended";
             case PRE_SESSION -> "§b§lBuilding Mode - interactions enabled";
@@ -387,7 +387,7 @@ public class SessionManager {
     /**
      * Update the config on whether multiple bottles of holy water can be created in a single session
      *
-     * @param capped {@code true} if only a single holy water can be mae by each player each session.
+     * @param capped {@code true} if only a single holy water can be made by each player each session.
      */
     public void setHolyWaterCapping(boolean capped) {
         this.plugin.getConfig().set("holy-water.holy-water-session-capped", capped);

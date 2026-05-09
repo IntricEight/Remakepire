@@ -92,9 +92,10 @@ public class BrigadierCommands {
                         .then(this.buildConfigSubcommand())
                         .then(this.buildBeaconSubcommand())
                         .then(this.buildVampireCooldownSubcommand())
-                        // TODO: Expand this to match the format of vampire cooldown resetting, where you can choose individual players to reset
-                        .then(Commands.literal("resettomecooldowns").executes((ctx) -> this.executePowCommand(ctx, "admin", "resettomecooldowns")))
+                        .then(this.buildTomeCooldownSubcommand())
+
                         .then(Commands.literal("onehumanleft").executes((ctx) -> this.executePowCommand(ctx, "admin", "onehumanleft")))
+
                         .then(((LiteralArgumentBuilder) Commands.literal("vampirehealthcheck")
                                 .then(Commands.literal("get").executes((ctx) -> this.executePowCommand(ctx, "admin", "vampirehealthcheck", "get"))))
                                 .then(Commands.literal("set")
@@ -365,7 +366,13 @@ public class BrigadierCommands {
                         })));
     }
 
-
+    private LiteralArgumentBuilder<CommandSourceStack> buildTomeCooldownSubcommand() {
+        return Commands.literal("resettomecooldowns").executes((ctx) -> this.executePowCommand(ctx, "admin", "resettomecooldowns"))
+                .then(Commands.argument("player", StringArgumentType.word()).suggests((ctx, builder) -> this.suggestOnlinePlayers(builder)).executes((ctx) -> {
+                    String player = StringArgumentType.getString(ctx, "player");
+                    return this.executePowCommand(ctx, "admin", "resettomecooldowns", player);
+                }));
+    }
 
     private void registerLatinCureCommand(Commands commands) {
         commands.register(((LiteralArgumentBuilder) Commands.literal("voluntate-mea-hoc-nefandum-vinculum-abicio").executes((ctx) -> {
