@@ -449,6 +449,17 @@ public class SessionManager {
         this.plugin.getConfig().set("cure.sire-death-requirement", requireDeath);
         this.plugin.saveConfig();
     }
+
+    /**
+     * Update the config on whether vampires can ride on living mounts
+     *
+     * @param canRide {@code true} if vampires can ride living mounts.
+     */
+    public void setVampiresRideLivingMounts(boolean canRide) {
+        this.plugin.getConfig().set("vampire.allow-vampire-mounts", canRide);
+        this.plugin.saveConfig();
+    }
+
     /**
      * Update the config on whether vampires are given a direction and distance indicator toward new vampires.
      *
