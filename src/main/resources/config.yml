@@ -258,7 +258,7 @@ cure_books_enabled: false
 cure_books_spawn_chance: 0.3
 
 # ============================================================================
-# PASSIVE MOB SPAWNING SYSTEM
+# MOB SPAWNING SYSTEM
 # ============================================================================
 passive-mob-spawning:
   # Enable automatic spawning every in-game morning
@@ -273,6 +273,11 @@ passive-mob-spawning:
   # Number of animals to spawn per cycle (morning auto-spawn or /pow admin spawnanimals)
   # Default: 80
   spawn-count: 100
+
+# Allow NPC mobs to spawn
+# When true, Pillager patrols and Wandering Traders may spawn during active sessions.
+# Default: false (disabled)
+enable-npc-mobs: false
 
 # ============================================================================
 # COMBAT & PERMADEATH SYSTEM

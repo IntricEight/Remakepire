@@ -524,6 +524,15 @@ public class ConfigManager {
     }
 
     /**
+     * Retrieve if NPC mobs (such as pillagers and wandering traders) can spawn naturally
+     *
+     * @return {@code true} if NPC mobs can spawn
+     */
+    public boolean areNpcMobsEnabled() {
+        return this.config.getBoolean("enable-npc-mobs", false);
+    }
+
+    /**
      * Retrieve the highest stage that a vampire can be on and get permakilled.
      *
      * @return The highest permadeath-enabled vampire stage.

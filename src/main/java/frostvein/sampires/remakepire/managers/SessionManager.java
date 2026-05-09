@@ -395,6 +395,22 @@ public class SessionManager {
     }
 
     /**
+     * Update the config on whether NPC mobs such as Pillagers and Wandering Traders can spawn naturally.
+     *
+     * @param enabled {@code true} if NPC mobs can spawn naturally.
+     */
+    public void setNpcSpawningGamerules(boolean enabled) {
+        World world = this.plugin.getWorld();
+
+        // Update the config's setting with the provided preference
+        this.plugin.getConfig().set("enable-npc-mobs", enabled);
+        this.plugin.saveConfig();
+
+        // Update the world's gamerule state
+        this.setNpcSpawningGamerules(world, enabled);
+    }
+
+    /**
      * Update the config on when vampires can be permakilled.
      *
      * @param stage the highest stage that vampires can be permakilled at.
@@ -681,7 +697,8 @@ public class SessionManager {
         world.setGameRule(GameRule.SHOW_DEATH_MESSAGES, false);
         world.setGameRule(GameRule.DO_INSOMNIA, false);
         world.setGameRule(GameRule.DO_IMMEDIATE_RESPAWN, true);
-        world.setGameRule(GameRule.DO_TRADER_SPAWNING, false);
+
+        this.setNpcSpawningGamerules(world, plugin.getConfigManager().areNpcMobsEnabled());
     }
 
     /**
@@ -701,6 +718,8 @@ public class SessionManager {
         world.setGameRule(GameRule.SHOW_DEATH_MESSAGES, false);
         world.setGameRule(GameRule.DO_INSOMNIA, false);
         world.setGameRule(GameRule.DO_IMMEDIATE_RESPAWN, false);
+
+        this.setNpcSpawningGamerules(world, false);
     }
 
     /**
@@ -776,6 +795,17 @@ public class SessionManager {
      */
     public boolean isPreSession() {
         return this.getSessionState() == PRE_SESSION;
+    }
+
+    /**
+     * Set the game rules for whether certain NPC mobs are allowed to spawn.
+     *
+     * @param enabled {@code true} if NPC mobs should be able to spawn naturally.
+     */
+    private void setNpcSpawningGamerules(World world, boolean enabled) {
+        world.setGameRule(GameRule.DO_TRADER_SPAWNING, enabled);
+        world.setGameRule(GameRule.DO_PATROL_SPAWNING, enabled);
+        world.setGameRule(GameRule.DISABLE_RAIDS, enabled);
     }
 
     /**

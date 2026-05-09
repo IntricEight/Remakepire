@@ -253,13 +253,14 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                     senderMessage += "vampire-level-capping§r set to: " + Boolean.parseBoolean(args[1]);
                     break;
 
-                case "stakepermadeathstage":
-                    int stage = Integer.parseInt(args[1]);
-                    if (stage >= 1 && stage <= 3) {
-                        sessionManager.setStakePermadeathMinimumStage(stage);
                 case "new_vampire_tracking":
                     sessionManager.setTrackingNewVampires(Boolean.parseBoolean(args[1]));
                     senderMessage += "new-vampire-tracking§r set to: " + Boolean.parseBoolean(args[1]);
+                    break;
+
+                case "enable_npc_mobs":
+                    sessionManager.setNpcSpawningGamerules(Boolean.parseBoolean(args[1]));
+                    senderMessage += "enable-npc-mobs§r set to: " + Boolean.parseBoolean(args[1]);
                     break;
 
                 case "stake_permadeath_stage":
