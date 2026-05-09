@@ -624,6 +624,15 @@ public class ConfigManager {
     }
 
     /**
+     * Retrieve whether a vampire's sire must be dead before the vampire can be cured.
+     *
+     * @return {@code true} if the sire must be permakilled for the cure to work.
+     */
+    public boolean doCuresRequireSireDeath() {
+        return this.config.getBoolean("cure.sire-death-requirement", true);
+    }
+
+    /**
      * Retrieve whether messages that players send will be blocked until they confirm otherwise.
      *
      * @return {@code true} if the message will be blocked.

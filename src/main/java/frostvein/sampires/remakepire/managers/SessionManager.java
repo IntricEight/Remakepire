@@ -439,6 +439,16 @@ public class SessionManager {
         this.plugin.getConfig().set("chat.alert-on-player-leave", shouldAlert);
         this.plugin.saveConfig();
     }
+
+    /**
+     * Update the config on whether vampires can be cured while their sire lives.
+     *
+     * @param requireDeath {@code true} if the sire must be dead before curing.
+     */
+    public void setCureRequiresSireDeath(boolean requireDeath) {
+        this.plugin.getConfig().set("cure.sire-death-requirement", requireDeath);
+        this.plugin.saveConfig();
+    }
     /**
      * Update the config on whether vampires are given a direction and distance indicator toward new vampires.
      *

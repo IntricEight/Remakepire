@@ -243,6 +243,10 @@ cure:
   # Default: 25
   cure-distance: 25
 
+  # Controls if vampires require their sire to be dead before they can be cured
+  # Default: true (The spawn's Sire must be permakilled)
+  sire-death-requirement: true
+
 # Fourth Cure Book Configuration
 # Controls whether "The Retribution 4/3" book should spawn in tome chests
 # Default: false (disabled)

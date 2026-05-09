@@ -258,6 +258,11 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                     senderMessage += "new-vampire-tracking§r set to: " + Boolean.parseBoolean(args[1]);
                     break;
 
+                case "cure_requires_dead_sire":
+                    sessionManager.setCureRequiresSireDeath(Boolean.parseBoolean(args[1]));
+                    senderMessage += "sire-death-requirement§r set to: " + Boolean.parseBoolean(args[1]);
+                    break;
+
                 case "enable_npc_mobs":
                     sessionManager.setNpcSpawningGamerules(Boolean.parseBoolean(args[1]));
                     senderMessage += "enable-npc-mobs§r set to: " + Boolean.parseBoolean(args[1]);

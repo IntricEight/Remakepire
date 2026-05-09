@@ -89,12 +89,28 @@ public class HolyWaterEffectManager implements Listener {
     }
 
     /**
+     * Search the player's inventory to find a bottle of holy water.
+     *
+     * @param player the player being searched.
+     * @return The bottle of holy water, or {@code null} if none is found.
+     */
+    public ItemStack findHolyWater(Player player) {
+        for (ItemStack item : player.getInventory()) {
+            if (this.isWaterSplashBottle(item)) {
+                return item;
+            }
+        }
+
+        return null;
+    }
+
+    /**
      * Determine if a potion is a splash bottle of water.
      *
      * @param item the item being checked.
      * @return {@code true} if the item does not have potion metadata or is an effectless potion.
      */
-    private boolean isWaterSplashBottle(ItemStack item) {
+    public boolean isWaterSplashBottle(ItemStack item) {
         if (item == null) {
             return false;
         } else if (item.getType() != Material.SPLASH_POTION) {
