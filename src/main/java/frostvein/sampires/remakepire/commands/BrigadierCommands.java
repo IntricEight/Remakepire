@@ -119,7 +119,10 @@ public class BrigadierCommands {
                                                     int amount = IntegerArgumentType.getInteger(ctx, "amount");
                                                     return this.executePowCommand(ctx, "admin", "givetome", player, ability, String.valueOf(amount));
                                                 })))))
-                        .then(Commands.literal("select_tomes")
+                        .then(Commands.literal("select_tomes").executes((ctx) -> {
+                                    String senderName = ctx.getSource().getSender().getName();
+                                    return this.executePowCommand(ctx, "admin", "select_tomes", senderName);
+                                })
                                 .then(Commands.argument("player", StringArgumentType.word()).suggests((ctx, builder) -> this.suggestOnlinePlayers(builder)).executes((ctx) -> {
                                     String player = StringArgumentType.getString(ctx, "player");
                                     return this.executePowCommand(ctx, "admin", "select_tomes", player);
