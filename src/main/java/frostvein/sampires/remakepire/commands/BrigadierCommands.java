@@ -301,10 +301,6 @@ public class BrigadierCommands {
                         .then(Commands.literal("true").executes(ctx -> this.executePowCommand(ctx, "admin", "config", "vampire_level_cap", "true")))
                         .then(Commands.literal("false").executes(ctx -> this.executePowCommand(ctx, "admin", "config", "vampire_level_cap", "false")))
                 )
-                .then(Commands.literal("stakepermadeathstage")
-                        .then(Commands.literal("1").executes(ctx -> this.executePowCommand(ctx, "admin", "config", "stakepermadeathstage", "1")))
-                        .then(Commands.literal("2").executes(ctx -> this.executePowCommand(ctx, "admin", "config", "stakepermadeathstage", "2")))
-                        .then(Commands.literal("3").executes(ctx -> this.executePowCommand(ctx, "admin", "config", "stakepermadeathstage", "3")))
 
                 .then(Commands.literal("new_vampire_tracking").executes(ctx -> this.executePowCommand(ctx, "admin", "config", "new_vampire_tracking"))
                         .then(Commands.literal("true").executes(ctx -> this.executePowCommand(ctx, "admin", "config", "new_vampire_tracking", "true")))
