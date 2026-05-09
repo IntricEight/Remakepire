@@ -222,45 +222,57 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
             return true;
 
         } else {
+            // Store and template the update message to send to the player
+            String senderMessage = "Config for §6";
+
             switch (args[0].toLowerCase()) {
                 case "holywatercap":
+                case "holy_water_cap":
                     sessionManager.setHolyWaterCapping(Boolean.parseBoolean(args[1]));
+                    senderMessage += "holy-water-session-capped§r set to: " + Boolean.parseBoolean(args[1]);
                     break;
 
-                case "newtomecap":
+                case "tome_cap":
                     sessionManager.setTomeAbsorptionCapping(Boolean.parseBoolean(args[1]));
+                    senderMessage += "tome-absorption-capping§r set to: " + Boolean.parseBoolean(args[1]);
                     break;
 
-                case "vampirelevelcap":
-                    boolean isCapping = Boolean.parseBoolean(args[1]);
-                    sessionManager.setVampireLevelCapping(isCapping);
+                case "vampire_level_cap":
+                    sessionManager.setVampireLevelCapping(Boolean.parseBoolean(args[1]));
 
                     // Clear existing promotion and stage bans if capping is being disabled
-                    if (!isCapping) {
+                    if (!Boolean.parseBoolean(args[1])) {
                         plugin.getVampireManager().clearAllPromotionBans();
                         plugin.getVampireManager().clearAllStageCaps();
                     }
 
+                    senderMessage += "vampire-level-capping§r set to: " + Boolean.parseBoolean(args[1]);
                     break;
 
                 case "stakepermadeathstage":
                     int stage = Integer.parseInt(args[1]);
                     if (stage >= 1 && stage <= 3) {
                         sessionManager.setStakePermadeathMinimumStage(stage);
+                case "stake_permadeath_stage":
+                    if (Integer.parseInt(args[1]) >= 1 && Integer.parseInt(args[1]) <= 3) {
+                        sessionManager.setStakePermadeathMinimumStage(Integer.parseInt(args[1]));
+                        senderMessage += "permadeath-minimum-stage§r set to: " + Integer.parseInt(args[1]);
                     } else {
-                        sender.sendMessage("§cInvalid stage! Use 1, 2, or 3");
+                        senderMessage = "§cInvalid stage! Use 1, 2, or 3";
                     }
 
                     break;
 
-                case "humanlifelimit":
+                case "human_life_limit":
                     sessionManager.setHumanLivesEnforced(Boolean.parseBoolean(args[1]));
+                    senderMessage += "enforce-life-limit§r set to: " + Boolean.parseBoolean(args[1]);
                     break;
 
                 default:
-                    sender.sendMessage("§cInvalid configuration. Use: holywatercap, newtomecap, vampirelevelcap, stakepermadeathstage, or humanlifelimit.");
-                    return true;
+                    senderMessage = "§cInvalid configuration. Use \"/pow admin config help\" for a list of config command options.";
             }
+
+            sender.sendMessage(senderMessage);
         }
 
         return true;
@@ -1624,10 +1636,10 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
 
             } else if (command.getName().equalsIgnoreCase("config")) {
                 if (args.length == 1) {
-                    completions.addAll(Arrays.asList("holywatercap", "newtomecap", "vampirelevelcap", "stakepermadeathstage", "humanlifelimit"));
+                    completions.addAll(Arrays.asList("help", "holy_water_cap", "tome_cap", "vampire_level_cap", "stake_permadeath_stage", "human_life_limit"));
 
                 } else if (args.length == 2) {
-                    if (args[0].equals("stakepermadeathstage")) {
+                    if (args[0].equals("stake_permadeath_stage")) {
                         completions.addAll(Arrays.asList("1", "2", "3"));
                     } else {
                         completions.addAll(Arrays.asList("true", "false"));

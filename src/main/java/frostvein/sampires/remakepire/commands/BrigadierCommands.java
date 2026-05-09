@@ -283,23 +283,36 @@ public class BrigadierCommands {
                 .then(Commands.literal("holywatercap")
                         .then(Commands.literal("true").executes(ctx -> this.executePowCommand(ctx, "admin", "config", "holywatercap", "true")))
                         .then(Commands.literal("false").executes(ctx -> this.executePowCommand(ctx, "admin", "config", "holywatercap", "false")))
+                .then(Commands.literal("help").executes(ctx -> this.executePowCommand(ctx, "admin", "config", "help")))
+
+                .then(Commands.literal("holy_water_cap").executes(ctx -> this.executePowCommand(ctx, "admin", "config", "holy_water_cap"))
+                        .then(Commands.literal("true").executes(ctx -> this.executePowCommand(ctx, "admin", "config", "holy_water_cap", "true")))
+                        .then(Commands.literal("false").executes(ctx -> this.executePowCommand(ctx, "admin", "config", "holy_water_cap", "false")))
                 )
-                .then(Commands.literal("newtomecap")
-                        .then(Commands.literal("true").executes(ctx -> this.executePowCommand(ctx, "admin", "config", "newtomecap", "true")))
-                        .then(Commands.literal("false").executes(ctx -> this.executePowCommand(ctx, "admin", "config", "newtomecap", "false")))
+
+                .then(Commands.literal("tome_cap").executes(ctx -> this.executePowCommand(ctx, "admin", "config", "tome_cap"))
+                        .then(Commands.literal("true").executes(ctx -> this.executePowCommand(ctx, "admin", "config", "tome_cap", "true")))
+                        .then(Commands.literal("false").executes(ctx -> this.executePowCommand(ctx, "admin", "config", "tome_cap", "false")))
                 )
-                .then(Commands.literal("vampirelevelcap")
-                        .then(Commands.literal("true").executes(ctx -> this.executePowCommand(ctx, "admin", "config", "vampirelevelcap", "true")))
-                        .then(Commands.literal("false").executes(ctx -> this.executePowCommand(ctx, "admin", "config", "vampirelevelcap", "false")))
+
+                .then(Commands.literal("vampire_level_cap").executes(ctx -> this.executePowCommand(ctx, "admin", "config", "vampire_level_cap"))
+                        .then(Commands.literal("true").executes(ctx -> this.executePowCommand(ctx, "admin", "config", "vampire_level_cap", "true")))
+                        .then(Commands.literal("false").executes(ctx -> this.executePowCommand(ctx, "admin", "config", "vampire_level_cap", "false")))
                 )
                 .then(Commands.literal("stakepermadeathstage")
                         .then(Commands.literal("1").executes(ctx -> this.executePowCommand(ctx, "admin", "config", "stakepermadeathstage", "1")))
                         .then(Commands.literal("2").executes(ctx -> this.executePowCommand(ctx, "admin", "config", "stakepermadeathstage", "2")))
                         .then(Commands.literal("3").executes(ctx -> this.executePowCommand(ctx, "admin", "config", "stakepermadeathstage", "3")))
+
+                .then(Commands.literal("stake_permadeath_stage").executes(ctx -> this.executePowCommand(ctx, "admin", "config", "stake_permadeath_stage"))
+                        .then(Commands.literal("1").executes(ctx -> this.executePowCommand(ctx, "admin", "config", "stake_permadeath_stage", "1")))
+                        .then(Commands.literal("2").executes(ctx -> this.executePowCommand(ctx, "admin", "config", "stake_permadeath_stage", "2")))
+                        .then(Commands.literal("3").executes(ctx -> this.executePowCommand(ctx, "admin", "config", "stake_permadeath_stage", "3")))
                 )
-                .then(Commands.literal("humanlifelimit")
-                        .then(Commands.literal("true").executes(ctx -> this.executePowCommand(ctx, "admin", "config", "humanlifelimit", "true")))
-                        .then(Commands.literal("false").executes(ctx -> this.executePowCommand(ctx, "admin", "config", "humanlifelimit", "false")))
+
+                .then(Commands.literal("human_life_limit").executes(ctx -> this.executePowCommand(ctx, "admin", "config", "human_life_limit"))
+                        .then(Commands.literal("true").executes(ctx -> this.executePowCommand(ctx, "admin", "config", "human_life_limit", "true")))
+                        .then(Commands.literal("false").executes(ctx -> this.executePowCommand(ctx, "admin", "config", "human_life_limit", "false")))
                 );
     }
 

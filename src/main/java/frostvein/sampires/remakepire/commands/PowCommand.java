@@ -195,7 +195,7 @@ public class PowCommand implements CommandExecutor, TabCompleter {
                 if (args.length == 4 && args[1].equalsIgnoreCase("config")) {
                     String configName = args[2].toLowerCase();
 
-                    if (configName.equals("stakepermadeathstage")) {
+                    if (configName.equals("stake_permadeath_stage")) {
                         // Handle vampire permadeath setting with the valid numbers 1, 2 and 3
                         List<String> stageOptions = Arrays.asList("1", "2", "3");
                         return stageOptions.stream().filter((s) -> s.startsWith(args[3].toLowerCase())).collect(Collectors.toList());
