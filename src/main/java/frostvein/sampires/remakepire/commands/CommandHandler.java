@@ -212,6 +212,14 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
      * @return {@code true}
      */
     private boolean handleConfigCommand(CommandSender sender, String[] args) {
+        /* Configuration Commands design
+        * If only 1 argument is passed:
+        * * Retrieve the current config value and give it to the sender.
+        *
+        * If 2 or more arguments are passed:
+        * * Execute a change command, updating the value inside the config.yml file.
+        */
+
         if (args.length < 2) {
             sender.sendMessage("§cUsage: /pow admin config <configuration> <new setting>");
             sender.sendMessage("§7  holywatercap <true/false> - Limit holy water creation");
@@ -220,7 +228,60 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
             sender.sendMessage("§7  stakepermadeathstage <1/2/3> - Set stage that vampires can permadie on");
             sender.sendMessage("§7  humanlifelimit <true/false> - Humans always die on their sixth death");
             return true;
+            switch (args[0].toLowerCase()) {
+                case "help":
+                    sender.sendMessage("§aUsage: /pow admin config <configuration> <new setting>");
+                    sender.sendMessage("§7  alert_on_quit [true|false] - Alert admins when a player leaves");
+                    sender.sendMessage("§7  holy_water_cap [true|false] - Limit holy water creation");
+                    sender.sendMessage("§7  tome_cap [true|false] - Limit new tome abilities absorbed");
+                    sender.sendMessage("§7  vampire_level_cap [true|false] - Prevent vampires from returning to lost levels");
+                    sender.sendMessage("§7  new_vampire_tracking [true|false] - Allow vampires to track down newly created vampires");
+                    sender.sendMessage("§7  allow_vampire_mounts [true|false] - Allow vampires to ride living mounts");
+                    sender.sendMessage("§7  cure_requires_dead_sire [true|false] - Require a sire's permadeath before their spawn can be cured");
+                    sender.sendMessage("§7  enable_npc_mobs [true|false] - Allow NPC mobs to naturally spawn");
+                    sender.sendMessage("§7  stake_permadeath_stage [1|2|3] - Set stage that vampires can permadie on");
+                    sender.sendMessage("§7  human_life_limit [true|false] - Humans always die on their sixth death");
+                    break;
 
+                case "alert_on_quit":
+                    sender.sendMessage("§6alert-on-player-leave§r is currently: " + configManager.shouldAlertOnPlayerQuit());
+                    break;
+
+                case "holy_water_cap":
+                    sender.sendMessage("§6holy-water-session-capped§r is currently: " + configManager.isHolyWaterSessionCapped());
+                    break;
+
+                case "tome_cap":
+                    sender.sendMessage("§6tome-absorption-capping§r is currently: " + configManager.isTomeAbsorptionCapped());
+                    break;
+
+                case "vampire_level_cap":
+                    sender.sendMessage("§6vampire-level-capping§r is currently: " + configManager.isVampireLevelingCapped());
+                    break;
+
+                case "new_vampire_tracking":
+                    sender.sendMessage("§6new_vampire_tracking§r is currently: " + configManager.canTrackNewVampires());
+                    break;
+
+                case "cure_requires_dead_sire":
+                    sender.sendMessage("§6cure_requires_dead_sire§r is currently: " + configManager.doCuresRequireSireDeath());
+                    break;
+
+                case "enable_npc_mobs":
+                    sender.sendMessage("§6enable_npc_mobs§r is currently: " + configManager.areNpcMobsEnabled());
+                    break;
+
+                case "stake_permadeath_stage":
+                    sender.sendMessage("§6permadeath-minimum-stage§r is currently: " + configManager.getPermadeathMinimumStage());
+                    break;
+
+                case "human_life_limit":
+                    sender.sendMessage("§6enforce-life-limit§r is currently: " + configManager.isLifeLimitEnforced());
+                    break;
+
+                default:
+                    sender.sendMessage("§cInvalid configuration. Use \"/pow admin config help\" for a list of config command options.");
+            }
         } else {
             // Store and template the update message to send to the player
             String senderMessage = "Config for §6";
