@@ -73,34 +73,36 @@ public class ForcedVampireCureCommand implements CommandExecutor {
                 long time = caster.getWorld().getTime();
                 boolean isDay = time >= 0L && time < 12300L;
 
+                // Only allow a cure during the day
                 if (!isDay) {
                     caster.sendMessage("§cThe holy words can only be spoken during the day, when the sun's light empowers them.");
-                    return true;
 
                 } else {
-                    ItemStack holyWater = this.findHolyWater(caster);
+                    ItemStack holyWater = this.plugin.getHolyWaterEffectManager().findHolyWater(caster);
 
+                    // Ensure the caster has holy water in their inventory
                     if (holyWater == null) {
                         caster.sendMessage("§cYou need holy water to sanctify the creature with these words.");
-                        return true;
 
                     } else {
+                        // Ensure both caster and target are within cure range of a holy beacon
                         double cureDistance = this.plugin.getConfigManager().getCureBeaconDistance();
                         BeaconSite nearestHolyBeacon = this.beaconManager.getNearestHolyBeacon(caster.getLocation(), cureDistance);
 
+                        // Ensure the caster is within cure range of a holy beacon
                         if (nearestHolyBeacon == null) {
                             caster.sendMessage("§cYou must be close to a holy beacon to channel the divine power of these words.");
-                            return true;
 
                         } else {
                             BeaconSite targetNearestBeacon = this.beaconManager.getNearestHolyBeacon(target.getLocation(), cureDistance);
+
+                            // Ensure the caster and target are within cure range of the same holy beacon
                             if (targetNearestBeacon != null && targetNearestBeacon.equals(nearestHolyBeacon)) {
                                 String sireName = this.sireManager.getSire(target);
 
-                                if (sireName != null && !this.sireManager.isSireDead(target)) {
+                                if (sireName != null && !this.sireManager.canBeCured(target)) {
                                     caster.sendMessage("§4The curse cannot be broken while " + target.getName() + "'s sire, " + sireName + ", still walks the world in mortal form...");
                                     caster.sendMessage("§4The blood bond must be severed through the maker's true death.");
-                                    return true;
 
                                 } else {
                                     holyWater.setAmount(holyWater.getAmount() - 1);
@@ -121,55 +123,17 @@ public class ForcedVampireCureCommand implements CommandExecutor {
                                     targetLoc.getWorld().playSound(targetLoc, Sound.ENTITY_LIGHTNING_BOLT_THUNDER, SoundCategory.PLAYERS, 0.5F, 1.5F);
 
                                     this.plugin.getForcedCureChoiceManager().openChoiceGUI(caster, target, nearestHolyBeacon);
-                                    return true;
                                 }
                             } else {
                                 caster.sendMessage("§cThe creature must also be within the holy beacon's divine light for the ritual to work.");
                                 caster.sendMessage("§7Both you and " + target.getName() + " must be near the same holy beacon.");
-                                return true;
                             }
                         }
                     }
                 }
-            }
-        }
-    }
 
-    private ItemStack findHolyWater(Player player) {
-        for (ItemStack item : player.getInventory()) {
-            if (this.isWaterSplashBottle(item)) {
-                return item;
-            }
-        }
-
-        return null;
-    }
-
-    private boolean isWaterSplashBottle(ItemStack item) {
-        if (item != null && item.getType() == Material.SPLASH_POTION) {
-            if (!item.hasItemMeta()) {
                 return true;
-
-            } else if (!(item.getItemMeta() instanceof PotionMeta)) {
-                return true;
-
-            } else {
-                PotionMeta potionMeta = (PotionMeta)item.getItemMeta();
-
-                if (potionMeta.hasCustomEffects()) {
-                    return false;
-
-                } else {
-                    try {
-                        PotionType baseType = potionMeta.getBasePotionType();
-                        return baseType == PotionType.WATER;
-                    } catch (Exception e) {
-                        return true;
-                    }
-                }
             }
-        } else {
-            return false;
         }
     }
 }

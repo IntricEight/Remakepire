@@ -139,17 +139,17 @@ public class TomeManager {
                 int currentSessionId = this.plugin.getSessionManager().getSessionIDObjective().getScore("session_id_holder").getScore();
                 this.playerTomeUsageSession.put(player.getUniqueId(), currentSessionId);
 
-                // If players aren't being limited to one new tome ability each session, set a timer that allows the human to absorb a new tome after the duration
-                if (!TOME_CAP_ENABLED) {
-                    // Set a timer to remove the player from the tome prevention list after the timer elapses
-                    BukkitTask absorptionCooldonTask = Bukkit.getScheduler().runTaskLater(this.plugin, () -> {
+                // Set a timer to remove the player from the tome prevention list after the timer elapses
+                BukkitTask absorptionCooldonTask = Bukkit.getScheduler().runTaskLater(this.plugin, () -> {
+                    // Only remove the player if tome capping is not enabled. After the timer elapses
+                    if (!TOME_CAP_ENABLED) {
                         this.playerTomeUsageSession.remove(player.getUniqueId());
 
                         if (player.isOnline()) {
                             player.sendMessage("§aYour mind eases, recovered from the strain of ancient knowledge.");
                         }
-                    }, (long)plugin.getConfigManager().getTomeAbsorptionIntervalMinutes() * 20 * 60);
-                }
+                    }
+                }, (long)plugin.getConfigManager().getTomeAbsorptionIntervalMinutes() * 60 * 20);
             }
 
             this.plugin.logInfo("Granted tome ability '" + abilityName + "' to player " + player.getName());

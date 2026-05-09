@@ -17,6 +17,10 @@ chat:
     your chat message, [Click Here]&e. This prevention message will not appear again
     until your next log on if you do choose to send your message via the blue text.'
 
+  # Control if an admin alert is sent when a player leaves the game
+  # Default: true (A message is sent when a player leaves)
+  alert-on-player-leave: true
+
 # ============================================================================
 # TOME CHEST SYSTEM
 # ============================================================================
@@ -129,12 +133,16 @@ vampire:
   # Default: 40,101,-113 (the vampire crypt)
   respawn-location: -1102, -2, -987
 
-  # Set if vampires are stuck when they drop a level during the session
+  # Control if vampires are stuck when they drop a level during the session
   # Choose if vampires are prevented to regaining a blood level for the rest of the active session, or if they can raise and lower their level at will
   # Default: true (Vampires cannot return to lost levels)
   vampire-level-capping: true
 
-  # Set if vampires are negatively affected by silver blocks
+  # Control if vampires get a directional indicator toward new vampires
+  # Default: true (Show directions to new vampires)
+  new-vampire-tracking: true
+
+  # Control if vampires are negatively affected by silver blocks
   # When true (default), high-level vampires are repulsed and weakened by silver-based blocks
   # Does not affect vampire aversion to silver items and damage
   # Default: true
@@ -235,6 +243,10 @@ cure:
   # Default: 25
   cure-distance: 25
 
+  # Controls if vampires require their sire to be dead before they can be cured
+  # Default: true (The spawn's Sire must be permakilled)
+  sire-death-requirement: true
+
 # Fourth Cure Book Configuration
 # Controls whether "The Retribution 4/3" book should spawn in tome chests
 # Default: false (disabled)
@@ -250,7 +262,7 @@ cure_books_enabled: false
 cure_books_spawn_chance: 0.3
 
 # ============================================================================
-# PASSIVE MOB SPAWNING SYSTEM
+# MOB SPAWNING SYSTEM
 # ============================================================================
 passive-mob-spawning:
   # Enable automatic spawning every in-game morning
@@ -265,6 +277,11 @@ passive-mob-spawning:
   # Number of animals to spawn per cycle (morning auto-spawn or /pow admin spawnanimals)
   # Default: 80
   spawn-count: 100
+
+# Allow NPC mobs to spawn
+# When true, Pillager patrols and Wandering Traders may spawn during active sessions.
+# Default: false (disabled)
+enable-npc-mobs: false
 
 # ============================================================================
 # COMBAT & PERMADEATH SYSTEM

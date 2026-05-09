@@ -351,6 +351,15 @@ public class ConfigManager {
     }
 
     /**
+     * Retrieve if vampires are given a direction and distance indicator toward new vampires.
+     *
+     * @return {@code true} if vampires are pointed toward new vampires.
+     */
+    public boolean canTrackNewVampires() {
+        return this.config.getBoolean("vampire.new-vampire-tracking", true);
+    }
+
+    /**
      * Retrieve the baseline complete beacon conversion time for a single player.
      *
      * @return the milliseconds it takes to convert a beacon from one side's alignment into the others.
@@ -515,6 +524,15 @@ public class ConfigManager {
     }
 
     /**
+     * Retrieve if NPC mobs (such as pillagers and wandering traders) can spawn naturally
+     *
+     * @return {@code true} if NPC mobs can spawn
+     */
+    public boolean areNpcMobsEnabled() {
+        return this.config.getBoolean("enable-npc-mobs", false);
+    }
+
+    /**
      * Retrieve the highest stage that a vampire can be on and get permakilled.
      *
      * @return The highest permadeath-enabled vampire stage.
@@ -606,6 +624,15 @@ public class ConfigManager {
     }
 
     /**
+     * Retrieve whether a vampire's sire must be dead before the vampire can be cured.
+     *
+     * @return {@code true} if the sire must be permakilled for the cure to work.
+     */
+    public boolean doCuresRequireSireDeath() {
+        return this.config.getBoolean("cure.sire-death-requirement", true);
+    }
+
+    /**
      * Retrieve whether messages that players send will be blocked until they confirm otherwise.
      *
      * @return {@code true} if the message will be blocked.
@@ -621,6 +648,15 @@ public class ConfigManager {
      */
     public String getFirstMessageBlockedMessage() {
         return this.config.getString("chat.first-message-blocked-message", "&eIt looks like you've attempted to send a message! Vampire SMP is geared to revolve around immersion, consider finding the person you need to speak to, or messaging them on discord. If you still need to send your chat message, [Click Here]&e. This prevention message will not appear again until your next log on if you do choose to send your message via the blue text.");
+    }
+
+    /**
+     * Retrieve if a message should be sent to all Operators when a player leaves the game.
+     *
+     * @return {@code true} if an alert message should be sent.
+     */
+    public boolean shouldAlertOnPlayerQuit() {
+        return this.config.getBoolean("chat.alert-on-player-leave", true);
     }
 
     /**

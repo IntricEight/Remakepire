@@ -55,78 +55,48 @@ public class VampireCureCommand implements CommandExecutor {
             long time = player.getWorld().getTime();
             boolean isDay = time >= 0L && time < 12300L;
 
+            // Only allow a cure during the day
             if (!isDay) {
                 player.sendMessage("§cThis ritual can only be performed during the day.");
-                return true;
             } else {
-                ItemStack holyWater = this.findHolyWater(player);
+                ItemStack holyWater = this.plugin.getHolyWaterEffectManager().findHolyWater(player);
+
+                // Ensure the caster has holy water in their inventory
                 if (holyWater == null) {
                     player.sendMessage("§cYou need holy water to perform this ritual.");
-                    return true;
 
                 } else {
+                    // Ensure the caster is within cure range of a holy beacon
                     double cureDistance = this.plugin.getConfigManager().getCureBeaconDistance();
                     BeaconSite nearestHolyBeacon = this.beaconManager.getNearestHolyBeacon(player.getLocation(), cureDistance);
 
                     if (nearestHolyBeacon == null) {
                         player.sendMessage("§cYou must be close to a holy beacon to perform this ritual.");
-                        return true;
 
                     } else {
                         String sireName = this.sireManager.getSire(player);
 
-                        if (sireName != null && !this.sireManager.isSireDead(player)) {
+                        if (sireName != null && !this.sireManager.canBeCured(player)) {
                             player.sendMessage("§4The curse cannot be broken while your sire, " + sireName + ", still walks the world in mortal form...");
                             player.sendMessage("§4Only through your maker's true death can you find release.");
-                            return true;
-
                         } else {
                             this.performCure(player, holyWater, nearestHolyBeacon);
-                            return true;
                         }
                     }
                 }
             }
+
+            return true;
         }
     }
 
-    private ItemStack findHolyWater(Player player) {
-        for (ItemStack item : player.getInventory()) {
-            if (this.isWaterSplashBottle(item)) {
-                return item;
-            }
-        }
-
-        return null;
-    }
-
-    private boolean isWaterSplashBottle(ItemStack item) {
-        if (item != null && item.getType() == Material.SPLASH_POTION) {
-            if (!item.hasItemMeta()) {
-                return true;
-
-            } else if (!(item.getItemMeta() instanceof PotionMeta)) {
-                return true;
-            } else {
-                PotionMeta potionMeta = (PotionMeta)item.getItemMeta();
-
-                if (potionMeta.hasCustomEffects()) {
-                    return false;
-                } else {
-                    try {
-                        PotionType baseType = potionMeta.getBasePotionType();
-                        return baseType == PotionType.WATER;
-
-                    } catch (Exception e) {
-                        return true;
-                    }
-                }
-            }
-        } else {
-            return false;
-        }
-    }
-
+    /**
+     * Cure the player of vampirism and destroy the beacon and holy water used for the process.
+     *
+     * @param player the vampire being cured.
+     * @param holyWater the bottle of holy water being expended.
+     * @param holyBeacon the beacon being used for the cure.
+     */
     private void performCure(Player player, ItemStack holyWater, BeaconSite holyBeacon) {
         Location playerLoc = player.getLocation();
         Location beaconLoc = holyBeacon.getLocation();
@@ -139,6 +109,7 @@ public class VampireCureCommand implements CommandExecutor {
         player.sendMessage("§aYou are cured. You are human once more.");
         player.sendMessage("§8But the holy site has been permanently corrupted by your dark presence...");
 
+        // Alert all players that a vampire has been cured
         for(Player onlinePlayer : Bukkit.getOnlinePlayers()) {
             if (!onlinePlayer.equals(player)) {
                 if (this.vampireManager.isVampire(onlinePlayer)) {
@@ -149,6 +120,7 @@ public class VampireCureCommand implements CommandExecutor {
             }
         }
 
+        // Create the visual and audio effects of the cure working on the vampire
         player.getWorld().spawnParticle(Particle.SOUL, playerLoc, 100, 1.0, 2.0, 1.0, 0.1);
         player.getWorld().spawnParticle(Particle.EXPLOSION_EMITTER, playerLoc, 1, 0.5, 1.0, 0.5, 0.0);
         player.getWorld().spawnParticle(Particle.EXPLOSION_EMITTER, playerLoc, 5, 1.0, 1.0, 1.0, 0.0);
@@ -156,6 +128,7 @@ public class VampireCureCommand implements CommandExecutor {
         player.getWorld().playSound(playerLoc, Sound.BLOCK_GLASS_BREAK, SoundCategory.MASTER, 1.0F, 1.0F);
         player.getWorld().playSound(playerLoc, Sound.AMBIENT_SOUL_SAND_VALLEY_MOOD, SoundCategory.MASTER, 1.0F, 1.5F);
 
+        // Create the particle effects of destroying the beacon
         if (beaconLoc != null) {
             player.getWorld().spawnParticle(Particle.LARGE_SMOKE, beaconLoc.clone().add(0.0, 1.5, 0.0), 50, 0.5, 1.0, 0.5, 0.05);
             player.getWorld().spawnParticle(Particle.SMOKE, beaconLoc.clone().add(0.0, 1.5, 0.0), 30, 0.3, 0.8, 0.3, 0.02);
@@ -181,6 +154,9 @@ public class VampireCureCommand implements CommandExecutor {
         DeathHandler.checkAndAnnounceTeamElimination(this.plugin, false, true);
     }
 
+    /**
+     * Determine if all functioning beacons are currently desecrated.
+     */
     private void checkIfAllBeaconsEvil() {
         int evilCount = this.beaconManager.getAllEvilBeacons().size();
         int totalBeacons = this.beaconManager.getAllBeacons().size();

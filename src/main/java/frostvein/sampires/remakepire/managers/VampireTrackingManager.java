@@ -41,6 +41,10 @@ public class VampireTrackingManager {
             this.stopTracking(newVampireId);
             this.mostRecentVampireId = newVampireId;
 
+            // Check if the new vampire should be tracked
+            // Done out here instead of inside the task to reduce the config checks
+            boolean shouldTrack = this.plugin.getConfigManager().canTrackNewVampires();
+
             BukkitTask trackingTask = (new BukkitRunnable() {
                 int ticksRemaining = TRACKING_DURATION_SECONDS * 20;
 
@@ -51,7 +55,7 @@ public class VampireTrackingManager {
                         Player trackedPlayer = Bukkit.getPlayer(newVampireId);
 
                         if (trackedPlayer != null && trackedPlayer.isOnline()) {
-                            VampireTrackingManager.this.updateTrackingForAllVampires(trackedPlayer);
+                            VampireTrackingManager.this.updateTrackingForAllVampires(trackedPlayer, shouldTrack);
                             this.ticksRemaining -= UPDATE_INTERVAL_TICKS;
                         } else {
                             VampireTrackingManager.this.stopTracking(newVampireId);
@@ -70,21 +74,28 @@ public class VampireTrackingManager {
      *
      * @param trackedVampire the newly turned player.
      */
-    private void updateTrackingForAllVampires(Player trackedVampire) {
+    private void updateTrackingForAllVampires(Player trackedVampire, boolean trackLocation) {
         if (this.mostRecentVampireId == null || trackedVampire.getUniqueId().equals(this.mostRecentVampireId)) {
             Location trackedLocation = trackedVampire.getLocation();
             final ConversionAssistant conversionAssistant = new ConversionAssistant();
 
             for(Player vampire : Bukkit.getOnlinePlayers()) {
                 if (this.vampireManager.isVampire(vampire) && !vampire.getUniqueId().equals(trackedVampire.getUniqueId()) && vampire.getWorld().equals(trackedVampire.getWorld()) && (this.plugin.getVampireFeedingManager() == null || !this.plugin.getVampireFeedingManager().isFeeding(vampire))) {
-                    Location vampireLocation = vampire.getLocation();
+                    String message;
 
-                    double deltaX = trackedLocation.getX() - vampireLocation.getX();
-                    double deltaZ = trackedLocation.getZ() - vampireLocation.getZ();
-                    double distance = Math.sqrt(deltaX * deltaX + deltaZ * deltaZ);
+                    // Only give directions if that feature is enabled
+                    if (trackLocation) {
+                        Location vampireLocation = vampire.getLocation();
 
-                    String direction = conversionAssistant.getRelativeDirection(deltaX, deltaZ, vampireLocation.getYaw());
-                    String message = String.format("§4New Vampire: §f%s §7(§f%.0f blocks§7)", direction, distance);
+                        double deltaX = trackedLocation.getX() - vampireLocation.getX();
+                        double deltaZ = trackedLocation.getZ() - vampireLocation.getZ();
+                        double distance = Math.sqrt(deltaX * deltaX + deltaZ * deltaZ);
+
+                        String direction = conversionAssistant.getRelativeDirection(deltaX, deltaZ, vampireLocation.getYaw());
+                        message = String.format("§4New Vampire: §f%s §7(§f%.0f blocks§7)", direction, distance);
+                    } else {
+                        message = "§4§lNew Vampire";
+                    }
 
                     this.plugin.getSessionManager().sendActionBar(vampire, message);
                 }

@@ -36,12 +36,14 @@ import frostvein.sampires.remakepire.beacons.BeaconSite;
 import frostvein.sampires.remakepire.beacons.BeaconSite.BeaconState;
 import frostvein.sampires.remakepire.listeners.CureBookReadingListener;
 import frostvein.sampires.remakepire.managers.BeaconManager;
+import frostvein.sampires.remakepire.managers.ConfigManager;
 import frostvein.sampires.remakepire.managers.SessionManager;
 import frostvein.sampires.remakepire.managers.TomeManager;
 import frostvein.sampires.remakepire.managers.VampireManager;
 
 public class CommandHandler implements CommandExecutor, TabCompleter {
     private final RemakepirePlugin plugin;
+    private final ConfigManager configManager;
     private final SessionManager sessionManager;
     private final VampireManager vampireManager;
     private final BeaconManager beaconManager;
@@ -49,6 +51,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
 
     public CommandHandler(RemakepirePlugin plugin) {
         this.plugin = plugin;
+        this.configManager = plugin.getConfigManager();
         this.sessionManager = plugin.getSessionManager();
         this.vampireManager = plugin.getVampireManager();
         this.beaconManager = plugin.getBeaconManager();
@@ -69,9 +72,9 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         } else if (command.getName().equalsIgnoreCase("beacon")) {
             return this.handleBeaconCommand(sender, args);
         } else if (command.getName().equalsIgnoreCase("vampirecooldowns")) {
-            return this.handleCooldownCommand(sender, args);
+            return this.handleVampireCooldownCommand(sender, args);
         } else if (command.getName().equalsIgnoreCase("resettomecooldowns")) {
-            return this.handleResetTomeCooldownsCommand(sender, args);
+            return this.handleResetTomeCooldownCommand(sender, args);
         } else if (command.getName().equalsIgnoreCase("onehumanleft")) {
             return this.handleOneHumanLeftCommand(sender, args);
         } else if (command.getName().equalsIgnoreCase("vampirehealthcheck")) {
@@ -106,6 +109,10 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
             return this.handleListTomeChestsCommand(sender, args);
         } else if (command.getName().equalsIgnoreCase("resetplayer")) {
             return this.handleResetPlayerCommand(sender, args);
+        } else if (command.getName().equalsIgnoreCase("config")) {
+            // Allow admins to change some elements within the configuration file without needing to restart the server
+            return this.handleConfigCommand(sender, args);
+
         } else {
             return command.getName().equalsIgnoreCase("set_vampire_spawn") ? this.handleSetVampireSpawnCommand(sender, args) : false;
         }
@@ -197,6 +204,153 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         }
     }
 
+    /**
+     * Execute commands sent using the config admin options.
+     *
+     * @param sender the admin who entered the command.
+     * @param args the command arguments.
+     * @return {@code true}
+     */
+    private boolean handleConfigCommand(CommandSender sender, String[] args) {
+        /* Configuration Commands design
+        * If only 1 argument is passed:
+        * * Retrieve the current config value and give it to the sender.
+        *
+        * If 2 or more arguments are passed:
+        * * Execute a change command, updating the value inside the config.yml file.
+        */
+
+        if (args.length < 2) {
+            switch (args[0].toLowerCase()) {
+                case "help":
+                    sender.sendMessage("§aUsage: /pow admin config <configuration> <new setting>");
+                    sender.sendMessage("§7  alert_on_quit [true|false] - Alert admins when a player leaves");
+                    sender.sendMessage("§7  holy_water_cap [true|false] - Limit holy water creation");
+                    sender.sendMessage("§7  tome_cap [true|false] - Limit new tome abilities absorbed");
+                    sender.sendMessage("§7  vampire_level_cap [true|false] - Prevent vampires from returning to lost levels");
+                    sender.sendMessage("§7  new_vampire_tracking [true|false] - Allow vampires to track down newly created vampires");
+                    sender.sendMessage("§7  allow_vampire_mounts [true|false] - Allow vampires to ride living mounts");
+                    sender.sendMessage("§7  cure_requires_dead_sire [true|false] - Require a sire's permadeath before their spawn can be cured");
+                    sender.sendMessage("§7  enable_npc_mobs [true|false] - Allow NPC mobs to naturally spawn");
+                    sender.sendMessage("§7  stake_permadeath_stage [1|2|3] - Set stage that vampires can permadie on");
+                    sender.sendMessage("§7  human_life_limit [true|false] - Humans always die on their sixth death");
+                    break;
+
+                case "alert_on_quit":
+                    sender.sendMessage("§6alert-on-player-leave§r is currently: " + configManager.shouldAlertOnPlayerQuit());
+                    break;
+
+                case "holy_water_cap":
+                    sender.sendMessage("§6holy-water-session-capped§r is currently: " + configManager.isHolyWaterSessionCapped());
+                    break;
+
+                case "tome_cap":
+                    sender.sendMessage("§6tome-absorption-capping§r is currently: " + configManager.isTomeAbsorptionCapped());
+                    break;
+
+                case "vampire_level_cap":
+                    sender.sendMessage("§6vampire-level-capping§r is currently: " + configManager.isVampireLevelingCapped());
+                    break;
+
+                case "new_vampire_tracking":
+                    sender.sendMessage("§6new_vampire_tracking§r is currently: " + configManager.canTrackNewVampires());
+                    break;
+
+                case "allow_vampire_mounts":
+                    sender.sendMessage("§6allow_vampire_mounts§r is currently: " + configManager.canVampiresRideLivingMounts());
+                    break;
+
+                case "cure_requires_dead_sire":
+                    sender.sendMessage("§6cure_requires_dead_sire§r is currently: " + configManager.doCuresRequireSireDeath());
+                    break;
+
+                case "enable_npc_mobs":
+                    sender.sendMessage("§6enable_npc_mobs§r is currently: " + configManager.areNpcMobsEnabled());
+                    break;
+
+                case "stake_permadeath_stage":
+                    sender.sendMessage("§6permadeath-minimum-stage§r is currently: " + configManager.getPermadeathMinimumStage());
+                    break;
+
+                case "human_life_limit":
+                    sender.sendMessage("§6enforce-life-limit§r is currently: " + configManager.isLifeLimitEnforced());
+                    break;
+
+                default:
+                    sender.sendMessage("§cInvalid configuration. Use \"/pow admin config help\" for a list of config command options.");
+            }
+        } else {
+            // Store and template the update message to send to the player
+            String senderMessage = "Config for §6";
+
+            switch (args[0].toLowerCase()) {
+                case "alert_on_quit":
+                    sessionManager.setAlertOnPlayerQuit(Boolean.parseBoolean(args[1]));
+                    senderMessage += "alert-on-player-leave§r set to: " + Boolean.parseBoolean(args[1]);
+                    break;
+
+                case "holy_water_cap":
+                    sessionManager.setHolyWaterCapping(Boolean.parseBoolean(args[1]));
+                    senderMessage += "holy-water-session-capped§r set to: " + Boolean.parseBoolean(args[1]);
+                    break;
+
+                case "tome_cap":
+                    sessionManager.setTomeAbsorptionCapping(Boolean.parseBoolean(args[1]));
+                    senderMessage += "tome-absorption-capping§r set to: " + Boolean.parseBoolean(args[1]);
+                    break;
+
+                case "vampire_level_cap":
+                    sessionManager.setVampireLevelCapping(Boolean.parseBoolean(args[1]));
+
+                    // Clear existing promotion and stage bans if capping is being disabled
+                    if (!Boolean.parseBoolean(args[1])) {
+                        plugin.getVampireManager().clearAllPromotionBans();
+                        plugin.getVampireManager().clearAllStageCaps();
+                    }
+
+                    senderMessage += "vampire-level-capping§r set to: " + Boolean.parseBoolean(args[1]);
+                    break;
+
+                case "new_vampire_tracking":
+                    sessionManager.setTrackingNewVampires(Boolean.parseBoolean(args[1]));
+                    senderMessage += "new-vampire-tracking§r set to: " + Boolean.parseBoolean(args[1]);
+                    break;
+
+                case "cure_requires_dead_sire":
+                    sessionManager.setCureRequiresSireDeath(Boolean.parseBoolean(args[1]));
+                    senderMessage += "sire-death-requirement§r set to: " + Boolean.parseBoolean(args[1]);
+                    break;
+
+                case "enable_npc_mobs":
+                    sessionManager.setNpcSpawningGamerules(Boolean.parseBoolean(args[1]));
+                    senderMessage += "enable-npc-mobs§r set to: " + Boolean.parseBoolean(args[1]);
+                    break;
+
+                case "stake_permadeath_stage":
+                    if (Integer.parseInt(args[1]) >= 1 && Integer.parseInt(args[1]) <= 3) {
+                        sessionManager.setStakePermadeathMinimumStage(Integer.parseInt(args[1]));
+                        senderMessage += "permadeath-minimum-stage§r set to: " + Integer.parseInt(args[1]);
+                    } else {
+                        senderMessage = "§cInvalid stage! Use 1, 2, or 3";
+                    }
+
+                    break;
+
+                case "human_life_limit":
+                    sessionManager.setHumanLivesEnforced(Boolean.parseBoolean(args[1]));
+                    senderMessage += "enforce-life-limit§r set to: " + Boolean.parseBoolean(args[1]);
+                    break;
+
+                default:
+                    senderMessage = "§cInvalid configuration. Use \"/pow admin config help\" for a list of config command options.";
+            }
+
+            sender.sendMessage(senderMessage);
+        }
+
+        return true;
+    }
+
     private boolean handleSetVampireSpawnCommand(CommandSender sender, String[] args) {
         double x, y, z;
 
@@ -248,7 +402,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         }
     }
 
-    private boolean handleCooldownCommand(CommandSender sender, String[] args) {
+    private boolean handleVampireCooldownCommand(CommandSender sender, String[] args) {
         if (args.length == 0) {
             sender.sendMessage("§cUsage: /pow admin vampirecooldowns <reset|clear> [player]");
             sender.sendMessage("§7- /pow admin vampirecooldowns reset §8- Reset all cooldowns for all online players");
@@ -297,15 +451,29 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         this.plugin.getVampireAbilityManager().clearGlobalCooldowns();
     }
 
-    private boolean handleResetTomeCooldownsCommand(CommandSender sender, String[] args) {
+    private boolean handleResetTomeCooldownCommand(CommandSender sender, String[] args) {
         int humansAffected = 0;
 
-        for(Player player : Bukkit.getOnlinePlayers()) {
-            if (this.plugin.getVampireManager().isHuman(player)) {
-                TomeAbility.clearAllCooldowns(player);
-                player.removeScoreboardTag("blessing_used_session");
-                player.removeScoreboardTag("stopthebleeding_used_session");
-                player.sendMessage("§aYour tome ability cooldowns have been reset by an administrator.");
+        // Handle the cooldown command for individual players
+        if (args.length == 0) {
+            for(Player player : Bukkit.getOnlinePlayers()) {
+                if (this.plugin.getVampireManager().isHuman(player)) {
+                    TomeAbility.clearAllCooldowns(player);
+                    player.removeScoreboardTag("blessing_used_session");
+                    player.removeScoreboardTag("stopthebleeding_used_session");
+                    player.sendMessage("§aYour tome ability cooldowns have been reset by an administrator.");
+                    ++humansAffected;
+                }
+            }
+        } else {
+            // Handle the cooldown command for a single player
+            Player target = Bukkit.getPlayer(args[0]);
+
+            if (target != null && this.plugin.getVampireManager().isHuman(target)) {
+                TomeAbility.clearAllCooldowns(target);
+                target.removeScoreboardTag("blessing_used_session");
+                target.removeScoreboardTag("stopthebleeding_used_session");
+                target.sendMessage("§aYour tome ability cooldowns have been reset by an administrator.");
                 ++humansAffected;
             }
         }
@@ -341,37 +509,33 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
 
                     if (newTicks < 1) {
                         sender.sendMessage("§cInterval must be at least 1 tick.");
-                        return true;
-
                     } else {
                         this.sessionManager.setVampireHealthCheckTicks(newTicks);
                         double seconds = newTicks / 20.0;
                         sender.sendMessage("§aVampire Health Check Interval set to: §e" + newTicks + " ticks §7(" + seconds + " seconds)");
                         sender.sendMessage("§7Changes saved to config and take effect immediately");
-                        return true;
                     }
                 } catch (NumberFormatException e) {
                     sender.sendMessage("§cInvalid number: " + args[1]);
-                    return true;
                 }
             } else {
                 sender.sendMessage("§cUsage: /pow admin vampirehealthcheck [get|set] [ticks]");
                 sender.sendMessage("§7- /pow admin vampirehealthcheck get §8- Show current interval");
                 sender.sendMessage("§7- /pow admin vampirehealthcheck set <ticks> §8- Set new interval");
                 sender.sendMessage("§7Current: §e" + this.sessionManager.getVampireHealthCheckTicks() + " ticks");
-                return true;
             }
         } else {
             int currentTicks = this.sessionManager.getVampireHealthCheckTicks();
             sender.sendMessage("§aVampire Health Check Interval: §e" + currentTicks + " ticks §7(" + (currentTicks / 20) + " seconds)");
-            return true;
         }
+
+        return true;
     }
 
     private boolean handleBreakWarningCommand(CommandSender sender, String[] args) {
         sender.sendMessage("§ePlaying first warning sound for all players...");
 
-        // Send the first warning noisee (crows)
+        // Send the first warning noise (crows)
         for(Player player : Bukkit.getOnlinePlayers()) {
             player.playSound(player.getLocation(), "crimson:crimson.sound.crimson_warning_1", SoundCategory.MASTER, 1.0F, 1.0F);
         }
@@ -1529,19 +1693,32 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
 
             } else if (command.getName().equalsIgnoreCase("vampire")) {
                 if (args.length == 1) {
-                    for(Player player : Bukkit.getOnlinePlayers()) {
+                    for (Player player : Bukkit.getOnlinePlayers()) {
                         completions.add(player.getName());
                     }
                 } else if (args.length == 2) {
                     completions.addAll(Arrays.asList("human", "1", "2", "3", "turn", "clearcap", "clearban"));
 
                 } else if (args.length == 3 && args[1].equalsIgnoreCase("turn")) {
-                    for(Player player : Bukkit.getOnlinePlayers()) {
+                    for (Player player : Bukkit.getOnlinePlayers()) {
                         if (this.vampireManager.isVampire(player)) {
                             completions.add(player.getName());
                         }
                     }
                 }
+
+            } else if (command.getName().equalsIgnoreCase("config")) {
+                if (args.length == 1) {
+                    completions.addAll(Arrays.asList("help", "alert_on_quit", "holy_water_cap", "tome_cap", "vampire_level_cap", "new_vampire_tracking", "allow_vampire_mounts", "cure_requires_dead_sire", "enable_npc_mobs", "stake_permadeath_stage", "human_life_limit"));
+
+                } else if (args.length == 2) {
+                    if (args[0].equals("stake_permadeath_stage")) {
+                        completions.addAll(Arrays.asList("1", "2", "3"));
+                    } else {
+                        completions.addAll(Arrays.asList("true", "false"));
+                    }
+                }
+
             } else if (command.getName().equalsIgnoreCase("beacon")) {
                 if (args.length == 1) {
                     completions.addAll(Arrays.asList("add", "remove", "list", "info", "stats", "reload", "validate", "holy", "desecrated", "neutral", "fix", "refresh", "cleanup", "clearcooldowns", "debug"));

@@ -36,16 +36,6 @@ public class VampireSireManager {
     }
 
     /**
-     * Add a sire relation to the game sire mappings.
-     *
-     * @param vampireName the fledgling vampire's name.
-     * @param sireName the vampire sire's name.
-     */
-    private void putSire(String vampireName, String sireName) {
-        this.sireMap.put(vampireName.toLowerCase(), sireName);
-    }
-
-    /**
      * Retrieve the sire of the vampire.
      *
      * @param vampire the vampire whose sire is being retrieved.
@@ -84,7 +74,8 @@ public class VampireSireManager {
      * @return {@code true} if the vampire is curable.
      */
     public boolean canBeCured(Player vampire) {
-        return this.isSireDead(vampire);
+        // Allow the cure if either the sire death requirement is disabled, or the vampire's sire is dead
+        return !this.plugin.getConfigManager().doCuresRequireSireDeath() || this.isSireDead(vampire);
     }
 
     /**

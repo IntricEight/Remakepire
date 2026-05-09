@@ -163,7 +163,7 @@ public class SessionManager {
     private String getSessionStatusMessage() {
         return switch (this.getSessionState()) {
             case BEFORE_SESSION -> "§e§lSession is primed and ready to start";
-            case IN_SESSION -> "§7§lSession status unknown";
+            case IN_SESSION -> "§7§lSession is currently active";
             case PAUSED -> "§6§lSession is currently paused";
             case AFTER_SESSION -> "§c§lSession has ended";
             case PRE_SESSION -> "§b§lBuilding Mode - interactions enabled";
@@ -361,6 +361,101 @@ public class SessionManager {
      */
     public void setVampireHealthCheckTicks(int ticks) {
         this.plugin.getConfig().set("vampire_health_check_ticks", Math.max(1, ticks));
+        this.plugin.saveConfig();
+    }
+
+    /**
+     * Update the config on whether tome ability absorptions should be capped per session.
+     *
+     * @param capped {@code true} if tome absorption should be capped to one each session.
+     */
+    public void setTomeAbsorptionCapping(boolean capped) {
+        this.plugin.getConfig().set("tome-absorption.tome-absorption-capping", capped);
+        this.plugin.saveConfig();
+    }
+
+    /**
+     * Update the config on whether vampires can return to lost levels during a session.
+     *
+     * @param capped {@code true} if vampire levels should be restricted upon dropping a level.
+     */
+    public void setVampireLevelCapping(boolean capped) {
+        this.plugin.getConfig().set("vampire.vampire-level-capping", capped);
+        this.plugin.saveConfig();
+    }
+
+    /**
+     * Update the config on whether multiple bottles of holy water can be created in a single session
+     *
+     * @param capped {@code true} if only a single holy water can be made by each player each session.
+     */
+    public void setHolyWaterCapping(boolean capped) {
+        this.plugin.getConfig().set("holy-water.holy-water-session-capped", capped);
+        this.plugin.saveConfig();
+    }
+
+    /**
+     * Update the config on whether NPC mobs such as Pillagers and Wandering Traders can spawn naturally.
+     *
+     * @param enabled {@code true} if NPC mobs can spawn naturally.
+     */
+    public void setNpcSpawningGamerules(boolean enabled) {
+        World world = this.plugin.getWorld();
+
+        // Update the config's setting with the provided preference
+        this.plugin.getConfig().set("enable-npc-mobs", enabled);
+        this.plugin.saveConfig();
+
+        // Update the world's gamerule state
+        this.setNpcSpawningGamerules(world, enabled);
+    }
+
+    /**
+     * Update the config on when vampires can be permakilled.
+     *
+     * @param stage the highest stage that vampires can be permakilled at.
+     */
+    public void setStakePermadeathMinimumStage(int stage) {
+        this.plugin.getConfig().set("combat.permadeath-minimum-stage", Math.max(1, stage));
+        this.plugin.saveConfig();
+    }
+
+    /**
+     * Update the config on whether humans require a vampire to kill them to permanently die.
+     *
+     * @param capped {@code true} if humans will be permakilled on their sixth death, regardless of the cause.
+     */
+    public void setHumanLivesEnforced(boolean capped) {
+        this.plugin.getConfig().set("combat.enforce-life-limit", capped);
+        this.plugin.saveConfig();
+    }
+
+    /**
+     * Update the config on whether Operators should be alerted when a player quits the game.
+     *
+     * @param shouldAlert {@code true} if Operators should be messaged.
+     */
+    public void setAlertOnPlayerQuit(boolean shouldAlert) {
+        this.plugin.getConfig().set("chat.alert-on-player-leave", shouldAlert);
+        this.plugin.saveConfig();
+    }
+
+    /**
+     * Update the config on whether vampires can be cured while their sire lives.
+     *
+     * @param requireDeath {@code true} if the sire must be dead before curing.
+     */
+    public void setCureRequiresSireDeath(boolean requireDeath) {
+        this.plugin.getConfig().set("cure.sire-death-requirement", requireDeath);
+        this.plugin.saveConfig();
+    }
+    /**
+     * Update the config on whether vampires are given a direction and distance indicator toward new vampires.
+     *
+     * @param track {@code true} if vampires are given directions to the new vampire.
+     */
+    public void setTrackingNewVampires(boolean track) {
+        this.plugin.getConfig().set("vampire.new-vampire-tracking", track);
         this.plugin.saveConfig();
     }
 
@@ -612,7 +707,8 @@ public class SessionManager {
         world.setGameRule(GameRule.SHOW_DEATH_MESSAGES, false);
         world.setGameRule(GameRule.DO_INSOMNIA, false);
         world.setGameRule(GameRule.DO_IMMEDIATE_RESPAWN, true);
-        world.setGameRule(GameRule.DO_TRADER_SPAWNING, false);
+
+        this.setNpcSpawningGamerules(world, plugin.getConfigManager().areNpcMobsEnabled());
     }
 
     /**
@@ -632,6 +728,8 @@ public class SessionManager {
         world.setGameRule(GameRule.SHOW_DEATH_MESSAGES, false);
         world.setGameRule(GameRule.DO_INSOMNIA, false);
         world.setGameRule(GameRule.DO_IMMEDIATE_RESPAWN, false);
+
+        this.setNpcSpawningGamerules(world, false);
     }
 
     /**
@@ -707,6 +805,17 @@ public class SessionManager {
      */
     public boolean isPreSession() {
         return this.getSessionState() == PRE_SESSION;
+    }
+
+    /**
+     * Set the game rules for whether certain NPC mobs are allowed to spawn.
+     *
+     * @param enabled {@code true} if NPC mobs should be able to spawn naturally.
+     */
+    private void setNpcSpawningGamerules(World world, boolean enabled) {
+        world.setGameRule(GameRule.DO_TRADER_SPAWNING, enabled);
+        world.setGameRule(GameRule.DO_PATROL_SPAWNING, enabled);
+        world.setGameRule(GameRule.DISABLE_RAIDS, enabled);
     }
 
     /**
