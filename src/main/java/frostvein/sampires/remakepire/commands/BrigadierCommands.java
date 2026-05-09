@@ -280,10 +280,12 @@ public class BrigadierCommands {
 
     private LiteralArgumentBuilder<CommandSourceStack> buildConfigSubcommand() {
         return Commands.literal("config")
-                .then(Commands.literal("holywatercap")
-                        .then(Commands.literal("true").executes(ctx -> this.executePowCommand(ctx, "admin", "config", "holywatercap", "true")))
-                        .then(Commands.literal("false").executes(ctx -> this.executePowCommand(ctx, "admin", "config", "holywatercap", "false")))
                 .then(Commands.literal("help").executes(ctx -> this.executePowCommand(ctx, "admin", "config", "help")))
+
+                .then(Commands.literal("alert_on_quit").executes(ctx -> this.executePowCommand(ctx, "admin", "config", "alert_on_quit"))
+                        .then(Commands.literal("true").executes(ctx -> this.executePowCommand(ctx, "admin", "config", "alert_on_quit", "true")))
+                        .then(Commands.literal("false").executes(ctx -> this.executePowCommand(ctx, "admin", "config", "alert_on_quit", "false")))
+                )
 
                 .then(Commands.literal("holy_water_cap").executes(ctx -> this.executePowCommand(ctx, "admin", "config", "holy_water_cap"))
                         .then(Commands.literal("true").executes(ctx -> this.executePowCommand(ctx, "admin", "config", "holy_water_cap", "true")))

@@ -624,6 +624,15 @@ public class ConfigManager {
     }
 
     /**
+     * Retrieve if a message should be sent to all Operators when a player leaves the game.
+     *
+     * @return {@code true} if an alert message should be sent.
+     */
+    public boolean shouldAlertOnPlayerQuit() {
+        return this.config.getBoolean("chat.alert-on-player-leave", true);
+    }
+
+    /**
      * Retrieve the default location where vampires will respawn after dying.
      *
      * @param world the world hosting the plugin interactions.

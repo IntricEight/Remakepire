@@ -414,6 +414,15 @@ public class SessionManager {
         this.plugin.saveConfig();
     }
 
+    /**
+     * Update the config on whether Operators should be alerted when a player quits the game.
+     *
+     * @param shouldAlert {@code true} if Operators should be messaged.
+     */
+    public void setAlertOnPlayerQuit(boolean shouldAlert) {
+        this.plugin.getConfig().set("chat.alert-on-player-leave", shouldAlert);
+        this.plugin.saveConfig();
+    }
     public void incrementSessionID() {
         this.sessionIDObjective.getScore("session_id_holder").setScore(this.sessionIDObjective.getScore("session_id_holder").getScore() + 1);
         this.updateAllPlayersSessionIDs();

@@ -226,7 +226,11 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
             String senderMessage = "Config for §6";
 
             switch (args[0].toLowerCase()) {
-                case "holywatercap":
+                case "alert_on_quit":
+                    sessionManager.setAlertOnPlayerQuit(Boolean.parseBoolean(args[1]));
+                    senderMessage += "alert-on-player-leave§r set to: " + Boolean.parseBoolean(args[1]);
+                    break;
+
                 case "holy_water_cap":
                     sessionManager.setHolyWaterCapping(Boolean.parseBoolean(args[1]));
                     senderMessage += "holy-water-session-capped§r set to: " + Boolean.parseBoolean(args[1]);

@@ -17,6 +17,10 @@ chat:
     your chat message, [Click Here]&e. This prevention message will not appear again
     until your next log on if you do choose to send your message via the blue text.'
 
+  # Control if an admin alert is sent when a player leaves the game
+  # Default: true (A message is sent when a player leaves)
+  alert-on-player-leave: true
+
 # ============================================================================
 # TOME CHEST SYSTEM
 # ============================================================================
