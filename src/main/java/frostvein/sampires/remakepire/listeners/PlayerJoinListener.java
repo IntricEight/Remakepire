@@ -107,12 +107,15 @@ public class PlayerJoinListener implements Listener {
     public void onPlayerQuit(PlayerQuitEvent event) {
         Player player = event.getPlayer();
 
-        for(Player potentialOp : this.plugin.getWorld().getPlayers()) {
-            if (potentialOp.isOp()) {
-                if (this.plugin.getSessionManager().isSessionActive()) {
-                    potentialOp.sendMessage("Note: " + event.getPlayer().getName() + " has left during an active session. Consider pausing the session if this was unintended.");
-                } else {
-                    potentialOp.sendMessage("Note: " + event.getPlayer().getName() + " has left. Perhaps do not start/resume session until they return.");
+        // If leave alerts are active, alert admins when a player quits the game
+        if (plugin.getConfigManager().shouldAlertOnPlayerQuit()) {
+            for (Player potentialOp : this.plugin.getWorld().getPlayers()) {
+                if (potentialOp.isOp()) {
+                    if (this.plugin.getSessionManager().isSessionActive()) {
+                        potentialOp.sendMessage("Note: " + event.getPlayer().getName() + " has left during an active session. Consider pausing the session if this was unintended.");
+                    } else {
+                        potentialOp.sendMessage("Note: " + event.getPlayer().getName() + " has left. Perhaps do not start/resume session until they return.");
+                    }
                 }
             }
         }

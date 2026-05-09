@@ -351,6 +351,15 @@ public class ConfigManager {
     }
 
     /**
+     * Retrieve if vampires are given a direction and distance indicator toward new vampires.
+     *
+     * @return {@code true} if vampires are pointed toward new vampires.
+     */
+    public boolean canTrackNewVampires() {
+        return this.config.getBoolean("vampire.new-vampire-tracking", true);
+    }
+
+    /**
      * Retrieve the baseline complete beacon conversion time for a single player.
      *
      * @return the milliseconds it takes to convert a beacon from one side's alignment into the others.

@@ -423,6 +423,16 @@ public class SessionManager {
         this.plugin.getConfig().set("chat.alert-on-player-leave", shouldAlert);
         this.plugin.saveConfig();
     }
+    /**
+     * Update the config on whether vampires are given a direction and distance indicator toward new vampires.
+     *
+     * @param track {@code true} if vampires are given directions to the new vampire.
+     */
+    public void setTrackingNewVampires(boolean track) {
+        this.plugin.getConfig().set("vampire.new-vampire-tracking", track);
+        this.plugin.saveConfig();
+    }
+
     public void incrementSessionID() {
         this.sessionIDObjective.getScore("session_id_holder").setScore(this.sessionIDObjective.getScore("session_id_holder").getScore() + 1);
         this.updateAllPlayersSessionIDs();

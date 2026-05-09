@@ -138,7 +138,10 @@ vampire:
   # Default: true (Vampires cannot return to lost levels)
   vampire-level-capping: true
 
-  # Set if vampires are negatively affected by silver blocks
+  # Control if vampires get a directional indicator toward new vampires
+  # Default: true (Show directions to new vampires)
+  new-vampire-tracking: true
+
   # Control if vampires are negatively affected by silver blocks
   # When true (default), high-level vampires are repulsed and weakened by silver-based blocks
   # Does not affect vampire aversion to silver items and damage

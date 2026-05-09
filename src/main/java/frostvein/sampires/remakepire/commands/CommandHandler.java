@@ -257,6 +257,11 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                     int stage = Integer.parseInt(args[1]);
                     if (stage >= 1 && stage <= 3) {
                         sessionManager.setStakePermadeathMinimumStage(stage);
+                case "new_vampire_tracking":
+                    sessionManager.setTrackingNewVampires(Boolean.parseBoolean(args[1]));
+                    senderMessage += "new-vampire-tracking§r set to: " + Boolean.parseBoolean(args[1]);
+                    break;
+
                 case "stake_permadeath_stage":
                     if (Integer.parseInt(args[1]) >= 1 && Integer.parseInt(args[1]) <= 3) {
                         sessionManager.setStakePermadeathMinimumStage(Integer.parseInt(args[1]));
