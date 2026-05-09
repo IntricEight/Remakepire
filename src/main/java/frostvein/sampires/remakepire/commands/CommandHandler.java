@@ -1709,7 +1709,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
 
             } else if (command.getName().equalsIgnoreCase("config")) {
                 if (args.length == 1) {
-                    completions.addAll(Arrays.asList("help", "holy_water_cap", "tome_cap", "vampire_level_cap", "stake_permadeath_stage", "human_life_limit"));
+                    completions.addAll(Arrays.asList("help", "alert_on_quit", "holy_water_cap", "tome_cap", "vampire_level_cap", "new_vampire_tracking", "allow_vampire_mounts", "cure_requires_dead_sire", "enable_npc_mobs", "stake_permadeath_stage", "human_life_limit"));
 
                 } else if (args.length == 2) {
                     if (args[0].equals("stake_permadeath_stage")) {
