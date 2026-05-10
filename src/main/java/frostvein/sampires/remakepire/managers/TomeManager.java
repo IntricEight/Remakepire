@@ -293,7 +293,7 @@ public class TomeManager {
             ++slot;
         }
 
-        this.addCureBookToGUI(gui, target, 45, "CureBook1Read", "§5Cure Book 1", "The Remedy 1/3");
+        this.addCureBookToGUI(gui, target, 45, "CureBook1Read", "§5Cure Book 1", "A Study on Blood");
         this.addCureBookToGUI(gui, target, 46, "CureBook2Read", "§5Cure Book 2", "The Cure 2/3");
         this.addCureBookToGUI(gui, target, 47, "CureBook3Read", "§5Cure Book 3", "The Absolution 3/3");
         this.addCureBookToGUI(gui, target, 48, "CureBook4Read", "§5Cure Book 4", "The Retribution 4/3");

@@ -1303,9 +1303,34 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         if (meta != null) {
             switch (bookNum) {
                 case 1:
-                    meta.setTitle("The Remedy 1/3");
-                    meta.setAuthor("§5An ancient scholar");
-                    meta.setPages("§5§lTHE REMEDY§r\n§8Part I of III\n\n§7In the darkest hours, when the cursed blood burns within your veins, know that salvation exists.\n\n§7The ancients spoke of a trinity of knowledge...", "§7...that when combined, can sever the unholy bond between mortal and monster.\n\n§7This is the first piece of that forbidden wisdom.\n\n§8Read on, seeker of the light...");
+                    meta.setTitle("A Study on Blood");    // The Remedy 1/3
+                    meta.setAuthor("§5Fernida Penfield");
+                    meta.setPages("§4§lA Study on Blood§r\n" +
+                            "§0§lIntroduction§r\n" +
+                            "Over the course of this book I, Fernida Penfield, shall enquire into the effects of Sanguine blood on Humans as well as other Creatures. I will focus on the fields of Sanguine Conjuration, Thralling, and Sanguine Biology.",
+                            "§o[The chapter on Thralling seems to have been torn out]§r",
+                            "§4§lChapter 2:§r§4\n" +
+                            "§r§0Sanguine Conjuration§r\n\n" +
+                            "Sanguine Conjuration is the act of transforming or altering living things via the insertion of Vampiric or Deific blood. As a general principal, experimentation into conjuration should be taken with extreme",
+                            "caution as Sanguine creations tend to be larger, more aggressive, and stronger than their mundane variants. For this purpose I have created a series of cells for containing test subjects. I will now list a series of experiments I have conducted and their results.",
+                            "EXPERIMENT LOG 1\n" +
+                            "Subject: Common Dairy Cow.\n" +
+                            "Result:\n" +
+                            "The subject began to develop a remarkably human lower body, unfortunately its organs failed to develop properly and it perspired four hours after the introduction of Blood.",
+                            "EXPERIMENT LOG 2\n" +
+                            "Subject: Pig\n" +
+                            "Result:\n" +
+                            "The subject has been developing nicely growing largely, stronger and a touch more intelligent, strangely it's body shows signs of decay, although it is not dying. §7§oThis is the one.\nMeet me in the mines\nYou know the spot~ PS§r",
+                            "§8§oAgreed, this will work nicely. I'll bring the Sulfates and zinc dust the book recommends. What's the plan once its ready? release it in the mines and run like hell? ~ LS §r\n§7§oPretty much. ~ PS§r",
+                            "§o[The remaining experiment logs are either too damaged to read or uninteresting]§r",
+                            "§4§lChapter 3:§r\n" +
+                            "§0Sanguine Biology§r\n\n" +
+                            "Regardless of whether they are a Vampire or a god, my tests has proven a definitive link between the blood of Sire and a fledgling.\n" +
+                            "Introducing the blood of a sire to a fledgling seems to have a limited",
+                            "reg ne ati e eff . I b   e e th s can in effec pre n t e   ing of a sang  ne bei altogether, quite curi inde  . in ad    n to     t  s ho y water is     al  st certainly key to \"c     \" san uine b  \n\n" +
+                            "§o[The rest of the writing is completely illegible]§r");
+
+//                    meta.setPages("§5§lTHE REMEDY§r\n§8Part I of III\n\n§7In the darkest hours, when the cursed blood burns within your veins, know that salvation exists.\n\n§7The ancients spoke of a trinity of knowledge...", "§7...that when combined, can sever the unholy bond between mortal and monster.\n\n§7This is the first piece of that forbidden wisdom.\n\n§8Read on, seeker of the light...");
                     break;
                 case 2:
                     meta.setTitle("The Cure 2/3");
