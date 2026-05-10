@@ -1350,7 +1350,6 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
 
             List<String> lore = new ArrayList<>();
             lore.add("§5An ancient tome of forbidden knowledge");
-            lore.add("§7Part " + bookNum + " of the cure series");
             lore.add("");
             lore.add("§eRead this book to absorb its wisdom");
 

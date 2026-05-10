@@ -231,7 +231,7 @@ public class TomeListener implements Listener {
         boolean hasTag = target.getScoreboardTags().contains(tag);
 
         String friendlyName = switch (tag) {
-            case "CureBook1Read" -> "Cure Book 1 (The Remedy)";
+            case "CureBook1Read" -> "Cure Book 1 (A Study on Blood)";
             case "CureBook2Read" -> "Cure Book 2 (The Cure)";
             case "CureBook3Read" -> "Cure Book 3 (The Absolution)";
             case "CureBook4Read" -> "Cure Book 4 (The Retribution)";

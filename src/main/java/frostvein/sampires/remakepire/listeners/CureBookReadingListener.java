@@ -80,7 +80,7 @@ public class CureBookReadingListener implements Listener {
                 case BOOK_NUM_REMEDY:
                     if (!player.getScoreboardTags().contains(TAG_CURE_BOOK_1)) {
                         tagToAdd = TAG_CURE_BOOK_1;
-                        bookName = "The Remedy";
+                        bookName = "A Study on Blood";
                         isNewTag = true;
                     }
 
@@ -120,7 +120,15 @@ public class CureBookReadingListener implements Listener {
 
             if (tagToAdd != null && isNewTag) {
                 player.addScoreboardTag(tagToAdd);
-                player.sendMessage("§8§o[You absorb the ancient knowledge within " + bookName + "...]");
+
+                // Send a custom message for each cure book
+                if (tagToAdd.equals(TAG_CURE_BOOK_1)) {
+                    player.sendMessage("§8§o[You feel as if you have found the first part of a greater mystery]");
+                } else {
+                    // TODO: Add more areas for each tome as Cleo gives more specifications
+                    player.sendMessage("§8§o[You absorb the ancient knowledge within " + bookName + "...]");
+                }
+
                 this.plugin.logInfo("CURE BOOK READ: " + player.getName() + " read book #" + bookNumber);
 
                 if (bookNumber != BOOK_NUM_RETRIBUTION && hasReadAllCureBooks(player)) {

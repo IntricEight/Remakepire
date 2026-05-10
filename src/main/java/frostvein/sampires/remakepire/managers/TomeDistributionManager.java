@@ -340,7 +340,6 @@ public class TomeDistributionManager {
 
             List<String> lore = new ArrayList<>();
             lore.add("§5An ancient tome of forbidden knowledge");
-            lore.add("§7Part " + bookNumber + " of the cure series");
             lore.add("");
             lore.add("§eRead this book to absorb its wisdom");
 

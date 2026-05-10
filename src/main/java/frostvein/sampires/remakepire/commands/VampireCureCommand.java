@@ -44,7 +44,7 @@ public class VampireCureCommand implements CommandExecutor {
 
         } else if (!CureBookReadingListener.hasReadAllCureBooks(player)) {
             player.sendMessage("§cYou do not know these ancient words...");
-            player.sendMessage("§7You must first read all three cure books to learn the ritual.");
+            player.sendMessage("§7Within three ancient tomes lie the secrets to this ritual.");
             return true;
 
         } else if (!this.vampireManager.isVampire(player)) {
