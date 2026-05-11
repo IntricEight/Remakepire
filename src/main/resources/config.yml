@@ -323,7 +323,7 @@ oakhurst:
   # Town name
   # Used for all instances where the town's name is used
   # Default: "Oakhurst"
-  town-name: "Oakhurst"
+  town-name: "Thornewood"
 
   # Town center (the main settlement location)
   # Used for teleportation and direction-based abilities like Uncanny Direction

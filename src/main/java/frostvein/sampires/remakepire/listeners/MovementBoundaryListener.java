@@ -94,12 +94,21 @@ implements Listener {
 
             return;
         }
+
         if (!canLeave && crossedBoundary) {
             event.setCancelled(true);
 
             if (!player.getScoreboardTags().contains("informed_boundary")) {
                 player.addScoreboardTag("informed_boundary");
-                String blockedMessage = !this.plugin.getVampireManager().isHuman(player) ? (this.areAllBeaconsDesecrated() ? "§4But while humans remain... Hope still stands..." : "§cYou feel a force tying you to " + TOWN_NAME + "... You may not leave while an enemy's beacon remains... But one that has embraced darkness, and yet has found strength to return to the light... Could escape...") : (this.areAllBeaconsHoly() ? "§aBut while evil creatures still walk " + TOWN_NAME + ", your job is not yet finished..." : "§cYou feel a force tying you to " + TOWN_NAME + "... You may not leave while an enemy's beacon remains... But one that has embraced darkness, and yet has found strength to return to the light... Could escape...");
+                String blockedMessage =
+                        !this.plugin.getVampireManager().isHuman(player)
+                        ? (this.areAllBeaconsDesecrated()
+                            ? "§4But while humans remain... Hope still stands..."
+                            : "§cA spiritual force stops you from leaving the area. You have stepped into the Fairy Circle that is the town of " + TOWN_NAME + ", and now that you have, the fae won't let you leave unless the Holy Lights are in perfect harmony.")
+                        : (this.areAllBeaconsHoly()
+                            ? "§aBut while evil creatures still walk " + TOWN_NAME + ", your job is not yet finished..."
+                            : "§cA spiritual force stops you from leaving the area. You have stepped into the Fairy Circle that is the town of " + TOWN_NAME + ", and now that you have, the fae won't let you leave unless the Holy Lights are in perfect harmony.");
+
                 player.sendMessage(blockedMessage);
             }
         }
