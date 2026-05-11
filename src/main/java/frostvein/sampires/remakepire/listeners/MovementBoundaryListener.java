@@ -33,73 +33,72 @@ implements Listener {
     @EventHandler
     public void onPlayerMove(PlayerMoveEvent event) {
         Player player = event.getPlayer();
-        Location to = event.getTo();
+        Location to = event.getTo(), from = event.getFrom();;
 
-        if (to == null) {
-            return;
-        }
-
-        Location from = event.getFrom();
-
-        if (from.getBlockX() == to.getBlockX() && from.getBlockY() == to.getBlockY() && from.getBlockZ() == to.getBlockZ()) {
-            return;
-        }
-
+        // Creative mode players can move uninhibited beyond the border
         if (player.getGameMode() == GameMode.CREATIVE) {
             return;
         }
 
-        double minX = this.plugin.getConfigManager().getBorderMinX();
-        double maxX = this.plugin.getConfigManager().getBorderMaxX();
-        double minZ = this.plugin.getConfigManager().getBorderMinZ();
-        double maxZ = this.plugin.getConfigManager().getBorderMaxZ();
+        // End the event check early if the player has not moved from their previous position
+        if (from.getBlockX() == to.getBlockX() && from.getBlockY() == to.getBlockY() && from.getBlockZ() == to.getBlockZ()) {
+            return;
+        }
 
+        double minX = this.plugin.getConfigManager().getBorderMinX(), minZ = this.plugin.getConfigManager().getBorderMinZ();
+        double maxX = this.plugin.getConfigManager().getBorderMaxX(), maxZ = this.plugin.getConfigManager().getBorderMaxZ();
         double toX = to.getX(), toZ = to.getZ();
         double fromX = from.getX(), fromZ = from.getZ();
 
+        // Determine the condition of the player's movement attempt regarding the border
         boolean wasInsideBoundary = fromX >= minX && fromX <= maxX && fromZ >= minZ && fromZ <= maxZ;
         boolean isOutsideBoundary = toX < minX || toX > maxX || toZ < minZ || toZ > maxZ;
-        boolean crossedBoundary = toX < minX || toX > maxX || toZ < minZ || toZ > maxZ;
+
         boolean canLeave = false;
         String leaveMessage = null;
 
+        // Tune the freedom message based on the player's condition and alignment
         if (player.getScoreboardTags().contains("CuredVampire")) {
             canLeave = true;
             leaveMessage = "§6You are leaving " + TOWN_NAME + "...\n§eThe familiar lands fade behind you as you venture beyond the border.";
 
         } else if (!this.plugin.getVampireManager().isHuman(player)) {
-            if (this.areAllBeaconsDesecrated() && !this.anySurvivalModeHumansExist()) {
+            if (this.areAllBeaconsDesecrated() && !this.anySurvivingHumansExist()) {
                 canLeave = true;
                 leaveMessage = "§4You are free of your chains, creature of the night...";
-
-            } else if (this.areAllBeaconsDesecrated()) {
-                canLeave = false;
             }
-        } else if (this.areAllBeaconsHoly() && !this.anySurvivalModeVampiresExist()) {
+        } else if (this.areAllBeaconsHoly() && !this.anySurvivingVampiresExist()) {
             canLeave = true;
             leaveMessage = "§aYou are free... Finally free...";
-
-        } else if (this.areAllBeaconsHoly()) {
-            canLeave = false;
         }
 
+        // Send the leave message to the player if they have legally escaped beyond the border
         if (canLeave && wasInsideBoundary && isOutsideBoundary) {
             if (!player.getScoreboardTags().contains("LeftOakhurst")) {
                 player.addScoreboardTag("LeftOakhurst");
-
-                if (leaveMessage != null) {
-                    player.sendMessage(leaveMessage);
-                }
+                player.sendMessage(leaveMessage);
             }
 
             return;
         }
-        if (!canLeave && crossedBoundary) {
+
+        // Prevent the player from passing the border, and inform them on why they are denied freedom
+        if (!canLeave && isOutsideBoundary) {
             event.setCancelled(true);
 
+            // Only inform the player a single time on the border condition
             if (!player.getScoreboardTags().contains("informed_boundary")) {
+                String blockedMessage;
                 player.addScoreboardTag("informed_boundary");
-                String blockedMessage = !this.plugin.getVampireManager().isHuman(player) ? (this.areAllBeaconsDesecrated() ? "§4But while humans remain... Hope still stands..." : "§cYou feel a force tying you to " + TOWN_NAME + "... You may not leave while an enemy's beacon remains... But one that has embraced darkness, and yet has found strength to return to the light... Could escape...") : (this.areAllBeaconsHoly() ? "§aBut while evil creatures still walk " + TOWN_NAME + ", your job is not yet finished..." : "§cYou feel a force tying you to " + TOWN_NAME + "... You may not leave while an enemy's beacon remains... But one that has embraced darkness, and yet has found strength to return to the light... Could escape...");
+
+                if (this.plugin.getVampireManager().isVampire(player) && this.areAllBeaconsDesecrated()) {
+                    blockedMessage = "§4But while humans remain... Hope still stands...";
+                } else if (this.plugin.getVampireManager().isHuman(player) && this.areAllBeaconsHoly()) {
+                    blockedMessage = "§aBut while evil creatures still walk " + TOWN_NAME + ", your job is not yet finished...";
+                } else {
+                    blockedMessage = "§cYou feel a force tying you to " + TOWN_NAME + "... You may not leave while an enemy's beacon remains... But one that has embraced darkness, and yet has found strength to return to the light... Could escape...";
+                }
+
                 player.sendMessage(blockedMessage);
             }
         }
@@ -163,12 +162,13 @@ implements Listener {
 
     /**
      * Determine if all humans have been defeated.
+     * Checks if any human players are in survival or adventure mode.
      *
      * @return {@code true} if there are no survival-mode humans online.
      */
-    private boolean anySurvivalModeHumansExist() {
+    private boolean anySurvivingHumansExist() {
         for (Player onlinePlayer : this.plugin.getServer().getOnlinePlayers()) {
-            if (onlinePlayer.getGameMode() != GameMode.SURVIVAL || !this.plugin.getVampireManager().isHuman(onlinePlayer)) continue;
+            if (onlinePlayer.getGameMode() != GameMode.SURVIVAL || onlinePlayer.getGameMode() != GameMode.ADVENTURE || !this.plugin.getVampireManager().isHuman(onlinePlayer)) continue;
             return true;
         }
 
@@ -177,12 +177,13 @@ implements Listener {
 
     /**
      * Determine if all vampires have been defeated.
+     * Checks if any vampire players are in survival or adventure mode.
      *
      * @return {@code true} if there are no survival-mode vampires online.
      */
-    private boolean anySurvivalModeVampiresExist() {
+    private boolean anySurvivingVampiresExist() {
         for (Player onlinePlayer : this.plugin.getServer().getOnlinePlayers()) {
-            if (onlinePlayer.getGameMode() != GameMode.SURVIVAL || this.plugin.getVampireManager().isHuman(onlinePlayer)) continue;
+            if (onlinePlayer.getGameMode() != GameMode.SURVIVAL || onlinePlayer.getGameMode() != GameMode.ADVENTURE || this.plugin.getVampireManager().isHuman(onlinePlayer)) continue;
             return true;
         }
 
