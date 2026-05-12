@@ -208,7 +208,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
      * Execute commands sent using the config admin options.
      *
      * @param sender the admin who entered the command.
-     * @param args the command arguments.
+     * @param args the arguments attached to the command.
      * @return {@code true}
      */
     private boolean handleConfigCommand(CommandSender sender, String[] args) {
