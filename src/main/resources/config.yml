@@ -150,6 +150,7 @@ vampire:
 
   # Control if vampires can mount animals, such as pigs and horses
   # Exceptions are made for undead mounts, such as skeleton horses
+  # Humans are prevented from riding these undead mounts
   # Default: true (all mounts are allowed)
   allow-vampire-mounts: true
 
