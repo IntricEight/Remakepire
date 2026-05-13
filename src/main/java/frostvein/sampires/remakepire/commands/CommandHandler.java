@@ -224,16 +224,16 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
             switch (args[0].toLowerCase()) {
                 case "help":
                     sender.sendMessage("§aUsage: /pow admin config <configuration> <new setting>");
-                    sender.sendMessage("§7  alert_on_quit [true|false] - Alert admins when a player leaves");
-                    sender.sendMessage("§7  holy_water_cap [true|false] - Limit holy water creation");
-                    sender.sendMessage("§7  tome_cap [true|false] - Limit new tome abilities absorbed");
-                    sender.sendMessage("§7  vampire_level_cap [true|false] - Prevent vampires from returning to lost levels");
-                    sender.sendMessage("§7  new_vampire_tracking [true|false] - Allow vampires to track down newly created vampires");
-                    sender.sendMessage("§7  allow_vampire_mounts [true|false] - Allow vampires to ride living mounts");
-                    sender.sendMessage("§7  cure_requires_dead_sire [true|false] - Require a sire's permadeath before their spawn can be cured");
-                    sender.sendMessage("§7  enable_npc_mobs [true|false] - Allow NPC mobs to naturally spawn");
-                    sender.sendMessage("§7  stake_permadeath_stage [1|2|3] - Set stage that vampires can permadie on");
-                    sender.sendMessage("§7  human_life_limit [true|false] - Humans always die on their sixth death");
+                    sender.sendMessage("§e  alert_on_quit [true|false] §7- Alert admins when a player leaves");
+                    sender.sendMessage("§e  holy_water_cap [true|false] §7- Limit holy water creation");
+                    sender.sendMessage("§e  tome_cap [true|false] §7- Limit new tome abilities absorbed");
+                    sender.sendMessage("§e  vampire_level_cap [true|false] §7- Prevent vampires from returning to lost levels");
+                    sender.sendMessage("§e  new_vampire_tracking [true|false] §7- Allow vampires to track down newly created vampires");
+                    sender.sendMessage("§e  allow_vampire_mounts [true|false] §7- Allow vampires to ride living mounts");
+                    sender.sendMessage("§e  cure_requires_dead_sire [true|false] §7- Require a sire's permadeath before their spawn can be cured");
+                    sender.sendMessage("§e  enable_npc_mobs [true|false] §7- Allow NPC mobs to naturally spawn");
+                    sender.sendMessage("§e  stake_permadeath_stage [1|2|3] §7- Set stage that vampires can permadie on");
+                    sender.sendMessage("§e  human_life_limit [true|false] §7- Humans always die on their sixth death");
                     break;
 
                 case "alert_on_quit":
