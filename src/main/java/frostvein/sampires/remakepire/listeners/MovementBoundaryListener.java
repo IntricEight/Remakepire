@@ -33,14 +33,24 @@ implements Listener {
     }
 
     /**
-     * Prevent players from leaving the border surrounding the game map until leaving conditions are met.
+     * Prevent players from leaving the border surrounding the game map until leaving conditions are met.<br/>
+     * This triggers on movement from players controlling their character's movement directly as well as players controlling a mount's movement.
      *
      * @param event a player moving.
      */
     @EventHandler
     public void onPlayerMove(PlayerMoveEvent event) {
         Player player = event.getPlayer();
-        Location to = event.getTo(), from = event.getFrom();
+        Entity mount = player.getVehicle();
+
+        Location to, from = event.getFrom();
+
+        // Prevent excessive rubber-banding due to the player's location being slightly different from the mount's
+        if (mount != null) {
+            to = mount.getLocation();
+        } else {
+            to = event.getTo();
+        }
 
         // Creative mode players can move uninhibited beyond the border
         if (player.getGameMode() == GameMode.CREATIVE) {
@@ -75,13 +85,21 @@ implements Listener {
 
         // Prevent the player from passing the border, and inform them on why they are denied freedom
         if (!canLeave && isOutsideBoundary) {
-            event.setCancelled(true);
+            // Depending on whether the player is mounted or not, different methods must be used to stop their movement
+            if (mount != null) {
+                mount.teleport(from);
+                mount.setVelocity(new Vector(0, 0, 0));
+            } else {
+                event.setCancelled(true);
+            }
+
             this.informPlayerOnBlockedExit(player);
         }
     }
 
     /**
-     * Prevent players from leaving the border surrounding the game map using vehicles until leaving conditions are met.
+     * Prevent players from leaving the border surrounding the game map using vehicles until leaving conditions are met.<br/>
+     * This triggers on movement from inside a vehicle like a minecart or a boat.
      *
      * @param event a vehicle (minecart, boat, etc.) moving.
      */
@@ -163,7 +181,9 @@ implements Listener {
     }
 
     /**
-     * Prevent players from leaving the border surrounding the game map using mounts until leaving conditions are met.
+     * Prevent players from leaving the border surrounding the game map using idle mounts until leaving conditions are met.<br/>
+     * This triggers on movement done by mobs not being actively steered by a player. This function therefore prevents idling mobs from
+     * taking the player outside the game map.
      *
      * @param event a non-player entity moving.
      */
