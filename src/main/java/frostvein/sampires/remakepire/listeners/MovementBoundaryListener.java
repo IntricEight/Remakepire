@@ -11,7 +11,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.entity.Vehicle;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityMountEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.event.vehicle.VehicleEnterEvent;
 import org.bukkit.event.vehicle.VehicleMoveEvent;
 import frostvein.sampires.remakepire.RemakepirePlugin;
 import frostvein.sampires.remakepire.beacons.BeaconSite;
@@ -52,8 +54,8 @@ implements Listener {
             to = event.getTo();
         }
 
-        // Creative mode players can move uninhibited beyond the border
-        if (player.getGameMode() == GameMode.CREATIVE) {
+        // Determine if the player's game mode should let them ignore the border
+        if (this.getGameModeOverride(player)) {
             return;
         }
 
@@ -135,8 +137,8 @@ implements Listener {
         for (Entity passenger : vehicle.getPassengers()) {
             // Determine if the passenger is a player who should be prevented from leaving the border
             if (passenger instanceof Player player) {
-                // Creative mode players can move uninhibited beyond the border
-                if (player.getGameMode() == GameMode.CREATIVE) continue;
+                // Determine if the player's game mode should let them ignore the border
+                if (this.getGameModeOverride(player)) continue;
 
                 // Determine if this player can leave the border
                 if (this.meetsLeaveCondition(player)) {
@@ -219,8 +221,8 @@ implements Listener {
         for (Entity passenger : entity.getPassengers()) {
             // Determine if the passenger is a player who should be prevented from leaving the border
             if (passenger instanceof Player player) {
-                // Creative mode players can move uninhibited beyond the border
-                if (player.getGameMode() == GameMode.CREATIVE) continue;
+                // Determine if the player's game mode should let them ignore the border
+                if (this.getGameModeOverride(player)) continue;
 
                 // Determine if this player can leave the border
                 if (this.meetsLeaveCondition(player)) {
@@ -261,6 +263,61 @@ implements Listener {
             }
         }
     }
+
+    /**
+     * Prevent players from leaving the border by entering a vehicle outside the border.
+     *
+     * @param event a vehicle is being entered.
+     */
+    @EventHandler
+    public void onVehicleEnter(VehicleEnterEvent event) {
+        // Only proceed if a player is attempting to ride a vehicle
+        if (!(event.getEntered() instanceof Player player)) {
+            return;
+        }
+
+        // Determine if the player's game mode should let them ignore the border
+        if (this.getGameModeOverride(player)) {
+            return;
+        }
+
+        // Determine whether the vehicle can be entered based on its location and the player's condition
+        boolean canRide = this.isInsideBoundary(event.getVehicle().getLocation()) || this.meetsLeaveCondition(player);
+
+        // Let the player mount uninhibited if inside the game boundaries, or if they are allowed to leave
+        if (!canRide) {
+            event.setCancelled(true);
+        }
+    }
+
+
+    /**
+     * Prevent players from leaving the border by mounting onto an entity outside the border.
+     *
+     * @param event an entity is being mounted.
+     */
+    @EventHandler
+    public void onEntityMount(EntityMountEvent event) {
+        // Only proceed if a player is attempting to mount an entity
+        if (!(event.getEntity() instanceof Player player)) {
+            return;
+        }
+
+        // Determine if the player's game mode should let them ignore the border
+        if (this.getGameModeOverride(player)) {
+            return;
+        }
+
+        // Determine whether the mount can be ridden based on their location and the player's condition
+        boolean canMount = this.isInsideBoundary(event.getMount().getLocation()) || this.meetsLeaveCondition(player);
+
+        // Let the player mount uninhibited if inside the game boundaries, or if they are allowed to leave
+        if (!canMount) {
+            event.setCancelled(true);
+        }
+    }
+
+
 
     /**
      * Check if all beacons have been desecrated.
@@ -436,7 +493,15 @@ implements Listener {
         return "§aDespite all odds, you have slipped beyond the beacon's grasp and escaped.";
     }
 
-
-
+    /**
+     * Determine if the player's game mode should allow them to ignore the game boundaries.
+     *
+     * @param player the player being checked.
+     * @return {@code true} if the player can ignore the border.
+     */
+    private boolean getGameModeOverride(Player player) {
+        // Creative mode players can move uninhibited beyond the border
+        return player.getGameMode() == GameMode.CREATIVE;
+    }
 }
 
