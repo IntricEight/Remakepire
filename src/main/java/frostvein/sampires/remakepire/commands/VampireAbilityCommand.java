@@ -41,6 +41,7 @@ public class VampireAbilityCommand implements CommandExecutor, TabCompleter {
 
         } else {
             String subCommand = args[0].toLowerCase();
+
             if (subCommand.equals("list")) {
                 this.listAbilities(player);
                 return true;
@@ -70,28 +71,17 @@ public class VampireAbilityCommand implements CommandExecutor, TabCompleter {
                         }
                     }
 
-                    if (subCommand.equals("bat") && this.plugin.getBatTransformationManager().isInBatForm(player)) {
-                        VampireAbility batAbility = this.abilityManager.getAbility("bat");
-
-                        if (batAbility != null && batAbility.canUse(player, this.plugin.getVampireManager())) {
-                            batAbility.execute(player, this.plugin.getVampireManager(), this.plugin);
-                            return true;
-                        }
-                    }
-
                     if (!this.abilityManager.useAbility(player, subCommand) && this.abilityManager.getAbility(subCommand) == null) {
                         player.sendMessage("§cUnknown ability: " + subCommand);
                         player.sendMessage("§eUse '/pow vability list' to see available abilities.");
                     }
-
-                    return true;
-
                 } else {
                     Location beaconLoc = suppressingBeacon.getLocation();
                     beaconLoc.distance(player.getLocation());
                     player.sendMessage("§7A divine energy interferes with your dark powers, it should be snuffed out.");
-                    return true;
                 }
+
+                return true;
             }
         }
     }
