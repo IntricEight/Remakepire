@@ -41,10 +41,10 @@ public class FeedingListener implements Listener {
     )
     public void onEntityDeath(EntityDeathEvent event) {
         if (this.plugin.getSessionManager().isSessionActive()) {
-            Entity deadEntity = event.getEntity();
+            LivingEntity deadEntity = event.getEntity();
 
             if (!(deadEntity instanceof Player)) {
-                Player killer = ((LivingEntity)deadEntity).getKiller();
+                Player killer = deadEntity.getKiller();
 
                 if (killer != null && this.vampireManager.isVampire(killer)) {
                     int experienceDropped = event.getDroppedExp();
