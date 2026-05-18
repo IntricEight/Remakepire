@@ -35,6 +35,7 @@ public class VampireFeedingManager implements Listener {
     private static final int THIRST_GAIN_PER_SECOND = 2;
     private final Map<UUID, FeedingSession> activeSessions = new HashMap<>();
     private final Map<UUID, Integer> sessionFeedingThirst = new HashMap<>();
+    private final Map<UUID, Boolean> justDiedToFeeding = new HashMap<>();
 
     /**
      * Create an instance of the Vampire Feeding manager.
@@ -221,9 +222,15 @@ public class VampireFeedingManager implements Listener {
             }
 
             vampire.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, 3600, 9, false, false));
-            target.sendMessage("§a§lYour garlic immunity protects you from turning.");
-            target.sendMessage("§aYou will respawn as a human, not as a cursed creature.");
-            target.setHealth(0.0);
+
+            // Only trigger the target's death once
+            if (!didVictimAlreadyDie(target)) {
+                target.sendMessage("§a§lYour garlic immunity protects you from turning.");
+                target.sendMessage("§aYou will respawn as a human, not as a cursed creature.");
+
+                this.killVictim(target);
+            }
+
             this.cancelFeedingSession(session);
 
         } else if (!this.plugin.getVampireTurningManager().isTurningEnabled(vampire)) {
@@ -249,8 +256,14 @@ public class VampireFeedingManager implements Listener {
             }
 
             vampire.sendMessage("§cYou have killed " + target.getName() + ". They will respawn as a human, wounded.");
-            target.sendMessage("§7You have been slain by a vampire, but they do not turn you...");
-            target.setHealth(0.0);
+
+            // Only trigger the target's death once
+            if (!didVictimAlreadyDie(target)) {
+                target.sendMessage("§7You have been slain by a vampire, but they do not turn you...");
+
+                this.killVictim(target);
+            }
+
             this.cancelFeedingSession(session);
 
         } else if (target.getScoreboardTags().contains("CuredVampire")) {
@@ -464,6 +477,32 @@ public class VampireFeedingManager implements Listener {
      */
     public boolean isPlayerBeingFedUpon(Player player) {
         return this.activeSessions.values().stream().anyMatch((session) -> session.targetId.equals(player.getUniqueId()));
+    }
+
+    /**
+     * Record that the player has just died by feeding, and set a timer to prevent them from dying again for a short period.
+     *
+     * @param victim the player who died.
+     */
+    private void killVictim(Player victim) {
+        // Kill the target player
+        victim.setHealth(0.0);
+
+        // Add the player to the list of feeding casualties
+        this.justDiedToFeeding.put(victim.getUniqueId(), true);
+
+        // Set a timer to remove the player from the feeding death's list
+        Bukkit.getScheduler().runTaskLater(this.plugin, () -> this.justDiedToFeeding.remove(victim.getUniqueId()), 40L);
+    }
+
+    /**
+     * Prevent the player from being killed multiple times during
+     *
+     * @param victim the player being checked.
+     * @return {@code true} if the player is on the list of recent feeding deaths.
+     */
+    private boolean didVictimAlreadyDie(Player victim) {
+        return this.justDiedToFeeding.containsKey(victim.getUniqueId());
     }
 
     /**
