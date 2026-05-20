@@ -396,6 +396,16 @@ public class SessionManager {
     }
 
     /**
+     * Update the config on what percent of damage should be ignored by players.
+     *
+     * @param percentage the percentage to ignore.
+     */
+    public void setDamageSuppression(int percentage) {
+        this.plugin.getConfig().set("damage_suppression", percentage);
+        this.plugin.saveConfig();
+    }
+
+    /**
      * Update the config on whether NPC mobs such as Pillagers and Wandering Traders can spawn naturally.
      *
      * @param enabled {@code true} if NPC mobs can spawn naturally.
