@@ -479,6 +479,15 @@ public class ConfigManager {
     }
 
     /**
+     * Retrieve the number of seconds that vampires get weakness for after killing someone with garlic.
+     *
+     * @return The seconds until vampires regain their strength.
+     */
+    public int getGarlicWeaknessDuration() {
+        return this.config.getInt("garlic.weakness-duration", 180);
+    }
+
+    /**
      * Retrieve whether the console logging should be reduced to only essential messages.
      *
      * @return {@code true} if logging should be reduced.

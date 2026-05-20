@@ -28,7 +28,7 @@ public class TomeDistributionManager {
     private final ConversionAssistant conversionAssistant;
     private int distributionCount = 4;
     private List<Location> tomeLocations = new ArrayList<>();
-    private final String[] tomeTypes = new String[]{"BanishUndead", "Blessing", "EnlightenedEye", "HolyWord", "LanternThrash", "PrayerOfFaith", "RallyingCry", "ShoulderBarge", "TurnUndead", "UncannyDirection", "UnnaturalHaste", "WayOfTheLand", "WayOfTheLumberjack", "WayOfTheProspector"};
+    private final String[] tomeTypes = new String[]{"BanishUndead", "Blessing", "EnlightenedEye", "HolyWord", "LanternThrash", "PrayerOfFaith", "RallyingCry", "ShoulderBarge", "TurnUndead", "UncannyDirection", "UnnaturalHaste", "WayOfTheLand", "WayOfTheLumberjack", "WayOfTheProspector", "StopTheBleeding"};
     private final Enchantment[] enchantmentTypes = new Enchantment[]{Enchantment.EFFICIENCY, Enchantment.PROTECTION, Enchantment.FEATHER_FALLING, Enchantment.KNOCKBACK, Enchantment.SWEEPING_EDGE};
 
     /**

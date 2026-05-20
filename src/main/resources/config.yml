@@ -223,6 +223,10 @@ garlic:
   # Default: 2700 seconds (45 minutes) maximum
   recovery-duration-max-seconds: 2700
 
+  # Control the duration that vampires experience weakness after killing a player protected by garlic
+  # Default: 180 seconds (3 minutes)
+  weakness-duration: 180
+
 # ============================================================================
 # LOGGING
 # ============================================================================
