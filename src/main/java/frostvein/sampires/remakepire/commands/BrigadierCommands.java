@@ -94,16 +94,6 @@ public class BrigadierCommands {
                         .then(this.buildVampireCooldownSubcommand())
                         .then(this.buildTomeCooldownSubcommand())
 
-                        .then(Commands.literal("onehumanleft").executes((ctx) -> this.executePowCommand(ctx, "admin", "onehumanleft")))
-
-                        .then(((LiteralArgumentBuilder) Commands.literal("vampirehealthcheck")
-                                .then(Commands.literal("get").executes((ctx) -> this.executePowCommand(ctx, "admin", "vampirehealthcheck", "get"))))
-                                .then(Commands.literal("set")
-                                        .then(Commands.argument("ticks", IntegerArgumentType.integer(1, 1000)).executes((ctx) -> {
-                                            int ticks = IntegerArgumentType.getInteger(ctx, "ticks");
-                                            return this.executePowCommand(ctx, "admin", "vampirehealthcheck", "set", String.valueOf(ticks));
-                                        }))))
-
                         .then(Commands.literal("break_warning").executes((ctx) -> this.executePowCommand(ctx, "admin", "break_warning")))
 
                         .then(Commands.literal("givetome")
@@ -152,13 +142,6 @@ public class BrigadierCommands {
                                 .then(Commands.literal("all").executes((ctx) -> this.executePowCommand(ctx, "admin", "removeendermen", "all"))))
                                 .then(Commands.literal("toggle").executes((ctx) -> this.executePowCommand(ctx, "admin", "removeendermen", "toggle")))
                                 .then(Commands.literal("status").executes((ctx) -> this.executePowCommand(ctx, "admin", "removeendermen", "status"))))
-                        .then(((LiteralArgumentBuilder) Commands.literal("damagesuppression")
-                                .then(Commands.literal("get").executes((ctx) -> this.executePowCommand(ctx, "admin", "damagesuppression", "get"))))
-                                .then(Commands.literal("set")
-                                        .then(Commands.argument("percentage", IntegerArgumentType.integer(0, 100)).executes((ctx) -> {
-                                            int percentage = IntegerArgumentType.getInteger(ctx, "percentage");
-                                            return this.executePowCommand(ctx, "admin", "damagesuppression", "set", String.valueOf(percentage));
-                                        }))))
                         .then(Commands.literal("setupplayer")
                                 .then(Commands.argument("player", StringArgumentType.word()).suggests((ctx, builder) -> this.suggestOnlinePlayers(builder)).executes((ctx) -> {
                                     String player = StringArgumentType.getString(ctx, "player");
@@ -312,6 +295,18 @@ public class BrigadierCommands {
                         .then(Commands.literal("false").executes(ctx -> this.executePowCommand(ctx, "admin", "config", "allow_vampire_mounts", "false")))
                 )
 
+                .then(Commands.literal("vampire_health_check").executes(ctx -> this.executePowCommand(ctx, "admin", "config", "vampire_health_check"))
+                        .then(Commands.argument("ticks", IntegerArgumentType.integer(1, 1000)).executes((ctx) -> {
+                            int ticks = IntegerArgumentType.getInteger(ctx, "ticks");
+                            return this.executePowCommand(ctx, "admin", "config", "vampire_health_check", String.valueOf(ticks));
+                        })))
+
+                .then(Commands.literal("damage_suppression").executes((ctx) -> this.executePowCommand(ctx, "admin", "config", "damage_suppression"))
+                        .then(Commands.argument("percentage", IntegerArgumentType.integer(0, 100)).executes((ctx) -> {
+                            int percentage = IntegerArgumentType.getInteger(ctx, "percentage");
+                            return this.executePowCommand(ctx, "admin", "config", "damage_suppression", String.valueOf(percentage));
+                        })))
+
                 .then(Commands.literal("cure_requires_dead_sire").executes(ctx -> this.executePowCommand(ctx, "admin", "config", "cure_requires_dead_sire"))
                         .then(Commands.literal("true").executes(ctx -> this.executePowCommand(ctx, "admin", "config", "cure_requires_dead_sire", "true")))
                         .then(Commands.literal("false").executes(ctx -> this.executePowCommand(ctx, "admin", "config", "cure_requires_dead_sire", "false")))
@@ -331,6 +326,11 @@ public class BrigadierCommands {
                 .then(Commands.literal("human_life_limit").executes(ctx -> this.executePowCommand(ctx, "admin", "config", "human_life_limit"))
                         .then(Commands.literal("true").executes(ctx -> this.executePowCommand(ctx, "admin", "config", "human_life_limit", "true")))
                         .then(Commands.literal("false").executes(ctx -> this.executePowCommand(ctx, "admin", "config", "human_life_limit", "false")))
+                )
+
+                .then(Commands.literal("one_human_left").executes((ctx) -> this.executePowCommand(ctx, "admin", "config", "one_human_left"))
+                        .then(Commands.literal("true").executes(ctx -> this.executePowCommand(ctx, "admin", "config", "one_human_left", "true")))
+                        .then(Commands.literal("false").executes(ctx -> this.executePowCommand(ctx, "admin", "config", "one_human_left", "false")))
                 );
     }
 

@@ -676,6 +676,15 @@ public class ConfigManager {
     }
 
     /**
+     * Retrieve the percentage of received damage that players will ignore.
+     *
+     * @return The percent of damage that will be ignored by players.
+     */
+    public int getDamageSuppression() {
+        return this.plugin.getConfig().getInt("damage_suppression", 50);
+    }
+
+    /**
      * Retrieve whether the first three cure books can spawn in tome chests.
      *
      * @return {@code true} if cure books can spawn in tome chests.
