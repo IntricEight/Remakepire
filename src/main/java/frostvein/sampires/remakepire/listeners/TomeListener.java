@@ -232,7 +232,7 @@ public class TomeListener implements Listener {
 
         String friendlyName = switch (tag) {
             case "CureBook1Read" -> "Cure Book 1 (A Study on Blood)";
-            case "CureBook2Read" -> "Cure Book 2 (The Cure)";
+            case "CureBook2Read" -> "Cure Book 2 (Notes for Future Biographers)";
             case "CureBook3Read" -> "Cure Book 3 (The Absolution)";
             case "CureBook4Read" -> "Cure Book 4 (The Retribution)";
             default -> tag;

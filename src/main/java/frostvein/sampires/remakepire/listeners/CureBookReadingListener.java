@@ -88,7 +88,7 @@ public class CureBookReadingListener implements Listener {
                 case BOOK_NUM_CURE:
                     if (!player.getScoreboardTags().contains(TAG_CURE_BOOK_2)) {
                         tagToAdd = TAG_CURE_BOOK_2;
-                        bookName = "The Cure";
+                        bookName = "Notes for Future Biographers";
                         isNewTag = true;
                     }
 

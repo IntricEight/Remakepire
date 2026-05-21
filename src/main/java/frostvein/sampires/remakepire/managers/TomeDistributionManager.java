@@ -328,9 +328,24 @@ public class TomeDistributionManager {
                             "§o[The rest of the writing is completely illegible]§r");
                     break;
                 case 1:
-                    bookMeta.setTitle("The Cure 2/3");
-                    bookMeta.setAuthor("§5An ancient scholar");
-                    bookMeta.setPages("§5§lTHE CURE§r\n§8Part II of III\n\n§7The second fragment reveals the nature of the curse itself.\n\n§7Born of darkness, sustained by blood, the vampire's existence is a perversion of nature's order...", "§7...yet within this perversion lies the key to its undoing.\n\n§7Holy water, blessed by the righteous, weakens the bond.\n\n§8Continue your search, truth-seeker...");
+                    bookMeta.setTitle("Notes for Future Biographers");
+                    bookMeta.setAuthor("§5Fernida Penfield");
+                    bookMeta.setPages("§0§lNotes for Future Biographers§r§l\n" +
+                            "§r§8By Ferninda Penfield§r\n\n" +
+                            "§o[You skip to the only entries relevant to your investigation\n" +
+                            "The text is surprisingly disorganised, and oozes ego.]",
+                            "",
+                            "§r§8§lEntry 28, March 1st  1845§r\n" +
+                                    "Our relentless pursuit of the perfect sanguine creature, has exhausted our stores of zinc and sulphates, I'll have to make another trip to Wendell Jr. and see if he will fund some more in the next shipment. The paranoid fool, will be sure we meet in his",
+                            "grandiose library, a treasure trove for those deluded enough to believe in his magicks and con-artistry. The mans wealth would be better funding better facilities for us, better than the charlatans he's been hiring to fix this \"curse\" of a late. Ginnethon S especially.",
+                            "The man is creepy, and is far too influential, He corrupts Wendell more and more. I fear he could screw us all by offering to turn the blathering idiot. Sanguine blood may be useful, but it may be better sourced from those who think themselves deities, I was wrong to think",
+                            "others might be more \"grounded\" or \"sane\".",
+                            "§8§lEntry 29, March 3rd 1845§r\n" +
+                                    "A great success! Not only has Wendell has agreed to meet with me, but he has sworn to share with me the device he uses to mix alchemical ingredients. The thing must have cost thousands of dollars; a specialist for such a machine would not be easy to",
+                            "find nor cheap. The Vortex, as he calls it, mixes Alchemical ingredients beyond the capabilities of any standard machine, intermeshing them in a way previously unachievable. It is essential for the preparation of many concoctions, such as the Sulphates I use for my research, in",
+                            "addition to §o[illegible]§r and §o[illegible]§r. With this in my hands, I'll soon have no need of Wendell or his hanger on charlatans and magicians.\n" +
+                                    "\n- Fernida, Future Alchemical Legend.");
+//                    bookMeta.setPages("§5§lTHE CURE§r\n§8Part II of III\n\n§7The second fragment reveals the nature of the curse itself.\n\n§7Born of darkness, sustained by blood, the vampire's existence is a perversion of nature's order...", "§7...yet within this perversion lies the key to its undoing.\n\n§7Holy water, blessed by the righteous, weakens the bond.\n\n§8Continue your search, truth-seeker...");
                     break;
                 case 2:
                     bookMeta.setTitle("The Absolution 3/3");
