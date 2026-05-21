@@ -315,6 +315,16 @@ public class ConfigManager {
     }
 
     /**
+     * Update the config on whether tome ability absorptions should be capped per session.
+     *
+     * @param capped {@code true} if tome absorption should be capped to one each session.
+     */
+    public void setTomeAbsorptionCapping(boolean capped) {
+        this.plugin.getConfig().set("tome-absorption.tome-absorption-capping", capped);
+        this.plugin.saveConfig();
+    }
+
+    /**
      * Retrieve the cooldown time between when a human can gain new tome abilities.
      *
      * @return the minutes between tome absorptions.
@@ -351,12 +361,32 @@ public class ConfigManager {
     }
 
     /**
+     * Update the config on whether vampires can return to lost levels during a session.
+     *
+     * @param capped {@code true} if vampire levels should be restricted upon dropping a level.
+     */
+    public void setVampireLevelCapping(boolean capped) {
+        this.plugin.getConfig().set("vampire.vampire-level-capping", capped);
+        this.plugin.saveConfig();
+    }
+
+    /**
      * Retrieve if vampires are given a direction and distance indicator toward new vampires.
      *
      * @return {@code true} if vampires are pointed toward new vampires.
      */
     public boolean canTrackNewVampires() {
         return this.config.getBoolean("vampire.new-vampire-tracking", true);
+    }
+
+    /**
+     * Update the config on whether vampires are given a direction and distance indicator toward new vampires.
+     *
+     * @param track {@code true} if vampires are given directions to the new vampire.
+     */
+    public void setTrackingNewVampires(boolean track) {
+        this.plugin.getConfig().set("vampire.new-vampire-tracking", track);
+        this.plugin.saveConfig();
     }
 
     /**
@@ -470,6 +500,15 @@ public class ConfigManager {
     }
 
     /**
+     * Retrieve the number of seconds that vampires get weakness for after killing someone with garlic.
+     *
+     * @return The seconds until vampires regain their strength.
+     */
+    public int getGarlicWeaknessDuration() {
+        return this.config.getInt("garlic.weakness-duration", 180);
+    }
+
+    /**
      * Retrieve whether the console logging should be reduced to only essential messages.
      *
      * @return {@code true} if logging should be reduced.
@@ -494,6 +533,16 @@ public class ConfigManager {
      */
     public boolean isHolyWaterSessionCapped() {
         return this.config.getBoolean("holy-water.holy-water-session-capped", true);
+    }
+
+    /**
+     * Update the config on whether multiple bottles of holy water can be created in a single session
+     *
+     * @param capped {@code true} if only a single holy water can be made by each player each session.
+     */
+    public void setHolyWaterCapping(boolean capped) {
+        this.plugin.getConfig().set("holy-water.holy-water-session-capped", capped);
+        this.plugin.saveConfig();
     }
 
     /**
@@ -542,12 +591,32 @@ public class ConfigManager {
     }
 
     /**
+     * Update the config on when vampires can be permakilled.
+     *
+     * @param stage the highest stage that vampires can be permakilled at.
+     */
+    public void setStakePermadeathMinimumStage(int stage) {
+        this.plugin.getConfig().set("combat.permadeath-minimum-stage", Math.max(1, stage));
+        this.plugin.saveConfig();
+    }
+
+    /**
      * Retrieve if humans will die once their lives run out, or be kept alive until a vampire gets the final kill.
      *
      * @return {@code true} is humans will permanently die on their sixth death, regardless of its cause.
      */
     public boolean isLifeLimitEnforced() {
         return this.config.getBoolean("combat.enforce-life-limit", false);
+    }
+
+    /**
+     * Update the config on whether humans require a vampire to kill them to permanently die.
+     *
+     * @param capped {@code true} if humans will be permakilled on their sixth death, regardless of the cause.
+     */
+    public void setLifeLimitEnforced(boolean capped) {
+        this.plugin.getConfig().set("combat.enforce-life-limit", capped);
+        this.plugin.saveConfig();
     }
 
     /**
@@ -566,6 +635,35 @@ public class ConfigManager {
      */
     public boolean canVampiresRideLivingMounts() {
         return this.config.getBoolean("vampire.allow-vampire-mounts", true);
+    }
+
+    /**
+     * Update the config on whether vampires can ride on living mounts
+     *
+     * @param canRide {@code true} if vampires can ride living mounts.
+     */
+    public void setVampiresRideLivingMounts(boolean canRide) {
+        this.plugin.getConfig().set("vampire.allow-vampire-mounts", canRide);
+        this.plugin.saveConfig();
+    }
+
+    /**
+     * Retrieve the speed at which vampires regenerate health.
+     *
+     * @return The number of ticks it takes for each health point regeneration.
+     */
+    public int getVampireHealthCheckTicks() {
+        return this.plugin.getConfig().getInt("vampire_health_check_ticks", 9);
+    }
+
+    /**
+     * Update the config on how quickly vampires regenerate health.
+     *
+     * @param ticks the number of ticks between each health point recovery.
+     */
+    public void setVampireHealthCheckTicks(int ticks) {
+        this.plugin.getConfig().set("vampire_health_check_ticks", Math.max(1, ticks));
+        this.plugin.saveConfig();
     }
 
     /**
@@ -651,6 +749,16 @@ public class ConfigManager {
     }
 
     /**
+     * Update the config on whether vampires can be cured while their sire lives.
+     *
+     * @param requireDeath {@code true} if the sire must be dead before curing.
+     */
+    public void setCureRequiresSireDeath(boolean requireDeath) {
+        this.plugin.getConfig().set("cure.sire-death-requirement", requireDeath);
+        this.plugin.saveConfig();
+    }
+
+    /**
      * Retrieve whether messages that players send will be blocked until they confirm otherwise.
      *
      * @return {@code true} if the message will be blocked.
@@ -675,6 +783,16 @@ public class ConfigManager {
      */
     public boolean shouldAlertOnPlayerQuit() {
         return this.config.getBoolean("chat.alert-on-player-leave", true);
+    }
+
+    /**
+     * Update the config on whether Operators should be alerted when a player quits the game.
+     *
+     * @param shouldAlert {@code true} if Operators should be messaged.
+     */
+    public void setAlertOnPlayerQuit(boolean shouldAlert) {
+        this.plugin.getConfig().set("chat.alert-on-player-leave", shouldAlert);
+        this.plugin.saveConfig();
     }
 
     /**

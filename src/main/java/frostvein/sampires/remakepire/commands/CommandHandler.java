@@ -281,22 +281,22 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
 
             switch (args[0].toLowerCase()) {
                 case "alert_on_quit":
-                    sessionManager.setAlertOnPlayerQuit(Boolean.parseBoolean(args[1]));
+                    configManager.setAlertOnPlayerQuit(Boolean.parseBoolean(args[1]));
                     senderMessage += "alert-on-player-leave§r set to: " + Boolean.parseBoolean(args[1]);
                     break;
 
                 case "holy_water_cap":
-                    sessionManager.setHolyWaterCapping(Boolean.parseBoolean(args[1]));
+                    configManager.setHolyWaterCapping(Boolean.parseBoolean(args[1]));
                     senderMessage += "holy-water-session-capped§r set to: " + Boolean.parseBoolean(args[1]);
                     break;
 
                 case "tome_cap":
-                    sessionManager.setTomeAbsorptionCapping(Boolean.parseBoolean(args[1]));
+                    configManager.setTomeAbsorptionCapping(Boolean.parseBoolean(args[1]));
                     senderMessage += "tome-absorption-capping§r set to: " + Boolean.parseBoolean(args[1]);
                     break;
 
                 case "vampire_level_cap":
-                    sessionManager.setVampireLevelCapping(Boolean.parseBoolean(args[1]));
+                    configManager.setVampireLevelCapping(Boolean.parseBoolean(args[1]));
 
                     // Clear existing promotion and stage bans if capping is being disabled
                     if (!Boolean.parseBoolean(args[1])) {
@@ -308,12 +308,12 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                     break;
 
                 case "new_vampire_tracking":
-                    sessionManager.setTrackingNewVampires(Boolean.parseBoolean(args[1]));
+                    configManager.setTrackingNewVampires(Boolean.parseBoolean(args[1]));
                     senderMessage += "new-vampire-tracking§r set to: " + Boolean.parseBoolean(args[1]);
                     break;
 
                 case "allow_vampire_mounts":
-                    sessionManager.setVampiresRideLivingMounts(Boolean.parseBoolean(args[1]));
+                    configManager.setVampiresRideLivingMounts(Boolean.parseBoolean(args[1]));
                     senderMessage += "allow-vampire-mounts§r set to: " + Boolean.parseBoolean(args[1]);
                     break;
 
@@ -345,7 +345,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                     break;
 
                 case "cure_requires_dead_sire":
-                    sessionManager.setCureRequiresSireDeath(Boolean.parseBoolean(args[1]));
+                    configManager.setCureRequiresSireDeath(Boolean.parseBoolean(args[1]));
                     senderMessage += "sire-death-requirement§r set to: " + Boolean.parseBoolean(args[1]);
                     break;
 
@@ -356,7 +356,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
 
                 case "stake_permadeath_stage":
                     if (Integer.parseInt(args[1]) >= 1 && Integer.parseInt(args[1]) <= 3) {
-                        sessionManager.setStakePermadeathMinimumStage(Integer.parseInt(args[1]));
+                        configManager.setStakePermadeathMinimumStage(Integer.parseInt(args[1]));
                         senderMessage += "permadeath-minimum-stage§r set to: " + Integer.parseInt(args[1]);
                     } else {
                         senderMessage = "§cInvalid stage! Use 1, 2, or 3";
@@ -365,7 +365,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                     break;
 
                 case "human_life_limit":
-                    sessionManager.setHumanLivesEnforced(Boolean.parseBoolean(args[1]));
+                    configManager.setLifeLimitEnforced(Boolean.parseBoolean(args[1]));
                     senderMessage += "enforce-life-limit§r set to: " + Boolean.parseBoolean(args[1]);
                     break;
 
