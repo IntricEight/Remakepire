@@ -245,7 +245,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                     break;
 
                 case "vampire_health_check":
-                    sender.sendMessage("§6vampire_health_check_ticks§r is currently: " + sessionManager.getVampireHealthCheckTicks() + " (" + (sessionManager.getVampireHealthCheckTicks() / 20) + " seconds)");
+                    sender.sendMessage("§6vampire_health_check_ticks§r is currently: " + configManager.getVampireHealthCheckTicks() + " (" + (configManager.getVampireHealthCheckTicks() / 20) + " seconds)");
                     break;
 
                 case "damage_suppression":
@@ -322,7 +322,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                         if (Integer.parseInt(args[1]) < 1) {
                             senderMessage = "§cInterval must be at least 1 tick.";
                         } else {
-                            this.sessionManager.setVampireHealthCheckTicks(Integer.parseInt(args[1]));
+                            this.configManager.setVampireHealthCheckTicks(Integer.parseInt(args[1]));
                             senderMessage += "vampire_health_check_ticks§r set to: " + Integer.parseInt(args[1]) + " ticks (" + Integer.parseInt(args[1]) / 20.0 + " seconds)";
                         }
                     } catch (NumberFormatException e) {
@@ -333,7 +333,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
 
                 case "damage_suppression":
                     if (Integer.parseInt(args[1]) >= 0 && Integer.parseInt(args[1]) <= 100) {
-                        sessionManager.setDamageSuppression(Integer.parseInt(args[1]));
+                        configManager.setDamageSuppression(Integer.parseInt(args[1]));
 
                         senderMessage += "damage_suppression§r set to: " + Integer.parseInt(args[1]) + "%";
 
