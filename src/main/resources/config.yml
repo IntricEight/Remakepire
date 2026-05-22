@@ -148,6 +148,12 @@ vampire:
   # Default: true
   silver-weakness: true
 
+  # Control if vampires can mount animals, such as pigs and horses
+  # Exceptions are made for undead mounts, such as skeleton horses
+  # Humans are prevented from riding these undead mounts
+  # Default: true (all mounts are allowed)
+  allow-vampire-mounts: true
+
 # Vampire Health Check Configuration
 # Controls how often vampire health is checked and regenerated (in ticks)
 # 20 ticks = 1 second
@@ -214,6 +220,10 @@ garlic:
   recovery-duration-min-seconds: 2100
   # Default: 2700 seconds (45 minutes) maximum
   recovery-duration-max-seconds: 2700
+
+  # Control the duration that vampires experience weakness after killing a player protected by garlic
+  # Default: 180 seconds (3 minutes)
+  weakness-duration: 180
 
 # ============================================================================
 # LOGGING

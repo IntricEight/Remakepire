@@ -29,6 +29,7 @@ import frostvein.sampires.remakepire.listeners.InitGameListener;
 import frostvein.sampires.remakepire.listeners.InteractionListener;
 import frostvein.sampires.remakepire.listeners.IronWeaknessListener;
 import frostvein.sampires.remakepire.listeners.MovementBoundaryListener;
+import frostvein.sampires.remakepire.listeners.MountTeamsListener;
 import frostvein.sampires.remakepire.listeners.NoSleepListener;
 import frostvein.sampires.remakepire.listeners.PlayerJoinListener;
 import frostvein.sampires.remakepire.listeners.ThirstEffectsListener;
@@ -180,6 +181,7 @@ public final class RemakepirePlugin extends JavaPlugin {
         this.getServer().getPluginManager().registerEvents(this.tomeVampireRestrictionListener, this);
         this.getServer().getPluginManager().registerEvents(this.endermanRemovalListener, this);
         this.getServer().getPluginManager().registerEvents(new MovementBoundaryListener(this), this);
+        this.getServer().getPluginManager().registerEvents(new MountTeamsListener(this), this);
         this.getServer().getPluginManager().registerEvents(new FourthBookRevealListener(this), this);
         this.getServer().getPluginManager().registerEvents(new ForcedCureChoiceListener(this), this);
         this.getServer().getPluginManager().registerEvents(new InitGameListener(this), this);
