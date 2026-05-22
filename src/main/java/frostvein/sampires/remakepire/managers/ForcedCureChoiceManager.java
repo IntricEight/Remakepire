@@ -269,7 +269,7 @@ public class ForcedCureChoiceManager {
         }
 
         for(Player player : Bukkit.getOnlinePlayers()) {
-            if (this.plugin.getVampireManager().isHuman(player)) {
+            if (this.plugin.getVampireManager().isHuman(player) && player.getGameMode() == GameMode.SURVIVAL) {
                 player.addPotionEffect(new PotionEffect(PotionEffectType.DARKNESS, -1, 0, false, false, true));
             }
         }

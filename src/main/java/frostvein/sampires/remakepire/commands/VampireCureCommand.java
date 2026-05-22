@@ -1,11 +1,6 @@
 package frostvein.sampires.remakepire.commands;
 
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.Particle;
-import org.bukkit.Sound;
-import org.bukkit.SoundCategory;
+import org.bukkit.*;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -176,7 +171,7 @@ public class VampireCureCommand implements CommandExecutor {
         }
 
         for(Player player : this.plugin.getServer().getOnlinePlayers()) {
-            if (this.vampireManager.isHuman(player)) {
+            if (this.vampireManager.isHuman(player) && player.getGameMode() == GameMode.SURVIVAL) {
                 player.addPotionEffect(new PotionEffect(PotionEffectType.DARKNESS, -1, 0, false, false, true));
             }
         }
