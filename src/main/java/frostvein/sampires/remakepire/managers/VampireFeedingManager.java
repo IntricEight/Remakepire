@@ -221,7 +221,7 @@ public class VampireFeedingManager implements Listener {
                 vampire.sendMessage("§cYou have killed " + target.getName() + " - they will die as a human, wounded.");
             }
 
-            vampire.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, 3600, 9, false, false));
+            vampire.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, this.plugin.getConfigManager().getGarlicWeaknessDuration() * 20, 9, false, false));
 
             // Only trigger the target's death once
             if (!didVictimAlreadyDie(target)) {
