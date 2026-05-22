@@ -277,7 +277,7 @@ public class CombatListener implements Listener {
                                             attacker.sendMessage("§cYou have killed " + victim.getName() + " - they will respawn as a human, wounded.");
                                         }
 
-                                        attacker.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, 3600, 9, false, false));
+                                        attacker.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, this.plugin.getConfigManager().getGarlicWeaknessDuration() * 20, 9, false, false));
 
                                         if (this.vampireManager.isHuman(victim)) {
                                             victim.sendMessage("§a§lYour garlic immunity protects you from turning.");

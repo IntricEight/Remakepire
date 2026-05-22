@@ -197,7 +197,7 @@ public class ThirstEffectsListener implements Listener {
                     ThirstEffectsListener.this.scheduleVampireHealthCheck();
                 }
             }
-        }).runTaskLater(this.plugin, this.plugin.getSessionManager().getVampireHealthCheckTicks());
+        }).runTaskLater(this.plugin, this.plugin.getConfigManager().getVampireHealthCheckTicks());
     }
 
     /**
@@ -211,14 +211,12 @@ public class ThirstEffectsListener implements Listener {
 
         if (currentFoodLevel < 20) {
             this.thirstManager.regenerateFood(vampire);
-        } else {
-            if (currentFoodLevel >= 20 && currentHealth < maxHealth && !vampire.isDead() && vampire.getHealth() > 0) {
-                vampire.setFoodLevel(currentFoodLevel - 1);
-                float currentSaturation = vampire.getSaturation();
-                vampire.setSaturation(Math.max(0.0F, currentSaturation - 0.5F));
-                double newHealth = Math.min(maxHealth, currentHealth + 1.0);
-                vampire.setHealth(newHealth);
-            }
+        } else if (currentFoodLevel >= 20 && currentHealth < maxHealth && !vampire.isDead() && vampire.getHealth() > 0) {
+            vampire.setFoodLevel(currentFoodLevel - 1);
+            float currentSaturation = vampire.getSaturation();
+            vampire.setSaturation(Math.max(0.0F, currentSaturation - 0.5F));
+            double newHealth = Math.min(maxHealth, currentHealth + 1.0);
+            vampire.setHealth(newHealth);
         }
     }
 }
