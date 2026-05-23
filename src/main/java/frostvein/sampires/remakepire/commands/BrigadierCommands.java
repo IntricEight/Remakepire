@@ -94,6 +94,12 @@ public class BrigadierCommands {
                         .then(this.buildVampireCooldownSubcommand())
                         .then(this.buildTomeCooldownSubcommand())
 
+                        .then(Commands.literal("make_incurable")
+                                .then(Commands.argument("player", StringArgumentType.word()).suggests((ctx, builder) -> this.suggestOnlinePlayers(builder)).executes((ctx) -> {
+                                    String player = StringArgumentType.getString(ctx, "player");
+                                    return this.executePowCommand(ctx, "admin", "make_incurable", player);
+                                })))
+
                         .then(Commands.literal("break_warning").executes((ctx) -> this.executePowCommand(ctx, "admin", "break_warning")))
 
                         .then(Commands.literal("givetome")

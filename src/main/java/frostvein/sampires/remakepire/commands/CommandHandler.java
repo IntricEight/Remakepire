@@ -103,10 +103,12 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
             return this.handleListTomeChestsCommand(sender, args);
         } else if (command.getName().equalsIgnoreCase("resetplayer")) {
             return this.handleResetPlayerCommand(sender, args);
+        } else if (command.getName().equalsIgnoreCase("make_incurable")) {
+            // Make a player impossible to cure
+            return this.makePlayerIncurable(sender, args);
         } else if (command.getName().equalsIgnoreCase("config")) {
             // Allow admins to change some elements within the configuration file without needing to restart the server
             return this.handleConfigCommand(sender, args);
-
         } else {
             return command.getName().equalsIgnoreCase("set_vampire_spawn") ? this.handleSetVampireSpawnCommand(sender, args) : false;
         }
@@ -1506,6 +1508,33 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         }
     }
 
+    private boolean makePlayerIncurable(CommandSender sender, String[] args) {
+        if (args.length == 0) {
+            sender.sendMessage("§cUsage: /make_incurable <player>");
+            sender.sendMessage("§7This command makes a vampire impossible to cure, and immune to the force cure.");
+            sender.sendMessage("§7The plugin will treat the player as though their sire was still alive.");
+            sender.sendMessage("§7However, it will still prevent curing even if the config is toggled to ignore whether the vampire's sire is alive.");
+            sender.sendMessage("§7To revert, use /tag to manually remove the CannotCure tag from the player.");
+
+        } else {
+            String target = args[0].toLowerCase();
+            Player targetPlayer = Bukkit.getPlayer(args[0].toLowerCase());
+
+            if (targetPlayer == null) {
+                sender.sendMessage("§cPlayer '" + target + "' not found or not online.");
+                return true;
+            }
+
+            targetPlayer.addScoreboardTag("CannotCure");
+
+            sender.sendMessage("§aMade §e" + targetPlayer.getName() + "§a immune to the cure.");
+            targetPlayer.sendMessage("§aAn admin has made you impossible to cure.");
+            this.plugin.logInfo("Admin " + sender.getName() + " made " + targetPlayer.getName() + "impossible to cure");
+        }
+
+        return true;
+    }
+
     private boolean handleFixAttributesCommand(CommandSender sender, String[] args) {
         if (args.length == 0) {
             if (sender instanceof Player) {
@@ -1516,7 +1545,6 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                 sender.sendMessage("§cUsage: /fixattributes <player | all>");
             }
 
-            return true;
         } else {
             String target = args[0].toLowerCase();
 
@@ -1543,9 +1571,9 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                 sender.sendMessage("§aAggressively cleaned attribute modifiers for §e" + targetPlayer.getName() + "§a.");
                 this.plugin.logInfo("Admin " + sender.getName() + " fixed attributes for " + targetPlayer.getName());
             }
-
-            return true;
         }
+
+        return true;
     }
 
     private boolean handleRemoveEndermenCommand(CommandSender sender, String[] args) {
@@ -1738,7 +1766,13 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                 if (args.length == 1) {
                     completions.add("all");
 
-                    for(Player player : Bukkit.getOnlinePlayers()) {
+                    for (Player player : Bukkit.getOnlinePlayers()) {
+                        completions.add(player.getName());
+                    }
+                }
+            } else if (command.getName().equalsIgnoreCase("make_incurable")) {
+                if (args.length == 1) {
+                    for (Player player : Bukkit.getOnlinePlayers()) {
                         completions.add(player.getName());
                     }
                 }
