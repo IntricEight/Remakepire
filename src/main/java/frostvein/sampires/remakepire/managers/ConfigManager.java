@@ -573,12 +573,21 @@ public class ConfigManager {
     }
 
     /**
-     * Retrieve if NPC mobs (such as pillagers and wandering traders) can spawn naturally
+     * Retrieve if NPC mobs (such as pillagers and wandering traders) can spawn naturally.
      *
-     * @return {@code true} if NPC mobs can spawn
+     * @return {@code true} if NPC mobs can spawn.
      */
     public boolean areNpcMobsEnabled() {
         return this.config.getBoolean("enable-npc-mobs", false);
+    }
+
+    /**
+     * Retrieve if players are allowed to breed animals when the game session is not active.
+     *
+     * @return {@code true} if animals can be bred out of session.
+     */
+    public boolean canBreedAnimalsOutOfSession() {
+        return this.config.getBoolean("allow-breeding-out-of-session", true);
     }
 
     /**

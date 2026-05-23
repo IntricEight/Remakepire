@@ -372,7 +372,7 @@ public class DeathHandler implements Listener {
      *
      * @param deathLocation the location where the vampire was staked.
      */
-    private void createVampireDeathEffects(Location deathLocation) {
+    public void createVampireDeathEffects(Location deathLocation) {
         if (deathLocation.getWorld() != null) {
             Location centerLoc = deathLocation.clone().add(0.0, 1.0, 0.0);
             deathLocation.getWorld().spawnParticle(Particle.SOUL_FIRE_FLAME, centerLoc, 60, 1.5, 1.0, 1.5, 0.1);
