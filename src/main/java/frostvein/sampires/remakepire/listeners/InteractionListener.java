@@ -43,7 +43,8 @@ public class InteractionListener implements Listener {
     }
 
     /**
-     * Prevent vampires from interacting with entities in bat form or feeding entities.
+     * Prevent vampires from interacting with entities in bat form or feeding entities.<br/>
+     * Prevent players from breeding animals out of session, if the setting is prevented.
      *
      * @param event a player interacts with an entity.
      */
@@ -58,7 +59,11 @@ public class InteractionListener implements Listener {
         boolean hasFoodInMainHand = itemInHand != null && itemInHand.getType() != Material.AIR && FEEDING_ITEMS.contains(itemInHand.getType());
         boolean hasFoodInOffHand = offHand != null && offHand.getType() != Material.AIR && FEEDING_ITEMS.contains(offHand.getType());
 
-        if (this.plugin.getVampireManager().isVampire(player)) {
+        if (!this.plugin.getConfigManager().canBreedAnimalsOutOfSession() && !this.plugin.getSessionManager().isSessionActive()) {
+            event.setCancelled(true);
+            player.sendMessage("§cYou cannot interact with animals while the session is not active.");
+
+        } else if (this.plugin.getVampireManager().isVampire(player)) {
             if (this.plugin.getBatTransformationManager().isInBatForm(player)) {
                 event.setCancelled(true);
                 player.sendMessage("§cYou cannot interact with anything while you are in your bat form.");
