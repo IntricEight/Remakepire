@@ -63,5 +63,4 @@ public class ConversionAssistant {
     public String locationToString(Location location) {
         return location.getWorld().getName() + "," + location.getBlockX() + "," + location.getBlockY() + "," + location.getBlockZ();
     }
-
 }

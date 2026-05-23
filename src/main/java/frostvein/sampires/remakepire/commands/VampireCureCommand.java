@@ -1,15 +1,11 @@
 package frostvein.sampires.remakepire.commands;
 
-import org.bukkit.*;
+import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.PotionMeta;
-import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
-import org.bukkit.potion.PotionType;
 import frostvein.sampires.remakepire.RemakepirePlugin;
 import frostvein.sampires.remakepire.beacons.BeaconSite;
 import frostvein.sampires.remakepire.beacons.BeaconSite.BeaconState;
@@ -47,11 +43,8 @@ public class VampireCureCommand implements CommandExecutor {
             return true;
 
         } else {
-            long time = player.getWorld().getTime();
-            boolean isDay = time >= 0L && time < 12300L;
-
             // Only allow a cure during the day
-            if (!isDay) {
+            if (!this.plugin.getEffectManager().isDaytime(player.getWorld())) {
                 player.sendMessage("§cThis ritual can only be performed during the day.");
             } else {
                 ItemStack holyWater = this.plugin.getHolyWaterEffectManager().findHolyWater(player);
@@ -93,8 +86,6 @@ public class VampireCureCommand implements CommandExecutor {
      * @param holyBeacon the beacon being used for the cure.
      */
     private void performCure(Player player, ItemStack holyWater, BeaconSite holyBeacon) {
-        Location playerLoc = player.getLocation();
-        Location beaconLoc = holyBeacon.getLocation();
         holyWater.setAmount(holyWater.getAmount() - 1);
 
         player.sendTitle("§6§lCURED", "§eThe curse is lifted", 10, 60, 20);
@@ -115,31 +106,30 @@ public class VampireCureCommand implements CommandExecutor {
             }
         }
 
-        // Create the visual and audio effects of the cure working on the vampire
-        player.getWorld().spawnParticle(Particle.SOUL, playerLoc, 100, 1.0, 2.0, 1.0, 0.1);
-        player.getWorld().spawnParticle(Particle.EXPLOSION_EMITTER, playerLoc, 1, 0.5, 1.0, 0.5, 0.0);
-        player.getWorld().spawnParticle(Particle.EXPLOSION_EMITTER, playerLoc, 5, 1.0, 1.0, 1.0, 0.0);
-        player.getWorld().playSound(playerLoc, Sound.BLOCK_BELL_USE, SoundCategory.MASTER, 1.5F, 0.8F);
-        player.getWorld().playSound(playerLoc, Sound.BLOCK_GLASS_BREAK, SoundCategory.MASTER, 1.0F, 1.0F);
-        player.getWorld().playSound(playerLoc, Sound.AMBIENT_SOUL_SAND_VALLEY_MOOD, SoundCategory.MASTER, 1.0F, 1.5F);
-
-        // Create the particle effects of destroying the beacon
-        if (beaconLoc != null) {
-            player.getWorld().spawnParticle(Particle.LARGE_SMOKE, beaconLoc.clone().add(0.0, 1.5, 0.0), 50, 0.5, 1.0, 0.5, 0.05);
-            player.getWorld().spawnParticle(Particle.SMOKE, beaconLoc.clone().add(0.0, 1.5, 0.0), 30, 0.3, 0.8, 0.3, 0.02);
-            player.getWorld().playSound(beaconLoc, Sound.ENTITY_WITHER_HURT, SoundCategory.MASTER, 0.8F, 0.6F);
-        }
-
         this.vampireManager.setPlayerAsHuman(player);
         player.getActivePotionEffects().forEach((effect) -> player.removePotionEffect(effect.getType()));
         player.addScoreboardTag("CuredVampire");
+
+        // Check for and apply the effects of beacon control
+        if (this.plugin.getSessionManager().isHumansFinalStandActive()) {
+            // Restore the human's health when humans control all beacons
+            this.plugin.getEffectManager().removeHumansFinalStandHealthReduction(player);
+
+        } else if (this.plugin.getSessionManager().isVampiresEternalNightActive()) {
+            // Apply blindness to the human if vampires control all beacons
+            this.plugin.getEffectManager().applyEternalNightDarkness(player);
+        }
+
+        // Create the visual and audio effects of the cure working on the vampire
+        this.plugin.getForcedCureChoiceManager().createCureEffects(player);
+        this.plugin.getForcedCureChoiceManager().createBeaconCorruptionEffects(player, holyBeacon);
         holyBeacon.setState(BeaconState.PERMANENTLY_DESECRATED);
 
         this.beaconManager.updateBeaconDisplay(holyBeacon);
         this.beaconManager.saveBeacons();
         this.plugin.getBeaconMajorityManager().updateBeaconMajorityBonuses();
         this.beaconManager.checkAndBroadcastCompleteControl();
-        this.checkIfAllBeaconsEvil();
+        this.plugin.getBeaconConversionListener().triggerIfAllBeaconsEvil();
 
         if (this.plugin.getVampireTurningManager() != null) {
             this.plugin.getVampireTurningManager().disableAllVampireTurning();
@@ -147,35 +137,5 @@ public class VampireCureCommand implements CommandExecutor {
 
         this.plugin.logInfo("VAMPIRE CURE: " + player.getName() + " has been cured at beacon: " + holyBeacon.getName());
         DeathHandler.checkAndAnnounceTeamElimination(this.plugin, false, true);
-    }
-
-    /**
-     * Determine if all functioning beacons are currently desecrated.
-     */
-    private void checkIfAllBeaconsEvil() {
-        int evilCount = this.beaconManager.getAllEvilBeacons().size();
-        int totalBeacons = this.beaconManager.getAllBeacons().size();
-
-        if (evilCount >= totalBeacons && totalBeacons > 0 && !this.plugin.getSessionManager().isVampiresEternalNightActive()) {
-            this.triggerVampiresEternalNight();
-        }
-    }
-
-    private void triggerVampiresEternalNight() {
-        this.plugin.logInfo("VAMPIRES ETERNAL NIGHT TRIGGERED - All beacons are now evil!");
-
-        for(Player player : this.plugin.getServer().getOnlinePlayers()) {
-            player.sendTitle("§4§lETERNAL NIGHT FALLS", "§cThe darkness consumes all hope", 20, 100, 40);
-            player.sendMessage("§c All beacons now pulse with unholy energy.");
-            player.playSound(player.getLocation(), Sound.ENTITY_WITHER_SPAWN, SoundCategory.MASTER, 1.0F, 0.5F);
-        }
-
-        for(Player player : this.plugin.getServer().getOnlinePlayers()) {
-            if (this.vampireManager.isHuman(player) && player.getGameMode() == GameMode.SURVIVAL) {
-                player.addPotionEffect(new PotionEffect(PotionEffectType.DARKNESS, -1, 0, false, false, true));
-            }
-        }
-
-        this.plugin.getSessionManager().setVampiresEternalNightActive(true);
     }
 }

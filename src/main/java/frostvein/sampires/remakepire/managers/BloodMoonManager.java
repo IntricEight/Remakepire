@@ -35,9 +35,8 @@ public class BloodMoonManager {
      * Begin or end the blood moon depending on the time of day and moon phase
      */
     private void checkTimeAndMoon() {
-        long time = this.plugin.getWorld().getTime();
         long fullTime = this.plugin.getWorld().getFullTime();
-        boolean isNight = time >= 12000L && time < 24000L;
+        boolean isNight = !this.plugin.getEffectManager().isDaytime(this.plugin.getWorld());
         boolean isFullMoon = fullTime % 192000L < 24000L;
 
         if (isNight && isFullMoon && !this.isBloodMoonActive) {
@@ -104,7 +103,7 @@ public class BloodMoonManager {
         if (this.isBloodMoonActive) {
             for(Player player : Bukkit.getOnlinePlayers()) {
                 if (this.plugin.getVampireManager().isVampireStage2(player) || this.plugin.getVampireManager().isVampireStage3(player)) {
-                    if (this.canPlayerSeeSky(player)) {
+                    if (this.plugin.getEffectManager().canPlayerSeeSky(player)) {
                         player.addPotionEffect(new PotionEffect(PotionEffectType.UNLUCK, 240, 0, false, false), false);
 
                         if (!player.getScoreboardTags().contains("informed_blood_moon")) {
@@ -118,17 +117,6 @@ public class BloodMoonManager {
                 }
             }
         }
-    }
-
-    /**
-     * Determine if the player is vertically exposed to the open sky.
-     *
-     * @param player the player whose access is being checked.
-     * @return {@code true} if the player has no solid blocks above their head.
-     */
-    private boolean canPlayerSeeSky(Player player) {
-        Block highestBlock = player.getWorld().getHighestBlockAt(player.getLocation());
-        return player.getLocation().getBlockY() >= highestBlock.getY();
     }
 
     /**

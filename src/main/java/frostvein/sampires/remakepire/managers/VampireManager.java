@@ -352,6 +352,16 @@ public class VampireManager {
             turner.playSound(turner.getLocation(), Sound.ENTITY_ZOMBIE_VILLAGER_CURE, 0.5F, 1.2F);
         }
 
+        // Check for and apply the effects of beacon control
+        if (this.plugin.getSessionManager().isHumansFinalStandActive()) {
+            // Reduce the vampire's health when humans control all beacons
+            this.plugin.getEffectManager().applyHumansFinalStandHealthReduction(target);
+
+        } else if (this.plugin.getSessionManager().isVampiresEternalNightActive()) {
+            // Remove the new vampire's blindness if vampires control all beacons
+            this.plugin.getEffectManager().removeEternalNightDarkness(target);
+        }
+
         Bukkit.getScheduler().runTaskLater(this.plugin, () -> {
             if (target.isOnline() && this.isVampire(target)) {
                 target.removeScoreboardTag("ImmuneToThirst");
