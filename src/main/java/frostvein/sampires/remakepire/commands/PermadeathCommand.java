@@ -57,7 +57,7 @@ public class PermadeathCommand implements CommandExecutor {
                     player.sendMessage("§4This is the most extreme setting - use with caution.");
                     break;
                 default:
-                    player.sendMessage("§cInvalid option. Use: §e/pow permadeath <on|off|absolute>");
+                    player.sendMessage("§cInvalid option. Use: §e/pow permadeath <on | off | absolute>");
                     player.sendMessage("§7  on §8- Die permanently if vampire tries to turn you");
                     player.sendMessage("§7  off §8- Become a vampire if turned (default)");
                     player.sendMessage("§7  absolute §8- Die permanently from ANY vampire kill");
@@ -87,6 +87,6 @@ public class PermadeathCommand implements CommandExecutor {
         }
 
         player.sendMessage("");
-        player.sendMessage("§7Change with: §e/pow permadeath <on|off|absolute>");
+        player.sendMessage("§7Change with: §e/pow permadeath <on | off | absolute>");
     }
 }

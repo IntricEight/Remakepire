@@ -13,7 +13,6 @@ import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.SoundCategory;
-import org.bukkit.attribute.Attribute;
 import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarFlag;
 import org.bukkit.boss.BarStyle;
@@ -24,7 +23,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerToggleSneakEvent;
-import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitTask;
 import frostvein.sampires.remakepire.RemakepirePlugin;
@@ -408,17 +406,27 @@ public class BeaconConversionListener implements Listener {
     }
 
     /**
-     * Clean up the conversions before shutting down the server.
+     * Trigger the holy control final stand scenario if all functioning beacons are currently consecrated.
      */
-    public void shutdown() {
-        int conversionCount = this.activeConversions.size();
+    public void triggerIfAllBeaconsHoly() {
+        int holyCount = this.beaconManager.getHolyBeacons().size();
+        int totalBeacons = this.beaconManager.getAllBeacons().size();
 
-        for(ConversionData data : this.activeConversions.values()) {
-            data.cleanup();
+        if (holyCount >= totalBeacons && totalBeacons > 0 && !this.plugin.getSessionManager().isVampiresEternalNightActive()) {
+            this.plugin.getBeaconConversionListener().triggerVampiresEternalNight();
         }
+    }
 
-        this.activeConversions.clear();
-        this.plugin.logInfo("BeaconConversionListener shutdown - cleaned up " + conversionCount + " active conversions.");
+    /**
+     * Trigger the darkness control final stand scenario if all functioning beacons are currently desecrated.
+     */
+    public void triggerIfAllBeaconsEvil() {
+        int evilCount = this.beaconManager.getAllEvilBeacons().size();
+        int totalBeacons = this.beaconManager.getAllBeacons().size();
+
+        if (evilCount >= totalBeacons && totalBeacons > 0 && !this.plugin.getSessionManager().isVampiresEternalNightActive()) {
+            this.plugin.getBeaconConversionListener().triggerVampiresEternalNight();
+        }
     }
 
     /**
@@ -458,12 +466,7 @@ public class BeaconConversionListener implements Listener {
 
         // Reduce the vampires' max health while the final stand is active
         for(Player player : this.plugin.getServer().getOnlinePlayers()) {
-            if (this.vampireManager.isVampire(player)) {
-                player.getAttribute(Attribute.MAX_HEALTH).setBaseValue(6.0);
-                if (player.getHealth() > 6) {
-                    player.setHealth(6.0);
-                }
-            }
+            this.plugin.getEffectManager().applyHumansFinalStandHealthReduction(player);
         }
 
         this.plugin.getSessionManager().setHumansFinalStandActive(true);
@@ -484,7 +487,7 @@ public class BeaconConversionListener implements Listener {
         // Restore the vampires' max health
         for(Player player : this.plugin.getServer().getOnlinePlayers()) {
             if (this.vampireManager.isVampire(player)) {
-                player.getAttribute(Attribute.MAX_HEALTH).setBaseValue(20.0);
+                this.plugin.getEffectManager().removeHumansFinalStandHealthReduction(player);
             }
         }
 
@@ -492,10 +495,12 @@ public class BeaconConversionListener implements Listener {
     }
 
     /**
-     * Trigger the complete darkness control final stand scenario.
+     * Trigger the complete darkness control final stand scenario Eternal Night.
      */
-    private void triggerVampiresEternalNight() {
+    public void triggerVampiresEternalNight() {
         this.plugin.logInfo("VAMPIRES ETERNAL NIGHT TRIGGERED - All 7 beacons are desecrated!");
+
+        this.plugin.getSessionManager().setVampiresEternalNightActive(true);
 
         for(Player player : this.plugin.getServer().getOnlinePlayers()) {
             player.sendTitle("§4§lETERNAL NIGHT FALLS", "§cThe darkness consumes all hope", 20, 100, 40);
@@ -505,12 +510,8 @@ public class BeaconConversionListener implements Listener {
 
         // Blind all humans while the final stand is active
         for(Player player : this.plugin.getServer().getOnlinePlayers()) {
-            if (this.vampireManager.isHuman(player) && player.getGameMode() == GameMode.SURVIVAL) {
-                player.addPotionEffect(new PotionEffect(PotionEffectType.DARKNESS, -1, 0, false, false, true));
-            }
+            this.plugin.getEffectManager().applyEternalNightDarkness(player);
         }
-
-        this.plugin.getSessionManager().setVampiresEternalNightActive(true);
     }
 
     /**
@@ -518,6 +519,8 @@ public class BeaconConversionListener implements Listener {
      */
     private void disableVampiresEternalNight() {
         this.plugin.logInfo("VAMPIRES ETERNAL NIGHT ENDED - A human has sanctified a beacon!");
+
+        this.plugin.getSessionManager().setVampiresEternalNightActive(false);
 
         for(Player player : this.plugin.getServer().getOnlinePlayers()) {
             player.sendTitle("§6§lLIGHT RETURNS", "§eA beacon shines with holy light once more", 20, 80, 20);
@@ -528,11 +531,23 @@ public class BeaconConversionListener implements Listener {
         // Remove the blindness effect from humans
         for(Player player : this.plugin.getServer().getOnlinePlayers()) {
             if (this.vampireManager.isHuman(player)) {
-                player.removePotionEffect(PotionEffectType.DARKNESS);
+                this.plugin.getEffectManager().removeEternalNightDarkness(player);
             }
         }
+    }
 
-        this.plugin.getSessionManager().setVampiresEternalNightActive(false);
+    /**
+     * Clean up the conversions before shutting down the server.
+     */
+    public void shutdown() {
+        int conversionCount = this.activeConversions.size();
+
+        for(ConversionData data : this.activeConversions.values()) {
+            data.cleanup();
+        }
+
+        this.activeConversions.clear();
+        this.plugin.logInfo("BeaconConversionListener shutdown - cleaned up " + conversionCount + " active conversions.");
     }
 
     private class ConversionData {

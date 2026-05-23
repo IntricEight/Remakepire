@@ -651,6 +651,15 @@ public class BeaconManager {
     }
 
     /**
+     * Retrieve the beacons that players can still interact with.
+     *
+     * @return The {@code Collection} of functioning beacons in the plugin.
+     */
+    public Collection<BeaconSite> getAllFunctionalBeacons() {
+        return this.beacons.values().stream().filter(beacon -> beacon.getState() != BeaconState.PERMANENTLY_DESECRATED).collect(Collectors.toList());
+    }
+
+    /**
      * Retrieve the list of evil beacons.
      *
      * @return The {@code List} of desecrated beacons.
@@ -732,7 +741,7 @@ public class BeaconManager {
 
                 for(Player player : Bukkit.getOnlinePlayers()) {
                     if (this.plugin.getVampireManager().isHuman(player)) {
-                        player.removePotionEffect(PotionEffectType.DARKNESS);
+                        this.plugin.getEffectManager().removeEternalNightDarkness(player);
                     }
 
                     player.sendMessage("§6A beacon has been reclaimed by the light... The eternal darkness recedes.");
@@ -864,7 +873,7 @@ public class BeaconManager {
 
                 for(Player player : Bukkit.getOnlinePlayers()) {
                     if (this.plugin.getVampireManager().isVampire(player)) {
-                        player.getAttribute(Attribute.MAX_HEALTH).setBaseValue(20.0);
+                        this.plugin.getEffectManager().removeHumansFinalStandHealthReduction(player);
                     }
 
                     player.sendMessage("§4A beacon has fallen to darkness... The humans' final stand wavers.");

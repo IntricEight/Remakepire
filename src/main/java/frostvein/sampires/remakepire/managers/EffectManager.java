@@ -206,7 +206,7 @@ public class EffectManager {
      * @param player the player who is being checked.
      * @return {@code true} if there are no blocks above the player.
      */
-    private boolean canPlayerSeeSky(Player player) {
+    public boolean canPlayerSeeSky(Player player) {
         Block highestBlock = player.getWorld().getHighestBlockAt(player.getLocation());
         return player.getLocation().getBlockY() >= highestBlock.getY();
     }
@@ -217,7 +217,7 @@ public class EffectManager {
      * @param world the world hosting the plugin interactions.
      * @return {@code true} if it is daytime.
      */
-    private boolean isDaytime(World world) {
+    public boolean isDaytime(World world) {
         long time = world.getTime();
         return time >= 0L && time < 12000L;
     }
@@ -228,27 +228,38 @@ public class EffectManager {
      * @param world the world hosting the plugin interactions.
      * @return {@code true} if the weather is clear.
      */
-    private boolean isClearWeather(World world) {
+    public boolean isClearWeather(World world) {
         return !world.hasStorm() && !world.isThundering();
     }
 
     /**
-     * Blind the player.
+     * Blind the player from the desecrated beacon's final stand, if they are a living human.
      *
      * @param player the human gaining the status.
      */
-    private void applyEternalNightDarkness(Player player) {
-        PotionEffect darkness = new PotionEffect(PotionEffectType.DARKNESS, 100, 0, false, false, true);
-        player.addPotionEffect(darkness);
+    public void applyEternalNightDarkness(Player player) {
+        if (this.vampireManager.isHuman(player) && player.getGameMode() == GameMode.SURVIVAL && this.plugin.getSessionManager().isVampiresEternalNightActive()) {
+            PotionEffect darkness = new PotionEffect(PotionEffectType.DARKNESS, -1, 0, false, false, true);
+            player.addPotionEffect(darkness);
+        }
+    }
+
+    /**
+     * Remove the blinding effects of vampire total beacon control.
+     *
+     * @param player the player losing the effect.
+     */
+    public void removeEternalNightDarkness(Player player) {
+        player.removePotionEffect(PotionEffectType.DARKNESS);
     }
 
     /**
      * Reduce the maximum health of vampires if the holy control final stand is active.
      *
-     * @param player the vampire gaining the status.
+     * @param player the vampire losing their hearts.
      */
-    private void applyHumansFinalStandHealthReduction(Player player) {
-        if (this.plugin.getSessionManager().isHumansFinalStandActive()) {
+    public void applyHumansFinalStandHealthReduction(Player player) {
+        if (this.vampireManager.isVampire(player) && player.getGameMode() == GameMode.SURVIVAL && this.plugin.getSessionManager().isHumansFinalStandActive()) {
             AttributeInstance healthAttribute = player.getAttribute(Attribute.MAX_HEALTH);
 
             if (healthAttribute != null && healthAttribute.getBaseValue() > LAST_STAND_VAMPIRE_HEALTH) {
@@ -258,6 +269,17 @@ public class EffectManager {
                     player.setHealth(LAST_STAND_VAMPIRE_HEALTH);
                 }
             }
+        }
+    }
+
+    /**
+     * Restore the maximum health of vampires.
+     *
+     * @param player the vampire restoring their hearts.
+     */
+    public void removeHumansFinalStandHealthReduction(Player player) {
+        if (player.getGameMode() == GameMode.SURVIVAL) {
+            player.getAttribute(Attribute.MAX_HEALTH).setBaseValue(20.0);
         }
     }
 
