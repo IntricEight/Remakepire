@@ -152,6 +152,7 @@ vampire:
 
   # Control if vampires can mount animals, such as pigs and horses
   # Exceptions are made for undead mounts, such as skeleton horses
+  # Humans are prevented from riding these undead mounts
   # Default: true (all mounts are allowed)
   allow-vampire-mounts: true
 
@@ -222,6 +223,10 @@ garlic:
   # Default: 2700 seconds (45 minutes) maximum
   recovery-duration-max-seconds: 2700
 
+  # Control the duration that vampires experience weakness after killing a player protected by garlic
+  # Default: 180 seconds (3 minutes)
+  weakness-duration: 180
+
 # ============================================================================
 # LOGGING
 # ============================================================================
@@ -286,9 +291,14 @@ passive-mob-spawning:
   spawn-count: 100
 
 # Allow NPC mobs to spawn
-# When true, Pillager patrols and Wandering Traders may spawn during active sessions.
+# When true, Pillager patrols and Wandering Traders may spawn during active sessions
 # Default: false (disabled)
 enable-npc-mobs: false
+
+# Allow players to breed animals when the session is not active
+# When false, players will be prevented from feeding animals during build mode
+# Default: true (allowed)
+allow-breeding-out-of-session: true
 
 # ============================================================================
 # COMBAT & PERMADEATH SYSTEM

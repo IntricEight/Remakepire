@@ -42,9 +42,10 @@ public class SessionManager {
     public static final String INFORMED_WEAPON_WEAKNESS = "informed_weapon_weakness";
     public static final String INFORMED_VAMPIRE_CLAWS = "informed_vampire_claws";
     public static final String INFORMED_BOUNDARY = "informed_boundary";
+    public static final String INFORMED_BOUNDARY_COMPANION = "informed_boundary_companion";
     public static final String STOPTHEBLEEDING_USED_SESSION = "stopthebleeding_used_session";
     public static final String BLESSING_USED_SESSION = "blessing_used_session";
-    public static final List<String> INFORMED_CONSTANTS = Arrays.asList(INFORMED_IRON_BLOCK_REPEL, INFORMED_CRAFTING_ITEMS, INFORMED_PICKUP_ITEM, INFORMED_PICKUP_HOLY_WATER, INFORMED_USE_HOLY_WATER, INFORMED_IRON_BLOCK_WEAKNESS, INFORMED_SUCCESSFUL_FEEDING, INFORMED_BLOOD_MOON, INFORMED_ENCHANTING_ITEMS, INFORMED_WEAPON_WEAKNESS, INFORMED_VAMPIRE_CLAWS, INFORMED_BOUNDARY, STOPTHEBLEEDING_USED_SESSION, BLESSING_USED_SESSION);
+    public static final List<String> INFORMED_CONSTANTS = Arrays.asList(INFORMED_IRON_BLOCK_REPEL, INFORMED_CRAFTING_ITEMS, INFORMED_PICKUP_ITEM, INFORMED_PICKUP_HOLY_WATER, INFORMED_USE_HOLY_WATER, INFORMED_IRON_BLOCK_WEAKNESS, INFORMED_SUCCESSFUL_FEEDING, INFORMED_BLOOD_MOON, INFORMED_ENCHANTING_ITEMS, INFORMED_WEAPON_WEAKNESS, INFORMED_VAMPIRE_CLAWS, INFORMED_BOUNDARY, INFORMED_BOUNDARY_COMPANION, STOPTHEBLEEDING_USED_SESSION, BLESSING_USED_SESSION);
 
     /**
      * Create an instance of the Session manager.
@@ -283,7 +284,7 @@ public class SessionManager {
     /**
      * Update the config on whether the vampire team controls all beacons.
      *
-     * @param active {@code true} if all of the beacons are darkness aligned.
+     * @param active {@code true} if all the beacons are darkness aligned.
      */
     public void setVampiresOwningAllBeacons(boolean active) {
         this.plugin.getConfig().set("vampires_own_all_beacons", active);
@@ -346,55 +347,6 @@ public class SessionManager {
     }
 
     /**
-     * Retrieve the speed at which vampires regenerate health.
-     *
-     * @return The number of ticks it takes for each health point regeneration.
-     */
-    public int getVampireHealthCheckTicks() {
-        return this.plugin.getConfig().getInt("vampire_health_check_ticks", 9);
-    }
-
-    /**
-     * Update the config on how quickly vampires regenerate health.
-     *
-     * @param ticks the number of ticks between each health point recovery.
-     */
-    public void setVampireHealthCheckTicks(int ticks) {
-        this.plugin.getConfig().set("vampire_health_check_ticks", Math.max(1, ticks));
-        this.plugin.saveConfig();
-    }
-
-    /**
-     * Update the config on whether tome ability absorptions should be capped per session.
-     *
-     * @param capped {@code true} if tome absorption should be capped to one each session.
-     */
-    public void setTomeAbsorptionCapping(boolean capped) {
-        this.plugin.getConfig().set("tome-absorption.tome-absorption-capping", capped);
-        this.plugin.saveConfig();
-    }
-
-    /**
-     * Update the config on whether vampires can return to lost levels during a session.
-     *
-     * @param capped {@code true} if vampire levels should be restricted upon dropping a level.
-     */
-    public void setVampireLevelCapping(boolean capped) {
-        this.plugin.getConfig().set("vampire.vampire-level-capping", capped);
-        this.plugin.saveConfig();
-    }
-
-    /**
-     * Update the config on whether multiple bottles of holy water can be created in a single session
-     *
-     * @param capped {@code true} if only a single holy water can be made by each player each session.
-     */
-    public void setHolyWaterCapping(boolean capped) {
-        this.plugin.getConfig().set("holy-water.holy-water-session-capped", capped);
-        this.plugin.saveConfig();
-    }
-
-    /**
      * Update the config on whether NPC mobs such as Pillagers and Wandering Traders can spawn naturally.
      *
      * @param enabled {@code true} if NPC mobs can spawn naturally.
@@ -408,66 +360,6 @@ public class SessionManager {
 
         // Update the world's gamerule state
         this.setNpcSpawningGamerules(world, enabled);
-    }
-
-    /**
-     * Update the config on when vampires can be permakilled.
-     *
-     * @param stage the highest stage that vampires can be permakilled at.
-     */
-    public void setStakePermadeathMinimumStage(int stage) {
-        this.plugin.getConfig().set("combat.permadeath-minimum-stage", Math.max(1, stage));
-        this.plugin.saveConfig();
-    }
-
-    /**
-     * Update the config on whether humans require a vampire to kill them to permanently die.
-     *
-     * @param capped {@code true} if humans will be permakilled on their sixth death, regardless of the cause.
-     */
-    public void setHumanLivesEnforced(boolean capped) {
-        this.plugin.getConfig().set("combat.enforce-life-limit", capped);
-        this.plugin.saveConfig();
-    }
-
-    /**
-     * Update the config on whether Operators should be alerted when a player quits the game.
-     *
-     * @param shouldAlert {@code true} if Operators should be messaged.
-     */
-    public void setAlertOnPlayerQuit(boolean shouldAlert) {
-        this.plugin.getConfig().set("chat.alert-on-player-leave", shouldAlert);
-        this.plugin.saveConfig();
-    }
-
-    /**
-     * Update the config on whether vampires can be cured while their sire lives.
-     *
-     * @param requireDeath {@code true} if the sire must be dead before curing.
-     */
-    public void setCureRequiresSireDeath(boolean requireDeath) {
-        this.plugin.getConfig().set("cure.sire-death-requirement", requireDeath);
-        this.plugin.saveConfig();
-    }
-
-    /**
-     * Update the config on whether vampires can ride on living mounts
-     *
-     * @param canRide {@code true} if vampires can ride living mounts.
-     */
-    public void setVampiresRideLivingMounts(boolean canRide) {
-        this.plugin.getConfig().set("vampire.allow-vampire-mounts", canRide);
-        this.plugin.saveConfig();
-    }
-
-    /**
-     * Update the config on whether vampires are given a direction and distance indicator toward new vampires.
-     *
-     * @param track {@code true} if vampires are given directions to the new vampire.
-     */
-    public void setTrackingNewVampires(boolean track) {
-        this.plugin.getConfig().set("vampire.new-vampire-tracking", track);
-        this.plugin.saveConfig();
     }
 
     public void incrementSessionID() {

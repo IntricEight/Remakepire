@@ -270,29 +270,30 @@ public class IronWeaknessListener implements Listener {
     public void onPlayerInteract(PlayerInteractEvent event) {
         Player player = event.getPlayer();
 
-        if (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK) {
-            if (this.vampireManager.isVampireStage2OrHigher(player)) {
-                ItemStack item = event.getItem();
+        try {
+            if (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK) {
+                if (this.vampireManager.isVampireStage2OrHigher(player)) {
+                    ItemStack item = event.getItem();
 
+                    // Check if the player is taking an item from a shelf
+                    if (event.getClickedBlock() != null && event.getClickedBlock().getState() instanceof Shelf) {
+                        // Check if any iron items have entered the player's inventory after they have taken from the shelf
+                        Bukkit.getScheduler().runTaskLater(this.plugin, () -> {
+                            scanAndRemoveIronFromSingleInventory(player);
+                        }, 5L);
 
-                // Check if the player is taking an item from a shelf
-                if (event.getClickedBlock().getState() instanceof Shelf) {
-                    // Check if any iron items have entered the player's inventory after they have taken from the shelf
-                    Bukkit.getScheduler().runTaskLater(this.plugin, () -> {
-                        scanAndRemoveIronFromSingleInventory(player);
-                    }, 5L);
+                        return;
+                    }
 
-                    return;
-                }
-
-                // Check if the player is attempting to throw a bottle of holy water
-                if (item != null && this.isHolyWater(item)) {
-                    event.setCancelled(true);
-                    player.sendMessage("§cThe Holy Water burns your hand as you try to throw it! You feel unable to bring yourself to use this item...");
-                    return;
+                    // Check if the player is attempting to throw a bottle of holy water
+                    if (item != null && this.isHolyWater(item)) {
+                        event.setCancelled(true);
+                        player.sendMessage("§cThe Holy Water burns your hand as you try to throw it! You feel unable to bring yourself to use this item...");
+                        return;
+                    }
                 }
             }
-        }
+        } catch (Exception e) {}
     }
 
     /**

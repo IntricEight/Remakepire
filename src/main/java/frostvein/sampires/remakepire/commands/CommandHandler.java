@@ -75,10 +75,6 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
             return this.handleVampireCooldownCommand(sender, args);
         } else if (command.getName().equalsIgnoreCase("resettomecooldowns")) {
             return this.handleResetTomeCooldownCommand(sender, args);
-        } else if (command.getName().equalsIgnoreCase("onehumanleft")) {
-            return this.handleOneHumanLeftCommand(sender, args);
-        } else if (command.getName().equalsIgnoreCase("vampirehealthcheck")) {
-            return this.handleVampireHealthCheckCommand(sender, args);
         } else if (command.getName().equalsIgnoreCase("break_warning")) {
             return this.handleBreakWarningCommand(sender, args);
         } else if (command.getName().equalsIgnoreCase("givetome")) {
@@ -95,8 +91,6 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
             return this.handleFixAttributesCommand(sender, args);
         } else if (command.getName().equalsIgnoreCase("removeendermen")) {
             return this.handleRemoveEndermenCommand(sender, args);
-        } else if (command.getName().equalsIgnoreCase("damagesuppression")) {
-            return this.handleDamageSuppressionCommand(sender, args);
         } else if (command.getName().equalsIgnoreCase("setupplayer")) {
             return this.handleSetupPlayerCommand(sender, args);
         } else if (command.getName().equalsIgnoreCase("spawnanimals")) {
@@ -120,7 +114,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
 
     private boolean handleResetPlayerCommand(CommandSender sender, String[] args) {
         if (args.length < 1) {
-            sender.sendMessage("§cUsage: /pow admin resetplayer <player> [true|false]");
+            sender.sendMessage("§cUsage: /pow admin resetplayer <player> [true | false]");
             sender.sendMessage("§7  true/false = clear inventory");
             return true;
 
@@ -207,8 +201,8 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
     /**
      * Execute commands sent using the config admin options.
      *
-     * @param sender the admin who entered the command.
-     * @param args the command arguments.
+     * @param sender the admin sending the command.
+     * @param args the arguments attached to the command.
      * @return {@code true}
      */
     private boolean handleConfigCommand(CommandSender sender, String[] args) {
@@ -223,17 +217,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         if (args.length < 2) {
             switch (args[0].toLowerCase()) {
                 case "help":
-                    sender.sendMessage("§aUsage: /pow admin config <configuration> <new setting>");
-                    sender.sendMessage("§7  alert_on_quit [true|false] - Alert admins when a player leaves");
-                    sender.sendMessage("§7  holy_water_cap [true|false] - Limit holy water creation");
-                    sender.sendMessage("§7  tome_cap [true|false] - Limit new tome abilities absorbed");
-                    sender.sendMessage("§7  vampire_level_cap [true|false] - Prevent vampires from returning to lost levels");
-                    sender.sendMessage("§7  new_vampire_tracking [true|false] - Allow vampires to track down newly created vampires");
-                    sender.sendMessage("§7  allow_vampire_mounts [true|false] - Allow vampires to ride living mounts");
-                    sender.sendMessage("§7  cure_requires_dead_sire [true|false] - Require a sire's permadeath before their spawn can be cured");
-                    sender.sendMessage("§7  enable_npc_mobs [true|false] - Allow NPC mobs to naturally spawn");
-                    sender.sendMessage("§7  stake_permadeath_stage [1|2|3] - Set stage that vampires can permadie on");
-                    sender.sendMessage("§7  human_life_limit [true|false] - Humans always die on their sixth death");
+                    this.sendConfigHelp(sender);
                     break;
 
                 case "alert_on_quit":
@@ -260,6 +244,14 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                     sender.sendMessage("§6allow_vampire_mounts§r is currently: " + configManager.canVampiresRideLivingMounts());
                     break;
 
+                case "vampire_health_check":
+                    sender.sendMessage("§6vampire_health_check_ticks§r is currently: " + configManager.getVampireHealthCheckTicks() + " (" + (configManager.getVampireHealthCheckTicks() / 20) + " seconds)");
+                    break;
+
+                case "damage_suppression":
+                    sender.sendMessage("§7Current damage suppression: §e" + configManager.getDamageSuppression() + "%");
+                    break;
+
                 case "cure_requires_dead_sire":
                     sender.sendMessage("§6cure_requires_dead_sire§r is currently: " + configManager.doCuresRequireSireDeath());
                     break;
@@ -276,6 +268,10 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                     sender.sendMessage("§6enforce-life-limit§r is currently: " + configManager.isLifeLimitEnforced());
                     break;
 
+                case "one_human_left":
+                    sender.sendMessage("§6one_human_left§r is currently: " + this.sessionManager.isOneHumanLeftActive());
+                    break;
+
                 default:
                     sender.sendMessage("§cInvalid configuration. Use \"/pow admin config help\" for a list of config command options.");
             }
@@ -285,22 +281,22 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
 
             switch (args[0].toLowerCase()) {
                 case "alert_on_quit":
-                    sessionManager.setAlertOnPlayerQuit(Boolean.parseBoolean(args[1]));
+                    configManager.setAlertOnPlayerQuit(Boolean.parseBoolean(args[1]));
                     senderMessage += "alert-on-player-leave§r set to: " + Boolean.parseBoolean(args[1]);
                     break;
 
                 case "holy_water_cap":
-                    sessionManager.setHolyWaterCapping(Boolean.parseBoolean(args[1]));
+                    configManager.setHolyWaterCapping(Boolean.parseBoolean(args[1]));
                     senderMessage += "holy-water-session-capped§r set to: " + Boolean.parseBoolean(args[1]);
                     break;
 
                 case "tome_cap":
-                    sessionManager.setTomeAbsorptionCapping(Boolean.parseBoolean(args[1]));
+                    configManager.setTomeAbsorptionCapping(Boolean.parseBoolean(args[1]));
                     senderMessage += "tome-absorption-capping§r set to: " + Boolean.parseBoolean(args[1]);
                     break;
 
                 case "vampire_level_cap":
-                    sessionManager.setVampireLevelCapping(Boolean.parseBoolean(args[1]));
+                    configManager.setVampireLevelCapping(Boolean.parseBoolean(args[1]));
 
                     // Clear existing promotion and stage bans if capping is being disabled
                     if (!Boolean.parseBoolean(args[1])) {
@@ -312,17 +308,44 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                     break;
 
                 case "new_vampire_tracking":
-                    sessionManager.setTrackingNewVampires(Boolean.parseBoolean(args[1]));
+                    configManager.setTrackingNewVampires(Boolean.parseBoolean(args[1]));
                     senderMessage += "new-vampire-tracking§r set to: " + Boolean.parseBoolean(args[1]);
                     break;
 
                 case "allow_vampire_mounts":
-                    sessionManager.setVampiresRideLivingMounts(Boolean.parseBoolean(args[1]));
+                    configManager.setVampiresRideLivingMounts(Boolean.parseBoolean(args[1]));
                     senderMessage += "allow-vampire-mounts§r set to: " + Boolean.parseBoolean(args[1]);
                     break;
 
+                case "vampire_health_check":
+                    try {
+                        if (Integer.parseInt(args[1]) < 1) {
+                            senderMessage = "§cInterval must be at least 1 tick.";
+                        } else {
+                            this.configManager.setVampireHealthCheckTicks(Integer.parseInt(args[1]));
+                            senderMessage += "vampire_health_check_ticks§r set to: " + Integer.parseInt(args[1]) + " ticks (" + Integer.parseInt(args[1]) / 20.0 + " seconds)";
+                        }
+                    } catch (NumberFormatException e) {
+                        senderMessage = "§cInvalid number: " + args[1];
+                    }
+
+                    break;
+
+                case "damage_suppression":
+                    if (Integer.parseInt(args[1]) >= 0 && Integer.parseInt(args[1]) <= 100) {
+                        configManager.setDamageSuppression(Integer.parseInt(args[1]));
+
+                        senderMessage += "damage_suppression§r set to: " + Integer.parseInt(args[1]) + "%";
+
+                        this.plugin.logInfo("Admin " + sender.getName() + " set damage suppression to " + Integer.parseInt(args[1]) + "%");
+                    } else {
+                        senderMessage = "§cPercentage must be between 0 and 100.";
+                    }
+
+                    break;
+
                 case "cure_requires_dead_sire":
-                    sessionManager.setCureRequiresSireDeath(Boolean.parseBoolean(args[1]));
+                    configManager.setCureRequiresSireDeath(Boolean.parseBoolean(args[1]));
                     senderMessage += "sire-death-requirement§r set to: " + Boolean.parseBoolean(args[1]);
                     break;
 
@@ -333,7 +356,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
 
                 case "stake_permadeath_stage":
                     if (Integer.parseInt(args[1]) >= 1 && Integer.parseInt(args[1]) <= 3) {
-                        sessionManager.setStakePermadeathMinimumStage(Integer.parseInt(args[1]));
+                        configManager.setStakePermadeathMinimumStage(Integer.parseInt(args[1]));
                         senderMessage += "permadeath-minimum-stage§r set to: " + Integer.parseInt(args[1]);
                     } else {
                         senderMessage = "§cInvalid stage! Use 1, 2, or 3";
@@ -342,8 +365,14 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                     break;
 
                 case "human_life_limit":
-                    sessionManager.setHumanLivesEnforced(Boolean.parseBoolean(args[1]));
+                    configManager.setLifeLimitEnforced(Boolean.parseBoolean(args[1]));
                     senderMessage += "enforce-life-limit§r set to: " + Boolean.parseBoolean(args[1]);
+                    break;
+
+                case "one_human_left":
+                    this.sessionManager.setOneHumanLeftActive(Boolean.parseBoolean(args[1]));
+                    senderMessage += "one_human_left§r set to: " + Boolean.parseBoolean(args[1]);
+                    senderMessage += Boolean.parseBoolean(args[1]) ? "\n§aOne Human Left mode ACTIVATED: Humans no longer have beacon cooldowns" : "\n§cOne Human Left mode DEACTIVATED: Normal beacon cooldowns restored for all players";
                     break;
 
                 default:
@@ -354,6 +383,28 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         }
 
         return true;
+    }
+
+    /**
+     * Relay hte usage information of the config commands to the sender.
+     *
+     * @param sender the player sending the command.
+     */
+    private void sendConfigHelp(CommandSender sender) {
+        sender.sendMessage("§aUsage: /pow admin config <configuration> <new setting>");
+        sender.sendMessage("§e  alert_on_quit [true | false] §7- Alert admins when a player leaves");
+        sender.sendMessage("§e  holy_water_cap [true | false] §7- Limit holy water creation");
+        sender.sendMessage("§e  tome_cap [true | false] §7- Limit new tome abilities absorbed");
+        sender.sendMessage("§e  vampire_level_cap [true | false] §7- Prevent vampires from returning to lost levels");
+        sender.sendMessage("§e  new_vampire_tracking [true | false] §7- Allow vampires to track down newly created vampires");
+        sender.sendMessage("§e  allow_vampire_mounts [true | false] §7- Allow vampires to ride living mounts");
+        sender.sendMessage("§e  vampire_health_check [ticks] §7- Configure vampire health check interval");
+        sender.sendMessage("§e  damage_suppression [percentage] §7- Configure damage suppression");
+        sender.sendMessage("§e  cure_requires_dead_sire [true | false] §7- Require a sire's permadeath before their spawn can be cured");
+        sender.sendMessage("§e  enable_npc_mobs [true | false] §7- Allow NPC mobs to naturally spawn");
+        sender.sendMessage("§e  stake_permadeath_stage [1 | 2 | 3] §7- Set stage that vampires can permadie on");
+        sender.sendMessage("§e  human_life_limit [true | false] §7- Humans always die on their sixth death");
+        sender.sendMessage("§e  one_human_left [true | false] §7- Activate One Human Left mode (no beacon cooldowns)");
     }
 
     private boolean handleSetVampireSpawnCommand(CommandSender sender, String[] args) {
@@ -409,7 +460,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
 
     private boolean handleVampireCooldownCommand(CommandSender sender, String[] args) {
         if (args.length == 0) {
-            sender.sendMessage("§cUsage: /pow admin vampirecooldowns <reset|clear> [player]");
+            sender.sendMessage("§cUsage: /pow admin vampirecooldowns <reset | clear> [player]");
             sender.sendMessage("§7- /pow admin vampirecooldowns reset §8- Reset all cooldowns for all online players");
             sender.sendMessage("§7- /pow admin vampirecooldowns reset <player> §8- Reset cooldowns for a specific player");
             sender.sendMessage("§7- /pow admin vampirecooldowns clear §8- Same as reset");
@@ -493,50 +544,6 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         return true;
     }
 
-    private boolean handleOneHumanLeftCommand(CommandSender sender, String[] args) {
-        boolean newState = !this.sessionManager.isOneHumanLeftActive();
-        this.sessionManager.setOneHumanLeftActive(newState);
-
-        if (newState) {
-            sender.sendMessage("§aOne Human Left mode ACTIVATED: Humans no longer have beacon cooldowns");
-        } else {
-            sender.sendMessage("§cOne Human Left mode DEACTIVATED: Normal beacon cooldowns restored for all players");
-        }
-
-        return true;
-    }
-
-    private boolean handleVampireHealthCheckCommand(CommandSender sender, String[] args) {
-        if (args.length != 0 && !args[0].equalsIgnoreCase("get")) {
-            if (args[0].equalsIgnoreCase("set") && args.length >= 2) {
-                try {
-                    int newTicks = Integer.parseInt(args[1]);
-
-                    if (newTicks < 1) {
-                        sender.sendMessage("§cInterval must be at least 1 tick.");
-                    } else {
-                        this.sessionManager.setVampireHealthCheckTicks(newTicks);
-                        double seconds = newTicks / 20.0;
-                        sender.sendMessage("§aVampire Health Check Interval set to: §e" + newTicks + " ticks §7(" + seconds + " seconds)");
-                        sender.sendMessage("§7Changes saved to config and take effect immediately");
-                    }
-                } catch (NumberFormatException e) {
-                    sender.sendMessage("§cInvalid number: " + args[1]);
-                }
-            } else {
-                sender.sendMessage("§cUsage: /pow admin vampirehealthcheck [get|set] [ticks]");
-                sender.sendMessage("§7- /pow admin vampirehealthcheck get §8- Show current interval");
-                sender.sendMessage("§7- /pow admin vampirehealthcheck set <ticks> §8- Set new interval");
-                sender.sendMessage("§7Current: §e" + this.sessionManager.getVampireHealthCheckTicks() + " ticks");
-            }
-        } else {
-            int currentTicks = this.sessionManager.getVampireHealthCheckTicks();
-            sender.sendMessage("§aVampire Health Check Interval: §e" + currentTicks + " ticks §7(" + (currentTicks / 20) + " seconds)");
-        }
-
-        return true;
-    }
-
     private boolean handleBreakWarningCommand(CommandSender sender, String[] args) {
         sender.sendMessage("§ePlaying first warning sound for all players...");
 
@@ -561,7 +568,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
 
     private boolean handleSessionCommand(CommandSender sender, String[] args) {
         if (args.length != 1) {
-            sender.sendMessage("§cUsage: /pow admin session <start|pause|end|prime|resume|building>");
+            sender.sendMessage("§cUsage: /pow admin session <start | pause | end | prime | resume | building>");
             return true;
 
         } else {
@@ -647,7 +654,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
 
     private boolean handleVampireCommand(CommandSender sender, String[] args) {
         if (args.length < 2) {
-            sender.sendMessage("§cUsage: /pow admin vampire <player> <human|1|2|3|turn|clearcap|clearban>");
+            sender.sendMessage("§cUsage: /pow admin vampire <player> <human | 1 | 2 | 3 | turn | clearcap | clearban>");
             sender.sendMessage("§7  clearcap - Remove stage cap (allows vampire to level up after thirst demotion)");
             sender.sendMessage("§7  clearban - Remove promotion ban (allows vampire to level up again)");
             return true;
@@ -1255,7 +1262,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
 
     private boolean handleGiveCureBookCommand(CommandSender sender, String[] args) {
         if (args.length < 2) {
-            sender.sendMessage("§cUsage: /pow admin give_cure_book <player> <1|2|3|4>");
+            sender.sendMessage("§cUsage: /pow admin give_cure_book <player> <1 | 2 | 3 | 4>");
             return true;
 
         } else {
@@ -1502,7 +1509,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
 
     private boolean handleClearBloodMoonBuffsCommand(CommandSender sender, String[] args) {
         if (args.length == 0) {
-            sender.sendMessage("§cUsage: /clearbloodmoonbuffs <player|all>");
+            sender.sendMessage("§cUsage: /clearbloodmoonbuffs <player | all>");
             sender.sendMessage("§7This command removes stacked blood moon attribute modifiers");
             return true;
 
@@ -1545,7 +1552,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                 sender.sendMessage("§aAggressively cleaned your attribute modifiers.");
 
             } else {
-                sender.sendMessage("§cUsage: /fixattributes <player|all>");
+                sender.sendMessage("§cUsage: /fixattributes <player | all>");
             }
 
             return true;
@@ -1582,7 +1589,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
 
     private boolean handleRemoveEndermenCommand(CommandSender sender, String[] args) {
         if (args.length == 0) {
-            sender.sendMessage("§cUsage: /removeendermen <all|toggle|status>");
+            sender.sendMessage("§cUsage: /removeendermen <all | toggle | status>");
             sender.sendMessage("§7- /removeendermen all §8- Remove all existing endermen from loaded chunks");
             sender.sendMessage("§7- /removeendermen toggle §8- Toggle enderman spawn prevention on/off");
             sender.sendMessage("§7- /removeendermen status §8- Check if enderman removal is enabled");
@@ -1608,58 +1615,6 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                     break;
                 default:
                     sender.sendMessage("§cInvalid action. Use 'all', 'toggle', or 'status'.");
-            }
-
-            return true;
-        }
-    }
-
-    private boolean handleDamageSuppressionCommand(CommandSender sender, String[] args) {
-        if (args.length == 0) {
-            sender.sendMessage("§cUsage: /pow admin damagesuppression <set|get> [percentage]");
-            sender.sendMessage("§7- /pow admin damagesuppression get §8- Show current damage suppression percentage");
-            sender.sendMessage("§7- /pow admin damagesuppression set <percentage> §8- Set damage suppression (0-100)");
-            return true;
-
-        } else {
-            switch (args[0].toLowerCase()) {
-                case "get":
-                    try {
-                        int suppressionScore = this.plugin.getConfig().getInt("damage_suppression", 0);
-                        sender.sendMessage("§7Current damage suppression: §e" + suppressionScore + "%");
-                    } catch (Exception e) {
-                        sender.sendMessage("§cError reading damage suppression: " + e.getMessage());
-                    }
-                    break;
-                case "set":
-                    if (args.length < 2) {
-                        sender.sendMessage("§cUsage: /pow admin damagesuppression set <percentage>");
-                        sender.sendMessage("§7Example: /pow admin damagesuppression set 50 (for 50% damage reduction)");
-                        return true;
-                    }
-
-                    try {
-                        int percentage = Integer.parseInt(args[1]);
-                        if (percentage >= 0 && percentage <= 100) {
-                            this.plugin.getConfig().set("damage_suppression", percentage);
-                            this.plugin.saveConfig();
-
-                            sender.sendMessage("§aDamage suppression set to §e" + percentage + "%");
-                            sender.sendMessage("§7Changes are active immediately (no server restart required)");
-                            this.plugin.logInfo("Admin " + sender.getName() + " set damage suppression to " + percentage + "%");
-                            break;
-                        }
-
-                        sender.sendMessage("§cPercentage must be between 0 and 100.");
-                        return true;
-                    } catch (NumberFormatException e) {
-                        sender.sendMessage("§cInvalid number format. Use whole numbers (e.g., 50).");
-                    } catch (Exception e) {
-                        sender.sendMessage("§cError setting damage suppression: " + e.getMessage());
-                    }
-                    break;
-                default:
-                    sender.sendMessage("§cInvalid action. Use 'set' or 'get'.");
             }
 
             return true;
@@ -1753,13 +1708,25 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
 
             } else if (command.getName().equalsIgnoreCase("config")) {
                 if (args.length == 1) {
-                    completions.addAll(Arrays.asList("help", "alert_on_quit", "holy_water_cap", "tome_cap", "vampire_level_cap", "new_vampire_tracking", "allow_vampire_mounts", "cure_requires_dead_sire", "enable_npc_mobs", "stake_permadeath_stage", "human_life_limit"));
+                    completions.addAll(Arrays.asList("help", "alert_on_quit", "holy_water_cap", "tome_cap", "vampire_level_cap", "new_vampire_tracking", "allow_vampire_mounts", "vampire_health_check", "damage_suppression", "cure_requires_dead_sire", "enable_npc_mobs", "stake_permadeath_stage", "human_life_limit", "one_human_left"));
 
                 } else if (args.length == 2) {
-                    if (args[0].equals("stake_permadeath_stage")) {
-                        completions.addAll(Arrays.asList("1", "2", "3"));
-                    } else {
-                        completions.addAll(Arrays.asList("true", "false"));
+                    switch (args[0]) {
+                        case "stake_permadeath_stage":
+                            completions.addAll(Arrays.asList("1", "2", "3"));
+                            break;
+
+                        case "vampire_health_check":
+                            completions.addAll(Arrays.asList("20", "40", "60", "100", "200"));
+                            break;
+
+                        case "damage_suppression":
+                            completions.addAll(Arrays.asList("0", "10", "25", "50", "75", "100"));
+                            break;
+
+                        default:
+                            completions.addAll(Arrays.asList("true", "false"));
+                            break;
                     }
                 }
 

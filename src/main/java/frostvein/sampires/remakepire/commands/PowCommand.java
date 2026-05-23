@@ -25,6 +25,11 @@ public class PowCommand implements CommandExecutor, TabCompleter {
     private final ToggleTurningCommand turningCommand;
     private final PendingMessageCommand sendMessageCommand;
 
+    /**
+     * Create an instance of the plugin's custom command heading manager.
+     *
+     * @param plugin the host plugin object.
+     */
     public PowCommand(RemakepirePlugin plugin) {
         this.plugin = plugin;
         this.adminHandler = new CommandHandler(plugin);
@@ -87,6 +92,13 @@ public class PowCommand implements CommandExecutor, TabCompleter {
         }
     }
 
+    /**
+     * Determine if the sender has admin permissions and can use admin commands.
+     *
+     * @param sender the player sending the command.
+     * @param args the arguments attached to the command.
+     * @return {@code true} if the command was processed without failure.
+     */
     private boolean handleAdminCommand(CommandSender sender, String[] args) {
         if (!sender.hasPermission("vampiresmp.admin")) {
             sender.sendMessage("§cYou don't have permission to use admin commands.");
@@ -110,39 +122,52 @@ public class PowCommand implements CommandExecutor, TabCompleter {
         }
     }
 
+    /**
+     * Print to the sender a list of available commands they can run using the pow heading command.
+     *
+     * @param sender the player sending the command.
+     */
     private void sendHelp(CommandSender sender) {
         sender.sendMessage("§6§l=== VampireSMP Commands ===");
-        sender.sendMessage("§e/pow admin §7- Admin commands (requires permission)");
+
+        // Only let the sender know about the admin option if they have access to it
+        if (sender.hasPermission("vampiresmp.admin")) {
+            sender.sendMessage("§e/pow admin §7- Admin commands (requires permission)");
+        }
+
         sender.sendMessage("§e/pow vability <name> §7- Use vampire abilities");
         sender.sendMessage("§e/pow tome <name> §7- Use tome abilities (humans)");
         sender.sendMessage("§e/voluntate-mea-hoc-nefandum-vinculum-abicio §7- Cure yourself from vampirism");
         sender.sendMessage("§e/hoc-vinculum-tibi-dirumpo-mala-creatura <player> §7- Force cure a vampire");
         sender.sendMessage("§e/pow beaconstatus §7- Check beacon spiritual influence");
         sender.sendMessage("§e/pow texture §7- Apply VampireSMP texture pack");
-        sender.sendMessage("§e/pow permadeath <on|off|absolute> §7- Set permadeath preference");
+        sender.sendMessage("§e/pow permadeath <on | off | absolute> §7- Set permadeath preference");
         sender.sendMessage("§e/pow toggle-turning §7- Toggle vampire turning ability");
         sender.sendMessage("§e/pow sendmessage §7- Send pending chat message");
     }
 
+    /**
+     * Print to the sender a list of available admin commands they can run using the pow admin command.
+     *
+     * @param sender the admin sending the command.
+     */
     private void sendAdminHelp(CommandSender sender) {
         sender.sendMessage("§6§l=== VampireSMP Admin Commands ===");
         sender.sendMessage("§e/pow admin init §7- Initialize a new game (full reset)");
-        sender.sendMessage("§e/pow admin session <start|pause|end|prime|resume|building> §7- Manage session state");
-        sender.sendMessage("§e/pow admin vampire <player> <human|1|2|3|turn> §7- Manage vampire status");
+        sender.sendMessage("§e/pow admin session <start | pause | end | prime | resume | building> §7- Manage session state");
+        sender.sendMessage("§e/pow admin vampire <player> <human | 1 | 2 | 3 | turn> §7- Manage vampire status");
         sender.sendMessage("§e/pow admin beacon <subcommand> §7- Manage beacon sites (use tab for options)");
-        sender.sendMessage("§e/pow admin vampirecooldowns <reset|clear> [player] §7- Reset vampire ability cooldowns");
-        sender.sendMessage("§e/pow admin resettomecooldowns §7- Reset tome ability cooldowns for all humans");
-        sender.sendMessage("§e/pow admin onehumanleft §7- Toggle One Human Left mode (no beacon cooldowns)");
-        sender.sendMessage("§e/pow admin vampirehealthcheck <get|set> [ticks] §7- Configure vampire health check interval");
+        sender.sendMessage("§e/pow admin config <configuration> §7- Configure values in the configuration file live and in-game");
+        sender.sendMessage("§e/pow admin vampirecooldowns <reset | clear> [player] §7- Reset vampire ability cooldowns");
+        sender.sendMessage("§e/pow admin resettomecooldowns [player] §7- Reset tome ability cooldowns");
         sender.sendMessage("§e/pow admin break_warning §7- Play break warning sounds");
         sender.sendMessage("§e/pow admin givetome <player> <ability> [amount] §7- Give tome to player");
         sender.sendMessage("§e/pow admin select_tomes <player> §7- Open GUI to grant tome abilities");
-        sender.sendMessage("§e/pow admin give_cure_book <player> <1|2|3|4> §7- Give cure book item to player");
+        sender.sendMessage("§e/pow admin give_cure_book <player> <1 | 2 | 3 | 4> §7- Give cure book item to player");
         sender.sendMessage("§e/pow admin distributetomes §7- Manually trigger tome distribution");
-        sender.sendMessage("§e/pow admin clearbloodmoonbuffs <all|player> §7- Clear blood moon buffs");
-        sender.sendMessage("§e/pow admin fixattributes <all|player> §7- Fix stuck attribute modifiers (health/speed)");
-        sender.sendMessage("§e/pow admin removeendermen <all|toggle|status> §7- Manage enderman removal");
-        sender.sendMessage("§e/pow admin damagesuppression <get|set> [percentage] §7- Configure damage suppression");
+        sender.sendMessage("§e/pow admin clearbloodmoonbuffs <all | player> §7- Clear blood moon buffs");
+        sender.sendMessage("§e/pow admin fixattributes <all | player> §7- Fix stuck attribute modifiers (health/speed)");
+        sender.sendMessage("§e/pow admin removeendermen <all | toggle | status> §7- Manage enderman removal");
         sender.sendMessage("§e/pow admin setupplayer <player> §7- Give starter items to player");
         sender.sendMessage("§e/pow admin spawnanimals §7- Manually trigger passive mob spawning");
         sender.sendMessage("§e/pow admin addtomechest §7- Add current location as tome chest spawn");
@@ -152,6 +177,15 @@ public class PowCommand implements CommandExecutor, TabCompleter {
         sender.sendMessage("§e/pow admin set_vampire_spawn [x y z] §7- Set vampire respawn location");
     }
 
+    /**
+     * Create the list of autocorrecting options for pow commands as they are written out in the command line.
+     *
+     * @param sender the player sending the command.
+     * @param command the command that is being created and executed.
+     * @param alias the chosen head for the command.
+     * @param args the arguments attached to the command.
+     * @return A {@code List} of options for the autocomplete to suggest.
+     */
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         List<String> completions = new ArrayList<>();
 
@@ -174,7 +208,7 @@ public class PowCommand implements CommandExecutor, TabCompleter {
                 }
 
                 if (args.length == 2) {
-                    List<String> adminCommands = Arrays.asList("init", "session", "vampire", "beacon", "vampirecooldowns", "resettomecooldowns", "onehumanleft", "vampirehealthcheck", "break_warning", "givetome", "select_tomes", "give_cure_book", "distributetomes", "clearbloodmoonbuffs", "fixattributes", "removeendermen", "damagesuppression", "setupplayer", "spawnanimals", "addtomechest", "removetomechest", "listtomechests", "resetplayer", "set_vampire_spawn", "config");
+                    List<String> adminCommands = Arrays.asList("init", "session", "vampire", "beacon", "vampirecooldowns", "resettomecooldowns", "break_warning", "givetome", "select_tomes", "give_cure_book", "distributetomes", "clearbloodmoonbuffs", "fixattributes", "removeendermen", "setupplayer", "spawnanimals", "addtomechest", "removetomechest", "listtomechests", "resetplayer", "set_vampire_spawn", "config");
                     return adminCommands.stream().filter((s) -> s.startsWith(args[1].toLowerCase())).collect(Collectors.toList());
                 }
 
@@ -183,6 +217,7 @@ public class PowCommand implements CommandExecutor, TabCompleter {
                     return sessionOptions.stream().filter((s) -> s.startsWith(args[2].toLowerCase())).collect(Collectors.toList());
                 }
 
+                // Set the player autofill options for 'vampire'
                 if (args.length == 3 && args[1].equalsIgnoreCase("vampire")) {
                     return Bukkit.getOnlinePlayers().stream().map(Player::getName).filter((s) -> s.toLowerCase().startsWith(args[2].toLowerCase())).collect(Collectors.toList());
                 }
@@ -190,6 +225,11 @@ public class PowCommand implements CommandExecutor, TabCompleter {
                 if (args.length == 4 && args[1].equalsIgnoreCase("vampire")) {
                     List<String> vampireOptions = Arrays.asList("human", "1", "2", "3", "turn", "clearcap", "clearban");
                     return vampireOptions.stream().filter((s) -> s.startsWith(args[3].toLowerCase())).collect(Collectors.toList());
+                }
+
+                // Set the player autofill for 'resettomecooldowns'
+                if (args.length == 3 && args[1].equalsIgnoreCase("resettomecooldowns")) {
+                    return Bukkit.getOnlinePlayers().stream().map(Player::getName).filter((s) -> s.toLowerCase().startsWith(args[2].toLowerCase())).collect(Collectors.toList());
                 }
 
                 if (args.length == 4 && args[1].equalsIgnoreCase("config")) {
@@ -233,22 +273,6 @@ public class PowCommand implements CommandExecutor, TabCompleter {
 
                 if (args.length == 4 && args[1].equalsIgnoreCase("vampirecooldowns") && (args[2].equalsIgnoreCase("reset") || args[2].equalsIgnoreCase("clear"))) {
                     return Bukkit.getOnlinePlayers().stream().map(Player::getName).filter((s) -> s.toLowerCase().startsWith(args[3].toLowerCase())).collect(Collectors.toList());
-                }
-
-                if (args.length == 3 && args[1].equalsIgnoreCase("damagesuppression")) {
-                    return Arrays.asList("get", "set").stream().filter((s) -> s.startsWith(args[2].toLowerCase())).collect(Collectors.toList());
-                }
-
-                if (args.length == 4 && args[1].equalsIgnoreCase("damagesuppression") && args[2].equalsIgnoreCase("set")) {
-                    return Arrays.asList("0", "10", "25", "50", "75", "100");
-                }
-
-                if (args.length == 3 && args[1].equalsIgnoreCase("vampirehealthcheck")) {
-                    return Arrays.asList("get", "set").stream().filter((s) -> s.startsWith(args[2].toLowerCase())).collect(Collectors.toList());
-                }
-
-                if (args.length == 4 && args[1].equalsIgnoreCase("vampirehealthcheck") && args[2].equalsIgnoreCase("set")) {
-                    return Arrays.asList("20", "40", "60", "100", "200");
                 }
 
                 if (args.length == 3 && args[1].equalsIgnoreCase("givetome")) {
