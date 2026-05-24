@@ -1343,7 +1343,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                     meta.setTitle("Notes for Future Biographers");
                     meta.setAuthor("§5Fernida Penfield");
                     meta.setPages("§0§lNotes for Future Biographers§r§l\n" +
-                            "§r§8By Ferninda Penfield§r\n\n" +
+                            "§r§8By Fernida Penfield§r\n\n" +
                             "§o[You skip to the only entries relevant to your investigation\n" +
                             "The text is surprisingly disorganised, and oozes ego.]",
                             "",
@@ -1373,7 +1373,6 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
             List<String> lore = new ArrayList<>();
             lore.add("§5An ancient tome of forbidden knowledge");
             lore.add("");
-            lore.add("§eRead this book to absorb its wisdom");
 
             meta.setLore(lore);
             CureBookReadingListener.markAsAuthenticCureBook(meta, bookNum, this.plugin);

@@ -124,6 +124,10 @@ public class CureBookReadingListener implements Listener {
                 // Send a custom message for each cure book
                 if (tagToAdd.equals(TAG_CURE_BOOK_1)) {
                     player.sendMessage("§8§o[You feel as if you have found the first part of a greater mystery]");
+                } else if (tagToAdd.equals(TAG_CURE_BOOK_2)) {
+                    player.sendMessage("§8§o[You feel like you've found the second part of a greater mystery]");
+                } else if  (tagToAdd.equals(TAG_CURE_BOOK_3)) {
+                    player.sendMessage("§8§o[This feels like the third piece of a greater mystery, perhaps you should find the others]");
                 } else {
                     // TODO: Add more areas for each tome as Cleo gives more specifications
                     player.sendMessage("§8§o[You absorb the ancient knowledge within " + bookName + "...]");
@@ -133,10 +137,8 @@ public class CureBookReadingListener implements Listener {
 
                 if (bookNumber != BOOK_NUM_RETRIBUTION && hasReadAllCureBooks(player)) {
                     player.sendMessage("");
-                    player.sendMessage("§6§lTRINITY OF RESTORATION COMPLETE.");
-                    player.sendMessage("§eYou have absorbed the knowledge from all three cure books. You now know the words to cure yourself of vampirism:");
-                    player.sendMessage("§7/§6voluntate-mea-hoc-nefandum-vinculum-abicio");
-                    player.sendMessage("§7Stand near a holy beacon, with a bottle of holy water on your person, and in the light of day, say those words, and be free.");
+                    player.sendMessage("§6§lPenfield Journals Discovered:");
+                    player.sendMessage("§eWith these three books, you've determined the recipe for a cure to vampirism:");
                     player.sendMessage("");
 
                     this.plugin.logInfo("CURE UNLOCKED: " + player.getName() + " has unlocked the /vol cure command");

@@ -331,7 +331,7 @@ public class TomeDistributionManager {
                     bookMeta.setTitle("Notes for Future Biographers");
                     bookMeta.setAuthor("§5Fernida Penfield");
                     bookMeta.setPages("§0§lNotes for Future Biographers§r§l\n" +
-                            "§r§8By Ferninda Penfield§r\n\n" +
+                            "§r§8By Fernida Penfield§r\n\n" +
                             "§o[You skip to the only entries relevant to your investigation\n" +
                             "The text is surprisingly disorganised, and oozes ego.]",
                             "",
@@ -356,7 +356,6 @@ public class TomeDistributionManager {
             List<String> lore = new ArrayList<>();
             lore.add("§5An ancient tome of forbidden knowledge");
             lore.add("");
-            lore.add("§eRead this book to absorb its wisdom");
 
             bookMeta.setLore(lore);
             CureBookReadingListener.markAsAuthenticCureBook(bookMeta, bookNumber, this.plugin);
