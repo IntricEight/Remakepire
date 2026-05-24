@@ -262,6 +262,10 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                     sender.sendMessage("§6enable_npc_mobs§r is currently: " + configManager.areNpcMobsEnabled());
                     break;
 
+                case "breeding_out_of_session":
+                    sender.sendMessage("§6allow-breeding-out-of-session§r is currently: " + configManager.canBreedAnimalsOutOfSession());
+                    break;
+
                 case "stake_permadeath_stage":
                     sender.sendMessage("§6permadeath-minimum-stage§r is currently: " + configManager.getPermadeathMinimumStage());
                     break;
@@ -356,6 +360,11 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                     senderMessage += "enable-npc-mobs§r set to: " + Boolean.parseBoolean(args[1]);
                     break;
 
+                case "breeding_out_of_session":
+                    configManager.setBreedAnimalsOutOfSession(Boolean.parseBoolean(args[1]));
+                    senderMessage += "allow-breeding-out-of-session§r set to: " + Boolean.parseBoolean(args[1]);
+                    break;
+
                 case "stake_permadeath_stage":
                     if (Integer.parseInt(args[1]) >= 1 && Integer.parseInt(args[1]) <= 3) {
                         configManager.setStakePermadeathMinimumStage(Integer.parseInt(args[1]));
@@ -404,6 +413,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         sender.sendMessage("§e  damage_suppression [percentage] §7- Configure damage suppression");
         sender.sendMessage("§e  cure_requires_dead_sire [true | false] §7- Require a sire's permadeath before their spawn can be cured");
         sender.sendMessage("§e  enable_npc_mobs [true | false] §7- Allow NPC mobs to naturally spawn");
+        sender.sendMessage("§e  breeding_out_of_session [true | false] §7- Allow animals to be bred and hatched outside of active session");
         sender.sendMessage("§e  stake_permadeath_stage [1 | 2 | 3] §7- Set stage that vampires can permadie on");
         sender.sendMessage("§e  human_life_limit [true | false] §7- Humans always die on their sixth death");
         sender.sendMessage("§e  one_human_left [true | false] §7- Activate One Human Left mode (no beacon cooldowns)");
@@ -1697,7 +1707,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
 
             } else if (command.getName().equalsIgnoreCase("config")) {
                 if (args.length == 1) {
-                    completions.addAll(Arrays.asList("help", "alert_on_quit", "holy_water_cap", "tome_cap", "vampire_level_cap", "new_vampire_tracking", "allow_vampire_mounts", "vampire_health_check", "damage_suppression", "cure_requires_dead_sire", "enable_npc_mobs", "stake_permadeath_stage", "human_life_limit", "one_human_left"));
+                    completions.addAll(Arrays.asList("help", "alert_on_quit", "holy_water_cap", "tome_cap", "vampire_level_cap", "new_vampire_tracking", "allow_vampire_mounts", "vampire_health_check", "damage_suppression", "cure_requires_dead_sire", "enable_npc_mobs", "breeding_out_of_session", "stake_permadeath_stage", "human_life_limit", "one_human_left"));
 
                 } else if (args.length == 2) {
                     switch (args[0]) {

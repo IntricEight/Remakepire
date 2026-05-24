@@ -294,6 +294,7 @@ passive-mob-spawning:
 enable-npc-mobs: false
 
 # Allow players to breed animals when the session is not active
+# Chickens are also prevented from spawning from thrown eggs when this is false
 # When false, players will be prevented from feeding animals during build mode
 # Default: true (allowed)
 allow-breeding-out-of-session: true

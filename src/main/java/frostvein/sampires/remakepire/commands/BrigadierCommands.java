@@ -323,6 +323,11 @@ public class BrigadierCommands {
                         .then(Commands.literal("false").executes(ctx -> this.executePowCommand(ctx, "admin", "config", "enable_npc_mobs", "false")))
                 )
 
+                .then(Commands.literal("breeding_out_of_session").executes(ctx -> this.executePowCommand(ctx, "admin", "config", "breeding_out_of_session"))
+                        .then(Commands.literal("true").executes(ctx -> this.executePowCommand(ctx, "admin", "config", "breeding_out_of_session", "true")))
+                        .then(Commands.literal("false").executes(ctx -> this.executePowCommand(ctx, "admin", "config", "breeding_out_of_session", "false")))
+                )
+
                 .then(Commands.literal("stake_permadeath_stage").executes(ctx -> this.executePowCommand(ctx, "admin", "config", "stake_permadeath_stage"))
                         .then(Commands.literal("1").executes(ctx -> this.executePowCommand(ctx, "admin", "config", "stake_permadeath_stage", "1")))
                         .then(Commands.literal("2").executes(ctx -> this.executePowCommand(ctx, "admin", "config", "stake_permadeath_stage", "2")))
