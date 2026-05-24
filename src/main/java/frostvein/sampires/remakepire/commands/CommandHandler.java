@@ -1340,7 +1340,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
 //                    meta.setPages("§5§lTHE REMEDY§r\n§8Part I of III\n\n§7In the darkest hours, when the cursed blood burns within your veins, know that salvation exists.\n\n§7The ancients spoke of a trinity of knowledge...", "§7...that when combined, can sever the unholy bond between mortal and monster.\n\n§7This is the first piece of that forbidden wisdom.\n\n§8Read on, seeker of the light...");
                     break;
                 case 2:
-                    meta.setTitle("Notes for Future Biographers");
+                    meta.setTitle("Notes for Future Biographers");      // The Cure 2/3
                     meta.setAuthor("§5Fernida Penfield");
                     meta.setPages("§0§lNotes for Future Biographers§r§l\n" +
                             "§r§8By Fernida Penfield§r\n\n" +

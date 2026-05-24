@@ -328,7 +328,7 @@ public class TomeDistributionManager {
                             "§o[The rest of the writing is completely illegible]§r");
                     break;
                 case 1:
-                    bookMeta.setTitle("Notes for Future Biographers");
+                    bookMeta.setTitle("Notes for Future Biographers");      // The Cure 2/3
                     bookMeta.setAuthor("§5Fernida Penfield");
                     bookMeta.setPages("§0§lNotes for Future Biographers§r§l\n" +
                             "§r§8By Fernida Penfield§r\n\n" +
