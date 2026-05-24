@@ -9,6 +9,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.CreatureSpawnEvent;
+import org.bukkit.event.player.PlayerEggThrowEvent;
 import org.bukkit.event.world.ChunkLoadEvent;
 import frostvein.sampires.remakepire.RemakepirePlugin;
 
@@ -28,7 +29,8 @@ public class EndermanRemovalListener implements Listener {
     }
 
     /**
-     * Prevent an enderman from spawning in the world.
+     * Prevent an enderman from spawning in the world.<br/>
+     * Prevent chickens from spawning if animal breeding is disabled, and we are out of session.
      *
      * @param event a non-player entity spawns.
      */
@@ -36,11 +38,24 @@ public class EndermanRemovalListener implements Listener {
             priority = EventPriority.HIGHEST
     )
     public void onCreatureSpawn(CreatureSpawnEvent event) {
-        if (this.endermanRemovalEnabled.get()) {
-            if (event.getEntityType() == EntityType.ENDERMAN) {
-                event.setCancelled(true);
-                this.plugin.logInfo("Prevented Enderman spawn at " + event.getLocation().getBlockX() + ", " + event.getLocation().getBlockY() + ", " + event.getLocation().getBlockZ() + " (Reason: " + String.valueOf(event.getSpawnReason()) + ")");
-            }
+        if (!this.plugin.getConfigManager().canBreedAnimalsOutOfSession() && !this.plugin.getSessionManager().isSessionActive()) {
+            event.setCancelled(event.getEntityType() == EntityType.CHICKEN && event.getSpawnReason() == CreatureSpawnEvent.SpawnReason.EGG);
+
+        } else if (this.endermanRemovalEnabled.get() && event.getEntityType() == EntityType.ENDERMAN) {
+            event.setCancelled(true);
+            this.plugin.logInfo("Prevented Enderman spawn at " + event.getLocation().getBlockX() + ", " + event.getLocation().getBlockY() + ", " + event.getLocation().getBlockZ() + " (Reason: " + event.getSpawnReason() + ")");
+        }
+    }
+
+    /**
+     * Prevent chickens from spawning when a session is not active and animal breeding is disabled.
+     *
+     * @param event an egg is thrown.
+     */
+    @EventHandler
+    public void onEggThrow(PlayerEggThrowEvent event) {
+        if (!this.plugin.getConfigManager().canBreedAnimalsOutOfSession() && !this.plugin.getSessionManager().isSessionActive()) {
+            event.setHatching(false);
         }
     }
 

@@ -21,7 +21,6 @@ import org.bukkit.entity.Wolf;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
-import org.bukkit.event.player.PlayerEggThrowEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
@@ -76,18 +75,6 @@ public class InteractionListener implements Listener {
                     }
                 }
             }
-        }
-    }
-
-    /**
-     * Prevent chickens from spawning when a session is not active and animal breeding is disabled
-     *
-     * @param event an egg is thrown.
-     */
-    @EventHandler
-    public void onEggThrow(PlayerEggThrowEvent event) {
-        if (!this.plugin.getConfigManager().canBreedAnimalsOutOfSession() && !this.plugin.getSessionManager().isSessionActive()) {
-            event.setHatching(false);
         }
     }
 
