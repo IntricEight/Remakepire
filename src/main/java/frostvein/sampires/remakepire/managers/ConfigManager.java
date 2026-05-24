@@ -600,6 +600,16 @@ public class ConfigManager {
     }
 
     /**
+     * Update the config on whether animals can be bred and chickens can be hatched out of session.
+     *
+     * @param canBreed {@code true} if animals can be bred out of session.
+     */
+    public void setBreedAnimalsOutOfSession(boolean canBreed) {
+        this.plugin.getConfig().set("allow-breeding-out-of-session", canBreed);
+        this.plugin.saveConfig();
+    }
+
+    /**
      * Retrieve the highest stage that a vampire can be on and get permakilled.
      *
      * @return The highest permadeath-enabled vampire stage.

@@ -167,6 +167,7 @@ public class PowCommand implements CommandExecutor, TabCompleter {
         sender.sendMessage("§e/pow admin distributetomes §7- Manually trigger tome distribution");
         sender.sendMessage("§e/pow admin clearbloodmoonbuffs <all | player> §7- Clear blood moon buffs");
         sender.sendMessage("§e/pow admin fixattributes <all | player> §7- Fix stuck attribute modifiers (health/speed)");
+        sender.sendMessage("§e/pow admin make_incurable <player> §7- Makes the player incapable of being cured.");
         sender.sendMessage("§e/pow admin removeendermen <all | toggle | status> §7- Manage enderman removal");
         sender.sendMessage("§e/pow admin setupplayer <player> §7- Give starter items to player");
         sender.sendMessage("§e/pow admin spawnanimals §7- Manually trigger passive mob spawning");
@@ -208,7 +209,7 @@ public class PowCommand implements CommandExecutor, TabCompleter {
                 }
 
                 if (args.length == 2) {
-                    List<String> adminCommands = Arrays.asList("init", "session", "vampire", "beacon", "vampirecooldowns", "resettomecooldowns", "break_warning", "givetome", "select_tomes", "give_cure_book", "distributetomes", "clearbloodmoonbuffs", "fixattributes", "removeendermen", "setupplayer", "spawnanimals", "addtomechest", "removetomechest", "listtomechests", "resetplayer", "set_vampire_spawn", "config");
+                    List<String> adminCommands = Arrays.asList("init", "session", "vampire", "beacon", "vampirecooldowns", "resettomecooldowns", "break_warning", "givetome", "select_tomes", "give_cure_book", "distributetomes", "clearbloodmoonbuffs", "make_incurable", "fixattributes", "removeendermen", "setupplayer", "spawnanimals", "addtomechest", "removetomechest", "listtomechests", "resetplayer", "set_vampire_spawn", "config");
                     return adminCommands.stream().filter((s) -> s.startsWith(args[1].toLowerCase())).collect(Collectors.toList());
                 }
 
@@ -308,6 +309,10 @@ public class PowCommand implements CommandExecutor, TabCompleter {
                     return options.stream().filter((s) -> s.toLowerCase().startsWith(args[2].toLowerCase())).collect(Collectors.toList());
                 }
 
+                if (args.length == 3 && args[1].equalsIgnoreCase("make_incurable")) {
+                    return Bukkit.getOnlinePlayers().stream().map(Player::getName).filter((s) -> s.toLowerCase().startsWith(args[2].toLowerCase())).collect(Collectors.toList());
+                }
+
                 if (args.length == 3 && args[1].equalsIgnoreCase("resetplayer")) {
                     return Bukkit.getOnlinePlayers().stream().map(Player::getName).filter((s) -> s.toLowerCase().startsWith(args[2].toLowerCase())).collect(Collectors.toList());
                 }
@@ -328,10 +333,6 @@ public class PowCommand implements CommandExecutor, TabCompleter {
                 }
 
                 if (args.length == 3 && args[1].equalsIgnoreCase("setupplayer")) {
-                    return Bukkit.getOnlinePlayers().stream().map(Player::getName).filter((s) -> s.toLowerCase().startsWith(args[2].toLowerCase())).collect(Collectors.toList());
-                }
-
-                if (args.length == 3 && args[1].equalsIgnoreCase("resetplayer")) {
                     return Bukkit.getOnlinePlayers().stream().map(Player::getName).filter((s) -> s.toLowerCase().startsWith(args[2].toLowerCase())).collect(Collectors.toList());
                 }
 
