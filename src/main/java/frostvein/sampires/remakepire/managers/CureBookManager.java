@@ -14,7 +14,7 @@ public class CureBookManager {
     private final ConfigManager configManager;
 
     // Remove this if a separate file for book text gets implemented
-    private static final boolean CUSTOM_BOOKS = false;
+    private static final boolean CUSTOM_BOOKS = false, CUSTOM_MESSAGES = false;
 
     /**
      * Create an instance of the Cure Book manager.
@@ -50,7 +50,7 @@ public class CureBookManager {
     public String[] getCureBook4UnreadableMessage() {
         List<String> messages = new ArrayList<>();
 
-        if (CUSTOM_BOOKS) {
+        if (CUSTOM_MESSAGES) {
 
         } else {
             messages.add("§8§o[The words within this tome are beyond your comprehension... Perhaps you must first complete the Trinity of Restoration.]");
@@ -64,7 +64,7 @@ public class CureBookManager {
      *
      * @return a {@code String[]} of pages to fill the book's placeholder pages.
      */
-    public String[] getCureBook4UnreadableText() {
+    public String[] getCureBook4UnreadablePages() {
         List<String> pages = new ArrayList<>();
 
         if (CUSTOM_BOOKS) {
@@ -91,7 +91,7 @@ public class CureBookManager {
     public String[] getCureBookReadMessage(int bookNumber) {
         List<String> messages = new ArrayList<>();
 
-        if (CUSTOM_BOOKS) {
+        if (CUSTOM_MESSAGES) {
             switch (bookNumber) {
                 case 1:
                     break;
@@ -119,7 +119,7 @@ public class CureBookManager {
     public String[] getSelfCureLearntMessage() {
         List<String> messages = new ArrayList<>();
 
-        if (CUSTOM_BOOKS) {
+        if (CUSTOM_MESSAGES) {
 
         } else {
             messages.add("");
@@ -141,7 +141,7 @@ public class CureBookManager {
     public String[] getForceCureLearntMessage() {
         List<String> messages = new ArrayList<>();
 
-        if (CUSTOM_BOOKS) {
+        if (CUSTOM_MESSAGES) {
 
         } else {
             messages.add("");
