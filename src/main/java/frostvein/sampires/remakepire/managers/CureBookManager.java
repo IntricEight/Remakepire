@@ -105,7 +105,7 @@ public class CureBookManager {
                     break;
             }
         } else {
-            messages.add("§8§o[You absorb the ancient knowledge within " + bookNumber + "...]");
+            messages.add("§8§o[You absorb the ancient knowledge within " + this.getCureBookName(bookNumber, false) + "...]");
         }
 
         return messages.toArray(new String[0]);

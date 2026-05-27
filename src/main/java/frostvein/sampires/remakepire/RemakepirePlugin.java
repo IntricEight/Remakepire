@@ -44,6 +44,7 @@ import frostvein.sampires.remakepire.managers.BeaconManager;
 import frostvein.sampires.remakepire.managers.BeetrootManager;
 import frostvein.sampires.remakepire.managers.BloodMoonManager;
 import frostvein.sampires.remakepire.managers.ConfigManager;
+import frostvein.sampires.remakepire.managers.CureBookManager;
 import frostvein.sampires.remakepire.managers.EffectManager;
 import frostvein.sampires.remakepire.managers.ForcedCureChoiceManager;
 import frostvein.sampires.remakepire.managers.HolyWaterEffectManager;
@@ -91,6 +92,7 @@ public final class RemakepirePlugin extends JavaPlugin {
     private BeaconMajorityManager beaconMajorityManager;
     private TomeVampireRestrictionListener tomeVampireRestrictionListener;
     private TomeDistributionManager tomeDistributionManager;
+    private CureBookManager cureBookManager;
     private VampireTexturePackManager vampireTexturePackManager;
     private EndermanRemovalListener endermanRemovalListener;
     private DamageSuppressionListener damageSuppressionListener;
@@ -141,6 +143,7 @@ public final class RemakepirePlugin extends JavaPlugin {
         this.vampireFeedingManager = new VampireFeedingManager(this);
         this.beaconMajorityManager = new BeaconMajorityManager(this);
         this.tomeDistributionManager = new TomeDistributionManager(this);
+        this.cureBookManager = new CureBookManager(this);
         this.vampireTexturePackManager = new VampireTexturePackManager(this);
         this.endermanRemovalListener = new EndermanRemovalListener(this);
         this.damageSuppressionListener = new DamageSuppressionListener(this);
@@ -555,6 +558,10 @@ public final class RemakepirePlugin extends JavaPlugin {
 
     public TomeDistributionManager getTomeDistributionManager() {
         return this.tomeDistributionManager;
+    }
+
+    public CureBookManager getCureBookManager() {
+        return this.cureBookManager;
     }
 
     public VampireTexturePackManager getVampireTexturePackManager() {
