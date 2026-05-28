@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BookMeta;
 import frostvein.sampires.remakepire.RemakepirePlugin;
@@ -11,10 +12,8 @@ import frostvein.sampires.remakepire.listeners.CureBookReadingListener;
 
 public class CureBookManager {
     private final RemakepirePlugin plugin;
-    private final ConfigManager configManager;
-
-    // Remove this if a separate file for book text gets implemented
-    private static final boolean CUSTOM_BOOKS = false, CUSTOM_MESSAGES = false;
+    private FileConfiguration textConfig;
+    private final boolean CUSTOM_BOOKS, CUSTOM_MESSAGES;
 
     /**
      * Create an instance of the Cure Book manager.
@@ -23,9 +22,13 @@ public class CureBookManager {
      */
     public CureBookManager(RemakepirePlugin plugin) {
         this.plugin = plugin;
-        this.configManager = plugin.getConfigManager();
 
-        // TODO Get whether we are using custom books or not
+        // Get the custom config file, which requires a different method than the default config file
+        this.textConfig = this.plugin.getTextConfig();
+
+        // Determine whether we are using custom features or not
+        this.CUSTOM_BOOKS = this.plugin.getConfig().getBoolean("custom-cure-books", false);
+        this.CUSTOM_MESSAGES = this.plugin.getConfig().getBoolean("custom-cure-book-messages", false);
     }
 
     /**
@@ -40,7 +43,6 @@ public class CureBookManager {
 
         return book;
     }
-
 
     /**
      *
@@ -160,69 +162,47 @@ public class CureBookManager {
      *
      * @param bookNumber the cure book's order in the sequence.
      * @param itemName whether to return the book's name or the item's name.<br/>
-     *                 (Example: "The Remedy" vs "The Remedy 1/3")
+     *                 (Example: "The Remedy" vs "The Remedy 1/3").<br/>
+     *                 {@code true} returns the item's name.
      * @return the cure book's name.
      */
     public String getCureBookName(int bookNumber, boolean itemName) {
-        switch (bookNumber) {
-            case 1:
-                if (itemName && CUSTOM_BOOKS) {
-                    // The item name of the custom cure book
-
-                } else if (itemName) {
-                    // The item name of the default first cure book
-                    return "The Remedy 1/3";
-                } else if (CUSTOM_BOOKS) {
-                    // The book name of the custom cure book
-
-                } else {
-                    // The book name of the default first cure book
-                    return "The Remedy";
-                }
-            case 2:
-                if (itemName && CUSTOM_BOOKS) {
-                    // The item name of the custom cure book
-
-                } else if (itemName) {
-                    // The item name of the default second cure book
-                    return "The Cure 2/3";
-                } else if (CUSTOM_BOOKS) {
-                    // The book name of the custom cure book
-
-                } else {
-                    // The book name of the default second cure book
-                    return "The Cure";
-                }
-            case 3:
-                if (itemName && CUSTOM_BOOKS) {
-                    // The item name of the custom cure book
-
-                } else if (itemName) {
-                    // The item name of the default third cure book
-                    return "The Absolution 3/3";
-                } else if (CUSTOM_BOOKS) {
-                    // The book name of the custom cure book
-
-                } else {
-                    // The book name of the default third cure book
-                    return "The Absolution";
-                }
-            case 4:
-                if (itemName && CUSTOM_BOOKS) {
-                    // The item name of the custom cure book
-
-                } else if (itemName) {
-                    // The item name of the default fourth cure book
-                    return "The Retribution 4/3";
-                } else if (CUSTOM_BOOKS) {
-                    // The book name of the custom cure book
-
-                } else {
-                    // The book name of the default fourth cure book
-                    return "The Retribution";
-                }
-            default:
-                return "ERROR in title";
+        if (itemName && CUSTOM_BOOKS) {
+            // The item name of the custom cure books
+            return switch (bookNumber) {
+                case 1 -> this.textConfig.getString("cure-book-1.item-title", "ERROR could not find item title");
+                case 2 -> this.textConfig.getString("cure-book-2.item-title", "ERROR could not find item title");
+                case 3 -> this.textConfig.getString("cure-book-3.item-title", "ERROR could not find item title");
+                case 4 -> this.textConfig.getString("cure-book-4.item-title", "ERROR could not find item title");
+                default -> "ERROR retrieving title from config";
+            };
+        } else if (CUSTOM_BOOKS) {
+            // The book name of the custom cure book
+            return switch (bookNumber) {
+                case 1 -> this.textConfig.getString("cure-book-1.title", "ERROR could not find title");
+                case 2 -> this.textConfig.getString("cure-book-2.title", "ERROR could not find title");
+                case 3 -> this.textConfig.getString("cure-book-3.title", "ERROR could not find title");
+                case 4 -> this.textConfig.getString("cure-book-4.title", "ERROR could not find title");
+                default -> "ERROR retrieving title from config";
+            };
+        } else if (itemName) {
+            // The item name of the default cure books
+            return switch (bookNumber) {
+                case 1 -> "The Remedy 1/3";
+                case 2 -> "The Cure 2/3";
+                case 3 -> "The Absolution 3/3";
+                case 4 -> "The Retribution 4/3";
+                default -> "ERROR in title";
+            };
+        } else {
+            // The book name of the default cure books
+            return switch (bookNumber) {
+                case 1 -> "The Remedy";
+                case 2 -> "The Cure";
+                case 3 -> "The Absolution";
+                case 4 -> "The Retribution";
+                default -> "ERROR in title";
+            };
         }
     }
 
@@ -234,13 +214,18 @@ public class CureBookManager {
      */
     public String getCureBookAuthor(int bookNumber) {
         if (CUSTOM_BOOKS) {
-            // TODO Retrieve from config file. Give an option for each book's author
-            return "";
+            return switch (bookNumber) {
+                case 1 -> this.textConfig.getString("cure-book-1.author", "ERROR could not find author");
+                case 2 -> this.textConfig.getString("cure-book-2.author", "ERROR could not find author");
+                case 3 -> this.textConfig.getString("cure-book-3.author", "ERROR could not find author");
+                case 4 -> this.textConfig.getString("cure-book-4.author", "ERROR could not find author");
+                default -> "ERROR retrieving author from config";
+            };
         } else {
             return switch (bookNumber) {
                 case 1, 2, 3 -> "§5An ancient scholar";
                 case 4 -> "§4A vengeful spirit";
-                default -> "ERROR in author";
+                default -> "ERROR in author default name";
             };
         }
     }
@@ -276,45 +261,29 @@ public class CureBookManager {
      * @return the {@code BookMeta} of the first cure book.
      */
     private BookMeta getCureBook1Meta() {
-//        ItemStack book = new ItemStack(Material.WRITTEN_BOOK);
-//        BookMeta bookMeta = (BookMeta)(new ItemStack(Material.WRITTEN_BOOK)).getItemMeta();
         BookMeta bookMeta = (BookMeta)Bukkit.getItemFactory().getItemMeta(Material.WRITTEN_BOOK);
+        List<String> pages = new ArrayList<>(), lore = new ArrayList<>();
         final int BOOK_NUMBER = 1;
 
+        bookMeta.setTitle(this.getCureBookName(BOOK_NUMBER, true));
+        bookMeta.setAuthor(this.getCureBookAuthor(BOOK_NUMBER));
+
         if (CUSTOM_BOOKS) {
-            // 3 Fields for main book contents
-            // Title: 1 line only
-            // Author: 1 line only
-            // Pages: Allow as many as they want, figure out how to allow them to make an array inside a yml file and bring that in here (Through a String[])
-
-
-
-            // Lore format
-            List<String> lore = new ArrayList<>();
-
-            // Figure out if each line in lore needs to be added separately, or if I can reuse the String[] from above.
-            // If each must be added individually, make a loop for adding that to the book lore
-
-
-
-
+            pages = this.textConfig.getStringList("cure-book-1.pages");
+            lore = this.textConfig.getStringList("cure-book-1.item-details");
         } else {
-            bookMeta.setTitle(this.getCureBookName(BOOK_NUMBER, true));
-            bookMeta.setAuthor(this.getCureBookAuthor(BOOK_NUMBER));
-            bookMeta.setPages(
-                    "§5§lTHE REMEDY§r\n§8Part I of III\n\n§7In the darkest hours, when the cursed blood burns within your veins, know that salvation exists.\n\n§7The ancients spoke of a trinity of knowledge...",
-                    "§7...that when combined, can sever the unholy bond between mortal and monster.\n\n§7This is the first piece of that forbidden wisdom.\n\n§8Read on, seeker of the light..."
-            );
+            pages.add("§5§lTHE REMEDY§r\n§8Part I of III\n\n§7In the darkest hours, when the cursed blood burns within your veins, know that salvation exists.\n\n§7The ancients spoke of a trinity of knowledge...");
+            pages.add("§7...that when combined, can sever the unholy bond between mortal and monster.\n\n§7This is the first piece of that forbidden wisdom.\n\n§8Read on, seeker of the light...");
 
-            List<String> lore = new ArrayList<>();
             lore.add("§5An ancient tome of forbidden knowledge");
             lore.add("§7Part 1 of the cure series");
             lore.add("");
             lore.add("§eRead this book to absorb its wisdom");
-
-            bookMeta.setLore(lore);
-            CureBookReadingListener.markAsAuthenticCureBook(bookMeta, BOOK_NUMBER, this.plugin);
         }
+
+        bookMeta.setPages(pages);
+        bookMeta.setLore(lore);
+        CureBookReadingListener.markAsAuthenticCureBook(bookMeta, BOOK_NUMBER, this.plugin);
 
         return bookMeta;
     }
@@ -326,27 +295,28 @@ public class CureBookManager {
      */
     private BookMeta getCureBook2Meta() {
         BookMeta bookMeta = (BookMeta)Bukkit.getItemFactory().getItemMeta(Material.WRITTEN_BOOK);
+        List<String> pages = new ArrayList<>(), lore = new ArrayList<>();
         final int BOOK_NUMBER = 2;
 
+        bookMeta.setTitle(this.getCureBookName(BOOK_NUMBER, true));
+        bookMeta.setAuthor(this.getCureBookAuthor(BOOK_NUMBER));
+
         if (CUSTOM_BOOKS) {
-
+            pages = this.textConfig.getStringList("cure-book-2.pages");
+            lore = this.textConfig.getStringList("cure-book-2.item-details");
         } else {
-            bookMeta.setTitle(this.getCureBookName(BOOK_NUMBER, true));
-            bookMeta.setAuthor(this.getCureBookAuthor(BOOK_NUMBER));
-            bookMeta.setPages(
-                    "§5§lTHE CURE§r\n§8Part II of III\n\n§7The second fragment reveals the nature of the curse itself.\n\n§7Born of darkness, sustained by blood, the vampire's existence is a perversion of nature's order...",
-                    "§7...yet within this perversion lies the key to its undoing.\n\n§7Holy water, blessed by the righteous, weakens the bond.\n\n§8Continue your search, truth-seeker..."
-            );
+            pages.add("§5§lTHE CURE§r\n§8Part II of III\n\n§7The second fragment reveals the nature of the curse itself.\n\n§7Born of darkness, sustained by blood, the vampire's existence is a perversion of nature's order...");
+            pages.add("§7...yet within this perversion lies the key to its undoing.\n\n§7Holy water, blessed by the righteous, weakens the bond.\n\n§8Continue your search, truth-seeker...");
 
-            List<String> lore = new ArrayList<>();
             lore.add("§5An ancient tome of forbidden knowledge");
             lore.add("§7Part 2 of the cure series");
             lore.add("");
             lore.add("§eRead this book to absorb its wisdom");
-
-            bookMeta.setLore(lore);
-            CureBookReadingListener.markAsAuthenticCureBook(bookMeta, BOOK_NUMBER, this.plugin);
         }
+
+        bookMeta.setPages(pages);
+        bookMeta.setLore(lore);
+        CureBookReadingListener.markAsAuthenticCureBook(bookMeta, BOOK_NUMBER, this.plugin);
 
         return bookMeta;
     }
@@ -358,27 +328,28 @@ public class CureBookManager {
      */
     private BookMeta getCureBook3Meta() {
         BookMeta bookMeta = (BookMeta)Bukkit.getItemFactory().getItemMeta(Material.WRITTEN_BOOK);
+        List<String> pages = new ArrayList<>(), lore = new ArrayList<>();
         final int BOOK_NUMBER = 3;
 
+        bookMeta.setTitle(this.getCureBookName(BOOK_NUMBER, true));
+        bookMeta.setAuthor(this.getCureBookAuthor(BOOK_NUMBER));
+
         if (CUSTOM_BOOKS) {
-
+            pages = this.textConfig.getStringList("cure-book-3.pages");
+            lore = this.textConfig.getStringList("cure-book-3.item-details");
         } else {
-            bookMeta.setTitle(this.getCureBookName(BOOK_NUMBER, true));
-            bookMeta.setAuthor(this.getCureBookAuthor(BOOK_NUMBER));
-            bookMeta.setPages(
-                    "§5§lTHE ABSOLUTION§r\n§8Part III of III\n\n§7The final piece completes the trinity.\n\n§7With all three fragments of knowledge, the words of power are revealed:\n\n§6voluntate-mea-hoc-nefandum-vinculum-abicio",
-                    "§7Stand near a holy beacon, with holy water upon your person, beneath the light of day.\n\n§7Speak the words, and be free of the curse forevermore.\n\n§8May the light guide your path."
-            );
+            pages.add("§5§lTHE ABSOLUTION§r\n§8Part III of III\n\n§7The final piece completes the trinity.\n\n§7With all three fragments of knowledge, the words of power are revealed:\n\n§6voluntate-mea-hoc-nefandum-vinculum-abicio");
+            pages.add("§7Stand near a holy beacon, with holy water upon your person, beneath the light of day.\n\n§7Speak the words, and be free of the curse forevermore.\n\n§8May the light guide your path.");
 
-            List<String> lore = new ArrayList<>();
             lore.add("§5An ancient tome of forbidden knowledge");
             lore.add("§7Part 3 of the cure series");
             lore.add("");
             lore.add("§eRead this book to absorb its wisdom");
-
-            bookMeta.setLore(lore);
-            CureBookReadingListener.markAsAuthenticCureBook(bookMeta, BOOK_NUMBER, this.plugin);
         }
+
+        bookMeta.setPages(pages);
+        bookMeta.setLore(lore);
+        CureBookReadingListener.markAsAuthenticCureBook(bookMeta, BOOK_NUMBER, this.plugin);
 
         return bookMeta;
     }
@@ -390,32 +361,31 @@ public class CureBookManager {
      */
     private BookMeta getCureBook4Meta() {
         BookMeta bookMeta = (BookMeta)Bukkit.getItemFactory().getItemMeta(Material.WRITTEN_BOOK);
+        List<String> pages = new ArrayList<>(), lore = new ArrayList<>();
         final int BOOK_NUMBER = 4;
 
+        bookMeta.setTitle(this.getCureBookName(BOOK_NUMBER, true));
+        bookMeta.setAuthor(this.getCureBookAuthor(BOOK_NUMBER));
+
         if (CUSTOM_BOOKS) {
-
+            pages = this.textConfig.getStringList("cure-book-4.pages");
+            lore = this.textConfig.getStringList("cure-book-4.item-details");
         } else {
-            bookMeta.setTitle(this.getCureBookName(BOOK_NUMBER, true));
-            bookMeta.setAuthor(this.getCureBookAuthor(BOOK_NUMBER));
-            bookMeta.setPages(
-                    "§4§lTHE RETRIBUTION§r\n§8The Fourth Tome\n\n§7This knowledge was never meant to be found.\n\n§7While the trinity speaks of self-salvation, this tome reveals darker words - words of forced redemption...",
-                    "§7...or forced damnation.\n\n§4hoc-vinculum-tibi-dirumpo-mala-creatura\n\n§7With these words, you may force the choice upon another creature of the night.\n\n§8Use this power wisely, for it carries great consequence."
-            );
+            pages.add("§4§lTHE RETRIBUTION§r\n§8The Fourth Tome\n\n§7This knowledge was never meant to be found.\n\n§7While the trinity speaks of self-salvation, this tome reveals darker words - words of forced redemption...");
+            pages.add("§7...or forced damnation.\n\n§4hoc-vinculum-tibi-dirumpo-mala-creatura\n\n§7With these words, you may force the choice upon another creature of the night.\n\n§8Use this power wisely, for it carries great consequence.");
 
-            List<String> lore = new ArrayList<>();
             lore.add("§5An ancient tome of forbidden knowledge");
             lore.add("§7Part 4 of the cure series");
             lore.add("");
             lore.add("§eRead this book to absorb its wisdom");
-
-            bookMeta.setLore(lore);
-            CureBookReadingListener.markAsAuthenticCureBook(bookMeta, BOOK_NUMBER, this.plugin);
         }
+
+        bookMeta.setPages(pages);
+        bookMeta.setLore(lore);
+        CureBookReadingListener.markAsAuthenticCureBook(bookMeta, BOOK_NUMBER, this.plugin);
 
         return bookMeta;
     }
-
-
 
 
 

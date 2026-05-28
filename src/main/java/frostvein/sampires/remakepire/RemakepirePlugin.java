@@ -1,8 +1,11 @@
 package frostvein.sampires.remakepire;
 
+import java.io.File;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scoreboard.NameTagVisibility;
 import org.bukkit.scoreboard.Objective;
@@ -108,12 +111,18 @@ public final class RemakepirePlugin extends JavaPlugin {
     private Team castTeam;
     private Team vampireCastTeam;
     private Location vampireRespawnLocation;
+    private FileConfiguration textConfig;
 
     /**
      * Enable the Remakepires plugin on the server.
      */
     public void onEnable() {
         this.saveDefaultConfig();
+
+        // Save the text-config file in the plugin data folder (If it does not already exist)
+        saveResource("text-config.yml", false);
+        this.loadTextConfig();
+
         this.configManager = new ConfigManager(this);
         this.world = Bukkit.getWorld(WORLD_NAME);
         this.initializeHumanCastTeam();
@@ -310,6 +319,28 @@ public final class RemakepirePlugin extends JavaPlugin {
         }
 
         this.logInfo("VampireSMP Plugin has been disabled!");
+    }
+
+    /**
+     * Retrieve the text configuration file, used for modifying text readouts such as the contents of cure books, or border messages.
+     *
+     * @return A file of configuration options.
+     */
+    public FileConfiguration getTextConfig() {
+        return textConfig;
+    }
+
+    /**
+     * Load the text configuration file into the project resources.
+     */
+    private void loadTextConfig() {
+        File textConfigFile = new File(getDataFolder(), "text-config.yml");
+
+        if (!textConfigFile.exists()) {
+            saveResource("text-config.yml", false);
+        }
+
+        textConfig = YamlConfiguration.loadConfiguration(textConfigFile);
     }
 
     /**
