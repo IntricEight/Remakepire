@@ -216,24 +216,33 @@ custom-border-messages: false
 # The custom messages that appear the first time players are prevented from leaving the game boundaries
 border-blocked-messages:
   # The beacons are not all controlled by a single team
-  beacons-not-controlled: "§cYou feel a force tying you to Oakhurst... You may not leave while an enemy's beacon remains... But one that has embraced darkness, and yet has found strength to return to the light... Could escape..."
+  beacons-not-controlled:
+    - "§cYou feel a force tying you to Oakhurst... You may not leave while an enemy's beacon remains..."
+    - "§cBut one that has embraced darkness, and yet has found strength to return to the light... Could escape..."
 
   # The player is a human and all beacons are holy, but vampires remain alive
-  vampires-remain-alive: "§aBut while evil creatures still walk Oakhurst, your job is not yet finished..."
+  vampires-remain-alive:
+    - "§aBut while evil creatures still walk Oakhurst, your job is not yet finished..."
 
   # The player is a vampire and all beacons are desecrated, but humans remain alive
-  humans-remain-alive: "§4But while humans remain... Hope still stands..."
+  humans-remain-alive:
+    - "§4But while humans remain... Hope still stands..."
 
   # The player attempts to leave the border while in a vehicle with a player who cannot leave the border
-  shared-escape-prevented: "§cWhilst freedom lies within your reach, you feel a force dragging your companion back... You cannot leave Oakhurst while one tethered to the beacons remains by you."
+  shared-escape-prevented:
+    - "§cWhilst freedom lies within your reach, you feel a force dragging your companion back... You cannot leave Oakhurst while one tethered to the beacons remains by you."
 
 # The custom messages that appear when players successfully leave the game boundary for the first time
 border-freedom-messages:
   # The player is a cured vampire
-  cured-vampire-freedom: "§6You are leaving Oakhurst...\n§eThe familiar lands fade behind you as you venture beyond the border."
+  cured-vampire-freedom:
+    - "§6You are leaving Oakhurst..."
+    - "§eThe familiar lands fade behind you as you venture beyond the border."
 
   # The player is a human
-  human-freedom: "§aYou are free... Finally free..."
+  human-freedom:
+    - "§aYou are free... Finally free..."
 
   # The player is a vampire
-  vampire-freedom: "§4You are free of your chains, creature of the night..."
+  vampire-freedom:
+    - "§4You are free of your chains, creature of the night..."

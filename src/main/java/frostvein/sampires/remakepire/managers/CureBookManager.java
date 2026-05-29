@@ -35,7 +35,7 @@ public class CureBookManager {
      * Retrieve a cure book using its sequence number.
      *
      * @param bookNumber the cure book's order in the sequence.
-     * @return the cure book.
+     * @return The cure book.
      */
     public ItemStack getCureBook(int bookNumber) {
         ItemStack book = new ItemStack(Material.WRITTEN_BOOK);
@@ -48,7 +48,7 @@ public class CureBookManager {
      * Retrieve the data of a cure book using its sequence number.
      *
      * @param bookNumber the cure book's order in the sequence.
-     * @return the {@code BookMeta} of the cure book.
+     * @return The {@code BookMeta} of the cure book.
      */
     private BookMeta getCureBookMeta(int bookNumber) {
         BookMeta bookMeta = (BookMeta)Bukkit.getItemFactory().getItemMeta(Material.WRITTEN_BOOK);
@@ -70,7 +70,7 @@ public class CureBookManager {
      * @param itemName whether to return the book's name or the item's name.<br/>
      *                 (Example: "The Remedy" vs "The Remedy 1/3").<br/>
      *                 {@code true} returns the item's name.
-     * @return the cure book's name.
+     * @return The cure book's name.
      */
     public String getCureBookName(int bookNumber, boolean itemName) {
         if (itemName && CUSTOM_BOOKS) {
@@ -126,7 +126,7 @@ public class CureBookManager {
      * Retrieve the pages of the cure book.
      *
      * @param bookNumber the cure book's order in the sequence.
-     * @return an {@code ArrayList} of page contents in the book.
+     * @return An {@code ArrayList} of page contents in the book.
      */
     private List<String> getCureBookPages(int bookNumber) {
         List<String> pages = new ArrayList<>();
@@ -163,7 +163,7 @@ public class CureBookManager {
      * Retrieve the item description of the cure book.
      *
      * @param bookNumber the cure book's order in the sequence.
-     * @return an {@code ArrayList} of lines to go into the lore field.
+     * @return An {@code ArrayList} of lines to go into the lore field.
      */
     private List<String> getCureBookLore(int bookNumber) {
         List<String> lore = new ArrayList<>();
@@ -183,7 +183,7 @@ public class CureBookManager {
     /**
      * Retrieve the placeholder text that fills the book before the player has completed the cure trinity.
      *
-     * @return an {@code ArrayList} of pages to fill the book's placeholder pages.
+     * @return An {@code ArrayList} of pages to fill the book's placeholder pages.
      */
     public List<String> getCureBook4UnreadablePages() {
         List<String> pages = new ArrayList<>();
@@ -201,7 +201,7 @@ public class CureBookManager {
      * Retrieve a message to inform the reader that they have learnt the knowledge within the cure book.
      *
      * @param bookNumber the cure book's order in the sequence.
-     * @return the message to send to the cure book's reader.
+     * @return The message to send to the cure book's reader.
      */
     public String[] getCureBookReadMessage(int bookNumber) {
         List<String> messages = new ArrayList<>();
@@ -219,7 +219,7 @@ public class CureBookManager {
     /**
      * Retrieve a message to inform the reader that thy lack the necessary knowledge to read this cure book.
      *
-     * @return the message to send to the cure book's attempted reader.
+     * @return The message to send to the cure book's attempted reader.
      */
     public String[] getCureBook4UnreadableMessage() {
         List<String> messages = new ArrayList<>();
@@ -237,7 +237,7 @@ public class CureBookManager {
     /**
      * Inform the reader that they have completed the cure trinity and can now cure themselves of vampirism.
      *
-     * @return the message to send to the cure book's reader.
+     * @return The message to send to the cure book's reader.
      */
     public String[] getSelfCureLearntMessage() {
         List<String> messages = new ArrayList<>();
@@ -259,7 +259,7 @@ public class CureBookManager {
     /**
      * Inform the reader that they have discovered the force cure and can now cure others of vampirism.
      *
-     * @return the message to send to the cure book's reader.
+     * @return The message to send to the cure book's reader.
      */
     public String[] getForceCureLearntMessage() {
         List<String> messages = new ArrayList<>();
