@@ -12,7 +12,7 @@ import frostvein.sampires.remakepire.listeners.CureBookReadingListener;
 
 public class CureBookManager {
     private final RemakepirePlugin plugin;
-    private FileConfiguration textConfig;
+    private final FileConfiguration textConfig;
     private final boolean CUSTOM_BOOKS, CUSTOM_MESSAGES;
 
     /**
@@ -197,16 +197,8 @@ public class CureBookManager {
         return pages;
     }
 
-
-
-
-
-    /*
-     * Add other public methods for retrieving the messages that are sent to the player when cure books are interacted with
-     */
-
     /**
-     * Retrieve a message to inform the reader that they have learnt the knowledge within the cure book
+     * Retrieve a message to inform the reader that they have learnt the knowledge within the cure book.
      *
      * @param bookNumber the cure book's order in the sequence.
      * @return the message to send to the cure book's reader.
@@ -215,18 +207,8 @@ public class CureBookManager {
         List<String> messages = new ArrayList<>();
 
         if (CUSTOM_MESSAGES) {
-            switch (bookNumber) {
-                case 1:
-                    break;
-                case 2:
-                    break;
-                case 3:
-                    break;
-                case 4:
-                    break;
-                default:
-                    break;
-            }
+            // Retrieve the custom message from reading the cure book
+            messages = this.textConfig.getStringList("cure-book-messages.cure-book-" + bookNumber +"-read");
         } else {
             messages.add("§8§o[You absorb the ancient knowledge within " + this.getCureBookName(bookNumber, false) + "...]");
         }
@@ -243,7 +225,7 @@ public class CureBookManager {
         List<String> messages = new ArrayList<>();
 
         if (CUSTOM_MESSAGES) {
-
+            messages = this.textConfig.getStringList("cure-book-messages.cure-book-4-unreadable");
         } else {
             messages.add("§8§o[The words within this tome are beyond your comprehension... Perhaps you must first complete the Trinity of Restoration.]");
         }
@@ -261,7 +243,7 @@ public class CureBookManager {
         List<String> messages = new ArrayList<>();
 
         if (CUSTOM_MESSAGES) {
-
+            messages = this.textConfig.getStringList("cure-book-messages.willing-cure-learnt");
         } else {
             messages.add("");
             messages.add("§6§lTRINITY OF RESTORATION COMPLETE.");
@@ -283,7 +265,7 @@ public class CureBookManager {
         List<String> messages = new ArrayList<>();
 
         if (CUSTOM_MESSAGES) {
-
+            messages = this.textConfig.getStringList("cure-book-messages.force-cure-learnt");
         } else {
             messages.add("");
             messages.add("§4§lWORDS OF RETRIBUTION LEARNED.");
@@ -295,8 +277,4 @@ public class CureBookManager {
 
         return messages.toArray(new String[0]);
     }
-
-
-
-
 }

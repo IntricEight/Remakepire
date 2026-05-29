@@ -4,10 +4,14 @@
 # This file contains config options for much of the text within the Vampires game, such as the contents of the cure books, or the border messages.
 # Interaction with this file is UNNECESSARY to running a Vampires game. If this file is overwhelming you, just leave all the "custom..." variables
 # as false, and close the file.
-#
+
 # The default text of the plugin has been written in each config option. Use these to guide your customization process.
 # The character '§' indicates a text modifier, based on what character comes next (§o §5 are two examples). Use them to modify the appearance of
 # their lines of text as desired.
+
+# Supported Customization Options
+#   Cure book contents - The details of the cure books
+#   Cure book messages - The messages spawned when a cure book is interacted with
 
 
 # ============================================================================
@@ -147,24 +151,46 @@ cure-book-4:
 
 
 # Enable/Disable using the content in this file for messages that appear when a player reads a cure book
-# The config modifier is responsible for testing their custom book contents to ensure alignment and quality is as desired
 # Default: false (Custom content disabled)
 custom-cure-book-messages: false
 
+# The custom messages that appear when certain cure conditions are met
 cure-book-messages:
-
+  # A player reads cure book 1 for the first time
   cure-book-1-read:
-    - ""
+    - "§8§o[You absorb the ancient knowledge within The Remedy...]"
 
+  # A player reads cure book 2 for the first time
   cure-book-2-read:
-    - ""
+    - "§8§o[You absorb the ancient knowledge within The Cure...]"
 
+  # A player reads cure book 3 for the first time
   cure-book-3-read:
-    - ""
+    - "§8§o[You absorb the ancient knowledge within The Absolution...]"
 
+  # A player successfully reads cure book 4 for the first time
   cure-book-4-read:
+    - "§8§o[You absorb the ancient knowledge within The Retribution...]"
+
+  # A player attempts to read cure book 4 without completing the cure trinity
+  cure-book-4-unreadable:
+    - "§8§o[The words within this tome are beyond your comprehension... Perhaps you must first complete the Trinity of Restoration.]"
+
+  # A player reads all the books required to learn how to cure themselves of vampirism
+  willing-cure-learnt:
+    - ""
+    - "§6§lTRINITY OF RESTORATION COMPLETE.");
+    - "§eYou have absorbed the knowledge from all three cure books. You now know the words to cure yourself of vampirism:");
+    - "§7/§6voluntate-mea-hoc-nefandum-vinculum-abicio");
+    - "§7Stand near a holy beacon, with a bottle of holy water on your person, and in the light of day, say those words, and be free.");
     - ""
 
-  cure-book-4-unreadable:
+  # A player reads all the books required to learn how to cure others of vampirism (or kill them)
+  force-cure-learnt:
+    - ""
+    - "§4§lWORDS OF RETRIBUTION LEARNED."
+    - "§cYou have learned the vengeful words to force cure others:"
+    - "§7/§4hoc-vinculum-tibi-dirumpo-mala-creatura §7<§4player§7>"
+    - "§7You and the creature must be within range of a holy beacon, hold a holy water on your person, and in the light of day, say those words, and give them the final choice."
     - ""
 
