@@ -12,6 +12,7 @@
 # Supported Customization Options
 #   Cure book contents - The details of the cure books
 #   Cure book messages - The messages spawned when a cure book is interacted with
+#   Border messages - The messages that appear when interacting with the game border
 
 
 # ============================================================================
@@ -194,3 +195,45 @@ cure-book-messages:
     - "§7You and the creature must be within range of a holy beacon, hold a holy water on your person, and in the light of day, say those words, and give them the final choice."
     - ""
 
+
+# ============================================================================
+# GAME BORDER
+#   Inside this section, there are controls for each outcome of interacting with the world border.
+#   Begin by setting custom-border-messages to true, and then edit or replace sections to change what appears in each state of the player-border relationship.
+#   Changes these messages do not change the leave condition itself. You'll need to get a copy of the raw plugin code to modify that.
+#   To return the border to its original form, toggle the control back to false and the plugin will revert to the default version of each message.
+# ============================================================================
+
+# Enable/Disable using the content in this file at the game border
+# Default: false (Custom content disabled)
+custom-border-messages: false
+
+# Reminder of the default leave conditions for VampireSMP:
+#   Player is a cured vampire
+#   Player is a human, all beacons are holy, and no vampires remain
+#   Player is a vampire, all beacons are desecrated, and no humans remain
+
+# The custom messages that appear the first time players are prevented from leaving the game boundaries
+border-blocked-messages:
+  # The beacons are not all controlled by a single team
+  beacons-not-controlled: "§cYou feel a force tying you to Oakhurst... You may not leave while an enemy's beacon remains... But one that has embraced darkness, and yet has found strength to return to the light... Could escape..."
+
+  # The player is a human and all beacons are holy, but vampires remain alive
+  vampires-remain-alive: "§aBut while evil creatures still walk Oakhurst, your job is not yet finished..."
+
+  # The player is a vampire and all beacons are desecrated, but humans remain alive
+  humans-remain-alive: "§4But while humans remain... Hope still stands..."
+
+  # The player attempts to leave the border while in a vehicle with a player who cannot leave the border
+  shared-escape-prevented: "§cWhilst freedom lies within your reach, you feel a force dragging your companion back... You cannot leave Oakhurst while one tethered to the beacons remains by you."
+
+# The custom messages that appear when players successfully leave the game boundary for the first time
+border-freedom-messages:
+  # The player is a cured vampire
+  cured-vampire-freedom: "§6You are leaving Oakhurst...\n§eThe familiar lands fade behind you as you venture beyond the border."
+
+  # The player is a human
+  human-freedom: "§aYou are free... Finally free..."
+
+  # The player is a vampire
+  vampire-freedom: "§4You are free of your chains, creature of the night..."

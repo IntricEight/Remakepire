@@ -6,6 +6,7 @@ import java.util.List;
 import io.papermc.paper.event.entity.EntityMoveEvent;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Vehicle;
@@ -15,14 +16,17 @@ import org.bukkit.event.entity.EntityMountEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.vehicle.VehicleEnterEvent;
 import org.bukkit.event.vehicle.VehicleMoveEvent;
+import org.bukkit.util.Vector;
 import frostvein.sampires.remakepire.RemakepirePlugin;
 import frostvein.sampires.remakepire.beacons.BeaconSite;
-import org.bukkit.util.Vector;
 
 public class MovementBoundaryListener
 implements Listener {
     private final RemakepirePlugin plugin;
+    private final FileConfiguration textConfig;
     private final String TOWN_NAME;
+    private static final String LEFT_OAKHURST_TAG = "LeftOakhurst", INFORMED_BOUNDARY = "informed_boundary", INFORMED_BOUNDARY_COMPANION = "informed_boundary_companion", CURED_VAMPIRE_TAG = "CuredVampire";
+    private final boolean CUSTOM_BORDER_MESSAGES;
 
     /**
      * Create an instance of the Movement Boundary border listener.
@@ -31,7 +35,11 @@ implements Listener {
      */
     public MovementBoundaryListener(RemakepirePlugin plugin) {
         this.plugin = plugin;
+        this.textConfig = this.plugin.getTextConfig();
         this.TOWN_NAME = plugin.getConfigManager().getTownName();
+
+        // Determine whether we are using custom features or not
+        this.CUSTOM_BORDER_MESSAGES = this.textConfig.getBoolean("custom-border-messages", false);
     }
 
     /**
@@ -77,8 +85,8 @@ implements Listener {
 
         // Send the leave message to the player if they have legally escaped beyond the border
         if (canLeave && wasInsideBoundary && isOutsideBoundary) {
-            if (!player.getScoreboardTags().contains("LeftOakhurst")) {
-                player.addScoreboardTag("LeftOakhurst");
+            if (!player.getScoreboardTags().contains(LEFT_OAKHURST_TAG)) {
+                player.addScoreboardTag(LEFT_OAKHURST_TAG);
                 player.sendMessage(this.getLeaveSuccessMessage(player));
             }
 
@@ -95,7 +103,10 @@ implements Listener {
                 event.setCancelled(true);
             }
 
-            this.informPlayerOnBlockedExit(player);
+            if (!player.getScoreboardTags().contains(INFORMED_BOUNDARY)) {
+                player.addScoreboardTag(INFORMED_BOUNDARY);
+                player.sendMessage(this.getPlayerBlockedExitMessage(player));
+            }
         }
     }
 
@@ -159,23 +170,26 @@ implements Listener {
 
             // Let all blocked players know why they cannot leave
             for (Player passenger : illegalPassengers) {
-                this.informPlayerOnBlockedExit(passenger);
+                if (!passenger.getScoreboardTags().contains(INFORMED_BOUNDARY)) {
+                    passenger.addScoreboardTag(INFORMED_BOUNDARY);
+                    passenger.sendMessage(this.getPlayerBlockedExitMessage(passenger));
+                }
             }
 
             // Give any players who can leave the border a message that they are held back by their forbidden companion
             for (Player passenger : allowedPassengers) {
-                if (!passenger.getScoreboardTags().contains("informed_boundary_companion")) {
-                    passenger.addScoreboardTag("informed_boundary_companion");
+                if (!passenger.getScoreboardTags().contains(INFORMED_BOUNDARY_COMPANION)) {
+                    passenger.addScoreboardTag(INFORMED_BOUNDARY_COMPANION);
 
                     // Let the player know that while they can leave, they are prevented as long as their companion is in the same vehicle
-                    passenger.sendMessage("§cWhilst freedom lies within your reach, you feel a force dragging your companion back... You cannot leave " + TOWN_NAME + " while one tethered to the beacons remains by you.");
+                    passenger.sendMessage(this.getPassengerPreventedLeaveMessage());
                 }
             }
         } else if (!allowedPassengers.isEmpty() && wasInsideBoundary && isOutsideBoundary) {
             // Send the leave message to the players if they have legally escaped beyond the border
             for (Player passenger : allowedPassengers) {
-                if (!passenger.getScoreboardTags().contains("LeftOakhurst")) {
-                    passenger.addScoreboardTag("LeftOakhurst");
+                if (!passenger.getScoreboardTags().contains(LEFT_OAKHURST_TAG)) {
+                    passenger.addScoreboardTag(LEFT_OAKHURST_TAG);
                     passenger.sendMessage(this.getLeaveSuccessMessage(passenger));
                 }
             }
@@ -241,23 +255,26 @@ implements Listener {
 
             // Let all blocked players know why they cannot leave
             for (Player passenger : illegalPassengers) {
-                this.informPlayerOnBlockedExit(passenger);
+                if (!passenger.getScoreboardTags().contains(INFORMED_BOUNDARY)) {
+                    passenger.addScoreboardTag(INFORMED_BOUNDARY);
+                    passenger.sendMessage(this.getPlayerBlockedExitMessage(passenger));
+                }
             }
 
             // Give any players who can leave the border a message that they are held back by their forbidden companion
             for (Player passenger : allowedPassengers) {
-                if (!passenger.getScoreboardTags().contains("informed_boundary_companion")) {
-                    passenger.addScoreboardTag("informed_boundary_companion");
+                if (!passenger.getScoreboardTags().contains(INFORMED_BOUNDARY_COMPANION)) {
+                    passenger.addScoreboardTag(INFORMED_BOUNDARY_COMPANION);
 
                     // Let the player know that while they can leave, they are prevented as long as their companion is in the same vehicle
-                    passenger.sendMessage("§cWhilst freedom lies within your reach, you feel a force dragging your companion back... You cannot leave " + TOWN_NAME + " while one tethered to the beacons remains by you.");
+                    passenger.sendMessage(this.getPassengerPreventedLeaveMessage());
                 }
             }
         } else if (!allowedPassengers.isEmpty() && wasInsideBoundary && isOutsideBoundary) {
             // Send the leave message to the players if they have legally escaped beyond the border
             for (Player passenger : allowedPassengers) {
-                if (!passenger.getScoreboardTags().contains("LeftOakhurst")) {
-                    passenger.addScoreboardTag("LeftOakhurst");
+                if (!passenger.getScoreboardTags().contains(LEFT_OAKHURST_TAG)) {
+                    passenger.addScoreboardTag(LEFT_OAKHURST_TAG);
                     passenger.sendMessage(this.getLeaveSuccessMessage(passenger));
                 }
             }
@@ -424,25 +441,29 @@ implements Listener {
     }
 
     /**
-     * Inform the player on why they cannot leave through the border.
+     * Retrieve a status message for the player about why they cannot leave through the border.
      *
      * @param player the player who is being prevented from leaving.
      */
-    private void informPlayerOnBlockedExit(Player player) {
-        // Only inform the player a single time on the border condition
-        if (!player.getScoreboardTags().contains("informed_boundary")) {
-            String blockedMessage;
-            player.addScoreboardTag("informed_boundary");
-
-            if (this.plugin.getVampireManager().isVampire(player) && this.areAllBeaconsDesecrated()) {
-                blockedMessage = "§4But while humans remain... Hope still stands...";
-            } else if (this.plugin.getVampireManager().isHuman(player) && this.areAllBeaconsHoly()) {
-                blockedMessage = "§aBut while evil creatures still walk " + TOWN_NAME + ", your job is not yet finished...";
+    private String getPlayerBlockedExitMessage(Player player) {
+        if (this.plugin.getVampireManager().isVampire(player) && this.areAllBeaconsDesecrated()) {
+            if (CUSTOM_BORDER_MESSAGES) {
+                return this.textConfig.getString("border-blocked-messages.humans-remain-alive", "ERROR could not find vampire trapped message");
             } else {
-                blockedMessage = "§cYou feel a force tying you to " + TOWN_NAME + "... You may not leave while an enemy's beacon remains... But one that has embraced darkness, and yet has found strength to return to the light... Could escape...";
+                return "§4But while humans remain... Hope still stands...";
             }
-
-            player.sendMessage(blockedMessage);
+        } else if (this.plugin.getVampireManager().isHuman(player) && this.areAllBeaconsHoly()) {
+            if (CUSTOM_BORDER_MESSAGES) {
+                return this.textConfig.getString("border-blocked-messages.vampires-remain-alive", "ERROR could not find human trapped message");
+            } else {
+                return "§aBut while evil creatures still walk " + TOWN_NAME + ", your job is not yet finished...";
+            }
+        } else {
+            if (CUSTOM_BORDER_MESSAGES) {
+                return this.textConfig.getString("border-blocked-messages.beacons-not-controlled", "ERROR could not find beacons trapping message");
+            } else {
+                return "§cYou feel a force tying you to " + TOWN_NAME + "... You may not leave while an enemy's beacon remains... But one that has embraced darkness, and yet has found strength to return to the light... Could escape...";
+            }
         }
     }
 
@@ -455,7 +476,7 @@ implements Listener {
     private boolean meetsLeaveCondition(Player player) {
         // Determine if the player is allowed to leave the game boundaries
         // Each of the following is a leave condition
-        if (player.getScoreboardTags().contains("CuredVampire")) {
+        if (player.getScoreboardTags().contains(CURED_VAMPIRE_TAG)) {
             return true;
 
         } else if (!this.plugin.getVampireManager().isHuman(player)) {
@@ -478,19 +499,44 @@ implements Listener {
      */
     private String getLeaveSuccessMessage(Player player) {
         // Tune the freedom message based on the game's condition and player's alignment
-        if (player.getScoreboardTags().contains("CuredVampire")) {
-            return "§6You are leaving " + TOWN_NAME + "...\n§eThe familiar lands fade behind you as you venture beyond the border.";
+        if (player.getScoreboardTags().contains(CURED_VAMPIRE_TAG)) {
+            if (CUSTOM_BORDER_MESSAGES) {
+                return this.textConfig.getString("border-freedom-messages.cured-vampire-freedom", "ERROR could not find cured vampire leave message");
+            } else {
+                return "§6You are leaving " + TOWN_NAME + "...\n§eThe familiar lands fade behind you as you venture beyond the border.";
+            }
 
-        } else if (!this.plugin.getVampireManager().isHuman(player)) {
+        } else if (this.plugin.getVampireManager().isVampire(player)) {
             if (this.areAllBeaconsDesecrated() && !this.anySurvivingHumansExist()) {
-                return "§4You are free of your chains, creature of the night...";
+                if (CUSTOM_BORDER_MESSAGES) {
+                    return this.textConfig.getString("border-freedom-messages.vampire-freedom", "ERROR could not find vampire leave message");
+                } else {
+                    return "§4You are free of your chains, creature of the night...";
+                }
             }
         } else if (this.areAllBeaconsHoly() && !this.anySurvivingVampiresExist()) {
-            return "§aYou are free... Finally free...";
+            if (CUSTOM_BORDER_MESSAGES) {
+                return this.textConfig.getString("border-freedom-messages.human-freedom", "ERROR could not find human leave message");
+            } else {
+                return "§aYou are free... Finally free...";
+            }
         }
 
         // Because this function is only meant to be used when the player is allowed to leave, this return statement should not fire
         return "§aDespite all odds, you have slipped beyond the beacon's grasp and escaped.";
+    }
+
+    /**
+     * Retrieve a status message for the player informing them that while they can leave, they are prevented as long as their companion is in the same vehicle.
+     *
+     * @return A message about how the player is stopped from leaving.
+     */
+    private String getPassengerPreventedLeaveMessage() {
+        if (CUSTOM_BORDER_MESSAGES) {
+            return this.textConfig.getString("border-blocked-messages.shared-escape-prevented", "ERROR could not find passenger prevented message");
+        } else {
+            return "§cWhilst freedom lies within your reach, you feel a force dragging your companion back... You cannot leave " + TOWN_NAME + " while one tethered to the beacons remains by you.";
+        }
     }
 
     /**
@@ -504,4 +550,3 @@ implements Listener {
         return player.getGameMode() == GameMode.CREATIVE;
     }
 }
-
