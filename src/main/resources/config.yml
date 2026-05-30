@@ -259,6 +259,10 @@ cure:
   # Default: true (The spawn's Sire must be permakilled)
   sire-death-requirement: true
 
+  # Controls how long a player must apply the forced cure before it can take effect
+  # Default: 5 seconds
+  seconds-to-cure: 5
+
 # Fourth Cure Book Configuration
 # Controls whether "The Retribution 4/3" book should spawn in tome chests
 # Default: false (disabled)

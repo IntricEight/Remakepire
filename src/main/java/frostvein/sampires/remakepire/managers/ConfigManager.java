@@ -114,6 +114,15 @@ public class ConfigManager {
     }
 
     /**
+     * Retrieve the time a player must apply for the force cure to a player before they are trapped into their choice
+     *
+     * @return the seconds it takes to apply the cure.
+     */
+    public int getCureApplicationSeconds() {
+        return this.config.getInt("cure.seconds-to-cure", 5);
+    }
+
+    /**
      * Retrieve the cooldown on the vampire ability Bat Transformation.
      *
      * @return the seconds between ability uses.

@@ -19,6 +19,11 @@ import frostvein.sampires.remakepire.listeners.CureBookReadingListener;
 import frostvein.sampires.remakepire.managers.BeaconManager;
 import frostvein.sampires.remakepire.managers.VampireManager;
 import frostvein.sampires.remakepire.managers.VampireSireManager;
+import org.bukkit.scheduler.BukkitTask;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 public class ForcedVampireCureCommand implements CommandExecutor {
     private final RemakepirePlugin plugin;
@@ -26,11 +31,16 @@ public class ForcedVampireCureCommand implements CommandExecutor {
     private final BeaconManager beaconManager;
     private final VampireSireManager sireManager;
 
+    private final Map<UUID, CureSession> activeForcedCureSessions = new HashMap<>();
+    private final int cureSeconds;
+
     public ForcedVampireCureCommand(RemakepirePlugin plugin) {
         this.plugin = plugin;
         this.vampireManager = plugin.getVampireManager();
         this.beaconManager = plugin.getBeaconManager();
         this.sireManager = plugin.getSireManager();
+
+        this.cureSeconds = this.plugin.getConfigManager().getCureApplicationSeconds();
     }
 
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
@@ -70,6 +80,22 @@ public class ForcedVampireCureCommand implements CommandExecutor {
                 return true;
 
             } else {
+                /*
+                * Try out Cleo's idea for the new curing feature
+                   Item to check for: Prismarine shard
+
+                    Use a method similar to stop the bleeding, where they need to use a keybind while crouching. COpy the checking process,
+                    and then bring over the force cure menu / process
+                    No beacon or daylight or sire death requirement: Only requires the syringe item
+                */
+
+
+
+
+
+
+
+
                 // Only allow a cure during the day
                 if (!this.plugin.getEffectManager().isDaytime(caster.getWorld())) {
                     caster.sendMessage("§cThe holy words can only be spoken during the day, when the sun's light empowers them.");
@@ -132,5 +158,33 @@ public class ForcedVampireCureCommand implements CommandExecutor {
                 return true;
             }
         }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+    private static class CureSession {
+        public Player healer, vampire;
+        public final long startTime;
+        public BukkitTask task;
+        public int preparationSecondsRemaining;
+
+
+        public CureSession(Player healer, Player vampire) {
+            this.healer = healer;
+            this.vampire = vampire;
+            this.startTime = System.currentTimeMillis();
+        }
+
+
+
     }
 }
