@@ -146,7 +146,7 @@ public class ForcedCureChoiceListener implements Listener {
     }
 
     /**
-     * Check if a vampire is attempting to feed on another player whenever a vampire sneaks.
+     * Check if a player is attempting to execute a force cure whenever a player stops sneaking.
      *
      * @param event a player beginning or stopping to sneak.
      */
