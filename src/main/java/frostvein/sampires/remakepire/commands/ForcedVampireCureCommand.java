@@ -1,6 +1,10 @@
 package frostvein.sampires.remakepire.commands;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
@@ -11,36 +15,23 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.PotionMeta;
-import org.bukkit.potion.PotionType;
+import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scheduler.BukkitTask;
 import frostvein.sampires.remakepire.RemakepirePlugin;
-import frostvein.sampires.remakepire.beacons.BeaconSite;
 import frostvein.sampires.remakepire.listeners.CureBookReadingListener;
-import frostvein.sampires.remakepire.managers.BeaconManager;
+import frostvein.sampires.remakepire.managers.VampireAbilityManager;
 import frostvein.sampires.remakepire.managers.VampireManager;
 import frostvein.sampires.remakepire.managers.VampireSireManager;
-import org.bukkit.scheduler.BukkitTask;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
 
 public class ForcedVampireCureCommand implements CommandExecutor {
     private final RemakepirePlugin plugin;
     private final VampireManager vampireManager;
-    private final BeaconManager beaconManager;
     private final VampireSireManager sireManager;
-
-    private final Map<UUID, CureSession> activeForcedCureSessions = new HashMap<>();
-    private final int cureSeconds;
 
     public ForcedVampireCureCommand(RemakepirePlugin plugin) {
         this.plugin = plugin;
         this.vampireManager = plugin.getVampireManager();
-        this.beaconManager = plugin.getBeaconManager();
         this.sireManager = plugin.getSireManager();
-
-        this.cureSeconds = this.plugin.getConfigManager().getCureApplicationSeconds();
     }
 
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
@@ -89,102 +80,62 @@ public class ForcedVampireCureCommand implements CommandExecutor {
                     No beacon or daylight or sire death requirement: Only requires the syringe item
                 */
 
+//                ItemStack holyWater = this.plugin.getHolyWaterEffectManager().findHolyWater(caster);
 
+                // Retrieve the prismarine shard in either hand, prioritizing one held in the main hand
+                ItemStack mainHandSyringe = caster.getInventory().getItemInMainHand(), offHandSyringe = null;
 
+                if (mainHandSyringe.getType() != Material.PRISMARINE_SHARD) {
+                    mainHandSyringe = null;
 
+                    offHandSyringe = caster.getInventory().getItemInOffHand();
 
+                    if (offHandSyringe.getType() != Material.PRISMARINE_SHARD) {
+                        offHandSyringe = null;
+                    }
+                }
 
+                /* Logic following this:
+                    If the main hand has prismarine, then offhand will be null
+                    If main hand does not, then main is set to null and offhand might or might not hold it
 
+                    Conclusions:
+                      - if both main and off are empty, no prismarine found
+                      - if main is not null, then main is holding prismarine. No check is made for if offhand is holding prismarine, and it remains null
+                      - if main is null and offhand is not null, then main is not holding prismarine and offhand is holding prismarine
+                      - is both are null, then neither are holding prismarine
+                 */
 
-                // Only allow a cure during the day
-                if (!this.plugin.getEffectManager().isDaytime(caster.getWorld())) {
-                    caster.sendMessage("§cThe holy words can only be spoken during the day, when the sun's light empowers them.");
+                // Ensure the caster has a syringe (prismarine shard) in their hands
+                if (mainHandSyringe == null && offHandSyringe == null) {
+                    caster.sendMessage("§cYou must hold a syringe of the sire's blood to enact the cure.");
 
                 } else {
-                    ItemStack holyWater = this.plugin.getHolyWaterEffectManager().findHolyWater(caster);
 
-                    // Ensure the caster has holy water in their inventory
-                    if (holyWater == null) {
-                        caster.sendMessage("§cYou need holy water to sanctify the creature with these words.");
+                    // Request that the game runner turns off sire death requirements for running the expected version of it. I won't be changing this here
+                    String sireName = this.sireManager.getSire(target);
+                    if (sireName != null && !this.sireManager.canBeCured(target)) {
+                        caster.sendMessage("§4The curse cannot be broken while " + target.getName() + "'s sire, " + sireName + ", still walks the world in mortal form...");
+                        caster.sendMessage("§4The blood bond must be severed through the maker's true death.");
 
                     } else {
-                        // Ensure both caster and target are within cure range of a holy beacon
-                        double cureDistance = this.plugin.getConfigManager().getCureBeaconDistance();
-                        BeaconSite nearestHolyBeacon = this.beaconManager.getNearestHolyBeacon(caster.getLocation(), cureDistance);
-
-                        // Ensure the caster is within cure range of a holy beacon
-                        if (nearestHolyBeacon == null) {
-                            caster.sendMessage("§cYou must be close to a holy beacon to channel the divine power of these words.");
-
+                        // Remove the prismarine from the hand holding it, prioritizing the main hand
+                        if (mainHandSyringe == null) {
+                            // Remove the prismarine stack from the offhand
+                            caster.getInventory().setItemInOffHand(null);
                         } else {
-                            BeaconSite targetNearestBeacon = this.beaconManager.getNearestHolyBeacon(target.getLocation(), cureDistance);
-
-                            // Ensure the caster and target are within cure range of the same holy beacon
-                            if (targetNearestBeacon != null && targetNearestBeacon.equals(nearestHolyBeacon)) {
-                                String sireName = this.sireManager.getSire(target);
-
-                                if (sireName != null && !this.sireManager.canBeCured(target)) {
-                                    caster.sendMessage("§4The curse cannot be broken while " + target.getName() + "'s sire, " + sireName + ", still walks the world in mortal form...");
-                                    caster.sendMessage("§4The blood bond must be severed through the maker's true death.");
-
-                                } else {
-                                    holyWater.setAmount(holyWater.getAmount() - 1);
-
-                                    caster.sendMessage("§6You speak the holy words of retribution...");
-                                    caster.sendMessage("§7Divine light tears through the creature's cursed form...");
-                                    caster.sendMessage("§e" + target.getName() + " must now choose their fate...");
-
-                                    Location targetLoc = target.getLocation();
-
-                                    targetLoc.getWorld().spawnParticle(Particle.END_ROD, targetLoc.clone().add(0.0, 1.0, 0.0), 50, 0.3, 1.0, 0.3, 0.1);
-                                    targetLoc.getWorld().spawnParticle(Particle.ENCHANT, targetLoc.clone().add(0.0, 1.0, 0.0), 60, 0.5, 1.5, 0.5, 0.5);
-                                    targetLoc.getWorld().spawnParticle(Particle.WHITE_ASH, targetLoc.clone().add(0.0, 1.0, 0.0), 40, 0.4, 1.2, 0.4, 0.05);
-                                    targetLoc.getWorld().spawnParticle(Particle.EXPLOSION_EMITTER, targetLoc, 1, 0.0, 0.0, 0.0, 0.0);
-
-                                    targetLoc.getWorld().playSound(targetLoc, Sound.BLOCK_BELL_USE, SoundCategory.PLAYERS, 1.5F, 1.0F);
-                                    targetLoc.getWorld().playSound(targetLoc, Sound.BLOCK_BEACON_ACTIVATE, SoundCategory.PLAYERS, 1.0F, 1.2F);
-                                    targetLoc.getWorld().playSound(targetLoc, Sound.ENTITY_LIGHTNING_BOLT_THUNDER, SoundCategory.PLAYERS, 0.5F, 1.5F);
-
-                                    this.plugin.getForcedCureChoiceManager().openChoiceGUI(caster, target, nearestHolyBeacon);
-                                }
-                            } else {
-                                caster.sendMessage("§cThe creature must also be within the holy beacon's divine light for the ritual to work.");
-                                caster.sendMessage("§7Both you and " + target.getName() + " must be near the same holy beacon.");
-                            }
+                            // Remove the prismarine stack from the main hand
+                            caster.getInventory().setItemInMainHand(null);
                         }
+
+                        // Logic for this: Use the feeding or Stop the Bleeding timer logic to determine if the caster is crouched next to the vampire for X time (from config)
+                        // Once that time has elapsed, run the force cure
+                        this.plugin.getForcedCureChoiceListener().startCureSession(caster, target);
                     }
                 }
 
                 return true;
             }
         }
-    }
-
-
-
-
-
-
-
-
-
-
-
-
-    private static class CureSession {
-        public Player healer, vampire;
-        public final long startTime;
-        public BukkitTask task;
-        public int preparationSecondsRemaining;
-
-
-        public CureSession(Player healer, Player vampire) {
-            this.healer = healer;
-            this.vampire = vampire;
-            this.startTime = System.currentTimeMillis();
-        }
-
-
-
     }
 }

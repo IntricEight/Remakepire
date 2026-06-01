@@ -99,6 +99,7 @@ public final class RemakepirePlugin extends JavaPlugin {
     private PassiveMobSpawningManager passiveMobSpawningManager;
     private VampireTurningManager vampireTurningManager;
     private VampireSireManager sireManager;
+    private ForcedCureChoiceListener forcedCureChoiceListener;
     private ForcedCureChoiceManager forcedCureChoiceManager;
     private InitGameManager initGameManager;
     private CureBookReadingListener cureBookReadingListener;
@@ -149,6 +150,7 @@ public final class RemakepirePlugin extends JavaPlugin {
         this.passiveMobSpawningManager = new PassiveMobSpawningManager(this);
         this.vampireTurningManager = new VampireTurningManager(this);
         this.sireManager = new VampireSireManager(this);
+        this.forcedCureChoiceListener = new ForcedCureChoiceListener(this);
         this.forcedCureChoiceManager = new ForcedCureChoiceManager(this);
 
         this.initGameManager = new InitGameManager(this);
@@ -183,7 +185,7 @@ public final class RemakepirePlugin extends JavaPlugin {
         this.getServer().getPluginManager().registerEvents(new MovementBoundaryListener(this), this);
         this.getServer().getPluginManager().registerEvents(new MountTeamsListener(this), this);
         this.getServer().getPluginManager().registerEvents(new FourthBookRevealListener(this), this);
-        this.getServer().getPluginManager().registerEvents(new ForcedCureChoiceListener(this), this);
+        this.getServer().getPluginManager().registerEvents(forcedCureChoiceListener, this);
         this.getServer().getPluginManager().registerEvents(new InitGameListener(this), this);
         this.bloodMoonAttributeListener = new BloodMoonAttributeListener(this);
         this.getServer().getPluginManager().registerEvents(this.bloodMoonAttributeListener, this);
@@ -583,6 +585,10 @@ public final class RemakepirePlugin extends JavaPlugin {
 
     public VampireSireManager getSireManager() {
         return this.sireManager;
+    }
+
+    public ForcedCureChoiceListener getForcedCureChoiceListener() {
+        return this.forcedCureChoiceListener;
     }
 
     public ForcedCureChoiceManager getForcedCureChoiceManager() {

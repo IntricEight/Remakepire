@@ -16,8 +16,6 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import frostvein.sampires.remakepire.RemakepirePlugin;
-import frostvein.sampires.remakepire.beacons.BeaconSite;
-import frostvein.sampires.remakepire.beacons.BeaconSite.BeaconState;
 import frostvein.sampires.remakepire.listeners.DeathHandler;
 
 public class ForcedCureChoiceManager {
@@ -38,12 +36,11 @@ public class ForcedCureChoiceManager {
      *
      * @param caster the player forcing the cure.
      * @param target the player who must make the decision.
-     * @param holyBeacon the beacon being used for the cure.
      */
-    public void openChoiceGUI(Player caster, Player target, BeaconSite holyBeacon) {
+    public void openChoiceGUI(Player caster, Player target) {
         boolean hadFlight = target.getAllowFlight();
         boolean wasInvulnerable = target.isInvulnerable();
-        this.pendingCures.put(target.getUniqueId(), new ForcedCureData(caster.getUniqueId(), target.getUniqueId(), holyBeacon, hadFlight, wasInvulnerable));
+        this.pendingCures.put(target.getUniqueId(), new ForcedCureData(caster.getUniqueId(), target.getUniqueId(), hadFlight, wasInvulnerable));
         this.applyEffectsAndOpenGUI(target);
     }
 
@@ -151,7 +148,7 @@ public class ForcedCureChoiceManager {
             this.removePendingCure(target);
             Player caster = data.getCaster();
             this.plugin.logInfo("FORCED CURE CHOICE: " + target.getName() + " chose to return to humanity");
-            this.performCure(caster, target, data.holyBeacon);
+            this.performCure(caster, target);
         }
     }
 
@@ -175,8 +172,33 @@ public class ForcedCureChoiceManager {
             this.removePendingCure(target);
             Player caster = data.getCaster();
             this.plugin.logInfo("FORCED CURE CHOICE: " + target.getName() + " chose permadeath over cure");
-            this.performPermadeath(caster, target, data.holyBeacon);
+            this.performPermadeath(caster, target);
         }
+    }
+
+    /**
+     * Create the visual and auditory effects of initiating the force cure, and open the force cure choice GUI.
+     *
+     * @param healer the player enacting the force cure.
+     * @param target the vampire being cured.
+     */
+    public void executeForceVampireCure(Player healer, Player target) {
+        healer.sendMessage("§6You speak the holy words of retribution...");
+        healer.sendMessage("§7Divine light tears through the creature's cursed form...");
+        healer.sendMessage("§e" + target.getName() + " must now choose their fate...");
+
+        Location targetLoc = target.getLocation();
+
+        targetLoc.getWorld().spawnParticle(Particle.END_ROD, targetLoc.clone().add(0.0, 1.0, 0.0), 50, 0.3, 1.0, 0.3, 0.1);
+        targetLoc.getWorld().spawnParticle(Particle.ENCHANT, targetLoc.clone().add(0.0, 1.0, 0.0), 60, 0.5, 1.5, 0.5, 0.5);
+        targetLoc.getWorld().spawnParticle(Particle.WHITE_ASH, targetLoc.clone().add(0.0, 1.0, 0.0), 40, 0.4, 1.2, 0.4, 0.05);
+        targetLoc.getWorld().spawnParticle(Particle.EXPLOSION_EMITTER, targetLoc, 1, 0.0, 0.0, 0.0, 0.0);
+
+        targetLoc.getWorld().playSound(targetLoc, Sound.BLOCK_BELL_USE, SoundCategory.PLAYERS, 1.5F, 1.0F);
+        targetLoc.getWorld().playSound(targetLoc, Sound.BLOCK_BEACON_ACTIVATE, SoundCategory.PLAYERS, 1.0F, 1.2F);
+        targetLoc.getWorld().playSound(targetLoc, Sound.ENTITY_LIGHTNING_BOLT_THUNDER, SoundCategory.PLAYERS, 0.5F, 1.5F);
+
+        this.openChoiceGUI(healer, target);
     }
 
     /**
@@ -184,9 +206,8 @@ public class ForcedCureChoiceManager {
      *
      * @param caster the player forcing the cure.
      * @param target the player who must make the decision.
-     * @param holyBeacon the beacon being used for the cure.
      */
-    private void performCure(Player caster, Player target, BeaconSite holyBeacon) {
+    private void performCure(Player caster, Player target) {
         caster.sendMessage("§6" + target.getName() + " has chosen to return to humanity...");
         caster.sendMessage("§7The creature of darkness accepts their redemption...");
         caster.sendMessage("§aYou have sanctified " + target.getName() + ", and they have accepted.");
@@ -226,10 +247,7 @@ public class ForcedCureChoiceManager {
 
         // Create the visual and audio effects of the cure working on the vampire
         this.createCureEffects(target);
-        this.createBeaconCorruptionEffects(target, holyBeacon);
-        holyBeacon.setState(BeaconState.PERMANENTLY_DESECRATED);
 
-        this.plugin.getBeaconManager().updateBeaconDisplay(holyBeacon);
         this.plugin.getBeaconManager().saveBeacons();
         this.plugin.getBeaconMajorityManager().updateBeaconMajorityBonuses();
         this.plugin.getBeaconManager().checkAndBroadcastCompleteControl();
@@ -247,9 +265,8 @@ public class ForcedCureChoiceManager {
      *
      * @param caster the player forcing the cure.
      * @param target the player who must make the decision.
-     * @param holyBeacon the beacon being used for the cure.
      */
-    private void performPermadeath(Player caster, Player target, BeaconSite holyBeacon) {
+    private void performPermadeath(Player caster, Player target) {
         caster.sendMessage("§4" + target.getName() + " has refused redemption...");
         caster.sendMessage("§7The creature chooses death over humanity...");
         caster.sendMessage("§8Their wish is granted...");
@@ -298,22 +315,6 @@ public class ForcedCureChoiceManager {
     }
 
     /**
-     * Create the visual and audio effects of destroying a beacon.
-     *
-     * @param player the player being cured.
-     * @param beacon the beacon being corrupted.
-     */
-    public void createBeaconCorruptionEffects(Player player, BeaconSite beacon) {
-        Location beaconLocation = beacon.getLocation();
-
-        if (beaconLocation != null) {
-            player.getWorld().spawnParticle(Particle.LARGE_SMOKE, beaconLocation.clone().add(0.0, 1.5, 0.0), 50, 0.5, 1.0, 0.5, 0.05);
-            player.getWorld().spawnParticle(Particle.SMOKE, beaconLocation.clone().add(0.0, 1.5, 0.0), 30, 0.3, 0.8, 0.3, 0.02);
-            player.getWorld().playSound(beaconLocation, Sound.ENTITY_WITHER_HURT, SoundCategory.MASTER, 0.8F, 0.6F);
-        }
-    }
-
-    /**
      * Clear the list of pending cures before shutting down the manager.
      */
     public void shutdown() {
@@ -322,7 +323,6 @@ public class ForcedCureChoiceManager {
 
     public static class ForcedCureData {
         public final UUID casterUUID, targetUUID;
-        public final BeaconSite holyBeacon;
         public final boolean hadFlightBefore, wasInvulnerableBefore;
 
         /**
@@ -330,14 +330,12 @@ public class ForcedCureChoiceManager {
          *
          * @param casterUUID the UUID of the player forcing the cure.
          * @param targetUUID the UUID of the player who must make the decision.
-         * @param holyBeacon the beacon being used for the cure.
          * @param hadFlightBefore {@code true} if the playr
          * @param wasInvulnerableBefore {@code true} if
          */
-        public ForcedCureData(UUID casterUUID, UUID targetUUID, BeaconSite holyBeacon, boolean hadFlightBefore, boolean wasInvulnerableBefore) {
+        public ForcedCureData(UUID casterUUID, UUID targetUUID, boolean hadFlightBefore, boolean wasInvulnerableBefore) {
             this.casterUUID = casterUUID;
             this.targetUUID = targetUUID;
-            this.holyBeacon = holyBeacon;
             this.hadFlightBefore = hadFlightBefore;
             this.wasInvulnerableBefore = wasInvulnerableBefore;
         }
