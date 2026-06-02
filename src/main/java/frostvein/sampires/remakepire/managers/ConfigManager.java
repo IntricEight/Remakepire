@@ -714,15 +714,6 @@ public class ConfigManager {
     }
 
     /**
-     * Retrieve whether the first three cure books can spawn in tome chests.
-     *
-     * @return {@code true} if cure books can spawn in tome chests.
-     */
-    public boolean isCureBooksEnabled() {
-        return this.config.getBoolean("cure_books_enabled", true);
-    }
-
-    /**
      * Retrieve the chance that a tome chest's contents will be replaced by a cure book.
      *
      * @return The percentage chance of a cure book appearing in tome chests each cycle.

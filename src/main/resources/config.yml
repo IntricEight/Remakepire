@@ -353,6 +353,12 @@ oakhurst:
     # With center at 50 and diameter 1098: boundaries are -499 to 599
     diameter: 1500
 
+# Control whether the game border can hold players inside
+# When false, all players will be able to leave the town, and will be told they have escaped
+# WARNING: Players who haven't fulfilled a leave condition will be stuck in place if they are outside the border when it is enabled.
+# Default: true (border traps players)
+border_active: true
+
 # ============================================================================
 # INTERNAL STATE TRACKING - DO NOT MODIFY
 # ============================================================================

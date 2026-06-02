@@ -258,6 +258,10 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                     sender.sendMessage("§6cure_requires_dead_sire§r is currently: " + configManager.doCuresRequireSireDeath());
                     break;
 
+                case "cure_book_spawning":
+                    sender.sendMessage("§6cure_books_enabled§r is currently: " + sessionManager.isCureBooksEnabled());
+                    break;
+
                 case "enable_npc_mobs":
                     sender.sendMessage("§6enable_npc_mobs§r is currently: " + configManager.areNpcMobsEnabled());
                     break;
@@ -276,6 +280,10 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
 
                 case "one_human_left":
                     sender.sendMessage("§6one_human_left§r is currently: " + this.sessionManager.isOneHumanLeftActive());
+                    break;
+
+                case "border_active":
+                    sender.sendMessage("§6border_active§r is currently: " + this.sessionManager.isBorderActive());
                     break;
 
                 default:
@@ -355,6 +363,11 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                     senderMessage += "sire-death-requirement§r set to: " + Boolean.parseBoolean(args[1]);
                     break;
 
+                case "cure_book_spawning":
+                    sessionManager.setCureBooksEnabled(Boolean.parseBoolean(args[1]));
+                    senderMessage += "cure_books_enabled§r set to" + Boolean.parseBoolean(args[1]);
+                    break;
+
                 case "enable_npc_mobs":
                     sessionManager.setNpcSpawningGamerules(Boolean.parseBoolean(args[1]));
                     senderMessage += "enable-npc-mobs§r set to: " + Boolean.parseBoolean(args[1]);
@@ -384,6 +397,11 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                     this.sessionManager.setOneHumanLeftActive(Boolean.parseBoolean(args[1]));
                     senderMessage += "one_human_left§r set to: " + Boolean.parseBoolean(args[1]);
                     senderMessage += Boolean.parseBoolean(args[1]) ? "\n§aOne Human Left mode ACTIVATED: Humans no longer have beacon cooldowns" : "\n§cOne Human Left mode DEACTIVATED: Normal beacon cooldowns restored for all players";
+                    break;
+
+                case "border_active":
+                    this.sessionManager.setBorderActive(Boolean.parseBoolean(args[1]));
+                    senderMessage += "§6border_active§r set to: " +  Boolean.parseBoolean(args[1]);
                     break;
 
                 default:

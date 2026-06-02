@@ -15,9 +15,9 @@ import org.bukkit.event.entity.EntityMountEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.vehicle.VehicleEnterEvent;
 import org.bukkit.event.vehicle.VehicleMoveEvent;
+import org.bukkit.util.Vector;
 import frostvein.sampires.remakepire.RemakepirePlugin;
 import frostvein.sampires.remakepire.beacons.BeaconSite;
-import org.bukkit.util.Vector;
 
 public class MovementBoundaryListener
 implements Listener {
@@ -317,8 +317,6 @@ implements Listener {
         }
     }
 
-
-
     /**
      * Check if all beacons have been desecrated.
      *
@@ -454,19 +452,26 @@ implements Listener {
      */
     private boolean meetsLeaveCondition(Player player) {
         // Determine if the player is allowed to leave the game boundaries
-        // Each of the following is a leave condition
-        if (player.getScoreboardTags().contains("CuredVampire")) {
-            return true;
 
-        } else if (!this.plugin.getVampireManager().isHuman(player)) {
-            return this.areAllBeaconsDesecrated() && !this.anySurvivingHumansExist();
+        // Check if the border is currently enabled
+        if (this.plugin.getSessionManager().isBorderActive()) {
+            // Each of the following is a leave condition
+            if (player.getScoreboardTags().contains("CuredVampire")) {
+                return true;
 
-        } else if (this.areAllBeaconsHoly() && !this.anySurvivingVampiresExist()) {
+            } else if (!this.plugin.getVampireManager().isHuman(player)) {
+                return this.areAllBeaconsDesecrated() && !this.anySurvivingHumansExist();
+
+            } else if (this.areAllBeaconsHoly() && !this.anySurvivingVampiresExist()) {
+                return true;
+            }
+
+            // If none of the above have been met, then the player should not be allowed to leave the game boundaries
+            return false;
+        } else {
+            // Allow the player to leave without issue if the border is not active
             return true;
         }
-
-        // If none of the above have been met, then the player should not be allowed to leave the game boundaries
-        return false;
     }
 
     /**
@@ -489,7 +494,7 @@ implements Listener {
             return "§aYou are free... Finally free...";
         }
 
-        // Because this function is only meant to be used when the player is allowed to leave, this return statement should not fire
+        // This statement either fires during an error, or when the border has been disabled through another means.
         return "§aDespite all odds, you have slipped beyond the beacon's grasp and escaped.";
     }
 
@@ -504,4 +509,3 @@ implements Listener {
         return player.getGameMode() == GameMode.CREATIVE;
     }
 }
-
