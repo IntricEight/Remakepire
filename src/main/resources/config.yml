@@ -288,7 +288,7 @@ passive-mob-spawning:
   # Default: 80
   spawn-count: 100
 
-# Allow NPC mobs to spawn
+# Allow NPC mobs to spawn during sessions
 # When true, Pillager patrols and Wandering Traders may spawn during active sessions
 # Default: false (disabled)
 enable-npc-mobs: false
