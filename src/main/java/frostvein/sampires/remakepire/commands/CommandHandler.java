@@ -430,11 +430,13 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         sender.sendMessage("§e  vampire_health_check [ticks] §7- Configure vampire health check interval");
         sender.sendMessage("§e  damage_suppression [percentage] §7- Configure damage suppression");
         sender.sendMessage("§e  cure_requires_dead_sire [true | false] §7- Require a sire's permadeath before their spawn can be cured");
+        sender.sendMessage("§e  cure_book_spawning [true | false] §7- Allow cure books to spawn within tome chests");
         sender.sendMessage("§e  enable_npc_mobs [true | false] §7- Allow NPC mobs to naturally spawn");
         sender.sendMessage("§e  breeding_out_of_session [true | false] §7- Allow animals to be bred and hatched outside of active session");
         sender.sendMessage("§e  stake_permadeath_stage [1 | 2 | 3] §7- Set stage that vampires can permadie on");
         sender.sendMessage("§e  human_life_limit [true | false] §7- Humans always die on their sixth death");
         sender.sendMessage("§e  one_human_left [true | false] §7- Activate One Human Left mode (no beacon cooldowns)");
+        sender.sendMessage("§e  border_active [true | false] §7- Activate or deactivate the game boundary for trapped players");
     }
 
     private boolean handleSetVampireSpawnCommand(CommandSender sender, String[] args) {
@@ -1725,7 +1727,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
 
             } else if (command.getName().equalsIgnoreCase("config")) {
                 if (args.length == 1) {
-                    completions.addAll(Arrays.asList("help", "alert_on_quit", "holy_water_cap", "tome_cap", "vampire_level_cap", "new_vampire_tracking", "allow_vampire_mounts", "vampire_health_check", "damage_suppression", "cure_requires_dead_sire", "enable_npc_mobs", "breeding_out_of_session", "stake_permadeath_stage", "human_life_limit", "one_human_left"));
+                    completions.addAll(Arrays.asList("help", "alert_on_quit", "holy_water_cap", "tome_cap", "vampire_level_cap", "new_vampire_tracking", "allow_vampire_mounts", "vampire_health_check", "damage_suppression", "cure_requires_dead_sire", "cure_book_spawning", "enable_npc_mobs", "breeding_out_of_session", "stake_permadeath_stage", "human_life_limit", "one_human_left", "border_active"));
 
                 } else if (args.length == 2) {
                     switch (args[0]) {

@@ -10,7 +10,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import frostvein.sampires.remakepire.RemakepirePlugin;
 
-
 public class ConfigGuiManager {
     private final RemakepirePlugin plugin;
     public static final String CONFIG_GUI_TITLE = "§8§lConfiguration Options";
@@ -128,6 +127,8 @@ public class ConfigGuiManager {
          * human_life_limit         "skull"
          * one_human_left           "Ochre froglight"
          * border_active            "barrier"
+         *
+         * If changing any values from this, don't forget to change the associated values inside both getItemVisual() and getCommandNameFromItem()
          */
 
         return ItemStack.of( switch (commandName) {
@@ -148,7 +149,7 @@ public class ConfigGuiManager {
             case "one_human_left" ->            Material.OCHRE_FROGLIGHT;
             case "border_active" ->             Material.BARRIER;
 
-            default -> throw new IllegalStateException("Unexpected value: " + commandName);
+            default -> throw new IllegalStateException("Unexpected command: " + commandName);
         });
     }
 
@@ -267,10 +268,10 @@ public class ConfigGuiManager {
     }
 
     /**
-     *
+     * Determine the description and appearance of the configuration setting.
      *
      * @param commandName the name of the command that is being described.
-     * @return A List of strings
+     * @return A List of strings that describe the config option.
      */
     private static List<String> getConfigCommandDescription(String commandName) {
         List<String> description = new ArrayList<>();

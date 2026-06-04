@@ -261,8 +261,6 @@ public class TomeListener implements Listener {
      */
     @EventHandler
     public void onInventoryClose(InventoryCloseEvent event) {
-        event.getView().getTitle();
-
         if (event.getView().getTitle().equals(TomeManager.TOME_SELECTION_GUI_TITLE)) {
             if (event.getPlayer() instanceof Player player) {
                 Bukkit.getScheduler().runTaskLater(this.plugin, () -> {
