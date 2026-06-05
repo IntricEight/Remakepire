@@ -63,8 +63,9 @@ public class SessionManager {
      * Retrieve the plugin configuration from the file.
      */
     public void loadConfig() {
-        this.plugin.saveDefaultConfig();
-        this.plugin.reloadConfig();
+        // Can only use the commented code once. Right now, ConfigManager is created earlier, and so should be the single point where those two lines are called
+//        this.plugin.saveDefaultConfig();
+//        this.plugin.reloadConfig();
         this.config = this.plugin.getConfig();
     }
 

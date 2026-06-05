@@ -216,7 +216,13 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         * * Execute a change command, updating the value inside the config.yml file.
         */
 
-        if (args.length < 2) {
+        if (args.length == 0) {
+            // If the command was sent by a player, open up the configuration control GUI
+            if (sender instanceof Player admin) {
+                this.plugin.getConfigGuiManager().openConfigGUI(admin);
+            }
+
+        } else if (args.length == 1) {
             switch (args[0].toLowerCase()) {
                 case "help":
                     this.sendConfigHelp(sender);
@@ -408,6 +414,9 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                     senderMessage = "§cInvalid configuration. Use \"/pow admin config help\" for a list of config command options.";
             }
 
+            // Update the config GUI screen with the updated config value for the item that was changed.
+            this.plugin.getConfigGuiManager().refreshConfigGuiItem(args[0].toLowerCase());
+
             sender.sendMessage(senderMessage);
         }
 
@@ -421,6 +430,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
      */
     private void sendConfigHelp(CommandSender sender) {
         sender.sendMessage("§aUsage: /pow admin config <configuration> <new setting>");
+        sender.sendMessage("§oUse §e/pow admin config§r to use the Configuration GUI");
         sender.sendMessage("§e  alert_on_quit [true | false] §7- Alert admins when a player leaves");
         sender.sendMessage("§e  holy_water_cap [true | false] §7- Limit holy water creation");
         sender.sendMessage("§e  tome_cap [true | false] §7- Limit new tome abilities absorbed");

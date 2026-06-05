@@ -268,7 +268,7 @@ public class BrigadierCommands {
     }
 
     private LiteralArgumentBuilder<CommandSourceStack> buildConfigSubcommand() {
-        return Commands.literal("config")
+        return Commands.literal("config").executes(ctx -> this.executePowCommand(ctx, "admin", "config"))
                 .then(Commands.literal("help").executes(ctx -> this.executePowCommand(ctx, "admin", "config", "help")))
 
                 .then(Commands.literal("alert_on_quit").executes(ctx -> this.executePowCommand(ctx, "admin", "config", "alert_on_quit"))

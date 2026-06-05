@@ -17,6 +17,7 @@ import frostvein.sampires.remakepire.listeners.BeetrootListener;
 import frostvein.sampires.remakepire.listeners.BlockListener;
 import frostvein.sampires.remakepire.listeners.BloodMoonAttributeListener;
 import frostvein.sampires.remakepire.listeners.CombatListener;
+import frostvein.sampires.remakepire.listeners.ConfigGuiListener;
 import frostvein.sampires.remakepire.listeners.CureBookReadingListener;
 import frostvein.sampires.remakepire.listeners.DamageSuppressionListener;
 import frostvein.sampires.remakepire.listeners.DeathHandler;
@@ -43,6 +44,7 @@ import frostvein.sampires.remakepire.managers.BeaconMajorityManager;
 import frostvein.sampires.remakepire.managers.BeaconManager;
 import frostvein.sampires.remakepire.managers.BeetrootManager;
 import frostvein.sampires.remakepire.managers.BloodMoonManager;
+import frostvein.sampires.remakepire.managers.ConfigGuiManager;
 import frostvein.sampires.remakepire.managers.ConfigManager;
 import frostvein.sampires.remakepire.managers.EffectManager;
 import frostvein.sampires.remakepire.managers.ForcedCureChoiceManager;
@@ -100,6 +102,7 @@ public final class RemakepirePlugin extends JavaPlugin {
     private VampireTurningManager vampireTurningManager;
     private VampireSireManager sireManager;
     private ForcedCureChoiceManager forcedCureChoiceManager;
+    private ConfigGuiManager configGuiManager;
     private InitGameManager initGameManager;
     private CureBookReadingListener cureBookReadingListener;
     private World world;
@@ -150,11 +153,13 @@ public final class RemakepirePlugin extends JavaPlugin {
         this.vampireTurningManager = new VampireTurningManager(this);
         this.sireManager = new VampireSireManager(this);
         this.forcedCureChoiceManager = new ForcedCureChoiceManager(this);
+        this.configGuiManager = new ConfigGuiManager(this);
 
         this.initGameManager = new InitGameManager(this);
         this.getServer().getPluginManager().registerEvents(this.damageSuppressionListener, this);
         this.getServer().getPluginManager().registerEvents(this.deathHandler, this);
         this.getServer().getPluginManager().registerEvents(new CombatListener(this), this);
+        this.getServer().getPluginManager().registerEvents(new ConfigGuiListener(this), this);
         this.getServer().getPluginManager().registerEvents(new PlayerJoinListener(this), this);
         this.getServer().getPluginManager().registerEvents(new BlockListener(this), this);
         this.getServer().getPluginManager().registerEvents(new VampireCraftBlocker(this), this);
@@ -196,7 +201,7 @@ public final class RemakepirePlugin extends JavaPlugin {
         this.beaconManager.validateBeacons();
         this.initVampireRespawnLocation();
         this.sessionManager.executeServerCommand("tick freeze");
-        this.logInfo("VampireSMP Plugin has been enabled!");
+        this.logInfo("Remakepire Plugin has been enabled!");
     }
 
     /**
@@ -306,7 +311,11 @@ public final class RemakepirePlugin extends JavaPlugin {
             this.forcedCureChoiceManager.shutdown();
         }
 
-        this.logInfo("VampireSMP Plugin has been disabled!");
+        if (this.configGuiManager != null) {
+            this.configGuiManager.shutdown();
+        }
+
+        this.logInfo("Remakepire Plugin has been disabled!");
     }
 
     /**
@@ -587,6 +596,10 @@ public final class RemakepirePlugin extends JavaPlugin {
 
     public ForcedCureChoiceManager getForcedCureChoiceManager() {
         return this.forcedCureChoiceManager;
+    }
+
+    public ConfigGuiManager getConfigGuiManager() {
+        return this.configGuiManager;
     }
 
     public InitGameManager getInitGameManager() {
