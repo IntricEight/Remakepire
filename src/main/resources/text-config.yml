@@ -129,7 +129,7 @@ cure-book-4:
   # The page contents of the fourth cure book
   # Each bullet point is a new page, ordered from first to last in the book
   pages:
-    - "§4§lTHE RETRIBUTION§r\n§8The Fourth Tome\n\n§7This knowledge was never meant to be found.\n\n§7While the trinity speaks of self-salvation, this tome reveals darker words - words of forced redemption...",
+    - "§4§lTHE RETRIBUTION§r\n§8The Fourth Tome\n\n§7This knowledge was never meant to be found.\n\n§7While the trinity speaks of self-salvation, this tome reveals darker words - words of forced redemption..."
     - "§7...or forced damnation.\n\n§4hoc-vinculum-tibi-dirumpo-mala-creatura\n\n§7With these words, you may force the choice upon another creature of the night.\n\n§8Use this power wisely, for it carries great consequence."
 
   # The page contents of the fourth cure book that appear if the reader has not completed the Trinity of Restoration
@@ -180,10 +180,10 @@ cure-book-messages:
   # A player reads all the books required to learn how to cure themselves of vampirism
   willing-cure-learnt:
     - ""
-    - "§6§lTRINITY OF RESTORATION COMPLETE.");
-    - "§eYou have absorbed the knowledge from all three cure books. You now know the words to cure yourself of vampirism:");
-    - "§7/§6voluntate-mea-hoc-nefandum-vinculum-abicio");
-    - "§7Stand near a holy beacon, with a bottle of holy water on your person, and in the light of day, say those words, and be free.");
+    - "§6§lTRINITY OF RESTORATION COMPLETE."
+    - "§eYou have absorbed the knowledge from all three cure books. You now know the words to cure yourself of vampirism:"
+    - "§7/§6voluntate-mea-hoc-nefandum-vinculum-abicio"
+    - "§7Stand near a holy beacon, with a bottle of holy water on your person, and in the light of day, say those words, and be free."
     - ""
 
   # A player reads all the books required to learn how to cure others of vampirism (or kill them)
