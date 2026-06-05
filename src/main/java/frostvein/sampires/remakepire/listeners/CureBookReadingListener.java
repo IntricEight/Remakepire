@@ -3,9 +3,7 @@ package frostvein.sampires.remakepire.listeners;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerEditBookEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BookMeta;
 import org.bukkit.persistence.PersistentDataContainer;
@@ -37,14 +35,6 @@ public class CureBookReadingListener implements Listener {
     }
 
     /**
-     * Nothing is written in this function.
-     *
-     * @param event a book is edited.
-     */
-    @EventHandler
-    public void onBookEdit(PlayerEditBookEvent event) {}
-
-    /**
      * Retrieve if the player has read the first three cure books.
      *
      * @param player the player whose cure book consumption is being checked.
@@ -72,15 +62,15 @@ public class CureBookReadingListener implements Listener {
      * @return {@code true} if a new cure book is being reading.
      */
     public boolean onCureBookRead(Player player, int bookNumber) {
+        // Ensure the cure book is within the 4 established cure books
         if (bookNumber >= 1 && bookNumber <= 4) {
-            String tagToAdd = null, bookName = null;
+            String tagToAdd = null;
             boolean isNewTag = false;
 
             switch (bookNumber) {
                 case BOOK_NUM_REMEDY:
                     if (!player.getScoreboardTags().contains(TAG_CURE_BOOK_1)) {
                         tagToAdd = TAG_CURE_BOOK_1;
-                        bookName = "The Remedy";
                         isNewTag = true;
                     }
 
@@ -88,7 +78,6 @@ public class CureBookReadingListener implements Listener {
                 case BOOK_NUM_CURE:
                     if (!player.getScoreboardTags().contains(TAG_CURE_BOOK_2)) {
                         tagToAdd = TAG_CURE_BOOK_2;
-                        bookName = "The Cure";
                         isNewTag = true;
                     }
 
@@ -96,20 +85,18 @@ public class CureBookReadingListener implements Listener {
                 case BOOK_NUM_ABSOLUTION:
                     if (!player.getScoreboardTags().contains(TAG_CURE_BOOK_3)) {
                         tagToAdd = TAG_CURE_BOOK_3;
-                        bookName = "The Absolution";
                         isNewTag = true;
                     }
 
                     break;
                 case BOOK_NUM_RETRIBUTION:
                     if (!hasReadAllCureBooks(player)) {
-                        player.sendMessage("§8§o[The words within this tome are beyond your comprehension... Perhaps you must first complete the Trinity of Restoration.]");
+                        player.sendMessage(this.plugin.getCureBookManager().getCureBook4UnreadableMessage());
                         return false;
                     }
 
                     if (!player.getScoreboardTags().contains(TAG_CURE_BOOK_4)) {
                         tagToAdd = TAG_CURE_BOOK_4;
-                        bookName = "The Retribution";
                         isNewTag = true;
                     }
 
@@ -120,33 +107,22 @@ public class CureBookReadingListener implements Listener {
 
             if (tagToAdd != null && isNewTag) {
                 player.addScoreboardTag(tagToAdd);
-                player.sendMessage("§8§o[You absorb the ancient knowledge within " + bookName + "...]");
+                player.sendMessage(this.plugin.getCureBookManager().getCureBookReadMessage(bookNumber));
                 this.plugin.logInfo("CURE BOOK READ: " + player.getName() + " read book #" + bookNumber);
 
                 if (bookNumber != BOOK_NUM_RETRIBUTION && hasReadAllCureBooks(player)) {
-                    player.sendMessage("");
-                    player.sendMessage("§6§lTRINITY OF RESTORATION COMPLETE.");
-                    player.sendMessage("§eYou have absorbed the knowledge from all three cure books. You now know the words to cure yourself of vampirism:");
-                    player.sendMessage("§7/§6voluntate-mea-hoc-nefandum-vinculum-abicio");
-                    player.sendMessage("§7Stand near a holy beacon, with a bottle of holy water on your person, and in the light of day, say those words, and be free.");
-                    player.sendMessage("");
+                    player.sendMessage(this.plugin.getCureBookManager().getSelfCureLearntMessage());
 
                     this.plugin.logInfo("CURE UNLOCKED: " + player.getName() + " has unlocked the /vol cure command");
 
+                    // Now that the Trinity has been completed, allow the Retribution Book to spawn
                     if (!this.plugin.getConfig().getBoolean("fourth_book_spawn_enabled", false)) {
                         this.plugin.getConfig().set("fourth_book_spawn_enabled", true);
                         this.plugin.saveConfig();
                         this.plugin.logInfo("FOURTH BOOK ENABLED: " + player.getName() + " completed the Trinity, the fourth book can now spawn");
                     }
-                }
-
-                if (bookNumber == BOOK_NUM_RETRIBUTION && hasReadAllCureBooks(player)) {
-                    player.sendMessage("");
-                    player.sendMessage("§4§lWORDS OF RETRIBUTION LEARNED.");
-                    player.sendMessage("§cYou have learned the vengeful words to force cure others:");
-                    player.sendMessage("§7/§4hoc-vinculum-tibi-dirumpo-mala-creatura §7<§4player§7>");
-                    player.sendMessage("§7You and the creature must be within range of a holy beacon, hold a holy water on your person, and in the light of day, say those words, and give them the final choice.");
-                    player.sendMessage("");
+                } else if (bookNumber == BOOK_NUM_RETRIBUTION && hasReadAllCureBooks(player)) {
+                    player.sendMessage(this.plugin.getCureBookManager().getForceCureLearntMessage());
 
                     this.plugin.logInfo("FORCE CURE UNLOCKED: " + player.getName() + " has unlocked the /hoc force cure command");
                 }

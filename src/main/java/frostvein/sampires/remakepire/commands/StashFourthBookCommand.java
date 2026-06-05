@@ -56,27 +56,14 @@ public class StashFourthBookCommand implements CommandExecutor {
                 } else {
                     Inventory chestInventory = chest.getInventory();
                     chestInventory.clear();
-                    ItemStack book = this.createRetributionBook();
+                    ItemStack book = this.plugin.getCureBookManager().getCureBook(4);
                     chestInventory.addItem(book);
-                    sender.sendMessage("§aSuccessfully stashed 'The Retribution 4/3' in the chest at " + x + ", " + y + ", " + z + ".");
-                    this.plugin.logInfo(sender.getName() + " used /stash_fourth_book - placed The Retribution 4/3 at " + x + ", " + y + ", " + z);
+                    sender.sendMessage("§aSuccessfully stashed '" + this.plugin.getCureBookManager().getCureBookName(4, true) + "' in the chest at " + x + ", " + y + ", " + z + ".");
+
+                    this.plugin.logInfo(sender.getName() + " used /stash_fourth_book - placed " + this.plugin.getCureBookManager().getCureBookName(4, true) + " at " + x + ", " + y + ", " + z);
                     return true;
                 }
             }
         }
-    }
-
-    private ItemStack createRetributionBook() {
-        ItemStack book = new ItemStack(Material.WRITTEN_BOOK);
-        BookMeta bookMeta = (BookMeta)book.getItemMeta();
-
-        if (bookMeta != null) {
-            bookMeta.setTitle("The Retribution 4/3");
-            bookMeta.setAuthor("§4A vengeful hand...");
-            bookMeta.setPages("§8§o[The writing in this book is unlike the previous three, it is hurried and panicked, the ink is smeared and the smell of blood rests faintly on the pages]§r\n\n§0The spirits are too lenient... Too soft...", "§0These disgusting, vial, works of evil could never be convinced to come back to the light...\n\n§0They must be dragged back to humanity, kicking and screaming.", "§0They will have to choose. Accept the light, or face eternal darkness.\n\n§0I will give them this choice, with these holy words:", "§7/§4hoc-vinculum-tibi-dirumpo-mala-creatura §7<§4Players-Name§7>");
-            book.setItemMeta(bookMeta);
-        }
-
-        return book;
     }
 }
