@@ -164,7 +164,7 @@ public class VampireSireManager {
     private void loadSireMappings() {
         if (!this.dataFile.exists()) {
             this.plugin.logInfo("VampireSireManager: No existing sire mappings file found, starting fresh.");
-            this.plugin.logInfo("VampireSireManager: Edit plugins/VampireSMP/sire_mappings.json to add sire relationships.");
+            this.plugin.logInfo("VampireSireManager: Edit plugins/Remakepire/sire_mappings.json to add sire relationships.");
             this.plugin.logInfo("VampireSireManager: Format: {\"Fledgling_Name\": \"Sire_Name\"}");
 
             Map<String, String> exampleMap = new HashMap<>();

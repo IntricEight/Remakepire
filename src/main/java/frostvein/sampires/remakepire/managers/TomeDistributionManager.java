@@ -106,7 +106,7 @@ public class TomeDistributionManager {
                 this.addEnchantmentBookToLocation(location);
             }
 
-            boolean cureBooksEnabled = this.configManager.isCureBooksEnabled();
+            boolean cureBooksEnabled = this.plugin.getSessionManager().isCureBooksEnabled();
             double cureBooksSpawnChance = this.configManager.getCureBooksSpawnChance();
             boolean cureBookAdded = false;
 

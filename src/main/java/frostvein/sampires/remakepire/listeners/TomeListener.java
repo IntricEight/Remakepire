@@ -153,7 +153,7 @@ public class TomeListener implements Listener {
      */
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
-        if (event.getView().getTitle() != null && event.getView().getTitle().equals("§6§lSelect Tome Abilities")) {
+        if (event.getView().getTitle() != null && event.getView().getTitle().equals(TomeManager.TOME_SELECTION_GUI_TITLE)) {
             event.setCancelled(true);
 
             if (event.getWhoClicked() instanceof Player admin) {
@@ -261,12 +261,10 @@ public class TomeListener implements Listener {
      */
     @EventHandler
     public void onInventoryClose(InventoryCloseEvent event) {
-        event.getView().getTitle();
-
-        if (event.getView().getTitle().equals("§6§lSelect Tome Abilities")) {
+        if (event.getView().getTitle().equals(TomeManager.TOME_SELECTION_GUI_TITLE)) {
             if (event.getPlayer() instanceof Player player) {
                 Bukkit.getScheduler().runTaskLater(this.plugin, () -> {
-                    if (player.getOpenInventory() == null || player.getOpenInventory().getTitle() == null || !player.getOpenInventory().getTitle().equals("§6§lSelect Tome Abilities")) {
+                    if (player.getOpenInventory() == null || player.getOpenInventory().getTitle() == null || !player.getOpenInventory().getTitle().equals(TomeManager.TOME_SELECTION_GUI_TITLE)) {
                         this.tomeManager.removeTomeSelectionTarget(player.getUniqueId());
                     }
                 }, 1L);

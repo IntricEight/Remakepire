@@ -334,8 +334,6 @@ implements Listener {
         }
     }
 
-
-
     /**
      * Check if all beacons have been desecrated.
      *
@@ -480,19 +478,26 @@ implements Listener {
      */
     private boolean meetsLeaveCondition(Player player) {
         // Determine if the player is allowed to leave the game boundaries
-        // Each of the following is a leave condition
-        if (player.getScoreboardTags().contains(CURED_VAMPIRE_TAG)) {
-            return true;
 
-        } else if (!this.plugin.getVampireManager().isHuman(player)) {
-            return this.areAllBeaconsDesecrated() && !this.anySurvivingHumansExist();
+        // Check if the border is currently enabled
+        if (this.plugin.getSessionManager().isBorderActive()) {
+            // Each of the following is a leave condition
+            if (player.getScoreboardTags().contains("CuredVampire")) {
+                return true;
 
-        } else if (this.areAllBeaconsHoly() && !this.anySurvivingVampiresExist()) {
+            } else if (!this.plugin.getVampireManager().isHuman(player)) {
+                return this.areAllBeaconsDesecrated() && !this.anySurvivingHumansExist();
+
+            } else if (this.areAllBeaconsHoly() && !this.anySurvivingVampiresExist()) {
+                return true;
+            }
+
+            // If none of the above have been met, then the player should not be allowed to leave the game boundaries
+            return false;
+        } else {
+            // Allow the player to leave without issue if the border is not active
             return true;
         }
-
-        // If none of the above have been met, then the player should not be allowed to leave the game boundaries
-        return false;
     }
 
     /**
@@ -549,6 +554,8 @@ implements Listener {
             messages.add("§cWhilst freedom lies within your reach, you feel a force dragging your companion back... You cannot leave " + TOWN_NAME + " while one tethered to the beacons remains by you.");
         }
 
+        // This statement either fires during an error, or when the border has been disabled through another means.
+        return "§aDespite all odds, you have slipped beyond the beacon's grasp and escaped.";
         return messages.toArray(new String[0]);
     }
 

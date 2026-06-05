@@ -215,7 +215,13 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         * * Execute a change command, updating the value inside the config.yml file.
         */
 
-        if (args.length < 2) {
+        if (args.length == 0) {
+            // If the command was sent by a player, open up the configuration control GUI
+            if (sender instanceof Player admin) {
+                this.plugin.getConfigGuiManager().openConfigGUI(admin);
+            }
+
+        } else if (args.length == 1) {
             switch (args[0].toLowerCase()) {
                 case "help":
                     this.sendConfigHelp(sender);
@@ -257,6 +263,10 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                     sender.sendMessage("§6cure_requires_dead_sire§r is currently: " + configManager.doCuresRequireSireDeath());
                     break;
 
+                case "cure_book_spawning":
+                    sender.sendMessage("§6cure_books_enabled§r is currently: " + sessionManager.isCureBooksEnabled());
+                    break;
+
                 case "enable_npc_mobs":
                     sender.sendMessage("§6enable_npc_mobs§r is currently: " + configManager.areNpcMobsEnabled());
                     break;
@@ -275,6 +285,10 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
 
                 case "one_human_left":
                     sender.sendMessage("§6one_human_left§r is currently: " + this.sessionManager.isOneHumanLeftActive());
+                    break;
+
+                case "border_active":
+                    sender.sendMessage("§6border_active§r is currently: " + this.sessionManager.isBorderActive());
                     break;
 
                 default:
@@ -354,6 +368,11 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                     senderMessage += "sire-death-requirement§r set to: " + Boolean.parseBoolean(args[1]);
                     break;
 
+                case "cure_book_spawning":
+                    sessionManager.setCureBooksEnabled(Boolean.parseBoolean(args[1]));
+                    senderMessage += "cure_books_enabled§r set to" + Boolean.parseBoolean(args[1]);
+                    break;
+
                 case "enable_npc_mobs":
                     sessionManager.setNpcSpawningGamerules(Boolean.parseBoolean(args[1]));
                     senderMessage += "enable-npc-mobs§r set to: " + Boolean.parseBoolean(args[1]);
@@ -385,9 +404,17 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                     senderMessage += Boolean.parseBoolean(args[1]) ? "\n§aOne Human Left mode ACTIVATED: Humans no longer have beacon cooldowns" : "\n§cOne Human Left mode DEACTIVATED: Normal beacon cooldowns restored for all players";
                     break;
 
+                case "border_active":
+                    this.sessionManager.setBorderActive(Boolean.parseBoolean(args[1]));
+                    senderMessage += "§6border_active§r set to: " +  Boolean.parseBoolean(args[1]);
+                    break;
+
                 default:
                     senderMessage = "§cInvalid configuration. Use \"/pow admin config help\" for a list of config command options.";
             }
+
+            // Update the config GUI screen with the updated config value for the item that was changed.
+            this.plugin.getConfigGuiManager().refreshConfigGuiItem(args[0].toLowerCase());
 
             sender.sendMessage(senderMessage);
         }
@@ -402,6 +429,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
      */
     private void sendConfigHelp(CommandSender sender) {
         sender.sendMessage("§aUsage: /pow admin config <configuration> <new setting>");
+        sender.sendMessage("§oUse §e/pow admin config§r to use the Configuration GUI");
         sender.sendMessage("§e  alert_on_quit [true | false] §7- Alert admins when a player leaves");
         sender.sendMessage("§e  holy_water_cap [true | false] §7- Limit holy water creation");
         sender.sendMessage("§e  tome_cap [true | false] §7- Limit new tome abilities absorbed");
@@ -411,11 +439,13 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         sender.sendMessage("§e  vampire_health_check [ticks] §7- Configure vampire health check interval");
         sender.sendMessage("§e  damage_suppression [percentage] §7- Configure damage suppression");
         sender.sendMessage("§e  cure_requires_dead_sire [true | false] §7- Require a sire's permadeath before their spawn can be cured");
+        sender.sendMessage("§e  cure_book_spawning [true | false] §7- Allow cure books to spawn within tome chests");
         sender.sendMessage("§e  enable_npc_mobs [true | false] §7- Allow NPC mobs to naturally spawn");
         sender.sendMessage("§e  breeding_out_of_session [true | false] §7- Allow animals to be bred and hatched outside of active session");
         sender.sendMessage("§e  stake_permadeath_stage [1 | 2 | 3] §7- Set stage that vampires can permadie on");
         sender.sendMessage("§e  human_life_limit [true | false] §7- Humans always die on their sixth death");
         sender.sendMessage("§e  one_human_left [true | false] §7- Activate One Human Left mode (no beacon cooldowns)");
+        sender.sendMessage("§e  border_active [true | false] §7- Activate or deactivate the game boundary for trapped players");
     }
 
     private boolean handleSetVampireSpawnCommand(CommandSender sender, String[] args) {
@@ -1665,7 +1695,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
 
             } else if (command.getName().equalsIgnoreCase("config")) {
                 if (args.length == 1) {
-                    completions.addAll(Arrays.asList("help", "alert_on_quit", "holy_water_cap", "tome_cap", "vampire_level_cap", "new_vampire_tracking", "allow_vampire_mounts", "vampire_health_check", "damage_suppression", "cure_requires_dead_sire", "enable_npc_mobs", "breeding_out_of_session", "stake_permadeath_stage", "human_life_limit", "one_human_left"));
+                    completions.addAll(Arrays.asList("help", "alert_on_quit", "holy_water_cap", "tome_cap", "vampire_level_cap", "new_vampire_tracking", "allow_vampire_mounts", "vampire_health_check", "damage_suppression", "cure_requires_dead_sire", "cure_book_spawning", "enable_npc_mobs", "breeding_out_of_session", "stake_permadeath_stage", "human_life_limit", "one_human_left", "border_active"));
 
                 } else if (args.length == 2) {
                     switch (args[0]) {
