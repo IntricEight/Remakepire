@@ -1,8 +1,11 @@
 package frostvein.sampires.remakepire;
 
+import java.io.File;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scoreboard.NameTagVisibility;
 import org.bukkit.scoreboard.Objective;
@@ -46,6 +49,7 @@ import frostvein.sampires.remakepire.managers.BeetrootManager;
 import frostvein.sampires.remakepire.managers.BloodMoonManager;
 import frostvein.sampires.remakepire.managers.ConfigGuiManager;
 import frostvein.sampires.remakepire.managers.ConfigManager;
+import frostvein.sampires.remakepire.managers.CureBookManager;
 import frostvein.sampires.remakepire.managers.EffectManager;
 import frostvein.sampires.remakepire.managers.ForcedCureChoiceManager;
 import frostvein.sampires.remakepire.managers.HolyWaterEffectManager;
@@ -93,6 +97,7 @@ public final class RemakepirePlugin extends JavaPlugin {
     private BeaconMajorityManager beaconMajorityManager;
     private TomeVampireRestrictionListener tomeVampireRestrictionListener;
     private TomeDistributionManager tomeDistributionManager;
+    private CureBookManager cureBookManager;
     private VampireTexturePackManager vampireTexturePackManager;
     private EndermanRemovalListener endermanRemovalListener;
     private DamageSuppressionListener damageSuppressionListener;
@@ -109,12 +114,18 @@ public final class RemakepirePlugin extends JavaPlugin {
     private Team castTeam;
     private Team vampireCastTeam;
     private Location vampireRespawnLocation;
+    private FileConfiguration textConfig;
 
     /**
      * Enable the Remakepires plugin on the server.
      */
     public void onEnable() {
         this.saveDefaultConfig();
+
+        // Save the text-config file in the plugin data folder (If it does not already exist)
+        saveResource("text-config.yml", false);
+        this.loadTextConfig();
+
         this.configManager = new ConfigManager(this);
         this.world = Bukkit.getWorld(WORLD_NAME);
         this.initializeHumanCastTeam();
@@ -144,6 +155,7 @@ public final class RemakepirePlugin extends JavaPlugin {
         this.vampireFeedingManager = new VampireFeedingManager(this);
         this.beaconMajorityManager = new BeaconMajorityManager(this);
         this.tomeDistributionManager = new TomeDistributionManager(this);
+        this.cureBookManager = new CureBookManager(this);
         this.vampireTexturePackManager = new VampireTexturePackManager(this);
         this.endermanRemovalListener = new EndermanRemovalListener(this);
         this.damageSuppressionListener = new DamageSuppressionListener(this);
@@ -316,6 +328,28 @@ public final class RemakepirePlugin extends JavaPlugin {
         }
 
         this.logInfo("Remakepire Plugin has been disabled!");
+    }
+
+    /**
+     * Retrieve the text configuration file, used for modifying text readouts such as the contents of cure books, or border messages.
+     *
+     * @return A file of configuration options.
+     */
+    public FileConfiguration getTextConfig() {
+        return textConfig;
+    }
+
+    /**
+     * Load the text configuration file into the project resources.
+     */
+    private void loadTextConfig() {
+        File textConfigFile = new File(getDataFolder(), "text-config.yml");
+
+        if (!textConfigFile.exists()) {
+            saveResource("text-config.yml", false);
+        }
+
+        textConfig = YamlConfiguration.loadConfiguration(textConfigFile);
     }
 
     /**
@@ -564,6 +598,10 @@ public final class RemakepirePlugin extends JavaPlugin {
 
     public TomeDistributionManager getTomeDistributionManager() {
         return this.tomeDistributionManager;
+    }
+
+    public CureBookManager getCureBookManager() {
+        return this.cureBookManager;
     }
 
     public VampireTexturePackManager getVampireTexturePackManager() {

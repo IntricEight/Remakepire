@@ -76,9 +76,9 @@ public class TomeListener implements Listener {
                             BookMeta obscuredMeta = (BookMeta)obscuredBook.getItemMeta();
 
                             if (obscuredMeta != null) {
-                                obscuredMeta.setTitle("The Retribution 4/3");
-                                obscuredMeta.setAuthor("§4A vengeful hand...");
-                                obscuredMeta.setPages("§8§oThe words within this tome are beyond your comprehension...\n\n§7Perhaps you must first complete the Trinity of Restoration.");
+                                obscuredMeta.setTitle(this.plugin.getCureBookManager().getCureBookName(4, true));
+                                obscuredMeta.setAuthor(this.plugin.getCureBookManager().getCureBookAuthor(4));
+                                obscuredMeta.setPages(this.plugin.getCureBookManager().getCureBook4UnreadablePages());
                                 obscuredBook.setItemMeta(obscuredMeta);
                             }
 
@@ -231,10 +231,10 @@ public class TomeListener implements Listener {
         boolean hasTag = target.getScoreboardTags().contains(tag);
 
         String friendlyName = switch (tag) {
-            case "CureBook1Read" -> "Cure Book 1 (The Remedy)";
-            case "CureBook2Read" -> "Cure Book 2 (The Cure)";
-            case "CureBook3Read" -> "Cure Book 3 (The Absolution)";
-            case "CureBook4Read" -> "Cure Book 4 (The Retribution)";
+            case "CureBook1Read" -> "Cure Book 1 (" + this.plugin.getCureBookManager().getCureBookName(1, false) + ")";
+            case "CureBook2Read" -> "Cure Book 2 (" + this.plugin.getCureBookManager().getCureBookName(2, false) + ")";
+            case "CureBook3Read" -> "Cure Book 3 (" + this.plugin.getCureBookManager().getCureBookName(3, false) + ")";
+            case "CureBook4Read" -> "Cure Book 4 (" + this.plugin.getCureBookManager().getCureBookName(4, false) + ")";
             default -> tag;
         };
 
