@@ -22,7 +22,7 @@ public class StashThirdBookCommand implements CommandExecutor {
     }
 
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        World world = Bukkit.getWorld("world");
+        World world = Bukkit.getWorld(RemakepirePlugin.WORLD_NAME);
 
         if (world == null) {
             sender.sendMessage("§cWorld 'world' not found.");

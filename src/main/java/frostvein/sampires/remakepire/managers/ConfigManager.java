@@ -46,10 +46,10 @@ public class ConfigManager {
     public List<Location> getTomeChestLocations() {
         List<String> locationStrings = this.config.getStringList("tome-chests.locations");
         List<Location> locations = new ArrayList<>();
-        World world = this.plugin.getServer().getWorld("world");
+        World world = this.plugin.getServer().getWorld(RemakepirePlugin.WORLD_NAME);
 
         if (world == null) {
-            this.plugin.getLogger().severe("World 'world' not found! Cannot load tome chest locations.");
+            this.plugin.getLogger().severe("World '" + RemakepirePlugin.WORLD_NAME + "' not found! Cannot load tome chest locations.");
             return locations;
 
         } else {
@@ -974,7 +974,7 @@ public class ConfigManager {
             warnings.add("Town center (" + (int)townX + ", " + (int)townZ + ")");
         }
 
-        World world = this.plugin.getServer().getWorld("world");
+        World world = this.plugin.getServer().getWorld(RemakepirePlugin.WORLD_NAME);
 
         if (world != null) {
             Location vampireSpawn = this.getVampireRespawnLocation(world);

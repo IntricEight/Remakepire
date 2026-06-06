@@ -28,6 +28,7 @@ public class SessionManager {
     private final Map<UUID, Integer> pausedFoodLevels = new HashMap<>();
     private final Map<UUID, Float> pausedSaturationLevels = new HashMap<>();
     private Objective sessionObjective, sessionIDObjective, gameIDObjective;
+    public static final String SESSION_ID_HOLDER = "session_id_holder", GAME_ID_HOLDER = "game_id_holder";
     public static final int BEFORE_SESSION = 0, IN_SESSION = 1, PAUSED = 2, AFTER_SESSION = 3, PRE_SESSION = 4;
     private long totalSessionTime = 0L, currentPhaseStartTime = 0L;
     private boolean trackingSessionTime = false;
@@ -418,14 +419,14 @@ public class SessionManager {
     }
 
     public void incrementSessionID() {
-        this.sessionIDObjective.getScore("session_id_holder").setScore(this.sessionIDObjective.getScore("session_id_holder").getScore() + 1);
+        this.sessionIDObjective.getScore(SESSION_ID_HOLDER).setScore(this.sessionIDObjective.getScore(SESSION_ID_HOLDER).getScore() + 1);
         this.updateAllPlayersSessionIDs();
     }
 
     public void incrementGameID() {
-        this.gameIDObjective.getScore("game_id_holder").setScore(this.gameIDObjective.getScore("game_id_holder").getScore() + 1);
+        this.gameIDObjective.getScore(GAME_ID_HOLDER).setScore(this.gameIDObjective.getScore(GAME_ID_HOLDER).getScore() + 1);
         this.updateAllPlayersGameIDs();
-        this.plugin.logInfo("Game ID incremented to: " + this.gameIDObjective.getScore("game_id_holder").getScore());
+        this.plugin.logInfo("Game ID incremented to: " + this.gameIDObjective.getScore(GAME_ID_HOLDER).getScore());
     }
 
     public void initializeScoreboard() {
@@ -441,13 +442,13 @@ public class SessionManager {
         this.sessionIDObjective = mainScoreboard.getObjective("vsmp_session_id");
         if (this.sessionIDObjective == null) {
             this.sessionIDObjective = mainScoreboard.registerNewObjective("vsmp_session_id", "dummy");
-            this.sessionIDObjective.getScore("session_id_holder").setScore(1);
+            this.sessionIDObjective.getScore(SESSION_ID_HOLDER).setScore(1);
         }
 
         this.gameIDObjective = mainScoreboard.getObjective("vsmp_game_id");
         if (this.gameIDObjective == null) {
             this.gameIDObjective = mainScoreboard.registerNewObjective("vsmp_game_id", "dummy");
-            this.gameIDObjective.getScore("game_id_holder").setScore(1);
+            this.gameIDObjective.getScore(GAME_ID_HOLDER).setScore(1);
         }
 
         Bukkit.getScheduler().runTaskLater(this.plugin, () -> {
@@ -457,11 +458,11 @@ public class SessionManager {
     }
 
     public boolean playerReturningToSession(Player player) {
-        return this.sessionIDObjective.getScore(player.getName()).getScore() == this.sessionIDObjective.getScore("session_id_holder").getScore();
+        return this.sessionIDObjective.getScore(player.getName()).getScore() == this.sessionIDObjective.getScore(SESSION_ID_HOLDER).getScore();
     }
 
     public boolean playerReturningToGame(Player player) {
-        return this.gameIDObjective.getScore(player.getName()).getScore() == this.gameIDObjective.getScore("game_id_holder").getScore();
+        return this.gameIDObjective.getScore(player.getName()).getScore() == this.gameIDObjective.getScore(GAME_ID_HOLDER).getScore();
     }
 
     public long getSessionTime() {
@@ -501,7 +502,7 @@ public class SessionManager {
     }
 
     public void updateAllPlayersSessionIDs() {
-        int session_id = this.sessionIDObjective.getScore("session_id_holder").getScore();
+        int session_id = this.sessionIDObjective.getScore(SESSION_ID_HOLDER).getScore();
 
         for(Player player : this.plugin.getWorld().getPlayers()) {
             this.sessionIDObjective.getScore(player.getName()).setScore(session_id);
@@ -509,7 +510,7 @@ public class SessionManager {
     }
 
     public void updateAllPlayersGameIDs() {
-        int game_id = this.gameIDObjective.getScore("game_id_holder").getScore();
+        int game_id = this.gameIDObjective.getScore(GAME_ID_HOLDER).getScore();
 
         for(Player player : this.plugin.getWorld().getPlayers()) {
             this.gameIDObjective.getScore(player.getName()).setScore(game_id);

@@ -138,7 +138,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                     target.removeScoreboardTag(tag);
                 }
 
-                target.addScoreboardTag("human");
+                target.addScoreboardTag(VampireManager.HUMAN_TAG);
 
                 try {
                     Scoreboard mainScoreboard = Bukkit.getScoreboardManager().getMainScoreboard();
@@ -556,8 +556,8 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
             for(Player player : Bukkit.getOnlinePlayers()) {
                 if (this.plugin.getVampireManager().isHuman(player)) {
                     TomeAbility.clearAllCooldowns(player);
-                    player.removeScoreboardTag("blessing_used_session");
-                    player.removeScoreboardTag("stopthebleeding_used_session");
+                    player.removeScoreboardTag(SessionManager.BLESSING_USED_SESSION);
+                    player.removeScoreboardTag(SessionManager.STOPTHEBLEEDING_USED_SESSION);
                     player.sendMessage("§aYour tome ability cooldowns have been reset by an administrator.");
                     ++humansAffected;
                 }
@@ -568,8 +568,8 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
 
             if (target != null && this.plugin.getVampireManager().isHuman(target)) {
                 TomeAbility.clearAllCooldowns(target);
-                target.removeScoreboardTag("blessing_used_session");
-                target.removeScoreboardTag("stopthebleeding_used_session");
+                target.removeScoreboardTag(SessionManager.BLESSING_USED_SESSION);
+                target.removeScoreboardTag(SessionManager.STOPTHEBLEEDING_USED_SESSION);
                 target.sendMessage("§aYour tome ability cooldowns have been reset by an administrator.");
                 ++humansAffected;
             }

@@ -234,7 +234,7 @@ border-blocked-messages:
 
 # The custom messages that appear when players successfully leave the game boundary for the first time
 border-freedom-messages:
-  # The player is a cured vampire
+  # The player is a cured vampire or the border has been disabled
   cured-vampire-freedom:
     - "§6You are leaving Oakhurst..."
     - "§eThe familiar lands fade behind you as you venture beyond the border."

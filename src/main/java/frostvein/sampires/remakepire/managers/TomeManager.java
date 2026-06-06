@@ -32,6 +32,7 @@ import frostvein.sampires.remakepire.abilities.tome.UnnaturalHasteTomeAbility;
 import frostvein.sampires.remakepire.abilities.tome.WayOfTheLandTomeAbility;
 import frostvein.sampires.remakepire.abilities.tome.WayOfTheLumberjackTomeAbility;
 import frostvein.sampires.remakepire.abilities.tome.WayOfTheProspectorTomeAbility;
+import frostvein.sampires.remakepire.listeners.CureBookReadingListener;
 
 public class TomeManager {
     private final RemakepirePlugin plugin;
@@ -293,10 +294,10 @@ public class TomeManager {
             ++slot;
         }
 
-        this.addCureBookToGUI(gui, target, 45, "CureBook1Read", "§5Cure Book 1", this.plugin.getCureBookManager().getCureBookName(1, true));
-        this.addCureBookToGUI(gui, target, 46, "CureBook2Read", "§5Cure Book 2", this.plugin.getCureBookManager().getCureBookName(2, true));
-        this.addCureBookToGUI(gui, target, 47, "CureBook3Read", "§5Cure Book 3", this.plugin.getCureBookManager().getCureBookName(3, true));
-        this.addCureBookToGUI(gui, target, 48, "CureBook4Read", "§5Cure Book 4", this.plugin.getCureBookManager().getCureBookName(4, true));
+        this.addCureBookToGUI(gui, target, 45, CureBookReadingListener.TAG_CURE_BOOK_1, "§5Cure Book 1", this.plugin.getCureBookManager().getCureBookName(1, true));
+        this.addCureBookToGUI(gui, target, 46, CureBookReadingListener.TAG_CURE_BOOK_2, "§5Cure Book 2", this.plugin.getCureBookManager().getCureBookName(2, true));
+        this.addCureBookToGUI(gui, target, 47, CureBookReadingListener.TAG_CURE_BOOK_3, "§5Cure Book 3", this.plugin.getCureBookManager().getCureBookName(3, true));
+        this.addCureBookToGUI(gui, target, 48, CureBookReadingListener.TAG_CURE_BOOK_4, "§5Cure Book 4", this.plugin.getCureBookManager().getCureBookName(4, true));
 
         admin.openInventory(gui);
         admin.sendMessage("§6Select tome abilities to grant to §e" + target.getName());

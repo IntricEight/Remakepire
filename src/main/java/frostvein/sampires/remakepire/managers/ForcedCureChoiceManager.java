@@ -213,7 +213,7 @@ public class ForcedCureChoiceManager {
 
         this.plugin.getVampireManager().setPlayerAsHuman(target);
         target.getActivePotionEffects().forEach((effect) -> target.removePotionEffect(effect.getType()));
-        target.addScoreboardTag("CuredVampire");
+        target.addScoreboardTag(VampireManager.CURED_VAMPIRE_TAG);
 
         // Check for and apply the effects of beacon control
         if (this.plugin.getSessionManager().isHumansFinalStandActive()) {

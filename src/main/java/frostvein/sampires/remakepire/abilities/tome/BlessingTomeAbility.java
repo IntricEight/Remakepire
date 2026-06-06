@@ -9,6 +9,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.potion.PotionType;
 import frostvein.sampires.remakepire.RemakepirePlugin;
+import frostvein.sampires.remakepire.managers.SessionManager;
 
 public class BlessingTomeAbility extends TomeAbility {
     /**
@@ -27,7 +28,7 @@ public class BlessingTomeAbility extends TomeAbility {
             this.sendCannotUseMessage(player, "Only humans can use tome abilities!");
             return false;
 
-        } else if (isSessionCapped && player.getScoreboardTags().contains("blessing_used_session")) {
+        } else if (isSessionCapped && player.getScoreboardTags().contains(SessionManager.BLESSING_USED_SESSION)) {
             this.sendCannotUseMessage(player, "You have already used Blessing this session!");
             return false;
 
@@ -60,7 +61,7 @@ public class BlessingTomeAbility extends TomeAbility {
                 this.sendSuccessMessage(player, "Divine light flows through the water, blessing it into holy water!");
                 player.sendMessage("§7The blessed water can now be thrown as a splash potion.");
 
-                player.addScoreboardTag("blessing_used_session");
+                player.addScoreboardTag(SessionManager.BLESSING_USED_SESSION);
 
                 return true;
 

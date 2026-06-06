@@ -231,10 +231,10 @@ public class TomeListener implements Listener {
         boolean hasTag = target.getScoreboardTags().contains(tag);
 
         String friendlyName = switch (tag) {
-            case "CureBook1Read" -> "Cure Book 1 (" + this.plugin.getCureBookManager().getCureBookName(1, false) + ")";
-            case "CureBook2Read" -> "Cure Book 2 (" + this.plugin.getCureBookManager().getCureBookName(2, false) + ")";
-            case "CureBook3Read" -> "Cure Book 3 (" + this.plugin.getCureBookManager().getCureBookName(3, false) + ")";
-            case "CureBook4Read" -> "Cure Book 4 (" + this.plugin.getCureBookManager().getCureBookName(4, false) + ")";
+            case CureBookReadingListener.TAG_CURE_BOOK_1 -> "Cure Book 1 (" + this.plugin.getCureBookManager().getCureBookName(1, false) + ")";
+            case CureBookReadingListener.TAG_CURE_BOOK_2 -> "Cure Book 2 (" + this.plugin.getCureBookManager().getCureBookName(2, false) + ")";
+            case CureBookReadingListener.TAG_CURE_BOOK_3 -> "Cure Book 3 (" + this.plugin.getCureBookManager().getCureBookName(3, false) + ")";
+            case CureBookReadingListener.TAG_CURE_BOOK_4 -> "Cure Book 4 (" + this.plugin.getCureBookManager().getCureBookName(4, false) + ")";
             default -> tag;
         };
 

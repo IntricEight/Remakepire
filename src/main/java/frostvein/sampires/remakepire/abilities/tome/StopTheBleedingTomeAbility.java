@@ -16,6 +16,7 @@ import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Scoreboard;
 import frostvein.sampires.remakepire.RemakepirePlugin;
+import frostvein.sampires.remakepire.managers.SessionManager;
 import frostvein.sampires.remakepire.managers.VampireAbilityManager;
 
 public class StopTheBleedingTomeAbility extends TomeAbility {
@@ -26,7 +27,6 @@ public class StopTheBleedingTomeAbility extends TomeAbility {
     // Controls how frequently particle effects appear (in ticks)
     private static final int PARTICLE_INTERVAL_TICKS = 20;
     private static final String ACTIVE_TAG = "stopthebleeding_active";
-    private static final String USED_TAG = "stopthebleeding_used_session";
     private final Map<UUID, HealingSession> activeHealingSessions = new HashMap<>();
 
     /**
@@ -50,7 +50,7 @@ public class StopTheBleedingTomeAbility extends TomeAbility {
                 this.cancelHealing(player, "You stop focusing on healing.");
                 return false;
 
-            } else if (player.getScoreboardTags().contains(USED_TAG)) {
+            } else if (player.getScoreboardTags().contains(SessionManager.STOPTHEBLEEDING_USED_SESSION)) {
                 this.sendCannotUseMessage(player, "You have already used Stop the Bleeding this session!");
                 return false;
 
@@ -151,7 +151,7 @@ public class StopTheBleedingTomeAbility extends TomeAbility {
 
         healer.playSound(healer.getLocation(), Sound.BLOCK_BEACON_ACTIVATE, SoundCategory.PLAYERS, 1.0F, 1.5F);
         target.playSound(target.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, SoundCategory.PLAYERS, 1.0F, 1.2F);
-        healer.addScoreboardTag(USED_TAG);
+        healer.addScoreboardTag(SessionManager.STOPTHEBLEEDING_USED_SESSION);
     }
 
     /**

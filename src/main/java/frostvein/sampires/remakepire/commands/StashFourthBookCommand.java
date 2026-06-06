@@ -39,7 +39,7 @@ public class StashFourthBookCommand implements CommandExecutor {
                 return true;
             }
 
-            World world = Bukkit.getWorld("world");
+            World world = Bukkit.getWorld(RemakepirePlugin.WORLD_NAME);
 
             if (world == null) {
                 sender.sendMessage("§cWorld 'world' not found.");

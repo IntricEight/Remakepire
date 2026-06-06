@@ -452,10 +452,10 @@ public class InitGameManager {
             admin.sendMessage("§6§l========================================");
             admin.sendMessage("§6§lINITIALIZING GAME...");
             admin.sendMessage("§6§l========================================");
-            World world = this.plugin.getServer().getWorld("world");
+            World world = this.plugin.getServer().getWorld(RemakepirePlugin.WORLD_NAME);
 
             if (world == null) {
-                admin.sendMessage("§cError: World 'world' not found.");
+                admin.sendMessage("§cError: World '" + RemakepirePlugin.WORLD_NAME + "' not found.");
                 this.cancelInitialization(admin);
 
             } else {
@@ -631,7 +631,7 @@ public class InitGameManager {
 
                 for(Player player : onlinePlayers) {
                     if (!vampireIds.contains(player.getUniqueId())) {
-                        player.addScoreboardTag("human");
+                        player.addScoreboardTag(VampireManager.HUMAN_TAG);
                         player.sendTitle("§e§lHuman", "", 10, 100, 20);
                         player.sendMessage("");
                         player.sendMessage("§e§l========================================");

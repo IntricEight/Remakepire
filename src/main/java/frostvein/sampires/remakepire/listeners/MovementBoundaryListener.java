@@ -19,13 +19,15 @@ import org.bukkit.event.vehicle.VehicleMoveEvent;
 import org.bukkit.util.Vector;
 import frostvein.sampires.remakepire.RemakepirePlugin;
 import frostvein.sampires.remakepire.beacons.BeaconSite;
+import frostvein.sampires.remakepire.managers.SessionManager;
+import frostvein.sampires.remakepire.managers.VampireManager;
 
 public class MovementBoundaryListener
 implements Listener {
     private final RemakepirePlugin plugin;
     private final FileConfiguration textConfig;
     private final String TOWN_NAME;
-    private static final String LEFT_OAKHURST_TAG = "LeftOakhurst", INFORMED_BOUNDARY = "informed_boundary", INFORMED_BOUNDARY_COMPANION = "informed_boundary_companion", CURED_VAMPIRE_TAG = "CuredVampire";
+    public static final String LEFT_OAKHURST_TAG = "LeftOakhurst";
     private final boolean CUSTOM_BORDER_MESSAGES;
 
     /**
@@ -103,8 +105,8 @@ implements Listener {
                 event.setCancelled(true);
             }
 
-            if (!player.getScoreboardTags().contains(INFORMED_BOUNDARY)) {
-                player.addScoreboardTag(INFORMED_BOUNDARY);
+            if (!player.getScoreboardTags().contains(SessionManager.INFORMED_BOUNDARY)) {
+                player.addScoreboardTag(SessionManager.INFORMED_BOUNDARY);
                 player.sendMessage(this.getPlayerBlockedExitMessages(player));
             }
         }
@@ -170,16 +172,16 @@ implements Listener {
 
             // Let all blocked players know why they cannot leave
             for (Player passenger : illegalPassengers) {
-                if (!passenger.getScoreboardTags().contains(INFORMED_BOUNDARY)) {
-                    passenger.addScoreboardTag(INFORMED_BOUNDARY);
+                if (!passenger.getScoreboardTags().contains(SessionManager.INFORMED_BOUNDARY)) {
+                    passenger.addScoreboardTag(SessionManager.INFORMED_BOUNDARY);
                     passenger.sendMessage(this.getPlayerBlockedExitMessages(passenger));
                 }
             }
 
             // Give any players who can leave the border a message that they are held back by their forbidden companion
             for (Player passenger : allowedPassengers) {
-                if (!passenger.getScoreboardTags().contains(INFORMED_BOUNDARY_COMPANION)) {
-                    passenger.addScoreboardTag(INFORMED_BOUNDARY_COMPANION);
+                if (!passenger.getScoreboardTags().contains(SessionManager.INFORMED_BOUNDARY_COMPANION)) {
+                    passenger.addScoreboardTag(SessionManager.INFORMED_BOUNDARY_COMPANION);
 
                     // Let the player know that while they can leave, they are prevented as long as their companion is in the same vehicle
                     passenger.sendMessage(this.getPassengerPreventedLeaveMessages());
@@ -255,16 +257,16 @@ implements Listener {
 
             // Let all blocked players know why they cannot leave
             for (Player passenger : illegalPassengers) {
-                if (!passenger.getScoreboardTags().contains(INFORMED_BOUNDARY)) {
-                    passenger.addScoreboardTag(INFORMED_BOUNDARY);
+                if (!passenger.getScoreboardTags().contains(SessionManager.INFORMED_BOUNDARY)) {
+                    passenger.addScoreboardTag(SessionManager.INFORMED_BOUNDARY);
                     passenger.sendMessage(this.getPlayerBlockedExitMessages(passenger));
                 }
             }
 
             // Give any players who can leave the border a message that they are held back by their forbidden companion
             for (Player passenger : allowedPassengers) {
-                if (!passenger.getScoreboardTags().contains(INFORMED_BOUNDARY_COMPANION)) {
-                    passenger.addScoreboardTag(INFORMED_BOUNDARY_COMPANION);
+                if (!passenger.getScoreboardTags().contains(SessionManager.INFORMED_BOUNDARY_COMPANION)) {
+                    passenger.addScoreboardTag(SessionManager.INFORMED_BOUNDARY_COMPANION);
 
                     // Let the player know that while they can leave, they are prevented as long as their companion is in the same vehicle
                     passenger.sendMessage(this.getPassengerPreventedLeaveMessages());
@@ -482,7 +484,7 @@ implements Listener {
         // Check if the border is currently enabled
         if (this.plugin.getSessionManager().isBorderActive()) {
             // Each of the following is a leave condition
-            if (player.getScoreboardTags().contains("CuredVampire")) {
+            if (player.getScoreboardTags().contains(VampireManager.CURED_VAMPIRE_TAG)) {
                 return true;
 
             } else if (!this.plugin.getVampireManager().isHuman(player)) {
@@ -511,7 +513,7 @@ implements Listener {
         List<String> messages = new ArrayList<>();
 
         // Tune the freedom message based on the game's condition and player's alignment
-        if (player.getScoreboardTags().contains(CURED_VAMPIRE_TAG)) {
+        if (player.getScoreboardTags().contains(VampireManager.CURED_VAMPIRE_TAG)) {
             if (CUSTOM_BORDER_MESSAGES) {
                 messages = this.textConfig.getStringList("border-freedom-messages.cured-vampire-freedom");
             } else {
@@ -555,7 +557,6 @@ implements Listener {
         }
 
         // This statement either fires during an error, or when the border has been disabled through another means.
-        return "§aDespite all odds, you have slipped beyond the beacon's grasp and escaped.";
         return messages.toArray(new String[0]);
     }
 
