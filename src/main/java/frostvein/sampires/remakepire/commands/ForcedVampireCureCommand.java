@@ -1,25 +1,14 @@
 package frostvein.sampires.remakepire.commands;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
 import org.bukkit.Bukkit;
-import org.bukkit.GameMode;
-import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.Particle;
-import org.bukkit.Sound;
-import org.bukkit.SoundCategory;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.scheduler.BukkitTask;
 import frostvein.sampires.remakepire.RemakepirePlugin;
 import frostvein.sampires.remakepire.listeners.CureBookReadingListener;
-import frostvein.sampires.remakepire.managers.VampireAbilityManager;
 import frostvein.sampires.remakepire.managers.VampireManager;
 import frostvein.sampires.remakepire.managers.VampireSireManager;
 
@@ -83,16 +72,13 @@ public class ForcedVampireCureCommand implements CommandExecutor {
 //                ItemStack holyWater = this.plugin.getHolyWaterEffectManager().findHolyWater(caster);
 
                 // Retrieve the prismarine shard in either hand, prioritizing one held in the main hand
-                ItemStack mainHandSyringe = caster.getInventory().getItemInMainHand(), offHandSyringe = null;
+                ItemStack mainHandSyringe = null, offHandSyringe = null;
 
-                if (mainHandSyringe.getType() != Material.PRISMARINE_SHARD) {
-                    mainHandSyringe = null;
+                if (caster.getInventory().getItemInMainHand().getType() == Material.PRISMARINE_SHARD) {
+                    mainHandSyringe = caster.getInventory().getItemInMainHand();
 
+                } else if (caster.getInventory().getItemInOffHand().getType() == Material.PRISMARINE_SHARD) {
                     offHandSyringe = caster.getInventory().getItemInOffHand();
-
-                    if (offHandSyringe.getType() != Material.PRISMARINE_SHARD) {
-                        offHandSyringe = null;
-                    }
                 }
 
                 /* Logic following this:
@@ -119,18 +105,8 @@ public class ForcedVampireCureCommand implements CommandExecutor {
                         caster.sendMessage("§4The blood bond must be severed through the maker's true death.");
 
                     } else {
-                        // Remove the prismarine from the hand holding it, prioritizing the main hand
-                        if (mainHandSyringe == null) {
-                            // Remove the prismarine stack from the offhand
-                            caster.getInventory().setItemInOffHand(null);
-                        } else {
-                            // Remove the prismarine stack from the main hand
-                            caster.getInventory().setItemInMainHand(null);
-                        }
-
-                        // Logic for this: Use the feeding or Stop the Bleeding timer logic to determine if the caster is crouched next to the vampire for X time (from config)
                         // Once that time has elapsed, run the force cure
-                        this.plugin.getForcedCureChoiceListener().startCureSession(caster, target);
+                        this.plugin.getForcedCureChoiceListener().startForceCureSession(caster, target);
                     }
                 }
 

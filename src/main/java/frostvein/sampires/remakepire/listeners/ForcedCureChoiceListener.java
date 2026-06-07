@@ -1,14 +1,16 @@
 package frostvein.sampires.remakepire.listeners;
 
-import frostvein.sampires.remakepire.commands.ForcedVampireCureCommand;
-import frostvein.sampires.remakepire.managers.VampireAbilityManager;
-import frostvein.sampires.remakepire.managers.VampireFeedingManager;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.chat.ClickEvent.Action;
-import org.bukkit.*;
+import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -18,19 +20,15 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerToggleSneakEvent;
 import org.bukkit.inventory.ItemStack;
-import frostvein.sampires.remakepire.RemakepirePlugin;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.scheduler.BukkitTask;
-import org.checkerframework.checker.units.qual.C;
+import frostvein.sampires.remakepire.RemakepirePlugin;
+import frostvein.sampires.remakepire.managers.VampireAbilityManager;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
 
 public class ForcedCureChoiceListener implements Listener {
     private final RemakepirePlugin plugin;
-
-    private final Map<UUID, CureSession> activeForcedCureSessions = new HashMap<>();
+    private final Map<UUID, SelfCureSession> activeSelfCureSessions = new HashMap<>();
+    private final Map<UUID, ForceCureSession> activeForcedCureSessions = new HashMap<>();
     private final int cureSeconds;
 
     /**
@@ -43,7 +41,7 @@ public class ForcedCureChoiceListener implements Listener {
 
         this.cureSeconds = this.plugin.getConfigManager().getCureApplicationSeconds();
         Bukkit.getPluginManager().registerEvents(this, plugin);
-        this.startCureDetectionTask();
+        this.startCureDetectionTasks();
     }
 
     /**
@@ -153,17 +151,17 @@ public class ForcedCureChoiceListener implements Listener {
     @EventHandler
     public void onPlayerToggleSneak(PlayerToggleSneakEvent event) {
         Player player = event.getPlayer();
-        CureSession session = this.activeForcedCureSessions.get(player.getUniqueId());
+        ForceCureSession session = this.activeForcedCureSessions.get(player.getUniqueId());
 
         if (!event.isSneaking() && session != null) {
-            this.cancelCureSession(session);
+            this.cancelForceCureSession(session, true);
         }
     }
 
     /**
      * Begin checking if a player is attempting to force cure another player.
      */
-    private void startCureDetectionTask() {
+    private void startCureDetectionTasks() {
         (new BukkitRunnable() {
             public void run() {
                 ForcedCureChoiceListener.this.checkCureSessions();
@@ -172,14 +170,23 @@ public class ForcedCureChoiceListener implements Listener {
     }
 
     /**
-     * Begin the process of force curing a player
+     * Begin the process of self curing a player of vampirism.
+     *
+     * @param vampire the player curing themselves.
+     */
+    public void startSelfCureSession(Player vampire) {
+        SelfCureSession session = new SelfCureSession(vampire.getUniqueId());
+        this.activeSelfCureSessions.put(vampire.getUniqueId(), session);
+    }
+
+    /**
+     * Begin the process of force curing a player of vampirism.
      *
      * @param healer the player curing.
      * @param target the player about to be cured.
      */
-    public void startCureSession(Player healer, Player target) {
-        CureSession session = new CureSession(healer.getUniqueId(), target.getUniqueId());
-
+    public void startForceCureSession(Player healer, Player target) {
+        ForceCureSession session = new ForceCureSession(healer.getUniqueId(), target.getUniqueId());
         this.activeForcedCureSessions.put(healer.getUniqueId(), session);
     }
 
@@ -187,7 +194,31 @@ public class ForcedCureChoiceListener implements Listener {
      * Manage the forced cure attempts of players
      */
     private void checkCureSessions() {
-        for (CureSession session : this.activeForcedCureSessions.values().toArray(new CureSession[0])) {
+        // Check the condition of all the self cure sessions
+        for (SelfCureSession session : this.activeSelfCureSessions.values().toArray(new SelfCureSession[0])) {
+            Player healer = Bukkit.getPlayer(session.vampireId);
+
+            if (healer != null && healer.isOnline() && healer.getGameMode() != GameMode.SPECTATOR) {
+                if (!this.plugin.getVampireManager().isVampire(healer)) {
+                    // Do another check that the target is a vampire
+                    healer.sendMessage("§cYou must be a vampire to be cured.");
+                    this.cancelSelfCureSession(session, false);
+
+                } else if (!this.plugin.getSessionManager().isSessionActive()) {
+                    // Make sure no curing is happening outside of session
+                    this.cancelSelfCureSession(session, true);
+
+                } else {
+                    // Follow the processPreparationPhase logic
+                    this.processPreparationPhaseSelfCure(session, healer);
+                }
+            } else {
+                this.cancelSelfCureSession(session, false);
+            }
+        }
+
+        // Check the condition of all the force cure sessions
+        for (ForceCureSession session : this.activeForcedCureSessions.values().toArray(new ForceCureSession[0])) {
             Player healer = Bukkit.getPlayer(session.healerId), target = Bukkit.getPlayer(session.vampireId);
 
             if (healer != null && target != null &&
@@ -197,21 +228,76 @@ public class ForcedCureChoiceListener implements Listener {
                 if (!this.plugin.getVampireManager().isVampire(target)) {
                     // Do another check that the target is a vampire
                     healer.sendMessage("§cThe target must be a vampire to be cured.");
+                    this.cancelForceCureSession(session, false);
 
                 } else if (!this.plugin.getSessionManager().isSessionActive()) {
                     // Make sure no curing is happening outside of session
-                    this.cancelCureSession(session);
+                    this.cancelForceCureSession(session, true);
 
                 } else if (healer.isSneaking() && this.isInCureRange(healer, target)) {
-                    // Implement timer feature here?
                     // Follow the processPreparationPhase logic
-                    this.processPreparationPhase(session, healer, target);
+                    this.processPreparationPhaseForceCure(session, healer, target);
                 } else {
-                    this.cancelCureSession(session);
+                    this.cancelForceCureSession(session, true);
                 }
             } else {
-                this.cancelCureSession(session);
+                this.cancelForceCureSession(session, false);
             }
+        }
+    }
+
+    /**
+     * Manage the countdown until the cure is enacted upon the vampire.
+     *
+     * @param session the cure session.
+     * @param healer the vampire curing themselves.
+     */
+    private void processPreparationPhaseSelfCure(SelfCureSession session, Player healer) {
+        --session.preparationSecondsRemaining;
+        String preparationMessage = "§8Preparing to inject... " + VampireAbilityManager.formatTime(session.preparationSecondsRemaining) + " remaining";
+        this.plugin.getSessionManager().sendActionBar(healer, preparationMessage);
+
+        // Check that the player is holding the syringe the entire time
+        // Retrieve the prismarine shard in either hand, prioritizing one held in the main hand
+        ItemStack mainHandSyringe = healer.getInventory().getItemInMainHand(), offHandSyringe = null;
+
+        if (mainHandSyringe.getType() != Material.PRISMARINE_SHARD) {
+            mainHandSyringe = null;
+
+            offHandSyringe = healer.getInventory().getItemInOffHand();
+
+            if (offHandSyringe.getType() != Material.PRISMARINE_SHARD) {
+                offHandSyringe = null;
+            }
+        }
+
+        // Check if the healer is still holding the syringe
+        if (mainHandSyringe == null && offHandSyringe == null) {
+            healer.sendMessage("§cYou must hold a syringe of your sire's blood to enact the cure.");
+            this.cancelSelfCureSession(session,false);
+            return;
+        }
+
+        // Alert the players that the cure has begun.
+        if (session.preparationSecondsRemaining <= 0 && !session.cureCompleted) {
+            // Remove the syringe from the hand holding it, prioritizing the main hand
+            if (mainHandSyringe == null) {
+                // Remove the prismarine stack from the offhand
+                healer.getInventory().setItemInOffHand(null);
+            } else {
+                // Remove the prismarine stack from the main hand
+                healer.getInventory().setItemInMainHand(null);
+            }
+
+            // Reset the action bar of the cured player
+            this.plugin.getSessionManager().sendActionBar(healer, "");
+
+            // Mark that the cure has been completed
+            session.cureCompleted = true;
+            this.cancelSelfCureSession(session, false);
+
+            // Force cure the player
+            this.plugin.getForcedCureChoiceManager().performCure(healer);
         }
     }
 
@@ -222,15 +308,46 @@ public class ForcedCureChoiceListener implements Listener {
      * @param healer the player curing.
      * @param target the player about to be cured.
      */
-    private void processPreparationPhase(CureSession session, Player healer, Player target) {
+    private void processPreparationPhaseForceCure(ForceCureSession session, Player healer, Player target) {
         --session.preparationSecondsRemaining;
         String preparationMessage = "§8Preparing to inject... " + VampireAbilityManager.formatTime(session.preparationSecondsRemaining) + " remaining";
         this.plugin.getSessionManager().sendActionBar(healer, preparationMessage);
 
+        // Check that the player is holding the syringe the entire time
+        // Retrieve the prismarine shard in either hand, prioritizing one held in the main hand
+        ItemStack mainHandSyringe = null, offHandSyringe = null;
+
+        if (healer.getInventory().getItemInMainHand().getType() == Material.PRISMARINE_SHARD) {
+            mainHandSyringe = healer.getInventory().getItemInMainHand();
+
+        } else if (healer.getInventory().getItemInOffHand().getType() == Material.PRISMARINE_SHARD) {
+            offHandSyringe = healer.getInventory().getItemInOffHand();
+        }
+
+        // Check if the healer is still holding the syringe
+        if (mainHandSyringe == null && offHandSyringe == null) {
+            healer.sendMessage("§cYou must hold a syringe of the sire's blood to enact the cure.");
+            this.cancelForceCureSession(session,false);
+            return;
+        }
+
         // Alert the players that the cure has begun.
-        if (session.preparationSecondsRemaining <= 0) {
+        if (session.preparationSecondsRemaining <= 0 && !session.choiceOffered) {
+            // Remove the syringe from the hand holding it, prioritizing the main hand
+            if (mainHandSyringe == null) {
+                // Remove the prismarine stack from the offhand
+                healer.getInventory().setItemInOffHand(null);
+            } else {
+                // Remove the prismarine stack from the main hand
+                healer.getInventory().setItemInMainHand(null);
+            }
+
             // Reset the action bar of the healing player
             this.plugin.getSessionManager().sendActionBar(healer, "");
+
+            // Mark that the cure choice has been offered
+            session.choiceOffered = true;
+            this.cancelForceCureSession(session, false);
 
             // Force cure the targeted vampire
             this.plugin.getForcedCureChoiceManager().executeForceVampireCure(healer, target);
@@ -242,11 +359,26 @@ public class ForcedCureChoiceListener implements Listener {
      *
      * @param session the blood feeding session.
      */
-    private void cancelCureSession(CureSession session) {
+    private void cancelSelfCureSession(SelfCureSession session, boolean sendMessage) {
+        Player vampire = Bukkit.getPlayer(session.vampireId);
+
+        if (sendMessage && vampire != null && vampire.isOnline()) {
+            vampire.sendMessage("§aYou move the syringe away from your vein.");
+        }
+
+        this.activeSelfCureSessions.remove(session.vampireId);
+    }
+
+    /**
+     * Stop the vampire feeding process.
+     *
+     * @param session the blood feeding session.
+     */
+    private void cancelForceCureSession(ForceCureSession session, boolean sendMessage) {
         Player healer = Bukkit.getPlayer(session.healerId), target = Bukkit.getPlayer(session.vampireId);
 
-        if (target != null && target.isOnline()) {
-            target.sendMessage("§aYou no longer feel a vampire draining your life force");
+        if (sendMessage && target != null && target.isOnline()) {
+            healer.sendMessage("§aYou move your syringe away from " + target.getName());
         }
 
         this.activeForcedCureSessions.remove(session.healerId);
@@ -267,23 +399,34 @@ public class ForcedCureChoiceListener implements Listener {
         }
     }
 
-
-
-
-
-    private class CureSession {
-        public  final UUID healerId, vampireId;
+    private class SelfCureSession {
+        public final UUID vampireId;
         public final long startTime;
-        public BukkitTask task;
         public int preparationSecondsRemaining;
+        public boolean cureCompleted;
 
+        public SelfCureSession(UUID vampireId) {
+            this.vampireId = vampireId;
+            this.startTime = System.currentTimeMillis();
 
-        public CureSession(UUID healerId, UUID vampireId) {
+            this.preparationSecondsRemaining = cureSeconds;
+            this.cureCompleted = false;
+        }
+    }
+
+    private class ForceCureSession {
+        public final UUID healerId, vampireId;
+        public final long startTime;
+        public int preparationSecondsRemaining;
+        public boolean choiceOffered;
+
+        public ForceCureSession(UUID healerId, UUID vampireId) {
             this.healerId = healerId;
             this.vampireId = vampireId;
             this.startTime = System.currentTimeMillis();
 
             this.preparationSecondsRemaining = cureSeconds;
+            this.choiceOffered = false;
         }
     }
 }

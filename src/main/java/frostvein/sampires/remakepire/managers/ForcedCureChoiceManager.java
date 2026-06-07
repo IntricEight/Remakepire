@@ -177,13 +177,61 @@ public class ForcedCureChoiceManager {
     }
 
     /**
+     * Cure the player of vampirism.
+     *
+     * @param player the vampire being cured.
+     */
+    public void performCure(Player player) {
+        player.sendTitle("§6§lCURED", "§eThe curse is lifted", 10, 60, 20);
+        player.sendMessage("§7The mixture burns through your veins...");
+        player.sendMessage("§7The corrupted blood boils away...");
+        player.sendMessage("§aYou feel your humanity returning...");
+        player.sendMessage("§aYou are cured. You are human once more.");
+
+        // Alert all players that a vampire has been cured
+        for(Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+            if (!onlinePlayer.equals(player)) {
+                if (this.plugin.getVampireManager().isVampire(onlinePlayer)) {
+                    onlinePlayer.sendMessage("§4A disturbance ripples through the darkness... One of your kind has abandoned the gift of immortality...");
+                } else {
+                    onlinePlayer.sendMessage("§aA vampire has rejected the curse of immortality and has been cured.");
+                }
+            }
+        }
+
+        this.plugin.getVampireManager().setPlayerAsHuman(player);
+        player.getActivePotionEffects().forEach((effect) -> player.removePotionEffect(effect.getType()));
+        player.addScoreboardTag("CuredVampire");
+
+        // Check for and apply the effects of beacon control
+        if (this.plugin.getSessionManager().isHumansFinalStandActive()) {
+            // Restore the human's health when humans control all beacons
+            this.plugin.getEffectManager().removeHumansFinalStandHealthReduction(player);
+
+        } else if (this.plugin.getSessionManager().isVampiresEternalNightActive()) {
+            // Apply blindness to the human if vampires control all beacons
+            this.plugin.getEffectManager().applyEternalNightDarkness(player);
+        }
+
+        // Create the visual and audio effects of the cure working on the vampire
+        this.plugin.getForcedCureChoiceManager().createCureEffects(player);
+
+        if (this.plugin.getVampireTurningManager() != null) {
+            this.plugin.getVampireTurningManager().disableAllVampireTurning();
+        }
+
+        this.plugin.logInfo("VAMPIRE CURE: " + player.getName() + " has been cured");
+        DeathHandler.checkAndAnnounceTeamElimination(this.plugin, false, true);
+    }
+
+    /**
      * Create the visual and auditory effects of initiating the force cure, and open the force cure choice GUI.
      *
      * @param healer the player enacting the force cure.
      * @param target the vampire being cured.
      */
     public void executeForceVampireCure(Player healer, Player target) {
-        healer.sendMessage("§6You speak the holy words of retribution...");
+        healer.sendMessage("§6Your syringe empties into the vampire's veins");
         healer.sendMessage("§7Divine light tears through the creature's cursed form...");
         healer.sendMessage("§e" + target.getName() + " must now choose their fate...");
 

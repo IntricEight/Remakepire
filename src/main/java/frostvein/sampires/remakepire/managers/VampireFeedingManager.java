@@ -3,15 +3,14 @@ package frostvein.sampires.remakepire.managers;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import org.bukkit.Bukkit;
-import org.bukkit.GameMode;
-import org.bukkit.Sound;
-import org.bukkit.SoundCategory;
+
+import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerToggleSneakEvent;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -108,6 +107,21 @@ public class VampireFeedingManager implements Listener {
     private void processPreparationPhase(FeedingSession session, Player vampire, Player target) {
         --session.preparationSecondsRemaining;
         String preparationMessage;
+
+        // Stop players attempting a cure from feeding by checking if they are holidng prismarine
+        ItemStack mainHandSyringe = null, offHandSyringe = null;
+
+        if (vampire.getInventory().getItemInMainHand().getType() == Material.PRISMARINE_SHARD) {
+            mainHandSyringe = vampire.getInventory().getItemInMainHand();
+
+        } else if (vampire.getInventory().getItemInOffHand().getType() == Material.PRISMARINE_SHARD) {
+            offHandSyringe = vampire.getInventory().getItemInOffHand();
+        }
+
+        // Stop the feeding session if they are holding a prismarine syringe during the preparation phase
+        if (mainHandSyringe != null || offHandSyringe != null) {
+            this.cancelFeedingSession(session);
+        }
 
         if (this.vampireManager.isHuman(target)) {
             preparationMessage = "§8Preparing to feed... " + VampireAbilityManager.formatTime(session.preparationSecondsRemaining) + " remaining";
