@@ -114,12 +114,21 @@ public class ConfigManager {
     }
 
     /**
-     * Retrieve the time a player must apply for the force cure to a player before they are trapped into their choice
+     * Retrieve the time a player can cancel their self cure before the cure is enacted.
      *
      * @return the seconds it takes to apply the cure.
      */
-    public int getCureApplicationSeconds() {
-        return this.config.getInt("cure.seconds-to-cure", 5);
+    public int getSelfCureApplicationSeconds() {
+        return this.config.getInt("cure.seconds-to-self-cure", 5);
+    }
+
+    /**
+     * Retrieve the time a player must apply for the force cure to a player before they are trapped into their choice.
+     *
+     * @return the seconds it takes to apply the cure.
+     */
+    public int getForceCureApplicationSeconds() {
+        return this.config.getInt("cure.seconds-to-force-cure", 5);
     }
 
     /**

@@ -29,7 +29,7 @@ public class ForcedCureChoiceListener implements Listener {
     private final RemakepirePlugin plugin;
     private final Map<UUID, SelfCureSession> activeSelfCureSessions = new HashMap<>();
     private final Map<UUID, ForceCureSession> activeForcedCureSessions = new HashMap<>();
-    private final int cureSeconds;
+    private final int selfCureSession, forceCureSeconds;
 
     /**
      * Create an instance of the Forced Cure Choice listener.
@@ -39,7 +39,8 @@ public class ForcedCureChoiceListener implements Listener {
     public ForcedCureChoiceListener(RemakepirePlugin plugin) {
         this.plugin = plugin;
 
-        this.cureSeconds = this.plugin.getConfigManager().getCureApplicationSeconds();
+        this.selfCureSession = this.plugin.getConfigManager().getSelfCureApplicationSeconds();
+        this.forceCureSeconds = this.plugin.getConfigManager().getForceCureApplicationSeconds();
         Bukkit.getPluginManager().registerEvents(this, plugin);
         this.startCureDetectionTasks();
     }
@@ -409,7 +410,7 @@ public class ForcedCureChoiceListener implements Listener {
             this.vampireId = vampireId;
             this.startTime = System.currentTimeMillis();
 
-            this.preparationSecondsRemaining = cureSeconds;
+            this.preparationSecondsRemaining = selfCureSession;
             this.cureCompleted = false;
         }
     }
@@ -425,7 +426,7 @@ public class ForcedCureChoiceListener implements Listener {
             this.vampireId = vampireId;
             this.startTime = System.currentTimeMillis();
 
-            this.preparationSecondsRemaining = cureSeconds;
+            this.preparationSecondsRemaining = forceCureSeconds;
             this.choiceOffered = false;
         }
     }
