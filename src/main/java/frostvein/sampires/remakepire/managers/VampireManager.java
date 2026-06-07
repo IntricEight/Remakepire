@@ -243,6 +243,7 @@ public class VampireManager {
 
         try {
             this.removeAllVampireTags(player);
+            player.removePotionEffect(PotionEffectType.DARKNESS);
             player.addScoreboardTag("vampire");
             if (this.plugin.getTomeManager() != null) {
                 this.plugin.getTomeManager().removeAllAbilities(player);
@@ -475,6 +476,7 @@ public class VampireManager {
 
         this.plugin.getServer().getScheduler().runTaskLater(this.plugin, () -> {
             player.setGameMode(GameMode.SPECTATOR);
+            player.addScoreboardTag("perma_dead");
 
             player.sendTitle("§4§lFINAL DEATH", "§7Your journey has ended", 10, 100, 30);
             player.sendMessage("");

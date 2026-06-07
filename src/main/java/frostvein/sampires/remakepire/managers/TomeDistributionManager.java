@@ -64,7 +64,7 @@ public class TomeDistributionManager {
         this.stopDistributionTask();
         this.distributionTask = Bukkit.getScheduler().runTaskTimer(this.plugin, this::distributeTomes, 0L, intervalTicks);
 
-        this.plugin.logInfo("TomeDistributionManager: Started daily tome distribution task");
+        this.plugin.logInfo("TomeDistributionManager: Started tome distribution task (every " + intervalTicks / 20L / 60L + " minutes)");
     }
 
     /**
@@ -83,37 +83,37 @@ public class TomeDistributionManager {
      * Distribute a random (weighted) tome, cure, or enchanted book to each tome location.
      */
     public void distributeTomes() {
-        if (this.plugin.getSessionManager().getSessionState() != SessionManager.IN_SESSION) {
-            this.plugin.getLogger().warning("TomeDistributionManager: Tomes may not be distributed outside of session");
-        } else if (this.tomeLocations.isEmpty()) {
-            this.plugin.getLogger().warning("TomeDistributionManager: No tome locations available for distribution");
-        } else {
-            this.clearAllTomeChests();
-            List<Location> tomeSelectedLocations = this.selectRandomLocations();
+        if (this.plugin.getSessionManager().getSessionState() == 1) {
+            if (this.tomeLocations.isEmpty()) {
+                this.plugin.getLogger().warning("TomeDistributionManager: No tome locations available for distribution");
+            } else {
+                this.clearAllTomeChests();
+                List<Location> tomeSelectedLocations = this.selectRandomLocations();
 
-            for(Location location : tomeSelectedLocations) {
-                String randomTome = this.getRandomTomeType();
-                this.distributeTomeToLocation(location, randomTome);
+                for (Location location : tomeSelectedLocations) {
+                    String randomTome = this.getRandomTomeType();
+                    this.distributeTomeToLocation(location, randomTome);
+                }
+
+                List<Location> emptyLocations = new ArrayList<>(this.tomeLocations);
+                emptyLocations.removeAll(tomeSelectedLocations);
+
+                for (Location location : emptyLocations) {
+                    this.addEnchantmentBookToLocation(location);
+                }
+
+                boolean cureBooksEnabled = this.configManager.isCureBooksEnabled();
+                double cureBooksSpawnChance = this.configManager.getCureBooksSpawnChance();
+                boolean cureBookAdded = false;
+
+                if (cureBooksEnabled && this.random.nextDouble() < cureBooksSpawnChance) {
+                    Location randomLocation = this.tomeLocations.get(this.random.nextInt(this.tomeLocations.size()));
+                    this.replaceCureBookAtLocation(randomLocation);
+                    cureBookAdded = true;
+                }
+
+                this.plugin.logInfo("TomeDistributionManager: Distributed " + tomeSelectedLocations.size() + " tomes, " + emptyLocations.size() + " enchantment books" + (cureBookAdded ? ", and 1 cure book (replaced a chest)" : "") + " to chest locations");
             }
-
-            List<Location> emptyLocations = new ArrayList<>(this.tomeLocations);
-            emptyLocations.removeAll(tomeSelectedLocations);
-
-            for(Location location : emptyLocations) {
-                this.addEnchantmentBookToLocation(location);
-            }
-
-            boolean cureBooksEnabled = this.configManager.isCureBooksEnabled();
-            double cureBooksSpawnChance = this.configManager.getCureBooksSpawnChance();
-            boolean cureBookAdded = false;
-
-            if (cureBooksEnabled && this.random.nextDouble() < cureBooksSpawnChance) {
-                Location randomLocation = this.tomeLocations.get(this.random.nextInt(this.tomeLocations.size()));
-                this.replaceCureBookAtLocation(randomLocation);
-                cureBookAdded = true;
-            }
-
-            this.plugin.logInfo("TomeDistributionManager: Distributed " + tomeSelectedLocations.size() + " tomes, " + emptyLocations.size() + " enchantment books" + (cureBookAdded ? ", and 1 cure book (replaced a chest)" : "") + " to chest locations");
         }
     }
 
@@ -298,17 +298,17 @@ public class TomeDistributionManager {
                 case 0:
                     bookMeta.setTitle("The Remedy 1/3");
                     bookMeta.setAuthor("§5An ancient scholar");
-                    bookMeta.setPages("§5§lTHE REMEDY§r\n§8Part I of III\n\n§7In the darkest hours, when the cursed blood burns within your veins, know that salvation exists.\n\n§7The ancients spoke of a trinity of knowledge...", "§7...that when combined, can sever the unholy bond between mortal and monster.\n\n§7This is the first piece of that forbidden wisdom.\n\n§8Read on, seeker of the light...");
+                    bookMeta.setPages("§5§lTHE REMEDY§r\n§8Part I of III\n\n§7In the darkest hours, when the cursed blood burns within your veins, know that salvation exists.\n\n§7The ancients spoke of a trinity of knowledge...", "§7...that when combined, can sever the unholy bond between mortal and monster.\n\n§7This first piece reveals the place of redemption: beneath the light of a holy beacon, where divine grace gathers.\n\n§8Read on, seeker of the light...");
                     break;
                 case 1:
                     bookMeta.setTitle("The Cure 2/3");
                     bookMeta.setAuthor("§5An ancient scholar");
-                    bookMeta.setPages("§5§lTHE CURE§r\n§8Part II of III\n\n§7The second fragment reveals the nature of the curse itself.\n\n§7Born of darkness, sustained by blood, the vampire's existence is a perversion of nature's order...", "§7...yet within this perversion lies the key to its undoing.\n\n§7Holy water, blessed by the righteous, weakens the bond.\n\n§8Continue your search, truth-seeker...");
+                    bookMeta.setPages("§5§lTHE CURE§r\n§8Part II of III\n\n§7The second fragment reveals the nature of the curse itself.\n\n§7Born of darkness, sustained by blood, the vampire's existence is a perversion of nature's order...", "§7...yet within this perversion lies the key to its undoing.\n\n§7Holy water, blessed by the righteous, weakens the bond. Yet the bloodline binds; Your sire must lie dead for the cure to hold.\n\n§8Continue your search, truth-seeker...");
                     break;
                 case 2:
                     bookMeta.setTitle("The Absolution 3/3");
                     bookMeta.setAuthor("§5An ancient scholar");
-                    bookMeta.setPages("§5§lTHE ABSOLUTION§r\n§8Part III of III\n\n§7The final piece completes the trinity.\n\n§7With all three fragments of knowledge, the words of power are revealed:\n\n§6voluntate-mea-hoc-nefandum-vinculum-abicio", "§7Stand near a holy beacon, with holy water upon your person, beneath the light of day.\n\n§7Speak the words, and be free of the curse forevermore.\n\n§8May the light guide your path.");
+                    bookMeta.setPages("§5§lTHE ABSOLUTION§r\n§8Part III of III\n\n§7The final piece completes the trinity.\n\n§7With all three fragments of knowledge, the words of power are revealed:\n\n§6voluntate-mea-hoc-nefandum-vinculum-abicio", "§7These words have no power in shadow — only beneath the light of day may they bind.\n\n§7Recall what the other tomes have taught you, gather what is needed, and speak.\n\n§8May the light guide your path.");
             }
 
             List<String> lore = new ArrayList<>();

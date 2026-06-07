@@ -364,9 +364,6 @@ public class SessionManager {
         this.plugin.saveConfig();
     }
 
-    /**
-     *
-     */
     public void incrementSessionID() {
         this.sessionIDObjective.getScore("session_id_holder").setScore(this.sessionIDObjective.getScore("session_id_holder").getScore() + 1);
         this.updateAllPlayersSessionIDs();
@@ -651,26 +648,29 @@ public class SessionManager {
      * @param player the player being reset.
      */
     public void resetPlayer(Player player) {
-        if (player.getGameMode() == GameMode.SPECTATOR) {
-            player.setGameMode(GameMode.SURVIVAL);
-            this.plugin.logInfo("Reset " + player.getName() + " from spectator to survival mode (new game/session)");
+        // Ignore players who are dead
+        if (!player.getScoreboardTags().contains("perma_dead")) {
+            if (player.getGameMode() == GameMode.SPECTATOR) {
+                player.setGameMode(GameMode.SURVIVAL);
+                this.plugin.logInfo("Reset " + player.getName() + " from spectator to survival mode (new game/session)");
+            }
+
+            player.getAttribute(Attribute.MAX_HEALTH).setBaseValue(20.0);
+            double actualMaxHealth = player.getAttribute(Attribute.MAX_HEALTH).getValue();
+            player.setHealth(actualMaxHealth);
+
+            for (String string : INFORMED_CONSTANTS) {
+                player.removeScoreboardTag(string);
+            }
+
+            this.plugin.getVampireManager().clearPromotionBan(player);
+            BeetrootManager beetrootManager = this.plugin.getBeetrootManager();
+            if (beetrootManager != null) {
+                beetrootManager.resetPlayerBeetrootUsage(player);
+            }
+
+            player.removeScoreboardTag("ChatPrevented");
         }
-
-        player.getAttribute(Attribute.MAX_HEALTH).setBaseValue(20.0);
-        double actualMaxHealth = player.getAttribute(Attribute.MAX_HEALTH).getValue();
-        player.setHealth(actualMaxHealth);
-
-        for(String string : INFORMED_CONSTANTS) {
-            player.removeScoreboardTag(string);
-        }
-
-        this.plugin.getVampireManager().clearPromotionBan(player);
-        BeetrootManager beetrootManager = this.plugin.getBeetrootManager();
-        if (beetrootManager != null) {
-            beetrootManager.resetPlayerBeetrootUsage(player);
-        }
-
-        player.removeScoreboardTag("ChatPrevented");
     }
 
     public int getSessionState() {

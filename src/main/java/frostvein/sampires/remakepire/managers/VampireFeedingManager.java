@@ -105,34 +105,38 @@ public class VampireFeedingManager implements Listener {
      * @param target the player about to lose health or blood.
      */
     private void processPreparationPhase(FeedingSession session, Player vampire, Player target) {
-        --session.preparationSecondsRemaining;
-        String preparationMessage;
-
-        if (this.vampireManager.isHuman(target)) {
-            preparationMessage = "§8Preparing to feed... " + VampireAbilityManager.formatTime(session.preparationSecondsRemaining) + " remaining";
+        if (target.getGameMode() != GameMode.SURVIVAL) {
+            this.cancelFeedingSession(session);
         } else {
-            preparationMessage = "§8Preparing to siphon... " + VampireAbilityManager.formatTime(session.preparationSecondsRemaining) + " remaining";
-        }
-
-        this.plugin.getSessionManager().sendActionBar(vampire, preparationMessage);
-
-        // Alert the players that the feeding has begun.
-        if (session.preparationSecondsRemaining <= 0) {
-            session.phase = VampireFeedingManager.FeedingPhase.ACTIVE_FEEDING;
-            this.plugin.getSessionManager().sendActionBar(vampire, "");
+            --session.preparationSecondsRemaining;
+            String preparationMessage;
 
             if (this.vampireManager.isHuman(target)) {
-                vampire.sendMessage("§4§lYou begin feeding on " + target.getName() + "!");
-                target.sendMessage("§c§lYou feel a vampire draining your life force!");
-                target.sendMessage("§7Move away or break the vampire's crouch to escape!");
-
+                preparationMessage = "§8Preparing to feed... " + VampireAbilityManager.formatTime(session.preparationSecondsRemaining) + " remaining";
             } else {
-                vampire.sendMessage("§4§lYou begin siphoning from " + target.getName() + "!");
-                target.sendMessage("§c§lYou feel another vampire siphoning your essence!");
-                target.sendMessage("§7Move away or break the vampire's crouch to escape!");
+                preparationMessage = "§8Preparing to siphon... " + VampireAbilityManager.formatTime(session.preparationSecondsRemaining) + " remaining";
             }
 
-            vampire.getWorld().playSound(vampire.getLocation(), Sound.ENTITY_WITCH_DRINK, SoundCategory.PLAYERS, 1.0F, 0.8F);
+            this.plugin.getSessionManager().sendActionBar(vampire, preparationMessage);
+
+            // Alert the players that the feeding has begun.
+            if (session.preparationSecondsRemaining <= 0) {
+                session.phase = VampireFeedingManager.FeedingPhase.ACTIVE_FEEDING;
+                this.plugin.getSessionManager().sendActionBar(vampire, "");
+
+                if (this.vampireManager.isHuman(target)) {
+                    vampire.sendMessage("§4§lYou begin feeding on " + target.getName() + "!");
+                    target.sendMessage("§c§lYou feel a vampire draining your life force!");
+                    target.sendMessage("§7Move away or break the vampire's crouch to escape!");
+
+                } else {
+                    vampire.sendMessage("§4§lYou begin siphoning from " + target.getName() + "!");
+                    target.sendMessage("§c§lYou feel another vampire siphoning your essence!");
+                    target.sendMessage("§7Move away or break the vampire's crouch to escape!");
+                }
+
+                vampire.getWorld().playSound(vampire.getLocation(), Sound.ENTITY_WITCH_DRINK, SoundCategory.PLAYERS, 1.0F, 0.8F);
+            }
         }
     }
 

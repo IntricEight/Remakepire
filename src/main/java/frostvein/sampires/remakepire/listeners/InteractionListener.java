@@ -23,6 +23,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import frostvein.sampires.remakepire.RemakepirePlugin;
 import frostvein.sampires.remakepire.managers.SessionManager;
@@ -53,21 +54,17 @@ public class InteractionListener implements Listener {
         Player player = event.getPlayer();
         Entity targetEntity = event.getRightClicked();
 
-        ItemStack itemInHand = player.getInventory().getItemInMainHand();
-        ItemStack offHand = player.getInventory().getItemInOffHand();
-
-        boolean hasFoodInMainHand = itemInHand != null && itemInHand.getType() != Material.AIR && FEEDING_ITEMS.contains(itemInHand.getType());
-        boolean hasFoodInOffHand = offHand != null && offHand.getType() != Material.AIR && FEEDING_ITEMS.contains(offHand.getType());
-
         if (this.plugin.getVampireManager().isVampire(player)) {
             if (this.plugin.getBatTransformationManager().isInBatForm(player)) {
                 event.setCancelled(true);
                 player.sendMessage("§cYou cannot interact with anything while you are in your bat form.");
 
-            } else if (hasFoodInMainHand || hasFoodInOffHand) {
-                if (!(targetEntity instanceof Player)) {
-                    if (this.isFeedableMob(targetEntity)) {
-                        this.handleVampireFeedingAttempt(player, targetEntity, itemInHand, event);
+            } else if (!(targetEntity instanceof Player)) {
+                if (this.isFeedableMob(targetEntity)) {
+                    ItemStack handItem = event.getHand() == EquipmentSlot.OFF_HAND ? player.getInventory().getItemInOffHand() : player.getInventory().getItemInMainHand();
+
+                    if (handItem != null && FEEDING_ITEMS.contains(handItem.getType())) {
+                        this.handleVampireFeedingAttempt(player, targetEntity, handItem, event);
                     }
                 }
             }

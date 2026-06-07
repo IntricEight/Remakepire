@@ -143,16 +143,6 @@ public class FourthBookRevealListener implements Listener {
      * @return the written cure book 4/3.
      */
     private ItemStack createRetributionBook() {
-        ItemStack book = new ItemStack(Material.WRITTEN_BOOK);
-        BookMeta bookMeta = (BookMeta)book.getItemMeta();
-
-        if (bookMeta != null) {
-            bookMeta.setTitle("The Retribution 4/3");
-            bookMeta.setAuthor("§4A vengeful hand...");
-            bookMeta.setPages("§8§o[The writing in this book is unlike the previous three, it's is hurried and panicked, the ink is smeared and the smell of blood rests faintly on the pages]§r\n\n§4The spirits are too lenient... Too soft...", "§0These disgusting, vile, works of evil could never be convinced to come back to the light...\n\n§0They must be dragged back to humanity, even if it's by, kicking and screaming.", "§0Give them a choice. Accept the light, or face eternal darkness.\n\n§0I will give them this choice, with these holy words:", "§7/§4hoc-vinculum-tibi-dirumpo-mala-creatura §7<§4Players-Name§7>");
-            book.setItemMeta(bookMeta);
-        }
-
-        return book;
+        return CureBookReadingListener.createFourthCureBook(this.plugin);
     }
 }

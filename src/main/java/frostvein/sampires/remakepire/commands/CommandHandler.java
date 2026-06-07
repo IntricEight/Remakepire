@@ -193,7 +193,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
 
                 sender.sendMessage("§aPlayer " + target.getName() + " has been fully reset to a fresh state.");
                 target.sendMessage("§aYou have been reset to a fresh state by an administrator.");
-                target.sendMessage("§All vampire status, abilities, cooldowns, and death count have been cleared." + (clearInventory ? " Your inventory has also been cleared." : ""));
+                target.sendMessage("§7All vampire status, abilities, cooldowns, and death count have been cleared." + (clearInventory ? " Your inventory has also been cleared." : ""));
                 this.plugin.logInfo("Admin " + sender.getName() + " reset player " + target.getName() + " to fresh state");
 
                 return true;
@@ -1132,44 +1132,42 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
     }
 
     private ItemStack createCureBook(int bookNum) {
-        ItemStack book = new ItemStack(Material.WRITTEN_BOOK);
-        BookMeta meta = (BookMeta)book.getItemMeta();
+        if (bookNum == 4) {
+            return CureBookReadingListener.createFourthCureBook(this.plugin);
+        } else {
+            ItemStack book = new ItemStack(Material.WRITTEN_BOOK);
+            BookMeta meta = (BookMeta)book.getItemMeta();
+            if (meta != null) {
+                switch (bookNum) {
+                    case 1:
+                        meta.setTitle("The Remedy 1/3");
+                        meta.setAuthor("§5An ancient scholar");
+                        meta.setPages("§5§lTHE REMEDY§r\n§8Part I of III\n\n§7In the darkest hours, when the cursed blood burns within your veins, know that salvation exists.\n\n§7The ancients spoke of a trinity of knowledge...", "§7...that when combined, can sever the unholy bond between mortal and monster.\n\n§7This first piece reveals the place of redemption: beneath the light of a holy beacon, where divine grace gathers.\n\n§8Read on, seeker of the light...");
+                        break;
+                    case 2:
+                        meta.setTitle("The Cure 2/3");
+                        meta.setAuthor("§5An ancient scholar");
+                        meta.setPages("§5§lTHE CURE§r\n§8Part II of III\n\n§7The second fragment reveals the nature of the curse itself.\n\n§7Born of darkness, sustained by blood, the vampire's existence is a perversion of nature's order...", "§7...yet within this perversion lies the key to its undoing.\n\n§7Holy water, blessed by the righteous, weakens the bond. Yet the bloodline binds; Your sire must lie dead for the cure to hold.\n\n§8Continue your search, truth-seeker...");
+                        break;
+                    case 3:
+                        meta.setTitle("The Absolution 3/3");
+                        meta.setAuthor("§5An ancient scholar");
+                        meta.setPages("§5§lTHE ABSOLUTION§r\n§8Part III of III\n\n§7The final piece completes the trinity.\n\n§7With all three fragments of knowledge, the words of power are revealed:\n\n§6voluntate-mea-hoc-nefandum-vinculum-abicio", "§7These words have no power in shadow — only beneath the light of day may they bind.\n\n§7Recall what the other tomes have taught you, gather what is needed, and speak.\n\n§8May the light guide your path.");
+                }
 
-        if (meta != null) {
-            switch (bookNum) {
-                case 1:
-                    meta.setTitle("The Remedy 1/3");
-                    meta.setAuthor("§5An ancient scholar");
-                    meta.setPages("§5§lTHE REMEDY§r\n§8Part I of III\n\n§7In the darkest hours, when the cursed blood burns within your veins, know that salvation exists.\n\n§7The ancients spoke of a trinity of knowledge...", "§7...that when combined, can sever the unholy bond between mortal and monster.\n\n§7This is the first piece of that forbidden wisdom.\n\n§8Read on, seeker of the light...");
-                    break;
-                case 2:
-                    meta.setTitle("The Cure 2/3");
-                    meta.setAuthor("§5An ancient scholar");
-                    meta.setPages("§5§lTHE CURE§r\n§8Part II of III\n\n§7The second fragment reveals the nature of the curse itself.\n\n§7Born of darkness, sustained by blood, the vampire's existence is a perversion of nature's order...", "§7...yet within this perversion lies the key to its undoing.\n\n§7Holy water, blessed by the righteous, weakens the bond.\n\n§8Continue your search, truth-seeker...");
-                    break;
-                case 3:
-                    meta.setTitle("The Absolution 3/3");
-                    meta.setAuthor("§5An ancient scholar");
-                    meta.setPages("§5§lTHE ABSOLUTION§r\n§8Part III of III\n\n§7The final piece completes the trinity.\n\n§7With all three fragments of knowledge, the words of power are revealed:\n\n§6voluntate-mea-hoc-nefandum-vinculum-abicio", "§7Stand near a holy beacon, with holy water upon your person, beneath the light of day.\n\n§7Speak the words, and be free of the curse forevermore.\n\n§8May the light guide your path.");
-                    break;
-                case 4:
-                    meta.setTitle("The Retribution 4/3");
-                    meta.setAuthor("§4A vengeful spirit");
-                    meta.setPages("§4§lTHE RETRIBUTION§r\n§8The Fourth Tome\n\n§7This knowledge was never meant to be found.\n\n§7While the trinity speaks of self-salvation, this tome reveals darker words - words of forced redemption...", "§7...or forced damnation.\n\n§4hoc-vinculum-tibi-dirumpo-mala-creatura\n\n§7With these words, you may force the choice upon another creature of the night.\n\n§8Use this power wisely, for it carries great consequence.");
+                List<String> lore = new ArrayList();
+                lore.add("§5An ancient tome of forbidden knowledge");
+                lore.add("§7Part " + bookNum + " of the cure series");
+                lore.add("");
+                lore.add("§eRead this book to absorb its wisdom");
+                meta.setLore(lore);
+
+                CureBookReadingListener.markAsAuthenticCureBook(meta, bookNum, this.plugin);
+                book.setItemMeta(meta);
             }
 
-            List<String> lore = new ArrayList<>();
-            lore.add("§5An ancient tome of forbidden knowledge");
-            lore.add("§7Part " + bookNum + " of the cure series");
-            lore.add("");
-            lore.add("§eRead this book to absorb its wisdom");
-
-            meta.setLore(lore);
-            CureBookReadingListener.markAsAuthenticCureBook(meta, bookNum, this.plugin);
-            book.setItemMeta(meta);
+            return book;
         }
-
-        return book;
     }
 
     private boolean handleDistributeTomesCommand(CommandSender sender, String[] args) {

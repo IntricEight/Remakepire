@@ -12,6 +12,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityMountEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -56,6 +57,7 @@ public class HolyWordTomeAbility extends TomeAbility implements Listener {
                     } else if (vampireManager.isVampireStage2(target) || vampireManager.isVampireStage3(target)) {
                         target.sendMessage("§cYou are frozen by divine power!");
                         target.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, PARALYSIS_DURATION, 255, false, false));
+                        target.leaveVehicle();
                         UUID targetId = target.getUniqueId();
                         BukkitTask paralysisTask = Bukkit.getScheduler().runTaskLater(this.plugin, () -> this.paralyzedPlayers.remove(targetId), PARALYSIS_DURATION);
 
@@ -118,6 +120,21 @@ public class HolyWordTomeAbility extends TomeAbility implements Listener {
             event.setCancelled(true);
             if (System.currentTimeMillis() % 3000L < 50L) {
                 player.sendMessage("§4You are frozen by divine power and cannot move!");
+            }
+        }
+    }
+
+    /**
+     * Prevent paralyzed players from mounting.
+     *
+     * @param event a player attempts to mount an entity.
+     */
+    @EventHandler
+    public void onEntityMount(EntityMountEvent event) {
+        if (event.getEntity() instanceof Player player) {
+            if (this.paralyzedPlayers.containsKey(player.getUniqueId())) {
+                event.setCancelled(true);
+                player.sendMessage("§4You are frozen by divine power and cannot mount!");
             }
         }
     }

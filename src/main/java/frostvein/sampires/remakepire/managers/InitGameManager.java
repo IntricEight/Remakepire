@@ -1,33 +1,3 @@
-/*
- * Decompiled with CFR 0.153-SNAPSHOT (d6f6758-dirty).
- * 
- * Could not load the following classes:
- *  net.md_5.bungee.api.chat.BaseComponent
- *  net.md_5.bungee.api.chat.ClickEvent
- *  net.md_5.bungee.api.chat.ClickEvent$Action
- *  net.md_5.bungee.api.chat.ComponentBuilder
- *  net.md_5.bungee.api.chat.HoverEvent
- *  net.md_5.bungee.api.chat.HoverEvent$Action
- *  net.md_5.bungee.api.chat.TextComponent
- *  org.bukkit.Bukkit
- *  org.bukkit.GameMode
- *  org.bukkit.Location
- *  org.bukkit.Material
- *  org.bukkit.World
- *  org.bukkit.attribute.Attribute
- *  org.bukkit.attribute.AttributeInstance
- *  org.bukkit.attribute.AttributeModifier
- *  org.bukkit.command.CommandSender
- *  org.bukkit.entity.Player
- *  org.bukkit.inventory.Inventory
- *  org.bukkit.inventory.ItemStack
- *  org.bukkit.inventory.meta.ItemMeta
- *  org.bukkit.plugin.Plugin
- *  org.bukkit.potion.PotionEffect
- *  org.bukkit.potion.PotionEffectType
- *  org.bukkit.scoreboard.Objective
- *  org.bukkit.scoreboard.Scoreboard
- */
 package frostvein.sampires.remakepire.managers;
 
 import java.util.ArrayList;
@@ -599,6 +569,8 @@ public class InitGameManager {
                 admin.sendMessage("§7[7/9] Teleporting players...");
 
                 for(Player player : onlinePlayers) {
+                    player.removeScoreboardTag("perma_dead");
+
                     if (player.getGameMode() != GameMode.SURVIVAL) {
                         GameMode oldMode = player.getGameMode();
                         player.setGameMode(GameMode.SURVIVAL);
