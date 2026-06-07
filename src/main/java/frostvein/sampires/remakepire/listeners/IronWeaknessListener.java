@@ -33,6 +33,7 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 import frostvein.sampires.remakepire.RemakepirePlugin;
+import frostvein.sampires.remakepire.managers.SessionManager;
 import frostvein.sampires.remakepire.managers.VampireManager;
 
 public class IronWeaknessListener implements Listener {
@@ -226,8 +227,8 @@ public class IronWeaknessListener implements Listener {
                 if (this.ironMaterials.contains(itemType)) {
                     event.setCancelled(true);
 
-                    if (!player.getScoreboardTags().contains("informed_pickup_item")) {
-                        player.addScoreboardTag("informed_pickup_item");
+                    if (!player.getScoreboardTags().contains(SessionManager.INFORMED_PICKUP_ITEM)) {
+                        player.addScoreboardTag(SessionManager.INFORMED_PICKUP_ITEM);
                         player.sendMessage("§cThe silver you have tried to pick up burns your fingers as you touch it... Best leave it alone...");
                     }
                 }
@@ -251,8 +252,8 @@ public class IronWeaknessListener implements Listener {
             if (this.ironMaterials.contains(armorStandItemType)) {
                 event.setCancelled(true);
 
-                if (!player.getScoreboardTags().contains("informed_pickup_item")) {
-                    player.addScoreboardTag("informed_pickup_item");
+                if (!player.getScoreboardTags().contains(SessionManager.INFORMED_PICKUP_ITEM)) {
+                    player.addScoreboardTag(SessionManager.INFORMED_PICKUP_ITEM);
                     player.sendMessage("§cThe silver you have tried to pick up burns your fingers as you touch it... Best leave it alone...");
                 }
             }
@@ -344,9 +345,9 @@ public class IronWeaknessListener implements Listener {
                     if (this.isNearIronBlock(to, this.REPEL_DISTANCE)) {
                         event.setCancelled(true);
 
-                        if (!player.getScoreboardTags().contains("informed_iron_block_reply")) {
+                        if (!player.getScoreboardTags().contains(SessionManager.INFORMED_IRON_BLOCK_REPEL)) {
+                            player.addScoreboardTag(SessionManager.INFORMED_IRON_BLOCK_REPEL);
                             player.sendMessage("§cA block of silver is repelling you from this area...");
-                            player.addScoreboardTag("informed_iron_block_reply");
                         }
 
                         Vector knockbackDirection = this.getDirectionAwayFromNearestIron(to);
@@ -445,8 +446,8 @@ public class IronWeaknessListener implements Listener {
     private void applyIronEffects(Player player) {
         player.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, 40, 2, false, false));
 
-        if (!player.getScoreboardTags().contains("informed_iron_block_effects")) {
-            player.addScoreboardTag("informed_iron_block_effects");
+        if (!player.getScoreboardTags().contains(SessionManager.INFORMED_IRON_BLOCK_WEAKNESS)) {
+            player.addScoreboardTag(SessionManager.INFORMED_IRON_BLOCK_WEAKNESS);
             player.sendMessage("§cA source of silver nearby is weakening you...");
         }
     }

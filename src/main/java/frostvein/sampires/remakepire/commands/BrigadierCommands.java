@@ -94,6 +94,12 @@ public class BrigadierCommands {
                         .then(this.buildVampireCooldownSubcommand())
                         .then(this.buildTomeCooldownSubcommand())
 
+                        .then(Commands.literal("make_incurable")
+                                .then(Commands.argument("player", StringArgumentType.word()).suggests((ctx, builder) -> this.suggestOnlinePlayers(builder)).executes((ctx) -> {
+                                    String player = StringArgumentType.getString(ctx, "player");
+                                    return this.executePowCommand(ctx, "admin", "make_incurable", player);
+                                })))
+
                         .then(Commands.literal("break_warning").executes((ctx) -> this.executePowCommand(ctx, "admin", "break_warning")))
 
                         .then(Commands.literal("givetome")
@@ -262,7 +268,7 @@ public class BrigadierCommands {
     }
 
     private LiteralArgumentBuilder<CommandSourceStack> buildConfigSubcommand() {
-        return Commands.literal("config")
+        return Commands.literal("config").executes(ctx -> this.executePowCommand(ctx, "admin", "config"))
                 .then(Commands.literal("help").executes(ctx -> this.executePowCommand(ctx, "admin", "config", "help")))
 
                 .then(Commands.literal("alert_on_quit").executes(ctx -> this.executePowCommand(ctx, "admin", "config", "alert_on_quit"))
@@ -312,9 +318,19 @@ public class BrigadierCommands {
                         .then(Commands.literal("false").executes(ctx -> this.executePowCommand(ctx, "admin", "config", "cure_requires_dead_sire", "false")))
                 )
 
+                .then(Commands.literal("cure_book_spawning").executes(ctx -> this.executePowCommand(ctx, "admin", "config", "cure_book_spawning"))
+                        .then(Commands.literal("true").executes(ctx -> this.executePowCommand(ctx, "admin", "config", "cure_book_spawning", "true")))
+                        .then(Commands.literal("false").executes(ctx -> this.executePowCommand(ctx, "admin", "config", "cure_book_spawning", "false")))
+                )
+
                 .then(Commands.literal("enable_npc_mobs").executes(ctx -> this.executePowCommand(ctx, "admin", "config", "enable_npc_mobs"))
                         .then(Commands.literal("true").executes(ctx -> this.executePowCommand(ctx, "admin", "config", "enable_npc_mobs", "true")))
                         .then(Commands.literal("false").executes(ctx -> this.executePowCommand(ctx, "admin", "config", "enable_npc_mobs", "false")))
+                )
+
+                .then(Commands.literal("breeding_out_of_session").executes(ctx -> this.executePowCommand(ctx, "admin", "config", "breeding_out_of_session"))
+                        .then(Commands.literal("true").executes(ctx -> this.executePowCommand(ctx, "admin", "config", "breeding_out_of_session", "true")))
+                        .then(Commands.literal("false").executes(ctx -> this.executePowCommand(ctx, "admin", "config", "breeding_out_of_session", "false")))
                 )
 
                 .then(Commands.literal("stake_permadeath_stage").executes(ctx -> this.executePowCommand(ctx, "admin", "config", "stake_permadeath_stage"))
@@ -331,6 +347,11 @@ public class BrigadierCommands {
                 .then(Commands.literal("one_human_left").executes((ctx) -> this.executePowCommand(ctx, "admin", "config", "one_human_left"))
                         .then(Commands.literal("true").executes(ctx -> this.executePowCommand(ctx, "admin", "config", "one_human_left", "true")))
                         .then(Commands.literal("false").executes(ctx -> this.executePowCommand(ctx, "admin", "config", "one_human_left", "false")))
+                )
+
+                .then(Commands.literal("border_active").executes((ctx) -> this.executePowCommand(ctx, "admin", "config", "border_active"))
+                        .then(Commands.literal("true").executes(ctx -> this.executePowCommand(ctx, "admin", "config", "border_active", "true")))
+                        .then(Commands.literal("false").executes(ctx -> this.executePowCommand(ctx, "admin", "config", "border_active", "false")))
                 );
     }
 

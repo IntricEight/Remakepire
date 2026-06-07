@@ -37,6 +37,7 @@ public class VampireManager {
     public static final String HUMAN_TAG = "human";
     public static final String VAMPIRE_STAGE1_TAG = "vampire_stage1", VAMPIRE_STAGE2_TAG = "vampire_stage2", VAMPIRE_STAGE3_TAG = "vampire_stage3";
     public static final String PROMOTION_BAN_TAG = "promotion_ban";
+    public static final String CURED_VAMPIRE_TAG = "CuredVampire";
     private final NamespacedKey SUN_WEAKNESS_SPEED_KEY, VAMPIRE_SAFE_FALL_KEY;
 
     /**

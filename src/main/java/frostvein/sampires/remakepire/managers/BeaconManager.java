@@ -1331,7 +1331,7 @@ public class BeaconManager {
     private void createDefaultBeacons() {
         this.beacons.clear();
 
-        World world = this.plugin.getServer().getWorld("world");
+        World world = this.plugin.getServer().getWorld(RemakepirePlugin.WORLD_NAME);
 
         if (world == null) {
             this.plugin.getLogger().severe("World 'world' not found! Cannot create default beacons.");

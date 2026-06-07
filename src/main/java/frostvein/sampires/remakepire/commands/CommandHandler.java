@@ -34,7 +34,6 @@ import frostvein.sampires.remakepire.RemakepirePlugin;
 import frostvein.sampires.remakepire.abilities.tome.TomeAbility;
 import frostvein.sampires.remakepire.beacons.BeaconSite;
 import frostvein.sampires.remakepire.beacons.BeaconSite.BeaconState;
-import frostvein.sampires.remakepire.listeners.CureBookReadingListener;
 import frostvein.sampires.remakepire.managers.BeaconManager;
 import frostvein.sampires.remakepire.managers.ConfigManager;
 import frostvein.sampires.remakepire.managers.SessionManager;
@@ -103,10 +102,12 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
             return this.handleListTomeChestsCommand(sender, args);
         } else if (command.getName().equalsIgnoreCase("resetplayer")) {
             return this.handleResetPlayerCommand(sender, args);
+        } else if (command.getName().equalsIgnoreCase("make_incurable")) {
+            // Make a player impossible to cure
+            return this.makePlayerIncurable(sender, args);
         } else if (command.getName().equalsIgnoreCase("config")) {
             // Allow admins to change some elements within the configuration file without needing to restart the server
             return this.handleConfigCommand(sender, args);
-
         } else {
             return command.getName().equalsIgnoreCase("set_vampire_spawn") ? this.handleSetVampireSpawnCommand(sender, args) : false;
         }
@@ -137,7 +138,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                     target.removeScoreboardTag(tag);
                 }
 
-                target.addScoreboardTag("human");
+                target.addScoreboardTag(VampireManager.HUMAN_TAG);
 
                 try {
                     Scoreboard mainScoreboard = Bukkit.getScoreboardManager().getMainScoreboard();
@@ -214,7 +215,13 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         * * Execute a change command, updating the value inside the config.yml file.
         */
 
-        if (args.length < 2) {
+        if (args.length == 0) {
+            // If the command was sent by a player, open up the configuration control GUI
+            if (sender instanceof Player admin) {
+                this.plugin.getConfigGuiManager().openConfigGUI(admin);
+            }
+
+        } else if (args.length == 1) {
             switch (args[0].toLowerCase()) {
                 case "help":
                     this.sendConfigHelp(sender);
@@ -256,8 +263,16 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                     sender.sendMessage("§6cure_requires_dead_sire§r is currently: " + configManager.doCuresRequireSireDeath());
                     break;
 
+                case "cure_book_spawning":
+                    sender.sendMessage("§6cure_books_enabled§r is currently: " + sessionManager.isCureBooksEnabled());
+                    break;
+
                 case "enable_npc_mobs":
                     sender.sendMessage("§6enable_npc_mobs§r is currently: " + configManager.areNpcMobsEnabled());
+                    break;
+
+                case "breeding_out_of_session":
+                    sender.sendMessage("§6allow-breeding-out-of-session§r is currently: " + configManager.canBreedAnimalsOutOfSession());
                     break;
 
                 case "stake_permadeath_stage":
@@ -270,6 +285,10 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
 
                 case "one_human_left":
                     sender.sendMessage("§6one_human_left§r is currently: " + this.sessionManager.isOneHumanLeftActive());
+                    break;
+
+                case "border_active":
+                    sender.sendMessage("§6border_active§r is currently: " + this.sessionManager.isBorderActive());
                     break;
 
                 default:
@@ -349,9 +368,19 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                     senderMessage += "sire-death-requirement§r set to: " + Boolean.parseBoolean(args[1]);
                     break;
 
+                case "cure_book_spawning":
+                    sessionManager.setCureBooksEnabled(Boolean.parseBoolean(args[1]));
+                    senderMessage += "cure_books_enabled§r set to" + Boolean.parseBoolean(args[1]);
+                    break;
+
                 case "enable_npc_mobs":
                     sessionManager.setNpcSpawningGamerules(Boolean.parseBoolean(args[1]));
                     senderMessage += "enable-npc-mobs§r set to: " + Boolean.parseBoolean(args[1]);
+                    break;
+
+                case "breeding_out_of_session":
+                    configManager.setBreedAnimalsOutOfSession(Boolean.parseBoolean(args[1]));
+                    senderMessage += "allow-breeding-out-of-session§r set to: " + Boolean.parseBoolean(args[1]);
                     break;
 
                 case "stake_permadeath_stage":
@@ -375,9 +404,17 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                     senderMessage += Boolean.parseBoolean(args[1]) ? "\n§aOne Human Left mode ACTIVATED: Humans no longer have beacon cooldowns" : "\n§cOne Human Left mode DEACTIVATED: Normal beacon cooldowns restored for all players";
                     break;
 
+                case "border_active":
+                    this.sessionManager.setBorderActive(Boolean.parseBoolean(args[1]));
+                    senderMessage += "§6border_active§r set to: " +  Boolean.parseBoolean(args[1]);
+                    break;
+
                 default:
                     senderMessage = "§cInvalid configuration. Use \"/pow admin config help\" for a list of config command options.";
             }
+
+            // Update the config GUI screen with the updated config value for the item that was changed.
+            this.plugin.getConfigGuiManager().refreshConfigGuiItem(args[0].toLowerCase());
 
             sender.sendMessage(senderMessage);
         }
@@ -392,6 +429,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
      */
     private void sendConfigHelp(CommandSender sender) {
         sender.sendMessage("§aUsage: /pow admin config <configuration> <new setting>");
+        sender.sendMessage("§oUse §e/pow admin config§r to use the Configuration GUI");
         sender.sendMessage("§e  alert_on_quit [true | false] §7- Alert admins when a player leaves");
         sender.sendMessage("§e  holy_water_cap [true | false] §7- Limit holy water creation");
         sender.sendMessage("§e  tome_cap [true | false] §7- Limit new tome abilities absorbed");
@@ -401,10 +439,13 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         sender.sendMessage("§e  vampire_health_check [ticks] §7- Configure vampire health check interval");
         sender.sendMessage("§e  damage_suppression [percentage] §7- Configure damage suppression");
         sender.sendMessage("§e  cure_requires_dead_sire [true | false] §7- Require a sire's permadeath before their spawn can be cured");
+        sender.sendMessage("§e  cure_book_spawning [true | false] §7- Allow cure books to spawn within tome chests");
         sender.sendMessage("§e  enable_npc_mobs [true | false] §7- Allow NPC mobs to naturally spawn");
+        sender.sendMessage("§e  breeding_out_of_session [true | false] §7- Allow animals to be bred and hatched outside of active session");
         sender.sendMessage("§e  stake_permadeath_stage [1 | 2 | 3] §7- Set stage that vampires can permadie on");
         sender.sendMessage("§e  human_life_limit [true | false] §7- Humans always die on their sixth death");
         sender.sendMessage("§e  one_human_left [true | false] §7- Activate One Human Left mode (no beacon cooldowns)");
+        sender.sendMessage("§e  border_active [true | false] §7- Activate or deactivate the game boundary for trapped players");
     }
 
     private boolean handleSetVampireSpawnCommand(CommandSender sender, String[] args) {
@@ -515,8 +556,8 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
             for(Player player : Bukkit.getOnlinePlayers()) {
                 if (this.plugin.getVampireManager().isHuman(player)) {
                     TomeAbility.clearAllCooldowns(player);
-                    player.removeScoreboardTag("blessing_used_session");
-                    player.removeScoreboardTag("stopthebleeding_used_session");
+                    player.removeScoreboardTag(SessionManager.BLESSING_USED_SESSION);
+                    player.removeScoreboardTag(SessionManager.STOPTHEBLEEDING_USED_SESSION);
                     player.sendMessage("§aYour tome ability cooldowns have been reset by an administrator.");
                     ++humansAffected;
                 }
@@ -527,8 +568,8 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
 
             if (target != null && this.plugin.getVampireManager().isHuman(target)) {
                 TomeAbility.clearAllCooldowns(target);
-                target.removeScoreboardTag("blessing_used_session");
-                target.removeScoreboardTag("stopthebleeding_used_session");
+                target.removeScoreboardTag(SessionManager.BLESSING_USED_SESSION);
+                target.removeScoreboardTag(SessionManager.STOPTHEBLEEDING_USED_SESSION);
                 target.sendMessage("§aYour tome ability cooldowns have been reset by an administrator.");
                 ++humansAffected;
             }
@@ -1286,7 +1327,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                     return true;
                 }
 
-                ItemStack book = this.createCureBook(bookNum);
+                ItemStack book = this.plugin.getCureBookManager().getCureBook(bookNum);
 
                 if (target.getInventory().firstEmpty() == -1) {
                     target.getWorld().dropItemNaturally(target.getLocation(), book);
@@ -1301,47 +1342,6 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                 return true;
             }
         }
-    }
-
-    private ItemStack createCureBook(int bookNum) {
-        ItemStack book = new ItemStack(Material.WRITTEN_BOOK);
-        BookMeta meta = (BookMeta)book.getItemMeta();
-
-        if (meta != null) {
-            switch (bookNum) {
-                case 1:
-                    meta.setTitle("The Remedy 1/3");
-                    meta.setAuthor("§5An ancient scholar");
-                    meta.setPages("§5§lTHE REMEDY§r\n§8Part I of III\n\n§7In the darkest hours, when the cursed blood burns within your veins, know that salvation exists.\n\n§7The ancients spoke of a trinity of knowledge...", "§7...that when combined, can sever the unholy bond between mortal and monster.\n\n§7This is the first piece of that forbidden wisdom.\n\n§8Read on, seeker of the light...");
-                    break;
-                case 2:
-                    meta.setTitle("The Cure 2/3");
-                    meta.setAuthor("§5An ancient scholar");
-                    meta.setPages("§5§lTHE CURE§r\n§8Part II of III\n\n§7The second fragment reveals the nature of the curse itself.\n\n§7Born of darkness, sustained by blood, the vampire's existence is a perversion of nature's order...", "§7...yet within this perversion lies the key to its undoing.\n\n§7Holy water, blessed by the righteous, weakens the bond.\n\n§8Continue your search, truth-seeker...");
-                    break;
-                case 3:
-                    meta.setTitle("The Absolution 3/3");
-                    meta.setAuthor("§5An ancient scholar");
-                    meta.setPages("§5§lTHE ABSOLUTION§r\n§8Part III of III\n\n§7The final piece completes the trinity.\n\n§7With all three fragments of knowledge, the words of power are revealed:\n\n§6voluntate-mea-hoc-nefandum-vinculum-abicio", "§7Stand near a holy beacon, with holy water upon your person, beneath the light of day.\n\n§7Speak the words, and be free of the curse forevermore.\n\n§8May the light guide your path.");
-                    break;
-                case 4:
-                    meta.setTitle("The Retribution 4/3");
-                    meta.setAuthor("§4A vengeful spirit");
-                    meta.setPages("§4§lTHE RETRIBUTION§r\n§8The Fourth Tome\n\n§7This knowledge was never meant to be found.\n\n§7While the trinity speaks of self-salvation, this tome reveals darker words - words of forced redemption...", "§7...or forced damnation.\n\n§4hoc-vinculum-tibi-dirumpo-mala-creatura\n\n§7With these words, you may force the choice upon another creature of the night.\n\n§8Use this power wisely, for it carries great consequence.");
-            }
-
-            List<String> lore = new ArrayList<>();
-            lore.add("§5An ancient tome of forbidden knowledge");
-            lore.add("§7Part " + bookNum + " of the cure series");
-            lore.add("");
-            lore.add("§eRead this book to absorb its wisdom");
-
-            meta.setLore(lore);
-            CureBookReadingListener.markAsAuthenticCureBook(meta, bookNum, this.plugin);
-            book.setItemMeta(meta);
-        }
-
-        return book;
     }
 
     private boolean handleDistributeTomesCommand(CommandSender sender, String[] args) {
@@ -1506,6 +1506,33 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         }
     }
 
+    private boolean makePlayerIncurable(CommandSender sender, String[] args) {
+        if (args.length == 0) {
+            sender.sendMessage("§cUsage: /make_incurable <player>");
+            sender.sendMessage("§7This command makes a vampire impossible to cure, and immune to the force cure.");
+            sender.sendMessage("§7The plugin will treat the player as though their sire was still alive.");
+            sender.sendMessage("§7However, it will still prevent curing even if the config is toggled to ignore whether the vampire's sire is alive.");
+            sender.sendMessage("§7To revert, use /tag to manually remove the CannotCure tag from the player.");
+
+        } else {
+            String target = args[0].toLowerCase();
+            Player targetPlayer = Bukkit.getPlayer(args[0].toLowerCase());
+
+            if (targetPlayer == null) {
+                sender.sendMessage("§cPlayer '" + target + "' not found or not online.");
+                return true;
+            }
+
+            targetPlayer.addScoreboardTag("CannotCure");
+
+            sender.sendMessage("§aMade §e" + targetPlayer.getName() + "§a immune to the cure.");
+            targetPlayer.sendMessage("§aAn admin has made you impossible to cure.");
+            this.plugin.logInfo("Admin " + sender.getName() + " made " + targetPlayer.getName() + "impossible to cure");
+        }
+
+        return true;
+    }
+
     private boolean handleFixAttributesCommand(CommandSender sender, String[] args) {
         if (args.length == 0) {
             if (sender instanceof Player) {
@@ -1516,7 +1543,6 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                 sender.sendMessage("§cUsage: /fixattributes <player | all>");
             }
 
-            return true;
         } else {
             String target = args[0].toLowerCase();
 
@@ -1543,9 +1569,9 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                 sender.sendMessage("§aAggressively cleaned attribute modifiers for §e" + targetPlayer.getName() + "§a.");
                 this.plugin.logInfo("Admin " + sender.getName() + " fixed attributes for " + targetPlayer.getName());
             }
-
-            return true;
         }
+
+        return true;
     }
 
     private boolean handleRemoveEndermenCommand(CommandSender sender, String[] args) {
@@ -1669,7 +1695,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
 
             } else if (command.getName().equalsIgnoreCase("config")) {
                 if (args.length == 1) {
-                    completions.addAll(Arrays.asList("help", "alert_on_quit", "holy_water_cap", "tome_cap", "vampire_level_cap", "new_vampire_tracking", "allow_vampire_mounts", "vampire_health_check", "damage_suppression", "cure_requires_dead_sire", "enable_npc_mobs", "stake_permadeath_stage", "human_life_limit", "one_human_left"));
+                    completions.addAll(Arrays.asList("help", "alert_on_quit", "holy_water_cap", "tome_cap", "vampire_level_cap", "new_vampire_tracking", "allow_vampire_mounts", "vampire_health_check", "damage_suppression", "cure_requires_dead_sire", "cure_book_spawning", "enable_npc_mobs", "breeding_out_of_session", "stake_permadeath_stage", "human_life_limit", "one_human_left", "border_active"));
 
                 } else if (args.length == 2) {
                     switch (args[0]) {
@@ -1738,7 +1764,13 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                 if (args.length == 1) {
                     completions.add("all");
 
-                    for(Player player : Bukkit.getOnlinePlayers()) {
+                    for (Player player : Bukkit.getOnlinePlayers()) {
+                        completions.add(player.getName());
+                    }
+                }
+            } else if (command.getName().equalsIgnoreCase("make_incurable")) {
+                if (args.length == 1) {
+                    for (Player player : Bukkit.getOnlinePlayers()) {
                         completions.add(player.getName());
                     }
                 }

@@ -10,9 +10,9 @@ import java.util.Map;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
-import frostvein.sampires.remakepire.RemakepirePlugin;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import frostvein.sampires.remakepire.RemakepirePlugin;
 
 public class VampireSireManager {
     private final RemakepirePlugin plugin;
@@ -55,8 +55,13 @@ public class VampireSireManager {
         String sireName = this.getSire(vampire);
 
         if (sireName == null) {
+            // If the sire cannot be found, act as though they are dead
             return true;
+        } else if (vampire.getScoreboardTags().contains("CannotCure")) {
+            // If the player is impossible to cure, act as though their sire is alive
+            return false;
         } else {
+            // Only act like the sire is alive if they are online and in an activate game mode
             Player sire = Bukkit.getPlayer(sireName);
 
             if (sire == null) {
@@ -74,7 +79,12 @@ public class VampireSireManager {
      * @return {@code true} if the vampire is curable.
      */
     public boolean canBeCured(Player vampire) {
-        // Allow the cure if either the sire death requirement is disabled, or the vampire's sire is dead
+        // Determine if the player is allowed to be cured
+        if (vampire.getScoreboardTags().contains("CannotCure")) {
+            return false;
+        }
+
+        // Allow the cure if either the sire death requirement is disabled or the vampire's sire is dead
         return !this.plugin.getConfigManager().doCuresRequireSireDeath() || this.isSireDead(vampire);
     }
 
@@ -89,6 +99,9 @@ public class VampireSireManager {
 
         if (sireName == null) {
             return "No sire assigned (can cure freely)";
+        } else if (vampire.getScoreboardTags().contains("CannotCure")) {
+            // If the player is impossible to cure, act as though their sire is alive
+            return "No sire assigned, but the player is prevented from being cured.";
         } else {
             Player sire = Bukkit.getPlayer(sireName);
 
@@ -151,7 +164,7 @@ public class VampireSireManager {
     private void loadSireMappings() {
         if (!this.dataFile.exists()) {
             this.plugin.logInfo("VampireSireManager: No existing sire mappings file found, starting fresh.");
-            this.plugin.logInfo("VampireSireManager: Edit plugins/VampireSMP/sire_mappings.json to add sire relationships.");
+            this.plugin.logInfo("VampireSireManager: Edit plugins/Remakepire/sire_mappings.json to add sire relationships.");
             this.plugin.logInfo("VampireSireManager: Format: {\"Fledgling_Name\": \"Sire_Name\"}");
 
             Map<String, String> exampleMap = new HashMap<>();

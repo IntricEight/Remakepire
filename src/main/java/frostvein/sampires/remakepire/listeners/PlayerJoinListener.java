@@ -1,6 +1,8 @@
 package frostvein.sampires.remakepire.listeners;
 
 import java.util.List;
+
+import frostvein.sampires.remakepire.managers.SessionManager;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -48,7 +50,7 @@ public class PlayerJoinListener implements Listener {
         this.beetrootManager.restorePlayerState(player);
 
         this.plugin.getBeaconMajorityManager().applyBonusesToPlayer(player);
-        if (this.plugin.getVampireTexturePackManager() != null && (this.vampireManager.isVampire(player) || player.getScoreboardTags().contains("CuredVampire"))) {
+        if (this.plugin.getVampireTexturePackManager() != null && (this.vampireManager.isVampire(player) || player.getScoreboardTags().contains(VampireManager.CURED_VAMPIRE_TAG))) {
             this.plugin.getVampireTexturePackManager().onVampireLogin(player);
         }
 
@@ -62,8 +64,8 @@ public class PlayerJoinListener implements Listener {
         if (!this.plugin.getSessionManager().playerReturningToGame(player)) {
             player.sendMessage("§cA new game has been initialized since you last played. Resetting your stats accordingly.");
             this.plugin.getSessionManager().resetPlayer(player);
-            this.plugin.getSessionManager().getGameIDObjective().getScore(player.getName()).setScore(this.plugin.getSessionManager().getGameIDObjective().getScore("game_id_holder").getScore());
-            this.plugin.getSessionManager().getSessionIDObjective().getScore(player.getName()).setScore(this.plugin.getSessionManager().getSessionIDObjective().getScore("session_id_holder").getScore());
+            this.plugin.getSessionManager().getGameIDObjective().getScore(player.getName()).setScore(this.plugin.getSessionManager().getGameIDObjective().getScore(SessionManager.GAME_ID_HOLDER).getScore());
+            this.plugin.getSessionManager().getSessionIDObjective().getScore(player.getName()).setScore(this.plugin.getSessionManager().getSessionIDObjective().getScore(SessionManager.SESSION_ID_HOLDER).getScore());
             this.plugin.getVampireManager().clearPromotionBan(player);
 
         } else if (this.plugin.getSessionManager().playerReturningToSession(player)) {

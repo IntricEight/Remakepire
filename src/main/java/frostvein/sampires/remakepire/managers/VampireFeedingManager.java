@@ -266,7 +266,7 @@ public class VampireFeedingManager implements Listener {
 
             this.cancelFeedingSession(session);
 
-        } else if (target.getScoreboardTags().contains("CuredVampire")) {
+        } else if (target.getScoreboardTags().contains(VampireManager.CURED_VAMPIRE_TAG)) {
             vampire.sendMessage("§4You taste the blood of " + target.getName() + ", but it rejects your curse...");
             vampire.sendMessage("§4They have been cleansed by holy power - their soul slips beyond your grasp, lost forever.");
             target.sendMessage("§7The darkness reaches for you, but the holy blessing protects your soul...");

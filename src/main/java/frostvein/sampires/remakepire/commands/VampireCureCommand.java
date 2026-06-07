@@ -108,7 +108,7 @@ public class VampireCureCommand implements CommandExecutor {
 
         this.vampireManager.setPlayerAsHuman(player);
         player.getActivePotionEffects().forEach((effect) -> player.removePotionEffect(effect.getType()));
-        player.addScoreboardTag("CuredVampire");
+        player.addScoreboardTag(VampireManager.CURED_VAMPIRE_TAG);
 
         // Check for and apply the effects of beacon control
         if (this.plugin.getSessionManager().isHumansFinalStandActive()) {
