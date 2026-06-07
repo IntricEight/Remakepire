@@ -1360,9 +1360,21 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
 //                    meta.setPages("§5§lTHE CURE§r\n§8Part II of III\n\n§7The second fragment reveals the nature of the curse itself.\n\n§7Born of darkness, sustained by blood, the vampire's existence is a perversion of nature's order...", "§7...yet within this perversion lies the key to its undoing.\n\n§7Holy water, blessed by the righteous, weakens the bond.\n\n§8Continue your search, truth-seeker...");
                     break;
                 case 3:
-                    meta.setTitle("The Absolution 3/3");
-                    meta.setAuthor("§5An ancient scholar");
-                    meta.setPages("§5§lTHE ABSOLUTION§r\n§8Part III of III\n\n§7The final piece completes the trinity.\n\n§7With all three fragments of knowledge, the words of power are revealed:\n\n§6voluntate-mea-hoc-nefandum-vinculum-abicio", "§7Stand near a holy beacon, with holy water upon your person, beneath the light of day.\n\n§7Speak the words, and be free of the curse forevermore.\n\n§8May the light guide your path.");
+                    meta.setTitle("Reversing Vampirism");
+                    meta.setAuthor("§5Prior Sala Negahban");
+                    meta.setPages("§4§lReversing Vampirism§r§l\n" +
+                                "§r§oBy Prior Sala Negahban\n\n" +
+                                "§rSince their discovery by the church fathers in the 2nd century AD, the Vampire has been a perverse fascination of a subsect of clergymen. These clergymen can be",
+                                "divided into two camps: those who seek to eradicate the Vampire entirely, and those who seek to \"fix\" or \"cure\" them. While this has been the status quo for the last sixteen centuries, I believe I have discovered the foundations, at least, for a real cure for vampirism, a way to",
+                                "reverse their condition permanently. This has only become possible using recent developments in medical technology. As a scholar of occultism, medical science, and theology, I feel I am uniquely qualified to determine the exact recipe for this cure. The cure is to be delivered via",
+                                "injection, which is to say, via needle into the blood stream, as demonstrated by Francis Rynd. In this needle. lies our more occult and theological ingredients. The mixture must be of both Holy Water, and the blood of the one who turned the individual (archaically referred to as",
+                                "\"The Sire\") to be cured, referred to. While I have yet to find a device capable of mixing these reagents such that they do not react to one another, if such a thing should exist, I am certain that simply injecting a Vampire with this solution would reverse their Vampirism.\n",
+                                "§8§o[A note is scrawled in the margin]\n§r§8§oPerhaps we could use the Vortex Mixer we have for creating chemical mixtures? Don't think I have a Vampire to test it on though. At least not a willing one.§r§o\n\n" +
+                                "§rIt is worth remembering, however, that it is deeply",
+                                "unsafe to inject an individual unwillingly. Only those with the proper knowledge and training should attempt to forcefully cure someone using this method. Otherwise you risk hurting or even killing the vampire via medical malpractice.",
+                                "§8§o[Another note is scrawled in the margin]\n" +
+                                "§8§oI believe I left a book on the discovery of injection in the chamber below the witches hut.");
+//                    meta.setPages("§5§lTHE ABSOLUTION§r\n§8Part III of III\n\n§7The final piece completes the trinity.\n\n§7With all three fragments of knowledge, the words of power are revealed:\n\n§6voluntate-mea-hoc-nefandum-vinculum-abicio", "§7Stand near a holy beacon, with holy water upon your person, beneath the light of day.\n\n§7Speak the words, and be free of the curse forevermore.\n\n§8May the light guide your path.");
                     break;
                 case 4:
                     meta.setTitle("The Retribution 4/3");

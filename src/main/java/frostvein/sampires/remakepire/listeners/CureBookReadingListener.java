@@ -96,14 +96,14 @@ public class CureBookReadingListener implements Listener {
                 case BOOK_NUM_ABSOLUTION:
                     if (!player.getScoreboardTags().contains(TAG_CURE_BOOK_3)) {
                         tagToAdd = TAG_CURE_BOOK_3;
-                        bookName = "The Absolution";
+                        bookName = "Reversing Vampirism";
                         isNewTag = true;
                     }
 
                     break;
                 case BOOK_NUM_RETRIBUTION:
                     if (!hasReadAllCureBooks(player)) {
-                        player.sendMessage("§8§o[The words within this tome are beyond your comprehension... Perhaps you must first complete the Trinity of Restoration.]");
+                        player.sendMessage("§8§o[The words within this tome are beyond your comprehension... Perhaps other books hold the key to deciphering this journal]");
                         return false;
                     }
 
