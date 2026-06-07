@@ -212,7 +212,10 @@ holy-water:
 # CURE SYSTEM
 # ============================================================================
 cure:
-  cure-distance: 25
+  # Maximum distance (in blocks) a player and their target may be from the
+  # nearest holy beacon when performing /vampirecure or the forced cure command.
+  # Default: 25.0
+  cure-distance: 25.0
 
 # ============================================================================
 # PASSIVE MOB SPAWNING SYSTEM

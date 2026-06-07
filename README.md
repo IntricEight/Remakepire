@@ -10,4 +10,4 @@ If you would like to add a new feature to the plugin, create a branch off of **M
 This branch is to remain as close a copy to the original plugin as possible; no optimizations or refinements may be added that change the file or function structure of the code.<br/>
 The branch **Master** is where optimizations and program improvements to the basic features will be made. If you aren't interested in using this preserved version, then begin your plugin modifications from there instead.
 
-##### The current VSMP Plugin version updated: 1.0.6
+##### The current VSMP Plugin version updated: 1.0.7

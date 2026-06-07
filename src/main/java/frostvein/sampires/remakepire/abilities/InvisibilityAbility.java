@@ -32,7 +32,11 @@ public class InvisibilityAbility extends VampireAbility {
     }
 
     public boolean execute(Player player, VampireManager vampireManager, RemakepirePlugin plugin) {
-        if (player.hasPotionEffect(PotionEffectType.INVISIBILITY)) {
+        if (plugin.getBatTransformationManager().isInBatForm(player)) {
+            // Stop the player from using the ability while in bat form
+            return false;
+        } else if (player.hasPotionEffect(PotionEffectType.INVISIBILITY)) {
+            // Cancel the ability if it is used again while active
             player.removePotionEffect(PotionEffectType.INVISIBILITY);
             plugin.getVampireAbilityManager().clearInvisibilityAttackCount(player);
 
