@@ -146,7 +146,7 @@ public class ThirstManager {
     private void saveImmunityData() {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(this.immunityFile))) {
             for(Map.Entry<UUID, Integer> entry : this.immunityTimers.entrySet()) {
-                writer.write((entry.getKey()).toString() + ":" + String.valueOf(entry.getValue()));
+                writer.write((entry.getKey()).toString() + ":" + entry.getValue());
                 writer.newLine();
             }
         } catch (IOException e) {

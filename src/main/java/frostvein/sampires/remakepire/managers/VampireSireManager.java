@@ -109,7 +109,7 @@ public class VampireSireManager {
                 return "Sire '" + sireName + "' is OFFLINE (can cure)";
             } else {
                 GameMode sireGameMode = sire.getGameMode();
-                return sireGameMode == GameMode.SPECTATOR ? "Sire '" + sireName + "' is in SPECTATOR mode (can cure)" : "Sire '" + sireName + "' is ALIVE in " + String.valueOf(sireGameMode) + " mode (CANNOT cure)";
+                return sireGameMode == GameMode.SPECTATOR ? "Sire '" + sireName + "' is in SPECTATOR mode (can cure)" : "Sire '" + sireName + "' is ALIVE in " + sireGameMode + " mode (CANNOT cure)";
             }
         }
     }

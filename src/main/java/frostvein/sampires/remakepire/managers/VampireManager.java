@@ -34,7 +34,7 @@ public class VampireManager {
     private final Map<UUID, Double> lungingPlayers = new HashMap<>();
     private final Map<UUID, Integer> stageCaps = new HashMap<>();
     private static final long LEVEL_CHANGE_COOLDOWN = 5000L, LEVEL_CHANGE_TIMEOUT = 10000L, PROTECTION_DURATION = 10000L;
-    public static final String HUMAN_TAG = "human";
+    public static final String HUMAN_TAG = "human", VAMPIRE_TAG = "vampire";
     public static final String VAMPIRE_STAGE1_TAG = "vampire_stage1", VAMPIRE_STAGE2_TAG = "vampire_stage2", VAMPIRE_STAGE3_TAG = "vampire_stage3";
     public static final String PROMOTION_BAN_TAG = "promotion_ban";
     public static final String CURED_VAMPIRE_TAG = "CuredVampire";
@@ -116,7 +116,6 @@ public class VampireManager {
     public void setPlayerAsHuman(Player player) {
         this.removeAllVampireTags(player);
 
-        player.removeScoreboardTag("vampire");
         player.addScoreboardTag(HUMAN_TAG);
         this.addPlayerToCorrectTeam(player);
         player.setInvulnerable(false);
@@ -244,7 +243,9 @@ public class VampireManager {
 
         try {
             this.removeAllVampireTags(player);
-            player.addScoreboardTag("vampire");
+            player.removePotionEffect(PotionEffectType.DARKNESS);
+            player.addScoreboardTag(VAMPIRE_TAG);
+
             if (this.plugin.getTomeManager() != null) {
                 this.plugin.getTomeManager().removeAllAbilities(player);
             }
@@ -332,9 +333,9 @@ public class VampireManager {
     public void performVampireTurning(Player target, Player turner) {
         this.setPlayerAsVampire(target, 1);
 
-        if (!target.getScoreboardTags().contains("vampire")) {
-            target.addScoreboardTag("vampire");
-            this.plugin.getLogger().warning("Had to manually add 'vampire' tag during turning for " + target.getName());
+        if (!target.getScoreboardTags().contains(VAMPIRE_TAG)) {
+            target.addScoreboardTag(VAMPIRE_TAG);
+            this.plugin.getLogger().warning("Had to manually add '" + VAMPIRE_TAG + "' tag during turning for " + target.getName());
         }
 
         if (turner != null && this.plugin.getSireManager() != null) {
@@ -486,6 +487,7 @@ public class VampireManager {
 
         this.plugin.getServer().getScheduler().runTaskLater(this.plugin, () -> {
             player.setGameMode(GameMode.SPECTATOR);
+            player.addScoreboardTag(InitGameManager.PERMAKILLED_TAG);
 
             player.sendTitle("§4§lFINAL DEATH", "§7Your journey has ended", 10, 100, 30);
             player.sendMessage("");
@@ -702,10 +704,10 @@ public class VampireManager {
      * @param player the player being checked.
      */
     public void ensureVampireTagConsistency(Player player) {
-        if (this.isVampire(player) && !player.getScoreboardTags().contains("vampire")) {
-            player.addScoreboardTag("vampire");
-        } else if (!this.isVampire(player) && player.getScoreboardTags().contains("vampire")) {
-            player.removeScoreboardTag("vampire");
+        if (this.isVampire(player) && !player.getScoreboardTags().contains(VAMPIRE_TAG)) {
+            player.addScoreboardTag(VAMPIRE_TAG);
+        } else if (!this.isVampire(player) && player.getScoreboardTags().contains(VAMPIRE_TAG)) {
+            player.removeScoreboardTag(VAMPIRE_TAG);
         }
     }
 
@@ -737,8 +739,8 @@ public class VampireManager {
             this.setPlayerAsHuman(player);
         }
 
-        if (this.isVampire(player) && !player.getScoreboardTags().contains("vampire")) {
-            player.addScoreboardTag("vampire");
+        if (this.isVampire(player) && !player.getScoreboardTags().contains(VAMPIRE_TAG)) {
+            player.addScoreboardTag(VAMPIRE_TAG);
         }
     }
 
@@ -749,6 +751,7 @@ public class VampireManager {
      */
     private void removeAllVampireTags(Player player) {
         player.removeScoreboardTag(HUMAN_TAG);
+        player.removeScoreboardTag(VAMPIRE_TAG);
         player.removeScoreboardTag(VAMPIRE_STAGE1_TAG);
         player.removeScoreboardTag(VAMPIRE_STAGE2_TAG);
         player.removeScoreboardTag(VAMPIRE_STAGE3_TAG);
@@ -861,7 +864,7 @@ public class VampireManager {
         if (startTime == null) {
             return false;
         } else if (System.currentTimeMillis() - startTime > LEVEL_CHANGE_TIMEOUT) {
-            this.plugin.getLogger().warning("Level change timed out for player " + String.valueOf(playerId) + ", removing lock");
+            this.plugin.getLogger().warning("Level change timed out for player " + playerId + ", removing lock");
             this.levelChangeInProgress.remove(playerId);
             return false;
 

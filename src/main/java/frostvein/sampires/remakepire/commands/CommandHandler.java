@@ -191,7 +191,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
 
                 sender.sendMessage("§aPlayer " + target.getName() + " has been fully reset to a fresh state.");
                 target.sendMessage("§aYou have been reset to a fresh state by an administrator.");
-                target.sendMessage("§All vampire status, abilities, cooldowns, and death count have been cleared." + (clearInventory ? " Your inventory has also been cleared." : ""));
+                target.sendMessage("§7All vampire status, abilities, cooldowns, and death count have been cleared." + (clearInventory ? " Your inventory has also been cleared." : ""));
                 this.plugin.logInfo("Admin " + sender.getName() + " reset player " + target.getName() + " to fresh state");
 
                 return true;

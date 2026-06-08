@@ -298,11 +298,11 @@ public class DeathHandler implements Listener {
             killedWithWoodenWeapon = lastWeapon == Material.WOODEN_SWORD || lastWeapon == Material.WOODEN_AXE;
 
             if (killedWithWoodenWeapon) {
-                this.plugin.logInfo("DEBUG: Using tracked last weapon: " + String.valueOf(lastWeapon) + " (current weapon broke/dropped)");
+                this.plugin.logInfo("DEBUG: Using tracked last weapon: " + lastWeapon + " (current weapon broke/dropped)");
             }
         }
 
-        this.plugin.logInfo("DEBUG: PvP Death - Victim: " + victim.getName() + ", CurrentWeapon: " + String.valueOf(weapon != null ? weapon.getType() : "null") + ", LastTrackedWeapon: " + String.valueOf(lastWeapon) + ", IsWoodenWeapon: " + killedWithWoodenWeapon + ", IsVampire: " + this.vampireManager.isVampire(victim) + ", IsStage1: " + this.vampireManager.isVampireStage1(victim) + ", VictimTags: " + String.valueOf(victim.getScoreboardTags()));
+        this.plugin.logInfo("DEBUG: PvP Death - Victim: " + victim.getName() + ", CurrentWeapon: " + (weapon != null ? weapon.getType() : "null") + ", LastTrackedWeapon: " + lastWeapon + ", IsWoodenWeapon: " + killedWithWoodenWeapon + ", IsVampire: " + this.vampireManager.isVampire(victim) + ", IsStage1: " + this.vampireManager.isVampireStage1(victim) + ", VictimTags: " + victim.getScoreboardTags());
         this.lastWeaponUsed.remove(victim.getUniqueId());
         this.woodenStakeKills.remove(victim.getUniqueId());
 
@@ -362,7 +362,7 @@ public class DeathHandler implements Listener {
         } else {
             Material type = item.getType();
             boolean isWooden = type == Material.WOODEN_SWORD || type == Material.WOODEN_AXE;
-            this.plugin.logInfo("DEBUG: Weapon type: " + String.valueOf(type) + ", Is wooden: " + isWooden);
+            this.plugin.logInfo("DEBUG: Weapon type: " + type + ", Is wooden: " + isWooden);
             return isWooden;
         }
     }

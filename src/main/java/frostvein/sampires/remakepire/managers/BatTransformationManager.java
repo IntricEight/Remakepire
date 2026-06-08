@@ -394,7 +394,7 @@ public class BatTransformationManager {
                 for(ItemStack piece : currentArmor) {
                     if (piece != null && piece.getType() != Material.AIR) {
                         player.getWorld().dropItemNaturally(dropLocation, piece);
-                        this.plugin.getLogger().warning("Dropped armor piece: " + String.valueOf(piece.getType()));
+                        this.plugin.getLogger().warning("Dropped armor piece: " + piece.getType());
                     }
                 }
 

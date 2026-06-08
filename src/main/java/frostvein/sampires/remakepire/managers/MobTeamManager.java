@@ -89,7 +89,7 @@ public class MobTeamManager {
                             ++mobsAdded;
 
                         } catch (Exception e) {
-                            this.plugin.getLogger().warning("Failed to add mob " + String.valueOf(entity.getType()) + " to VampireCastTeam: " + e.getMessage());
+                            this.plugin.getLogger().warning("Failed to add mob " + entity.getType() + " to VampireCastTeam: " + e.getMessage());
                         }
                     }
                 }

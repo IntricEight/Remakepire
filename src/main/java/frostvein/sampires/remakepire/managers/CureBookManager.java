@@ -137,15 +137,15 @@ public class CureBookManager {
             switch (bookNumber) {
                 case 1:
                     pages.add("§5§lTHE REMEDY§r\n§8Part I of III\n\n§7In the darkest hours, when the cursed blood burns within your veins, know that salvation exists.\n\n§7The ancients spoke of a trinity of knowledge...");
-                    pages.add("§7...that when combined, can sever the unholy bond between mortal and monster.\n\n§7This is the first piece of that forbidden wisdom.\n\n§8Read on, seeker of the light...");
+                    pages.add("§7...that when combined, can sever the unholy bond between mortal and monster.\n\n§7This first piece reveals the place of redemption: beneath the light of a holy beacon, where divine grace gathers.\n\n§8Read on, seeker of the light...");
                     break;
                 case 2:
                     pages.add("§5§lTHE CURE§r\n§8Part II of III\n\n§7The second fragment reveals the nature of the curse itself.\n\n§7Born of darkness, sustained by blood, the vampire's existence is a perversion of nature's order...");
-                    pages.add("§7...yet within this perversion lies the key to its undoing.\n\n§7Holy water, blessed by the righteous, weakens the bond.\n\n§8Continue your search, truth-seeker...");
+                    pages.add("§7...yet within this perversion lies the key to its undoing.\n\n§7Holy water, blessed by the righteous, weakens the bond. Yet the bloodline binds; Your sire must lie dead for the cure to hold.\n\n§8Continue your search, truth-seeker...");
                     break;
                 case 3:
                     pages.add("§5§lTHE ABSOLUTION§r\n§8Part III of III\n\n§7The final piece completes the trinity.\n\n§7With all three fragments of knowledge, the words of power are revealed:\n\n§6voluntate-mea-hoc-nefandum-vinculum-abicio");
-                    pages.add("§7Stand near a holy beacon, with holy water upon your person, beneath the light of day.\n\n§7Speak the words, and be free of the curse forevermore.\n\n§8May the light guide your path.");
+                    pages.add("§7These words have no power in shadow — only beneath the light of day may they bind.\n\n§7Recall what the other tomes have taught you, gather what is needed, and speak.\n\n§8May the light guide your path.");
                     break;
                 case 4:
                     pages.add("§4§lTHE RETRIBUTION§r\n§8The Fourth Tome\n\n§7This knowledge was never meant to be found.\n\n§7While the trinity speaks of self-salvation, this tome reveals darker words - words of forced redemption...");

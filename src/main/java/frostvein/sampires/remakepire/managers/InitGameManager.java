@@ -42,6 +42,7 @@ public class InitGameManager {
     private final Map<UUID, InitData> adminData = new HashMap<>();
     private final Map<UUID, Boolean> guiRefreshInProgress = new HashMap<>();
     private static final int PLAYERS_PER_PAGE = 45, INVENTORY_SIZE = 54;
+    public static final String PERMAKILLED_TAG = "perma_dead";
 
     /**
      * Create an instance of the Initialize Game manager.
@@ -481,6 +482,7 @@ public class InitGameManager {
 
                 Collection<? extends Player> onlinePlayers = Bukkit.getOnlinePlayers();
 
+                // Clear all tags from all online players
                 for(Player player : onlinePlayers) {
                     for(String tag : new HashSet<>(player.getScoreboardTags())) {
                         player.removeScoreboardTag(tag);

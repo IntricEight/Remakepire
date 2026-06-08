@@ -85,38 +85,38 @@ public class TomeDistributionManager {
      * Distribute a random (weighted) tome, cure, or enchanted book to each tome location.
      */
     public void distributeTomes() {
-        if (this.plugin.getSessionManager().getSessionState() != SessionManager.IN_SESSION) {
-            this.plugin.getLogger().warning("TomeDistributionManager: Tomes may not be distributed outside of session");
-        } else if (this.tomeLocations.isEmpty()) {
-            this.plugin.getLogger().warning("TomeDistributionManager: No tome locations available for distribution");
-        } else {
-            this.clearAllTomeChests();
-            List<Location> tomeSelectedLocations = this.selectRandomLocations();
+        if (this.plugin.getSessionManager().getSessionState() == SessionManager.IN_SESSION) {
+            if (this.tomeLocations.isEmpty()) {
+                this.plugin.getLogger().warning("TomeDistributionManager: No tome locations available for distribution");
+            } else {
+                this.clearAllTomeChests();
+                List<Location> tomeSelectedLocations = this.selectRandomLocations();
 
-            for(Location location : tomeSelectedLocations) {
-                String randomTome = this.getRandomTomeType();
-                this.distributeTomeToLocation(location, randomTome);
+                for (Location location : tomeSelectedLocations) {
+                    String randomTome = this.getRandomTomeType();
+                    this.distributeTomeToLocation(location, randomTome);
+                }
+
+                // Spawn enchanted books at any location where a tome book was not spawned
+                List<Location> emptyLocations = new ArrayList<>(this.tomeLocations);
+                emptyLocations.removeAll(tomeSelectedLocations);
+
+                for (Location location : emptyLocations) {
+                    this.addEnchantmentBookToLocation(location);
+                }
+
+                boolean cureBooksEnabled = this.plugin.getSessionManager().isCureBooksEnabled();
+                double cureBooksSpawnChance = this.configManager.getCureBooksSpawnChance();
+                boolean cureBookAdded = false;
+
+                if (cureBooksEnabled && this.random.nextDouble() < cureBooksSpawnChance) {
+                    Location randomLocation = this.tomeLocations.get(this.random.nextInt(this.tomeLocations.size()));
+                    this.replaceCureBookAtLocation(randomLocation);
+                    cureBookAdded = true;
+                }
+
+                this.plugin.logInfo("TomeDistributionManager: Distributed " + tomeSelectedLocations.size() + " tomes, " + emptyLocations.size() + " enchantment books" + (cureBookAdded ? ", and 1 cure book (replaced a chest)" : "") + " to chest locations");
             }
-
-            // Spawn enchanted books at any location where a tome book was not spawned
-            List<Location> emptyLocations = new ArrayList<>(this.tomeLocations);
-            emptyLocations.removeAll(tomeSelectedLocations);
-
-            for(Location location : emptyLocations) {
-                this.addEnchantmentBookToLocation(location);
-            }
-
-            boolean cureBooksEnabled = this.plugin.getSessionManager().isCureBooksEnabled();
-            double cureBooksSpawnChance = this.configManager.getCureBooksSpawnChance();
-            boolean cureBookAdded = false;
-
-            if (cureBooksEnabled && this.random.nextDouble() < cureBooksSpawnChance) {
-                Location randomLocation = this.tomeLocations.get(this.random.nextInt(this.tomeLocations.size()));
-                this.replaceCureBookAtLocation(randomLocation);
-                cureBookAdded = true;
-            }
-
-            this.plugin.logInfo("TomeDistributionManager: Distributed " + tomeSelectedLocations.size() + " tomes, " + emptyLocations.size() + " enchantment books" + (cureBookAdded ? ", and 1 cure book (replaced a chest)" : "") + " to chest locations");
         }
     }
 

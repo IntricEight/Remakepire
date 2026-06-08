@@ -706,7 +706,12 @@ public class SessionManager {
      * @param player the player being reset.
      */
     public void resetPlayer(Player player) {
-        if (player.getGameMode() == GameMode.SPECTATOR) {
+        // Ignore players who have been permanently killed
+        if (player.getScoreboardTags().contains("perma_dead")) {
+            return;
+        }
+
+        if (player.getGameMode() == GameMode.SPECTATOR && !player.getScoreboardTags().contains("perma_dead")) {
             player.setGameMode(GameMode.SURVIVAL);
             this.plugin.logInfo("Reset " + player.getName() + " from spectator to survival mode (new game/session)");
         }
@@ -731,11 +736,10 @@ public class SessionManager {
     public int getSessionState() {
         if (this.sessionObjective == null) {
             return BEFORE_SESSION;
-
-        } else {
-            Score sessionScore = this.sessionObjective.getScore("state");
-            return sessionScore.getScore();
         }
+
+        Score sessionScore = this.sessionObjective.getScore("state");
+        return sessionScore.getScore();
     }
 
     /**
