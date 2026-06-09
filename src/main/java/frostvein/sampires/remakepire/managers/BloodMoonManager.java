@@ -106,8 +106,8 @@ public class BloodMoonManager {
                     if (this.plugin.getEffectManager().canPlayerSeeSky(player)) {
                         player.addPotionEffect(new PotionEffect(PotionEffectType.UNLUCK, 240, 0, false, false), false);
 
-                        if (!player.getScoreboardTags().contains("informed_blood_moon")) {
-                            player.addScoreboardTag("informed_blood_moon");
+                        if (!player.getScoreboardTags().contains(SessionManager.INFORMED_BLOOD_MOON)) {
+                            player.addScoreboardTag(SessionManager.INFORMED_BLOOD_MOON);
                             player.playSound(player, Sound.AMBIENT_NETHER_WASTES_MOOD, 1.0F, 1.0F);
                             player.sendMessage("§4You feel the Blood Moon's power coursing through your veins...");
                         }

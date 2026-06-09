@@ -23,13 +23,12 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import frostvein.sampires.remakepire.RemakepirePlugin;
-import frostvein.sampires.remakepire.managers.SessionManager;
 
 public class InteractionListener implements Listener {
     private final RemakepirePlugin plugin;
-    private final SessionManager sessionManager;
     private static final List<Material> FEEDING_ITEMS = Arrays.asList(Material.WHEAT, Material.CARROT, Material.POTATO, Material.BEETROOT, Material.WHEAT_SEEDS, Material.MELON_SEEDS, Material.PUMPKIN_SEEDS, Material.BEETROOT_SEEDS, Material.SWEET_BERRIES, Material.APPLE, Material.GOLDEN_APPLE, Material.GOLDEN_CARROT, Material.BREAD, Material.COOKIE, Material.MELON_SLICE, Material.DRIED_KELP, Material.HAY_BLOCK, Material.SUGAR);;
 
     /**
@@ -39,7 +38,6 @@ public class InteractionListener implements Listener {
      */
     public InteractionListener(RemakepirePlugin plugin) {
         this.plugin = plugin;
-        this.sessionManager = plugin.getSessionManager();
     }
 
     /**
@@ -53,25 +51,17 @@ public class InteractionListener implements Listener {
         Player player = event.getPlayer();
         Entity targetEntity = event.getRightClicked();
 
-        ItemStack itemInHand = player.getInventory().getItemInMainHand();
-        ItemStack offHand = player.getInventory().getItemInOffHand();
-
-        boolean hasFoodInMainHand = itemInHand != null && itemInHand.getType() != Material.AIR && FEEDING_ITEMS.contains(itemInHand.getType());
-        boolean hasFoodInOffHand = offHand != null && offHand.getType() != Material.AIR && FEEDING_ITEMS.contains(offHand.getType());
-
-        if (!this.plugin.getConfigManager().canBreedAnimalsOutOfSession() && !this.plugin.getSessionManager().isSessionActive()) {
-            event.setCancelled(true);
-            player.sendMessage("§cYou cannot interact with animals while the session is not active.");
-
-        } else if (this.plugin.getVampireManager().isVampire(player)) {
+        if (this.plugin.getVampireManager().isVampire(player)) {
             if (this.plugin.getBatTransformationManager().isInBatForm(player)) {
                 event.setCancelled(true);
                 player.sendMessage("§cYou cannot interact with anything while you are in your bat form.");
 
-            } else if (hasFoodInMainHand || hasFoodInOffHand) {
-                if (!(targetEntity instanceof Player)) {
-                    if (this.isFeedableMob(targetEntity)) {
-                        this.handleVampireFeedingAttempt(player, targetEntity, itemInHand, event);
+            } else if (!(targetEntity instanceof Player)) {
+                if (this.isFeedableMob(targetEntity)) {
+                    ItemStack handItem = event.getHand() == EquipmentSlot.OFF_HAND ? player.getInventory().getItemInOffHand() : player.getInventory().getItemInMainHand();
+
+                    if (handItem != null && FEEDING_ITEMS.contains(handItem.getType())) {
+                        this.handleVampireFeedingAttempt(player, targetEntity, handItem, event);
                     }
                 }
             }
@@ -97,7 +87,7 @@ public class InteractionListener implements Listener {
      * @param event a player interacts with an entity.
      */
     private void handleVampireFeedingAttempt(Player vampire, Entity mob, ItemStack foodItem, PlayerInteractEntityEvent event) {
-        this.plugin.logInfo("Vampire " + vampire.getName() + " attempted to feed " + String.valueOf(mob.getType()) + " with " + String.valueOf(foodItem.getType()));
+        this.plugin.logInfo("Vampire " + vampire.getName() + " attempted to feed " + mob.getType() + " with " + foodItem.getType());
 
         if (this.plugin.getVampireManager().isVampireStage1(vampire)) {
             vampire.sendMessage("§cThe animal tentatively eats from your hand, eyeing you suspiciously, as if it knows your true nature...");

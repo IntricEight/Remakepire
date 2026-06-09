@@ -1,0 +1,248 @@
+# Remakepire Text Content Configuration File
+
+# Note from the developer:
+# This file contains config options for much of the text within the Vampires game, such as the contents of the cure books, or the border messages.
+# Interaction with this file is UNNECESSARY to running a Vampires game. If this file is overwhelming you, just leave all the "custom..." variables
+# as false, and close the file.
+
+# The default text of the plugin has been written in each config option. Use these to guide your customization process.
+# The character '§' indicates a text modifier, based on what character comes next (§o §5 are two examples). Use them to modify the appearance of
+# their lines of text as desired.
+
+# Supported Customization Options
+#   Cure book contents - The details of the cure books
+#   Cure book messages - The messages spawned when a cure book is interacted with
+#   Border messages - The messages that appear when interacting with the game border
+
+
+# ============================================================================
+# CURE BOOKS - CONTENT AND MESSAGES
+#   Inside this section, there are controls for each part of the cure book encounters.
+#   Begin by setting custom-cure-books to true, and then edit or replace sections to change the titles, authors, and pages of the four cure books.
+#   To begin changing the messages that are sent when different conditions are met (first time opening the cure books, cure trinity completed, etc.),
+#     set custom-cure-book-messages to true.
+#   To return the books and messages to their original forms, toggle their custom control back to false and the plugin will revert to the default version of each feature.
+# ============================================================================
+
+# Enable/Disable using the content in this file inside the cure books
+# The config modifier is responsible for testing their custom book contents to ensure alignment and quality is as desired
+# Default: false (Custom content disabled)
+custom-cure-books: false
+
+# The custom content for cure book 1 - The Remedy
+cure-book-1:
+  # The title of the first cure book
+  # Default: The Remedy
+  title: "The Remedy"
+
+  # The author of the first cure book
+  # Default: §5An ancient scholar
+  author: "§5An ancient scholar"
+
+  # The page contents of the first cure book
+  # Each bullet point is a new page, ordered from first to last in the book
+  pages:
+    - "§5§lTHE REMEDY§r\n§8Part I of III\n\n§7In the darkest hours, when the cursed blood burns within your veins, know that salvation exists.\n\n§7The ancients spoke of a trinity of knowledge..."
+    - "§7...that when combined, can sever the unholy bond between mortal and monster.\n\n§7This first piece reveals the place of redemption: beneath the light of a holy beacon, where divine grace gathers.\n\n§8Read on, seeker of the light..."
+
+  # The name attached to the first cure book item
+  # Default: The Remedy 1/3
+  item-title: "The Remedy 1/3"
+
+  # The lore content of the first cure book (The text beneath the author name)
+  # Each bullet point is a new separate line, ordered from top to bottom in the item description
+  item-details:
+    - "§5An ancient tome of forbidden knowledge"
+    - "§7Part 1 of the cure series"
+    - ""
+    - "§eRead this book to absorb its wisdom"
+
+
+# The custom content for cure book 2 - The Cure
+cure-book-2:
+  # The title of the second cure book
+  # Default: The Cure
+  title: "The Cure"
+
+  # The author of the second cure book
+  # Default: §5An ancient scholar
+  author: "§5An ancient scholar"
+
+  # The page contents of the second cure book
+  # Each bullet point is a new page, ordered from first to last in the book
+  pages:
+    - "§5§lTHE CURE§r\n§8Part II of III\n\n§7The second fragment reveals the nature of the curse itself.\n\n§7Born of darkness, sustained by blood, the vampire's existence is a perversion of nature's order..."
+    - "§7...yet within this perversion lies the key to its undoing.\n\n§7Holy water, blessed by the righteous, weakens the bond. Yet the bloodline binds; Your sire must lie dead for the cure to hold.\n\n§8Continue your search, truth-seeker..."
+
+  # The name attached to the second cure book item
+  # Default: The Cure 2/3
+  item-title: "The Cure 2/3"
+
+  # The lore content of the second cure book
+  # Each bullet point is a new separate line, ordered from top to bottom in the item description
+  item-details:
+    - "§5An ancient tome of forbidden knowledge"
+    - "§7Part 2 of the cure series"
+    - ""
+    - "§eRead this book to absorb its wisdom"
+
+
+# The custom content for cure book 3 - The Absolution
+cure-book-3:
+  # The title of the third cure book
+  # Default: The Absolution
+  title: "The Absolution"
+
+  # The author of the third cure book
+  # Default: §5An ancient scholar
+  author: "§5An ancient scholar"
+
+  # The page contents of the third cure book
+  # Each bullet point is a new page, ordered from first to last in the book
+  pages:
+    - "§5§lTHE ABSOLUTION§r\n§8Part III of III\n\n§7The final piece completes the trinity.\n\n§7With all three fragments of knowledge, the words of power are revealed:\n\n§6voluntate-mea-hoc-nefandum-vinculum-abicio"
+    - "§7These words have no power in shadow — only beneath the light of day may they bind.\n\n§7Recall what the other tomes have taught you, gather what is needed, and speak.\n\n§8May the light guide your path."
+
+  # The name attached to the third cure book item
+  # Default: The Absolution 3/3
+  item-title: "The Absolution 3/3"
+
+  # The lore content of the third cure book (The text beneath the author name)
+  # Each bullet point is a new separate line, ordered from top to bottom in the item description
+  item-details:
+    - "§5An ancient tome of forbidden knowledge"
+    - "§7Part 3 of the cure series"
+    - ""
+    - "§eRead this book to absorb its wisdom"
+
+
+# The custom content for cure book 4 - The Retribution
+cure-book-4:
+  # The title of the fourth cure book
+  # Default: The Retribution
+  title: "The Retribution"
+
+  # The author of the fourth cure book
+  # Default: §4A vengeful spirit
+  author: "§4A vengeful spirit"
+
+  # The page contents of the fourth cure book
+  # Each bullet point is a new page, ordered from first to last in the book
+  pages:
+    - "§4§lTHE RETRIBUTION§r\n§8The Fourth Tome\n\n§7This knowledge was never meant to be found.\n\n§7While the trinity speaks of self-salvation, this tome reveals darker words - words of forced redemption..."
+    - "§7...or forced damnation.\n\n§4hoc-vinculum-tibi-dirumpo-mala-creatura\n\n§7With these words, you may force the choice upon another creature of the night.\n\n§8Use this power wisely, for it carries great consequence."
+
+  # The page contents of the fourth cure book that appear if the reader has not completed the Trinity of Restoration
+  # Each bullet point is a new page, ordered from first to last in the book
+  unreadable-pages:
+    - "§8§oThe words within this tome are beyond your comprehension...\n\n§7Perhaps you must first complete the Trinity of Restoration."
+
+  # The name attached to the fourth cure book item
+  # Default: The Retribution 4/3
+  item-title: "The Retribution 4/3"
+
+  # The lore content of the fourth cure book
+  # Each bullet point is a new separate line, ordered from top to bottom in the item description
+  item-details:
+    - "§5An ancient tome of forbidden knowledge"
+    - "§7Part 4 of the cure series"
+    - ""
+    - "§eRead this book to absorb its wisdom"
+
+
+
+# Enable/Disable using the content in this file for messages that appear when a player reads a cure book
+# Default: false (Custom content disabled)
+custom-cure-book-messages: false
+
+# The custom messages that appear when certain cure conditions are met
+cure-book-messages:
+  # A player reads cure book 1 for the first time
+  cure-book-1-read:
+    - "§8§o[You absorb the ancient knowledge within The Remedy...]"
+
+  # A player reads cure book 2 for the first time
+  cure-book-2-read:
+    - "§8§o[You absorb the ancient knowledge within The Cure...]"
+
+  # A player reads cure book 3 for the first time
+  cure-book-3-read:
+    - "§8§o[You absorb the ancient knowledge within The Absolution...]"
+
+  # A player successfully reads cure book 4 for the first time
+  cure-book-4-read:
+    - "§8§o[You absorb the ancient knowledge within The Retribution...]"
+
+  # A player attempts to read cure book 4 without completing the cure trinity
+  cure-book-4-unreadable:
+    - "§8§o[The words within this tome are beyond your comprehension... Perhaps you must first complete the Trinity of Restoration.]"
+
+  # A player reads all the books required to learn how to cure themselves of vampirism
+  willing-cure-learnt:
+    - ""
+    - "§6§lTRINITY OF RESTORATION COMPLETE."
+    - "§eYou have absorbed the knowledge from all three cure books. You now know the words to cure yourself of vampirism:"
+    - "§7/§6voluntate-mea-hoc-nefandum-vinculum-abicio"
+    - "§7Stand near a holy beacon, with a bottle of holy water on your person, and in the light of day, say those words, and be free."
+    - ""
+
+  # A player reads all the books required to learn how to cure others of vampirism (or kill them)
+  force-cure-learnt:
+    - ""
+    - "§4§lWORDS OF RETRIBUTION LEARNED."
+    - "§cYou have learned the vengeful words to force cure others:"
+    - "§7/§4hoc-vinculum-tibi-dirumpo-mala-creatura §7<§4player§7>"
+    - "§7You and the creature must be within range of a holy beacon, hold a holy water on your person, and in the light of day, say those words, and give them the final choice."
+    - ""
+
+
+# ============================================================================
+# GAME BORDER
+#   Inside this section, there are controls for each outcome of interacting with the world border.
+#   Begin by setting custom-border-messages to true, and then edit or replace sections to change what appears in each state of the player-border relationship.
+#   Changes these messages do not change the leave condition itself. You'll need to get a copy of the raw plugin code to modify that.
+#   To return the border to its original form, toggle the control back to false and the plugin will revert to the default version of each message.
+# ============================================================================
+
+# Enable/Disable using the content in this file at the game border
+# Default: false (Custom content disabled)
+custom-border-messages: false
+
+# Reminder of the default leave conditions for VampireSMP:
+#   Player is a cured vampire
+#   Player is a human, all beacons are holy, and no vampires remain
+#   Player is a vampire, all beacons are desecrated, and no humans remain
+
+# The custom messages that appear the first time players are prevented from leaving the game boundaries
+border-blocked-messages:
+  # The beacons are not all controlled by a single team
+  beacons-not-controlled:
+    - "§cYou feel a force tying you to Oakhurst... You may not leave while an enemy's beacon remains..."
+    - "§cBut one that has embraced darkness, and yet has found strength to return to the light... Could escape..."
+
+  # The player is a human and all beacons are holy, but vampires remain alive
+  vampires-remain-alive:
+    - "§aBut while evil creatures still walk Oakhurst, your job is not yet finished..."
+
+  # The player is a vampire and all beacons are desecrated, but humans remain alive
+  humans-remain-alive:
+    - "§4But while humans remain... Hope still stands..."
+
+  # The player attempts to leave the border while in a vehicle with a player who cannot leave the border
+  shared-escape-prevented:
+    - "§cWhilst freedom lies within your reach, you feel a force dragging your companion back... You cannot leave Oakhurst while one tethered to the beacons remains by you."
+
+# The custom messages that appear when players successfully leave the game boundary for the first time
+border-freedom-messages:
+  # The player is a cured vampire or the border has been disabled
+  cured-vampire-freedom:
+    - "§6You are leaving Oakhurst..."
+    - "§eThe familiar lands fade behind you as you venture beyond the border."
+
+  # The player is a human
+  human-freedom:
+    - "§aYou are free... Finally free..."
+
+  # The player is a vampire
+  vampire-freedom:
+    - "§4You are free of your chains, creature of the night..."

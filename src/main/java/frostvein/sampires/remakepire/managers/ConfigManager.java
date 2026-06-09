@@ -46,10 +46,10 @@ public class ConfigManager {
     public List<Location> getTomeChestLocations() {
         List<String> locationStrings = this.config.getStringList("tome-chests.locations");
         List<Location> locations = new ArrayList<>();
-        World world = this.plugin.getServer().getWorld("world");
+        World world = this.plugin.getServer().getWorld(RemakepirePlugin.WORLD_NAME);
 
         if (world == null) {
-            this.plugin.getLogger().severe("World 'world' not found! Cannot load tome chest locations.");
+            this.plugin.getLogger().severe("World '" + RemakepirePlugin.WORLD_NAME + "' not found! Cannot load tome chest locations.");
             return locations;
 
         } else {
@@ -329,7 +329,7 @@ public class ConfigManager {
      * @param capped {@code true} if tome absorption should be capped to one each session.
      */
     public void setTomeAbsorptionCapping(boolean capped) {
-        this.plugin.getConfig().set("tome-absorption.tome-absorption-capping", capped);
+        this.config.set("tome-absorption.tome-absorption-capping", capped);
         this.plugin.saveConfig();
     }
 
@@ -375,7 +375,7 @@ public class ConfigManager {
      * @param capped {@code true} if vampire levels should be restricted upon dropping a level.
      */
     public void setVampireLevelCapping(boolean capped) {
-        this.plugin.getConfig().set("vampire.vampire-level-capping", capped);
+        this.config.set("vampire.vampire-level-capping", capped);
         this.plugin.saveConfig();
     }
 
@@ -394,7 +394,7 @@ public class ConfigManager {
      * @param track {@code true} if vampires are given directions to the new vampire.
      */
     public void setTrackingNewVampires(boolean track) {
-        this.plugin.getConfig().set("vampire.new-vampire-tracking", track);
+        this.config.set("vampire.new-vampire-tracking", track);
         this.plugin.saveConfig();
     }
 
@@ -550,7 +550,7 @@ public class ConfigManager {
      * @param capped {@code true} if only a single holy water can be made by each player each session.
      */
     public void setHolyWaterCapping(boolean capped) {
-        this.plugin.getConfig().set("holy-water.holy-water-session-capped", capped);
+        this.config.set("holy-water.holy-water-session-capped", capped);
         this.plugin.saveConfig();
     }
 
@@ -605,7 +605,7 @@ public class ConfigManager {
      * @param canBreed {@code true} if animals can be bred out of session.
      */
     public void setBreedAnimalsOutOfSession(boolean canBreed) {
-        this.plugin.getConfig().set("allow-breeding-out-of-session", canBreed);
+        this.config.set("allow-breeding-out-of-session", canBreed);
         this.plugin.saveConfig();
     }
 
@@ -624,7 +624,7 @@ public class ConfigManager {
      * @param stage the highest stage that vampires can be permakilled at.
      */
     public void setStakePermadeathMinimumStage(int stage) {
-        this.plugin.getConfig().set("combat.permadeath-minimum-stage", Math.max(1, stage));
+        this.config.set("combat.permadeath-minimum-stage", Math.max(1, stage));
         this.plugin.saveConfig();
     }
 
@@ -643,7 +643,7 @@ public class ConfigManager {
      * @param capped {@code true} if humans will be permakilled on their sixth death, regardless of the cause.
      */
     public void setLifeLimitEnforced(boolean capped) {
-        this.plugin.getConfig().set("combat.enforce-life-limit", capped);
+        this.config.set("combat.enforce-life-limit", capped);
         this.plugin.saveConfig();
     }
 
@@ -671,7 +671,7 @@ public class ConfigManager {
      * @param canRide {@code true} if vampires can ride living mounts.
      */
     public void setVampiresRideLivingMounts(boolean canRide) {
-        this.plugin.getConfig().set("vampire.allow-vampire-mounts", canRide);
+        this.config.set("vampire.allow-vampire-mounts", canRide);
         this.plugin.saveConfig();
     }
 
@@ -681,7 +681,7 @@ public class ConfigManager {
      * @return The number of ticks it takes for each health point regeneration.
      */
     public int getVampireHealthCheckTicks() {
-        return this.plugin.getConfig().getInt("vampire_health_check_ticks", 9);
+        return this.config.getInt("vampire_health_check_ticks", 9);
     }
 
     /**
@@ -690,7 +690,7 @@ public class ConfigManager {
      * @param ticks the number of ticks between each health point recovery.
      */
     public void setVampireHealthCheckTicks(int ticks) {
-        this.plugin.getConfig().set("vampire_health_check_ticks", Math.max(1, ticks));
+        this.config.set("vampire_health_check_ticks", Math.max(1, ticks));
         this.plugin.saveConfig();
     }
 
@@ -709,7 +709,7 @@ public class ConfigManager {
      * @return The percent of damage that will be ignored by players.
      */
     public int getDamageSuppression() {
-        return this.plugin.getConfig().getInt("damage_suppression", 50);
+        return this.config.getInt("damage_suppression", 50);
     }
 
     /**
@@ -718,17 +718,8 @@ public class ConfigManager {
      * @param percentage the percentage to ignore.
      */
     public void setDamageSuppression(int percentage) {
-        this.plugin.getConfig().set("damage_suppression", percentage);
+        this.config.set("damage_suppression", percentage);
         this.plugin.saveConfig();
-    }
-
-    /**
-     * Retrieve whether the first three cure books can spawn in tome chests.
-     *
-     * @return {@code true} if cure books can spawn in tome chests.
-     */
-    public boolean isCureBooksEnabled() {
-        return this.config.getBoolean("cure_books_enabled", true);
     }
 
     /**
@@ -792,7 +783,7 @@ public class ConfigManager {
      * @param requireDeath {@code true} if the sire must be dead before curing.
      */
     public void setCureRequiresSireDeath(boolean requireDeath) {
-        this.plugin.getConfig().set("cure.sire-death-requirement", requireDeath);
+        this.config.set("cure.sire-death-requirement", requireDeath);
         this.plugin.saveConfig();
     }
 
@@ -829,7 +820,7 @@ public class ConfigManager {
      * @param shouldAlert {@code true} if Operators should be messaged.
      */
     public void setAlertOnPlayerQuit(boolean shouldAlert) {
-        this.plugin.getConfig().set("chat.alert-on-player-leave", shouldAlert);
+        this.config.set("chat.alert-on-player-leave", shouldAlert);
         this.plugin.saveConfig();
     }
 
@@ -992,7 +983,7 @@ public class ConfigManager {
             warnings.add("Town center (" + (int)townX + ", " + (int)townZ + ")");
         }
 
-        World world = this.plugin.getServer().getWorld("world");
+        World world = this.plugin.getServer().getWorld(RemakepirePlugin.WORLD_NAME);
 
         if (world != null) {
             Location vampireSpawn = this.getVampireRespawnLocation(world);

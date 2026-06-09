@@ -62,10 +62,8 @@ public class VampireCureCommand implements CommandExecutor {
                         player.sendMessage("§cYou must be close to a holy beacon to perform this ritual.");
 
                     } else {
-                        String sireName = this.sireManager.getSire(player);
-
-                        if (sireName != null && !this.sireManager.canBeCured(player)) {
-                            player.sendMessage("§4The curse cannot be broken while your sire, " + sireName + ", still walks the world in mortal form...");
+                        if (!this.sireManager.canBeCured(player)) {
+                            player.sendMessage("§4The curse cannot be broken while your sire still walks the world in mortal form...");
                             player.sendMessage("§4Only through your maker's true death can you find release.");
                         } else {
                             this.performCure(player, holyWater, nearestHolyBeacon);
@@ -108,7 +106,7 @@ public class VampireCureCommand implements CommandExecutor {
 
         this.vampireManager.setPlayerAsHuman(player);
         player.getActivePotionEffects().forEach((effect) -> player.removePotionEffect(effect.getType()));
-        player.addScoreboardTag("CuredVampire");
+        player.addScoreboardTag(VampireManager.CURED_VAMPIRE_TAG);
 
         // Check for and apply the effects of beacon control
         if (this.plugin.getSessionManager().isHumansFinalStandActive()) {

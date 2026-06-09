@@ -1,7 +1,7 @@
 package frostvein.sampires.remakepire.listeners;
 
+import java.util.Map;
 import java.util.Random;
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.data.Ageable;
@@ -11,6 +11,8 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.components.FoodComponent;
 import frostvein.sampires.remakepire.RemakepirePlugin;
 import frostvein.sampires.remakepire.managers.SessionManager;
 import frostvein.sampires.remakepire.managers.TomeManager;
@@ -46,8 +48,10 @@ public class BeetrootHarvestListener implements Listener {
                 if (crop.getAge() == crop.getMaximumAge()) {
                     Player player = event.getPlayer();
 
+                    // Stop bats from harvesting beetroot
                     if (this.plugin.getBatTransformationManager().isInBatForm(player)) {
                         event.setCancelled(true);
+
                     } else {
                         event.setDropItems(false);
                         Location dropLocation = event.getBlock().getLocation().add(0.5, 0.5, 0.5);
@@ -71,7 +75,8 @@ public class BeetrootHarvestListener implements Listener {
     }
 
     /**
-     * Ensure that any garlic given to the player is usable.
+     * Give the harvested garlic items straight into the players inventory, unless it is full.<br/>
+     * Make the garlic always edible, not just when a player is hungry.
      *
      * @param harvester the player who collected the beetroot plant.
      * @param quantity the amount of garlic that the player will be given.
@@ -79,8 +84,26 @@ public class BeetrootHarvestListener implements Listener {
     private void giveAlwaysEdibleBeetroot(Player harvester, int quantity) {
         try {
             if (harvester != null) {
-                String command = "give " + harvester.getName() + " minecraft:beetroot[minecraft:food={can_always_eat:1b,nutrition:1,saturation:1.2}] " + quantity;
-                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command);
+                ItemStack beetroot = new ItemStack(Material.BEETROOT, quantity);
+
+                ItemMeta meta = beetroot.getItemMeta();
+                if (meta != null) {
+                    FoodComponent food = meta.getFood();
+
+                    food.setCanAlwaysEat(true);
+                    food.setNutrition(1);
+                    food.setSaturation(1.2f);
+
+                    meta.setFood(food);
+                    beetroot.setItemMeta(meta);
+                }
+
+                Map<Integer, ItemStack> leftovers = harvester.getInventory().addItem(beetroot);
+
+                for (ItemStack leftover : leftovers.values()) {
+                    harvester.getWorld().dropItemNaturally(harvester.getLocation(), leftover);
+                }
+
                 this.plugin.logInfo("Gave " + quantity + " always-edible beetroot(s) to " + harvester.getName());
 
             } else {

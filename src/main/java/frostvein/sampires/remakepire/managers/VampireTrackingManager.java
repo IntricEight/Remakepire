@@ -113,7 +113,7 @@ public class VampireTrackingManager {
 
         if (task != null) {
             task.cancel();
-            this.plugin.logInfo("Stopped vampire tracking for " + String.valueOf(vampireId));
+            this.plugin.logInfo("Stopped vampire tracking for " + vampireId);
         }
     }
 

@@ -84,9 +84,9 @@ public class PlayerChatManager implements Listener {
         if (translatedMessage.contains("[Click Here]")) {
             String[] parts = translatedMessage.split("\\[Click Here\\]", 2);
             TextComponent message = new TextComponent("\n" + parts[0]);
-            TextComponent clickHere = new TextComponent(String.valueOf(ChatColor.AQUA) + "[Click Here]");
+            TextComponent clickHere = new TextComponent(ChatColor.AQUA + "[Click Here]");
             clickHere.setClickEvent(new ClickEvent(Action.RUN_COMMAND, "/pow sendmessage"));
-            clickHere.setHoverEvent(new HoverEvent(net.md_5.bungee.api.chat.HoverEvent.Action.SHOW_TEXT, (new ComponentBuilder(String.valueOf(ChatColor.GREEN) + "Click to send your message: " + String.valueOf(ChatColor.WHITE) + originalMessage)).create()));
+            clickHere.setHoverEvent(new HoverEvent(net.md_5.bungee.api.chat.HoverEvent.Action.SHOW_TEXT, (new ComponentBuilder(ChatColor.GREEN + "Click to send your message: " + ChatColor.WHITE + originalMessage)).create()));
             message.addExtra(clickHere);
 
             if (parts.length > 1) {

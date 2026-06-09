@@ -1,6 +1,8 @@
 package frostvein.sampires.remakepire.listeners;
 
 import java.util.List;
+
+import frostvein.sampires.remakepire.managers.*;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -9,9 +11,6 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.scoreboard.Team;
 import frostvein.sampires.remakepire.RemakepirePlugin;
 import frostvein.sampires.remakepire.abilities.tome.TurnUndeadTomeAbility;
-import frostvein.sampires.remakepire.managers.BeetrootManager;
-import frostvein.sampires.remakepire.managers.EffectManager;
-import frostvein.sampires.remakepire.managers.VampireManager;
 
 public class PlayerJoinListener implements Listener {
     private final RemakepirePlugin plugin;
@@ -32,7 +31,7 @@ public class PlayerJoinListener implements Listener {
     }
 
     /**
-     * Apply the current game status effects to a joining player.
+     * Apply the current game's status effects to a joining player.
      *
      * @param event a player joining the world.
      */
@@ -48,7 +47,7 @@ public class PlayerJoinListener implements Listener {
         this.beetrootManager.restorePlayerState(player);
 
         this.plugin.getBeaconMajorityManager().applyBonusesToPlayer(player);
-        if (this.plugin.getVampireTexturePackManager() != null && (this.vampireManager.isVampire(player) || player.getScoreboardTags().contains("CuredVampire"))) {
+        if (this.plugin.getVampireTexturePackManager() != null && (this.vampireManager.isVampire(player) || player.getScoreboardTags().contains(VampireManager.CURED_VAMPIRE_TAG))) {
             this.plugin.getVampireTexturePackManager().onVampireLogin(player);
         }
 
@@ -61,9 +60,11 @@ public class PlayerJoinListener implements Listener {
         player.sendMessage("§7" + sessionStatus);
         if (!this.plugin.getSessionManager().playerReturningToGame(player)) {
             player.sendMessage("§cA new game has been initialized since you last played. Resetting your stats accordingly.");
+
+            player.removeScoreboardTag(InitGameManager.PERMAKILLED_TAG);
             this.plugin.getSessionManager().resetPlayer(player);
-            this.plugin.getSessionManager().getGameIDObjective().getScore(player.getName()).setScore(this.plugin.getSessionManager().getGameIDObjective().getScore("game_id_holder").getScore());
-            this.plugin.getSessionManager().getSessionIDObjective().getScore(player.getName()).setScore(this.plugin.getSessionManager().getSessionIDObjective().getScore("session_id_holder").getScore());
+            this.plugin.getSessionManager().getGameIDObjective().getScore(player.getName()).setScore(this.plugin.getSessionManager().getGameIDObjective().getScore(SessionManager.GAME_ID_HOLDER).getScore());
+            this.plugin.getSessionManager().getSessionIDObjective().getScore(player.getName()).setScore(this.plugin.getSessionManager().getSessionIDObjective().getScore(SessionManager.SESSION_ID_HOLDER).getScore());
             this.plugin.getVampireManager().clearPromotionBan(player);
 
         } else if (this.plugin.getSessionManager().playerReturningToSession(player)) {

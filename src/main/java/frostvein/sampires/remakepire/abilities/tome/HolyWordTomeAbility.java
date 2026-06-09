@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.entity.Player;
@@ -12,6 +13,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityMountEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -48,7 +50,7 @@ public class HolyWordTomeAbility extends TomeAbility implements Listener {
             int stage1Affected = 0, stage2And3Paralyzed = 0;
 
             for(Player target : nearbyPlayers) {
-                if (!target.equals(player) && !(target.getLocation().distance(player.getLocation()) > RADIUS)) {
+                if (!target.equals(player) && !(target.getLocation().distance(player.getLocation()) > RADIUS) && target.getGameMode() != GameMode.SPECTATOR) {
                     if (vampireManager.isVampireStage1(target)) {
                         target.sendMessage("§cA holy word sends your mind reeling, but you hold fast against it's paralysing effects.");
                         ++stage1Affected;
@@ -56,10 +58,10 @@ public class HolyWordTomeAbility extends TomeAbility implements Listener {
                     } else if (vampireManager.isVampireStage2(target) || vampireManager.isVampireStage3(target)) {
                         target.sendMessage("§cYou are frozen by divine power!");
                         target.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, PARALYSIS_DURATION, 255, false, false));
-                        UUID targetId = target.getUniqueId();
-                        BukkitTask paralysisTask = Bukkit.getScheduler().runTaskLater(this.plugin, () -> this.paralyzedPlayers.remove(targetId), PARALYSIS_DURATION);
+                        target.leaveVehicle();
+                        BukkitTask paralysisTask = Bukkit.getScheduler().runTaskLater(this.plugin, () -> this.paralyzedPlayers.remove(target.getUniqueId()), PARALYSIS_DURATION);
 
-                        this.paralyzedPlayers.put(targetId, paralysisTask);
+                        this.paralyzedPlayers.put(target.getUniqueId(), paralysisTask);
                         target.getWorld().playSound(target.getLocation(), "minecraft:entity.zombie_villager.cure", 0.8F, 2.0F);
 
                         Bukkit.getScheduler().runTaskLater(this.plugin, () -> {
@@ -96,9 +98,7 @@ public class HolyWordTomeAbility extends TomeAbility implements Listener {
     )
     public void onEntityDamage(EntityDamageEvent event) {
         if (event.getEntity() instanceof Player player) {
-            UUID playerId = player.getUniqueId();
-
-            if (this.paralyzedPlayers.containsKey(playerId)) {
+            if (this.isParalyzed(player)) {
                 event.setCancelled(true);
             }
         }
@@ -112,12 +112,27 @@ public class HolyWordTomeAbility extends TomeAbility implements Listener {
     @EventHandler
     public void onPlayerMove(PlayerMoveEvent event) {
         Player player = event.getPlayer();
-        UUID playerId = player.getUniqueId();
 
-        if (this.paralyzedPlayers.containsKey(playerId) && (event.getFrom().getX() != event.getTo().getX() || event.getFrom().getY() != event.getTo().getY() || event.getFrom().getZ() != event.getTo().getZ())) {
+        if (this.isParalyzed(player) && (event.getFrom().getX() != event.getTo().getX() || event.getFrom().getY() != event.getTo().getY() || event.getFrom().getZ() != event.getTo().getZ())) {
             event.setCancelled(true);
+
             if (System.currentTimeMillis() % 3000L < 50L) {
                 player.sendMessage("§4You are frozen by divine power and cannot move!");
+            }
+        }
+    }
+
+    /**
+     * Prevent paralyzed players from mounting.
+     *
+     * @param event a player attempts to mount an entity.
+     */
+    @EventHandler
+    public void onEntityMount(EntityMountEvent event) {
+        if (event.getEntity() instanceof Player player) {
+            if (this.isParalyzed(player)) {
+                event.setCancelled(true);
+                player.sendMessage("§4You are frozen by divine power and cannot mount!");
             }
         }
     }

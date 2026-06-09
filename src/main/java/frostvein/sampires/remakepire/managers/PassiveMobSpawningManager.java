@@ -123,7 +123,7 @@ public class PassiveMobSpawningManager {
                             spawnCounts.put(mobType, spawnCounts.getOrDefault(mobType, 0) + 1);
 
                         } catch (Exception e) {
-                            this.plugin.getLogger().warning("PassiveMobSpawningManager: Failed to spawn " + String.valueOf(mobType) + " at " + conversionAssistant.locationToString(spawnLocation) + ": " + e.getMessage());
+                            this.plugin.getLogger().warning("PassiveMobSpawningManager: Failed to spawn " + mobType + " at " + conversionAssistant.locationToString(spawnLocation) + ": " + e.getMessage());
                         }
                     }
 

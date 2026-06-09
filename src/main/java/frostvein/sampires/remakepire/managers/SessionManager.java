@@ -12,6 +12,7 @@ import org.bukkit.GameMode;
 import org.bukkit.GameRule;
 import org.bukkit.World;
 import org.bukkit.attribute.Attribute;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -23,9 +24,11 @@ import frostvein.sampires.remakepire.RemakepirePlugin;
 
 public class SessionManager {
     private final RemakepirePlugin plugin;
+    private FileConfiguration config;
     private final Map<UUID, Integer> pausedFoodLevels = new HashMap<>();
     private final Map<UUID, Float> pausedSaturationLevels = new HashMap<>();
     private Objective sessionObjective, sessionIDObjective, gameIDObjective;
+    public static final String SESSION_ID_HOLDER = "session_id_holder", GAME_ID_HOLDER = "game_id_holder";
     public static final int BEFORE_SESSION = 0, IN_SESSION = 1, PAUSED = 2, AFTER_SESSION = 3, PRE_SESSION = 4;
     private long totalSessionTime = 0L, currentPhaseStartTime = 0L;
     private boolean trackingSessionTime = false;
@@ -54,8 +57,22 @@ public class SessionManager {
      */
     public SessionManager(RemakepirePlugin plugin) {
         this.plugin = plugin;
+        this.loadConfig();
     }
 
+    /**
+     * Retrieve the plugin configuration from the file.
+     */
+    public void loadConfig() {
+        // Can only use the commented code once. Right now, ConfigManager is created earlier, and so should be the single point where those two lines are called
+//        this.plugin.saveDefaultConfig();
+//        this.plugin.reloadConfig();
+        this.config = this.plugin.getConfig();
+    }
+
+    /**
+     * Begin running regular player status updates depending on the session status.
+     */
     public void startBackgroundTasks() {
         this.startSaturationTask();
         this.startActionBarTask();
@@ -234,13 +251,52 @@ public class SessionManager {
         return this.gameIDObjective;
     }
 
+
+    /**
+     * Retrieve whether the first three cure books can spawn in tome chests.
+     *
+     * @return {@code true} if cure books can spawn in tome chests.
+     */
+    public boolean isCureBooksEnabled() {
+        return this.config.getBoolean("cure_books_enabled", true);
+    }
+
+    /**
+     * Update the config on whether cure books can spawn in tome chests.
+     *
+     * @param enabled {@code true} if cure books should spawn in tome chests.
+     */
+    public void setCureBooksEnabled(boolean enabled) {
+        this.config.set("cure_books_enabled", enabled);
+        this.plugin.saveConfig();
+    }
+
+    /**
+     * Retrieve whether the border will trap players until they fulfill a leave condition.
+     *
+     * @return {@code true} if the border will trap players.
+     */
+    public boolean isBorderActive() {
+        return this.config.getBoolean("border_active", true);
+    }
+
+    /**
+     * Update the config on whether the border will trap players until they fulfill a leave condition.
+     *
+     * @param active {@code true} if the border will trap players.
+     */
+    public void setBorderActive(boolean active) {
+        this.config.set("border_active", active);
+        this.plugin.saveConfig();
+    }
+
     /**
      * Retrieve whether the first beacon of the game has been converted yet.
      *
      * @return {@code true} if the first beacon has been converted since the game was initialized.
      */
     public boolean isFirstBeaconConvertedTriggered() {
-        return this.plugin.getConfig().getBoolean("first_beacon_converted", false);
+        return this.config.getBoolean("first_beacon_converted", false);
     }
 
     /**
@@ -249,7 +305,7 @@ public class SessionManager {
      * @param triggered {@code true} when the first beacon of the game has been converted.
      */
     public void setFirstBeaconConvertedTriggered(boolean triggered) {
-        this.plugin.getConfig().set("first_beacon_converted", triggered);
+        this.config.set("first_beacon_converted", triggered);
         this.plugin.saveConfig();
     }
 
@@ -259,7 +315,7 @@ public class SessionManager {
      * @return {@code true} if the human team controls all beacons.
      */
     public boolean areHumansOwningAllBeacons() {
-        return this.plugin.getConfig().getBoolean("humans_own_all_beacons", false);
+        return this.config.getBoolean("humans_own_all_beacons", false);
     }
 
     /**
@@ -268,7 +324,7 @@ public class SessionManager {
      * @param active {@code true} if all the beacons are holy aligned.
      */
     public void setHumansOwningAllBeacons(boolean active) {
-        this.plugin.getConfig().set("humans_own_all_beacons", active);
+        this.config.set("humans_own_all_beacons", active);
         this.plugin.saveConfig();
     }
 
@@ -278,7 +334,7 @@ public class SessionManager {
      * @return {@code true} if the vampire team controls all beacons.
      */
     public boolean areVampiresOwningAllBeacons() {
-        return this.plugin.getConfig().getBoolean("vampires_own_all_beacons", false);
+        return this.config.getBoolean("vampires_own_all_beacons", false);
     }
 
     /**
@@ -287,7 +343,7 @@ public class SessionManager {
      * @param active {@code true} if all the beacons are darkness aligned.
      */
     public void setVampiresOwningAllBeacons(boolean active) {
-        this.plugin.getConfig().set("vampires_own_all_beacons", active);
+        this.config.set("vampires_own_all_beacons", active);
         this.plugin.saveConfig();
     }
 
@@ -315,7 +371,7 @@ public class SessionManager {
      * @return {@code true} if only one human remains alive.
      */
     public boolean isOneHumanLeftActive() {
-        return this.plugin.getConfig().getBoolean("one_human_left", false);
+        return this.config.getBoolean("one_human_left", false);
     }
 
     /**
@@ -324,7 +380,7 @@ public class SessionManager {
      * @param active {@code true} if there is a single human remaining in the game.
      */
     public void setOneHumanLeftActive(boolean active) {
-        this.plugin.getConfig().set("one_human_left", active);
+        this.config.set("one_human_left", active);
         this.plugin.saveConfig();
     }
 
@@ -355,7 +411,7 @@ public class SessionManager {
         World world = this.plugin.getWorld();
 
         // Update the config's setting with the provided preference
-        this.plugin.getConfig().set("enable-npc-mobs", enabled);
+        this.config.set("enable-npc-mobs", enabled);
         this.plugin.saveConfig();
 
         // Update the world's gamerule state
@@ -363,14 +419,14 @@ public class SessionManager {
     }
 
     public void incrementSessionID() {
-        this.sessionIDObjective.getScore("session_id_holder").setScore(this.sessionIDObjective.getScore("session_id_holder").getScore() + 1);
+        this.sessionIDObjective.getScore(SESSION_ID_HOLDER).setScore(this.sessionIDObjective.getScore(SESSION_ID_HOLDER).getScore() + 1);
         this.updateAllPlayersSessionIDs();
     }
 
     public void incrementGameID() {
-        this.gameIDObjective.getScore("game_id_holder").setScore(this.gameIDObjective.getScore("game_id_holder").getScore() + 1);
+        this.gameIDObjective.getScore(GAME_ID_HOLDER).setScore(this.gameIDObjective.getScore(GAME_ID_HOLDER).getScore() + 1);
         this.updateAllPlayersGameIDs();
-        this.plugin.logInfo("Game ID incremented to: " + this.gameIDObjective.getScore("game_id_holder").getScore());
+        this.plugin.logInfo("Game ID incremented to: " + this.gameIDObjective.getScore(GAME_ID_HOLDER).getScore());
     }
 
     public void initializeScoreboard() {
@@ -386,13 +442,13 @@ public class SessionManager {
         this.sessionIDObjective = mainScoreboard.getObjective("vsmp_session_id");
         if (this.sessionIDObjective == null) {
             this.sessionIDObjective = mainScoreboard.registerNewObjective("vsmp_session_id", "dummy");
-            this.sessionIDObjective.getScore("session_id_holder").setScore(1);
+            this.sessionIDObjective.getScore(SESSION_ID_HOLDER).setScore(1);
         }
 
         this.gameIDObjective = mainScoreboard.getObjective("vsmp_game_id");
         if (this.gameIDObjective == null) {
             this.gameIDObjective = mainScoreboard.registerNewObjective("vsmp_game_id", "dummy");
-            this.gameIDObjective.getScore("game_id_holder").setScore(1);
+            this.gameIDObjective.getScore(GAME_ID_HOLDER).setScore(1);
         }
 
         Bukkit.getScheduler().runTaskLater(this.plugin, () -> {
@@ -402,11 +458,11 @@ public class SessionManager {
     }
 
     public boolean playerReturningToSession(Player player) {
-        return this.sessionIDObjective.getScore(player.getName()).getScore() == this.sessionIDObjective.getScore("session_id_holder").getScore();
+        return this.sessionIDObjective.getScore(player.getName()).getScore() == this.sessionIDObjective.getScore(SESSION_ID_HOLDER).getScore();
     }
 
     public boolean playerReturningToGame(Player player) {
-        return this.gameIDObjective.getScore(player.getName()).getScore() == this.gameIDObjective.getScore("game_id_holder").getScore();
+        return this.gameIDObjective.getScore(player.getName()).getScore() == this.gameIDObjective.getScore(GAME_ID_HOLDER).getScore();
     }
 
     public long getSessionTime() {
@@ -446,7 +502,7 @@ public class SessionManager {
     }
 
     public void updateAllPlayersSessionIDs() {
-        int session_id = this.sessionIDObjective.getScore("session_id_holder").getScore();
+        int session_id = this.sessionIDObjective.getScore(SESSION_ID_HOLDER).getScore();
 
         for(Player player : this.plugin.getWorld().getPlayers()) {
             this.sessionIDObjective.getScore(player.getName()).setScore(session_id);
@@ -454,7 +510,7 @@ public class SessionManager {
     }
 
     public void updateAllPlayersGameIDs() {
-        int game_id = this.gameIDObjective.getScore("game_id_holder").getScore();
+        int game_id = this.gameIDObjective.getScore(GAME_ID_HOLDER).getScore();
 
         for(Player player : this.plugin.getWorld().getPlayers()) {
             this.gameIDObjective.getScore(player.getName()).setScore(game_id);
@@ -650,7 +706,12 @@ public class SessionManager {
      * @param player the player being reset.
      */
     public void resetPlayer(Player player) {
-        if (player.getGameMode() == GameMode.SPECTATOR) {
+        // Ignore players who have been permanently killed
+        if (player.getScoreboardTags().contains("perma_dead")) {
+            return;
+        }
+
+        if (player.getGameMode() == GameMode.SPECTATOR && !player.getScoreboardTags().contains("perma_dead")) {
             player.setGameMode(GameMode.SURVIVAL);
             this.plugin.logInfo("Reset " + player.getName() + " from spectator to survival mode (new game/session)");
         }
@@ -675,11 +736,10 @@ public class SessionManager {
     public int getSessionState() {
         if (this.sessionObjective == null) {
             return BEFORE_SESSION;
-
-        } else {
-            Score sessionScore = this.sessionObjective.getScore("state");
-            return sessionScore.getScore();
         }
+
+        Score sessionScore = this.sessionObjective.getScore("state");
+        return sessionScore.getScore();
     }
 
     /**

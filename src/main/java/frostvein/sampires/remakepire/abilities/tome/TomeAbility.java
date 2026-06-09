@@ -182,7 +182,7 @@ public abstract class TomeAbility {
      * @param cooldownSeconds the ability cooldown.
      */
     private void scheduleCooldownNotification(Player player, int cooldownSeconds) {
-        String taskKey = String.valueOf(player.getUniqueId()) + ":" + this.name;
+        String taskKey = player.getUniqueId() + ":" + this.name;
         BukkitTask existingTask = cooldownNotificationTasks.get(taskKey);
 
         if (existingTask != null && !existingTask.isCancelled()) {
@@ -225,7 +225,7 @@ public abstract class TomeAbility {
             cooldowns.remove(abilityName);
         }
 
-        String taskKey = String.valueOf(playerId) + ":" + abilityName;
+        String taskKey = playerId + ":" + abilityName;
         BukkitTask task = cooldownNotificationTasks.get(taskKey);
 
         if (task != null && !task.isCancelled()) {
@@ -242,7 +242,7 @@ public abstract class TomeAbility {
     public static void clearAllCooldowns(Player player) {
         UUID playerId = player.getUniqueId();
         playerCooldowns.remove(playerId);
-        String playerPrefix = String.valueOf(playerId) + ":";
+        String playerPrefix = playerId + ":";
 
         cooldownNotificationTasks.entrySet().removeIf((entry) -> {
             if ((entry.getKey()).startsWith(playerPrefix)) {

@@ -15,6 +15,7 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.ItemStack;
 import frostvein.sampires.remakepire.RemakepirePlugin;
+import frostvein.sampires.remakepire.managers.ForcedCureChoiceManager;
 
 public class ForcedCureChoiceListener implements Listener {
     private final RemakepirePlugin plugin;
@@ -29,15 +30,13 @@ public class ForcedCureChoiceListener implements Listener {
     }
 
     /**
-     * Control interactions with the cure choice UI.
+     * Control interactions with the cure choice GUI.
      *
      * @param event a player clicks inside an inventory menu.
      */
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
-        event.getView().getTitle();
-
-        if (event.getView().getTitle().equals("§4§lYour Fate Awaits...")) {
+        if (event.getView().getTitle().equals(ForcedCureChoiceManager.CURE_CHOICE_TITLE)) {
             event.setCancelled(true);
 
             if (event.getWhoClicked() instanceof Player player) {
@@ -65,15 +64,13 @@ public class ForcedCureChoiceListener implements Listener {
      */
     @EventHandler
     public void onInventoryClose(InventoryCloseEvent event) {
-        event.getView().getTitle();
-
-        if (event.getView().getTitle().equals("§4§lYour Fate Awaits...")) {
+        if (event.getView().getTitle().equals(ForcedCureChoiceManager.CURE_CHOICE_TITLE)) {
             if (event.getPlayer() instanceof Player player) {
                 if (this.plugin.getForcedCureChoiceManager().hasPendingCure(player)) {
                     player.sendMessage("");
-                    player.sendMessage("§4This is a decision you cannot run from monster.");
+                    player.sendMessage("§4This is a decision you cannot run from, monster.");
                     player.sendMessage("§7The spirits have come knocking, and they are joined by death.");
-                    player.sendMessage("§7Say your peace, and when you ready to make your decision,");
+                    player.sendMessage("§7Say your piece, and when you ready to make your decision,");
 
                     TextComponent message = new TextComponent("§e§l[CLICK HERE]");
                     message.setClickEvent(new ClickEvent(Action.RUN_COMMAND, "/pow reopen"));
@@ -99,9 +96,9 @@ public class ForcedCureChoiceListener implements Listener {
             this.plugin.getServer().getScheduler().runTaskLater(this.plugin, () -> {
                 if (player.isOnline() && this.plugin.getForcedCureChoiceManager().hasPendingCure(player)) {
                     player.sendMessage("");
-                    player.sendMessage("§4This is a decision you cannot run from monster.");
+                    player.sendMessage("§4This is a decision you cannot run from, monster.");
                     player.sendMessage("§7The spirits have come knocking, and they are joined by death.");
-                    player.sendMessage("§7Say your peace, and when you ready to make your decision,");
+                    player.sendMessage("§7Say your piece, and when you ready to make your decision,");
 
                     TextComponent message = new TextComponent("§e§l[CLICK HERE]");
                     message.setClickEvent(new ClickEvent(Action.RUN_COMMAND, "/pow reopen"));

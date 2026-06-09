@@ -23,6 +23,7 @@ import frostvein.sampires.remakepire.listeners.DeathHandler;
 public class ForcedCureChoiceManager {
     private final RemakepirePlugin plugin;
     private final Map<UUID, ForcedCureData> pendingCures = new HashMap<>();
+    public static final String CURE_CHOICE_TITLE = "§4§lYour Fate Awaits...";
 
     /**
      * Create an instance of the Force Cure Choice manager.
@@ -70,7 +71,7 @@ public class ForcedCureChoiceManager {
         target.setFlying(true);
         target.setInvulnerable(true);
 
-        Inventory gui = Bukkit.createInventory(null, 27, "§4§lYour Fate Awaits...");
+        Inventory gui = Bukkit.createInventory(null, 27, CURE_CHOICE_TITLE);
         ItemStack humanityButton = new ItemStack(Material.PLAYER_HEAD);
         ItemMeta humanityMeta = humanityButton.getItemMeta();
 
@@ -212,7 +213,7 @@ public class ForcedCureChoiceManager {
 
         this.plugin.getVampireManager().setPlayerAsHuman(target);
         target.getActivePotionEffects().forEach((effect) -> target.removePotionEffect(effect.getType()));
-        target.addScoreboardTag("CuredVampire");
+        target.addScoreboardTag(VampireManager.CURED_VAMPIRE_TAG);
 
         // Check for and apply the effects of beacon control
         if (this.plugin.getSessionManager().isHumansFinalStandActive()) {

@@ -288,9 +288,9 @@ passive-mob-spawning:
 
   # Number of animals to spawn per cycle (morning auto-spawn or /pow admin spawnanimals)
   # Default: 80
-  spawn-count: 100
+  spawn-count: 80
 
-# Allow NPC mobs to spawn
+# Allow NPC mobs to spawn during sessions
 # When true, Pillager patrols and Wandering Traders may spawn during active sessions
 # Default: false (disabled)
 enable-npc-mobs: false
@@ -354,6 +354,12 @@ oakhurst:
     # Total width/height of the playable area (creates a square area)
     # With center at 50 and diameter 1098: boundaries are -499 to 599
     diameter: 1500
+
+# Control whether the game border can hold players inside
+# When false, all players will be able to leave the town, and will be told they have escaped
+# WARNING: Players who haven't fulfilled a leave condition will be stuck in place if they are outside the border when it is enabled.
+# Default: true (border traps players)
+border_active: true
 
 # ============================================================================
 # INTERNAL STATE TRACKING - DO NOT MODIFY

@@ -1,7 +1,6 @@
 package frostvein.sampires.remakepire.listeners;
 
 import org.bukkit.Material;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -12,6 +11,7 @@ import org.bukkit.event.player.PlayerExpChangeEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import frostvein.sampires.remakepire.RemakepirePlugin;
+import frostvein.sampires.remakepire.managers.SessionManager;
 import frostvein.sampires.remakepire.managers.ThirstManager;
 import frostvein.sampires.remakepire.managers.VampireManager;
 
@@ -56,8 +56,8 @@ public class FeedingListener implements Listener {
                         if (!bottleFilled) {
                             this.thirstManager.handleEntityKill(killer, deadEntity.getType(), experienceDropped);
 
-                            if (experienceDropped > 0 && !killer.getScoreboardTags().contains("informed_successful_feeding")) {
-                                killer.addScoreboardTag("informed_successful_feeding");
+                            if (experienceDropped > 0 && !killer.getScoreboardTags().contains(SessionManager.INFORMED_SUCCESSFUL_FEEDING)) {
+                                killer.addScoreboardTag(SessionManager.INFORMED_SUCCESSFUL_FEEDING);
                                 killer.sendMessage("§cYou taste the metallic essence of life...");
                             }
                         }

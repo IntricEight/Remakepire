@@ -95,10 +95,8 @@ public class ForcedVampireCureCommand implements CommandExecutor {
 
                             // Ensure the caster and target are within cure range of the same holy beacon
                             if (targetNearestBeacon != null && targetNearestBeacon.equals(nearestHolyBeacon)) {
-                                String sireName = this.sireManager.getSire(target);
-
-                                if (sireName != null && !this.sireManager.canBeCured(target)) {
-                                    caster.sendMessage("§4The curse cannot be broken while " + target.getName() + "'s sire, " + sireName + ", still walks the world in mortal form...");
+                                if (!this.sireManager.canBeCured(target)) {
+                                    caster.sendMessage("§4The curse cannot be broken while " + target.getName() + "'s sire still walks the world in mortal form...");
                                     caster.sendMessage("§4The blood bond must be severed through the maker's true death.");
 
                                 } else {

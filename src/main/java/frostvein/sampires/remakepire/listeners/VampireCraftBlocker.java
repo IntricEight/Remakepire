@@ -9,6 +9,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.enchantment.EnchantItemEvent;
 import org.bukkit.event.inventory.CraftItemEvent;
 import frostvein.sampires.remakepire.RemakepirePlugin;
+import frostvein.sampires.remakepire.managers.SessionManager;
 
 public class VampireCraftBlocker implements Listener {
     RemakepirePlugin plugin;
@@ -44,8 +45,8 @@ public class VampireCraftBlocker implements Listener {
                 if (this.plugin.getVampireManager().isVampire(player)) {
                     event.setCancelled(true);
 
-                    if (!player.getScoreboardTags().contains("informed_crafting_items")) {
-                        player.addScoreboardTag("informed_crafting_items");
+                    if (!player.getScoreboardTags().contains(SessionManager.INFORMED_CRAFTING_ITEMS)) {
+                        player.addScoreboardTag(SessionManager.INFORMED_CRAFTING_ITEMS);
                         player.sendMessage("§cYou find yourself unable to put your mind to the task of crafting this... Such trinkets are beneath you.");
                     }
                 }
@@ -65,8 +66,8 @@ public class VampireCraftBlocker implements Listener {
         if (this.plugin.getVampireManager().isVampire(player)) {
             event.setCancelled(true);
 
-            if (!player.getScoreboardTags().contains("informed_enchanting_items")) {
-                player.addScoreboardTag("informed_enchanting_items");
+            if (!player.getScoreboardTags().contains(SessionManager.INFORMED_ENCHANTING_ITEMS)) {
+                player.addScoreboardTag(SessionManager.INFORMED_ENCHANTING_ITEMS);
                 player.sendMessage("§cThe ancient magics resist your vampiric essence... You cannot channel enchantments.");
             }
         }

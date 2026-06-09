@@ -42,6 +42,7 @@ public class InitGameManager {
     private final Map<UUID, InitData> adminData = new HashMap<>();
     private final Map<UUID, Boolean> guiRefreshInProgress = new HashMap<>();
     private static final int PLAYERS_PER_PAGE = 45, INVENTORY_SIZE = 54;
+    public static final String PERMAKILLED_TAG = "perma_dead";
 
     /**
      * Create an instance of the Initialize Game manager.
@@ -452,10 +453,10 @@ public class InitGameManager {
             admin.sendMessage("§6§l========================================");
             admin.sendMessage("§6§lINITIALIZING GAME...");
             admin.sendMessage("§6§l========================================");
-            World world = this.plugin.getServer().getWorld("world");
+            World world = this.plugin.getServer().getWorld(RemakepirePlugin.WORLD_NAME);
 
             if (world == null) {
-                admin.sendMessage("§cError: World 'world' not found.");
+                admin.sendMessage("§cError: World '" + RemakepirePlugin.WORLD_NAME + "' not found.");
                 this.cancelInitialization(admin);
 
             } else {
@@ -481,6 +482,7 @@ public class InitGameManager {
 
                 Collection<? extends Player> onlinePlayers = Bukkit.getOnlinePlayers();
 
+                // Clear all tags from all online players
                 for(Player player : onlinePlayers) {
                     for(String tag : new HashSet<>(player.getScoreboardTags())) {
                         player.removeScoreboardTag(tag);
@@ -631,7 +633,7 @@ public class InitGameManager {
 
                 for(Player player : onlinePlayers) {
                     if (!vampireIds.contains(player.getUniqueId())) {
-                        player.addScoreboardTag("human");
+                        player.addScoreboardTag(VampireManager.HUMAN_TAG);
                         player.sendTitle("§e§lHuman", "", 10, 100, 20);
                         player.sendMessage("");
                         player.sendMessage("§e§l========================================");

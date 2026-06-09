@@ -94,7 +94,7 @@ public class ArmorStorageManager {
                 return false;
             }
         } catch (Exception e) {
-            this.plugin.getLogger().severe("ArmorStorageManager: Failed to store and clear armor for player " + String.valueOf(playerId) + ": " + e.getMessage());
+            this.plugin.getLogger().severe("ArmorStorageManager: Failed to store and clear armor for player " + playerId + ": " + e.getMessage());
             e.printStackTrace();
             return false;
         }
@@ -129,7 +129,7 @@ public class ArmorStorageManager {
     public void clearStoredArmor(UUID playerId) {
         if (this.armorCache.remove(playerId) != null) {
             this.saveArmorData();
-            this.plugin.logInfo("ArmorStorageManager: Cleared stored armor for player " + String.valueOf(playerId));
+            this.plugin.logInfo("ArmorStorageManager: Cleared stored armor for player " + playerId);
         }
     }
 
@@ -216,7 +216,7 @@ public class ArmorStorageManager {
 
         this.armorCache.entrySet().removeIf((entry) -> {
             if (currentTime - (entry.getValue()).timestamp > maxAge) {
-                this.plugin.logInfo("ArmorStorageManager: Removed expired armor storage for player " + String.valueOf(entry.getKey()));
+                this.plugin.logInfo("ArmorStorageManager: Removed expired armor storage for player " + entry.getKey());
                 return true;
             }
 

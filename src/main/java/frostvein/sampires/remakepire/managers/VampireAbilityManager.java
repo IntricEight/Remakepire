@@ -681,7 +681,7 @@ public class VampireAbilityManager {
                 UUID playerId = playerEntry.getKey();
 
                 for (Map.Entry<String, Long> abilityEntry : playerEntry.getValue().entrySet()) {
-                    writer.write(playerId.toString() + ":" + abilityEntry.getKey() + ":" + String.valueOf(abilityEntry.getValue()));
+                    writer.write(playerId.toString() + ":" + abilityEntry.getKey() + ":" + abilityEntry.getValue());
                     writer.newLine();
                 }
             }

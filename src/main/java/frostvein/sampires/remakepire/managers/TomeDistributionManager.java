@@ -85,38 +85,38 @@ public class TomeDistributionManager {
      * Distribute a random (weighted) tome, cure, or enchanted book to each tome location.
      */
     public void distributeTomes() {
-        if (this.plugin.getSessionManager().getSessionState() != SessionManager.IN_SESSION) {
-            this.plugin.getLogger().warning("TomeDistributionManager: Tomes may not be distributed outside of session");
-        } else if (this.tomeLocations.isEmpty()) {
-            this.plugin.getLogger().warning("TomeDistributionManager: No tome locations available for distribution");
-        } else {
-            this.clearAllTomeChests();
-            List<Location> tomeSelectedLocations = this.selectRandomLocations();
+        if (this.plugin.getSessionManager().getSessionState() == SessionManager.IN_SESSION) {
+            if (this.tomeLocations.isEmpty()) {
+                this.plugin.getLogger().warning("TomeDistributionManager: No tome locations available for distribution");
+            } else {
+                this.clearAllTomeChests();
+                List<Location> tomeSelectedLocations = this.selectRandomLocations();
 
-            for(Location location : tomeSelectedLocations) {
-                String randomTome = this.getRandomTomeType();
-                this.distributeTomeToLocation(location, randomTome);
+                for (Location location : tomeSelectedLocations) {
+                    String randomTome = this.getRandomTomeType();
+                    this.distributeTomeToLocation(location, randomTome);
+                }
+
+                // Spawn enchanted books at any location where a tome book was not spawned
+                List<Location> emptyLocations = new ArrayList<>(this.tomeLocations);
+                emptyLocations.removeAll(tomeSelectedLocations);
+
+                for (Location location : emptyLocations) {
+                    this.addEnchantmentBookToLocation(location);
+                }
+
+                boolean cureBooksEnabled = this.plugin.getSessionManager().isCureBooksEnabled();
+                double cureBooksSpawnChance = this.configManager.getCureBooksSpawnChance();
+                boolean cureBookAdded = false;
+
+                if (cureBooksEnabled && this.random.nextDouble() < cureBooksSpawnChance) {
+                    Location randomLocation = this.tomeLocations.get(this.random.nextInt(this.tomeLocations.size()));
+                    this.replaceCureBookAtLocation(randomLocation);
+                    cureBookAdded = true;
+                }
+
+                this.plugin.logInfo("TomeDistributionManager: Distributed " + tomeSelectedLocations.size() + " tomes, " + emptyLocations.size() + " enchantment books" + (cureBookAdded ? ", and 1 cure book (replaced a chest)" : "") + " to chest locations");
             }
-
-            // Spawn enchanted books at any location where a tome book was not spawned
-            List<Location> emptyLocations = new ArrayList<>(this.tomeLocations);
-            emptyLocations.removeAll(tomeSelectedLocations);
-
-            for(Location location : emptyLocations) {
-                this.addEnchantmentBookToLocation(location);
-            }
-
-            boolean cureBooksEnabled = this.configManager.isCureBooksEnabled();
-            double cureBooksSpawnChance = this.configManager.getCureBooksSpawnChance();
-            boolean cureBookAdded = false;
-
-            if (cureBooksEnabled && this.random.nextDouble() < cureBooksSpawnChance) {
-                Location randomLocation = this.tomeLocations.get(this.random.nextInt(this.tomeLocations.size()));
-                this.replaceCureBookAtLocation(randomLocation);
-                cureBookAdded = true;
-            }
-
-            this.plugin.logInfo("TomeDistributionManager: Distributed " + tomeSelectedLocations.size() + " tomes, " + emptyLocations.size() + " enchantment books" + (cureBookAdded ? ", and 1 cure book (replaced a chest)" : "") + " to chest locations");
         }
     }
 
@@ -293,40 +293,7 @@ public class TomeDistributionManager {
      * @return The cure book 1/3, 2/3, or 3/3.
      */
     private ItemStack createRandomCureBook() {
-        int bookChoice = this.random.nextInt(3), bookNumber = bookChoice + 1;
-        ItemStack book = new ItemStack(Material.WRITTEN_BOOK);
-        BookMeta bookMeta = (BookMeta)book.getItemMeta();
-
-        if (bookMeta != null) {
-            switch (bookChoice) {
-                case 0:
-                    bookMeta.setTitle("The Remedy 1/3");
-                    bookMeta.setAuthor("§5An ancient scholar");
-                    bookMeta.setPages("§5§lTHE REMEDY§r\n§8Part I of III\n\n§7In the darkest hours, when the cursed blood burns within your veins, know that salvation exists.\n\n§7The ancients spoke of a trinity of knowledge...", "§7...that when combined, can sever the unholy bond between mortal and monster.\n\n§7This is the first piece of that forbidden wisdom.\n\n§8Read on, seeker of the light...");
-                    break;
-                case 1:
-                    bookMeta.setTitle("The Cure 2/3");
-                    bookMeta.setAuthor("§5An ancient scholar");
-                    bookMeta.setPages("§5§lTHE CURE§r\n§8Part II of III\n\n§7The second fragment reveals the nature of the curse itself.\n\n§7Born of darkness, sustained by blood, the vampire's existence is a perversion of nature's order...", "§7...yet within this perversion lies the key to its undoing.\n\n§7Holy water, blessed by the righteous, weakens the bond.\n\n§8Continue your search, truth-seeker...");
-                    break;
-                case 2:
-                    bookMeta.setTitle("The Absolution 3/3");
-                    bookMeta.setAuthor("§5An ancient scholar");
-                    bookMeta.setPages("§5§lTHE ABSOLUTION§r\n§8Part III of III\n\n§7The final piece completes the trinity.\n\n§7With all three fragments of knowledge, the words of power are revealed:\n\n§6voluntate-mea-hoc-nefandum-vinculum-abicio", "§7Stand near a holy beacon, with holy water upon your person, beneath the light of day.\n\n§7Speak the words, and be free of the curse forevermore.\n\n§8May the light guide your path.");
-            }
-
-            List<String> lore = new ArrayList<>();
-            lore.add("§5An ancient tome of forbidden knowledge");
-            lore.add("§7Part " + bookNumber + " of the cure series");
-            lore.add("");
-            lore.add("§eRead this book to absorb its wisdom");
-
-            bookMeta.setLore(lore);
-            CureBookReadingListener.markAsAuthenticCureBook(bookMeta, bookNumber, this.plugin);
-            book.setItemMeta(bookMeta);
-        }
-
-        return book;
+        return this.plugin.getCureBookManager().getCureBook(this.random.nextInt(3) + 1);
     }
 
     /**

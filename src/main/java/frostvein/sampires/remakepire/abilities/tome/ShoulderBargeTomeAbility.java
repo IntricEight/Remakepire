@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -63,20 +64,18 @@ public class ShoulderBargeTomeAbility extends TomeAbility {
             direction.setY(Math.max(direction.getY(), 0.1));
             Vector chargeVelocity = direction.multiply(CHARGE_VELOCITY);
             chargeVelocity.setY(UPWARD_VELOCITY);
+
             player.setVelocity(chargeVelocity);
             player.getWorld().playSound(player.getLocation(), "minecraft:entity.player.attack.crit", 0.8F, 1.2F);
             this.sendSuccessMessage(player, "You lower your shoulder and charge forward!");
-            final UUID playerId = player.getUniqueId();
 
-            synchronized(this.chargeHitEntities) {
-                this.chargeHitEntities.put(playerId, new HashSet<>());
-            }
+            this.chargeHitEntities.put(player.getUniqueId(), new HashSet<>());
 
             BukkitRunnable collisionTask = new BukkitRunnable() {
                 int ticksRemaining = CHARGE_DURATION;
 
                 public void run() {
-                    if (this.ticksRemaining > 0 && player.isOnline() && ShoulderBargeTomeAbility.this.chargingPlayers.containsKey(playerId)) {
+                    if (this.ticksRemaining > 0 && player.isOnline() && ShoulderBargeTomeAbility.this.chargingPlayers.containsKey(player.getUniqueId())) {
                         ShoulderBargeTomeAbility.this.checkForCollisions(player);
                         --this.ticksRemaining;
                     } else {
@@ -88,15 +87,15 @@ public class ShoulderBargeTomeAbility extends TomeAbility {
             collisionTask.runTaskTimer(this.plugin, 0L, 1L);
 
             BukkitTask chargeTask = Bukkit.getScheduler().runTaskLater(this.plugin, () -> {
-                this.chargingPlayers.remove(playerId);
-                synchronized(this.chargeHitEntities) {
-                    this.chargeHitEntities.remove(playerId);
-                }
+                this.chargingPlayers.remove(player.getUniqueId());
+
+                // Remove the caster from the list of hit entities
+                this.chargeHitEntities.remove(player.getUniqueId());
 
                 collisionTask.cancel();
             }, CHARGE_DURATION);
 
-            this.chargingPlayers.put(playerId, chargeTask);
+            this.chargingPlayers.put(player.getUniqueId(), chargeTask);
             return true;
         }
     }
@@ -108,36 +107,32 @@ public class ShoulderBargeTomeAbility extends TomeAbility {
      */
     private void checkForCollisions(Player player) {
         UUID playerId = player.getUniqueId();
-        Set<UUID> hitEntities;
-
-        synchronized(this.chargeHitEntities) {
-            hitEntities = this.chargeHitEntities.get(playerId);
-        }
+        Set<UUID> hitEntities = this.chargeHitEntities.get(playerId);
 
         if (hitEntities != null) {
             for(Entity entity : player.getNearbyEntities(1.5, 2.0, 1.5)) {
                 UUID entityId = entity.getUniqueId();
 
-                synchronized(hitEntities) {
-                    if (hitEntities.contains(entityId)) {
+                if (entity instanceof Player target) {
+                    // Prevent players in Spectator mode from being hit
+                    if (target.getGameMode() == GameMode.SPECTATOR) {
                         continue;
                     }
                 }
 
-                if (!entity.equals(player)) {
-                    synchronized(this.recentlyBargedEntities) {
-                        Long lastBargeTime = this.recentlyBargedEntities.get(entityId);
+                if (hitEntities.contains(entityId)) {
+                    continue;
+                }
 
-                        if (lastBargeTime != null && System.currentTimeMillis() - lastBargeTime < TARGET_COOLDOWN_MS) {
-                            continue;
-                        }
+                if (!entity.equals(player)) {
+                    Long lastBargeTime = this.recentlyBargedEntities.get(entityId);
+
+                    if (lastBargeTime != null && System.currentTimeMillis() - lastBargeTime < TARGET_COOLDOWN_MS) {
+                        continue;
                     }
 
                     this.handleCollision(player, entity);
-
-                    synchronized(hitEntities) {
-                        hitEntities.add(entityId);
-                    }
+                    hitEntities.add(entityId);
                 }
             }
         }
@@ -150,9 +145,7 @@ public class ShoulderBargeTomeAbility extends TomeAbility {
      * @param target a player who was hit by the ability.
      */
     private void handleCollision(Player player, Entity target) {
-        synchronized(this.recentlyBargedEntities) {
-            this.recentlyBargedEntities.put(target.getUniqueId(), System.currentTimeMillis());
-        }
+        this.recentlyBargedEntities.put(target.getUniqueId(), System.currentTimeMillis());
 
         Vector knockbackDirection = target.getLocation().subtract(player.getLocation()).toVector();
 
@@ -162,7 +155,7 @@ public class ShoulderBargeTomeAbility extends TomeAbility {
 
         knockbackDirection = knockbackDirection.normalize();
         knockbackDirection.setY(Math.max(knockbackDirection.getY(), 0.2));
-        Vector knockback = knockbackDirection.multiply(KNOCKBACK_STRENGTH);
+        final Vector knockback = knockbackDirection.multiply(KNOCKBACK_STRENGTH);
         target.setVelocity(knockback);
 
         if (target instanceof LivingEntity livingTarget) {
@@ -201,11 +194,8 @@ public class ShoulderBargeTomeAbility extends TomeAbility {
      * Clean up any expired instances of barging effects.
      */
     private void cleanupOldEntries() {
-        long currentTime = System.currentTimeMillis();
-
-        synchronized(this.recentlyBargedEntities) {
-            this.recentlyBargedEntities.entrySet().removeIf((entry) -> currentTime - entry.getValue() > TARGET_COOLDOWN_MS);
-        }
+        final long currentTime = System.currentTimeMillis();
+        this.recentlyBargedEntities.entrySet().removeIf((entry) -> currentTime - entry.getValue() > TARGET_COOLDOWN_MS);
     }
 
     /**
@@ -219,9 +209,6 @@ public class ShoulderBargeTomeAbility extends TomeAbility {
         }
 
         this.chargingPlayers.clear();
-
-        synchronized(this.recentlyBargedEntities) {
-            this.recentlyBargedEntities.clear();
-        }
+        this.recentlyBargedEntities.clear();
     }
 }
