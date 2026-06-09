@@ -29,6 +29,7 @@ public class DeathHandler implements Listener {
     private final VampireManager vampireManager;
     private final Map<UUID, Material> lastWeaponUsed = new HashMap<>();
     private final Map<UUID, UUID> woodenStakeKills = new HashMap<>();
+    public static final String PERMAKILLED_TAG = "PermaKilled", PERMADEATH_CHOSEN_TAG = "PermadeathChosen", PROMOTION_BAN_PENDING_TAG = "PromotionBanPending";
 
     // TODO: Remove wooden axes from having special effects on vampires. It's really inconsistent where they are applied and where they are not, so it doesn't seem intentional.
 
@@ -64,20 +65,20 @@ public class DeathHandler implements Listener {
         boolean wasVampire = this.vampireManager.isVampire(player);
         boolean wasHuman = this.vampireManager.isHuman(player);
 
-        if (this.vampireManager.isVampire(player) && player.getScoreboardTags().contains("PermaKilled")) {
+        if (wasVampire && player.getScoreboardTags().contains(PERMAKILLED_TAG)) {
             this.vampireManager.killVampirePermanently(player);
-            player.removeScoreboardTag("PermaKilled");
+            player.removeScoreboardTag(PERMAKILLED_TAG);
 
-        } else if (this.vampireManager.isHuman(player) && player.getScoreboardTags().contains("PermadeathChosen")) {
+        } else if (wasHuman && player.getScoreboardTags().contains(PERMADEATH_CHOSEN_TAG)) {
             this.vampireManager.killVampirePermanently(player);
-            player.removeScoreboardTag("PermadeathChosen");
+            player.removeScoreboardTag(PERMADEATH_CHOSEN_TAG);
 
-        } else if (this.vampireManager.isVampire(player) && player.getScoreboardTags().contains("PromotionBanPending")) {
+        } else if (wasVampire && player.getScoreboardTags().contains(PROMOTION_BAN_PENDING_TAG)) {
             this.vampireManager.applyPromotionBan(player);
-            player.removeScoreboardTag("PromotionBanPending");
+            player.removeScoreboardTag(PROMOTION_BAN_PENDING_TAG);
         }
 
-        if (this.vampireManager.isHuman(player)) {
+        if (wasHuman) {
             this.plugin.getServer().getScheduler().runTask(this.plugin, () -> {
                 try {
                     Scoreboard mainScoreboard = Bukkit.getScoreboardManager().getMainScoreboard();
@@ -108,22 +109,13 @@ public class DeathHandler implements Listener {
         }, 5L);
 
         this.plugin.getServer().getScheduler().runTaskLater(this.plugin, () -> {
-            if (!event.isBedSpawn() && this.vampireManager.isVampire(player)) {
+            if (!event.isBedSpawn() && wasVampire) {
                 player.setRespawnLocation(this.plugin.getVampireRespawnLocation());
                 player.teleport(this.plugin.getVampireRespawnLocation());
             }
         }, 7L);
 
         this.plugin.getServer().getScheduler().runTaskLater(this.plugin, () -> checkAndAnnounceTeamElimination(this.plugin, wasHuman, wasVampire), 10L);
-    }
-
-    /**
-     * Determine if a team has been eliminated from the game.
-     *
-     * @param plugin the host plugin object.
-     */
-    public static void checkAndAnnounceTeamElimination(RemakepirePlugin plugin) {
-        DeathHandler.checkAndAnnounceTeamElimination(plugin, false, false);
     }
 
     /**
@@ -278,7 +270,7 @@ public class DeathHandler implements Listener {
         if (killer != null) {
             this.handlePvPDeath(victim, killer, event);
         } else if (this.vampireManager.isVampire(victim)) {
-            victim.addScoreboardTag("PromotionBanPending");
+            victim.addScoreboardTag(PROMOTION_BAN_PENDING_TAG);
         }
     }
 
@@ -311,15 +303,15 @@ public class DeathHandler implements Listener {
             int victimStage = this.vampireManager.getVampireStage(victim);
 
             if (victimStage <= woodenStakeThreshold && killedWithWoodenWeapon) {
-                victim.addScoreboardTag("PermaKilled");
+                victim.addScoreboardTag(PERMAKILLED_TAG);
                 killer.sendMessage("§4You have permanently killed the vampire " + victim.getName() + "!");
                 this.createVampireDeathEffects(victim.getLocation());
                 this.broadcastPermaKill(victim, killer);
-                this.plugin.logInfo("PERMA-KILL: Applied PermaKilled tag to " + victim.getName() + " (Stage " + victimStage + ", Threshold: " + woodenStakeThreshold + ")");
+                this.plugin.logInfo("PERMA-KILL: Applied " + PERMAKILLED_TAG + " tag to " + victim.getName() + " (Stage " + victimStage + ", Threshold: " + woodenStakeThreshold + ")");
 
             } else {
-                victim.addScoreboardTag("PromotionBanPending");
-                this.plugin.logInfo("PROMOTION BAN: Applied PromotionBanPending tag to " + victim.getName() + " (Stage " + victimStage + ", Threshold: " + woodenStakeThreshold + ")");
+                victim.addScoreboardTag(PROMOTION_BAN_PENDING_TAG);
+                this.plugin.logInfo("PROMOTION BAN: Applied " + PROMOTION_BAN_PENDING_TAG + " tag to " + victim.getName() + " (Stage " + victimStage + ", Threshold: " + woodenStakeThreshold + ")");
             }
         }
     }

@@ -62,10 +62,8 @@ public class VampireCureCommand implements CommandExecutor {
                         player.sendMessage("§cYou must be close to a holy beacon to perform this ritual.");
 
                     } else {
-                        String sireName = this.sireManager.getSire(player);
-
-                        if (sireName != null && !this.sireManager.canBeCured(player)) {
-                            player.sendMessage("§4The curse cannot be broken while your sire, " + sireName + ", still walks the world in mortal form...");
+                        if (!this.sireManager.canBeCured(player)) {
+                            player.sendMessage("§4The curse cannot be broken while your sire still walks the world in mortal form...");
                             player.sendMessage("§4Only through your maker's true death can you find release.");
                         } else {
                             this.performCure(player, holyWater, nearestHolyBeacon);

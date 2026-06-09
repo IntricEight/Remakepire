@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.entity.Player;
@@ -49,7 +50,7 @@ public class HolyWordTomeAbility extends TomeAbility implements Listener {
             int stage1Affected = 0, stage2And3Paralyzed = 0;
 
             for(Player target : nearbyPlayers) {
-                if (!target.equals(player) && !(target.getLocation().distance(player.getLocation()) > RADIUS)) {
+                if (!target.equals(player) && !(target.getLocation().distance(player.getLocation()) > RADIUS) && target.getGameMode() != GameMode.SPECTATOR) {
                     if (vampireManager.isVampireStage1(target)) {
                         target.sendMessage("§cA holy word sends your mind reeling, but you hold fast against it's paralysing effects.");
                         ++stage1Affected;
