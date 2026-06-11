@@ -109,7 +109,7 @@ public class CureBookReadingListener implements Listener {
 
                     if (!player.getScoreboardTags().contains(TAG_CURE_BOOK_4)) {
                         tagToAdd = TAG_CURE_BOOK_4;
-                        bookName = "The Retribution";
+                        bookName = "On the Nature of Sanguinity";
                         isNewTag = true;
                     }
 
@@ -130,7 +130,7 @@ public class CureBookReadingListener implements Listener {
                     player.sendMessage("§8§o[This feels like the third piece of a greater mystery, perhaps you should find the others]");
                 } else {
                     // TODO: Add more areas for each tome as Cleo gives more specifications
-                    player.sendMessage("§8§o[You absorb the ancient knowledge within " + bookName + "...]");
+                    player.sendMessage("§8§o[You have gained a key understanding of vampire physiology]");
                 }
 
                 this.plugin.logInfo("CURE BOOK READ: " + player.getName() + " read book #" + bookNumber);
@@ -138,7 +138,7 @@ public class CureBookReadingListener implements Listener {
                 if (bookNumber != BOOK_NUM_RETRIBUTION && hasReadAllCureBooks(player)) {
                     player.sendMessage("");
                     player.sendMessage("§6§lPenfield Journals Discovered:");
-                    player.sendMessage("§eWith these three books, you've determined the recipe for a cure to vampirism:");
+                    player.sendMessage("§eWith these three books, you've determined the recipe for a cure to vampirism");
                     player.sendMessage("");
 
                     this.plugin.logInfo("CURE UNLOCKED: " + player.getName() + " has unlocked the /vol cure command");
@@ -152,10 +152,8 @@ public class CureBookReadingListener implements Listener {
 
                 if (bookNumber == BOOK_NUM_RETRIBUTION && hasReadAllCureBooks(player)) {
                     player.sendMessage("");
-                    player.sendMessage("§4§lWORDS OF RETRIBUTION LEARNED.");
-                    player.sendMessage("§cYou have learned the vengeful words to force cure others:");
-                    player.sendMessage("§7/§4hoc-vinculum-tibi-dirumpo-mala-creatura §7<§4player§7>");
-                    player.sendMessage("§7You and the creature must be within range of a holy beacon, hold a holy water on your person, and in the light of day, say those words, and give them the final choice.");
+                    player.sendMessage("§4§lGained a key understanding of vampire physiology");
+                    player.sendMessage("§cWith this, you have have everything you need to forcibly cure a vampire");
                     player.sendMessage("");
 
                     this.plugin.logInfo("FORCE CURE UNLOCKED: " + player.getName() + " has unlocked the /hoc force cure command");

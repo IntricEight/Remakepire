@@ -71,9 +71,25 @@ public class StashFourthBookCommand implements CommandExecutor {
         BookMeta bookMeta = (BookMeta)book.getItemMeta();
 
         if (bookMeta != null) {
-            bookMeta.setTitle("The Retribution 4/3");
-            bookMeta.setAuthor("§4A vengeful hand...");
-            bookMeta.setPages("§8§o[The writing in this book is unlike the previous three, it is hurried and panicked, the ink is smeared and the smell of blood rests faintly on the pages]§r\n\n§0The spirits are too lenient... Too soft...", "§0These disgusting, vial, works of evil could never be convinced to come back to the light...\n\n§0They must be dragged back to humanity, kicking and screaming.", "§0They will have to choose. Accept the light, or face eternal darkness.\n\n§0I will give them this choice, with these holy words:", "§7/§4hoc-vinculum-tibi-dirumpo-mala-creatura §7<§4Players-Name§7>");
+            bookMeta.setTitle("§r§cOn the Nature of Sanguinity");
+            bookMeta.setAuthor("§4§lTomas Orion");
+            bookMeta.setPages("§4§lOn the Nature of Sanguinity\n" +
+                            "§o2nd Ed§r\n" +
+                            "§oBy Tomas Orion§r\n\n" +
+                            "§8§o[You find a section that was not present in the edition you already read. It seems useful]\n",
+                            "§4§lPart 4, Biology§r\n" +
+                            "There are a few key differences in biology of a Vampire and an uncorrupted human.\n" +
+                            "The most famous and obvious are, of course, their \"fangs\".\n" +
+                            "The fangs are merely extended canine teeth, shaped to pierce flesh and gain access to a human artery or vein.",
+                            "Vampires pale skin is cased by the other large difference between a human and someone who has been affected by Vampirism: Circulation. As a Vampire's heart does not beat, their blood does not flow around their body, Instead it flows primarily between the throat and the stomach,",
+                            "where it is absorbed into the body through a means we do not yet understand. Something which has held my fascination for some time is that there is only one place in all of a vampires body where one can find blood, even when a vampire has not fed for some time. This location is the",
+                            "Vertebral Artery. An artery which carries blood to the brain. Only here can blood be constantly found within a vampires body.\n" +
+                            "Another change, present in vampires whose condition has progressed to a significant degree, is the presence of \"claws\". Claws are the elongated finger",
+                            "bones that protrude through the end of their fingers in a way that should be extremely painful for the afflicted but is somehow painless. In addition to this, Vampire muscle mass seems to gain significant density at this level, which allows them to commit acts of great strength and",
+                            "agility, jumping cliffs and speeding across the ground supernaturally quickly. In addition to this their nerves are dampened significantly, causing them to feel little pain outside of a few key sources. There are a few other minor differences worth mentioning...",
+                            "§o[You figure you've absorbed what knowledge you actually need from this text by now]§r");
+//            bookMeta.setPages("§8§o[The writing in this book is unlike the previous three, it is hurried and panicked, the ink is smeared and the smell of blood rests faintly on the pages]§r\n\n§0The spirits are too lenient... Too soft...", "§0These disgusting, vial, works of evil could never be convinced to come back to the light...\n\n§0They must be dragged back to humanity, kicking and screaming.", "§0They will have to choose. Accept the light, or face eternal darkness.\n\n§0I will give them this choice, with these holy words:", "§7/§4hoc-vinculum-tibi-dirumpo-mala-creatura §7<§4Players-Name§7>");
+
             book.setItemMeta(bookMeta);
         }
 

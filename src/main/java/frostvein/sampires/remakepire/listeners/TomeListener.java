@@ -69,23 +69,7 @@ public class TomeListener implements Listener {
                     int cureBookNumber = CureBookReadingListener.getAuthenticCureBookNumber(item, this.plugin);
 
                     if (cureBookNumber > 0) {
-                        // Prevent the player from reading the fourth cure book if the rest of the trinity has not been read
-                        if (cureBookNumber == 4 && !CureBookReadingListener.hasReadAllCureBooks(player)) {
-                            event.setCancelled(true);
-                            ItemStack obscuredBook = new ItemStack(Material.WRITTEN_BOOK);
-                            BookMeta obscuredMeta = (BookMeta)obscuredBook.getItemMeta();
-
-                            if (obscuredMeta != null) {
-                                obscuredMeta.setTitle("The Retribution 4/3");
-                                obscuredMeta.setAuthor("§4A vengeful hand...");
-                                obscuredMeta.setPages("§8§oThe words within this tome are beyond your comprehension...\n\n§7Perhaps you must first complete the Trinity of Restoration.");
-                                obscuredBook.setItemMeta(obscuredMeta);
-                            }
-
-                            player.openBook(obscuredBook);
-                        } else {
-                            this.plugin.getCureBookReadingListener().onCureBookRead(player, cureBookNumber);
-                        }
+                        this.plugin.getCureBookReadingListener().onCureBookRead(player, cureBookNumber);
                     } else if (!this.tomeManager.isValidAbility(tomeTitle)) {
                         this.plugin.logInfo("Invalid tome ability: '" + tomeTitle + "'");
 
@@ -233,8 +217,8 @@ public class TomeListener implements Listener {
         String friendlyName = switch (tag) {
             case "CureBook1Read" -> "Cure Book 1 (A Study on Blood)";
             case "CureBook2Read" -> "Cure Book 2 (Notes for Future Biographers)";
-            case "CureBook3Read" -> "Cure Book 3 (The Absolution)";
-            case "CureBook4Read" -> "Cure Book 4 (The Retribution)";
+            case "CureBook3Read" -> "Cure Book 3 (Reversing Vampirism)";
+            case "CureBook4Read" -> "Cure Book 4 (On the Nature of Sanguinity)";
             default -> tag;
         };
 
