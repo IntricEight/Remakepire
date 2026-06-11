@@ -75,7 +75,8 @@ public class CureBookManager {
     public String getCureBookName(int bookNumber, boolean itemName) {
         if (itemName && CUSTOM_BOOKS) {
             // The item name of the custom cure books
-            return this.textConfig.getString("cure-book-" + bookNumber + ".item-title", "ERROR could not find item title").substring(0, 32);
+            String bookName = this.textConfig.getString("cure-book-" + bookNumber + ".item-title", "ERROR could not find item title");
+            return bookName.substring(0, Math.min(bookName.length(), 32));
 
         } else if (CUSTOM_BOOKS) {
             // The book name of the custom cure book
