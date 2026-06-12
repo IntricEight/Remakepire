@@ -246,3 +246,34 @@ border-freedom-messages:
   # The player is a vampire
   vampire-freedom:
     - "§4You are free of your chains, creature of the night..."
+
+
+# ============================================================================
+# CURES AND KILLS - GLOBAL MESSAGES
+#   Inside this section, there are controls for the global announcements triggered when a player is permanently killed or a cure is executed.
+#   Begin by setting custom-global-announcements to true, and then edit or replace sections to change the announcements when a player is cured or killed.
+#
+#   To begin changing the messages that are sent under different conditions, set custom-global-announcements to true.
+#   To return the messages to their original forms, toggle their custom control back to false and the plugin will revert to the default version of each feature.
+# ============================================================================
+
+# Enable/Disable announcing the content in this file when a player is either cured or permanently killed
+# Default: false (Custom content disabled)
+custom-global-announcements: false
+
+# The custom messages that appear when a human or vampire is permanently killed
+combat-death-announcement:
+  # The message that humans see when a human is permakilled
+  human-death-to-humans: "§cA shiver runs down your spine, as a human soul is torn from this realm..."
+
+  # The message that vampires see when a human is permakilled
+  human-death-to-vampires: "§2You sense the fading light of a soul, unnoticed until its disappearance... One of your prey been slain."
+
+  # The message that humans see when a vampire is staked and permakilled
+  vampire-death-to-humans: "§aYou feel the realm has been purged of an evil spirit... Someone has successfully killed a vampire. Permanently."
+
+  # The message that vampires see when a vampire is staked and permakilled
+  vampire-death-to-vampires: "§4You feel a dark soul ripped from its human coil, somebody has slayed a member of your monstrous family..."
+
+
+
