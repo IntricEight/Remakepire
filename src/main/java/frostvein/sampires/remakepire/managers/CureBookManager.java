@@ -3,8 +3,14 @@ package frostvein.sampires.remakepire.managers;
 import java.util.ArrayList;
 import java.util.List;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.World;
+import org.bukkit.block.Block;
+import org.bukkit.block.Chest;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BookMeta;
 import frostvein.sampires.remakepire.RemakepirePlugin;
@@ -333,5 +339,75 @@ public class CureBookManager {
                 return "§4One of your kind has chosen eternal death over forced redemption... The darkness mourns their passing...";
             }
         }
+    }
+
+    /**
+     * Place a cure book inside a chest at the provided location.
+     *
+     * @param admin the player requesting to stash a cure book.
+     * @param bookNumber the cure book's order in the sequence.
+     * @param x the X coordinate of the chest.
+     * @param y the Y coordinate of the chest.
+     * @param z the Z coordinate of the chest.
+     * @return {@code true} if the book was successfully stashed.
+     */
+    public boolean stashCureBook(Player admin, int bookNumber, int x, int y, int z) {
+        World world = Bukkit.getWorld(RemakepirePlugin.WORLD_NAME);
+
+        if (world == null) {
+            admin.sendMessage("§cWorld '" + RemakepirePlugin.WORLD_NAME + "' not found.");
+            return false;
+        }
+
+        // Retrieve the tome chest at the location
+        Block block = world.getBlockAt(new Location(world, x, y, z));
+
+        if (!(block.getState() instanceof Chest chest)) {
+            admin.sendMessage("§cNo chest found at coordinates " + x + ", " + y + ", " + z + ".");
+            return false;
+        }
+
+        // Place the third cure book inside the chest
+        Inventory chestInventory = chest.getInventory();
+        chestInventory.clear();
+        ItemStack book = this.plugin.getCureBookManager().getCureBook(bookNumber);
+        chestInventory.addItem(book);
+        admin.sendMessage("§aSuccessfully stashed '" + this.plugin.getCureBookManager().getCureBookName(bookNumber, true) + "' in the chest at " + x + ", " + y + ", " + z + ".");
+
+        return true;
+    }
+
+    /**
+     * Place a cure book inside a chest at the provided location.
+     *
+     * @param bookNumber the cure book's order in the sequence.
+     * @param x the X coordinate of the chest.
+     * @param y the Y coordinate of the chest.
+     * @param z the Z coordinate of the chest.
+     * @return {@code true} if the book was successfully stashed.
+     */
+    public boolean stashCureBook(int bookNumber, int x, int y, int z) {
+        World world = Bukkit.getWorld(RemakepirePlugin.WORLD_NAME);
+
+        if (world == null) {
+            this.plugin.logInfo("§cWorld '" + RemakepirePlugin.WORLD_NAME + "' not found.");
+            return false;
+        }
+
+        // Retrieve the tome chest at the location
+        Block block = world.getBlockAt(new Location(world, x, y, z));
+
+        if (!(block.getState() instanceof Chest chest)) {
+            this.plugin.logInfo("§cNo chest found at coordinates " + x + ", " + y + ", " + z + ".");
+            return false;
+        }
+
+        // Place the third cure book inside the chest
+        Inventory chestInventory = chest.getInventory();
+        chestInventory.clear();
+        ItemStack book = this.plugin.getCureBookManager().getCureBook(bookNumber);
+        chestInventory.addItem(book);
+
+        return true;
     }
 }

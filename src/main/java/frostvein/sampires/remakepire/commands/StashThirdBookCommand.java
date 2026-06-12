@@ -1,51 +1,56 @@
 package frostvein.sampires.remakepire.commands;
 
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.World;
-import org.bukkit.block.Block;
-import org.bukkit.block.Chest;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.BookMeta;
+import org.bukkit.entity.Player;
 import frostvein.sampires.remakepire.RemakepirePlugin;
 
 public class StashThirdBookCommand implements CommandExecutor {
     private final RemakepirePlugin plugin;
 
+    /**
+     * Create an instance of the command manager to stash the third cure book.
+     *
+     * @param plugin the host plugin object.
+     */
     public StashThirdBookCommand(RemakepirePlugin plugin) {
         this.plugin = plugin;
     }
 
+    /**
+     * Stash the third cure book at the location provided through the command.
+     */
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        World world = Bukkit.getWorld(RemakepirePlugin.WORLD_NAME);
-
-        if (world == null) {
-            sender.sendMessage("§cWorld 'world' not found.");
+        if (args.length < 3) {
+            sender.sendMessage("§cUsage: /stash_third_book <x> <y> <z>");
             return true;
-
-        } else {
-            Location chestLocation = new Location(world, 76.0, 80.0, 407.0);
-            Block block = world.getBlockAt(chestLocation);
-
-            if (!(block.getState() instanceof Chest chest)) {
-                sender.sendMessage("§cNo chest found at coordinates 76, 80, 407.");
-                return true;
-
-            } else {
-                Inventory chestInventory = chest.getInventory();
-                chestInventory.clear();
-                ItemStack book = this.plugin.getCureBookManager().getCureBook(3);
-                chestInventory.addItem(book);
-                sender.sendMessage("§aSuccessfully stashed '" + this.plugin.getCureBookManager().getCureBookName(3, true) + "' in the chest at 76, 80, 407.");
-
-                this.plugin.logInfo(sender.getName() + " used /stash_third_book - placed " + this.plugin.getCureBookManager().getCureBookName(3, true) + " at 76, 80, 407");
-                return true;
-            }
         }
+
+        boolean stashSucccess;
+        int x, y, z;
+
+        try {
+            x = Integer.parseInt(args[0]);
+            y = Integer.parseInt(args[1]);
+            z = Integer.parseInt(args[2]);
+
+        } catch (NumberFormatException e) {
+            sender.sendMessage("§cInvalid coordinates. Use whole numbers.");
+            return true;
+        }
+
+        // Stash the third cure book inside the chest at the location, if it exists
+        if (sender instanceof Player admin) {
+            stashSucccess = this.plugin.getCureBookManager().stashCureBook(admin, 3, x, y, z);
+        } else {
+            stashSucccess = this.plugin.getCureBookManager().stashCureBook(3, x, y, z);
+        }
+
+        if (stashSucccess) {
+            this.plugin.logInfo(sender.getName() + " used /stash_third_book - placed " + this.plugin.getCureBookManager().getCureBookName(3, true) + " at " + x + ", " + y + ", " + z);
+        }
+
+        return true;
     }
 }
