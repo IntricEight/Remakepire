@@ -18,6 +18,7 @@ public class PowCommand implements CommandExecutor, TabCompleter {
     private final CommandHandler adminHandler;
     private final VampireAbilityCommand abilityCommand;
     private final TomeAbilityCommand tomeCommand;
+    private final CheckLivesCommand checkLivesCommand;
     private final ForcedCureReopenCommand forceCureReopenCommand;
     private final HolySitesCommand beaconStatusCommand;
     private final TexturePackCommand texturePackCommand;
@@ -35,6 +36,7 @@ public class PowCommand implements CommandExecutor, TabCompleter {
         this.adminHandler = new CommandHandler(plugin);
         this.abilityCommand = new VampireAbilityCommand(plugin);
         this.tomeCommand = new TomeAbilityCommand(plugin);
+        this.checkLivesCommand = new CheckLivesCommand(plugin);
         this.forceCureReopenCommand = new ForcedCureReopenCommand(plugin);
         this.beaconStatusCommand = new HolySitesCommand(plugin);
         this.texturePackCommand = new TexturePackCommand(plugin);
@@ -59,6 +61,8 @@ public class PowCommand implements CommandExecutor, TabCompleter {
                     return this.abilityCommand.onCommand(sender, command, label, subArgs);
                 case "tome":
                     return this.tomeCommand.onCommand(sender, command, label, subArgs);
+                case "checklives":
+                    return this.checkLivesCommand.onCommand(sender, command, label, subArgs);
                 case "beaconstatus":
                 case "holysites":
                 case "holy":
@@ -139,6 +143,7 @@ public class PowCommand implements CommandExecutor, TabCompleter {
         sender.sendMessage("§e/pow tome <name> §7- Use tome abilities (humans)");
         sender.sendMessage("§e/voluntate-mea-hoc-nefandum-vinculum-abicio §7- Cure yourself from vampirism");
         sender.sendMessage("§e/hoc-vinculum-tibi-dirumpo-mala-creatura <player> §7- Force cure a vampire");
+        sender.sendMessage("§e/pow checklives §7- Check how many lives this player has remaining");
         sender.sendMessage("§e/pow beaconstatus §7- Check beacon spiritual influence");
         sender.sendMessage("§e/pow texture §7- Apply VampireSMP texture pack");
         sender.sendMessage("§e/pow permadeath <on | off | absolute> §7- Set permadeath preference");
@@ -191,7 +196,7 @@ public class PowCommand implements CommandExecutor, TabCompleter {
         List<String> completions = new ArrayList<>();
 
         if (args.length == 1) {
-            List<String> subCommands = new ArrayList<>(Arrays.asList("vability", "tome", "beaconstatus", "permadeath", "toggle-turning", "help"));
+            List<String> subCommands = new ArrayList<>(Arrays.asList("vability", "tome", "checklives", "beaconstatus", "permadeath", "toggle-turning", "help"));
             if (sender.hasPermission("vampiresmp.admin")) {
                 subCommands.add(0, "admin");
             }
