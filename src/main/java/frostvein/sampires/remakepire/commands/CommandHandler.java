@@ -140,6 +140,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
 
                 target.addScoreboardTag(VampireManager.HUMAN_TAG);
 
+                // Reset the new human's death counter
                 try {
                     Scoreboard mainScoreboard = Bukkit.getScoreboardManager().getMainScoreboard();
                     Objective deathObjective = mainScoreboard.getObjective("vsmp_death");

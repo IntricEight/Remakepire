@@ -90,12 +90,14 @@ public class DeathHandler implements Listener {
                     Scoreboard mainScoreboard = Bukkit.getScoreboardManager().getMainScoreboard();
                     Objective deathObjective = mainScoreboard.getObjective("vsmp_death");
 
+                    // Make sure the player doesn't respawn with an illegal number of lives
                     if (deathObjective != null) {
                         int currentDeaths = deathObjective.getScore(player.getName()).getScore();
+                        int maxDeaths = this.plugin.getConfigManager().getHumanLifeCount();
 
-                        if (currentDeaths > 5) {
-                            deathObjective.getScore(player.getName()).setScore(5);
-                            this.plugin.logInfo("Capped death count for " + player.getName() + " at 5 (was " + currentDeaths + ")");
+                        if (currentDeaths > maxDeaths) {
+                            deathObjective.getScore(player.getName()).setScore(maxDeaths);
+                            this.plugin.logInfo("Capped death count for " + player.getName() + " at " + maxDeaths + " (was " + currentDeaths + ")");
                         }
                     }
                 } catch (Exception e) {

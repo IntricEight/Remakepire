@@ -620,6 +620,24 @@ public class ConfigManager {
     }
 
     /**
+     * Retrieve the number of lives that humans start out with.
+     *
+     * @return The total number of times humans can die and respawn.
+     */
+    public int getHumanLifeCount() {
+        int lives = this.config.getInt("combat.human-lives", 5);
+
+        // Make sure the life count is within the specified range
+        if (lives > 8) {
+            lives = 8;
+        } else if (lives < 0) {
+            lives = 0;
+        }
+
+        return lives;
+    }
+
+    /**
      * Retrieve if humans will die once their lives run out, or be kept alive until a vampire gets the final kill.
      *
      * @return {@code true} is humans will permanently die on their sixth death, regardless of its cause.

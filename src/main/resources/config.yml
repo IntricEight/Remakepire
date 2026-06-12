@@ -309,6 +309,15 @@ combat:
   # Default: 1 (only Stage 1 vampires can be staked)
   permadeath-minimum-stage: 1
 
+  # Control how many lives humans start out with
+  # Note that this is the number of times a human will revive. For example, 5 lives means 6 total deaths.
+  # Humans will always start out with 10 hearts, and lose hearts as their lives drop
+  # This change is not retroactive. If a human has died more times than allowed (after this value has been changed)
+  #   they will need to die one more time before it takes affect
+  # Minimum of 0 lives, maximum of 8
+  # Default: 5 (6 deaths)
+  human-lives: 5
+
   # Enable whether humans will be hard-capped to their 5 lives
   # When false, only a vampire can permakill a human player on their last life
   # Default: False (Extra dying is allowed)
