@@ -261,6 +261,27 @@ border-freedom-messages:
 # Default: false (Custom content disabled)
 custom-global-announcements: false
 
+# The custom messages that appear after a cure has been used
+global-cure-announcement:
+  # The message that humans see when a vampire chooses to cure themself
+  self-cure-announcement-to-humans: "§aA beacon of holy light flickers and dims... A vampire has been cured, but at great cost to the sacred site."
+
+  # The message that vampires see when a vampire chooses to cure themself
+  self-cure-announcement-to-vampires: "§4A disturbance ripples through the darkness... One of your kind has abandoned the gift of immortality..."
+
+  # The message that humans see when a vampire is cured by another player
+  force-cure-success-announcement-to-humans: "§6A beacon of holy light erupts with righteous fury... Someone has sanctified a vampire forcibly... The curing comes at a great cost to a sacred site..."
+
+  # The message that vampires see when a vampire is cured by another player
+  force-cure-success-announcement-to-vampires: "§4A disturbance ripples through the darkness... One of your kind has chosen humanity over eternal damnation..."
+
+  # The message that humans see when a vampire chooses death over being cured
+  force-cure-death-announcement-to-humans: "§8A vampire has refused the light and embraced final death... Their essence fades from this world forever..."
+
+  # The message that vampires see when a vampire chooses death over being cured
+  force-cure-death-announcement-to-vampires: "§4One of your kind has chosen eternal death over forced redemption... The darkness mourns their passing..."
+
+
 # The custom messages that appear when a human or vampire is permanently killed
 combat-death-announcement:
   # The message that humans see when a human is permakilled

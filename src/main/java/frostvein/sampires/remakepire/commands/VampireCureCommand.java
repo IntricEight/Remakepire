@@ -93,13 +93,17 @@ public class VampireCureCommand implements CommandExecutor {
         player.sendMessage("§aYou are cured. You are human once more.");
         player.sendMessage("§8But the holy site has been permanently corrupted by your dark presence...");
 
+        // Retrieve the messages to announce to the server population
+        final String messageToHumans = this.plugin.getCureBookManager().getSelfCureAnnouncementMessage(true);
+        final String messageToVampires = this.plugin.getCureBookManager().getSelfCureAnnouncementMessage(false);
+
         // Alert all players that a vampire has been cured
         for(Player onlinePlayer : Bukkit.getOnlinePlayers()) {
             if (!onlinePlayer.equals(player)) {
                 if (this.vampireManager.isVampire(onlinePlayer)) {
-                    onlinePlayer.sendMessage("§4A disturbance ripples through the darkness... One of your kind has abandoned the gift of immortality...");
+                    onlinePlayer.sendMessage(messageToVampires);
                 } else {
-                    onlinePlayer.sendMessage("§aA beacon of holy light flickers and dims... A vampire has been cured, but at great cost to the sacred site.");
+                    onlinePlayer.sendMessage(messageToHumans);
                 }
             }
         }

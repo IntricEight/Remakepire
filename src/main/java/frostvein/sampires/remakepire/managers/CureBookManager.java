@@ -13,7 +13,7 @@ import frostvein.sampires.remakepire.listeners.CureBookReadingListener;
 public class CureBookManager {
     private final RemakepirePlugin plugin;
     private final FileConfiguration textConfig;
-    private final boolean CUSTOM_BOOKS, CUSTOM_MESSAGES;
+    private final boolean CUSTOM_BOOKS, CUSTOM_MESSAGES, CUSTOM_CURE_MESSAGES;
 
     /**
      * Create an instance of the Cure Book manager.
@@ -29,6 +29,7 @@ public class CureBookManager {
         // Determine whether we are using custom features or not
         this.CUSTOM_BOOKS = this.textConfig.getBoolean("custom-cure-books", false);
         this.CUSTOM_MESSAGES = this.textConfig.getBoolean("custom-cure-book-messages", false);
+        this.CUSTOM_CURE_MESSAGES = this.textConfig.getBoolean("custom-global-announcements", false);
     }
 
     /**
@@ -277,5 +278,60 @@ public class CureBookManager {
         }
 
         return messages.toArray(new String[0]);
+    }
+
+    /**
+     * Retrieve a message to inform the reader that a vampire has cured themselves.
+     *
+     * @param messageToHumans {@code true} if we are retrieving the message that humans will see.
+     * @return A message to be announced across the server.
+     */
+    public String getSelfCureAnnouncementMessage(boolean messageToHumans) {
+        // Retrieve a message depending on whether we are retrieving the human or vampire's perspective message
+        if (CUSTOM_CURE_MESSAGES) {
+            if (messageToHumans) {
+                return this.textConfig.getString("global-cure-announcement.self-cure-announcement-to-humans");
+            } else {
+                return this.textConfig.getString("global-cure-announcement.self-cure-announcement-to-vampires");
+            }
+        } else {
+            if (messageToHumans) {
+                return "§aA beacon of holy light flickers and dims... A vampire has been cured, but at great cost to the sacred site.";
+            } else {
+                return "§4A disturbance ripples through the darkness... One of your kind has abandoned the gift of immortality...";
+            }
+        }
+    }
+
+    /**
+     * Retrieve a message to inform the reader that a vampire has undergone the force cure.
+     *
+     * @param messageToHumans {@code true} if we are retrieving the message that humans will see.
+     * @param cureSuccess {@code true} if the vampire chose to be cured over death.
+     * @return A message to be announced across the server.
+     */
+    public String getForceCureAnnouncementMessage(boolean messageToHumans, boolean cureSuccess) {
+        // Retrieve a message depending on whether we are retrieving the human or vampire's perspective message
+        if (CUSTOM_CURE_MESSAGES) {
+            if (messageToHumans && cureSuccess) {
+                return this.textConfig.getString("global-cure-announcement.force-cure-success-announcement-to-humans");
+            } else if (messageToHumans) {
+                return this.textConfig.getString("global-cure-announcement.force-cure-death-announcement-to-humans");
+            } else if (cureSuccess) {
+                return this.textConfig.getString("global-cure-announcement.force-cure-success-announcement-to-vampires");
+            } else {
+                return this.textConfig.getString("global-cure-announcement.force-cure-death-announcement-to-vampires");
+            }
+        } else {
+            if (messageToHumans && cureSuccess) {
+                return "§6A beacon of holy light erupts with righteous fury... Someone has sanctified a vampire forcibly... The curing comes at a great cost to a sacred site...";
+            } else if (messageToHumans) {
+                return "§8A vampire has refused the light and embraced final death... Their essence fades from this world forever...";
+            } else if (cureSuccess) {
+                return "§4A disturbance ripples through the darkness... One of your kind has chosen humanity over eternal damnation...";
+            } else {
+                return "§4One of your kind has chosen eternal death over forced redemption... The darkness mourns their passing...";
+            }
+        }
     }
 }
