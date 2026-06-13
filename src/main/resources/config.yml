@@ -339,7 +339,7 @@ damage_suppression: 50
 # ============================================================================
 oakhurst:
   # Town name
-  # Used for all instances where the town's name is used
+  # Used for all instances where the town's name is used (Unless custom messages are enabled in text-config.yml)
   # Default: "Oakhurst"
   town-name: "Oakhurst"
 
