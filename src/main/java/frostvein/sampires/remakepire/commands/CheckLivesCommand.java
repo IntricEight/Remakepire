@@ -44,7 +44,7 @@ public class CheckLivesCommand implements CommandExecutor {
                 if (currentDeaths < maxDeaths) {
                     sender.sendMessage("§6" + (maxDeaths - currentDeaths) + "§7 lives remaining");
                 } else {
-                    sender.sendMessage("§cYou are on your final life... Be careful!");
+                    sender.sendMessage("§cNo lives remain... Be careful!");
                 }
             }
         }

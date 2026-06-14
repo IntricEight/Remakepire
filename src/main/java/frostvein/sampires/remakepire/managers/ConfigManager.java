@@ -295,7 +295,6 @@ public class ConfigManager {
         return this.config.getInt("abilities.tome.way-of-the-prospector-cooldown", 600);
     }
 
-
     /**
      * Retrieve the cooldown on the tome ability Stop the Bleeding.
      *
@@ -303,6 +302,26 @@ public class ConfigManager {
      */
     public int getTomeStopTheBleedingCooldown() {
         return this.config.getInt("abilities.tome.stop-the-bleeding-cooldown", 7200);
+    }
+
+
+    public List<String> getTomeAbilityOptions() {
+        return this.config.getStringList("tome-chests.tome-options");
+    }
+
+
+    public List<String> getTomeEnchantmentOptions() {
+        return this.config.getStringList("tome-chests.enchantment-options");
+    }
+
+    /**
+     * Retrieve the ticks between tome book distribution cycles.
+     *
+     * @return The number of ticks after which tome chests will be refilled.
+     */
+    public long getTomeDistributionIntervalTicks() {
+        int minutes = this.config.getInt("tome-distribution-interval-minutes", 20);
+        return (long)minutes * 60L * 20L;
     }
 
     /**
@@ -738,16 +757,6 @@ public class ConfigManager {
      */
     public double getCureBooksSpawnChance() {
         return this.config.getDouble("cure_books_spawn_chance", 0.3);
-    }
-
-    /**
-     * Retrieve the ticks between tome book distribution cycles.
-     *
-     * @return The number of ticks after which tome chests will be refilled.
-     */
-    public long getTomeDistributionIntervalTicks() {
-        int minutes = this.config.getInt("tome-distribution-interval-minutes", 20);
-        return (long)minutes * 60L * 20L;
     }
 
     /**

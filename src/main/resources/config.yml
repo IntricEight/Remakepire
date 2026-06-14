@@ -24,9 +24,9 @@ chat:
 # ============================================================================
 # TOME CHEST SYSTEM
 # ============================================================================
-# List of coordinates where tome chests can spawn
-# Format: "x,y,z" - Use /pow admin addtomechest to add new locations in-game
 tome-chests:
+  # A list of coordinates where tome chests can spawn
+  # Format: "x,y,z" - Use /pow admin addtomechest to add new locations in-game
   locations:
     - -1141,59,-764
     - -560,110,-343
@@ -39,6 +39,65 @@ tome-chests:
     - -1437,101,-302
     - -1095,-11,-1028
     - -630,256,-1168
+
+  # A list of tome abilities that can spawn inside tome chests
+  # The default list are all the books supported in the plugin; you pick and choose which ones you want included in your game
+  # You can find a list of the supported tome options below this list
+  tome-options:
+    - "BanishUndead"
+    - "Blessing"
+    - "EnlightenedEye"
+    - "HolyWord"
+    - "LanternThrash"
+    - "PrayerOfFaith"
+    - "RallyingCry"
+    - "ShoulderBarge"
+    - "StopTheBleeding"
+    - "TurnUndead"
+    - "UncannyDirection"
+    - "UnnaturalHaste"
+    - "WayOfTheLand"
+    - "WayOfTheLumberjack"
+    - "WayOfTheProspector"
+
+# Tome Ability Book Options
+#    "BanishUndead"
+#    "Blessing"
+#    "EnlightenedEye"
+#    "HolyWord"
+#    "LanternThrash"
+#    "PrayerOfFaith"
+#    "RallyingCry"
+#    "ShoulderBarge"
+#    "StopTheBleeding"
+#    "TurnUndead"
+#    "UncannyDirection"
+#    "UnnaturalHaste"
+#    "WayOfTheLand"
+#    "WayOfTheLumberjack"
+#    "WayOfTheProspector"
+
+  # A list of enchantment books that can spawn inside tome chests
+  # The default list are all the enchantments supported in the default plugin
+  # You can find a list of the supported enchantment options below this list
+  enchantment-options:
+    - "Efficiency"
+    - "FeatherFalling"
+    - "Knockback"
+    - "Protection"
+    - "SweepingEdge"
+
+# Tome Enchantment Book Options
+#    "Efficiency"
+#    "FeatherFalling"
+#    "Knockback"
+#    "Mending"
+#    "Power"
+#    "Protection"
+#    "Punch"
+#    "Respiration"
+#    "Sharpness"
+#    "SweepingEdge"
 
 # Tome Distribution Interval
 # How often tomes are distributed to chests (in minutes)
