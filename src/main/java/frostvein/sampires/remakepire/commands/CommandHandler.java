@@ -833,6 +833,10 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                 case "desecrated":
                 case "desecrate":
                     return this.handleBeaconDesecrated(sender, args);
+                case "break":
+                case "corrupt":
+                case "corrupted":
+                    return this.handleBeaconCorrupted(sender, args);
                 case "neutral":
                     return this.handleBeaconNeutral(sender, args);
                 case "fix":
@@ -1014,6 +1018,11 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         }
     }
 
+    /**
+     * Retrieve a list of existing beacons grouped into their alignments.
+     *
+     * @return {@code true}
+     */
     private boolean handleBeaconList(CommandSender sender, String[] args) {
         for(String line : this.beaconManager.getBeaconList()) {
             sender.sendMessage(line);
@@ -1054,10 +1063,14 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         return true;
     }
 
+    /**
+     * Retrieve the info on a specific beacon.
+     *
+     * @return {@code true}
+     */
     private boolean handleBeaconInfo(CommandSender sender, String[] args) {
         if (args.length < 2) {
             sender.sendMessage("§cUsage: /pow admin beacon info <name>");
-            return true;
 
         } else {
             String name = args[1];
@@ -1065,14 +1078,14 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
 
             if (beacon == null) {
                 sender.sendMessage("§cBeacon '" + name + "' not found.");
-                return true;
 
             } else {
                 sender.sendMessage("§6§l=== BEACON INFO ===");
                 sender.sendMessage(beacon.getStatusString());
-                return true;
             }
         }
+
+        return true;
     }
 
     private boolean handleBeaconValidate(CommandSender sender, String[] args) {
@@ -1081,66 +1094,97 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         return true;
     }
 
+    /**
+     * Set a beacon as holy aligned.
+     *
+     * @return {@code true}
+     */
     private boolean handleBeaconHoly(CommandSender sender, String[] args) {
         if (args.length < 2) {
             sender.sendMessage("§cUsage: /pow admin beacon holy <name>");
-            return true;
-
         } else {
             String name = args[1];
 
             if (this.beaconManager.setBeaconHoly(name)) {
                 sender.sendMessage("§aBeacon '" + name + "' has been consecrated as holy.");
                 sender.sendMessage("§7The beacon now emanates divine light and protection.");
-
             } else {
                 sender.sendMessage("§cBeacon '" + name + "' not found.");
             }
-
-            return true;
         }
+
+        return true;
     }
 
+    /**
+     * Set a beacon as darkness aligned.
+     *
+     * @return {@code true}
+     */
     private boolean handleBeaconDesecrated(CommandSender sender, String[] args) {
         if (args.length < 2) {
             sender.sendMessage("§cUsage: /pow admin beacon desecrated <name>");
-            return true;
-
         } else {
             String name = args[1];
 
             if (this.beaconManager.setBeaconDesecrated(name)) {
                 sender.sendMessage("§4Beacon '" + name + "' has been desecrated by dark forces.");
                 sender.sendMessage("§7The beacon now radiates malevolent energy and shadow.");
-
             } else {
                 sender.sendMessage("§cBeacon '" + name + "' not found.");
             }
-
-            return true;
         }
+
+        return true;
     }
 
+    /**
+     * Set a beacon as a broken beacon (corrupted).
+     *
+     * @return {@code true}
+     */
+    private boolean handleBeaconCorrupted(CommandSender sender, String[] args) {
+        if (args.length < 2) {
+            sender.sendMessage("§cUsage: /pow admin beacon corrupted <name>");
+        } else {
+            String name = args[1];
+
+            if (this.beaconManager.setBeaconCorrupted(name)) {
+                sender.sendMessage("§4Beacon '" + name + "' has been corrupted by an expulsion of light and dark.");
+                sender.sendMessage("§7A lifeless energy leaks from the beacon.");
+            } else {
+                sender.sendMessage("§cBeacon '" + name + "' not found.");
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Set a beacon as unaligned (neutral).
+     *
+     * @return {@code true}.
+     */
     private boolean handleBeaconNeutral(CommandSender sender, String[] args) {
         if (args.length < 2) {
             sender.sendMessage("§cUsage: /pow admin beacon neutral <name>");
-            return true;
-
         } else {
             String name = args[1];
 
             if (this.beaconManager.setBeaconNeutral(name)) {
-                sender.sendMessage("§7Beacon '" + name + "' has been set to neutral.");
-                sender.sendMessage("§7The beacon texture has changed. Players will receive notification in 60 seconds.");
-
+                sender.sendMessage("§7Beacon '" + name + "' has been unaligned and set to neutral.");
+                sender.sendMessage("§7The beacon texture has changed. Players will receive notification in " + this.plugin.getConfigManager().getBeaconNeutralAnnouncementDelaySeconds() + " seconds.");
             } else {
                 sender.sendMessage("§cBeacon '" + name + "' not found.");
             }
-
-            return true;
         }
+
+        return true;
     }
 
+    /**
+     * Provide the sender with a helpful list of instructions on using POW's plugin commands
+     */
     private void sendBeaconHelp(CommandSender sender) {
         sender.sendMessage("§6§l=== BEACON COMMANDS ===");
         sender.sendMessage("§e/pow admin beacon add <name> [radius] §7- Add beacon at your location");
@@ -1160,7 +1204,6 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
     private boolean handleTurnCommand(CommandSender sender, Player target, String[] args) {
         if (!this.vampireManager.isHuman(target)) {
             sender.sendMessage("§c" + target.getName() + " is not human. Only humans can be turned into vampires.");
-            return true;
         } else {
             Player turner = null;
 
@@ -1179,30 +1222,25 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
             }
 
             this.plugin.getVampireManager().performVampireTurning(target, turner);
-            return true;
         }
+
+        return true;
     }
 
     private boolean handleGiveTomeCommand(CommandSender sender, String[] args) {
         if (args.length < 2) {
             sender.sendMessage("§cUsage: /givetome <player> <ability> [amount]");
-            return true;
-
         } else {
             Player target = Bukkit.getPlayer(args[0]);
 
             if (target == null) {
                 sender.sendMessage("§cPlayer '" + args[0] + "' not found.");
-                return true;
-
             } else {
                 String abilityName = args[1];
 
                 if (!this.tomeManager.isValidAbility(abilityName)) {
                     sender.sendMessage("§cUnknown tome ability: '" + abilityName + "'");
                     sender.sendMessage("§7Available abilities: " + String.join(", ", this.tomeManager.getAllAbilityNames()));
-                    return true;
-
                 } else {
                     int amount = 1;
 
@@ -1274,21 +1312,19 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                     }
 
                     sender.sendMessage("§aGave " + amount + "x Tome of " + abilityName + " to " + target.getName() + ".");
-                    return true;
                 }
             }
         }
+
+        return true;
     }
 
     private boolean handleSelectTomesCommand(CommandSender sender, String[] args) {
         if (!(sender instanceof Player admin)) {
             sender.sendMessage("§cThis command can only be used by players.");
-            return true;
 
         } else if (args.length < 1) {
             sender.sendMessage("§cUsage: /pow admin select_tomes <player>");
-            return true;
-
         } else {
             Player target = Bukkit.getPlayer(args[0]);
 
@@ -1297,28 +1333,26 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
             } else {
                 this.tomeManager.openTomeSelectionGUI(admin, target);
             }
-
-            return true;
         }
+
+        return true;
     }
 
     private boolean handleGiveCureBookCommand(CommandSender sender, String[] args) {
         if (args.length < 2) {
             sender.sendMessage("§cUsage: /pow admin give_cure_book <player> <1 | 2 | 3 | 4>");
-            return true;
-
         } else {
             Player target = Bukkit.getPlayer(args[0]);
 
             if (target == null) {
                 sender.sendMessage("§cPlayer '" + args[0] + "' not found.");
-                return true;
 
             } else {
                 int bookNum;
 
                 try {
                     bookNum = Integer.parseInt(args[1]);
+
                     if (bookNum < 1 || bookNum > 4) {
                         sender.sendMessage("§cBook number must be 1, 2, 3, or 4.");
                         return true;
@@ -1333,37 +1367,35 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                 if (target.getInventory().firstEmpty() == -1) {
                     target.getWorld().dropItemNaturally(target.getLocation(), book);
                     target.sendMessage("§5An ancient tome appears at your feet...");
-
                 } else {
                     target.getInventory().addItem(book);
                     target.sendMessage("§5An ancient tome has appeared in your inventory...");
                 }
 
                 sender.sendMessage("§aGave Cure Book " + bookNum + " to §e" + target.getName());
-                return true;
             }
         }
+
+        return true;
     }
 
     private boolean handleDistributeTomesCommand(CommandSender sender, String[] args) {
         if (this.plugin.getTomeDistributionManager().getTomeLocations().isEmpty()) {
             sender.sendMessage("§c§lWarning: §cNo tome chest locations are configured!");
             sender.sendMessage("§7Use §e/pow admin addtomechest §7to add tome chest locations first.");
-            return true;
 
         } else {
             sender.sendMessage("§eTriggering tome distribution...");
             this.plugin.getTomeDistributionManager().triggerDistribution();
             sender.sendMessage("§aTome distribution complete. Check the tome locations for new tomes.");
-            return true;
         }
+
+        return true;
     }
 
     private boolean handleAddTomeChestCommand(CommandSender sender, String[] args) {
         if (!(sender instanceof Player player)) {
             sender.sendMessage("§cThis command can only be used by players.");
-            return true;
-
         } else {
             Location location = player.getLocation();
 
@@ -1378,24 +1410,22 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                 sender.sendMessage("§c✖ This location already exists in the tome chest list.");
                 sender.sendMessage("§7Location: §e" + location.getBlockX() + ", " + location.getBlockY() + ", " + location.getBlockZ());
             }
-
-            return true;
         }
+
+        return true;
     }
 
     private boolean handleRemoveTomeChestCommand(CommandSender sender, String[] args) {
         if (!(sender instanceof Player player)) {
             sender.sendMessage("§cThis command can only be used by players.");
-            return true;
-
         } else {
             Location playerLocation = player.getLocation(), nearestLocation = null;
             List<Location> tomeLocations = this.plugin.getTomeDistributionManager().getTomeLocations();
-            double nearestDistance = Double.MAX_VALUE;
+            double nearestDistance = Double.MAX_VALUE, distance;
 
             for(Location loc : tomeLocations) {
                 if (loc.getWorld() != null && loc.getWorld().equals(playerLocation.getWorld())) {
-                    double distance = playerLocation.distance(loc);
+                    distance = playerLocation.distance(loc);
 
                     if (distance < nearestDistance) {
                         nearestDistance = distance;
@@ -1423,9 +1453,9 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                 sender.sendMessage("§c✖ No tome chest found within 10 blocks.");
                 sender.sendMessage("§7Move closer to a tome chest location and try again.");
             }
-
-            return true;
         }
+
+        return true;
     }
 
     private boolean handleListTomeChestsCommand(CommandSender sender, String[] args) {
@@ -1473,7 +1503,6 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         if (args.length == 0) {
             sender.sendMessage("§cUsage: /clearbloodmoonbuffs <player | all>");
             sender.sendMessage("§7This command removes stacked blood moon attribute modifiers");
-            return true;
 
         } else {
             String target = args[0].toLowerCase();
@@ -1502,9 +1531,9 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                 targetPlayer.sendMessage("§aAn admin has cleared your blood moon buffs.");
                 this.plugin.logInfo("Admin " + sender.getName() + " cleared blood moon buffs for " + targetPlayer.getName());
             }
-
-            return true;
         }
+
+        return true;
     }
 
     private boolean makePlayerIncurable(CommandSender sender, String[] args) {
@@ -1581,7 +1610,6 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
             sender.sendMessage("§7- /removeendermen all §8- Remove all existing endermen from loaded chunks");
             sender.sendMessage("§7- /removeendermen toggle §8- Toggle enderman spawn prevention on/off");
             sender.sendMessage("§7- /removeendermen status §8- Check if enderman removal is enabled");
-            return true;
 
         } else {
             switch (args[0].toLowerCase()) {
@@ -1604,22 +1632,19 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                 default:
                     sender.sendMessage("§cInvalid action. Use 'all', 'toggle', or 'status'.");
             }
-
-            return true;
         }
+
+        return true;
     }
 
     private boolean handleSetupPlayerCommand(CommandSender sender, String[] args) {
         if (args.length != 1) {
             sender.sendMessage("§cUsage: /setupplayer <playername>");
-            return true;
-
         } else {
             Player target = Bukkit.getPlayer(args[0]);
 
             if (target == null) {
                 sender.sendMessage("§cPlayer '" + args[0] + "' not found.");
-                return true;
 
             } else {
                 Random random = new Random();
@@ -1654,9 +1679,10 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                 }
 
                 sender.sendMessage("§aGave starter items to " + target.getName() + ". (" + itemsGiven + " in inventory, " + itemsDropped + " dropped)");
-                return true;
             }
         }
+
+        return true;
     }
 
     private boolean handleSpawnAnimalsCommand(CommandSender sender, String[] args) {
@@ -1720,12 +1746,12 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
 
             } else if (command.getName().equalsIgnoreCase("beacon")) {
                 if (args.length == 1) {
-                    completions.addAll(Arrays.asList("add", "remove", "list", "info", "stats", "reload", "validate", "holy", "desecrated", "neutral", "fix", "refresh", "cleanup", "clearcooldowns", "debug"));
+                    completions.addAll(Arrays.asList("add", "remove", "list", "info", "stats", "reload", "validate", "holy", "desecrated", "corrupted", "neutral", "fix", "refresh", "cleanup", "clearcooldowns", "debug"));
 
                 } else if (args.length == 2) {
                     String subCommand = args[0].toLowerCase();
 
-                    if (!subCommand.equals("remove") && !subCommand.equals("delete") && !subCommand.equals("info") && !subCommand.equals("holy") && !subCommand.equals("desecrated") && !subCommand.equals("desecrate") && !subCommand.equals("neutral")) {
+                    if (!subCommand.equals("remove") && !subCommand.equals("delete") && !subCommand.equals("info") && !subCommand.equals("holy") && !subCommand.equals("desecrated") && !subCommand.equals("desecrate") && !subCommand.equals("break") && !subCommand.equals("corrupt") && !subCommand.equals("corrupted") && !subCommand.equals("neutral")) {
                         if (subCommand.equals("add")) {
                             completions.add("<beacon_name>");
                         }

@@ -408,6 +408,11 @@ public class BrigadierCommands {
                             String name = StringArgumentType.getString(ctx, "name");
                             return this.executePowCommand(ctx, "admin", "beacon", "desecrated", name);
                         })))
+                .then(Commands.literal("corrupted")
+                        .then(Commands.argument("name", StringArgumentType.word()).suggests((ctx, builder) -> this.suggestBeaconNames(builder)).executes((ctx) -> {
+                            String name = StringArgumentType.getString(ctx, "name");
+                            return this.executePowCommand(ctx, "admin", "beacon", "corrupted", name);
+                        })))
                 .then(Commands.literal("neutral")
                         .then(Commands.argument("name", StringArgumentType.word()).suggests((ctx, builder) -> this.suggestBeaconNames(builder)).executes((ctx) -> {
                             String name = StringArgumentType.getString(ctx, "name");
