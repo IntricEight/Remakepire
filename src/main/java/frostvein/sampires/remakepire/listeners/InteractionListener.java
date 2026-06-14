@@ -52,11 +52,13 @@ public class InteractionListener implements Listener {
         Entity targetEntity = event.getRightClicked();
 
         if (this.plugin.getVampireManager().isVampire(player)) {
+            // Stop bat players from doing shenanigans
             if (this.plugin.getBatTransformationManager().isInBatForm(player)) {
                 event.setCancelled(true);
                 player.sendMessage("§cYou cannot interact with anything while you are in your bat form.");
 
             } else if (!(targetEntity instanceof Player)) {
+                // Stop higher vampires from feeding animals
                 if (this.isFeedableMob(targetEntity)) {
                     ItemStack handItem = event.getHand() == EquipmentSlot.OFF_HAND ? player.getInventory().getItemInOffHand() : player.getInventory().getItemInMainHand();
 

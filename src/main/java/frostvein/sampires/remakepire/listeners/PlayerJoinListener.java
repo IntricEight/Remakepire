@@ -61,7 +61,7 @@ public class PlayerJoinListener implements Listener {
         if (!this.plugin.getSessionManager().playerReturningToGame(player)) {
             player.sendMessage("§cA new game has been initialized since you last played. Resetting your stats accordingly.");
 
-            player.removeScoreboardTag(InitGameManager.PERMAKILLED_TAG);
+            player.removeScoreboardTag(DeathHandler.PERMAKILLED_TAG);
             this.plugin.getSessionManager().resetPlayer(player);
             this.plugin.getSessionManager().getGameIDObjective().getScore(player.getName()).setScore(this.plugin.getSessionManager().getGameIDObjective().getScore(SessionManager.GAME_ID_HOLDER).getScore());
             this.plugin.getSessionManager().getSessionIDObjective().getScore(player.getName()).setScore(this.plugin.getSessionManager().getSessionIDObjective().getScore(SessionManager.SESSION_ID_HOLDER).getScore());

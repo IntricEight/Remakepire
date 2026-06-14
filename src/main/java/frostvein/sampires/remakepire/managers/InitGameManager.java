@@ -42,7 +42,6 @@ public class InitGameManager {
     private final Map<UUID, InitData> adminData = new HashMap<>();
     private final Map<UUID, Boolean> guiRefreshInProgress = new HashMap<>();
     private static final int PLAYERS_PER_PAGE = 45, INVENTORY_SIZE = 54;
-    public static final String PERMAKILLED_TAG = "perma_dead";
 
     /**
      * Create an instance of the Initialize Game manager.

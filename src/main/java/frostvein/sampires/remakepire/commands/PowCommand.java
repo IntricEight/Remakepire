@@ -18,6 +18,7 @@ public class PowCommand implements CommandExecutor, TabCompleter {
     private final CommandHandler adminHandler;
     private final VampireAbilityCommand abilityCommand;
     private final TomeAbilityCommand tomeCommand;
+    private final CheckLivesCommand checkLivesCommand;
     private final ForcedCureReopenCommand forceCureReopenCommand;
     private final HolySitesCommand beaconStatusCommand;
     private final TexturePackCommand texturePackCommand;
@@ -35,6 +36,7 @@ public class PowCommand implements CommandExecutor, TabCompleter {
         this.adminHandler = new CommandHandler(plugin);
         this.abilityCommand = new VampireAbilityCommand(plugin);
         this.tomeCommand = new TomeAbilityCommand(plugin);
+        this.checkLivesCommand = new CheckLivesCommand(plugin);
         this.forceCureReopenCommand = new ForcedCureReopenCommand(plugin);
         this.beaconStatusCommand = new HolySitesCommand(plugin);
         this.texturePackCommand = new TexturePackCommand(plugin);
@@ -59,6 +61,8 @@ public class PowCommand implements CommandExecutor, TabCompleter {
                     return this.abilityCommand.onCommand(sender, command, label, subArgs);
                 case "tome":
                     return this.tomeCommand.onCommand(sender, command, label, subArgs);
+                case "checklives":
+                    return this.checkLivesCommand.onCommand(sender, command, label, subArgs);
                 case "beaconstatus":
                 case "holysites":
                 case "holy":
@@ -139,6 +143,7 @@ public class PowCommand implements CommandExecutor, TabCompleter {
         sender.sendMessage("§e/pow tome <name> §7- Use tome abilities (humans)");
         sender.sendMessage("§e/voluntate-mea-hoc-nefandum-vinculum-abicio §7- Cure yourself from vampirism");
         sender.sendMessage("§e/hoc-vinculum-tibi-dirumpo-mala-creatura <player> §7- Force cure a vampire");
+        sender.sendMessage("§e/pow checklives §7- Check how many lives this player has remaining");
         sender.sendMessage("§e/pow beaconstatus §7- Check beacon spiritual influence");
         sender.sendMessage("§e/pow texture §7- Apply VampireSMP texture pack");
         sender.sendMessage("§e/pow permadeath <on | off | absolute> §7- Set permadeath preference");
@@ -191,7 +196,7 @@ public class PowCommand implements CommandExecutor, TabCompleter {
         List<String> completions = new ArrayList<>();
 
         if (args.length == 1) {
-            List<String> subCommands = new ArrayList<>(Arrays.asList("vability", "tome", "beaconstatus", "permadeath", "toggle-turning", "help"));
+            List<String> subCommands = new ArrayList<>(Arrays.asList("vability", "tome", "checklives", "beaconstatus", "permadeath", "toggle-turning", "help"));
             if (sender.hasPermission("vampiresmp.admin")) {
                 subCommands.add(0, "admin");
             }
@@ -249,13 +254,13 @@ public class PowCommand implements CommandExecutor, TabCompleter {
                 }
 
                 if (args.length == 3 && args[1].equalsIgnoreCase("beacon")) {
-                    List<String> beaconOptions = Arrays.asList("add", "remove", "list", "info", "stats", "reload", "holy", "desecrated", "neutral", "validate", "fix", "refresh", "cleanup", "clearcooldowns", "debug");
+                    List<String> beaconOptions = Arrays.asList("add", "remove", "list", "info", "stats", "reload", "holy", "desecrated", "corrupted", "neutral", "validate", "fix", "refresh", "cleanup", "clearcooldowns", "debug");
                     return beaconOptions.stream().filter((s) -> s.startsWith(args[2].toLowerCase())).collect(Collectors.toList());
                 }
 
                 if (args.length == 4 && args[1].equalsIgnoreCase("beacon")) {
                     String subCommand = args[2].toLowerCase();
-                    if (subCommand.equals("remove") || subCommand.equals("delete") || subCommand.equals("info") || subCommand.equals("holy") || subCommand.equals("desecrated") || subCommand.equals("neutral")) {
+                    if (subCommand.equals("remove") || subCommand.equals("delete") || subCommand.equals("info") || subCommand.equals("holy") || subCommand.equals("desecrated") || subCommand.equals("corrupted") || subCommand.equals("neutral")) {
                         return this.plugin.getBeaconManager().getAllBeacons().stream().map((beacon) -> beacon.getName()).filter((s) -> s.toLowerCase().startsWith(args[3].toLowerCase())).collect(Collectors.toList());
                     }
 

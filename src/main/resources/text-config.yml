@@ -246,3 +246,55 @@ border-freedom-messages:
   # The player is a vampire
   vampire-freedom:
     - "§4You are free of your chains, creature of the night..."
+
+
+# ============================================================================
+# CURES AND KILLS - GLOBAL MESSAGES
+#   Inside this section, there are controls for the global announcements triggered when a player is permanently killed or a cure is executed.
+#   Begin by setting custom-global-announcements to true, and then edit or replace sections to change the announcements when a player is cured or killed.
+#
+#   To begin changing the messages that are sent under different conditions, set custom-global-announcements to true.
+#   To return the messages to their original forms, toggle their custom control back to false and the plugin will revert to the default version of each feature.
+# ============================================================================
+
+# Enable/Disable announcing the content in this file when a player is either cured or permanently killed
+# Default: false (Custom content disabled)
+custom-global-announcements: false
+
+# The custom messages that appear after a cure has been used
+global-cure-announcement:
+  # The message that humans see when a vampire chooses to cure themself
+  self-cure-announcement-to-humans: "§aA beacon of holy light flickers and dims... A vampire has been cured, but at great cost to the sacred site."
+
+  # The message that vampires see when a vampire chooses to cure themself
+  self-cure-announcement-to-vampires: "§4A disturbance ripples through the darkness... One of your kind has abandoned the gift of immortality..."
+
+  # The message that humans see when a vampire is cured by another player
+  force-cure-success-announcement-to-humans: "§6A beacon of holy light erupts with righteous fury... Someone has sanctified a vampire forcibly... The curing comes at a great cost to a sacred site..."
+
+  # The message that vampires see when a vampire is cured by another player
+  force-cure-success-announcement-to-vampires: "§4A disturbance ripples through the darkness... One of your kind has chosen humanity over eternal damnation..."
+
+  # The message that humans see when a vampire chooses death over being cured
+  force-cure-death-announcement-to-humans: "§8A vampire has refused the light and embraced final death... Their essence fades from this world forever..."
+
+  # The message that vampires see when a vampire chooses death over being cured
+  force-cure-death-announcement-to-vampires: "§4One of your kind has chosen eternal death over forced redemption... The darkness mourns their passing..."
+
+
+# The custom messages that appear when a human or vampire is permanently killed
+combat-death-announcement:
+  # The message that humans see when a human is permakilled
+  human-death-to-humans: "§cA shiver runs down your spine, as a human soul is torn from this realm..."
+
+  # The message that vampires see when a human is permakilled
+  human-death-to-vampires: "§2You sense the fading light of a soul, unnoticed until its disappearance... One of your prey been slain."
+
+  # The message that humans see when a vampire is staked and permakilled
+  vampire-death-to-humans: "§aYou feel the realm has been purged of an evil spirit... Someone has successfully killed a vampire. Permanently."
+
+  # The message that vampires see when a vampire is staked and permakilled
+  vampire-death-to-vampires: "§4You feel a dark soul ripped from its human coil, somebody has slayed a member of your monstrous family..."
+
+
+

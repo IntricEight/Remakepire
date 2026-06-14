@@ -6,24 +6,24 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import frostvein.sampires.remakepire.RemakepirePlugin;
 
-public class StashFourthBookCommand implements CommandExecutor {
+public class StashFirstBookCommand implements CommandExecutor {
     private final RemakepirePlugin plugin;
 
     /**
-     * Create an instance of the command manager to stash the fourth cure book.
+     * Create an instance of the command manager to stash the first cure book.
      *
      * @param plugin the host plugin object.
      */
-    public StashFourthBookCommand(RemakepirePlugin plugin) {
+    public StashFirstBookCommand(RemakepirePlugin plugin) {
         this.plugin = plugin;
     }
 
     /**
-     * Stash the fourth cure book at the location provided through the command.
+     * Stash the first cure book at the location provided through the command.
      */
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (args.length < 3) {
-            sender.sendMessage("§cUsage: /stash_fourth_book <x> <y> <z>");
+            sender.sendMessage("§cUsage: /stash_first_book <x> <y> <z>");
             return true;
         }
 
@@ -40,15 +40,15 @@ public class StashFourthBookCommand implements CommandExecutor {
             return true;
         }
 
-        // Stash the fourth cure book inside the chest at the location, if it exists
+        // Stash the third cure book inside the chest at the location, if it exists
         if (sender instanceof Player admin) {
-            stashSucccess = this.plugin.getCureBookManager().stashCureBook(admin, 4, x, y, z);
+            stashSucccess = this.plugin.getCureBookManager().stashCureBook(admin, 1, x, y, z);
         } else {
-            stashSucccess = this.plugin.getCureBookManager().stashCureBook(4, x, y, z);
+            stashSucccess = this.plugin.getCureBookManager().stashCureBook(1, x, y, z);
         }
 
         if (stashSucccess) {
-            this.plugin.logInfo(sender.getName() + " used /stash_fourth_book - placed " + this.plugin.getCureBookManager().getCureBookName(4, true) + " at " + x + ", " + y + ", " + z);
+            this.plugin.logInfo(sender.getName() + " used /stash_first_book - placed " + this.plugin.getCureBookManager().getCureBookName(1, true) + " at " + x + ", " + y + ", " + z);
         }
 
         return true;

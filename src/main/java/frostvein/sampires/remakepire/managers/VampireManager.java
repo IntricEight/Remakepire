@@ -477,17 +477,22 @@ public class VampireManager {
     }
 
     /**
-     * Permakill a vampire and inform them of their final death.
+     * Permakill a player and inform them of their final death.
      *
      * @param player the vampire who has been permakilled.
      */
-    public void killVampirePermanently(Player player) {
+    public void killPlayerPermanently(Player player) {
+        // Reset the player to a human
         this.removeAllVampireTags(player);
         player.addScoreboardTag(HUMAN_TAG);
 
         this.plugin.getServer().getScheduler().runTaskLater(this.plugin, () -> {
+            // Announce to the server that a player has been permakilled
+            this.plugin.getDeathHandler().broadcastPermaKill(player);
+
+            // Set the player's state to dead
             player.setGameMode(GameMode.SPECTATOR);
-            player.addScoreboardTag(InitGameManager.PERMAKILLED_TAG);
+            player.addScoreboardTag(DeathHandler.PERMAKILLED_TAG);
 
             player.sendTitle("§4§lFINAL DEATH", "§7Your journey has ended", 10, 100, 30);
             player.sendMessage("");
@@ -863,6 +868,7 @@ public class VampireManager {
 
         if (startTime == null) {
             return false;
+
         } else if (System.currentTimeMillis() - startTime > LEVEL_CHANGE_TIMEOUT) {
             this.plugin.getLogger().warning("Level change timed out for player " + playerId + ", removing lock");
             this.levelChangeInProgress.remove(playerId);

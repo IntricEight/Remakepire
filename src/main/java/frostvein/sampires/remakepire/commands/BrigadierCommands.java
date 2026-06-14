@@ -58,6 +58,8 @@ public class BrigadierCommands {
                 .then(this.buildVampireAbilitySubcommand())
                 .then(this.buildTomeAbilitySubcommand())
 
+                .then(Commands.literal("checklives").executes((ctx) -> this.executePowCommand(ctx, "checklives")))
+
                 .then(Commands.literal("beaconstatus").executes((ctx) -> this.executePowCommand(ctx, "beaconstatus")))
                 .then(Commands.literal("holysites").executes((ctx) -> this.executePowCommand(ctx, "beaconstatus")))
                 .then(Commands.literal("holy").executes((ctx) -> this.executePowCommand(ctx, "beaconstatus")))
@@ -180,6 +182,9 @@ public class BrigadierCommands {
                 ).executes((ctx) -> this.executePowCommand(ctx, "help"))).build(), "VampireSMP main command", List.of("vampiresmp", "vsmp"));
     }
 
+    /**
+     * Build out the vampire ability command subtree.
+     */
     private LiteralArgumentBuilder<CommandSourceStack> buildVampireAbilitySubcommand() {
         return Commands.literal("vability")
                     .then(Commands.literal("list").executes((ctx) -> this.executePowCommand(ctx, "vability", "list")))
@@ -190,6 +195,9 @@ public class BrigadierCommands {
                     }));
     }
 
+    /**
+     * Build out the tome ability command subtree.
+     */
     private LiteralArgumentBuilder<CommandSourceStack> buildTomeAbilitySubcommand() {
         return Commands.literal("tome")
                     .then(Commands.literal("list").executes((ctx) -> this.executePowCommand(ctx, "tome", "list")))
@@ -199,6 +207,9 @@ public class BrigadierCommands {
                     }));
     }
 
+    /**
+     * Build out the command subtree for manually applying a plugin texture pack.
+     */
     private LiteralArgumentBuilder<CommandSourceStack> buildTextureSubcommand() {
         return Commands.literal("texture")
                 .executes((ctx) -> this.executePowCommand(ctx, "texture"))
@@ -208,17 +219,9 @@ public class BrigadierCommands {
                 .then(Commands.literal("human").executes((ctx) -> this.executePowCommand(ctx, "texture", "human")));
     }
 
-    private LiteralArgumentBuilder<CommandSourceStack> buildAdminSubcommand() {
-        // TODO: If we do this at all. Otherwise, remove.
-        return null;
-    }
-
-
-
-
-
-
-
+    /**
+     * Build out the session status command subtree.
+     */
     private LiteralArgumentBuilder<CommandSourceStack> buildSessionSubcommand() {
         return Commands.literal("session")
                 .then(Commands.literal("start").executes((ctx) -> this.executePowCommand(ctx, "admin", "session", "start")))
@@ -229,6 +232,9 @@ public class BrigadierCommands {
                 .then(Commands.literal("building").executes((ctx) -> this.executePowCommand(ctx, "admin", "session", "building")));
     }
 
+    /**
+     * Build out the vampire state command subtree.
+     */
     private LiteralArgumentBuilder<CommandSourceStack> buildVampireSubcommand() {
         return (LiteralArgumentBuilder) Commands.literal("vampire")
                 .then(((RequiredArgumentBuilder) Commands.argument("player", StringArgumentType.word()).suggests((ctx, builder) -> this.suggestOnlinePlayers(builder))
@@ -267,6 +273,9 @@ public class BrigadierCommands {
                         })));
     }
 
+    /**
+     * Build out the in-game config control options command subtree.
+     */
     private LiteralArgumentBuilder<CommandSourceStack> buildConfigSubcommand() {
         return Commands.literal("config").executes(ctx -> this.executePowCommand(ctx, "admin", "config"))
                 .then(Commands.literal("help").executes(ctx -> this.executePowCommand(ctx, "admin", "config", "help")))
@@ -390,6 +399,11 @@ public class BrigadierCommands {
                         .then(Commands.argument("name", StringArgumentType.word()).suggests((ctx, builder) -> this.suggestBeaconNames(builder)).executes((ctx) -> {
                             String name = StringArgumentType.getString(ctx, "name");
                             return this.executePowCommand(ctx, "admin", "beacon", "desecrated", name);
+                        })))
+                .then(Commands.literal("corrupted")
+                        .then(Commands.argument("name", StringArgumentType.word()).suggests((ctx, builder) -> this.suggestBeaconNames(builder)).executes((ctx) -> {
+                            String name = StringArgumentType.getString(ctx, "name");
+                            return this.executePowCommand(ctx, "admin", "beacon", "corrupted", name);
                         })))
                 .then(Commands.literal("neutral")
                         .then(Commands.argument("name", StringArgumentType.word()).suggests((ctx, builder) -> this.suggestBeaconNames(builder)).executes((ctx) -> {
