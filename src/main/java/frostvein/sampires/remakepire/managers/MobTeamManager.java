@@ -2,8 +2,22 @@ package frostvein.sampires.remakepire.managers;
 
 import java.util.Arrays;
 import java.util.List;
-
-import org.bukkit.entity.*;
+import org.bukkit.entity.Bogged;
+import org.bukkit.entity.Creeper;
+import org.bukkit.entity.Drowned;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.Husk;
+import org.bukkit.entity.Phantom;
+import org.bukkit.entity.PigZombie;
+import org.bukkit.entity.Skeleton;
+import org.bukkit.entity.Spider;
+import org.bukkit.entity.Stray;
+import org.bukkit.entity.Witch;
+import org.bukkit.entity.Wither;
+import org.bukkit.entity.WitherSkeleton;
+import org.bukkit.entity.Zoglin;
+import org.bukkit.entity.Zombie;
+import org.bukkit.entity.ZombieVillager;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.scoreboard.Team;
