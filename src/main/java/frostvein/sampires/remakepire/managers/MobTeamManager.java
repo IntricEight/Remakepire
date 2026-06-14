@@ -12,7 +12,7 @@ import frostvein.sampires.remakepire.RemakepirePlugin;
 public class MobTeamManager {
     private final RemakepirePlugin plugin;
     private BukkitTask mobTeamTask;
-    private final List<Class<? extends Entity>> vampireMobTypes = Arrays.asList(Zombie.class, ZombieVillager.class, Drowned.class, Husk.class, Skeleton.class, WitherSkeleton.class, Bogged.class, Stray.class, Creeper.class, Spider.class, Witch.class, Phantom.class, Wither.class, Zoglin.class);
+    private final List<Class<? extends Entity>> vampireMobTypes = Arrays.asList(Zombie.class, ZombieVillager.class, Drowned.class, Husk.class, Skeleton.class, WitherSkeleton.class, Bogged.class, Stray.class, Creeper.class, Spider.class, Witch.class, Phantom.class, Wither.class, PigZombie.class, Zoglin.class);
     // Controls how frequently mobs are assigned to the vampire team
     private final long ASSIGNMENT_INTERVALS = 200L;
 
