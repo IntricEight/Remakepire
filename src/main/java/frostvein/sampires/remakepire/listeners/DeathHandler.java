@@ -34,8 +34,6 @@ public class DeathHandler implements Listener {
     private final FileConfiguration textConfig;
     private final boolean CUSTOM_DEATH_MESSAGES;
 
-    // TODO: Remove wooden axes from having special effects on vampires. It's really inconsistent where they are applied and where they are not, so it doesn't seem intentional.
-
     /**
      * Create an instance of the Death Handler listener.
      *

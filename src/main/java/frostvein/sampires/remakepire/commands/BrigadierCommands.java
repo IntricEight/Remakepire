@@ -220,14 +220,6 @@ public class BrigadierCommands {
     }
 
     /**
-     * Build out the admin permissions command subtree.
-     */
-    private LiteralArgumentBuilder<CommandSourceStack> buildAdminSubcommand() {
-        // TODO: If we do this at all. Otherwise, remove.
-        return null;
-    }
-
-    /**
      * Build out the session status command subtree.
      */
     private LiteralArgumentBuilder<CommandSourceStack> buildSessionSubcommand() {
