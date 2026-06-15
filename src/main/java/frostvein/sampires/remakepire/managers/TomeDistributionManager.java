@@ -30,7 +30,7 @@ public class TomeDistributionManager {
     private final Random random;
     private BukkitTask distributionTask;
     private final ConversionAssistant conversionAssistant;
-    private int distributionCount = 4;
+    private int distributionCount;
     private List<Location> tomeLocations = new ArrayList<>();
     private final String[] tomeTypes;
     private final Enchantment[] enchantmentTypes;
@@ -67,6 +67,9 @@ public class TomeDistributionManager {
         // Set what books can be found within the tome chests
         tomeTypes = this.loadTomeAbilityOptions();
         enchantmentTypes = this.loadEnchantmentBookOptions();
+
+        // Set the number of chests which should contain tome ability books each cycle
+        distributionCount = configManager.getAbilityDistributionCount();
     }
 
     /**
@@ -146,7 +149,7 @@ public class TomeDistributionManager {
                 this.plugin.getLogger().warning("TomeDistributionManager: No tome locations available for distribution");
             } else {
                 this.clearAllTomeChests();
-                List<Location> tomeSelectedLocations = this.selectRandomLocations();
+                List<Location> tomeSelectedLocations = this.selectRandomLocations(this.distributionCount);
 
                 for (Location location : tomeSelectedLocations) {
                     String randomTome = this.getRandomTomeType();
@@ -195,11 +198,11 @@ public class TomeDistributionManager {
      *
      * @return A {@code List} of {@code distributionCount} tome chest locations.
      */
-    private List<Location> selectRandomLocations() {
+    private List<Location> selectRandomLocations(int numberOf) {
         List<Location> availableLocations = new ArrayList<>(this.tomeLocations);
         Collections.shuffle(availableLocations, this.random);
-        int locationsToSelect = Math.min(this.distributionCount, availableLocations.size());
-        return availableLocations.subList(0, locationsToSelect);
+
+        return availableLocations.subList(0, Math.min(numberOf, availableLocations.size()));
     }
 
     /**

@@ -304,12 +304,29 @@ public class ConfigManager {
         return this.config.getInt("abilities.tome.stop-the-bleeding-cooldown", 7200);
     }
 
+    /**
+     * Retrieve how many tome chests should contain tome ability books.
+     *
+     * @return the number of tome chests.
+     */
+    public int getAbilityDistributionCount() {
+        return this.config.getInt("tome-chests.ability-book-count", 4);
+    }
 
+    /**
+     * Retrieve the tome abilities whose books are allowed to appear inside tome chests.
+     *
+     * @return A list of tome ability names.
+     */
     public List<String> getTomeAbilityOptions() {
         return this.config.getStringList("tome-chests.tome-options");
     }
 
-
+    /**
+     * Retrieve the enchantments whose books are allowed to appear inside tome chests.
+     *
+     * @return A list of item enchantment names.
+     */
     public List<String> getTomeEnchantmentOptions() {
         return this.config.getStringList("tome-chests.enchantment-options");
     }

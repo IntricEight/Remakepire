@@ -82,6 +82,8 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
             return this.handleSelectTomesCommand(sender, args);
         } else if (command.getName().equalsIgnoreCase("give_cure_book")) {
             return this.handleGiveCureBookCommand(sender, args);
+        } else if (command.getName().equalsIgnoreCase("stash_cure_book")) {
+                return this.handleStashCureBookCommand(sender, args);
         } else if (command.getName().equalsIgnoreCase("distributetomes")) {
             return this.handleDistributeTomesCommand(sender, args);
         } else if (command.getName().equalsIgnoreCase("clearbloodmoonbuffs")) {
@@ -1374,6 +1376,69 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
 
                 sender.sendMessage("§aGave Cure Book " + bookNum + " to §e" + target.getName());
             }
+        }
+
+        return true;
+    }
+
+    private boolean handleStashCureBookCommand(CommandSender sender, String[] args) {
+        // Catch if an improper number of parameters was provided
+        if (args.length != 1 && args.length != 4) {
+            sender.sendMessage("§cUsage: /stash_cure_book <1 | 2 | 3 | 4> <x> <y> <z>");
+            return true;
+        }
+
+        boolean stashSuccess;
+        int bookNumber, x, y, z;
+        Random random = new Random();
+
+        // Retrieve the book number from the first argument parameter
+        try {
+            bookNumber = Integer.parseInt(args[0]);
+
+        } catch (NumberFormatException e) {
+            sender.sendMessage("§cInvalid book number. Use whole numbers.");
+            return true;
+        }
+
+        // Check a valid cure book number was provided
+        if (bookNumber < 1 || bookNumber > 4) {
+            sender.sendMessage("§cInvalid book number. Choose a number between 1 and 4.");
+
+            return true;
+        }
+
+        if (args.length == 1) {
+            // Choose a random tome chest to deposit the cure book into
+            List<Location> tomeLocations = this.plugin.getTomeDistributionManager().getTomeLocations();
+            Location tomeLocation = tomeLocations.get(random.nextInt(tomeLocations.size()));
+
+            x = tomeLocation.getBlockX();
+            y = tomeLocation.getBlockY();
+            z = tomeLocation.getBlockZ();
+
+        } else {
+            // Store the provided location coordinates from the command
+            try {
+                x = Integer.parseInt(args[1]);
+                y = Integer.parseInt(args[2]);
+                z = Integer.parseInt(args[3]);
+
+            } catch (NumberFormatException e) {
+                sender.sendMessage("§cInvalid coordinates. Use whole numbers.");
+                return true;
+            }
+        }
+
+        // Stash the cure book inside the chest at the location, if it exists
+        if (sender instanceof Player admin) {
+            stashSuccess = this.plugin.getCureBookManager().stashCureBook(admin, bookNumber, x, y, z);
+        } else {
+            stashSuccess = this.plugin.getCureBookManager().stashCureBook(bookNumber, x, y, z);
+        }
+
+        if (stashSuccess) {
+            this.plugin.logInfo(sender.getName() + " used /stash_cure_book - placed " + this.plugin.getCureBookManager().getCureBookName(bookNumber, true) + " at " + x + ", " + y + ", " + z);
         }
 
         return true;

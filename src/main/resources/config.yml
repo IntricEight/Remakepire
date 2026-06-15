@@ -40,6 +40,10 @@ tome-chests:
     - -1095,-11,-1028
     - -630,256,-1168
 
+  # Control how many tome chests should contain tome ability books each distribution cycle
+  # Default: 4
+  ability-book-count: 4
+
   # A list of tome abilities that can spawn inside tome chests
   # The default list are all the books supported in the plugin; you pick and choose which ones you want included in your game
   # You can find a list of the supported tome options below this list

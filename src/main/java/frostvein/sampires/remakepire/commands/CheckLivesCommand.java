@@ -1,6 +1,5 @@
 package frostvein.sampires.remakepire.commands;
 
-import frostvein.sampires.remakepire.RemakepirePlugin;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -8,6 +7,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Scoreboard;
+import frostvein.sampires.remakepire.RemakepirePlugin;
 
 public class CheckLivesCommand implements CommandExecutor {
     private final RemakepirePlugin plugin;
