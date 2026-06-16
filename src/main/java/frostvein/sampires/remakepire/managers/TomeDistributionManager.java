@@ -1,9 +1,14 @@
 package frostvein.sampires.remakepire.managers;
 
+import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Random;
+import java.util.Set;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -17,7 +22,6 @@ import org.bukkit.inventory.meta.EnchantmentStorageMeta;
 import org.bukkit.scheduler.BukkitTask;
 import frostvein.sampires.remakepire.RemakepirePlugin;
 import frostvein.sampires.remakepire.abilities.tome.TomeAbility;
-import frostvein.sampires.remakepire.listeners.CureBookReadingListener;
 import frostvein.sampires.remakepire.utils.ConversionAssistant;
 
 public class TomeDistributionManager {
@@ -26,10 +30,27 @@ public class TomeDistributionManager {
     private final Random random;
     private BukkitTask distributionTask;
     private final ConversionAssistant conversionAssistant;
-    private int distributionCount = 4;
+    private int distributionCount;
     private List<Location> tomeLocations = new ArrayList<>();
-    private final String[] tomeTypes = new String[]{"BanishUndead", "Blessing", "EnlightenedEye", "HolyWord", "LanternThrash", "PrayerOfFaith", "RallyingCry", "ShoulderBarge", "TurnUndead", "UncannyDirection", "UnnaturalHaste", "WayOfTheLand", "WayOfTheLumberjack", "WayOfTheProspector", "StopTheBleeding"};
-    private final Enchantment[] enchantmentTypes = new Enchantment[]{Enchantment.EFFICIENCY, Enchantment.PROTECTION, Enchantment.FEATHER_FALLING, Enchantment.KNOCKBACK, Enchantment.SWEEPING_EDGE};
+    private final String[] tomeTypes;
+    private final Enchantment[] enchantmentTypes;
+
+    // The tome ability books and enchantments allowed to spawn inside the chests
+    private static final Set<String> ALLOWED_TOMES = new HashSet<>(Arrays.asList(
+            "BanishUndead", "Blessing", "EnlightenedEye", "HolyWord", "LanternThrash", "PrayerOfFaith", "RallyingCry", "ShoulderBarge", "TurnUndead", "UncannyDirection", "UnnaturalHaste", "WayOfTheLand", "WayOfTheLumberjack", "WayOfTheProspector", "StopTheBleeding"
+    ));
+    private static final Map<String, Enchantment> ENCHANTMENT_OPTIONS = Map.of(
+            "Efficiency", Enchantment.EFFICIENCY,
+            "FeatherFalling", Enchantment.FEATHER_FALLING,
+            "Knockback", Enchantment.KNOCKBACK,
+            "Mending", Enchantment.MENDING,
+            "Power", Enchantment.POWER,
+            "Protection", Enchantment.PROTECTION,
+            "Punch",  Enchantment.PUNCH,
+            "Respiration", Enchantment.RESPIRATION,
+            "Sharpness", Enchantment.SHARPNESS,
+            "SweepingEdge", Enchantment.SWEEPING_EDGE
+    );
 
     /**
      * Create an instance of the Armor Storage manager.
@@ -42,6 +63,44 @@ public class TomeDistributionManager {
         this.random = new Random();
         this.conversionAssistant = new ConversionAssistant();
         this.initializeTomeLocations();
+
+        // Set what books can be found within the tome chests
+        tomeTypes = this.loadTomeAbilityOptions();
+        enchantmentTypes = this.loadEnchantmentBookOptions();
+
+        // Set the number of chests which should contain tome ability books each cycle
+        distributionCount = configManager.getAbilityDistributionCount();
+    }
+
+    /**
+     * Retrieve the list of tome ability books that can spawn inside tome chests.
+     *
+     * @return A {@code String[]} of ability names that correlated to tome abilities.
+     */
+    private String[] loadTomeAbilityOptions() {
+        List<String> options = this.configManager.getTomeAbilityOptions();
+
+        // Remove items from the list if they don't match an existing tome book
+        options.removeIf(tome -> !ALLOWED_TOMES.contains(tome));
+
+        return options.toArray(new String[0]);
+    }
+
+    /**
+     * Retrieve the list of enchantment books that can spawn inside tome chests.
+     *
+     * @return A {@code Enchantment[]} of enchantments that should be spawned inside tome chests.
+     */
+    private Enchantment[] loadEnchantmentBookOptions() {
+        List<String> options = this.configManager.getTomeEnchantmentOptions();
+
+        // Add each enchantment book to the list if it is found within the provided config list
+        List<Enchantment> books = options.stream()
+                .map(ENCHANTMENT_OPTIONS::get)
+                .filter(Objects::nonNull)
+                .toList();
+
+        return books.toArray(new Enchantment[0]);
     }
 
     /**
@@ -90,7 +149,7 @@ public class TomeDistributionManager {
                 this.plugin.getLogger().warning("TomeDistributionManager: No tome locations available for distribution");
             } else {
                 this.clearAllTomeChests();
-                List<Location> tomeSelectedLocations = this.selectRandomLocations();
+                List<Location> tomeSelectedLocations = this.selectRandomLocations(this.distributionCount);
 
                 for (Location location : tomeSelectedLocations) {
                     String randomTome = this.getRandomTomeType();
@@ -139,11 +198,11 @@ public class TomeDistributionManager {
      *
      * @return A {@code List} of {@code distributionCount} tome chest locations.
      */
-    private List<Location> selectRandomLocations() {
+    private List<Location> selectRandomLocations(int numberOf) {
         List<Location> availableLocations = new ArrayList<>(this.tomeLocations);
         Collections.shuffle(availableLocations, this.random);
-        int locationsToSelect = Math.min(this.distributionCount, availableLocations.size());
-        return availableLocations.subList(0, locationsToSelect);
+
+        return availableLocations.subList(0, Math.min(numberOf, availableLocations.size()));
     }
 
     /**

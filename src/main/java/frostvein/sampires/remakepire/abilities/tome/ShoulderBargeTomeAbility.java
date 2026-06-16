@@ -113,6 +113,11 @@ public class ShoulderBargeTomeAbility extends TomeAbility {
             for(Entity entity : player.getNearbyEntities(1.5, 2.0, 1.5)) {
                 UUID entityId = entity.getUniqueId();
 
+                // Prevent item entities from being hit by the charge
+                if (!(entity instanceof LivingEntity)) {
+                    continue;
+                }
+
                 if (entity instanceof Player target) {
                     // Prevent players in Spectator mode from being hit
                     if (target.getGameMode() == GameMode.SPECTATOR) {
@@ -120,20 +125,24 @@ public class ShoulderBargeTomeAbility extends TomeAbility {
                     }
                 }
 
+                // Skip over entities that have just been hit by another charge
                 if (hitEntities.contains(entityId)) {
                     continue;
                 }
 
-                if (!entity.equals(player)) {
-                    Long lastBargeTime = this.recentlyBargedEntities.get(entityId);
-
-                    if (lastBargeTime != null && System.currentTimeMillis() - lastBargeTime < TARGET_COOLDOWN_MS) {
-                        continue;
-                    }
-
-                    this.handleCollision(player, entity);
-                    hitEntities.add(entityId);
+                // Skip over the charging player
+                if (entity.equals(player)) {
+                    continue;
                 }
+
+                Long lastBargeTime = this.recentlyBargedEntities.get(entityId);
+
+                if (lastBargeTime != null && System.currentTimeMillis() - lastBargeTime < TARGET_COOLDOWN_MS) {
+                    continue;
+                }
+
+                this.handleCollision(player, entity);
+                hitEntities.add(entityId);
             }
         }
     }

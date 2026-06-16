@@ -3,8 +3,14 @@ package frostvein.sampires.remakepire.managers;
 import java.util.ArrayList;
 import java.util.List;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.World;
+import org.bukkit.block.Block;
+import org.bukkit.block.Chest;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BookMeta;
 import frostvein.sampires.remakepire.RemakepirePlugin;
@@ -13,7 +19,7 @@ import frostvein.sampires.remakepire.listeners.CureBookReadingListener;
 public class CureBookManager {
     private final RemakepirePlugin plugin;
     private final FileConfiguration textConfig;
-    private final boolean CUSTOM_BOOKS, CUSTOM_MESSAGES;
+    private final boolean CUSTOM_BOOKS, CUSTOM_MESSAGES, CUSTOM_CURE_MESSAGES;
 
     /**
      * Create an instance of the Cure Book manager.
@@ -29,6 +35,7 @@ public class CureBookManager {
         // Determine whether we are using custom features or not
         this.CUSTOM_BOOKS = this.textConfig.getBoolean("custom-cure-books", false);
         this.CUSTOM_MESSAGES = this.textConfig.getBoolean("custom-cure-book-messages", false);
+        this.CUSTOM_CURE_MESSAGES = this.textConfig.getBoolean("custom-global-announcements", false);
     }
 
     /**
@@ -277,5 +284,130 @@ public class CureBookManager {
         }
 
         return messages.toArray(new String[0]);
+    }
+
+    /**
+     * Retrieve a message to inform the reader that a vampire has cured themselves.
+     *
+     * @param messageToHumans {@code true} if we are retrieving the message that humans will see.
+     * @return A message to be announced across the server.
+     */
+    public String getSelfCureAnnouncementMessage(boolean messageToHumans) {
+        // Retrieve a message depending on whether we are retrieving the human or vampire's perspective message
+        if (CUSTOM_CURE_MESSAGES) {
+            if (messageToHumans) {
+                return this.textConfig.getString("global-cure-announcement.self-cure-announcement-to-humans");
+            } else {
+                return this.textConfig.getString("global-cure-announcement.self-cure-announcement-to-vampires");
+            }
+        } else {
+            if (messageToHumans) {
+                return "§aA beacon of holy light flickers and dims... A vampire has been cured, but at great cost to the sacred site.";
+            } else {
+                return "§4A disturbance ripples through the darkness... One of your kind has abandoned the gift of immortality...";
+            }
+        }
+    }
+
+    /**
+     * Retrieve a message to inform the reader that a vampire has undergone the force cure.
+     *
+     * @param messageToHumans {@code true} if we are retrieving the message that humans will see.
+     * @param cureSuccess {@code true} if the vampire chose to be cured over death.
+     * @return A message to be announced across the server.
+     */
+    public String getForceCureAnnouncementMessage(boolean messageToHumans, boolean cureSuccess) {
+        // Retrieve a message depending on whether we are retrieving the human or vampire's perspective message
+        if (CUSTOM_CURE_MESSAGES) {
+            if (messageToHumans && cureSuccess) {
+                return this.textConfig.getString("global-cure-announcement.force-cure-success-announcement-to-humans");
+            } else if (messageToHumans) {
+                return this.textConfig.getString("global-cure-announcement.force-cure-death-announcement-to-humans");
+            } else if (cureSuccess) {
+                return this.textConfig.getString("global-cure-announcement.force-cure-success-announcement-to-vampires");
+            } else {
+                return this.textConfig.getString("global-cure-announcement.force-cure-death-announcement-to-vampires");
+            }
+        } else {
+            if (messageToHumans && cureSuccess) {
+                return "§6A beacon of holy light erupts with righteous fury... Someone has sanctified a vampire forcibly... The curing comes at a great cost to a sacred site...";
+            } else if (messageToHumans) {
+                return "§8A vampire has refused the light and embraced final death... Their essence fades from this world forever...";
+            } else if (cureSuccess) {
+                return "§4A disturbance ripples through the darkness... One of your kind has chosen humanity over eternal damnation...";
+            } else {
+                return "§4One of your kind has chosen eternal death over forced redemption... The darkness mourns their passing...";
+            }
+        }
+    }
+
+    /**
+     * Place a cure book inside a chest at the provided location.
+     *
+     * @param admin the player requesting to stash a cure book.
+     * @param bookNumber the cure book's order in the sequence.
+     * @param x the X coordinate of the chest.
+     * @param y the Y coordinate of the chest.
+     * @param z the Z coordinate of the chest.
+     * @return {@code true} if the book was successfully stashed.
+     */
+    public boolean stashCureBook(Player admin, int bookNumber, int x, int y, int z) {
+        World world = Bukkit.getWorld(RemakepirePlugin.WORLD_NAME);
+
+        if (world == null) {
+            admin.sendMessage("§cWorld '" + RemakepirePlugin.WORLD_NAME + "' not found.");
+            return false;
+        }
+
+        // Retrieve the tome chest at the location
+        Block block = world.getBlockAt(new Location(world, x, y, z));
+
+        if (!(block.getState() instanceof Chest chest)) {
+            admin.sendMessage("§cNo chest found at coordinates " + x + ", " + y + ", " + z + ".");
+            return false;
+        }
+
+        // Place the third cure book inside the chest
+        Inventory chestInventory = chest.getInventory();
+        chestInventory.clear();
+        ItemStack book = this.plugin.getCureBookManager().getCureBook(bookNumber);
+        chestInventory.addItem(book);
+        admin.sendMessage("§aSuccessfully stashed '" + this.plugin.getCureBookManager().getCureBookName(bookNumber, true) + "' in the chest at " + x + ", " + y + ", " + z + ".");
+
+        return true;
+    }
+
+    /**
+     * Place a cure book inside a chest at the provided location.
+     *
+     * @param bookNumber the cure book's order in the sequence.
+     * @param x the X coordinate of the chest.
+     * @param y the Y coordinate of the chest.
+     * @param z the Z coordinate of the chest.
+     * @return {@code true} if the book was successfully stashed.
+     */
+    public boolean stashCureBook(int bookNumber, int x, int y, int z) {
+        World world = Bukkit.getWorld(RemakepirePlugin.WORLD_NAME);
+
+        if (world == null) {
+            this.plugin.logInfo("§cWorld '" + RemakepirePlugin.WORLD_NAME + "' not found.");
+            return false;
+        }
+
+        // Retrieve the tome chest at the location
+        Block block = world.getBlockAt(new Location(world, x, y, z));
+
+        if (!(block.getState() instanceof Chest chest)) {
+            this.plugin.logInfo("§cNo chest found at coordinates " + x + ", " + y + ", " + z + ".");
+            return false;
+        }
+
+        // Place the third cure book inside the chest
+        Inventory chestInventory = chest.getInventory();
+        chestInventory.clear();
+        ItemStack book = this.plugin.getCureBookManager().getCureBook(bookNumber);
+        chestInventory.addItem(book);
+
+        return true;
     }
 }

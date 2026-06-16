@@ -200,13 +200,17 @@ public class ForcedCureChoiceManager {
         target.sendMessage("§aYou are human once more.");
         target.sendMessage("§8But the holy site has been permanently corrupted by your dark presence...");
 
+        // Retrieve the messages to announce to the server population
+        final String messageToHumans = this.plugin.getCureBookManager().getForceCureAnnouncementMessage(true, true);
+        final String messageToVampires = this.plugin.getCureBookManager().getForceCureAnnouncementMessage(false, true);
+
         // Alert all players that a vampire has been cured
         for(Player onlinePlayer : Bukkit.getOnlinePlayers()) {
             if (!onlinePlayer.equals(caster) && !onlinePlayer.equals(target)) {
                 if (this.plugin.getVampireManager().isVampire(onlinePlayer)) {
-                    onlinePlayer.sendMessage("§4A disturbance ripples through the darkness... One of your kind has chosen humanity over eternal damnation...");
+                    onlinePlayer.sendMessage(messageToVampires);
                 } else {
-                    onlinePlayer.sendMessage("§6A beacon of holy light erupts with righteous fury... Someone has sanctified a vampire forcibly... The curing comes at a great cost to a sacred site...");
+                    onlinePlayer.sendMessage(messageToHumans);
                 }
             }
         }
@@ -244,7 +248,8 @@ public class ForcedCureChoiceManager {
     }
 
     /**
-     * Perform the visual and message effects of a vampire permadeath.
+     * Perform the visual and message effects of a vampire permadeath.<br/>
+     * The beacon will not break from a permadeath cure.
      *
      * @param caster the player forcing the cure.
      * @param target the player who must make the decision.
@@ -254,23 +259,31 @@ public class ForcedCureChoiceManager {
         caster.sendMessage("§4" + target.getName() + " has refused redemption...");
         caster.sendMessage("§7The creature chooses death over humanity...");
         caster.sendMessage("§8Their wish is granted...");
+
         target.sendTitle("§4§lETERNAL REST", "§8You embrace the void", 10, 60, 20);
         target.sendMessage("§4You refuse the holy words and choose oblivion...");
         target.sendMessage("§8The darkness claims you one final time...");
         target.sendMessage("§8Your journey ends here...");
 
+        // Retrieve the messages to announce to the server population
+        final String messageToHumans = this.plugin.getCureBookManager().getForceCureAnnouncementMessage(true, false);
+        final String messageToVampires = this.plugin.getCureBookManager().getForceCureAnnouncementMessage(false, false);
+
+        // Alert all players that a vampire has been killed by the cure
         for(Player onlinePlayer : Bukkit.getOnlinePlayers()) {
             if (!onlinePlayer.equals(caster) && !onlinePlayer.equals(target)) {
                 if (this.plugin.getVampireManager().isVampire(onlinePlayer)) {
-                    onlinePlayer.sendMessage("§4One of your kind has chosen eternal death over forced redemption... The darkness mourns their passing...");
+                    onlinePlayer.sendMessage(messageToVampires);
                 } else {
-                    onlinePlayer.sendMessage("§8A vampire has refused the light and embraced final death... Their essence fades from this world forever...");
+                    onlinePlayer.sendMessage(messageToHumans);
                 }
             }
         }
 
         this.plugin.getDeathHandler().createVampireDeathEffects(target.getLocation());
         target.setGameMode(GameMode.SPECTATOR);
+        target.addScoreboardTag(DeathHandler.PERMAKILLED_TAG);
+
         target.sendMessage("");
         target.sendMessage("§4§l§m                                                    ");
         target.sendMessage("§4§lYOU HAVE CHOSEN PERMADEATH");
@@ -293,6 +306,7 @@ public class ForcedCureChoiceManager {
         player.getWorld().spawnParticle(Particle.SOUL, playerLocation, 100, 1.0, 2.0, 1.0, 0.1);
         player.getWorld().spawnParticle(Particle.EXPLOSION_EMITTER, playerLocation, 1, 0.5, 1.0, 0.5, 0.0);
         player.getWorld().spawnParticle(Particle.EXPLOSION_EMITTER, playerLocation, 5, 1.0, 1.0, 1.0, 0.0);
+
         player.getWorld().playSound(playerLocation, Sound.BLOCK_BELL_USE, SoundCategory.MASTER, 1.5F, 0.8F);
         player.getWorld().playSound(playerLocation, Sound.BLOCK_GLASS_BREAK, SoundCategory.MASTER, 1.0F, 1.0F);
         player.getWorld().playSound(playerLocation, Sound.AMBIENT_SOUL_SAND_VALLEY_MOOD, SoundCategory.MASTER, 1.0F, 1.5F);
@@ -332,8 +346,8 @@ public class ForcedCureChoiceManager {
          * @param casterUUID the UUID of the player forcing the cure.
          * @param targetUUID the UUID of the player who must make the decision.
          * @param holyBeacon the beacon being used for the cure.
-         * @param hadFlightBefore {@code true} if the playr
-         * @param wasInvulnerableBefore {@code true} if
+         * @param hadFlightBefore {@code true} if the player previously had an attribute which granted them flight.
+         * @param wasInvulnerableBefore {@code true} if the player previously had an attribute which made them invincible.
          */
         public ForcedCureData(UUID casterUUID, UUID targetUUID, BeaconSite holyBeacon, boolean hadFlightBefore, boolean wasInvulnerableBefore) {
             this.casterUUID = casterUUID;

@@ -822,6 +822,37 @@ public class BeaconManager {
     }
 
     /**
+     * Instantly corrupt a beacon and make it unusable.
+     *
+     * @param name the beacon to convert.
+     * @return {@code true} if the beacon was converted.
+     */
+    public boolean setBeaconCorrupted(String name) {
+        BeaconSite beacon = this.beacons.get(name.toLowerCase());
+
+        if (beacon != null) {
+            this.cancelPendingNeutralBroadcast(name.toLowerCase());
+
+            beacon.setState(BeaconState.PERMANENTLY_DESECRATED);
+            beacon.setLastChangedBy("Admin command");
+            beacon.setConversionCooldownUntil(0L);
+
+            this.updateBeaconDisplay(beacon);
+            this.saveBeacons();
+
+            this.plugin.logInfo("Set beacon '" + name + "' as corrupted (Beacon now unusable)");
+            this.plugin.getBeaconMajorityManager().updateBeaconMajorityBonuses();
+
+//            this.broadcastBeaconGainToTeam(beacon, BeaconState.PERMANENTLY_DESECRATED);
+            this.checkAndBroadcastCompleteControl();
+            this.checkAndDisableEternalNight();
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /**
      * Instantly convert a beacon into a neutral alignment.
      *
      * @param name the beacon to convert.

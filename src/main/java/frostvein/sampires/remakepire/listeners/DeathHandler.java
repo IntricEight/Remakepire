@@ -11,6 +11,7 @@ import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.SoundCategory;
 import org.bukkit.attribute.Attribute;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -29,9 +30,9 @@ public class DeathHandler implements Listener {
     private final VampireManager vampireManager;
     private final Map<UUID, Material> lastWeaponUsed = new HashMap<>();
     private final Map<UUID, UUID> woodenStakeKills = new HashMap<>();
-    public static final String PERMAKILLED_TAG = "PermaKilled", PERMADEATH_CHOSEN_TAG = "PermadeathChosen", PROMOTION_BAN_PENDING_TAG = "PromotionBanPending";
-
-    // TODO: Remove wooden axes from having special effects on vampires. It's really inconsistent where they are applied and where they are not, so it doesn't seem intentional.
+    public static final String PERMAKILLED_TAG = "perma_dead", PERMAKILL_PROCESSING_TAG = "PermaKilled", PERMADEATH_CHOSEN_TAG = "PermadeathChosen", PROMOTION_BAN_PENDING_TAG = "PromotionBanPending";
+    private final FileConfiguration textConfig;
+    private final boolean CUSTOM_DEATH_MESSAGES;
 
     /**
      * Create an instance of the Death Handler listener.
@@ -41,6 +42,9 @@ public class DeathHandler implements Listener {
     public DeathHandler(RemakepirePlugin plugin) {
         this.plugin = plugin;
         this.vampireManager = plugin.getVampireManager();
+        this.textConfig = this.plugin.getTextConfig();
+
+        this.CUSTOM_DEATH_MESSAGES = this.textConfig.getBoolean("custom-global-announcements", false);
     }
 
     /**
@@ -65,12 +69,12 @@ public class DeathHandler implements Listener {
         boolean wasVampire = this.vampireManager.isVampire(player);
         boolean wasHuman = this.vampireManager.isHuman(player);
 
-        if (wasVampire && player.getScoreboardTags().contains(PERMAKILLED_TAG)) {
-            this.vampireManager.killVampirePermanently(player);
-            player.removeScoreboardTag(PERMAKILLED_TAG);
+        if (wasVampire && player.getScoreboardTags().contains(PERMAKILL_PROCESSING_TAG)) {
+            this.vampireManager.killPlayerPermanently(player);
+            player.removeScoreboardTag(PERMAKILL_PROCESSING_TAG);
 
         } else if (wasHuman && player.getScoreboardTags().contains(PERMADEATH_CHOSEN_TAG)) {
-            this.vampireManager.killVampirePermanently(player);
+            this.vampireManager.killPlayerPermanently(player);
             player.removeScoreboardTag(PERMADEATH_CHOSEN_TAG);
 
         } else if (wasVampire && player.getScoreboardTags().contains(PROMOTION_BAN_PENDING_TAG)) {
@@ -84,12 +88,14 @@ public class DeathHandler implements Listener {
                     Scoreboard mainScoreboard = Bukkit.getScoreboardManager().getMainScoreboard();
                     Objective deathObjective = mainScoreboard.getObjective("vsmp_death");
 
+                    // Make sure the player doesn't respawn with an illegal number of lives
                     if (deathObjective != null) {
                         int currentDeaths = deathObjective.getScore(player.getName()).getScore();
+                        int maxDeaths = this.plugin.getConfigManager().getHumanLifeCount();
 
-                        if (currentDeaths > 5) {
-                            deathObjective.getScore(player.getName()).setScore(5);
-                            this.plugin.logInfo("Capped death count for " + player.getName() + " at 5 (was " + currentDeaths + ")");
+                        if (currentDeaths > maxDeaths) {
+                            deathObjective.getScore(player.getName()).setScore(maxDeaths);
+                            this.plugin.logInfo("Capped death count for " + player.getName() + " at " + maxDeaths + " (was " + currentDeaths + ")");
                         }
                     }
                 } catch (Exception e) {
@@ -303,11 +309,10 @@ public class DeathHandler implements Listener {
             int victimStage = this.vampireManager.getVampireStage(victim);
 
             if (victimStage <= woodenStakeThreshold && killedWithWoodenWeapon) {
-                victim.addScoreboardTag(PERMAKILLED_TAG);
+                victim.addScoreboardTag(PERMAKILL_PROCESSING_TAG);
                 killer.sendMessage("§4You have permanently killed the vampire " + victim.getName() + "!");
                 this.createVampireDeathEffects(victim.getLocation());
-                this.broadcastPermaKill(victim, killer);
-                this.plugin.logInfo("PERMA-KILL: Applied " + PERMAKILLED_TAG + " tag to " + victim.getName() + " (Stage " + victimStage + ", Threshold: " + woodenStakeThreshold + ")");
+                this.plugin.logInfo("PERMA-KILL: Applied " + PERMAKILL_PROCESSING_TAG + " tag to " + victim.getName() + " (Stage " + victimStage + ", Threshold: " + woodenStakeThreshold + ")");
 
             } else {
                 victim.addScoreboardTag(PROMOTION_BAN_PENDING_TAG);
@@ -317,16 +322,36 @@ public class DeathHandler implements Listener {
     }
 
     /**
-     * Alert the server that a vampire has been permanently.
+     * Alert the server that a player has been permanently killed.
      *
      * @param victim the player who was killed.
-     * @param killer the player who killed the victim.
      */
-    private void broadcastPermaKill(Player victim, Player killer) {
-        String vampireMessage = "§4You feel a dark soul ripped from its human coil, somebody has slayed a member of your monsterous family...";
-        String humanMessage = "§aYou feel the realm has been purged of an evil spirit... Someone has successfully killed a vampire. Permanently.";
+    public void broadcastPermaKill(Player victim) {
+        // Default messages for players who have avoided being placed on a team
+        String vampireMessage = "A player has met their final death.", humanMessage = "A player has been slain.";
 
+        // Broadcast a death message depending on what team the slain player was on
+        if (vampireManager.isHuman(victim)) {
+            if (CUSTOM_DEATH_MESSAGES) {
+                humanMessage = this.textConfig.getString("combat-death-announcement.human-death-to-humans", "Custom death message failed to load: human-death-to-humans");
+                vampireMessage = this.textConfig.getString("combat-death-announcement.human-death-to-vampires", "Custom death message failed to load: human-death-to-vampires");
+            } else {
+                humanMessage = "§cA shiver runs down your spine, as a human soul is torn from this realm...";
+                vampireMessage = "§2You sense the fading light of a soul, unnoticed until its disappearance... One of your prey been slain.";
+            }
+        } else if (vampireManager.isVampire(victim)) {
+            if (CUSTOM_DEATH_MESSAGES) {
+                humanMessage = this.textConfig.getString("combat-death-announcement.vampire-death-to-humans", "Custom death message failed to load: vampire-death-to-humans");
+                vampireMessage = this.textConfig.getString("combat-death-announcement.vampire-death-to-vampires", "Custom death message failed to load: vampire-death-to-vampires");
+            } else {
+                humanMessage = "§aYou feel the realm has been purged of an evil spirit... Someone has successfully killed a vampire. Permanently.";
+                vampireMessage = "§4You feel a dark soul ripped from its human coil, somebody has slayed a member of your monstrous family...";
+            }
+        }
+
+        // Send the curated death message to all online players
         for(Player player : Bukkit.getOnlinePlayers()) {
+            // Don't send the message to the player who died
             if (!player.getUniqueId().equals(victim.getUniqueId())) {
                 if (this.vampireManager.isVampire(player)) {
                     player.sendMessage(vampireMessage);
@@ -336,8 +361,7 @@ public class DeathHandler implements Listener {
             }
         }
 
-        String killerType = this.vampireManager.isVampire(killer) ? "vampire" : "human";
-        this.plugin.logInfo("PERMA-KILL: " + victim.getName() + " was permanently killed by " + killerType + " " + killer.getName());
+        this.plugin.logInfo("PERMA-KILL: " + victim.getName() + " was permanently killed");
     }
 
     /**

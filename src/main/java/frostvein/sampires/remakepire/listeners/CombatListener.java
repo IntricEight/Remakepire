@@ -36,8 +36,6 @@ public class CombatListener implements Listener {
     private final VampireAbilityManager vampireAbilityManager;
     private final BeetrootManager beetrootManager;
     private final Random random;
-    // Set the number of lives that humans have
-    private static final int humanLifeCount = 5;
 
     /**
      * Create an instance of the Combat listener.
@@ -219,7 +217,7 @@ public class CombatListener implements Listener {
                                 attacker.setCooldown(Material.WOODEN_SWORD, this.plugin.getConfigManager().getWoodenStakeCooldownTicks());
                             }
 
-                            // If the config is set to allow non-vampire kill sources on humans, check if the human has ran out of lives
+                            // If the config is set to allow non-vampire kill sources on humans, check if the human has run out of lives
                             if (plugin.getConfigManager().isLifeLimitEnforced() && victim.getHealth() - event.getFinalDamage() <= 0) {
                                 try {
                                     Scoreboard mainScoreboard = Bukkit.getScoreboardManager().getMainScoreboard();
@@ -228,8 +226,8 @@ public class CombatListener implements Listener {
                                     if (deathObjective != null) {
                                         int deaths = deathObjective.getScore(victim.getName()).getScore();
 
-                                        // Only force the perma death if the human has run out of lives
-                                        if (deaths >= humanLifeCount) {
+                                        // Only force the perma death if the human has run out of lives OR permadeath is set to ABSOLUTE
+                                        if (deaths >= this.plugin.getConfigManager().getHumanLifeCount() || this.plugin.getPermadeathManager().hasAbsolutePermadeathEnabled(victim)) {
                                             event.setCancelled(true);
 
                                             attacker.sendMessage("§4You watch the light of " + victim.getName() + "'s eyes fade, and extinguish. Lost forever.");
@@ -246,11 +244,14 @@ public class CombatListener implements Listener {
                                 }
                             }
 
+                            // Reduce a lower stage vampire's weapon damage by 10%
                             if (this.vampireManager.isVampireStage1(attacker) && this.isSwordOrAxe(attackerWeapon)) {
                                 event.setDamage(event.getDamage() * 0.9);
                             }
 
+                            // Manage vampire on human violence
                             if (this.vampireManager.isVampire(attacker) && this.vampireManager.isHuman(victim)) {
+                                // Manage vampire on human murder
                                 if (victim.getHealth() - event.getFinalDamage() <= 0) {
                                     this.plugin.getVampireFeedingManager().cancelFeedingSessionByTarget(victim);
 
@@ -289,7 +290,6 @@ public class CombatListener implements Listener {
                                         return;
                                     }
 
-
                                     if (!this.plugin.getVampireTurningManager().isTurningEnabled(attacker)) {
                                         event.setCancelled(true);
 
@@ -299,7 +299,7 @@ public class CombatListener implements Listener {
 
                                             // Apply the effect of a chosen permadeath on death
                                             if (deathObjective != null) {
-                                                if (deathObjective.getScore(victim.getName()).getScore() >= humanLifeCount) {
+                                                if (deathObjective.getScore(victim.getName()).getScore() >= this.plugin.getConfigManager().getHumanLifeCount()) {
                                                     attacker.sendMessage("§4You watch the light of " + victim.getName() + "'s eyes fade, and extinguish. Lost forever.");
                                                     victim.sendMessage("§7The world grows dim, blurry, you feel a darkness reach out, offering you one last chance to live, as a creature of the night... But you refuse... And slip under the veil of the afterlife.");
                                                     victim.addScoreboardTag(DeathHandler.PERMADEATH_CHOSEN_TAG);
@@ -475,8 +475,8 @@ public class CombatListener implements Listener {
                                 if (deathObjective != null) {
                                     int deaths = deathObjective.getScore(player.getName()).getScore();
 
-                                    // Only force the perma death if the human has run out of lives
-                                    if (deaths >= humanLifeCount) {
+                                    // Only force the perma death if the human has run out of lives OR permadeath is set to ABSOLUTE
+                                    if (deaths >= this.plugin.getConfigManager().getHumanLifeCount() || this.plugin.getPermadeathManager().hasAbsolutePermadeathEnabled(player)) {
                                         event.setCancelled(true);
 
                                         player.sendMessage("§7The world grows dim, blurry... the light which drew you back so many times beckons once more, but it seems fainter now, out of reach... You lose your grip, and slip under the veil of the afterlife.");
