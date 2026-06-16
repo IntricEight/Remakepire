@@ -312,7 +312,6 @@ public class DeathHandler implements Listener {
                 victim.addScoreboardTag(PERMAKILL_PROCESSING_TAG);
                 killer.sendMessage("§4You have permanently killed the vampire " + victim.getName() + "!");
                 this.createVampireDeathEffects(victim.getLocation());
-                this.broadcastPermaKill(victim);
                 this.plugin.logInfo("PERMA-KILL: Applied " + PERMAKILL_PROCESSING_TAG + " tag to " + victim.getName() + " (Stage " + victimStage + ", Threshold: " + woodenStakeThreshold + ")");
 
             } else {

@@ -482,13 +482,15 @@ public class VampireManager {
      * @param player the vampire who has been permakilled.
      */
     public void killPlayerPermanently(Player player) {
-        // Reset the player to a human
-        this.removeAllVampireTags(player);
-        player.addScoreboardTag(HUMAN_TAG);
-
         this.plugin.getServer().getScheduler().runTaskLater(this.plugin, () -> {
             // Announce to the server that a player has been permakilled
             this.plugin.getDeathHandler().broadcastPermaKill(player);
+
+            // Reset the player to a human
+            this.removeAllVampireTags(player);
+            player.addScoreboardTag(HUMAN_TAG);
+            player.setLevel(0);
+            player.setExp(0.0f);
 
             // Set the player's state to dead
             player.setGameMode(GameMode.SPECTATOR);
