@@ -173,7 +173,7 @@ public class CombatListener implements Listener {
                         }
 
                         // Apply damage reduction from the effects of sun weakness
-                        if (attacker.hasPotionEffect(PotionEffectType.TRIAL_OMEN)) {
+                        if (attacker.hasPotionEffect(PotionEffectType.RAID_OMEN)) {
                             event.setDamage(event.getDamage() * 0.5);
                         }
                     }

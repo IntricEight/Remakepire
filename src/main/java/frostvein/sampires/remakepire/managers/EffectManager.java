@@ -109,10 +109,10 @@ public class EffectManager {
                 // Apply the visual indicator of sun weakness
                 if (shouldApplyTrialOmen && !player.hasPotionEffect(PotionEffectType.INVISIBILITY) && player.getGameMode() == GameMode.SURVIVAL) {
                     if (stage == 2) {
-                        player.addPotionEffect(new PotionEffect(PotionEffectType.TRIAL_OMEN, 6000, 0, false, false, true));
+                        player.addPotionEffect(new PotionEffect(PotionEffectType.RAID_OMEN, 6000, 0, false, false, true));
                         this.lastTrialOmenApplied.put(playerUUID, currentTime);
                     } else if (stage == 3) {
-                        player.addPotionEffect(new PotionEffect(PotionEffectType.TRIAL_OMEN, 6000, 1, false, false, true));
+                        player.addPotionEffect(new PotionEffect(PotionEffectType.RAID_OMEN, 6000, 1, false, false, true));
                         this.lastTrialOmenApplied.put(playerUUID, currentTime);
                     }
                 }
@@ -122,8 +122,8 @@ public class EffectManager {
             } else {
                 this.removeSunWeaknessEffects(player);
 
-                if (player.hasPotionEffect(PotionEffectType.TRIAL_OMEN)) {
-                    player.removePotionEffect(PotionEffectType.TRIAL_OMEN);
+                if (player.hasPotionEffect(PotionEffectType.RAID_OMEN)) {
+                    player.removePotionEffect(PotionEffectType.RAID_OMEN);
                 }
 
                 this.lastTrialOmenApplied.remove(player.getUniqueId());
