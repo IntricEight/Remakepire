@@ -24,9 +24,9 @@ chat:
 # ============================================================================
 # TOME CHEST SYSTEM
 # ============================================================================
-# List of coordinates where tome chests can spawn
-# Format: "x,y,z" - Use /pow admin addtomechest to add new locations in-game
 tome-chests:
+  # A list of coordinates where tome chests can spawn
+  # Format: "x,y,z" - Use /pow admin addtomechest to add new locations in-game
   locations:
     - -1141,59,-764
     - -560,110,-343
@@ -39,6 +39,69 @@ tome-chests:
     - -1437,101,-302
     - -1095,-11,-1028
     - -630,256,-1168
+
+  # Control how many tome chests should contain tome ability books each distribution cycle
+  # Default: 4
+  ability-book-count: 4
+
+  # A list of tome abilities that can spawn inside tome chests
+  # The default list are all the books supported in the plugin; you pick and choose which ones you want included in your game
+  # You can find a list of the supported tome options below this list
+  tome-options:
+    - "BanishUndead"
+    - "Blessing"
+    - "EnlightenedEye"
+    - "HolyWord"
+    - "LanternThrash"
+    - "PrayerOfFaith"
+    - "RallyingCry"
+    - "ShoulderBarge"
+    - "StopTheBleeding"
+    - "TurnUndead"
+    - "UncannyDirection"
+    - "UnnaturalHaste"
+    - "WayOfTheLand"
+    - "WayOfTheLumberjack"
+    - "WayOfTheProspector"
+
+# Tome Ability Book Options
+#    "BanishUndead"
+#    "Blessing"
+#    "EnlightenedEye"
+#    "HolyWord"
+#    "LanternThrash"
+#    "PrayerOfFaith"
+#    "RallyingCry"
+#    "ShoulderBarge"
+#    "StopTheBleeding"
+#    "TurnUndead"
+#    "UncannyDirection"
+#    "UnnaturalHaste"
+#    "WayOfTheLand"
+#    "WayOfTheLumberjack"
+#    "WayOfTheProspector"
+
+  # A list of enchantment books that can spawn inside tome chests
+  # The default list are all the enchantments supported in the default plugin
+  # You can find a list of the supported enchantment options below this list
+  enchantment-options:
+    - "Efficiency"
+    - "FeatherFalling"
+    - "Knockback"
+    - "Protection"
+    - "SweepingEdge"
+
+# Tome Enchantment Book Options
+#    "Efficiency"
+#    "FeatherFalling"
+#    "Knockback"
+#    "Mending"
+#    "Power"
+#    "Protection"
+#    "Punch"
+#    "Respiration"
+#    "Sharpness"
+#    "SweepingEdge"
 
 # Tome Distribution Interval
 # How often tomes are distributed to chests (in minutes)
@@ -309,6 +372,15 @@ combat:
   # Default: 1 (only Stage 1 vampires can be staked)
   permadeath-minimum-stage: 1
 
+  # Control how many lives humans start out with
+  # Note that this is the number of times a human will revive. For example, 5 lives means 6 total deaths.
+  # Humans will always start out with 10 hearts, and lose hearts as their lives drop
+  # This change is not retroactive. If a human has died more times than allowed (after this value has been changed)
+  #   they will need to die one more time before it takes affect
+  # Minimum of 0 lives, maximum of 8
+  # Default: 5 (6 deaths)
+  human-lives: 5
+
   # Enable whether humans will be hard-capped to their 5 lives
   # When false, only a vampire can permakill a human player on their last life
   # Default: False (Extra dying is allowed)
@@ -330,7 +402,7 @@ damage_suppression: 50
 # ============================================================================
 oakhurst:
   # Town name
-  # Used for all instances where the town's name is used
+  # Used for all instances where the town's name is used (Unless custom messages are enabled in text-config.yml)
   # Default: "Oakhurst"
   town-name: "Oakhurst"
 

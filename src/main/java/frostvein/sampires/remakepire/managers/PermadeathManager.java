@@ -53,7 +53,7 @@ public class PermadeathManager {
         UUID playerId = player.getUniqueId();
         this.permadeathModes.put(playerId, mode);
         this.savePermadeathData();
-        this.plugin.logInfo("Player " + player.getName() + " permadeath mode set to: " + String.valueOf(mode));
+        this.plugin.logInfo("Player " + player.getName() + " permadeath mode set to: " + mode);
     }
 
     /**

@@ -19,6 +19,7 @@ import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Scoreboard;
 import frostvein.sampires.remakepire.RemakepirePlugin;
+import frostvein.sampires.remakepire.listeners.DeathHandler;
 
 public class VampireFeedingManager implements Listener {
     private final RemakepirePlugin plugin;
@@ -73,7 +74,6 @@ public class VampireFeedingManager implements Listener {
 
             if (vampire != null && target != null && vampire.isOnline() && target.isOnline() && vampire.getGameMode() != GameMode.SPECTATOR) {
                 if (target.getGameMode() != GameMode.SURVIVAL) {
-                    vampire.sendMessage("§cYou cannot feed on players who are not in survival mode.");
                     this.cancelFeedingSession(session);
 
                 } else if (!this.plugin.getSessionManager().isSessionActive()) {
@@ -106,6 +106,11 @@ public class VampireFeedingManager implements Listener {
      * @param target the player about to lose health or blood.
      */
     private void processPreparationPhase(FeedingSession session, Player vampire, Player target) {
+        if (target.getGameMode() != GameMode.SURVIVAL) {
+            this.cancelFeedingSession(session);
+            return;
+        }
+
         --session.preparationSecondsRemaining;
         String preparationMessage;
 
@@ -145,6 +150,11 @@ public class VampireFeedingManager implements Listener {
      * @param target the player losing health or blood.
      */
     private void processActiveFeedingPhase(FeedingSession session, Player vampire, Player target) {
+        if (target.getGameMode() != GameMode.SURVIVAL) {
+            this.cancelFeedingSession(session);
+            return;
+        }
+
         if (this.vampireManager.isHuman(target)) {
             UUID vampireId = vampire.getUniqueId();
             int currentSessionThirst = this.sessionFeedingThirst.getOrDefault(vampireId, 0);
@@ -208,7 +218,7 @@ public class VampireFeedingManager implements Listener {
         if (this.plugin.getPermadeathManager().hasAbsolutePermadeathEnabled(target)) {
             vampire.sendMessage("§4You watch the light of " + target.getName() + "'s eyes fade, and extinguish. Lost forever.");
             target.sendMessage("§7The world grows dim, blurry, you feel a darkness reach out, offering you one last chance to live, as a creature of the night... But you refuse... And slip under the veil of the afterlife.");
-            target.addScoreboardTag("PermadeathChosen");
+            target.addScoreboardTag(DeathHandler.PERMADEATH_CHOSEN_TAG);
             target.setHealth(0.0);
             this.cancelFeedingSession(session);
 
@@ -244,7 +254,7 @@ public class VampireFeedingManager implements Listener {
                     if (currentDeaths >= 5) {
                         vampire.sendMessage("§4You watch the light of " + target.getName() + "'s eyes fade, and extinguish. Lost forever.");
                         target.sendMessage("§7The world grows dim, blurry, you feel a darkness reach out, offering you one last chance to live, as a creature of the night... But you refuse... And slip under the veil of the afterlife.");
-                        target.addScoreboardTag("PermadeathChosen");
+                        target.addScoreboardTag(DeathHandler.PERMADEATH_CHOSEN_TAG);
                         target.setHealth(0.0);
 
                         this.cancelFeedingSession(session);
@@ -271,7 +281,7 @@ public class VampireFeedingManager implements Listener {
             vampire.sendMessage("§4They have been cleansed by holy power - their soul slips beyond your grasp, lost forever.");
             target.sendMessage("§7The darkness reaches for you, but the holy blessing protects your soul...");
             target.sendMessage("§7You feel yourself slipping away, into a peaceful sleep.");
-            target.addScoreboardTag("PermadeathChosen");
+            target.addScoreboardTag(DeathHandler.PERMADEATH_CHOSEN_TAG);
             target.setHealth(0.0);
 
             this.cancelFeedingSession(session);
@@ -279,7 +289,7 @@ public class VampireFeedingManager implements Listener {
         } else if (this.plugin.getPermadeathManager().hasPermadeathEnabled(target)) {
             vampire.sendMessage("§4You watch the light of " + target.getName() + "'s eyes fade, and extinguish. Lost forever.");
             target.sendMessage("§7The world grows dim, blurry, you feel a darkness reach out, offering you one last chance to live, as a creature of the night... But you refuse... And slip under the veil of the afterlife.");
-            target.addScoreboardTag("PermadeathChosen");
+            target.addScoreboardTag(DeathHandler.PERMADEATH_CHOSEN_TAG);
             target.setHealth(0.0);
 
             this.cancelFeedingSession(session);

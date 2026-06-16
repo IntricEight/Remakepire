@@ -45,7 +45,12 @@ public class BeaconTeleportAbility extends VampireAbility {
     }
 
     public boolean execute(Player player, VampireManager vampireManager, RemakepirePlugin plugin) {
-        if (player.getHealth() < player.getMaxHealth()) {
+        if (plugin.getBatTransformationManager().isInBatForm(player)) {
+            // Stop the player from using the ability while in bat form
+            player.sendMessage("§cYour fragile form cannot handle the strain of using the beacon network.");
+            return false;
+
+        } else if (player.getHealth() < player.getMaxHealth()) {
             player.sendMessage("§cYou find yourself too weak to use that ability... Rest up and heal first.");
             return false;
         } else {

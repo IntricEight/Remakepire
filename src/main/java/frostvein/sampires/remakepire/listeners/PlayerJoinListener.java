@@ -2,7 +2,7 @@ package frostvein.sampires.remakepire.listeners;
 
 import java.util.List;
 
-import frostvein.sampires.remakepire.managers.SessionManager;
+import frostvein.sampires.remakepire.managers.*;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -11,9 +11,6 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.scoreboard.Team;
 import frostvein.sampires.remakepire.RemakepirePlugin;
 import frostvein.sampires.remakepire.abilities.tome.TurnUndeadTomeAbility;
-import frostvein.sampires.remakepire.managers.BeetrootManager;
-import frostvein.sampires.remakepire.managers.EffectManager;
-import frostvein.sampires.remakepire.managers.VampireManager;
 
 public class PlayerJoinListener implements Listener {
     private final RemakepirePlugin plugin;
@@ -34,7 +31,7 @@ public class PlayerJoinListener implements Listener {
     }
 
     /**
-     * Apply the current game status effects to a joining player.
+     * Apply the current game's status effects to a joining player.
      *
      * @param event a player joining the world.
      */
@@ -63,6 +60,8 @@ public class PlayerJoinListener implements Listener {
         player.sendMessage("§7" + sessionStatus);
         if (!this.plugin.getSessionManager().playerReturningToGame(player)) {
             player.sendMessage("§cA new game has been initialized since you last played. Resetting your stats accordingly.");
+
+            player.removeScoreboardTag(DeathHandler.PERMAKILLED_TAG);
             this.plugin.getSessionManager().resetPlayer(player);
             this.plugin.getSessionManager().getGameIDObjective().getScore(player.getName()).setScore(this.plugin.getSessionManager().getGameIDObjective().getScore(SessionManager.GAME_ID_HOLDER).getScore());
             this.plugin.getSessionManager().getSessionIDObjective().getScore(player.getName()).setScore(this.plugin.getSessionManager().getSessionIDObjective().getScore(SessionManager.SESSION_ID_HOLDER).getScore());

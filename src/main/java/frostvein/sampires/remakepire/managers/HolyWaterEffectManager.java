@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -82,7 +83,7 @@ public class HolyWaterEffectManager implements Listener {
      */
     private void processHolyWaterHit(LivingEntity entity) {
         if (entity instanceof Player player) {
-            if (this.vampireManager.isVampire(player) && this.vampireManager.isVampireStage2OrHigher(player)) {
+            if (player.getGameMode() != GameMode.SPECTATOR && this.vampireManager.isVampire(player) && this.vampireManager.isVampireStage2OrHigher(player)) {
                 this.applyHolyWaterEffect(player);
             }
         }

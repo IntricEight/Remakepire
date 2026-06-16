@@ -52,15 +52,14 @@ public class PermadeathCommand implements CommandExecutor {
                     this.permadeathManager.setPermadeathMode(player, PermadeathMode.ABSOLUTE);
                     player.sendMessage("§4§lPERMADEATH: ABSOLUTE");
                     player.sendMessage("§cYou have chosen the path of ultimate sacrifice.");
-                    player.sendMessage("§7If you are killed by ANY vampire, you will die permanently,");
-                    player.sendMessage("§7regardless of their turning preference.");
+                    player.sendMessage("§7If you are killed by ANY means, you will die permanently");
                     player.sendMessage("§4This is the most extreme setting - use with caution.");
                     break;
                 default:
                     player.sendMessage("§cInvalid option. Use: §e/pow permadeath <on | off | absolute>");
                     player.sendMessage("§7  on §8- Die permanently if vampire tries to turn you");
                     player.sendMessage("§7  off §8- Become a vampire if turned (default)");
-                    player.sendMessage("§7  absolute §8- Die permanently from ANY vampire kill");
+                    player.sendMessage("§7  absolute §8- Die permanently from ANY death");
                     return true;
             }
 
@@ -83,7 +82,7 @@ public class PermadeathCommand implements CommandExecutor {
                 break;
             case ABSOLUTE:
                 player.sendMessage("§7Current setting: §4ABSOLUTE");
-                player.sendMessage("§7You will die permanently from ANY vampire kill.");
+                player.sendMessage("§7You will die permanently from ANY cause of death.");
         }
 
         player.sendMessage("");

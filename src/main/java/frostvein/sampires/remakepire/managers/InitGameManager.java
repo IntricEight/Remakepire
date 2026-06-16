@@ -481,6 +481,7 @@ public class InitGameManager {
 
                 Collection<? extends Player> onlinePlayers = Bukkit.getOnlinePlayers();
 
+                // Clear all tags from all online players
                 for(Player player : onlinePlayers) {
                     for(String tag : new HashSet<>(player.getScoreboardTags())) {
                         player.removeScoreboardTag(tag);

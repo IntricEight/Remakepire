@@ -3,11 +3,13 @@ package frostvein.sampires.remakepire.abilities.tome;
 import java.util.Set;
 import org.bukkit.Location;
 import org.bukkit.Particle;
+import org.bukkit.entity.Bogged;
 import org.bukkit.entity.Drowned;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Husk;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Phantom;
+import org.bukkit.entity.PigZombie;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Skeleton;
 import org.bukkit.entity.SkeletonHorse;
@@ -25,7 +27,7 @@ public class BanishUndeadTomeAbility extends TomeAbility {
     // Controls the size of the ability (in blocks)
     private static final int RADIUS = 40;
     // Controls the mobs effected by the ability
-    private final Set<Class<? extends Entity>> undeadMobTypes = Set.of(Zombie.class, Drowned.class, Husk.class, Skeleton.class, Stray.class, ZombieVillager.class, SkeletonHorse.class, ZombieHorse.class, Phantom.class, WitherSkeleton.class, Wither.class, Zoglin.class);
+    private final Set<Class<? extends Entity>> undeadMobTypes = Set.of(Zombie.class, ZombieVillager.class, Drowned.class, Husk.class, Skeleton.class, WitherSkeleton.class, Bogged.class, Stray.class, SkeletonHorse.class, ZombieHorse.class, Phantom.class, Wither.class, PigZombie.class, Zoglin.class);
 
     /**
      * Create an instance of the Banish Undead tome ability.
