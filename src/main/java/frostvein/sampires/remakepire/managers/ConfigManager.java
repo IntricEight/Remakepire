@@ -837,7 +837,7 @@ public class ConfigManager {
      * @return The message to stop the player from messaging others.
      */
     public String getFirstMessageBlockedMessage() {
-        return this.config.getString("chat.first-message-blocked-message", "&eIt looks like you've attempted to send a message! Vampire SMP is geared to revolve around immersion, consider finding the person you need to speak to, or messaging them on discord. If you still need to send your chat message, [Click Here]&e. This prevention message will not appear again until your next log on if you do choose to send your message via the blue text.");
+        return this.config.getString("chat.first-message-blocked-message", "&eIt looks like you've attempted to send a message! Vampire SMP is geared to revolve around immersion, consider finding the person you need to speak to, or messaging them on discord. If you still need to send your chat message, [Click Here]&e. This prevention message will not appear again until your next login if you do choose to send your message via the blue text.");
     }
 
     /**
