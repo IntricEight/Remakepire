@@ -16,9 +16,9 @@ public class VampireTexturePackManager {
     private static final String VAMPIRE_TEXTURE_PACK_SHA1_STRING = "e139890dd34f56724efcd5becb476999651ca43c";
     private static final String VAMPIRE_TEXTURE_PACK_PROMPT = "§5VampireSMP Vampire Pack\n§7This pack enhances your vampire experience!";
     // Control the human texture pack access details.
-    private static final String HUMAN_TEXTURE_PACK_URL = "https://download.mc-packs.net/pack/b1fbd00667c6ad35c11967a385184aa336d605e1.zip";
-    private static final String HUMAN_TEXTURE_PACK_SHA1_STRING = "b1fbd00667c6ad35c11967a385184aa336d605e1";
-    private static final String HUMAN_TEXTURE_PACK_PROMPT = "§aVampireSMP Human Pack\n§7This pack enhances your human experience!";
+    private static final String HUMAN_TEXTURE_PACK_URL = "https://download.mc-packs.net/pack/e0324a4c07208eb4fe9b0305f531be1c9dd90cc6.zip";
+    private static final String HUMAN_TEXTURE_PACK_SHA1_STRING = "e0324a4c07208eb4fe9b0305f531be1c9dd90cc6";
+    private static final String HUMAN_TEXTURE_PACK_PROMPT = "§aBlood of the Wild Human Pack\n§7This pack enhances your human experience!";
     private final Set<UUID> playersWithVampireTexturePack = new HashSet<>(), playersWithHumanTexturePack = new HashSet<>();
 
     /**
