@@ -28,17 +28,15 @@ tome-chests:
   # A list of coordinates where tome chests can spawn
   # Format: "x,y,z" - Use /pow admin addtomechest to add new locations in-game
   locations:
-    - -1141,59,-764
-    - -560,110,-343
-    - -684,125,-670
-    - -817,78,-380
-    - -508,75,-66
-    - -998,77,-1286
-    - -893,83,-908
-    - -1514,91,-625
-    - -1437,101,-302
-    - -1095,-11,-1028
-    - -630,256,-1168
+    - 202,61,-305
+    - 416,45,-109
+    - 504,139,398
+    - 494,125,593
+    - 153,99,128
+    - -19,104,100
+    - -125,71,421
+    - 76,80,407
+    - -397, 82, 364
 
   # Control how many tome chests should contain tome ability books each distribution cycle
   # Default: 4
@@ -408,8 +406,8 @@ oakhurst:
 
   # Town center (the main settlement location)
   # Used for teleportation and direction-based abilities like Uncanny Direction
-  town-center-x: -1032
-  town-center-z: -150
+  town-center-x: 79
+  town-center-z: 440
 
   # Teleport radius - how far from town center players can be randomly teleported
   # Default: 400 blocks
@@ -419,11 +417,11 @@ oakhurst:
   # The border is defined by a center point and diameter (total width)
   border:
     # Center of the playable area
-    center-x: -1024
-    center-z: -714
+    center-x: 50
+    center-z: 50
     # Total width/height of the playable area (creates a square area)
     # With center at 50 and diameter 1098: boundaries are -499 to 599
-    diameter: 1500
+    diameter: 1598
 
 # Control whether the game border can hold players inside
 # When false, all players will be able to leave the town, and will be told they have escaped
