@@ -169,7 +169,7 @@ public class PowCommand implements CommandExecutor, TabCompleter {
         sender.sendMessage("§e/pow admin givetome <player> <ability> [amount] §7- Give tome to player");
         sender.sendMessage("§e/pow admin select_tomes <player> §7- Open GUI to grant tome abilities");
         sender.sendMessage("§e/pow admin give_cure_book <player> <1 | 2 | 3 | 4> §7- Give cure book item to player");
-        sender.sendMessage("§e/pow admin stash_cure_book <1 | 2 | 3 | 4> <x> <y> <z> §7- Spawn a cure book inside a tome chest");
+        sender.sendMessage("§e/pow admin stash_cure_book <1 | 2 | 3 | 4> [x y z] §7- Spawn a cure book inside a tome chest. Don't provide coordinates to randomize book spawn location.");
         sender.sendMessage("§e/pow admin distributetomes §7- Manually trigger tome distribution");
         sender.sendMessage("§e/pow admin clearbloodmoonbuffs <all | player> §7- Clear blood moon buffs");
         sender.sendMessage("§e/pow admin fixattributes <all | player> §7- Fix stuck attribute modifiers (health/speed)");

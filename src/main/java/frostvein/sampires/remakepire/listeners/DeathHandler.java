@@ -337,7 +337,7 @@ public class DeathHandler implements Listener {
                 vampireMessage = this.textConfig.getString("combat-death-announcement.human-death-to-vampires", "Custom death message failed to load: human-death-to-vampires");
             } else {
                 humanMessage = "§cA shiver runs down your spine, as a human soul is torn from this realm...";
-                vampireMessage = "§2You sense the fading light of a soul, unnoticed until its disappearance... One of your prey been slain.";
+                vampireMessage = "§2You sense the fading light of a soul, unnoticed until its disappearance... One of your prey has been slain.";
             }
         } else if (vampireManager.isVampire(victim)) {
             if (CUSTOM_DEATH_MESSAGES) {
@@ -345,7 +345,7 @@ public class DeathHandler implements Listener {
                 vampireMessage = this.textConfig.getString("combat-death-announcement.vampire-death-to-vampires", "Custom death message failed to load: vampire-death-to-vampires");
             } else {
                 humanMessage = "§aYou feel the realm has been purged of an evil spirit... Someone has successfully killed a vampire. Permanently.";
-                vampireMessage = "§4You feel a dark soul ripped from its human coil, somebody has slayed a member of your monstrous family...";
+                vampireMessage = "§4You feel a dark soul ripped from its human coil, somebody has slain a member of your monstrous family...";
             }
         }
 

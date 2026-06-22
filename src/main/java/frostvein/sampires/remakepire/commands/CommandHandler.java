@@ -1192,10 +1192,16 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         sender.sendMessage("§e/pow admin beacon add <name> [radius] §7- Add beacon at your location");
         sender.sendMessage("§e/pow admin beacon remove <name> §7- Remove a beacon");
         sender.sendMessage("§e/pow admin beacon list §7- List all beacons");
-        sender.sendMessage("§e/pow admin beacon info <name> §7- Get detailed beacon info");
+        sender.sendMessage("§e/pow admin beacon list §7- List all beacons");
         sender.sendMessage("§e/pow admin beacon stats §7- Show spiritual influence statistics");
         sender.sendMessage("§e/pow admin beacon reload §7- Reload beacons from file");
         sender.sendMessage("§e/pow admin beacon validate §7- Check for invalid beacons");
+
+        sender.sendMessage("§e/pow admin beacon holy <name> §7- Instantly convert the beacon to holy");
+        sender.sendMessage("§e/pow admin beacon desecrated <name> §7- Instantly convert the beacon to desecrated");
+        sender.sendMessage("§e/pow admin beacon corrupted <name> §7- Instantly corrupt and break the beacon");
+        sender.sendMessage("§e/pow admin beacon neutral <name> §7- Instantly convert the beacon to neutral");
+
         sender.sendMessage("§e/pow admin beacon fix §7- Repair missing item displays");
         sender.sendMessage("§e/pow admin beacon refresh §7- Force refresh all beacon displays");
         sender.sendMessage("§e/pow admin beacon cleanup §7- AGGRESSIVE cleanup of all item displays at beacons");

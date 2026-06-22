@@ -10,7 +10,6 @@ import frostvein.sampires.remakepire.beacons.BeaconSite;
 
 public class ConfigManager {
     private final RemakepirePlugin plugin;
-    private FileConfiguration config;
 
     /**
      * Create an instance of the Config manager.
@@ -19,16 +18,6 @@ public class ConfigManager {
      */
     public ConfigManager(RemakepirePlugin plugin) {
         this.plugin = plugin;
-        this.loadConfig();
-    }
-
-    /**
-     * Retrieve the plugin configuration from the file.
-     */
-    public void loadConfig() {
-        this.plugin.saveDefaultConfig();
-        this.plugin.reloadConfig();
-        this.config = this.plugin.getConfig();
     }
 
     /**
@@ -44,13 +33,12 @@ public class ConfigManager {
      * @return A {@code List} of chest {@code Locations}.
      */
     public List<Location> getTomeChestLocations() {
-        List<String> locationStrings = this.config.getStringList("tome-chests.locations");
+        List<String> locationStrings = this.plugin.getConfig().getStringList("tome-chests.locations");
         List<Location> locations = new ArrayList<>();
         World world = this.plugin.getServer().getWorld(RemakepirePlugin.WORLD_NAME);
 
         if (world == null) {
             this.plugin.getLogger().severe("World '" + RemakepirePlugin.WORLD_NAME + "' not found! Cannot load tome chest locations.");
-            return locations;
 
         } else {
             for(String locString : locationStrings) {
@@ -69,8 +57,9 @@ public class ConfigManager {
                 }
             }
 
-            return locations;
         }
+
+        return locations;
     }
 
     /**
@@ -80,14 +69,15 @@ public class ConfigManager {
      * @return {@code true} if a new tome chest was added to the config.
      */
     public boolean addTomeChestLocation(Location location) {
-        List<String> locations = this.config.getStringList("tome-chests.locations");
+        List<String> locations = this.plugin.getConfig().getStringList("tome-chests.locations");
         String locationString = String.format("%d,%d,%d", location.getBlockX(), location.getBlockY(), location.getBlockZ());
 
         if (locations.contains(locationString)) {
             return false;
+
         } else {
             locations.add(locationString);
-            this.config.set("tome-chests.locations", locations);
+            this.plugin.getConfig().set("tome-chests.locations", locations);
             this.saveConfig();
             return true;
         }
@@ -100,14 +90,15 @@ public class ConfigManager {
      * @return {@code true} if the tome chest was removed from the config.
      */
     public boolean removeTomeChestLocation(Location location) {
-        List<String> locations = this.config.getStringList("tome-chests.locations");
+        List<String> locations = this.plugin.getConfig().getStringList("tome-chests.locations");
         String locationString = String.format("%d,%d,%d", location.getBlockX(), location.getBlockY(), location.getBlockZ());
 
         if (!locations.contains(locationString)) {
             return false;
+
         } else {
             locations.remove(locationString);
-            this.config.set("tome-chests.locations", locations);
+            this.plugin.getConfig().set("tome-chests.locations", locations);
             this.saveConfig();
             return true;
         }
@@ -119,7 +110,7 @@ public class ConfigManager {
      * @return the seconds between ability uses.
      */
     public int getVampireBatCooldown() {
-        return this.config.getInt("abilities.vampire.bat-cooldown", 900);
+        return this.plugin.getConfig().getInt("abilities.vampire.bat-cooldown", 900);
     }
 
     /**
@@ -128,7 +119,7 @@ public class ConfigManager {
      * @return the seconds between ability uses.
      */
     public int getVampireLungeCooldown() {
-        return this.config.getInt("abilities.vampire.lunge-cooldown", 45);
+        return this.plugin.getConfig().getInt("abilities.vampire.lunge-cooldown", 45);
     }
 
     /**
@@ -137,7 +128,7 @@ public class ConfigManager {
      * @return the seconds between ability uses.
      */
     public int getVampireVanishCooldown() {
-        return this.config.getInt("abilities.vampire.vanish-cooldown", 420);
+        return this.plugin.getConfig().getInt("abilities.vampire.vanish-cooldown", 420);
     }
 
     /**
@@ -155,7 +146,7 @@ public class ConfigManager {
      * @return the seconds between ability uses.
      */
     public int getVampireStormCallCooldown() {
-        return this.config.getInt("abilities.vampire.storm-call-cooldown", 7200);
+        return this.plugin.getConfig().getInt("abilities.vampire.storm-call-cooldown", 7200);
     }
 
     /**
@@ -164,7 +155,7 @@ public class ConfigManager {
      * @return the seconds between ability uses.
      */
     public int getVampireBeaconTeleportCooldown() {
-        return this.config.getInt("abilities.vampire.beacon-teleport-cooldown", 300);
+        return this.plugin.getConfig().getInt("abilities.vampire.beacon-teleport-cooldown", 300);
     }
 
     /**
@@ -173,7 +164,7 @@ public class ConfigManager {
      * @return the seconds between ability uses.
      */
     public int getVampireVisionCooldown() {
-        return this.config.getInt("abilities.vampire.vampire-vision-cooldown", 1);
+        return this.plugin.getConfig().getInt("abilities.vampire.vampire-vision-cooldown", 1);
     }
 
     /**
@@ -182,7 +173,7 @@ public class ConfigManager {
      * @return the seconds between ability uses.
      */
     public int getTomeBlessingCooldown() {
-        return this.config.getInt("abilities.tome.blessing-cooldown", 7200);
+        return this.plugin.getConfig().getInt("abilities.tome.blessing-cooldown", 7200);
     }
 
     /**
@@ -191,7 +182,7 @@ public class ConfigManager {
      * @return the seconds between ability uses.
      */
     public int getTomeBanishUndeadCooldown() {
-        return this.config.getInt("abilities.tome.banish-undead-cooldown", 900);
+        return this.plugin.getConfig().getInt("abilities.tome.banish-undead-cooldown", 900);
     }
 
     /**
@@ -200,7 +191,7 @@ public class ConfigManager {
      * @return the seconds between ability uses.
      */
     public int getTomeHolyWordCooldown() {
-        return this.config.getInt("abilities.tome.holy-word-cooldown", 600);
+        return this.plugin.getConfig().getInt("abilities.tome.holy-word-cooldown", 600);
     }
 
     /**
@@ -209,7 +200,7 @@ public class ConfigManager {
      * @return the seconds between ability uses.
      */
     public int getTomeEnlightenedEyeCooldown() {
-        return this.config.getInt("abilities.tome.enlightened-eye-cooldown", 900);
+        return this.plugin.getConfig().getInt("abilities.tome.enlightened-eye-cooldown", 900);
     }
 
     /**
@@ -218,7 +209,7 @@ public class ConfigManager {
      * @return the seconds between ability uses.
      */
     public int getTomeLanternThrashCooldown() {
-        return this.config.getInt("abilities.tome.lantern-thrash-cooldown", 300);
+        return this.plugin.getConfig().getInt("abilities.tome.lantern-thrash-cooldown", 300);
     }
 
     /**
@@ -227,7 +218,7 @@ public class ConfigManager {
      * @return the seconds between ability uses.
      */
     public int getTomePrayerOfFaithCooldown() {
-        return this.config.getInt("abilities.tome.prayer-of-faith-cooldown", 900);
+        return this.plugin.getConfig().getInt("abilities.tome.prayer-of-faith-cooldown", 900);
     }
 
     /**
@@ -236,7 +227,7 @@ public class ConfigManager {
      * @return the seconds between ability uses.
      */
     public int getTomeRallyingCryCooldown() {
-        return this.config.getInt("abilities.tome.rallying-cry-cooldown", 1200);
+        return this.plugin.getConfig().getInt("abilities.tome.rallying-cry-cooldown", 1200);
     }
 
     /**
@@ -245,7 +236,7 @@ public class ConfigManager {
      * @return the seconds between ability uses.
      */
     public int getTomeShoulderBargeCooldown() {
-        return this.config.getInt("abilities.tome.shoulder-barge-cooldown", 300);
+        return this.plugin.getConfig().getInt("abilities.tome.shoulder-barge-cooldown", 300);
     }
 
     /**
@@ -254,7 +245,7 @@ public class ConfigManager {
      * @return the seconds between ability uses.
      */
     public int getTomeTurnUndeadCooldown() {
-        return this.config.getInt("abilities.tome.turn-undead-cooldown", 1800);
+        return this.plugin.getConfig().getInt("abilities.tome.turn-undead-cooldown", 1800);
     }
 
 
@@ -264,7 +255,7 @@ public class ConfigManager {
      * @return the seconds between ability uses.
      */
     public int getTomeUncannyDirectionCooldown() {
-        return this.config.getInt("abilities.tome.uncanny-direction-cooldown", 30);
+        return this.plugin.getConfig().getInt("abilities.tome.uncanny-direction-cooldown", 30);
     }
 
 
@@ -274,7 +265,7 @@ public class ConfigManager {
      * @return the seconds between ability uses.
      */
     public int getTomeUnnaturalHasteCooldown() {
-        return this.config.getInt("abilities.tome.unnatural-haste-cooldown", 900);
+        return this.plugin.getConfig().getInt("abilities.tome.unnatural-haste-cooldown", 900);
     }
 
     /**
@@ -283,7 +274,7 @@ public class ConfigManager {
      * @return the seconds between ability uses.
      */
     public int getTomeWayOfTheLandCooldown() {
-        return this.config.getInt("abilities.tome.way-of-the-land-cooldown", 600);
+        return this.plugin.getConfig().getInt("abilities.tome.way-of-the-land-cooldown", 600);
     }
 
     /**
@@ -292,7 +283,7 @@ public class ConfigManager {
      * @return the seconds between ability uses.
      */
     public int getTomeWayOfTheLumberjackCooldown() {
-        return this.config.getInt("abilities.tome.way-of-the-lumberjack-cooldown", 600);
+        return this.plugin.getConfig().getInt("abilities.tome.way-of-the-lumberjack-cooldown", 600);
     }
 
     /**
@@ -301,7 +292,7 @@ public class ConfigManager {
      * @return the seconds between ability uses.
      */
     public int getTomeWayOfTheProspectorCooldown() {
-        return this.config.getInt("abilities.tome.way-of-the-prospector-cooldown", 600);
+        return this.plugin.getConfig().getInt("abilities.tome.way-of-the-prospector-cooldown", 600);
     }
 
     /**
@@ -310,7 +301,7 @@ public class ConfigManager {
      * @return the seconds between ability uses.
      */
     public int getTomeStopTheBleedingCooldown() {
-        return this.config.getInt("abilities.tome.stop-the-bleeding-cooldown", 7200);
+        return this.plugin.getConfig().getInt("abilities.tome.stop-the-bleeding-cooldown", 7200);
     }
 
     /**
@@ -319,7 +310,7 @@ public class ConfigManager {
      * @return the number of tome chests.
      */
     public int getAbilityDistributionCount() {
-        return this.config.getInt("tome-chests.ability-book-count", 4);
+        return this.plugin.getConfig().getInt("tome-chests.ability-book-count", 4);
     }
 
     /**
@@ -328,7 +319,7 @@ public class ConfigManager {
      * @return A list of tome ability names.
      */
     public List<String> getTomeAbilityOptions() {
-        return this.config.getStringList("tome-chests.tome-options");
+        return this.plugin.getConfig().getStringList("tome-chests.tome-options");
     }
 
     /**
@@ -337,7 +328,7 @@ public class ConfigManager {
      * @return A list of item enchantment names.
      */
     public List<String> getTomeEnchantmentOptions() {
-        return this.config.getStringList("tome-chests.enchantment-options");
+        return this.plugin.getConfig().getStringList("tome-chests.enchantment-options");
     }
 
     /**
@@ -346,7 +337,7 @@ public class ConfigManager {
      * @return The number of ticks after which tome chests will be refilled.
      */
     public long getTomeDistributionIntervalTicks() {
-        int minutes = this.config.getInt("tome-distribution-interval-minutes", 20);
+        int minutes = this.plugin.getConfig().getInt("tome-distribution-interval-minutes", 20);
         return (long)minutes * 60L * 20L;
     }
 
@@ -356,7 +347,7 @@ public class ConfigManager {
      * @return {@code true} if humans can only absorb a single tome ability during a session.
      */
     public boolean isTomeAbsorptionCapped() {
-        return this.config.getBoolean("tome-absorption.tome-absorption-capping", true);
+        return this.plugin.getConfig().getBoolean("tome-absorption.tome-absorption-capping", true);
     }
 
     /**
@@ -365,7 +356,7 @@ public class ConfigManager {
      * @param capped {@code true} if tome absorption should be capped to one each session.
      */
     public void setTomeAbsorptionCapping(boolean capped) {
-        this.config.set("tome-absorption.tome-absorption-capping", capped);
+        this.plugin.getConfig().set("tome-absorption.tome-absorption-capping", capped);
         this.plugin.saveConfig();
     }
 
@@ -375,7 +366,7 @@ public class ConfigManager {
      * @return the minutes between tome absorptions.
      */
     public int getTomeAbsorptionIntervalMinutes() {
-        return this.config.getInt("tome-absorption.tome-absorption-interval-minutes", 120);
+        return this.plugin.getConfig().getInt("tome-absorption.tome-absorption-interval-minutes", 120);
     }
 
     /**
@@ -384,7 +375,7 @@ public class ConfigManager {
      * @return the minutes it takes to run out of blood.
      */
     public int getThirstDepletionMinutes() {
-        return this.config.getInt("thirst.depletion-minutes", 120);
+        return this.plugin.getConfig().getInt("thirst.depletion-minutes", 120);
     }
 
     /**
@@ -393,7 +384,7 @@ public class ConfigManager {
      * @return the points of blood that each vampire can gain.
      */
     public int getMaxFeedingThirstPerSession() {
-        return this.config.getInt("thirst.max-feeding-per-session", 60);
+        return this.plugin.getConfig().getInt("thirst.max-feeding-per-session", 60);
     }
 
     /**
@@ -402,7 +393,7 @@ public class ConfigManager {
      * @return {@code true} if the vampire is prevented from leveling.
      */
     public boolean isVampireLevelingCapped() {
-        return this.config.getBoolean("vampire.vampire-level-capping", true);
+        return this.plugin.getConfig().getBoolean("vampire.vampire-level-capping", true);
     }
 
     /**
@@ -411,7 +402,7 @@ public class ConfigManager {
      * @param capped {@code true} if vampire levels should be restricted upon dropping a level.
      */
     public void setVampireLevelCapping(boolean capped) {
-        this.config.set("vampire.vampire-level-capping", capped);
+        this.plugin.getConfig().set("vampire.vampire-level-capping", capped);
         this.plugin.saveConfig();
     }
 
@@ -421,7 +412,7 @@ public class ConfigManager {
      * @return {@code true} if vampires are pointed toward new vampires.
      */
     public boolean canTrackNewVampires() {
-        return this.config.getBoolean("vampire.new-vampire-tracking", true);
+        return this.plugin.getConfig().getBoolean("vampire.new-vampire-tracking", true);
     }
 
     /**
@@ -430,7 +421,7 @@ public class ConfigManager {
      * @param track {@code true} if vampires are given directions to the new vampire.
      */
     public void setTrackingNewVampires(boolean track) {
-        this.config.set("vampire.new-vampire-tracking", track);
+        this.plugin.getConfig().set("vampire.new-vampire-tracking", track);
         this.plugin.saveConfig();
     }
 
@@ -440,7 +431,7 @@ public class ConfigManager {
      * @return the milliseconds it takes to convert a beacon from one side's alignment into the others.
      */
     public long getBeaconConversionTimeMs() {
-        long seconds = this.config.getLong("beacons.conversion-time-seconds", 300L);
+        long seconds = this.plugin.getConfig().getLong("beacons.conversion-time-seconds", 300L);
         return seconds * 1000L;
     }
 
@@ -450,7 +441,7 @@ public class ConfigManager {
      * @return the milliseconds it takes to convert a beacon from one side's alignment into the others.
      */
     public long getBeaconConversionCooldownMs() {
-        long minutes = this.config.getLong("beacons.conversion-cooldown-minutes", 60L);
+        long minutes = this.plugin.getConfig().getLong("beacons.conversion-cooldown-minutes", 60L);
         return minutes * 60L * 1000L;
     }
 
@@ -460,7 +451,7 @@ public class ConfigManager {
      * @return A {@code double} multiplier for the conversion speed.
      */
     public double getBeaconHumanSpeedMultiplier() {
-        return this.config.getDouble("beacons.human-speed-multiplier", 1.5);
+        return this.plugin.getConfig().getDouble("beacons.human-speed-multiplier", 1.5);
     }
 
     /**
@@ -469,7 +460,7 @@ public class ConfigManager {
      * @return A {@code double} multiplier for the conversion speed.
      */
     public double getBeaconFinalStandMultiplier() {
-        return this.config.getDouble("beacons.final-stand-multiplier", 6.0);
+        return this.plugin.getConfig().getDouble("beacons.final-stand-multiplier", 6.0);
     }
 
     /**
@@ -478,7 +469,7 @@ public class ConfigManager {
      * @return The seconds between the conversion and message.
      */
     public int getBeaconNeutralAnnouncementDelaySeconds() {
-        return this.config.getInt("beacons.neutral-announcement-delay-seconds", 60);
+        return this.plugin.getConfig().getInt("beacons.neutral-announcement-delay-seconds", 60);
     }
 
     /**
@@ -487,7 +478,7 @@ public class ConfigManager {
      * @return {@code true} if curing a vampire and corrupting a beacon traps the humans inside the border.
      */
     public boolean doCorruptedBeaconsTrapHumans() {
-        return this.config.getBoolean("beacons.corrupted-beacons-trap-humans", true);
+        return this.plugin.getConfig().getBoolean("beacons.corrupted-beacons-trap-humans", true);
     }
 
     /**
@@ -496,7 +487,7 @@ public class ConfigManager {
      * @return The seconds until the garlic effect could activate.
      */
     public int getGarlicProcessingTimeMin() {
-        return this.config.getInt("garlic.processing-time-min-seconds", 480);
+        return this.plugin.getConfig().getInt("garlic.processing-time-min-seconds", 480);
     }
 
     /**
@@ -505,7 +496,7 @@ public class ConfigManager {
      * @return The seconds until the garlic effect has to activate.
      */
     public int getGarlicProcessingTimeMax() {
-        return this.config.getInt("garlic.processing-time-max-seconds", 720);
+        return this.plugin.getConfig().getInt("garlic.processing-time-max-seconds", 720);
     }
 
     /**
@@ -514,7 +505,7 @@ public class ConfigManager {
      * @return The seconds until the garlic effect could wear off.
      */
     public int getGarlicImmunityDurationMin() {
-        return this.config.getInt("garlic.immunity-duration-min-seconds", 480);
+        return this.plugin.getConfig().getInt("garlic.immunity-duration-min-seconds", 480);
     }
 
     /**
@@ -523,7 +514,7 @@ public class ConfigManager {
      * @return The seconds until the garlic effect has to wear off.
      */
     public int getGarlicImmunityDurationMax() {
-        return this.config.getInt("garlic.immunity-duration-max-seconds", 600);
+        return this.plugin.getConfig().getInt("garlic.immunity-duration-max-seconds", 600);
     }
 
     /**
@@ -532,7 +523,7 @@ public class ConfigManager {
      * @return The seconds until the garlic effect could wear off.
      */
     public int getGarlicRecoveryDurationMin() {
-        return this.config.getInt("garlic.recovery-duration-min-seconds", 2100);
+        return this.plugin.getConfig().getInt("garlic.recovery-duration-min-seconds", 2100);
     }
 
     /**
@@ -541,7 +532,7 @@ public class ConfigManager {
      * @return The seconds until the garlic effect has to wear off.
      */
     public int getGarlicRecoveryDurationMax() {
-        return this.config.getInt("garlic.recovery-duration-max-seconds", 2700);
+        return this.plugin.getConfig().getInt("garlic.recovery-duration-max-seconds", 2700);
     }
 
     /**
@@ -550,7 +541,7 @@ public class ConfigManager {
      * @return The seconds until vampires regain their strength.
      */
     public int getGarlicWeaknessDuration() {
-        return this.config.getInt("garlic.weakness-duration", 180);
+        return this.plugin.getConfig().getInt("garlic.weakness-duration", 180);
     }
 
     /**
@@ -559,7 +550,7 @@ public class ConfigManager {
      * @return {@code true} if logging should be reduced.
      */
     public boolean isNonEssentialLoggingDisabled() {
-        return this.config.getBoolean("disable-nonessential-logging", false);
+        return this.plugin.getConfig().getBoolean("disable-nonessential-logging", false);
     }
 
     /**
@@ -568,7 +559,7 @@ public class ConfigManager {
      * @return The number of seconds that holy water disables a vampire's abilities.
      */
     public int getHolyWaterDisableDurationSeconds() {
-        return this.config.getInt("holy-water.disable-duration-seconds", 120);
+        return this.plugin.getConfig().getInt("holy-water.disable-duration-seconds", 120);
     }
 
     /**
@@ -577,7 +568,7 @@ public class ConfigManager {
      * @return {@code true} if holy water has been session capped.
      */
     public boolean isHolyWaterSessionCapped() {
-        return this.config.getBoolean("holy-water.holy-water-session-capped", true);
+        return this.plugin.getConfig().getBoolean("holy-water.holy-water-session-capped", true);
     }
 
     /**
@@ -586,7 +577,7 @@ public class ConfigManager {
      * @param capped {@code true} if only a single holy water can be made by each player each session.
      */
     public void setHolyWaterCapping(boolean capped) {
-        this.config.set("holy-water.holy-water-session-capped", capped);
+        this.plugin.getConfig().set("holy-water.holy-water-session-capped", capped);
         this.plugin.saveConfig();
     }
 
@@ -596,7 +587,7 @@ public class ConfigManager {
      * @return {@code true} if passive mobs will be spawned without admin intervention.
      */
     public boolean isPassiveMobAutoSpawnEnabled() {
-        return this.config.getBoolean("passive-mob-spawning.auto-spawn-enabled", true);
+        return this.plugin.getConfig().getBoolean("passive-mob-spawning.auto-spawn-enabled", true);
     }
 
     /**
@@ -605,7 +596,7 @@ public class ConfigManager {
      * @return The lowest number of passive mobs that will spawn.
      */
     public int getPassiveMobMinimumThreshold() {
-        return this.config.getInt("passive-mob-spawning.minimum-animal-threshold", 40);
+        return this.plugin.getConfig().getInt("passive-mob-spawning.minimum-animal-threshold", 40);
     }
 
     /**
@@ -614,7 +605,7 @@ public class ConfigManager {
      * @return The highest number of passive mobs that will spawn.
      */
     public int getPassiveMobSpawnCount() {
-        return this.config.getInt("passive-mob-spawning.spawn-count", 80);
+        return this.plugin.getConfig().getInt("passive-mob-spawning.spawn-count", 80);
     }
 
     /**
@@ -623,7 +614,7 @@ public class ConfigManager {
      * @return {@code true} if NPC mobs can spawn.
      */
     public boolean areNpcMobsEnabled() {
-        return this.config.getBoolean("enable-npc-mobs", false);
+        return this.plugin.getConfig().getBoolean("enable-npc-mobs", false);
     }
 
     /**
@@ -632,7 +623,7 @@ public class ConfigManager {
      * @return {@code true} if animals can be bred out of session.
      */
     public boolean canBreedAnimalsOutOfSession() {
-        return this.config.getBoolean("allow-breeding-out-of-session", true);
+        return this.plugin.getConfig().getBoolean("allow-breeding-out-of-session", true);
     }
 
     /**
@@ -641,7 +632,7 @@ public class ConfigManager {
      * @param canBreed {@code true} if animals can be bred out of session.
      */
     public void setBreedAnimalsOutOfSession(boolean canBreed) {
-        this.config.set("allow-breeding-out-of-session", canBreed);
+        this.plugin.getConfig().set("allow-breeding-out-of-session", canBreed);
         this.plugin.saveConfig();
     }
 
@@ -651,7 +642,7 @@ public class ConfigManager {
      * @return The highest permadeath-enabled vampire stage.
      */
     public int getPermadeathMinimumStage() {
-        return this.config.getInt("combat.permadeath-minimum-stage", 1);
+        return this.plugin.getConfig().getInt("combat.permadeath-minimum-stage", 1);
     }
 
     /**
@@ -660,7 +651,7 @@ public class ConfigManager {
      * @param stage the highest stage that vampires can be permakilled at.
      */
     public void setStakePermadeathMinimumStage(int stage) {
-        this.config.set("combat.permadeath-minimum-stage", Math.max(1, stage));
+        this.plugin.getConfig().set("combat.permadeath-minimum-stage", Math.max(1, stage));
         this.plugin.saveConfig();
     }
 
@@ -670,7 +661,7 @@ public class ConfigManager {
      * @return The total number of times humans can die and respawn.
      */
     public int getHumanLifeCount() {
-        int lives = this.config.getInt("combat.human-lives", 5);
+        int lives = this.plugin.getConfig().getInt("combat.human-lives", 5);
 
         // Make sure the life count is within the specified range
         if (lives > 8) {
@@ -688,7 +679,7 @@ public class ConfigManager {
      * @return {@code true} is humans will permanently die on their sixth death, regardless of its cause.
      */
     public boolean isLifeLimitEnforced() {
-        return this.config.getBoolean("combat.enforce-life-limit", false);
+        return this.plugin.getConfig().getBoolean("combat.enforce-life-limit", false);
     }
 
     /**
@@ -697,7 +688,7 @@ public class ConfigManager {
      * @param capped {@code true} if humans will be permakilled on their sixth death, regardless of the cause.
      */
     public void setLifeLimitEnforced(boolean capped) {
-        this.config.set("combat.enforce-life-limit", capped);
+        this.plugin.getConfig().set("combat.enforce-life-limit", capped);
         this.plugin.saveConfig();
     }
 
@@ -707,7 +698,7 @@ public class ConfigManager {
      * @return {@code true} if silver-based blocks affect vampires.
      */
     public boolean doSilverBlocksWeakenVampires() {
-        return this.config.getBoolean("vampire.silver-weakness", true);
+        return this.plugin.getConfig().getBoolean("vampire.silver-weakness", true);
     }
 
     /**
@@ -716,7 +707,7 @@ public class ConfigManager {
      * @return {@code true} if vampires can mount any animal.
      */
     public boolean canVampiresRideLivingMounts() {
-        return this.config.getBoolean("vampire.allow-vampire-mounts", true);
+        return this.plugin.getConfig().getBoolean("vampire.allow-vampire-mounts", true);
     }
 
     /**
@@ -725,7 +716,7 @@ public class ConfigManager {
      * @param canRide {@code true} if vampires can ride living mounts.
      */
     public void setVampiresRideLivingMounts(boolean canRide) {
-        this.config.set("vampire.allow-vampire-mounts", canRide);
+        this.plugin.getConfig().set("vampire.allow-vampire-mounts", canRide);
         this.plugin.saveConfig();
     }
 
@@ -735,7 +726,7 @@ public class ConfigManager {
      * @return The number of ticks it takes for each health point regeneration.
      */
     public int getVampireHealthCheckTicks() {
-        return this.config.getInt("vampire_health_check_ticks", 9);
+        return this.plugin.getConfig().getInt("vampire_health_check_ticks", 9);
     }
 
     /**
@@ -744,7 +735,7 @@ public class ConfigManager {
      * @param ticks the number of ticks between each health point recovery.
      */
     public void setVampireHealthCheckTicks(int ticks) {
-        this.config.set("vampire_health_check_ticks", Math.max(1, ticks));
+        this.plugin.getConfig().set("vampire_health_check_ticks", Math.max(1, ticks));
         this.plugin.saveConfig();
     }
 
@@ -754,7 +745,7 @@ public class ConfigManager {
      * @return The cooldown between wooden stake uses (in ticks).
      */
     public int getWoodenStakeCooldownTicks() {
-        return this.config.getInt("combat.wooden-stake-cooldown-ticks", 80);
+        return this.plugin.getConfig().getInt("combat.wooden-stake-cooldown-ticks", 80);
     }
 
     /**
@@ -763,7 +754,7 @@ public class ConfigManager {
      * @return The percent of damage that will be ignored by players.
      */
     public int getDamageSuppression() {
-        return this.config.getInt("damage_suppression", 50);
+        return this.plugin.getConfig().getInt("damage_suppression", 50);
     }
 
     /**
@@ -772,7 +763,7 @@ public class ConfigManager {
      * @param percentage the percentage to ignore.
      */
     public void setDamageSuppression(int percentage) {
-        this.config.set("damage_suppression", percentage);
+        this.plugin.getConfig().set("damage_suppression", percentage);
         this.plugin.saveConfig();
     }
 
@@ -782,7 +773,7 @@ public class ConfigManager {
      * @return The percentage chance of a cure book appearing in tome chests each cycle.
      */
     public double getCureBooksSpawnChance() {
-        return this.config.getDouble("cure_books_spawn_chance", 0.3);
+        return this.plugin.getConfig().getDouble("cure_books_spawn_chance", 0.3);
     }
 
     /**
@@ -791,7 +782,7 @@ public class ConfigManager {
      * @return The maximum distance (in blocks) that a player can be from a beacon and convert it.
      */
     public double getBeaconConversionDistance() {
-        return this.config.getDouble("beacons.distance.conversion-distance", 3.0);
+        return this.plugin.getConfig().getDouble("beacons.distance.conversion-distance", 3.0);
     }
 
     /**
@@ -800,7 +791,7 @@ public class ConfigManager {
      * @return The maximum distance (in blocks) that a vampire can be from a beacon and have their abilities suppressed.
      */
     public double getBeaconSuppressionDistance() {
-        return this.config.getDouble("beacons.distance.vampire-suppression-distance", 25.0);
+        return this.plugin.getConfig().getDouble("beacons.distance.vampire-suppression-distance", 25.0);
     }
 
     /**
@@ -809,7 +800,7 @@ public class ConfigManager {
      * @return The maximum distance (in blocks) that a vampire can be from a beacon while being cured.
      */
     public double getCureBeaconDistance() {
-        return this.config.getDouble("cure.cure-distance", 25.0);
+        return this.plugin.getConfig().getDouble("cure.cure-distance", 25.0);
     }
 
     /**
@@ -818,7 +809,7 @@ public class ConfigManager {
      * @return {@code true} if the sire must be permakilled for the cure to work.
      */
     public boolean doCuresRequireSireDeath() {
-        return this.config.getBoolean("cure.sire-death-requirement", true);
+        return this.plugin.getConfig().getBoolean("cure.sire-death-requirement", true);
     }
 
     /**
@@ -827,7 +818,7 @@ public class ConfigManager {
      * @param requireDeath {@code true} if the sire must be dead before curing.
      */
     public void setCureRequiresSireDeath(boolean requireDeath) {
-        this.config.set("cure.sire-death-requirement", requireDeath);
+        this.plugin.getConfig().set("cure.sire-death-requirement", requireDeath);
         this.plugin.saveConfig();
     }
 
@@ -837,7 +828,7 @@ public class ConfigManager {
      * @return {@code true} if the message will be blocked.
      */
     public boolean isFirstMessageBlockingEnabled() {
-        return this.config.getBoolean("chat.first-message-blocking-enabled", true);
+        return this.plugin.getConfig().getBoolean("chat.first-message-blocking-enabled", true);
     }
 
     /**
@@ -846,7 +837,7 @@ public class ConfigManager {
      * @return The message to stop the player from messaging others.
      */
     public String getFirstMessageBlockedMessage() {
-        return this.config.getString("chat.first-message-blocked-message", "&eIt looks like you've attempted to send a message! Vampire SMP is geared to revolve around immersion, consider finding the person you need to speak to, or messaging them on discord. If you still need to send your chat message, [Click Here]&e. This prevention message will not appear again until your next log on if you do choose to send your message via the blue text.");
+        return this.plugin.getConfig().getString("chat.first-message-blocked-message", "&eIt looks like you've attempted to send a message! Vampire SMP is geared to revolve around immersion, consider finding the person you need to speak to, or messaging them on discord. If you still need to send your chat message, [Click Here]&e. This prevention message will not appear again until your next login if you do choose to send your message via the blue text.");
     }
 
     /**
@@ -855,7 +846,7 @@ public class ConfigManager {
      * @return {@code true} if an alert message should be sent.
      */
     public boolean shouldAlertOnPlayerQuit() {
-        return this.config.getBoolean("chat.alert-on-player-leave", true);
+        return this.plugin.getConfig().getBoolean("chat.alert-on-player-leave", true);
     }
 
     /**
@@ -864,7 +855,7 @@ public class ConfigManager {
      * @param shouldAlert {@code true} if Operators should be messaged.
      */
     public void setAlertOnPlayerQuit(boolean shouldAlert) {
-        this.config.set("chat.alert-on-player-leave", shouldAlert);
+        this.plugin.getConfig().set("chat.alert-on-player-leave", shouldAlert);
         this.plugin.saveConfig();
     }
 
@@ -875,7 +866,7 @@ public class ConfigManager {
      * @return A {@code Location} where vampires will respawn.
      */
     public Location getVampireRespawnLocation(World world) {
-        String locationStr = this.config.getString("vampire.respawn-location", "40,101,-113");
+        String locationStr = this.plugin.getConfig().getString("vampire.respawn-location", "40,101,-113");
         String[] parts = locationStr.split(",");
 
         try {
@@ -896,7 +887,7 @@ public class ConfigManager {
      * @param locationStr The coordinates of a location.
      */
     public void setVampireRespawnLocation(String locationStr) {
-        this.config.set("vampire.respawn-location", locationStr);
+        this.plugin.getConfig().set("vampire.respawn-location", locationStr);
         this.plugin.saveConfig();
     }
 
@@ -906,7 +897,7 @@ public class ConfigManager {
      * @return The name of the town.
      */
     public String getTownName() {
-        return this.config.getString("oakhurst.town-name", "Oakhurst");
+        return this.plugin.getConfig().getString("oakhurst.town-name", "Oakhurst");
     }
 
     /**
@@ -915,7 +906,7 @@ public class ConfigManager {
      * @return The X coordinate of town's center.
      */
     public double getTownCenterX() {
-        return this.config.getDouble("oakhurst.town-center-x", 79.0);
+        return this.plugin.getConfig().getDouble("oakhurst.town-center-x", 79.0);
     }
 
     /**
@@ -924,7 +915,7 @@ public class ConfigManager {
      * @return The Z coordinate of town's center.
      */
     public double getTownCenterZ() {
-        return this.config.getDouble("oakhurst.town-center-z", 440.0);
+        return this.plugin.getConfig().getDouble("oakhurst.town-center-z", 440.0);
     }
 
     /**
@@ -933,7 +924,7 @@ public class ConfigManager {
      * @return The distance around town where players can spawn.
      */
     public double getTeleportRadius() {
-        return this.config.getDouble("oakhurst.teleport-radius", 400.0);
+        return this.plugin.getConfig().getDouble("oakhurst.teleport-radius", 400.0);
     }
 
     /**
@@ -942,7 +933,7 @@ public class ConfigManager {
      * @return The X coordinate of the border's center.
      */
     public double getBorderCenterX() {
-        return this.config.getDouble("oakhurst.border.center-x", 50.0);
+        return this.plugin.getConfig().getDouble("oakhurst.border.center-x", 50.0);
     }
 
     /**
@@ -951,7 +942,7 @@ public class ConfigManager {
      * @return The Z coordinate of the border's center.
      */
     public double getBorderCenterZ() {
-        return this.config.getDouble("oakhurst.border.center-z", 50.0);
+        return this.plugin.getConfig().getDouble("oakhurst.border.center-z", 50.0);
     }
 
     /**
@@ -960,7 +951,7 @@ public class ConfigManager {
      * @return The diameter of the game area (in blocks).
      */
     public double getBorderDiameter() {
-        return this.config.getDouble("oakhurst.border.diameter", 1098.0);
+        return this.plugin.getConfig().getDouble("oakhurst.border.diameter", 1098.0);
     }
 
     /**
