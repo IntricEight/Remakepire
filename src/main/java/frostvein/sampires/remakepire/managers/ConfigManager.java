@@ -137,7 +137,7 @@ public class ConfigManager {
      * @return the seconds between ability uses.
      */
     public int getRaiseUndeadCooldown() {
-        return this.config.getInt("abilities.vampire.raise-undead-cooldown", 600);
+        return this.plugin.getConfig().getInt("abilities.vampire.raise-undead-cooldown", 600);
     }
 
     /**
