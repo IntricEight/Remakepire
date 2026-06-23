@@ -263,7 +263,11 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                     break;
 
                 case "cure_requires_dead_sire":
-                    sender.sendMessage("§6cure_requires_dead_sire§r is currently: " + configManager.doCuresRequireSireDeath());
+                    sender.sendMessage("§6sire-death-requirement§r is currently: " + configManager.doCuresRequireSireDeath());
+                    break;
+
+                case "cure_requires_daylight":
+                    sender.sendMessage("§6daylight-requirement§r is currently: " + configManager.doCuresRequireDaytime());
                     break;
 
                 case "cure_book_spawning":
@@ -271,7 +275,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                     break;
 
                 case "enable_npc_mobs":
-                    sender.sendMessage("§6enable_npc_mobs§r is currently: " + configManager.areNpcMobsEnabled());
+                    sender.sendMessage("§6enable-npc-mobs§r is currently: " + configManager.areNpcMobsEnabled());
                     break;
 
                 case "breeding_out_of_session":
@@ -371,6 +375,11 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                     senderMessage += "sire-death-requirement§r set to: " + Boolean.parseBoolean(args[1]);
                     break;
 
+                case "cure_requires_daylight":
+                    configManager.setCureRequiresDaytime(Boolean.parseBoolean(args[1]));
+                    senderMessage += "daylight-requirement§r set to: " + Boolean.parseBoolean(args[1]);
+                    break;
+
                 case "cure_book_spawning":
                     sessionManager.setCureBooksEnabled(Boolean.parseBoolean(args[1]));
                     senderMessage += "cure_books_enabled§r set to" + Boolean.parseBoolean(args[1]);
@@ -442,6 +451,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         sender.sendMessage("§e  vampire_health_check [ticks] §7- Configure vampire health check interval");
         sender.sendMessage("§e  damage_suppression [percentage] §7- Configure damage suppression");
         sender.sendMessage("§e  cure_requires_dead_sire [true | false] §7- Require a sire's permadeath before their spawn can be cured");
+        sender.sendMessage("§e  cure_requires_daylight [true | false] §7- Require it to be day time for vampires to be cured");
         sender.sendMessage("§e  cure_book_spawning [true | false] §7- Allow cure books to spawn within tome chests");
         sender.sendMessage("§e  enable_npc_mobs [true | false] §7- Allow NPC mobs to naturally spawn");
         sender.sendMessage("§e  breeding_out_of_session [true | false] §7- Allow animals to be bred and hatched outside of active session");
@@ -1793,7 +1803,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
 
             } else if (command.getName().equalsIgnoreCase("config")) {
                 if (args.length == 1) {
-                    completions.addAll(Arrays.asList("help", "alert_on_quit", "holy_water_cap", "tome_cap", "vampire_level_cap", "new_vampire_tracking", "allow_vampire_mounts", "vampire_health_check", "damage_suppression", "cure_requires_dead_sire", "cure_book_spawning", "enable_npc_mobs", "breeding_out_of_session", "stake_permadeath_stage", "human_life_limit", "one_human_left", "border_active"));
+                    completions.addAll(Arrays.asList("help", "alert_on_quit", "holy_water_cap", "tome_cap", "vampire_level_cap", "new_vampire_tracking", "allow_vampire_mounts", "vampire_health_check", "damage_suppression", "cure_requires_dead_sire", "cure_requires_daylight", "cure_book_spawning", "enable_npc_mobs", "breeding_out_of_session", "stake_permadeath_stage", "human_life_limit", "one_human_left", "border_active"));
 
                 } else if (args.length == 2) {
                     switch (args[0]) {

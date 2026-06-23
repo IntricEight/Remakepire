@@ -70,8 +70,8 @@ public class ForcedVampireCureCommand implements CommandExecutor {
                 return true;
 
             } else {
-                // Only allow a cure during the day
-                if (!this.plugin.getEffectManager().isDaytime(caster.getWorld())) {
+                // Only allow a cure during the day (if this setting is enabled)
+                if (this.plugin.getConfigManager().doCuresRequireDaytime() && !this.plugin.getEffectManager().isDaytime(caster.getWorld())) {
                     caster.sendMessage("§cThe holy words can only be spoken during the day, when the sun's light empowers them.");
 
                 } else {
