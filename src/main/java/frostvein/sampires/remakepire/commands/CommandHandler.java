@@ -48,6 +48,11 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
     private final BeaconManager beaconManager;
     private final TomeManager tomeManager;
 
+    /**
+     * Create an instance of the plugin's custom commands' handler.
+     *
+     * @param plugin the host plugin object.
+     */
     public CommandHandler(RemakepirePlugin plugin) {
         this.plugin = plugin;
         this.configManager = plugin.getConfigManager();
@@ -57,85 +62,145 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         this.tomeManager = plugin.getTomeManager();
     }
 
+    /**
+     * Handle the command execution of the custom plugin admin commands.
+     *
+     * @return {@code true} if the command didn't trigger a fatal error.
+     */
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (!sender.hasPermission("vampiresmp.admin")) {
+            // Prevent players who don't have permission to use admin commands from executing the following functions
             sender.sendMessage("§cYou don't have permission to use this command.");
             return true;
 
         } else if (command.getName().equalsIgnoreCase("init")) {
+            // Begin the process of initializing a new game of Vampires
             return this.handleInitCommand(sender, args);
+
         } else if (command.getName().equalsIgnoreCase("session")) {
+            // Change the session's current state
             return this.handleSessionCommand(sender, args);
+
         } else if (command.getName().equalsIgnoreCase("vampire")) {
+            // Change a player's state in the vampire system
             return this.handleVampireCommand(sender, args);
+
         } else if (command.getName().equalsIgnoreCase("beacon")) {
+            // View or modify beacon data
             return this.handleBeaconCommand(sender, args);
+
         } else if (command.getName().equalsIgnoreCase("vampirecooldowns")) {
+            // Reset vampire ability cooldowns for designated parties
             return this.handleVampireCooldownCommand(sender, args);
+
         } else if (command.getName().equalsIgnoreCase("resettomecooldowns")) {
+            // Reset tome ability cooldowns for designated parties
             return this.handleResetTomeCooldownCommand(sender, args);
+
         } else if (command.getName().equalsIgnoreCase("break_warning")) {
+            // Cause two warning sounds to signal the end of a game session
             return this.handleBreakWarningCommand(sender, args);
+
         } else if (command.getName().equalsIgnoreCase("givetome")) {
+            // Give a player a physical tome book
             return this.handleGiveTomeCommand(sender, args);
+
         } else if (command.getName().equalsIgnoreCase("select_tomes")) {
+            // Give a player access to tome abilities or cure book readings without requiring its book
             return this.handleSelectTomesCommand(sender, args);
+
         } else if (command.getName().equalsIgnoreCase("give_cure_book")) {
+            // Give a player a physical cure book
             return this.handleGiveCureBookCommand(sender, args);
+
         } else if (command.getName().equalsIgnoreCase("stash_cure_book")) {
-                return this.handleStashCureBookCommand(sender, args);
+            // Remotely hide a cure book within a tome chest
+            return this.handleStashCureBookCommand(sender, args);
+
         } else if (command.getName().equalsIgnoreCase("distributetomes")) {
+            // Distribute the tome ability, enchantment, and cure books throughout the tome chests
             return this.handleDistributeTomesCommand(sender, args);
+
         } else if (command.getName().equalsIgnoreCase("clearbloodmoonbuffs")) {
+            // Clear the buffs from being under a blood moon from a player
             return this.handleClearBloodMoonBuffsCommand(sender, args);
+
         } else if (command.getName().equalsIgnoreCase("fixattributes")) {
+            // Restore the player's attributes to the expected state
             return this.handleFixAttributesCommand(sender, args);
+
         } else if (command.getName().equalsIgnoreCase("removeendermen")) {
+            // Control the active removal of endermen spawning
             return this.handleRemoveEndermenCommand(sender, args);
+
         } else if (command.getName().equalsIgnoreCase("setupplayer")) {
+            // Give the player the starting equipment for a new game
             return this.handleSetupPlayerCommand(sender, args);
+
         } else if (command.getName().equalsIgnoreCase("spawnanimals")) {
+            // Spawn passive animals in available locations around the map
             return this.handleSpawnAnimalsCommand(sender, args);
+
         } else if (command.getName().equalsIgnoreCase("addtomechest")) {
+            // Add a new tome chest at the player's current location
             return this.handleAddTomeChestCommand(sender, args);
+
         } else if (command.getName().equalsIgnoreCase("removetomechest")) {
+            // Remove a tome chest near the player's current location
             return this.handleRemoveTomeChestCommand(sender, args);
+
         } else if (command.getName().equalsIgnoreCase("listtomechests")) {
+            // Send the player a list of the tome chest locations
             return this.handleListTomeChestsCommand(sender, args);
+
         } else if (command.getName().equalsIgnoreCase("resetplayer")) {
+            // Clear a player's stats, tags, and (optionally) inventory
             return this.handleResetPlayerCommand(sender, args);
+
         } else if (command.getName().equalsIgnoreCase("make_incurable")) {
-            // Make a player impossible to cure
+            // Make a player impossible to cure (Remove the tag CannotCure to reverse this process)
             return this.makePlayerIncurable(sender, args);
+
         } else if (command.getName().equalsIgnoreCase("config")) {
             // Allow admins to change some elements within the configuration file without needing to restart the server
             return this.handleConfigCommand(sender, args);
+
+        } else if (command.getName().equalsIgnoreCase("set_vampire_spawn")) {
+            // Set the respawn location for vampires after they temporarily die
+            return this.handleSetVampireSpawnCommand(sender, args);
+
         } else {
-            return command.getName().equalsIgnoreCase("set_vampire_spawn") ? this.handleSetVampireSpawnCommand(sender, args) : false;
+            return false;
         }
     }
 
+    /**
+     * Reset a player's stats and tags to a default human state.<br/>
+     * Optionally, clear the player's inventory during the reset.
+     *
+     * @return {@code true}
+     */
     private boolean handleResetPlayerCommand(CommandSender sender, String[] args) {
         if (args.length < 1) {
             sender.sendMessage("§cUsage: /pow admin resetplayer <player> [true | false]");
             sender.sendMessage("§7  true/false = clear inventory");
-            return true;
 
         } else {
             Player target = Bukkit.getPlayer(args[0]);
 
             if (target == null) {
                 sender.sendMessage("§cPlayer not found: " + args[0]);
-                return true;
 
             } else {
                 boolean clearInventory = args.length >= 2 && args[1].equalsIgnoreCase("true");
+
                 if (target.getGameMode() == GameMode.SPECTATOR) {
                     target.setGameMode(GameMode.SURVIVAL);
                 }
 
                 this.vampireManager.setPlayerAsHuman(target);
 
+                // Clear the player of all tags before assigning them the human tag
                 for(String tag : new HashSet<>(target.getScoreboardTags())) {
                     target.removeScoreboardTag(tag);
                 }
@@ -170,9 +235,10 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                     this.plugin.getVampireAbilityManager().clearAllCooldowns(target);
                 }
 
+                // Reset the player's stats
                 target.getActivePotionEffects().forEach((effect) -> target.removePotionEffect(effect.getType()));
                 AttributeInstance healthAttribute = target.getAttribute(Attribute.MAX_HEALTH);
-                healthAttribute.getModifiers().forEach(arg_0 -> healthAttribute.removeModifier(arg_0));
+                healthAttribute.getModifiers().forEach(healthAttribute::removeModifier);
                 healthAttribute.setBaseValue(20.0);
                 target.setHealth(healthAttribute.getValue());
                 target.setFoodLevel(20);
@@ -186,6 +252,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
 
                 target.setInvulnerable(false);
 
+                // Clear the player's inventory
                 if (clearInventory) {
                     target.getInventory().clear();
                     target.getEnderChest().clear();
@@ -196,10 +263,10 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                 target.sendMessage("§aYou have been reset to a fresh state by an administrator.");
                 target.sendMessage("§7All vampire status, abilities, cooldowns, and death count have been cleared." + (clearInventory ? " Your inventory has also been cleared." : ""));
                 this.plugin.logInfo("Admin " + sender.getName() + " reset player " + target.getName() + " to fresh state");
-
-                return true;
             }
         }
+
+        return true;
     }
 
     /**
@@ -461,6 +528,11 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         sender.sendMessage("§e  border_active [true | false] §7- Activate or deactivate the game boundary for trapped players");
     }
 
+    /**
+     *
+     *
+     * @return {@code true}
+     */
     private boolean handleSetVampireSpawnCommand(CommandSender sender, String[] args) {
         double x, y, z;
 
@@ -497,6 +569,11 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         return true;
     }
 
+    /**
+     *
+     *
+     * @return {@code true}
+     */
     private boolean handleInitCommand(CommandSender sender, String[] args) {
         if (!(sender instanceof Player admin)) {
             sender.sendMessage("§cOnly players can use this command.");
@@ -1729,8 +1806,9 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
 
             } else {
                 Random random = new Random();
-
                 List<ItemStack> starterItems = new ArrayList<>();
+
+                // The items players will start a game with
                 starterItems.add(new ItemStack(Material.COOKED_CHICKEN, 1 + random.nextInt(4)));
                 starterItems.add(new ItemStack(Material.COOKED_SALMON, 1 + random.nextInt(4)));
                 starterItems.add(new ItemStack(Material.BREAD, 1 + random.nextInt(4)));
@@ -1745,6 +1823,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                     if (target.getInventory().firstEmpty() != -1) {
                         target.getInventory().addItem(item);
                         ++itemsGiven;
+
                     } else {
                         target.getWorld().dropItemNaturally(target.getLocation(), item);
                         ++itemsDropped;
