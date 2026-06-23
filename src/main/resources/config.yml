@@ -331,6 +331,10 @@ cure:
   # Default: true (The spawn's Sire must be permakilled)
   sire-death-requirement: true
 
+  # Controls if vampires require it to be day time (Between ticks 0 and 12000) for the cure to work
+  # Default: true (It must be day time)
+  daylight-requirement: true
+
 # Fourth Cure Book Configuration
 # Controls whether "The Retribution 4/3" book should spawn in tome chests
 # Default: false

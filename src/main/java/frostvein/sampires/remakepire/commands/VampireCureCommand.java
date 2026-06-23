@@ -43,8 +43,8 @@ public class VampireCureCommand implements CommandExecutor {
             return true;
 
         } else {
-            // Only allow a cure during the day
-            if (!this.plugin.getEffectManager().isDaytime(player.getWorld())) {
+            // Only allow a cure during the day (if this setting is enabled)
+            if (this.plugin.getConfigManager().doCuresRequireDaytime() && !this.plugin.getEffectManager().isDaytime(player.getWorld())) {
                 player.sendMessage("§cThis ritual can only be performed during the day.");
             } else {
                 ItemStack holyWater = this.plugin.getHolyWaterEffectManager().findHolyWater(player);

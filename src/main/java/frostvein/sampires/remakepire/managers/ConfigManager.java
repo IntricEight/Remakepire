@@ -814,6 +814,25 @@ public class ConfigManager {
     }
 
     /**
+     * Retrieve whether it must be daytime for a vampire to be curable.
+     *
+     * @return {@code true} if it must be day time for the cure to work.
+     */
+    public boolean doCuresRequireDaytime() {
+        return this.plugin.getConfig().getBoolean("cure.daylight-requirement", true);
+    }
+
+    /**
+     * Update the config on whether vampires can be cured when it is not day time.
+     *
+     * @param requireDay {@code true} if it must be day time for vampires to be curable.
+     */
+    public void setCureRequiresDaytime(boolean requireDay) {
+        this.plugin.getConfig().set("cure.daylight-requirement", requireDay);
+        this.plugin.saveConfig();
+    }
+
+    /**
      * Retrieve whether messages that players send will be blocked until they confirm otherwise.
      *
      * @return {@code true} if the message will be blocked.

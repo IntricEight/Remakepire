@@ -52,7 +52,7 @@ public class BrigadierCommands {
     }
 
     private void registerPowCommand(Commands commands) {
-        commands.register(((LiteralArgumentBuilder) ((LiteralArgumentBuilder) Commands.literal("pow")
+        commands.register(((LiteralArgumentBuilder) ( Commands.literal("pow")
                 .then(Commands.literal("help").executes((ctx) -> this.executePowCommand(ctx, "help"))))
 
                 .then(this.buildVampireAbilitySubcommand())
@@ -232,8 +232,7 @@ public class BrigadierCommands {
      * Build out the command subtree for manually applying a plugin texture pack.
      */
     private LiteralArgumentBuilder<CommandSourceStack> buildTextureSubcommand() {
-        return Commands.literal("texture")
-                .executes((ctx) -> this.executePowCommand(ctx, "texture"))
+        return Commands.literal("texture").executes((ctx) -> this.executePowCommand(ctx, "texture"))
                 .then(Commands.literal("all").executes((ctx) -> this.executePowCommand(ctx, "texture", "all")))
                 .then(Commands.literal("force").executes((ctx) -> this.executePowCommand(ctx, "texture", "force")))
                 .then(Commands.literal("vampire").executes((ctx) -> this.executePowCommand(ctx, "texture", "vampire")))
@@ -346,6 +345,11 @@ public class BrigadierCommands {
                 .then(Commands.literal("cure_requires_dead_sire").executes(ctx -> this.executePowCommand(ctx, "admin", "config", "cure_requires_dead_sire"))
                         .then(Commands.literal("true").executes(ctx -> this.executePowCommand(ctx, "admin", "config", "cure_requires_dead_sire", "true")))
                         .then(Commands.literal("false").executes(ctx -> this.executePowCommand(ctx, "admin", "config", "cure_requires_dead_sire", "false")))
+                )
+
+                .then(Commands.literal("cure_requires_daylight").executes(ctx -> this.executePowCommand(ctx, "admin", "config", "cure_requires_daylight"))
+                        .then(Commands.literal("true").executes(ctx -> this.executePowCommand(ctx, "admin", "config", "cure_requires_daylight", "true")))
+                        .then(Commands.literal("false").executes(ctx -> this.executePowCommand(ctx, "admin", "config", "cure_requires_daylight", "false")))
                 )
 
                 .then(Commands.literal("cure_book_spawning").executes(ctx -> this.executePowCommand(ctx, "admin", "config", "cure_book_spawning"))
