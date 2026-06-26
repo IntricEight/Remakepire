@@ -18,12 +18,22 @@ public class TomeAbilityCommand implements CommandExecutor, TabCompleter {
     private final TomeManager tomeManager;
     private final VampireManager vampireManager;
 
+    /**
+     * Create an instance of the plugin's tome ability command handler.
+     *
+     * @param plugin the host plugin object.
+     */
     public TomeAbilityCommand(RemakepirePlugin plugin) {
         this.plugin = plugin;
         this.tomeManager = plugin.getTomeManager();
         this.vampireManager = plugin.getVampireManager();
     }
 
+    /**
+     * Handle the command execution of triggering a human tome ability.
+     *
+     * @return {@code true}
+     */
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (!(sender instanceof Player player)) {
             sender.sendMessage("§cOnly players can use tome abilities.");
@@ -43,13 +53,19 @@ public class TomeAbilityCommand implements CommandExecutor, TabCompleter {
         }
     }
 
+    /**
+     * Send the user a list of tome abilities that they have unlocked.
+     *
+     * @param player The human checking their available tome abilities.
+     * @return {@code true}
+     */
     private boolean handleListCommand(Player player) {
+        // The player's current tome abilities
         Set<String> playerAbilities = this.tomeManager.getPlayerAbilities(player);
 
         if (playerAbilities.isEmpty()) {
             player.sendMessage("§7You have not learned any tome abilities yet.");
             player.sendMessage("§7Find ancient tomes scattered throughout the world to learn new abilities.");
-            return true;
 
         } else {
             player.sendMessage("§6§l=== YOUR TOME ABILITIES ===");
@@ -73,14 +89,28 @@ public class TomeAbilityCommand implements CommandExecutor, TabCompleter {
             }
 
             player.sendMessage("§7Total abilities: §e" + playerAbilities.size());
-            return true;
         }
+
+        return true;
     }
 
+    /**
+     * Trigger the chosen tome ability.
+     *
+     * @param player The human attempting to use a tome ability.
+     * @param abilityName The command name of the ability.
+     * @return {@code true}
+     */
     private boolean handleAbilityUse(Player player, String abilityName) {
-        return !this.tomeManager.useAbility(player, abilityName) ? true : true;
+        this.tomeManager.useAbility(player, abilityName);
+        return true;
     }
 
+    /**
+     * Print to the sender a list of available commands they can run using the tome command.
+     *
+     * @param player The human checking their options.
+     */
     private void sendUsage(Player player) {
         player.sendMessage("§6§l=== TOME ABILITIES ===");
         player.sendMessage("§e/pow tome list §7- Show your available abilities");
@@ -89,6 +119,12 @@ public class TomeAbilityCommand implements CommandExecutor, TabCompleter {
         player.sendMessage("§7Find ancient tomes in the world to learn new abilities.");
     }
 
+    /**
+     * Create the list of autocorrecting options for tome commands as they are written out in the command line.
+     *
+     * @param command the previous word in the argument list.
+     * @return A {@code List} of options for the autocomplete to suggest.
+     */
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         if (!(sender instanceof Player player)) {
             return new ArrayList<>();

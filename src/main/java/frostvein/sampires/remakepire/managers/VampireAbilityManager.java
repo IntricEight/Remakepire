@@ -228,10 +228,6 @@ public class VampireAbilityManager {
             player.sendMessage("§cYou cannot use vampire abilities while in spectator mode.");
             return false;
 
-        } else if (!this.sessionManager.isSessionActive()) {
-            player.sendMessage("§cAbilities cannot be used while the session is inactive.");
-            return false;
-
         } else if (this.plugin.getHolyWaterEffectManager().isAbilitiesDisabled(player)) {
             long remainingTime = this.plugin.getHolyWaterEffectManager().getRemainingDisableTime(player);
             player.sendMessage("§4§lHOLY WATER EFFECT ACTIVE");

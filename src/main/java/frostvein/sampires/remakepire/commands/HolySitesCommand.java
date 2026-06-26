@@ -16,12 +16,22 @@ public class HolySitesCommand implements CommandExecutor {
     private final BeaconManager beaconManager;
     private final VampireManager vampireManager;
 
+    /**
+     * Create an instance of the plugin's global beacon alignment distribution command handler.
+     *
+     * @param plugin the host plugin object.
+     */
     public HolySitesCommand(RemakepirePlugin plugin) {
         this.plugin = plugin;
         this.beaconManager = plugin.getBeaconManager();
         this.vampireManager = plugin.getVampireManager();
     }
 
+    /**
+     * Handle the command execution of retrieving data on the current status and distribution of the world's beacons.
+     *
+     * @return {@code true} if the command didn't trigger a fatal error.
+     */
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (!(sender instanceof Player player)) {
             sender.sendMessage("§cOnly players can use this command.");

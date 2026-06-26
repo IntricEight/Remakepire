@@ -502,7 +502,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
     }
 
     /**
-     * Relay hte usage information of the config commands to the sender.
+     * Relay the usage information of the config commands to the sender.
      *
      * @param sender the player sending the command.
      */
@@ -529,7 +529,8 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
     }
 
     /**
-     *
+     * Set a new default respawn location for the vampires.<br/>
+     * Using a bed will override this respawn location.
      *
      * @return {@code true}
      */
@@ -570,51 +571,52 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
     }
 
     /**
-     *
+     * Begin or cancel the process of initializing a new Vampires game.
      *
      * @return {@code true}
      */
     private boolean handleInitCommand(CommandSender sender, String[] args) {
         if (!(sender instanceof Player admin)) {
             sender.sendMessage("§cOnly players can use this command.");
-            return true;
 
         } else if (args.length > 0 && args[0].equalsIgnoreCase("cancel")) {
             this.plugin.getInitGameManager().cancelInitialization(admin);
-            return true;
 
         } else {
             this.plugin.getInitGameManager().startInitialization(admin);
-            return true;
         }
+
+        return true;
     }
 
+    /**
+     * Reset the cooldowns on vampire abilities for either a chosen player or all online players.
+     *
+     * @return {@code true}
+     */
     private boolean handleVampireCooldownCommand(CommandSender sender, String[] args) {
         if (args.length == 0) {
             sender.sendMessage("§cUsage: /pow admin vampirecooldowns <reset | clear> [player]");
             sender.sendMessage("§7- /pow admin vampirecooldowns reset §8- Reset all cooldowns for all online players");
             sender.sendMessage("§7- /pow admin vampirecooldowns reset <player> §8- Reset cooldowns for a specific player");
             sender.sendMessage("§7- /pow admin vampirecooldowns clear §8- Same as reset");
-            return true;
 
         } else {
             String action = args[0].toLowerCase();
             if (!action.equals("reset") && !action.equals("clear")) {
                 sender.sendMessage("§cInvalid action. Use 'reset' or 'clear'.");
-                return true;
 
             } else if (args.length >= 2) {
                 Player target = Bukkit.getPlayer(args[1]);
 
                 if (target == null) {
                     sender.sendMessage("§cPlayer '" + args[1] + "' not found.");
-                    return true;
 
                 } else {
                     this.resetPlayerCooldowns(target);
+
                     sender.sendMessage("§aReset all cooldowns for player: §e" + target.getName());
                     target.sendMessage("§aYour vampire ability cooldowns have been reset by an administrator.");
-                    return true;
                 }
             } else {
                 int playersAffected = 0;
@@ -627,17 +629,27 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
 
                 sender.sendMessage("§aReset all vampire ability cooldowns for §e" + playersAffected + " §aonline players.");
                 this.plugin.logInfo("Admin " + sender.getName() + " reset cooldowns for " + playersAffected + " players");
-
-                return true;
             }
         }
+
+        return true;
     }
 
+    /**
+     * Reset all vampire ability cooldowns for the player.
+     *
+     * @param player the player whose cooldowns are being reset.
+     */
     private void resetPlayerCooldowns(Player player) {
         this.plugin.getVampireAbilityManager().clearAllCooldowns(player);
         this.plugin.getVampireAbilityManager().clearGlobalCooldowns();
     }
 
+    /**
+     * Reset the cooldowns on tome abilities for either a chosen player or all online players.
+     *
+     * @return {@code true}
+     */
     private boolean handleResetTomeCooldownCommand(CommandSender sender, String[] args) {
         int humansAffected = 0;
 
@@ -646,8 +658,10 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
             for(Player player : Bukkit.getOnlinePlayers()) {
                 if (this.plugin.getVampireManager().isHuman(player)) {
                     TomeAbility.clearAllCooldowns(player);
+
                     player.removeScoreboardTag(SessionManager.BLESSING_USED_SESSION);
                     player.removeScoreboardTag(SessionManager.STOPTHEBLEEDING_USED_SESSION);
+
                     player.sendMessage("§aYour tome ability cooldowns have been reset by an administrator.");
                     ++humansAffected;
                 }
@@ -658,8 +672,10 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
 
             if (target != null && this.plugin.getVampireManager().isHuman(target)) {
                 TomeAbility.clearAllCooldowns(target);
+
                 target.removeScoreboardTag(SessionManager.BLESSING_USED_SESSION);
                 target.removeScoreboardTag(SessionManager.STOPTHEBLEEDING_USED_SESSION);
+
                 target.sendMessage("§aYour tome ability cooldowns have been reset by an administrator.");
                 ++humansAffected;
             }
@@ -675,6 +691,11 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         return true;
     }
 
+    /**
+     * Trigger a warning sound immediately, and schedule a second sound to trigger in 5 minutes.
+     *
+     * @return {@code true}
+     */
     private boolean handleBreakWarningCommand(CommandSender sender, String[] args) {
         sender.sendMessage("§ePlaying first warning sound for all players...");
 
@@ -697,10 +718,14 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         return true;
     }
 
+    /**
+     * Change the state of the game session.
+     *
+     * @return {@code true}
+     */
     private boolean handleSessionCommand(CommandSender sender, String[] args) {
         if (args.length != 1) {
             sender.sendMessage("§cUsage: /pow admin session <start | pause | end | prime | resume | building>");
-            return true;
 
         } else {
             switch (args[0].toLowerCase()) {
@@ -720,6 +745,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                     this.sessionManager.startSession();
                     sender.sendMessage("§aSession started.");
                     break;
+
                 case "pause":
                     if (this.sessionManager.getSessionState() != 1) {
                         sender.sendMessage("§cCannot pause session. No session is currently running.");
@@ -729,6 +755,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                     this.sessionManager.pauseSession();
                     sender.sendMessage("§eSession paused.");
                     break;
+
                 case "end":
                     if (this.sessionManager.getSessionState() != 1 && this.sessionManager.getSessionState() != 2) {
                         sender.sendMessage("§cCannot end session. No session is currently running or paused.");
@@ -738,18 +765,17 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                     this.sessionManager.endSession();
                     sender.sendMessage("§cSession ended.");
                     break;
+
                 case "prime":
                     if (this.sessionManager.getSessionState() == 0) {
                         sender.sendMessage("§cCannot prime session. A session is already primed. Start it with '/pow admin session start'.");
                         return true;
-                    }
 
-                    if (this.sessionManager.getSessionState() == 1) {
+                    } else if (this.sessionManager.getSessionState() == 1) {
                         sender.sendMessage("§cCannot prime session. A session is currently running. End it first with '/pow admin session end'.");
                         return true;
-                    }
 
-                    if (this.sessionManager.getSessionState() == 2) {
+                    } else if (this.sessionManager.getSessionState() == 2) {
                         sender.sendMessage("§cCannot prime session. A session is currently paused. Resume it first with '/pow admin session resume'.");
                         return true;
                     }
@@ -757,6 +783,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                     this.sessionManager.primeNewSession();
                     sender.sendMessage("§aSession primed. Use '/pow admin session start' to begin.");
                     break;
+
                 case "resume":
                     if (this.sessionManager.getSessionState() != 2) {
                         sender.sendMessage("§cCannot resume session. No session is currently paused.");
@@ -766,6 +793,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                     this.sessionManager.resumeSession();
                     sender.sendMessage("§aSession resumed.");
                     break;
+
                 case "building":
                     if (this.sessionManager.getSessionState() != 0) {
                         sender.sendMessage("§cCannot enter building mode. Session must be primed first. Use '/pow admin session prime' to prepare a new session.");
@@ -774,28 +802,32 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
 
                     this.sessionManager.preStartSession();
                     break;
+
                 default:
                     sender.sendMessage("§cInvalid action. Use: start, pause, end, prime, resume, or building.");
                     return true;
             }
-
-            return true;
         }
+
+        return true;
     }
 
+    /**
+     * Change a player's condition in the vampire system.
+     *
+     * @return {@code true}
+     */
     private boolean handleVampireCommand(CommandSender sender, String[] args) {
         if (args.length < 2) {
             sender.sendMessage("§cUsage: /pow admin vampire <player> <human | 1 | 2 | 3 | turn | clearcap | clearban>");
             sender.sendMessage("§7  clearcap - Remove stage cap (allows vampire to level up after thirst demotion)");
             sender.sendMessage("§7  clearban - Remove promotion ban (allows vampire to level up again)");
-            return true;
 
         } else {
             Player target = Bukkit.getPlayer(args[0]);
 
             if (target == null) {
                 sender.sendMessage("§cPlayer not found.");
-                return true;
 
             } else {
                 switch (args[1].toLowerCase()) {
@@ -811,6 +843,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                         sender.sendMessage("§a" + target.getName() + " is now human.");
                         target.sendMessage("§aYou have been set as human.");
                         break;
+
                     case "1":
                         this.vampireManager.setPlayerAsVampire(target, 1, true);
 
@@ -827,6 +860,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                         target.sendMessage("§5You have been set as a Stage 1 vampire.");
                         this.sendVampireTexturePackPrompt(target);
                         break;
+
                     case "2":
                         this.vampireManager.setPlayerAsVampire(target, 2, true);
 
@@ -843,6 +877,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                         target.sendMessage("§5You have been set as a Stage 2 vampire.");
                         this.sendVampireTexturePackPrompt(target);
                         break;
+
                     case "3":
                         this.vampireManager.setPlayerAsVampire(target, 3, true);
 
@@ -859,8 +894,10 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                         target.sendMessage("§5You have been set as a Stage 3 vampire.");
                         this.sendVampireTexturePackPrompt(target);
                         break;
+
                     case "turn":
                         return this.handleTurnCommand(sender, target, args);
+
                     case "clearcap":
                     case "clear_stage_cap":
                         if (this.vampireManager.hasStageCap(target)) {
@@ -874,6 +911,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                             sender.sendMessage("§c" + target.getName() + " does not have a stage cap.");
                         }
                         break;
+
                     case "clearban":
                     case "clear_promotion_ban":
                         if (this.vampireManager.hasPromotionBan(target)) {
@@ -885,16 +923,22 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                             sender.sendMessage("§c" + target.getName() + " does not have a promotion ban.");
                         }
                         break;
+
                     default:
                         sender.sendMessage("§cInvalid type. Use: human, 1, 2, 3, turn, clearcap, or clearban.");
                         return true;
                 }
-
-                return true;
             }
         }
+
+        return true;
     }
 
+    /**
+     * Handle commands to view or modify beacon data.
+     *
+     * @return {@code true}
+     */
     private boolean handleBeaconCommand(CommandSender sender, String[] args) {
         if (args.length == 0) {
             this.sendBeaconHelp(sender);
@@ -947,6 +991,11 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         }
     }
 
+    /**
+     * Refresh and validate the beacon visuals.
+     *
+     * @return {@code true}
+     */
     private boolean handleBeaconFix(CommandSender sender, String[] args) {
         sender.sendMessage("§eValidating and repairing beacon displays...");
         this.beaconManager.validateDisplays();
@@ -954,6 +1003,11 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         return true;
     }
 
+    /**
+     * Debug the beacon display for either a specified beacon or all the beacons
+     *
+     * @return {@code true}
+     */
     private boolean handleBeaconDebug(CommandSender sender, String[] args) {
         if (args.length != 1) {
             if (args.length == 2) {
@@ -963,14 +1017,13 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                 if (debugInfo != null) {
                     sender.sendMessage("§6=== BEACON DISPLAY DEBUG: " + beaconName.toUpperCase() + " ===");
                     sender.sendMessage(debugInfo);
+
                 } else {
                     sender.sendMessage("§cBeacon '" + beaconName + "' not found.");
                 }
 
-                return true;
             } else {
                 sender.sendMessage("§cUsage: /beacon debug [beacon_name]");
-                return true;
             }
         } else {
             sender.sendMessage("§6=== BEACON DISPLAY DEBUG INFO ===");
@@ -978,11 +1031,16 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
             for(BeaconSite beacon : this.beaconManager.getAllBeacons()) {
                 sender.sendMessage(this.beaconManager.getBeaconDisplayDebugInfo(beacon.getName()));
             }
-
-            return true;
         }
+
+        return true;
     }
 
+    /**
+     * Refresh all the beacon displays to match their stored state.
+     *
+     * @return {@code true}
+     */
     private boolean handleBeaconRefresh(CommandSender sender, String[] args) {
         sender.sendMessage("§eForce refreshing all beacon displays...");
         this.beaconManager.forceRefreshAllDisplays();
@@ -990,6 +1048,11 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         return true;
     }
 
+    /**
+     * Replace all the beacon displays to ensure they match their stored state.
+     *
+     * @return {@code true}
+     */
     private boolean handleBeaconCleanup(CommandSender sender, String[] args) {
         sender.sendMessage("§c§lWARNING: §ePerforming aggressive cleanup of ALL item displays at beacon locations...");
         this.beaconManager.cleanupAllDisplays();
@@ -997,6 +1060,11 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         return true;
     }
 
+    /**
+     * Remove the conversion cooldown for all beacon displays.
+     *
+     * @return {@code true}
+     */
     private boolean handleBeaconClearCooldowns(CommandSender sender, String[] args) {
         sender.sendMessage("§eClearing all beacon conversion cooldowns...");
         this.beaconManager.clearAllBeaconCooldownsForNewSession();
@@ -1004,22 +1072,25 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         return true;
     }
 
+    /**
+     * Add a new beacon to the game.
+     *
+     * @return {@code true}
+     */
     private boolean handleBeaconAdd(CommandSender sender, String[] args) {
         if (args.length < 2) {
             sender.sendMessage("§cUsage: /pow admin beacon add <name> [radius]");
             return true;
 
-        } else if (!(sender instanceof Player)) {
+        } else if (!(sender instanceof Player player)) {
             sender.sendMessage("§cOnly players can add beacons.");
             return true;
 
         } else {
-            Player player = (Player)sender;
             String name = args[1];
 
             if (this.beaconManager.getBeacon(name) != null) {
                 sender.sendMessage("§cA beacon named '" + name + "' already exists.");
-                return true;
 
             } else {
                 Location playerLocation = player.getLocation();
@@ -1053,16 +1124,20 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                     sender.sendMessage("§cFailed to add beacon.");
                     blockLocation.getBlock().setType(Material.AIR);
                 }
-
-                return true;
             }
+
+            return true;
         }
     }
 
+    /**
+     * Remove an existing beacon from the game.
+     *
+     * @return {@code true}
+     */
     private boolean handleBeaconRemove(CommandSender sender, String[] args) {
         if (args.length < 2) {
             sender.sendMessage("§cUsage: /pow admin beacon remove <name>");
-            return true;
 
         } else {
             String name = args[1];
@@ -1070,7 +1145,6 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
 
             if (beacon == null) {
                 sender.sendMessage("§cBeacon '" + name + "' not found.");
-                return true;
 
             } else {
                 if (sender instanceof Player player) {
@@ -1101,10 +1175,10 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                 } else {
                     sender.sendMessage("§cFailed to remove beacon '" + name + "'.");
                 }
-
-                return true;
             }
         }
+
+        return true;
     }
 
     /**
@@ -1120,12 +1194,22 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         return true;
     }
 
+    /**
+     * Reset beacon states to their versions stored within the plugin folder.
+     *
+     * @return {@code true}
+     */
     private boolean handleBeaconReload(CommandSender sender, String[] args) {
         this.beaconManager.reloadBeacons();
         sender.sendMessage("§aBeacons reloaded from file.");
         return true;
     }
 
+    /**
+     * Retrieve the alignment distribution and names of the beacons.
+     *
+     * @return {@code true}
+     */
     private boolean handleBeaconStats(CommandSender sender, String[] args) {
         Map<BeaconSite.BeaconState, Integer> stateStats = this.beaconManager.getStateStats();
         sender.sendMessage("§6§l=== BEACON STATISTICS ===");
@@ -1177,6 +1261,11 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         return true;
     }
 
+    /**
+     * Check that all beacons have an attached location in the current world.
+     *
+     * @return {@code true}
+     */
     private boolean handleBeaconValidate(CommandSender sender, String[] args) {
         this.beaconManager.validateBeacons();
         sender.sendMessage("§aBeacon validation complete. Check console for any issues.");
@@ -1296,9 +1385,16 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         sender.sendMessage("§e/pow admin beacon debug [name] §7- Debug beacon display info");
     }
 
+    /**
+     * Turn a human player into a new vampire and set their sire as another existing vampire.
+     *
+     * @param target the player being turned into a fledgling vampire.
+     * @return {@code true}
+     */
     private boolean handleTurnCommand(CommandSender sender, Player target, String[] args) {
         if (!this.vampireManager.isHuman(target)) {
             sender.sendMessage("§c" + target.getName() + " is not human. Only humans can be turned into vampires.");
+
         } else {
             Player turner = null;
 
@@ -1314,6 +1410,8 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                     sender.sendMessage("§c" + turner.getName() + " is not a vampire. Only vampires can turn humans.");
                     return true;
                 }
+            } else {
+                sender.sendMessage("§cMissing crucial argument for the turner player.");
             }
 
             this.plugin.getVampireManager().performVampireTurning(target, turner);
@@ -1322,20 +1420,28 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         return true;
     }
 
+    /**
+     * Give physical tome ability book(s) to a player.
+     *
+     * @return {@code true}
+     */
     private boolean handleGiveTomeCommand(CommandSender sender, String[] args) {
         if (args.length < 2) {
             sender.sendMessage("§cUsage: /givetome <player> <ability> [amount]");
+
         } else {
             Player target = Bukkit.getPlayer(args[0]);
 
             if (target == null) {
                 sender.sendMessage("§cPlayer '" + args[0] + "' not found.");
+
             } else {
                 String abilityName = args[1];
 
                 if (!this.tomeManager.isValidAbility(abilityName)) {
                     sender.sendMessage("§cUnknown tome ability: '" + abilityName + "'");
                     sender.sendMessage("§7Available abilities: " + String.join(", ", this.tomeManager.getAllAbilityNames()));
+
                 } else {
                     int amount = 1;
 
@@ -1414,12 +1520,18 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         return true;
     }
 
+    /**
+     * Open a menu and let an admin select the tome ability and cure books that a player is tagged to have read.
+     *
+     * @return {@code true}
+     */
     private boolean handleSelectTomesCommand(CommandSender sender, String[] args) {
         if (!(sender instanceof Player admin)) {
             sender.sendMessage("§cThis command can only be used by players.");
 
         } else if (args.length < 1) {
             sender.sendMessage("§cUsage: /pow admin select_tomes <player>");
+
         } else {
             Player target = Bukkit.getPlayer(args[0]);
 
@@ -1433,9 +1545,15 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         return true;
     }
 
+    /**
+     * Give a physical cure book to a player.
+     *
+     * @return {@code true}
+     */
     private boolean handleGiveCureBookCommand(CommandSender sender, String[] args) {
         if (args.length < 2) {
             sender.sendMessage("§cUsage: /pow admin give_cure_book <player> <1 | 2 | 3 | 4>");
+
         } else {
             Player target = Bukkit.getPlayer(args[0]);
 
@@ -1462,6 +1580,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                 if (target.getInventory().firstEmpty() == -1) {
                     target.getWorld().dropItemNaturally(target.getLocation(), book);
                     target.sendMessage("§5An ancient tome appears at your feet...");
+
                 } else {
                     target.getInventory().addItem(book);
                     target.sendMessage("§5An ancient tome has appeared in your inventory...");
@@ -1474,6 +1593,11 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         return true;
     }
 
+    /**
+     * Place a cure book within a tome chest.
+     *
+     * @return {@code true}
+     */
     private boolean handleStashCureBookCommand(CommandSender sender, String[] args) {
         // Catch if an improper number of parameters was provided
         if (args.length != 1 && args.length != 4) {
@@ -1481,7 +1605,6 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
             return true;
         }
 
-        boolean stashSuccess;
         int bookNumber, x, y, z;
         Random random = new Random();
 
@@ -1525,18 +1648,22 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
 
         // Stash the cure book inside the chest at the location, if it exists
         if (sender instanceof Player admin) {
-            stashSuccess = this.plugin.getCureBookManager().stashCureBook(admin, bookNumber, x, y, z);
-        } else {
-            stashSuccess = this.plugin.getCureBookManager().stashCureBook(bookNumber, x, y, z);
-        }
+            this.plugin.getCureBookManager().stashCureBook(admin, bookNumber, x, y, z);
+            this.plugin.logInfo(admin.getName() + " used /stash_cure_book - placed " + this.plugin.getCureBookManager().getCureBookName(bookNumber, true) + " at " + x + ", " + y + ", " + z);
 
-        if (stashSuccess) {
-            this.plugin.logInfo(sender.getName() + " used /stash_cure_book - placed " + this.plugin.getCureBookManager().getCureBookName(bookNumber, true) + " at " + x + ", " + y + ", " + z);
+        } else {
+            this.plugin.getCureBookManager().stashCureBook(bookNumber, x, y, z);
+            this.plugin.logInfo("Cure book stashed with /stash_cure_book - placed " + this.plugin.getCureBookManager().getCureBookName(bookNumber, true) + " at " + x + ", " + y + ", " + z);
         }
 
         return true;
     }
 
+    /**
+     * Trigger the tome chests to fill with a rotation of books.
+     *
+     * @return {@code true}
+     */
     private boolean handleDistributeTomesCommand(CommandSender sender, String[] args) {
         if (this.plugin.getTomeDistributionManager().getTomeLocations().isEmpty()) {
             sender.sendMessage("§c§lWarning: §cNo tome chest locations are configured!");
@@ -1551,9 +1678,15 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         return true;
     }
 
+    /**
+     * Add a new tome chest at the admin's location.
+     *
+     * @return {@code true}
+     */
     private boolean handleAddTomeChestCommand(CommandSender sender, String[] args) {
         if (!(sender instanceof Player player)) {
             sender.sendMessage("§cThis command can only be used by players.");
+
         } else {
             Location location = player.getLocation();
 
@@ -1573,9 +1706,15 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         return true;
     }
 
+    /**
+     * Remove the nearest tome chest within 10 blocks of the admin.
+     *
+     * @return {@code true}
+     */
     private boolean handleRemoveTomeChestCommand(CommandSender sender, String[] args) {
         if (!(sender instanceof Player player)) {
             sender.sendMessage("§cThis command can only be used by players.");
+
         } else {
             Location playerLocation = player.getLocation(), nearestLocation = null;
             List<Location> tomeLocations = this.plugin.getTomeDistributionManager().getTomeLocations();
@@ -1616,6 +1755,11 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         return true;
     }
 
+    /**
+     * List out the tome chest locations and offer the sender the option to teleport to them.
+     *
+     * @return {@code true}
+     */
     private boolean handleListTomeChestsCommand(CommandSender sender, String[] args) {
         List<Location> tomeLocations = this.plugin.getTomeDistributionManager().getTomeLocations();
 
@@ -1626,6 +1770,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         if (tomeLocations.isEmpty()) {
             sender.sendMessage("§7No tome chest locations configured.");
             sender.sendMessage("§7Use §e/pow admin addtomechest §7to add a location.");
+
         } else {
             int index = 1;
 
@@ -1657,6 +1802,11 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         return true;
     }
 
+    /**
+     * Remove the buffs from being under a blood moon from a vampire.
+     *
+     * @return {@code true}
+     */
     private boolean handleClearBloodMoonBuffsCommand(CommandSender sender, String[] args) {
         if (args.length == 0) {
             sender.sendMessage("§cUsage: /clearbloodmoonbuffs <player | all>");
@@ -1694,13 +1844,18 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         return true;
     }
 
+    /**
+     * Mark a player as impossible to cure of vampirism.
+     *
+     * @return {@code true}
+     */
     private boolean makePlayerIncurable(CommandSender sender, String[] args) {
         if (args.length == 0) {
             sender.sendMessage("§cUsage: /make_incurable <player>");
-            sender.sendMessage("§7This command makes a vampire impossible to cure, and immune to the force cure.");
+            sender.sendMessage("§7This command makes a vampire impossible to cure, and immune to the force cure movement trap.");
             sender.sendMessage("§7The plugin will treat the player as though their sire was still alive.");
             sender.sendMessage("§7However, it will still prevent curing even if the config is toggled to ignore whether the vampire's sire is alive.");
-            sender.sendMessage("§7To revert, use /tag to manually remove the CannotCure tag from the player.");
+            sender.sendMessage("§7To revert, use '/tag <name> remove CannotCure' to manually remove the CannotCure tag from the player.");
 
         } else {
             String target = args[0].toLowerCase();
@@ -1721,6 +1876,11 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         return true;
     }
 
+    /**
+     * Refresh a player's attributes to match their alignment and state.
+     *
+     * @return {@code true}
+     */
     private boolean handleFixAttributesCommand(CommandSender sender, String[] args) {
         if (args.length == 0) {
             if (sender instanceof Player) {
@@ -1762,6 +1922,11 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         return true;
     }
 
+    /**
+     * Toggle or trigger the endermen spawn prevention system.
+     *
+     * @return {@code true}
+     */
     private boolean handleRemoveEndermenCommand(CommandSender sender, String[] args) {
         if (args.length == 0) {
             sender.sendMessage("§cUsage: /removeendermen <all | toggle | status>");
@@ -1776,6 +1941,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                     sender.sendMessage("§aRemoved §e" + removedCount + " §aendermen from all loaded chunks.");
                     this.plugin.logInfo("Admin " + sender.getName() + " removed " + removedCount + " endermen");
                     break;
+
                 case "toggle":
                     boolean currentStatus = this.plugin.getEndermanRemovalListener().isEndermanRemovalEnabled();
                     this.plugin.getEndermanRemovalListener().setEndermanRemovalEnabled(!currentStatus);
@@ -1783,10 +1949,12 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                     sender.sendMessage("§aEnderman removal is now §e" + newStatus + "§a.");
                     this.plugin.logInfo("Admin " + sender.getName() + " toggled enderman removal to " + newStatus);
                     break;
+
                 case "status":
                     String statusMessage = this.plugin.getEndermanRemovalListener().isEndermanRemovalEnabled() ? "§aENABLED" : "§cDISABLED";
                     sender.sendMessage("§7Enderman removal is currently: " + statusMessage);
                     break;
+
                 default:
                     sender.sendMessage("§cInvalid action. Use 'all', 'toggle', or 'status'.");
             }
@@ -1795,9 +1963,15 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         return true;
     }
 
+    /**
+     * Give a player the default starting game items.
+     *
+     * @return {@code true}
+     */
     private boolean handleSetupPlayerCommand(CommandSender sender, String[] args) {
         if (args.length != 1) {
             sender.sendMessage("§cUsage: /setupplayer <playername>");
+
         } else {
             Player target = Bukkit.getPlayer(args[0]);
 
@@ -1845,6 +2019,11 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         return true;
     }
 
+    /**
+     *
+     *
+     * @return {@code true}
+     */
     private boolean handleSpawnAnimalsCommand(CommandSender sender, String[] args) {
         sender.sendMessage("§eManually spawning passive animals across the world...");
         this.plugin.getPassiveMobSpawningManager().triggerSpawning();
@@ -1852,11 +2031,18 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         return true;
     }
 
+    /**
+     * Create the list of autocorrecting options for admin commands as they are written out in the command line.
+     *
+     * @param command the previous word in the argument list.
+     * @return A {@code List} of options for the autocomplete to suggest.
+     */
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         if (!sender.hasPermission("vampiresmp.admin")) {
             return new ArrayList<>();
 
         } else {
+            // Stores the autocomplete options that will be displayed
             List<String> completions = new ArrayList<>();
 
             if (command.getName().equalsIgnoreCase("session")) {
@@ -1992,11 +2178,21 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         }
     }
 
+    /**
+     * Give an infinite night vision effect to the player.
+     *
+     * @param player the vampire gaining night vision.
+     */
     private void applyVampireNightVision(Player player) {
         PotionEffect nightVision = new PotionEffect(PotionEffectType.NIGHT_VISION, -1, 0, false, false, false);
         player.addPotionEffect(nightVision);
     }
 
+    /**
+     * Give the player a link to apply the vampire texture pack to their game.
+     *
+     * @param player the player changing to the vampire texture pack.
+     */
     private void sendVampireTexturePackPrompt(Player player) {
         TextComponent textureMessage = new TextComponent("§7Apply the vampire texture pack: ");
         TextComponent clickableText = new TextComponent("§c§n[CLICK HERE]");
