@@ -11,7 +11,6 @@
  *  - Implement getRaiseUndeadCooldown() inside managers/ConfigManager.java
  *  - Add this file (RaiseUndeadAbility.java) to the abilities folder
  *  - Add "raiseundead" to the VAMPIRE_ABILITIES list inside commands/BrigadierCommands.java
- *  - Add "raiseundead" to the 'vability' section in onTabComplete(...) inside commands/PowCommand.java
  *  - Register RaiseUndeadAbility() in registerAbilities inside managers/VampireAbilityManager.java
  */
 

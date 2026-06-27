@@ -40,7 +40,6 @@ public class TomeManager {
     private final Map<String, TomeAbility> abilities;
     private final Map<UUID, Integer> playerTomeUsageSession = new HashMap<>();
     private final Map<UUID, UUID> tomeSelectionTargets = new HashMap<>();
-    private final boolean TOME_CAP_ENABLED;
     public static final String TOME_TAG_PREFIX = "tome_ability_";
     public static final String TOME_SELECTION_GUI_TITLE = "§6§lSelect Tome Abilities";
 
@@ -52,7 +51,6 @@ public class TomeManager {
     public TomeManager(RemakepirePlugin plugin) {
         this.plugin = plugin;
         this.vampireManager = plugin.getVampireManager();
-        this.TOME_CAP_ENABLED = plugin.getConfigManager().isTomeAbsorptionCapped();
         this.abilities = new HashMap<>();
         this.registerTomeAbilities();
     }
@@ -125,7 +123,7 @@ public class TomeManager {
         } else if (this.hasAbility(player, abilityName)) {
             return false;
         } else if (player.getGameMode() != GameMode.CREATIVE && this.hasUsedTomeThisSession(player)) {
-            if (TOME_CAP_ENABLED) {
+            if (plugin.getConfigManager().isTomeAbsorptionCapped()) {
                 player.sendMessage("§cYou have already absorbed one tome this session. Your mind cannot handle more ancient knowledge.");
             } else {
                 player.sendMessage("§cYour mind requires more time to recover from the ancient knowledge you absorbed.");
@@ -143,7 +141,7 @@ public class TomeManager {
                 // Set a timer to remove the player from the tome prevention list after the timer elapses
                 BukkitTask absorptionCooldonTask = Bukkit.getScheduler().runTaskLater(this.plugin, () -> {
                     // Only remove the player if tome capping is not enabled. After the timer elapses
-                    if (!TOME_CAP_ENABLED) {
+                    if (!plugin.getConfigManager().isTomeAbsorptionCapped()) {
                         this.playerTomeUsageSession.remove(player.getUniqueId());
 
                         if (player.isOnline()) {
