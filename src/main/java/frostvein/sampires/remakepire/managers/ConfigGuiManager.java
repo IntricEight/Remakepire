@@ -122,7 +122,7 @@ public class ConfigGuiManager {
          * vampire_health_check     "bottle of enchanting (blood bottle)"
          * damage_suppression       "stone sword"
          * cure_requires_dead_sire  "wither skeleton skull"
-         * cure_requires_daylight   "shroomlight"
+         * cure_requires_daylight   "yellow stained glass"
          * cure_book_spawning       "written book"
          * enable_npc_mobs          "wandering trader spawn egg"
          * breeding_out_of_session  "wheat"
@@ -144,7 +144,7 @@ public class ConfigGuiManager {
             case "vampire_health_check" ->      Material.EXPERIENCE_BOTTLE;
             case "damage_suppression" ->        Material.STONE_SWORD;
             case "cure_requires_dead_sire" ->   Material.WITHER_SKELETON_SKULL;
-            case "cure_requires_daylight" ->    Material.SHROOMLIGHT;
+            case "cure_requires_daylight" ->    Material.YELLOW_STAINED_GLASS;
             case "cure_book_spawning" ->        Material.WRITTEN_BOOK;
             case "enable_npc_mobs" ->           Material.WANDERING_TRADER_SPAWN_EGG;
             case "breeding_out_of_session" ->   Material.WHEAT;
@@ -174,7 +174,7 @@ public class ConfigGuiManager {
             case Material.EXPERIENCE_BOTTLE ->              "vampire_health_check";
             case Material.STONE_SWORD ->                    "damage_suppression";
             case Material.WITHER_SKELETON_SKULL ->          "cure_requires_dead_sire";
-            case Material.SHROOMLIGHT ->                    "cure_requires_daylight";
+            case Material.YELLOW_STAINED_GLASS ->           "cure_requires_daylight";
             case Material.WRITTEN_BOOK ->                   "cure_book_spawning";
             case Material.WANDERING_TRADER_SPAWN_EGG ->     "enable_npc_mobs";
             case Material.WHEAT ->                          "breeding_out_of_session";
@@ -455,6 +455,12 @@ public class ConfigGuiManager {
 
             case "tome_cap":
                 this.configManager.setTomeAbsorptionCapping( !this.configManager.isTomeAbsorptionCapped() );
+
+                // Clear the list of tome absorption if the cap is being disabled
+                if (!this.configManager.isTomeAbsorptionCapped()) {
+                    this.plugin.getTomeManager().clearAllTomeUsage();
+                }
+
                 break;
 
             case "vampire_level_cap":
