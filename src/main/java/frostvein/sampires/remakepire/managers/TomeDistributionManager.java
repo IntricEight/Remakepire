@@ -1,6 +1,5 @@
 package frostvein.sampires.remakepire.managers;
 
-import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -22,6 +21,7 @@ import org.bukkit.inventory.meta.EnchantmentStorageMeta;
 import org.bukkit.scheduler.BukkitTask;
 import frostvein.sampires.remakepire.RemakepirePlugin;
 import frostvein.sampires.remakepire.abilities.tome.TomeAbility;
+import frostvein.sampires.remakepire.commands.BrigadierCommands;
 import frostvein.sampires.remakepire.utils.ConversionAssistant;
 
 public class TomeDistributionManager {
@@ -36,9 +36,7 @@ public class TomeDistributionManager {
     private final Enchantment[] enchantmentTypes;
 
     // The tome ability books and enchantments allowed to spawn inside the chests
-    private static final Set<String> ALLOWED_TOMES = new HashSet<>(Arrays.asList(
-            "BanishUndead", "Blessing", "EnlightenedEye", "HolyWord", "LanternThrash", "PrayerOfFaith", "RallyingCry", "ShoulderBarge", "TurnUndead", "UncannyDirection", "UnnaturalHaste", "WayOfTheLand", "WayOfTheLumberjack", "WayOfTheProspector", "StopTheBleeding"
-    ));
+    private static final Set<String> ALLOWED_TOMES = new HashSet<>(BrigadierCommands.TOME_ABILITIES);
     private static final Map<String, Enchantment> ENCHANTMENT_OPTIONS = Map.of(
             "Efficiency", Enchantment.EFFICIENCY,
             "FeatherFalling", Enchantment.FEATHER_FALLING,

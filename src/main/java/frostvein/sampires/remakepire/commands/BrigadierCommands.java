@@ -28,8 +28,31 @@ public class BrigadierCommands {
     private final PowCommand powCommand;
     private final VampireCureCommand cureCommand;
     private final ForcedVampireCureCommand forcedCureCommand;
-    private static final List<String> VAMPIRE_ABILITIES = Arrays.asList("bat", "lunge", "vanish", "stormcall", "beacontravel", "vision");
-    private static final List<String> TOME_ABILITIES = Arrays.asList("blessing", "banishundead", "holyword", "enlightenedeye", "lanternthrash", "prayeroffaith", "rallyingcry", "shoulderbarge", "turnundead", "uncannydirection", "unnaturalhaste", "wayoftheland", "wayofthelumberjack", "wayoftheprospector", "stopthebleeding");
+    public static final List<String> VAMPIRE_ABILITIES = Arrays.asList(
+            "bat",
+            "lunge",
+            "vanish",
+            "stormcall",
+            "beacontravel",
+            "vision"
+    );
+    public static final List<String> TOME_ABILITIES = Arrays.asList(
+            "blessing",
+            "banishundead",
+            "holyword",
+            "enlightenedeye",
+            "lanternthrash",
+            "prayeroffaith",
+            "rallyingcry",
+            "shoulderbarge",
+            "stopthebleeding",
+            "turnundead",
+            "uncannydirection",
+            "unnaturalhaste",
+            "wayoftheland",
+            "wayofthelumberjack",
+            "wayoftheprospector"
+    );
 
     /**
      * Create an instance of the plugin's custom command hierarchy structure.
