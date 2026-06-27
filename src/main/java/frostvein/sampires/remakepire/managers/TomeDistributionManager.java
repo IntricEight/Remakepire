@@ -275,7 +275,7 @@ public class TomeDistributionManager {
                 pageContent.append("§7No description available\n");
             }
 
-            pageContent.append("\n§6Use this knowledge wisely, for it comes with great responsibility.");
+            pageContent.append("\n§6Use this knowledge wisely, for it comes with great responsibility. ");
             pages.add(pageContent.toString());
             bookMeta.setPages(pages);
             tome.setItemMeta(bookMeta);
