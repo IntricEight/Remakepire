@@ -32,6 +32,7 @@ public class BrigadierCommands {
             "bat",
             "lunge",
             "vanish",
+            "raiseundead",
             "stormcall",
             "beacontravel",
             "vision"

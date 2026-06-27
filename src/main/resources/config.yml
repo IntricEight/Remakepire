@@ -135,6 +135,8 @@ abilities:
     lunge-cooldown: 45
     # Vanish/Invisibility cooldown (default: 420 seconds = 7 minutes)
     vanish-cooldown: 420
+    # Raise Undead cooldown (default: 600 seconds = 10 minutes)
+    raise-undead-cooldown: 600
     # Storm Call cooldown (default: 7200 seconds = 2 hours)
     storm-call-cooldown: 7200
     # Beacon Teleport cooldown (default: 300 seconds = 5 minutes)
