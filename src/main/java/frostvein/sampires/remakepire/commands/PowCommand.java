@@ -312,7 +312,7 @@ public class PowCommand implements CommandExecutor, TabCompleter {
                 }
 
                 if (args.length == 4 && args[1].equalsIgnoreCase("givetome")) {
-                    List<String> tomeAbilities = Arrays.asList("blessing", "banishundead", "holyword", "enlightenedeye", "lanternthrash", "prayeroffaith", "rallyingcry", "shoulderbarge", "turnundead", "uncannydirection", "unnaturalhaste", "wayoftheland", "wayofthelumberjack", "wayoftheprospector", "stopthebleeding");
+                    List<String> tomeAbilities = BrigadierCommands.TOME_ABILITIES;
                     return tomeAbilities.stream().filter((s) -> s.toLowerCase().startsWith(args[3].toLowerCase())).collect(Collectors.toList());
                 }
 
@@ -377,7 +377,9 @@ public class PowCommand implements CommandExecutor, TabCompleter {
             }
 
             if (args.length == 2 && args[0].equalsIgnoreCase("vability")) {
-                List<String> abilities = Arrays.asList("list", "all", "bat", "lunge", "vanish", "raiseundead", "stormcall", "beacontravel", "vision");
+                List<String> abilities = Arrays.asList("list", "all");
+                abilities.addAll(BrigadierCommands.VAMPIRE_ABILITIES);
+
                 return abilities.stream().filter((s) -> s.startsWith(args[1].toLowerCase())).collect(Collectors.toList());
 
             } else if (args.length == 2 && args[0].equalsIgnoreCase("tome")) {

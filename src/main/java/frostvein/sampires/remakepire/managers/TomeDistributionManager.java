@@ -1,12 +1,10 @@
 package frostvein.sampires.remakepire.managers;
 
-import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Random;
 import java.util.Set;
 import org.bukkit.Bukkit;
@@ -22,6 +20,7 @@ import org.bukkit.inventory.meta.EnchantmentStorageMeta;
 import org.bukkit.scheduler.BukkitTask;
 import frostvein.sampires.remakepire.RemakepirePlugin;
 import frostvein.sampires.remakepire.abilities.tome.TomeAbility;
+import frostvein.sampires.remakepire.commands.BrigadierCommands;
 import frostvein.sampires.remakepire.utils.ConversionAssistant;
 
 public class TomeDistributionManager {
@@ -36,9 +35,7 @@ public class TomeDistributionManager {
     private final Enchantment[] enchantmentTypes;
 
     // The tome ability books and enchantments allowed to spawn inside the chests
-    private static final Set<String> ALLOWED_TOMES = new HashSet<>(Arrays.asList(
-            "BanishUndead", "Blessing", "EnlightenedEye", "HolyWord", "LanternThrash", "PrayerOfFaith", "RallyingCry", "ShoulderBarge", "TurnUndead", "UncannyDirection", "UnnaturalHaste", "WayOfTheLand", "WayOfTheLumberjack", "WayOfTheProspector", "StopTheBleeding"
-    ));
+    private static final Set<String> ALLOWED_TOMES = new HashSet<>(BrigadierCommands.TOME_ABILITIES);
     private static final Map<String, Enchantment> ENCHANTMENT_OPTIONS = Map.of(
             "Efficiency", Enchantment.EFFICIENCY,
             "FeatherFalling", Enchantment.FEATHER_FALLING,
@@ -81,7 +78,7 @@ public class TomeDistributionManager {
         List<String> options = this.configManager.getTomeAbilityOptions();
 
         // Remove items from the list if they don't match an existing tome book
-        options.removeIf(tome -> !ALLOWED_TOMES.contains(tome));
+        options.removeIf(tome -> ALLOWED_TOMES.stream().noneMatch(allowedTome -> allowedTome.equalsIgnoreCase(tome)));
 
         return options.toArray(new String[0]);
     }
@@ -95,9 +92,11 @@ public class TomeDistributionManager {
         List<String> options = this.configManager.getTomeEnchantmentOptions();
 
         // Add each enchantment book to the list if it is found within the provided config list
-        List<Enchantment> books = options.stream()
-                .map(ENCHANTMENT_OPTIONS::get)
-                .filter(Objects::nonNull)
+        List<Enchantment> books = options.stream().map(tome -> ENCHANTMENT_OPTIONS.entrySet().stream()
+                        .filter(entry -> entry.getKey().equalsIgnoreCase(tome))
+                        .map(Map.Entry::getValue)
+                        .findFirst()
+                        .orElse(null))
                 .toList();
 
         return books.toArray(new Enchantment[0]);

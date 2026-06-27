@@ -1,3 +1,19 @@
+/* RAISE UNDEAD - Vampire Ability by IntricEight
+ *
+ * This ability lets vampires summon several basic zombies (number dependent on stage)
+ * around the vampire
+ *
+ * Use Conditions:
+ *  - Stage 2+ vampire
+ *
+ * Implementation Requirements:
+ *  - Add "raise-undead-cooldown: {integer}" to config.yml in abilities.vampire
+ *  - Implement getRaiseUndeadCooldown() inside managers/ConfigManager.java
+ *  - Add this file (RaiseUndeadAbility.java) to the abilities folder
+ *  - Add "raiseundead" to the VAMPIRE_ABILITIES list inside commands/BrigadierCommands.java
+ *  - Register RaiseUndeadAbility() in registerAbilities inside managers/VampireAbilityManager.java
+ */
+
 package frostvein.sampires.remakepire.abilities;
 
 import java.util.ArrayList;

@@ -386,6 +386,12 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                 case "tome_cap":
                     configManager.setTomeAbsorptionCapping(Boolean.parseBoolean(args[1]));
                     senderMessage += "tome-absorption-capping§r set to: " + Boolean.parseBoolean(args[1]);
+
+                    // Clear the list of tome absorption if the cap is being disabled
+                    if (!Boolean.parseBoolean(args[1])) {
+                        this.plugin.getTomeManager().clearAllTomeUsage();
+                    }
+
                     break;
 
                 case "vampire_level_cap":
@@ -1351,7 +1357,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
 
             if (this.beaconManager.setBeaconNeutral(name)) {
                 sender.sendMessage("§7Beacon '" + name + "' has been unaligned and set to neutral.");
-                sender.sendMessage("§7The beacon texture has changed. Players will receive notification in " + this.plugin.getConfigManager().getBeaconNeutralAnnouncementDelaySeconds() + " seconds.");
+                sender.sendMessage("§7The beacon texture has changed. Players will receive a notification in " + this.plugin.getConfigManager().getBeaconNeutralAnnouncementDelaySeconds() + " seconds.");
             } else {
                 sender.sendMessage("§cBeacon '" + name + "' not found.");
             }
