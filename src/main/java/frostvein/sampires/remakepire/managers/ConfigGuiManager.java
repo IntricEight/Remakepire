@@ -30,7 +30,7 @@ public class ConfigGuiManager {
      * Create an inventory screen for modifying values within the config file.
      */
     public void createConfigGui() {
-        /* Inventory Layout
+        /* Inventory Layout *
          * Leave a row and column of empty space around the items to format things.
          * This means that for every row of 9 items, only the middle 7 should be used.
          * Additionally, the first and last 9 items should be unused to create the top and bottom empty rows.
