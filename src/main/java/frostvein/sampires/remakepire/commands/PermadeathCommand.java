@@ -14,12 +14,22 @@ public class PermadeathCommand implements CommandExecutor {
     private final PermadeathManager permadeathManager;
     private final VampireManager vampireManager;
 
+    /**
+     * Create an instance of the plugin's permadeath setting command handler.
+     *
+     * @param plugin the host plugin object.
+     */
     public PermadeathCommand(RemakepirePlugin plugin) {
         this.plugin = plugin;
         this.permadeathManager = plugin.getPermadeathManager();
         this.vampireManager = plugin.getVampireManager();
     }
 
+    /**
+     * Handle the command execution of setting a human's permadeath setting.
+     *
+     * @return {@code true}
+     */
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (!(sender instanceof Player player)) {
             sender.sendMessage("§cThis command can only be used by players.");
@@ -42,12 +52,14 @@ public class PermadeathCommand implements CommandExecutor {
                     player.sendMessage("§7If a vampire with turning enabled kills you,");
                     player.sendMessage("§7you will die permanently instead of becoming a vampire.");
                     break;
+
                 case "off":
                     this.permadeathManager.setPermadeathMode(player, PermadeathMode.OFF);
                     player.sendMessage("§a§lPERMADEATH: OFF");
                     player.sendMessage("§7You will become a vampire if turned by one,");
                     player.sendMessage("§7following the normal vampire conversion rules.");
                     break;
+
                 case "absolute":
                     this.permadeathManager.setPermadeathMode(player, PermadeathMode.ABSOLUTE);
                     player.sendMessage("§4§lPERMADEATH: ABSOLUTE");
@@ -55,6 +67,7 @@ public class PermadeathCommand implements CommandExecutor {
                     player.sendMessage("§7If you are killed by ANY means, you will die permanently");
                     player.sendMessage("§4This is the most extreme setting - use with caution.");
                     break;
+
                 default:
                     player.sendMessage("§cInvalid option. Use: §e/pow permadeath <on | off | absolute>");
                     player.sendMessage("§7  on §8- Die permanently if vampire tries to turn you");
@@ -67,6 +80,11 @@ public class PermadeathCommand implements CommandExecutor {
         }
     }
 
+    /**
+     * Inform the player of their current permadeath setting.
+     *
+     * @param player the human checking the setting.
+     */
     private void showCurrentStatus(Player player) {
         PermadeathManager.PermadeathMode currentMode = this.permadeathManager.getPermadeathMode(player);
         player.sendMessage("§6§l=== PERMADEATH STATUS ===");

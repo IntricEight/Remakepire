@@ -9,10 +9,20 @@ import frostvein.sampires.remakepire.RemakepirePlugin;
 public class ForcedCureReopenCommand implements CommandExecutor {
     private final RemakepirePlugin plugin;
 
+    /**
+     * Create an instance of the plugin's forced cure GUI reopener command handler.
+     *
+     * @param plugin the host plugin object.
+     */
     public ForcedCureReopenCommand(RemakepirePlugin plugin) {
         this.plugin = plugin;
     }
 
+    /**
+     * Handle the command execution of reopening the forced cure choice GUI.
+     *
+     * @return {@code true} if the command didn't trigger a fatal error.
+     */
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (!(sender instanceof Player player)) {
             return true;

@@ -31,6 +31,11 @@ public class BrigadierCommands {
     private static final List<String> VAMPIRE_ABILITIES = Arrays.asList("bat", "lunge", "vanish", "raiseundead", "stormcall", "beacontravel", "vision");
     private static final List<String> TOME_ABILITIES = Arrays.asList("blessing", "banishundead", "holyword", "enlightenedeye", "lanternthrash", "prayeroffaith", "rallyingcry", "shoulderbarge", "turnundead", "uncannydirection", "unnaturalhaste", "wayoftheland", "wayofthelumberjack", "wayoftheprospector", "stopthebleeding");
 
+    /**
+     * Create an instance of the plugin's custom command hierarchy structure.
+     *
+     * @param plugin the host plugin object.
+     */
     public BrigadierCommands(RemakepirePlugin plugin) {
         this.plugin = plugin;
         this.powCommand = new PowCommand(plugin);
@@ -38,6 +43,9 @@ public class BrigadierCommands {
         this.forcedCureCommand = new ForcedVampireCureCommand(plugin);
     }
 
+    /**
+     * Register all the custom plugin commands into the game's command registrar.
+     */
     public void registerAll() {
         this.plugin.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS, (event) -> {
             Commands commands = event.registrar();
@@ -51,6 +59,11 @@ public class BrigadierCommands {
         });
     }
 
+    /**
+     * Build out the plugin command tree.
+     *
+     * @param commands The arguments passed to the command tree.
+     */
     private void registerPowCommand(Commands commands) {
         commands.register(((LiteralArgumentBuilder) ( Commands.literal("pow")
                 .then(Commands.literal("help").executes((ctx) -> this.executePowCommand(ctx, "help"))))
@@ -262,6 +275,7 @@ public class BrigadierCommands {
                             String player = StringArgumentType.getString(ctx, "player");
                             return this.executePowCommand(ctx, "admin", "vampire", player, "human");
                         })))
+
                         .then(Commands.literal("1").executes((ctx) -> {
                             String player = StringArgumentType.getString(ctx, "player");
                             return this.executePowCommand(ctx, "admin", "vampire", player, "1");
@@ -274,6 +288,7 @@ public class BrigadierCommands {
                             String player = StringArgumentType.getString(ctx, "player");
                             return this.executePowCommand(ctx, "admin", "vampire", player, "3");
                         }))
+
                         .then((Commands.literal("turn").executes((ctx) -> {
                             String player = StringArgumentType.getString(ctx, "player");
                             return this.executePowCommand(ctx, "admin", "vampire", player, "turn");
@@ -283,6 +298,7 @@ public class BrigadierCommands {
                                     String turner = StringArgumentType.getString(ctx, "turner");
                                     return this.executePowCommand(ctx, "admin", "vampire", player, "turn", turner);
                                 })))
+
                         .then(Commands.literal("clearcap").executes((ctx) -> {
                             String player = StringArgumentType.getString(ctx, "player");
                             return this.executePowCommand(ctx, "admin", "vampire", player, "clearcap");
@@ -389,6 +405,9 @@ public class BrigadierCommands {
                 );
     }
 
+    /**
+     * Build out the beacon state command subtree.
+     */
     private LiteralArgumentBuilder<CommandSourceStack> buildBeaconSubcommand() {
         return Commands.literal("beacon")
                 .then(Commands.literal("add")
@@ -451,6 +470,9 @@ public class BrigadierCommands {
                         })));
     }
 
+    /**
+     * Build out the vampire ability cooldowns command subtree.
+     */
     private LiteralArgumentBuilder<CommandSourceStack> buildVampireCooldownSubcommand() {
         return Commands.literal("vampirecooldowns")
                 .then((Commands.literal("reset").executes((ctx) -> this.executePowCommand(ctx, "admin", "vampirecooldowns", "reset")))
@@ -465,6 +487,9 @@ public class BrigadierCommands {
                         })));
     }
 
+    /**
+     * Build out the tome ability cooldowns command subtree.
+     */
     private LiteralArgumentBuilder<CommandSourceStack> buildTomeCooldownSubcommand() {
         return Commands.literal("resettomecooldowns").executes((ctx) -> this.executePowCommand(ctx, "admin", "resettomecooldowns"))
                 .then(Commands.argument("player", StringArgumentType.word()).suggests((ctx, builder) -> this.suggestOnlinePlayers(builder)).executes((ctx) -> {
@@ -473,6 +498,9 @@ public class BrigadierCommands {
                 }));
     }
 
+    /**
+     * Build out the voluntary cure command subtree.
+     */
     private void registerLatinCureCommand(Commands commands) {
         commands.register((Commands.literal("voluntate-mea-hoc-nefandum-vinculum-abicio").executes((ctx) -> {
             CommandSender sender = (ctx.getSource()).getSender();
@@ -481,6 +509,9 @@ public class BrigadierCommands {
         })).build(), "Cure yourself from vampirism");
     }
 
+    /**
+     * Build out the forced cure command subtree.
+     */
     private void registerLatinForcedCureCommand(Commands commands) {
         commands.register((Commands.literal("hoc-vinculum-tibi-dirumpo-mala-creatura")
                 .then(Commands.argument("player", StringArgumentType.word()).suggests((ctx, builder) -> this.suggestOnlinePlayers(builder)).executes((ctx) -> {
@@ -491,6 +522,9 @@ public class BrigadierCommands {
                 }))).build(), "Force a vampire back to humanity");
     }
 
+    /**
+     * Reformat the provided command into Bukkit's preferred command  style.
+     */
     private int executePowCommand(CommandContext<CommandSourceStack> ctx, String... args) {
         CommandSender sender = (ctx.getSource()).getSender();
 
@@ -504,6 +538,9 @@ public class BrigadierCommands {
         return 1;
     }
 
+    /**
+     * Assist in retrieving a list of online players to autofill relevant command arguments.
+     */
     private CompletableFuture<Suggestions> suggestOnlinePlayers(SuggestionsBuilder builder) {
         String remaining = builder.getRemainingLowerCase();
 
@@ -516,6 +553,9 @@ public class BrigadierCommands {
         return builder.buildFuture();
     }
 
+    /**
+     * Assist in retrieving a list of all vampire ability command names to autofill relevant command arguments.
+     */
     private CompletableFuture<Suggestions> suggestVampireAbilities(SuggestionsBuilder builder) {
         String remaining = builder.getRemainingLowerCase();
 
@@ -528,6 +568,9 @@ public class BrigadierCommands {
         return builder.buildFuture();
     }
 
+    /**
+     * Assist in retrieving a list of owned tome ability command names to autofill relevant command arguments.
+     */
     private CompletableFuture<Suggestions> suggestTomeAbilities(CommandContext<CommandSourceStack> ctx, SuggestionsBuilder builder) {
         String remaining = builder.getRemainingLowerCase();
         CommandSender sender = (ctx.getSource()).getSender();
@@ -543,6 +586,9 @@ public class BrigadierCommands {
         return builder.buildFuture();
     }
 
+    /**
+     * Assist in retrieving a list of all tome ability command names to autofill relevant command arguments.
+     */
     private CompletableFuture<Suggestions> suggestAllTomeAbilities(SuggestionsBuilder builder) {
         String remaining = builder.getRemainingLowerCase();
 
@@ -555,6 +601,9 @@ public class BrigadierCommands {
         return builder.buildFuture();
     }
 
+    /**
+     * Assist in retrieving a list of beacon names to autofill relevant command arguments.
+     */
     private CompletableFuture<Suggestions> suggestBeaconNames(SuggestionsBuilder builder) {
         String remaining = builder.getRemainingLowerCase();
 

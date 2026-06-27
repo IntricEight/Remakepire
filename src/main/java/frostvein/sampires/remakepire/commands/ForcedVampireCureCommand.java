@@ -2,7 +2,6 @@ package frostvein.sampires.remakepire.commands;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.SoundCategory;
@@ -11,8 +10,6 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.PotionMeta;
-import org.bukkit.potion.PotionType;
 import frostvein.sampires.remakepire.RemakepirePlugin;
 import frostvein.sampires.remakepire.beacons.BeaconSite;
 import frostvein.sampires.remakepire.listeners.CureBookReadingListener;
@@ -26,6 +23,11 @@ public class ForcedVampireCureCommand implements CommandExecutor {
     private final BeaconManager beaconManager;
     private final VampireSireManager sireManager;
 
+    /**
+     * Create an instance of the plugin's forced cure command handler.
+     *
+     * @param plugin the host plugin object.
+     */
     public ForcedVampireCureCommand(RemakepirePlugin plugin) {
         this.plugin = plugin;
         this.vampireManager = plugin.getVampireManager();
@@ -33,6 +35,11 @@ public class ForcedVampireCureCommand implements CommandExecutor {
         this.sireManager = plugin.getSireManager();
     }
 
+    /**
+     * Handle the command execution of triggering the force cure.
+     *
+     * @return {@code true} if the command didn't trigger a fatal error.
+     */
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (!(sender instanceof Player caster)) {
             sender.sendMessage("§cThis command can only be used by players.");
