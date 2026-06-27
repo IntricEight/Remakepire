@@ -1,4 +1,4 @@
-# VampireSMP Configuration File
+# Remakepire Configuration File
 
 # ============================================================================
 # CHAT SYSTEM
@@ -13,13 +13,14 @@ chat:
   # Use [Click Here] to add a clickable link that sends the message - if omitted, no link is shown
   first-message-blocked-message: '&eIt looks like you''ve attempted to send a message!
     Vampire SMP is geared to revolve around immersion, consider finding the person
-    you need to speak to, or messaging them on discord. If you still need to send
+    you need to speak to, or messaging them on Discord. If you still need to send
     your chat message, [Click Here]&e. This prevention message will not appear again
-    until your next log on if you do choose to send your message via the blue text.'
+    until your next login if you do choose to send your message via the blue text.'
 
   # Control if an admin alert is sent when a player leaves the game
   # Default: true (A message is sent when a player leaves)
   alert-on-player-leave: true
+
 
 # ============================================================================
 # TOME CHEST SYSTEM
@@ -43,7 +44,7 @@ tome-chests:
   ability-book-count: 4
 
   # A list of tome abilities that can spawn inside tome chests
-  # The default list are all the books supported in the plugin; you pick and choose which ones you want included in your game
+  # The default list is all the books supported in the plugin; you pick and choose which ones you want included in your game
   # You can find a list of the supported tome options below this list
   tome-options:
     - "BanishUndead"
@@ -80,7 +81,7 @@ tome-chests:
 #    "WayOfTheProspector"
 
   # A list of enchantment books that can spawn inside tome chests
-  # The default list are all the enchantments supported in the default plugin
+  # The default list is all the enchantments supported in the default plugin
   # You can find a list of the supported enchantment options below this list
   enchantment-options:
     - "Efficiency"
@@ -118,6 +119,7 @@ tome-absorption:
   # Default: 120 (2 hours)
   tome-absorption-interval-minutes: 120
 
+
 # ============================================================================
 # VAMPIRE ABILITY COOLDOWNS
 # ============================================================================
@@ -137,6 +139,7 @@ abilities:
     beacon-teleport-cooldown: 300
     # Vampire Vision cooldown (default: 1 second)
     vampire-vision-cooldown: 1
+
 
   # ============================================================================
   # TOME ABILITY COOLDOWNS
@@ -174,6 +177,7 @@ abilities:
     # Stop the Bleeding cooldown (default: 7200 seconds = 2 hours)
     stop-the-bleeding-cooldown: 7200
 
+
 # ============================================================================
 # THIRST SYSTEM
 # ============================================================================
@@ -186,13 +190,14 @@ thirst:
   # Default: 60
   max-feeding-per-session: 60
 
+
 # ============================================================================
 # VAMPIRE SETTINGS
 # ============================================================================
 vampire:
   # Respawn location for vampire players (x,y,z coordinates)
-  # Default: 40,101,-113 (the vampire crypt)
-  respawn-location: -1102, -2, -987
+  # Default: 40,101,-113 (the Oakhurst vampire crypt)
+  respawn-location: 40,101,-113
 
   # Control if vampires are stuck when they drop a level during the session
   # Choose if vampires are prevented to regaining a blood level for the rest of the active session, or if they can raise and lower their level at will
@@ -221,6 +226,7 @@ vampire:
 # Default: 9 ticks (0.45 seconds)
 vampire_health_check_ticks: 9
 
+
 # ============================================================================
 # BEACON SYSTEM
 # ============================================================================
@@ -246,19 +252,21 @@ beacons:
   neutral-announcement-delay-seconds: 60
 
   # Whether corrupted beacons trap humans by counting toward the total required to leave
-  # When true (default), corrupted beacons count as desecrated — humans can never reclaim them
+  # When true (default), corrupted beacons count as desecrated — humans cannot escape while they exist
   # When false, corrupted beacons are excluded from the total for both sides
+  # Default: true (humans are trapped forever)
   corrupted-beacons-trap-humans: true
 
   distance:
     # The maximum distance that a player can convert a beacon from (in blocks)
-    # Default: 3
+    # Default: 3 blocks
     conversion-distance: 3
 
     # The distance that vampires need to be from a beacon to use their powers (in blocks)
     # This is also the distance that humans receive regeneration within
-    # Default: 25
+    # Default: 25 blocks
     vampire-suppression-distance: 25
+
 
 # ============================================================================
 # GARLIC (BEETROOT) SYSTEM
@@ -286,6 +294,7 @@ garlic:
   # Default: 180 seconds (3 minutes)
   weakness-duration: 180
 
+
 # ============================================================================
 # LOGGING
 # ============================================================================
@@ -293,6 +302,7 @@ garlic:
 # When true, only warnings and errors will appear in console
 # Default: false (all logging enabled)
 disable-nonessential-logging: false
+
 
 # ============================================================================
 # HOLY WATER SYSTEM
@@ -306,31 +316,37 @@ holy-water:
   # Default: true
   holy-water-session-capped: true
 
+
 # ============================================================================
 # CURE SYSTEM
 # ============================================================================
 cure:
   # The maximum distance that a vampire can be from a holy beacon and be cured (in blocks)
-  # Default: 25
+  # Default: 25 blocks
   cure-distance: 25
 
   # Controls if vampires require their sire to be dead before they can be cured
   # Default: true (The spawn's Sire must be permakilled)
   sire-death-requirement: true
 
+  # Controls if vampires require it to be day time (Between ticks 0 and 12000) for the cure to work
+  # Default: true (It must be day time)
+  daylight-requirement: true
+
 # Fourth Cure Book Configuration
 # Controls whether "The Retribution 4/3" book should spawn in tome chests
-# Default: false (disabled)
+# Default: false
 fourth_book_spawn_enabled: false
 
 # Cure Books in Tome Chests
 # Controls whether cure books (1/3, 2/3, 3/3) should spawn in tome chest distribution
-# Default: true (enabled)
-cure_books_enabled: false
+# Default: true
+cure_books_enabled: true
 
 # Chance for a cure book to spawn in remaining empty chests (0.0 to 1.0)
 # Default: 0.3 (30% chance)
 cure_books_spawn_chance: 0.3
+
 
 # ============================================================================
 # MOB SPAWNING SYSTEM
@@ -342,16 +358,16 @@ passive-mob-spawning:
 
   # Minimum number of passive animals required before spawning is skipped
   # If animal count is below this threshold, spawning will occur
-  # Default: 40
-  minimum-animal-threshold: 60
+  # Default: 40 animals
+  minimum-animal-threshold: 40
 
   # Number of animals to spawn per cycle (morning auto-spawn or /pow admin spawnanimals)
-  # Default: 80
+  # Default: 80 animals
   spawn-count: 80
 
 # Allow NPC mobs to spawn during sessions
 # When true, Pillager patrols and Wandering Traders may spawn during active sessions
-# Default: false (disabled)
+# Default: false (disabled spawns)
 enable-npc-mobs: false
 
 # Allow players to breed animals when the session is not active
@@ -360,6 +376,7 @@ enable-npc-mobs: false
 # Default: true (allowed)
 allow-breeding-out-of-session: true
 
+
 # ============================================================================
 # COMBAT & PERMADEATH SYSTEM
 # ============================================================================
@@ -367,21 +384,21 @@ combat:
   # Maximum vampire stage that can be staked for permadeath
   # Vampires at this stage or BELOW can be perma-killed by wooden stakes
   # Valid values: 1, 2, or 3
-  # Default: 1 (only Stage 1 vampires can be staked)
+  # Default: 1 (only Stage 1 vampires can be perma-killed)
   permadeath-minimum-stage: 1
 
   # Control how many lives humans start out with
-  # Note that this is the number of times a human will revive. For example, 5 lives means 6 total deaths.
-  # Humans will always start out with 10 hearts, and lose hearts as their lives drop
+  # This is the number of times a human will revive. For example, 5 lives means 6 total deaths (5 revives + 1 starting life).
+  # Humans will always start out with 10 hearts, and lose 1 heart for each life lost
   # This change is not retroactive. If a human has died more times than allowed (after this value has been changed)
-  #   they will need to die one more time before it takes affect
-  # Minimum of 0 lives, maximum of 8
+  #   they will need to die one more time before it takes effect
+  # Valid values: 1 through 8
   # Default: 5 (6 deaths)
   human-lives: 5
 
   # Enable whether humans will be hard-capped to their 5 lives
-  # When false, only a vampire can permakill a human player on their last life
-  # Default: False (Extra dying is allowed)
+  # When false, only a vampire can perma-kill a human player on their last life
+  # Default: false (Extra dying is allowed)
   enforce-life-limit: false
 
   # Wooden stake cooldown in ticks (20 ticks = 1 second)
@@ -394,6 +411,7 @@ combat:
 # Valid values: 0-100 (0 = no suppression, 100 = no damage taken)
 # Default: 50 (50% damage reduction)
 damage_suppression: 50
+
 
 # ============================================================================
 # TOWN LOCATION SETTINGS
@@ -425,9 +443,10 @@ oakhurst:
 
 # Control whether the game border can hold players inside
 # When false, all players will be able to leave the town, and will be told they have escaped
-# WARNING: Players who haven't fulfilled a leave condition will be stuck in place if they are outside the border when it is enabled.
+# WARNING: Players who haven't fulfilled a leave condition will be frozen in place if they are outside the border when this is enabled.
 # Default: true (border traps players)
 border_active: true
+
 
 # ============================================================================
 # INTERNAL STATE TRACKING - DO NOT MODIFY

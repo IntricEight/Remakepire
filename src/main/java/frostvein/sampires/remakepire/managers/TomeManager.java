@@ -16,22 +16,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import frostvein.sampires.remakepire.RemakepirePlugin;
-import frostvein.sampires.remakepire.abilities.tome.BanishUndeadTomeAbility;
-import frostvein.sampires.remakepire.abilities.tome.BlessingTomeAbility;
-import frostvein.sampires.remakepire.abilities.tome.EnlightenedEyeTomeAbility;
-import frostvein.sampires.remakepire.abilities.tome.HolyWordTomeAbility;
-import frostvein.sampires.remakepire.abilities.tome.LanternThrashTomeAbility;
-import frostvein.sampires.remakepire.abilities.tome.PrayerOfFaithTomeAbility;
-import frostvein.sampires.remakepire.abilities.tome.RallyingCryTomeAbility;
-import frostvein.sampires.remakepire.abilities.tome.ShoulderBargeTomeAbility;
-import frostvein.sampires.remakepire.abilities.tome.StopTheBleedingTomeAbility;
-import frostvein.sampires.remakepire.abilities.tome.TomeAbility;
-import frostvein.sampires.remakepire.abilities.tome.TurnUndeadTomeAbility;
-import frostvein.sampires.remakepire.abilities.tome.UncannyDirectionTomeAbility;
-import frostvein.sampires.remakepire.abilities.tome.UnnaturalHasteTomeAbility;
-import frostvein.sampires.remakepire.abilities.tome.WayOfTheLandTomeAbility;
-import frostvein.sampires.remakepire.abilities.tome.WayOfTheLumberjackTomeAbility;
-import frostvein.sampires.remakepire.abilities.tome.WayOfTheProspectorTomeAbility;
+import frostvein.sampires.remakepire.abilities.tome.*;
 import frostvein.sampires.remakepire.listeners.CureBookReadingListener;
 
 public class TomeManager {
@@ -40,7 +25,6 @@ public class TomeManager {
     private final Map<String, TomeAbility> abilities;
     private final Map<UUID, Integer> playerTomeUsageSession = new HashMap<>();
     private final Map<UUID, UUID> tomeSelectionTargets = new HashMap<>();
-    private final boolean TOME_CAP_ENABLED;
     public static final String TOME_TAG_PREFIX = "tome_ability_";
     public static final String TOME_SELECTION_GUI_TITLE = "§6§lSelect Tome Abilities";
 
@@ -52,7 +36,6 @@ public class TomeManager {
     public TomeManager(RemakepirePlugin plugin) {
         this.plugin = plugin;
         this.vampireManager = plugin.getVampireManager();
-        this.TOME_CAP_ENABLED = plugin.getConfigManager().isTomeAbsorptionCapped();
         this.abilities = new HashMap<>();
         this.registerTomeAbilities();
     }
@@ -120,18 +103,22 @@ public class TomeManager {
     public boolean grantAbility(Player player, String abilityName) {
         if (!this.vampireManager.isHuman(player)) {
             return false;
+
         } else if (!this.isValidAbility(abilityName)) {
             return false;
+
         } else if (this.hasAbility(player, abilityName)) {
             return false;
+
         } else if (player.getGameMode() != GameMode.CREATIVE && this.hasUsedTomeThisSession(player)) {
-            if (TOME_CAP_ENABLED) {
+            if (plugin.getConfigManager().isTomeAbsorptionCapped()) {
                 player.sendMessage("§cYou have already absorbed one tome this session. Your mind cannot handle more ancient knowledge.");
             } else {
                 player.sendMessage("§cYour mind requires more time to recover from the ancient knowledge you absorbed.");
             }
 
             return false;
+
         } else {
             String tag = TOME_TAG_PREFIX + abilityName.toLowerCase();
             player.addScoreboardTag(tag);
@@ -143,7 +130,7 @@ public class TomeManager {
                 // Set a timer to remove the player from the tome prevention list after the timer elapses
                 BukkitTask absorptionCooldonTask = Bukkit.getScheduler().runTaskLater(this.plugin, () -> {
                     // Only remove the player if tome capping is not enabled. After the timer elapses
-                    if (!TOME_CAP_ENABLED) {
+                    if (!plugin.getConfigManager().isTomeAbsorptionCapped()) {
                         this.playerTomeUsageSession.remove(player.getUniqueId());
 
                         if (player.isOnline()) {
@@ -443,6 +430,11 @@ public class TomeManager {
             ((ShoulderBargeTomeAbility)shoulderBarge).cleanup();
         }
 
+        TomeAbility stopTheBleeding = this.getAbility("stopthebleeding");
+        if (stopTheBleeding instanceof StopTheBleedingTomeAbility) {
+            ((StopTheBleedingTomeAbility)stopTheBleeding).cleanup();
+        }
+
         TomeAbility holyWord = this.getAbility("holyword");
         if (holyWord instanceof HolyWordTomeAbility) {
             ((HolyWordTomeAbility)holyWord).cleanup();
@@ -453,13 +445,8 @@ public class TomeManager {
             ((WayOfTheLumberjackTomeAbility)lumberjack).cleanup();
         }
 
-        TomeAbility stopTheBleeding = this.getAbility("stopthebleeding");
-        if (stopTheBleeding instanceof StopTheBleedingTomeAbility) {
-            ((StopTheBleedingTomeAbility)stopTheBleeding).cleanup();
-        }
-
         TomeAbility.cancelAllNotificationTasks();
-        this.playerTomeUsageSession.clear();
+        clearAllTomeUsage();
         this.plugin.logInfo("TomeManager shutdown complete");
     }
 
@@ -474,10 +461,18 @@ public class TomeManager {
 
         if (!this.playerTomeUsageSession.containsKey(playerUUID)) {
             return false;
+
         } else {
             int currentSessionId = this.plugin.getSessionManager().getSessionIDObjective().getScore("session_id_holder").getScore();
             int tomeUsageSessionId = this.playerTomeUsageSession.get(playerUUID);
             return tomeUsageSessionId == currentSessionId;
         }
+    }
+
+    /**
+     * Clear the record of players who have used a tome this session.
+     */
+    public void clearAllTomeUsage() {
+        this.playerTomeUsageSession.clear();
     }
 }

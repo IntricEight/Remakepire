@@ -13,8 +13,8 @@ import frostvein.sampires.remakepire.RemakepirePlugin;
 
 public class ConfigGuiManager {
     private final RemakepirePlugin plugin;
-    private ConfigManager configManager;
-    private SessionManager sessionManager;
+    private final ConfigManager configManager;
+    private final SessionManager sessionManager;
     public static final String CONFIG_GUI_TITLE = "§8§lConfiguration Options";
     private Inventory configGui;
 
@@ -30,14 +30,14 @@ public class ConfigGuiManager {
      * Create an inventory screen for modifying values within the config file.
      */
     public void createConfigGui() {
-        /* Inventory Layout
+        /* Inventory Layout *
          * Leave a row and column of empty space around the items to format things.
          * This means that for every row of 9 items, only the middle 7 should be used.
          * Additionally, the first and last 9 items should be unused to create the top and bottom empty rows.
          */
 
         String[] commandsInGui = { "alert_on_quit", "holy_water_cap", "tome_cap", "vampire_level_cap", "new_vampire_tracking", "allow_vampire_mounts", "vampire_health_check",
-                "damage_suppression", "cure_requires_dead_sire", "cure_book_spawning", "enable_npc_mobs", "breeding_out_of_session", "stake_permadeath_stage", "human_life_limit",
+                "damage_suppression", "cure_requires_dead_sire", "cure_requires_daylight", "cure_book_spawning", "enable_npc_mobs", "breeding_out_of_session", "stake_permadeath_stage", "human_life_limit",
                 "one_human_left", "border_active" };
         final int ROWS = 5;
 
@@ -91,14 +91,15 @@ public class ConfigGuiManager {
             // Row 2
             case "damage_suppression" ->        19;
             case "cure_requires_dead_sire" ->   20;
-            case "cure_book_spawning" ->        21;
-            case "enable_npc_mobs" ->           22;
-            case "breeding_out_of_session" ->   23;
-            case "stake_permadeath_stage" ->    24;
-            case "human_life_limit" ->          25;
+            case "cure_requires_daylight" ->    21;
+            case "cure_book_spawning" ->        22;
+            case "enable_npc_mobs" ->           23;
+            case "breeding_out_of_session" ->   24;
+            case "stake_permadeath_stage" ->    25;
             // Row 3
-            case "one_human_left" ->            28;
-            case "border_active" ->             29;
+            case "human_life_limit" ->          28;
+            case "one_human_left" ->            29;
+            case "border_active" ->             30;
 
             default -> throw new IllegalStateException("Unexpected command name: " + commandName);
         };
@@ -121,6 +122,7 @@ public class ConfigGuiManager {
          * vampire_health_check     "bottle of enchanting (blood bottle)"
          * damage_suppression       "stone sword"
          * cure_requires_dead_sire  "wither skeleton skull"
+         * cure_requires_daylight   "yellow stained glass"
          * cure_book_spawning       "written book"
          * enable_npc_mobs          "wandering trader spawn egg"
          * breeding_out_of_session  "wheat"
@@ -142,6 +144,7 @@ public class ConfigGuiManager {
             case "vampire_health_check" ->      Material.EXPERIENCE_BOTTLE;
             case "damage_suppression" ->        Material.STONE_SWORD;
             case "cure_requires_dead_sire" ->   Material.WITHER_SKELETON_SKULL;
+            case "cure_requires_daylight" ->    Material.YELLOW_STAINED_GLASS;
             case "cure_book_spawning" ->        Material.WRITTEN_BOOK;
             case "enable_npc_mobs" ->           Material.WANDERING_TRADER_SPAWN_EGG;
             case "breeding_out_of_session" ->   Material.WHEAT;
@@ -171,6 +174,7 @@ public class ConfigGuiManager {
             case Material.EXPERIENCE_BOTTLE ->              "vampire_health_check";
             case Material.STONE_SWORD ->                    "damage_suppression";
             case Material.WITHER_SKELETON_SKULL ->          "cure_requires_dead_sire";
+            case Material.YELLOW_STAINED_GLASS ->           "cure_requires_daylight";
             case Material.WRITTEN_BOOK ->                   "cure_book_spawning";
             case Material.WANDERING_TRADER_SPAWN_EGG ->     "enable_npc_mobs";
             case Material.WHEAT ->                          "breeding_out_of_session";
@@ -240,6 +244,7 @@ public class ConfigGuiManager {
             case "vampire_health_check" ->      "Vampire Regeneration Rate";
             case "damage_suppression" ->        "Player Damage Resistance";
             case "cure_requires_dead_sire" ->   "Sire Death for Curing";
+            case "cure_requires_daylight" ->    "Daylight for Curing";
             case "cure_book_spawning" ->        "Allow Cure Book Spawning";
             case "enable_npc_mobs" ->           "Allow NPC Mob Spawns";
             case "breeding_out_of_session" ->   "Allow Animal Breeding Anytime";
@@ -282,6 +287,8 @@ public class ConfigGuiManager {
                     OTHER + this.configManager.getDamageSuppression() + "%";
             case "cure_requires_dead_sire" ->
                     this.configManager.doCuresRequireSireDeath() ? TRUE + "REQUIRED" : FALSE + "NOT REQUIRED";
+            case "cure_requires_daylight" ->
+                    this.configManager.doCuresRequireDaytime() ? TRUE + "REQUIRED" : FALSE + "NOT REQUIRED";
             case "cure_book_spawning" ->
                     this.sessionManager.isCureBooksEnabled() ? TRUE + "SPAWNING" : FALSE + "DISABLED";
             case "enable_npc_mobs" ->
@@ -355,6 +362,11 @@ public class ConfigGuiManager {
                 description.add("Require a vampire's sire to have been");
                 description.add("permakilled before they can be cured of");
                 description.add("vampirism.");
+                break;
+
+            case "cure_requires_daylight":
+                description.add("Require it to be day time before a");
+                description.add("a player can be cured of vampirism.");
                 break;
 
             case "cure_book_spawning":
@@ -443,6 +455,12 @@ public class ConfigGuiManager {
 
             case "tome_cap":
                 this.configManager.setTomeAbsorptionCapping( !this.configManager.isTomeAbsorptionCapped() );
+
+                // Clear the list of tome absorption if the cap is being disabled
+                if (!this.configManager.isTomeAbsorptionCapped()) {
+                    this.plugin.getTomeManager().clearAllTomeUsage();
+                }
+
                 break;
 
             case "vampire_level_cap":
@@ -506,6 +524,10 @@ public class ConfigGuiManager {
 
             case "cure_requires_dead_sire":
                 this.configManager.setCureRequiresSireDeath( !this.configManager.doCuresRequireSireDeath() );
+                break;
+
+            case "cure_requires_daylight":
+                this.configManager.setCureRequiresDaytime( !this.configManager.doCuresRequireDaytime() );
                 break;
 
             case "cure_book_spawning":

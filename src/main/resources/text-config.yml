@@ -13,6 +13,8 @@
 #   Cure book contents - The details of the cure books
 #   Cure book messages - The messages spawned when a cure book is interacted with
 #   Border messages - The messages that appear when interacting with the game border
+#   Global Cure messages - The messages that appear to each side when a player is cured (or killed by a cure)
+#   Global Death messages - The messages that appear to each side when a player is permanently killed
 
 
 # ============================================================================
@@ -25,7 +27,7 @@
 # ============================================================================
 
 # Enable/Disable using the content in this file inside the cure books
-# The config modifier is responsible for testing their custom book contents to ensure alignment and quality is as desired
+# The game runner is responsible for testing their custom book contents to ensure alignment and quality is as desired
 # Default: false (Custom content disabled)
 custom-cure-books: false
 
@@ -200,7 +202,7 @@ cure-book-messages:
 # GAME BORDER
 #   Inside this section, there are controls for each outcome of interacting with the world border.
 #   Begin by setting custom-border-messages to true, and then edit or replace sections to change what appears in each state of the player-border relationship.
-#   Changes these messages do not change the leave condition itself. You'll need to get a copy of the raw plugin code to modify that.
+#   Changing these messages do not change the leave condition itself. You'll need to get a copy of the raw plugin code to modify that.
 #   To return the border to its original form, toggle the control back to false and the plugin will revert to the default version of each message.
 # ============================================================================
 
@@ -284,17 +286,17 @@ global-cure-announcement:
 
 # The custom messages that appear when a human or vampire is permanently killed
 combat-death-announcement:
-  # The message that humans see when a human is permakilled
+  # The message that humans see when a human is perma-killed
   human-death-to-humans: "§cA shiver runs down your spine, as a human soul is torn from this realm..."
 
-  # The message that vampires see when a human is permakilled
-  human-death-to-vampires: "§2You sense the fading light of a soul, unnoticed until its disappearance... One of your prey been slain."
+  # The message that vampires see when a human is perma-killed
+  human-death-to-vampires: "§2You sense the fading light of a soul, unnoticed until its disappearance... One of your prey has been slain."
 
-  # The message that humans see when a vampire is staked and permakilled
+  # The message that humans see when a vampire is staked and perma-killed
   vampire-death-to-humans: "§aYou feel the realm has been purged of an evil spirit... Someone has successfully killed a vampire. Permanently."
 
-  # The message that vampires see when a vampire is staked and permakilled
-  vampire-death-to-vampires: "§4You feel a dark soul ripped from its human coil, somebody has slayed a member of your monstrous family..."
+  # The message that vampires see when a vampire is staked and perma-killed
+  vampire-death-to-vampires: "§4You feel a dark soul ripped from its human coil, somebody has slain a member of your monstrous family..."
 
 
 
