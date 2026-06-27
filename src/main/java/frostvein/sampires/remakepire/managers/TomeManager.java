@@ -103,10 +103,13 @@ public class TomeManager {
     public boolean grantAbility(Player player, String abilityName) {
         if (!this.vampireManager.isHuman(player)) {
             return false;
+
         } else if (!this.isValidAbility(abilityName)) {
             return false;
+
         } else if (this.hasAbility(player, abilityName)) {
             return false;
+
         } else if (player.getGameMode() != GameMode.CREATIVE && this.hasUsedTomeThisSession(player)) {
             if (plugin.getConfigManager().isTomeAbsorptionCapped()) {
                 player.sendMessage("§cYou have already absorbed one tome this session. Your mind cannot handle more ancient knowledge.");
@@ -115,6 +118,7 @@ public class TomeManager {
             }
 
             return false;
+
         } else {
             String tag = TOME_TAG_PREFIX + abilityName.toLowerCase();
             player.addScoreboardTag(tag);
@@ -426,6 +430,11 @@ public class TomeManager {
             ((ShoulderBargeTomeAbility)shoulderBarge).cleanup();
         }
 
+        TomeAbility stopTheBleeding = this.getAbility("stopthebleeding");
+        if (stopTheBleeding instanceof StopTheBleedingTomeAbility) {
+            ((StopTheBleedingTomeAbility)stopTheBleeding).cleanup();
+        }
+
         TomeAbility holyWord = this.getAbility("holyword");
         if (holyWord instanceof HolyWordTomeAbility) {
             ((HolyWordTomeAbility)holyWord).cleanup();
@@ -436,13 +445,8 @@ public class TomeManager {
             ((WayOfTheLumberjackTomeAbility)lumberjack).cleanup();
         }
 
-        TomeAbility stopTheBleeding = this.getAbility("stopthebleeding");
-        if (stopTheBleeding instanceof StopTheBleedingTomeAbility) {
-            ((StopTheBleedingTomeAbility)stopTheBleeding).cleanup();
-        }
-
         TomeAbility.cancelAllNotificationTasks();
-        this.playerTomeUsageSession.clear();
+        clearAllTomeUsage();
         this.plugin.logInfo("TomeManager shutdown complete");
     }
 
@@ -457,10 +461,18 @@ public class TomeManager {
 
         if (!this.playerTomeUsageSession.containsKey(playerUUID)) {
             return false;
+
         } else {
             int currentSessionId = this.plugin.getSessionManager().getSessionIDObjective().getScore("session_id_holder").getScore();
             int tomeUsageSessionId = this.playerTomeUsageSession.get(playerUUID);
             return tomeUsageSessionId == currentSessionId;
         }
+    }
+
+    /**
+     * Clear the record of players who have used a tome this session.
+     */
+    public void clearAllTomeUsage() {
+        this.playerTomeUsageSession.clear();
     }
 }

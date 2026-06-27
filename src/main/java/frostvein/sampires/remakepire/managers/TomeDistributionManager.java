@@ -5,7 +5,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Random;
 import java.util.Set;
 import org.bukkit.Bukkit;
@@ -79,7 +78,7 @@ public class TomeDistributionManager {
         List<String> options = this.configManager.getTomeAbilityOptions();
 
         // Remove items from the list if they don't match an existing tome book
-        options.removeIf(tome -> !ALLOWED_TOMES.contains(tome));
+        options.removeIf(tome -> ALLOWED_TOMES.stream().noneMatch(allowedTome -> allowedTome.equalsIgnoreCase(tome)));
 
         return options.toArray(new String[0]);
     }
@@ -93,9 +92,11 @@ public class TomeDistributionManager {
         List<String> options = this.configManager.getTomeEnchantmentOptions();
 
         // Add each enchantment book to the list if it is found within the provided config list
-        List<Enchantment> books = options.stream()
-                .map(ENCHANTMENT_OPTIONS::get)
-                .filter(Objects::nonNull)
+        List<Enchantment> books = options.stream().map(tome -> ENCHANTMENT_OPTIONS.entrySet().stream()
+                        .filter(entry -> entry.getKey().equalsIgnoreCase(tome))
+                        .map(Map.Entry::getValue)
+                        .findFirst()
+                        .orElse(null))
                 .toList();
 
         return books.toArray(new Enchantment[0]);
