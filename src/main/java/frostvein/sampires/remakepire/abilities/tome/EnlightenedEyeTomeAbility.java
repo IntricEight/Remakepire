@@ -7,7 +7,7 @@ import frostvein.sampires.remakepire.RemakepirePlugin;
 
 public class EnlightenedEyeTomeAbility extends TomeAbility {
     // Controls the duration of the ability (in ticks)
-    private static final int NIGHT_VISION_DURATION = 6000;
+    private static final int NIGHT_VISION_DURATION = PotionEffect.INFINITE_DURATION;
     // Controls the intensity of the ability
     private static final int NIGHT_VISION_AMPLIFIER = 0;
 
@@ -25,12 +25,17 @@ public class EnlightenedEyeTomeAbility extends TomeAbility {
             this.sendCannotUseMessage(player, "Only humans can use tome abilities!");
             return false;
 
+        } else if (player.hasPotionEffect(PotionEffectType.NIGHT_VISION)) {
+            player.removePotionEffect(PotionEffectType.NIGHT_VISION);
+            this.sendSuccessMessage(player, "Your vision returns to normal.");
+            return true;
+
         } else {
             player.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION, NIGHT_VISION_DURATION, NIGHT_VISION_AMPLIFIER, false, false));
             player.playSound(player.getLocation(), "minecraft:block.beacon.power_select", 1.0F, 1.5F);
             this.sendSuccessMessage(player, "Your eyes adjust to pierce the darkness...");
-            player.sendMessage("§7You can now see clearly in the shadows for 5 minutes.");
 
+            player.sendMessage("§7You can now see clearly in the shadows.");
             return true;
         }
     }
