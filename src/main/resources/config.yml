@@ -177,6 +177,7 @@ abilities:
     # Way of the Prospector cooldown (default: 600 seconds = 10 minutes)
     way-of-the-prospector-cooldown: 600
     # Stop the Bleeding cooldown (default: 7200 seconds = 2 hours)
+    # Applies to how frequently a player can be healed, not how often a player can heal others
     stop-the-bleeding-cooldown: 7200
 
 
