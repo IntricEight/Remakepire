@@ -10,7 +10,6 @@ import org.bukkit.World;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.attribute.AttributeModifier;
-import org.bukkit.attribute.AttributeModifier.Operation;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
@@ -99,7 +98,8 @@ public class EffectManager {
             this.lastTrialOmenApplied.remove(player.getUniqueId());
 
         } else {
-            if (this.canPlayerSeeSky(player) && this.isDaytime(player.getWorld()) && this.isClearWeather(player.getWorld())) {
+            // Apply sun weakness to the player during active sessions
+            if (this.canPlayerSeeSky(player) && this.isDaytime(player.getWorld()) && this.isClearWeather(player.getWorld()) && plugin.getSessionManager().isSessionActive()) {
                 int stage = this.vampireManager.getVampireStage(player);
                 long currentTime = System.currentTimeMillis();
                 UUID playerUUID = player.getUniqueId();
