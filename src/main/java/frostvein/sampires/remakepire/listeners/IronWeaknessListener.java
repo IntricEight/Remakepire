@@ -444,7 +444,7 @@ public class IronWeaknessListener implements Listener {
      * @param player the player being weakened.
      */
     private void applyIronEffects(Player player) {
-        player.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, 40, 2, false, false));
+        player.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, 40, 0, false, false));
 
         if (!player.getScoreboardTags().contains(SessionManager.INFORMED_IRON_BLOCK_WEAKNESS)) {
             player.addScoreboardTag(SessionManager.INFORMED_IRON_BLOCK_WEAKNESS);
