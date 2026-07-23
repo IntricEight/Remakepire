@@ -76,6 +76,6 @@ More notably, though, its source code is also thoroughly documented and freely a
 to turn POW's plugin into an open-source project for the community to mod. Although the scope of this plugin has grown since
 its original release. it remains designed around assisting game runners and other players in customizing the plugin.
 
-At the time of writing, the .zip file containing _Remakepire_'s source code has been posted inside the #coders-and-modders
-in the Fanpires server, public for everyone's use. If you are having trouble finding it, you can reach out to me (Intric) directly,
-or search for my posts within the channel.
+There are several modifications to Remakepire within this repository, accessible through different branches. Please peruse
+and combine them at your leisure if they contain features you would like to use, or use them as a starting point instead
+of the main branch as you desire.
