@@ -99,12 +99,12 @@ public class StopTheBleedingTomeAbility extends TomeAbility {
         HealingSession session = new HealingSession(healer, target);
         this.activeHealingSessions.put(healerId, session);
         session.start();
-        this.sendSuccessMessage(healer, "You begin focusing your healing energy on " + target.getName() + "...");
 
         if (!healer.equals(target)) {
-            target.sendMessage("§a" + healer.getName() + " is focusing healing energy on you. Stay close.");
+            this.sendSuccessMessage(healer, "You begin focusing your healing energy on " + target.getName() + "...");
+            this.sendSuccessMessage(target, healer.getName() + " is focusing healing energy on you. Stay close.");
         } else {
-            healer.sendMessage("§aYou focus healing energy on yourself...");
+            this.sendSuccessMessage(healer, "You focus healing energy on yourself...");
         }
     }
 
@@ -145,9 +145,9 @@ public class StopTheBleedingTomeAbility extends TomeAbility {
         }
 
         healer.removeScoreboardTag(ACTIVE_TAG);
-        int currentDeaths = this.getDeathScore(target);
-        int newDeaths = Math.max(0, currentDeaths - 1);
-        this.setDeathScore(target, newDeaths);
+
+        // Update the health and death counts of the player healed
+        this.setDeathScore(target, Math.max(0, this.getDeathScore(target) - 1));
         this.updateMaxHealth(target);
 
         // Notify the players of the healing success
