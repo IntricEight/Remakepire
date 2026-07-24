@@ -24,11 +24,14 @@ public class TurnUndeadTomeAbility extends TomeAbility {
         if (!this.canUse(player)) {
             this.sendCannotUseMessage(player, "Only humans can use tome abilities!");
             return false;
+
         } else {
             Team vampireCastTeam = this.plugin.getVampireCastTeam();
+
             if (vampireCastTeam == null) {
                 this.sendCannotUseMessage(player, "VampireCastTeam is not available!");
                 return false;
+
             } else {
                 vampireCastTeam.addEntry(player.getName());
 
@@ -43,6 +46,7 @@ public class TurnUndeadTomeAbility extends TomeAbility {
                 Bukkit.getScheduler().runTaskLater(this.plugin, () -> {
                     if (player.isOnline()) {
                         this.removeFromVampireCastTeam(player);
+
                         player.sendMessage("§aThe deathly aura fades... You feel alive once more.");
                         player.sendMessage("§7Undead creatures will now see you as a threat again.");
                         this.plugin.getWorld().playSound(player.getLocation(), "minecraft:block.beacon.activate", 1.0F, 1.2F);
@@ -51,7 +55,7 @@ public class TurnUndeadTomeAbility extends TomeAbility {
                         vampireCastTeam.removeEntry(player.getName());
                     }
 
-                }, (long)(EFFECT_DURATION * 20));
+                }, EFFECT_DURATION * 20);
                 return true;
             }
         }
@@ -63,15 +67,14 @@ public class TurnUndeadTomeAbility extends TomeAbility {
      * @param player the player who cast the ability.
      */
     private void removeFromVampireCastTeam(Player player) {
-        Team vampireCastTeam = this.plugin.getVampireCastTeam();
-        Team regularCastTeam = this.plugin.getCastTeam();
-
-        if (vampireCastTeam != null) {
-            vampireCastTeam.removeEntry(player.getName());
-        }
+        Team regularCastTeam = this.plugin.getCastTeam(), vampireCastTeam = this.plugin.getVampireCastTeam();
 
         if (regularCastTeam != null) {
             regularCastTeam.addEntry(player.getName());
+        }
+
+        if (vampireCastTeam != null) {
+            vampireCastTeam.removeEntry(player.getName());
         }
     }
 
@@ -83,8 +86,7 @@ public class TurnUndeadTomeAbility extends TomeAbility {
      */
     public static void cleanupHumanOnVampireCastTeam(RemakepirePlugin plugin, Player player) {
         if (plugin.getVampireManager().isHuman(player)) {
-            Team vampireCastTeam = plugin.getVampireCastTeam();
-            Team regularCastTeam = plugin.getCastTeam();
+            Team regularCastTeam = plugin.getCastTeam(), vampireCastTeam = plugin.getVampireCastTeam();
 
             if (vampireCastTeam != null && vampireCastTeam.hasEntry(player.getName())) {
                 vampireCastTeam.removeEntry(player.getName());

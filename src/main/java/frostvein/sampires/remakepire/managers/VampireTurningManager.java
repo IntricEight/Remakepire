@@ -63,7 +63,7 @@ public class VampireTurningManager {
      * Turn off all the vampires' turning ability.
      */
     public void disableAllVampireTurning() {
-        for(Player player : Bukkit.getOnlinePlayers()) {
+        for (Player player : Bukkit.getOnlinePlayers()) {
             if (this.plugin.getVampireManager().isVampire(player)) {
                 this.turningEnabled.put(player.getUniqueId(), false);
                 this.updateLuckEffect(player, false);
@@ -77,7 +77,7 @@ public class VampireTurningManager {
     public void enableAllVampireTurning() {
         this.turningEnabled.clear();
 
-        for(Player player : Bukkit.getOnlinePlayers()) {
+        for (Player player : Bukkit.getOnlinePlayers()) {
             if (this.plugin.getVampireManager().isVampire(player)) {
                 this.updateLuckEffect(player, true);
             }

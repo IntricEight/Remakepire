@@ -166,7 +166,7 @@ public class TomeManager {
     public Set<String> getPlayerAbilities(Player player) {
         Set<String> abilities = new HashSet<>();
 
-        for(String tag : player.getScoreboardTags()) {
+        for (String tag : player.getScoreboardTags()) {
             if (tag.startsWith(TOME_TAG_PREFIX)) {
                 String abilityName = tag.substring(TOME_TAG_PREFIX.length());
                 abilities.add(abilityName);
@@ -184,13 +184,15 @@ public class TomeManager {
     public void removeAllAbilities(Player player) {
         Set<String> tagsToRemove = new HashSet<>();
 
-        for(String tag : player.getScoreboardTags()) {
+        // Make a list of the player's tome ability tags
+        for (String tag : player.getScoreboardTags()) {
             if (tag.startsWith(TOME_TAG_PREFIX)) {
                 tagsToRemove.add(tag);
             }
         }
 
-        for(String tag : tagsToRemove) {
+        // Remove the tome ability tags from the playr
+        for (String tag : tagsToRemove) {
             player.removeScoreboardTag(tag);
         }
 
@@ -240,7 +242,7 @@ public class TomeManager {
         abilityNames.sort(String::compareToIgnoreCase);
         int slot = 0;
 
-        for(String abilityName : abilityNames) {
+        for (String abilityName : abilityNames) {
             if (slot >= 54) {
                 break;
             }
@@ -261,7 +263,7 @@ public class TomeManager {
 
                 List<String> lore = new ArrayList<>();
                 if (ability != null) {
-                    for(String line : ability.getDescriptionLines()) {
+                    for (String line : ability.getDescriptionLines()) {
                         lore.add("§7" + line);
                     }
                 }
@@ -341,7 +343,7 @@ public class TomeManager {
         StringBuilder result = new StringBuilder();
         boolean capitalizeNext = true;
 
-        for(int i = 0; i < abilityName.length(); ++i) {
+        for (int i = 0; i < abilityName.length(); ++i) {
             char c = abilityName.charAt(i);
             if (i > 0) {
                 String remaining = abilityName.substring(i).toLowerCase();

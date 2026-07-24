@@ -91,7 +91,7 @@ public class FourthBookRevealListener implements Listener {
      * @return {@code true} if the location matches that of a tome chest.
      */
     private boolean isTomeChest(Location location) {
-        for(Location tomeLocation : this.tomeChestLocations) {
+        for (Location tomeLocation : this.tomeChestLocations) {
             if (location.getBlockX() == tomeLocation.getBlockX() && location.getBlockY() == tomeLocation.getBlockY() && location.getBlockZ() == tomeLocation.getBlockZ() && location.getWorld().equals(tomeLocation.getWorld())) {
                 return true;
             }

@@ -188,7 +188,7 @@ public class ThirstEffectsListener implements Listener {
                 if (!ThirstEffectsListener.this.plugin.getSessionManager().isSessionActive()) {
                     ThirstEffectsListener.this.scheduleVampireHealthCheck();
                 } else {
-                    for(Player player : ThirstEffectsListener.this.plugin.getServer().getOnlinePlayers()) {
+                    for (Player player : ThirstEffectsListener.this.plugin.getServer().getOnlinePlayers()) {
                         if (ThirstEffectsListener.this.vampireManager.isVampire(player)) {
                             ThirstEffectsListener.this.processVampireFoodRegeneration(player);
                         }

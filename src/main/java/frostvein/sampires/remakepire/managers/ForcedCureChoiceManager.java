@@ -205,7 +205,7 @@ public class ForcedCureChoiceManager {
         final String messageToVampires = this.plugin.getCureBookManager().getForceCureAnnouncementMessage(false, true);
 
         // Alert all players that a vampire has been cured
-        for(Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+        for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
             if (!onlinePlayer.equals(caster) && !onlinePlayer.equals(target)) {
                 if (this.plugin.getVampireManager().isVampire(onlinePlayer)) {
                     onlinePlayer.sendMessage(messageToVampires);
@@ -270,7 +270,7 @@ public class ForcedCureChoiceManager {
         final String messageToVampires = this.plugin.getCureBookManager().getForceCureAnnouncementMessage(false, false);
 
         // Alert all players that a vampire has been killed by the cure
-        for(Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+        for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
             if (!onlinePlayer.equals(caster) && !onlinePlayer.equals(target)) {
                 if (this.plugin.getVampireManager().isVampire(onlinePlayer)) {
                     onlinePlayer.sendMessage(messageToVampires);

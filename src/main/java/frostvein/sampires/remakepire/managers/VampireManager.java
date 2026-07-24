@@ -464,11 +464,12 @@ public class VampireManager {
     private void applyDemotionEffectsToNearbyHumans(Player vampire) {
         Location vampireLocation = vampire.getLocation();
 
-        for(Player nearbyPlayer : Bukkit.getOnlinePlayers()) {
+        for (Player nearbyPlayer : Bukkit.getOnlinePlayers()) {
             if (this.isHuman(nearbyPlayer) && nearbyPlayer.getWorld().equals(vampire.getWorld())) {
                 if (nearbyPlayer.getLocation().distance(vampireLocation) <= 10) {
                     nearbyPlayer.sendMessage("§8You feel a darkness lunge out at you, a vampire near you has lost a piece of their essence and grown weaker...");
                     nearbyPlayer.playSound(nearbyPlayer.getLocation(), Sound.ENTITY_WARDEN_HEARTBEAT, SoundCategory.MASTER, 1.0F, 0.8F);
+
                     Vector direction = nearbyPlayer.getLocation().toVector().subtract(vampireLocation.toVector()).normalize();
                     nearbyPlayer.setVelocity(direction.multiply(2.4));
                 }
@@ -647,7 +648,7 @@ public class VampireManager {
      * Remove the vampire stage promotion bans from all online players.
      */
     public void clearAllPromotionBans() {
-        for(Player player : Bukkit.getOnlinePlayers()) {
+        for (Player player : Bukkit.getOnlinePlayers()) {
             this.clearPromotionBan(player);
         }
     }
@@ -798,7 +799,7 @@ public class VampireManager {
         int corrections = 0, skipped = 0;
         final int maxCorrectionsPerRun = 3;
 
-        for(Player player : Bukkit.getOnlinePlayers()) {
+        for (Player player : Bukkit.getOnlinePlayers()) {
             if (corrections >= maxCorrectionsPerRun) {
                 break;
             }

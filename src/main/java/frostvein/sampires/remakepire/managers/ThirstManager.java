@@ -145,7 +145,7 @@ public class ThirstManager {
      */
     private void saveImmunityData() {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(this.immunityFile))) {
-            for(Map.Entry<UUID, Integer> entry : this.immunityTimers.entrySet()) {
+            for (Map.Entry<UUID, Integer> entry : this.immunityTimers.entrySet()) {
                 writer.write((entry.getKey()).toString() + ":" + entry.getValue());
                 writer.newLine();
             }
@@ -161,7 +161,7 @@ public class ThirstManager {
         this.thirstTask = (new BukkitRunnable() {
             public void run() {
                 if (ThirstManager.this.sessionManager.isSessionActive()) {
-                    for(Player player : Bukkit.getOnlinePlayers()) {
+                    for (Player player : Bukkit.getOnlinePlayers()) {
                         if (ThirstManager.this.vampireManager.isVampire(player)) {
                             ThirstManager.this.processVampireThirst(player);
                         }
@@ -399,7 +399,7 @@ public class ThirstManager {
         Set<UUID> onlinePlayers = Bukkit.getOnlinePlayers().stream().map(OfflinePlayer::getUniqueId).collect(Collectors.toSet());
         Set<UUID> toRemove = new HashSet<>();
 
-        for(Map.Entry<UUID, Integer> entry : this.immunityTimers.entrySet()) {
+        for (Map.Entry<UUID, Integer> entry : this.immunityTimers.entrySet()) {
             UUID playerUUID = entry.getKey();
 
             if (onlinePlayers.contains(playerUUID)) {
@@ -425,7 +425,8 @@ public class ThirstManager {
             }
         }
 
-        for(UUID uuid : toRemove) {
+        // Remove the expire immunity timers from the map
+        for (UUID uuid : toRemove) {
             this.immunityTimers.remove(uuid);
         }
 

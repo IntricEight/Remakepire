@@ -263,7 +263,7 @@ public abstract class TomeAbility {
      * Cancel the scheduled notifications regarding tome abilities.
      */
     public static void cancelAllNotificationTasks() {
-        for(BukkitTask task : cooldownNotificationTasks.values()) {
+        for (BukkitTask task : cooldownNotificationTasks.values()) {
             if (task != null && !task.isCancelled()) {
                 task.cancel();
             }

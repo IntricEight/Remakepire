@@ -113,7 +113,7 @@ public class PassiveMobSpawningManager {
                     Map<EntityType, Integer> spawnCounts = new HashMap<>();
                     int mobsToSpawn = this.configManager.getPassiveMobSpawnCount();
 
-                    for(int i = 0; i < mobsToSpawn && i < validLocations.size(); ++i) {
+                    for (int i = 0; i < mobsToSpawn && i < validLocations.size(); ++i) {
                         Location spawnLocation = validLocations.get(i);
                         EntityType mobType = this.selectRandomMobType();
 
@@ -129,7 +129,7 @@ public class PassiveMobSpawningManager {
 
                     StringBuilder report = new StringBuilder("PassiveMobSpawningManager: Spawned " + mobsSpawned + " mobs - ");
 
-                    for(Map.Entry<EntityType, Integer> entry : spawnCounts.entrySet()) {
+                    for (Map.Entry<EntityType, Integer> entry : spawnCounts.entrySet()) {
                         report.append(entry.getValue()).append(" ").append(entry.getKey()).append(", ");
                     }
 
@@ -149,18 +149,18 @@ public class PassiveMobSpawningManager {
     private List<Location> findValidSpawnLocations(World world, Chunk[] loadedChunks) {
         List<Location> validLocations = new ArrayList<>();
         final int maxLocationsToCheck = 500;
-        int locationsChecked = 0;
+        int locationsChecked = 0, x, z;
         List<Chunk> chunkList = Arrays.asList(loadedChunks);
         Collections.shuffle(chunkList, this.random);
 
-        for(Chunk chunk : chunkList) {
+        for (Chunk chunk : chunkList) {
             if (locationsChecked >= maxLocationsToCheck) {
                 break;
             }
 
-            for(int attempt = 0; attempt < 3 && locationsChecked < maxLocationsToCheck; ++attempt) {
-                int x = (chunk.getX() << 4) + this.random.nextInt(16);
-                int z = (chunk.getZ() << 4) + this.random.nextInt(16);
+            for (int attempt = 0; attempt < 3 && locationsChecked < maxLocationsToCheck; ++attempt) {
+                x = (chunk.getX() << 4) + this.random.nextInt(16);
+                z = (chunk.getZ() << 4) + this.random.nextInt(16);
 
                 Block highestBlock = world.getHighestBlockAt(x, z);
                 Location spawnLocation = highestBlock.getLocation().add(0.0, 1.0, 0.0);

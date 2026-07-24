@@ -42,6 +42,7 @@ public class InitGameManager {
     private final Map<UUID, InitData> adminData = new HashMap<>();
     private final Map<UUID, Boolean> guiRefreshInProgress = new HashMap<>();
     private static final int PLAYERS_PER_PAGE = 45, INVENTORY_SIZE = 54;
+    public static final String SELECT_VAMPIRES_GUI_TITLE = "§4§lSelect Vampires";
 
     /**
      * Create an instance of the Initialize Game manager.
@@ -190,7 +191,7 @@ public class InitGameManager {
             int slot = 0, startIndex = currentPage * PLAYERS_PER_PAGE, endIndex = Math.min(startIndex + PLAYERS_PER_PAGE, playerCount);
             Inventory inventory = Bukkit.createInventory(null, INVENTORY_SIZE, "§4§lSelect Vampires");
 
-            for(int i = startIndex; i < endIndex; ++i) {
+            for (int i = startIndex; i < endIndex; ++i) {
                 Player player = onlinePlayers.get(i);
                 boolean isVampire = data.selectedVampires.contains(player.getUniqueId());
                 ItemStack item = new ItemStack(isVampire ? Material.EXPERIENCE_BOTTLE : Material.GLASS_BOTTLE);
@@ -482,8 +483,8 @@ public class InitGameManager {
                 Collection<? extends Player> onlinePlayers = Bukkit.getOnlinePlayers();
 
                 // Clear all tags from all online players
-                for(Player player : onlinePlayers) {
-                    for(String tag : new HashSet<>(player.getScoreboardTags())) {
+                for (Player player : onlinePlayers) {
+                    for (String tag : new HashSet<>(player.getScoreboardTags())) {
                         player.removeScoreboardTag(tag);
                     }
 
@@ -493,7 +494,7 @@ public class InitGameManager {
                 admin.sendMessage("§7[3.5/9] Resetting scoreboard objectives...");
                 Scoreboard mainScoreboard = Bukkit.getScoreboardManager().getMainScoreboard();
 
-                for(Objective obj : new HashSet<>(mainScoreboard.getObjectives())) {
+                for (Objective obj : new HashSet<>(mainScoreboard.getObjectives())) {
                     if (obj.getName().startsWith("vsmp_")) {
                         String name = obj.getName();
                         String displayName = obj.getDisplayName();
@@ -503,10 +504,10 @@ public class InitGameManager {
                     }
                 }
 
-                for(Player player : onlinePlayers) {
+                for (Player player : onlinePlayers) {
                     AttributeInstance healthAttr = player.getAttribute(Attribute.MAX_HEALTH);
 
-                    for(AttributeModifier modifier : healthAttr.getModifiers()) {
+                    for (AttributeModifier modifier : healthAttr.getModifiers()) {
                         healthAttr.removeModifier(modifier);
                     }
 
@@ -521,7 +522,7 @@ public class InitGameManager {
                     Objective deathObjective = mainScoreboard.getObjective("vsmp_death");
 
                     if (deathObjective != null) {
-                        for(Player player : onlinePlayers) {
+                        for (Player player : onlinePlayers) {
                             deathObjective.getScore(player.getName()).setScore(0);
                         }
 
@@ -562,13 +563,13 @@ public class InitGameManager {
                 Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "gamerule locatorBar false");
                 admin.sendMessage("§7[6/9] Applying saturation effect...");
 
-                for(Player player : onlinePlayers) {
+                for (Player player : onlinePlayers) {
                     player.addPotionEffect(new PotionEffect(PotionEffectType.SATURATION, 200, 9));
                 }
 
                 admin.sendMessage("§7[7/9] Teleporting players...");
 
-                for(Player player : onlinePlayers) {
+                for (Player player : onlinePlayers) {
                     if (player.getGameMode() != GameMode.SURVIVAL) {
                         GameMode oldMode = player.getGameMode();
                         player.setGameMode(GameMode.SURVIVAL);
@@ -596,7 +597,7 @@ public class InitGameManager {
                     playersToConvert = availablePlayers.subList(0, vampireCount);
 
                 } else {
-                    for(Player player : onlinePlayers) {
+                    for (Player player : onlinePlayers) {
                         if (data.selectedVampires.contains(player.getUniqueId())) {
                             playersToConvert.add(player);
                         }
@@ -605,7 +606,7 @@ public class InitGameManager {
 
                 Set<UUID> vampireIds = new HashSet<>();
 
-                for(Player player : playersToConvert) {
+                for (Player player : playersToConvert) {
                     this.plugin.getVampireManager().setPlayerAsVampire(player, 1);
                     vampireIds.add(player.getUniqueId());
 
@@ -630,7 +631,7 @@ public class InitGameManager {
 
                 admin.sendMessage("§7  → Converted " + playersToConvert.size() + " players to vampires");
 
-                for(Player player : onlinePlayers) {
+                for (Player player : onlinePlayers) {
                     if (!vampireIds.contains(player.getUniqueId())) {
                         player.addScoreboardTag(VampireManager.HUMAN_TAG);
                         player.sendTitle("§e§lHuman", "", 10, 100, 20);
@@ -655,8 +656,8 @@ public class InitGameManager {
 
                 admin.sendMessage("§7[11/11] Clearing potion effects...");
 
-                for(Player player : onlinePlayers) {
-                    for(PotionEffect effect : player.getActivePotionEffects()) {
+                for (Player player : onlinePlayers) {
+                    for (PotionEffect effect : player.getActivePotionEffects()) {
                         player.removePotionEffect(effect.getType());
                     }
                 }
@@ -683,26 +684,25 @@ public class InitGameManager {
      * @return A location to spawn a player at.
      */
     private Location getRandomTeleportLocation(World world) {
-        int maxAttempts = 50;
-        ConfigManager config = this.plugin.getConfigManager();
+        ConfigManager configManager = this.plugin.getConfigManager();
+        final int maxAttempts = 50;
 
-        double townCenterX = config.getTownCenterX();
-        double townCenterZ = config.getTownCenterZ();
-        double teleportRadius = config.getTeleportRadius();
+        final double townCenterX = configManager.getTownCenterX(), townCenterZ = configManager.getTownCenterZ();
+        final double teleportRadius = configManager.getTeleportRadius();
 
-        double minX = config.getBorderMinX();
-        double maxX = config.getBorderMaxX();
-        double minZ = config.getBorderMinZ();
-        double maxZ = config.getBorderMaxZ();
+        final double minX = configManager.getBorderMinX(), maxX = configManager.getBorderMaxX();
+        final double minZ = configManager.getBorderMinZ(), maxZ = configManager.getBorderMaxZ();
 
-        for(int attempt = 0; attempt < maxAttempts; ++attempt) {
-            double angle = ThreadLocalRandom.current().nextDouble() * 2.0 * Math.PI;
-            double distance = Math.sqrt(ThreadLocalRandom.current().nextDouble()) * teleportRadius;
-            double x = townCenterX + distance * Math.cos(angle);
-            double z = townCenterZ + distance * Math.sin(angle);
+        double angle, distance, x, z;
+
+        for (int attempt = 0; attempt < maxAttempts; ++attempt) {
+            angle = ThreadLocalRandom.current().nextDouble() * 2.0 * Math.PI;
+            distance = Math.sqrt(ThreadLocalRandom.current().nextDouble()) * teleportRadius;
+            x = townCenterX + distance * Math.cos(angle);
+            z = townCenterZ + distance * Math.sin(angle);
 
             if (!(x < minX + BORDER_BUFFER) && !(x > maxX - BORDER_BUFFER) && !(z < minZ + BORDER_BUFFER) && !(z > maxZ - BORDER_BUFFER)) {
-                Location loc = new Location(world, x, (double)(world.getHighestBlockYAt((int)x, (int)z) + 1), z);
+                Location loc = new Location(world, x, world.getHighestBlockYAt((int)x, (int)z) + 1, z);
 
                 if (loc.getY() > 0 && loc.getY() < world.getMaxHeight()) {
                     return loc;
@@ -806,7 +806,7 @@ public class InitGameManager {
         return this.guiRefreshInProgress.getOrDefault(adminId, false);
     }
 
-    public static enum InitState {
+    public enum InitState {
         IDLE,
         AWAITING_FIRST_CONFIRM,
         AWAITING_MODE_SELECTION,
@@ -822,7 +822,7 @@ public class InitGameManager {
         Set<UUID> selectedVampires = new HashSet<>();
         int currentPage = 0;
 
-        public static enum VampireMode {
+        public enum VampireMode {
             RANDOM,
             SELECTED
         }

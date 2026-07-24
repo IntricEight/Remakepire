@@ -13,13 +13,11 @@ import frostvein.sampires.remakepire.listeners.CureBookReadingListener;
 import frostvein.sampires.remakepire.listeners.DeathHandler;
 import frostvein.sampires.remakepire.managers.BeaconManager;
 import frostvein.sampires.remakepire.managers.VampireManager;
-import frostvein.sampires.remakepire.managers.VampireSireManager;
 
 public class VampireCureCommand implements CommandExecutor {
     private final RemakepirePlugin plugin;
     private final VampireManager vampireManager;
     private final BeaconManager beaconManager;
-    private final VampireSireManager sireManager;
 
     /**
      * Create an instance of the plugin's self cure command handler.
@@ -30,7 +28,6 @@ public class VampireCureCommand implements CommandExecutor {
         this.plugin = plugin;
         this.vampireManager = plugin.getVampireManager();
         this.beaconManager = plugin.getBeaconManager();
-        this.sireManager = plugin.getSireManager();
     }
 
     /**
@@ -70,7 +67,7 @@ public class VampireCureCommand implements CommandExecutor {
                         player.sendMessage("§cYou must be close to a holy beacon to perform this ritual.");
 
                     } else {
-                        if (!this.sireManager.canBeCured(player)) {
+                        if (!this.plugin.getSireManager().canBeCured(player)) {
                             player.sendMessage("§4The curse cannot be broken while your sire still walks the world in mortal form...");
                             player.sendMessage("§4Only through your maker's true death can you find release.");
                         } else {
@@ -106,7 +103,7 @@ public class VampireCureCommand implements CommandExecutor {
         final String messageToVampires = this.plugin.getCureBookManager().getSelfCureAnnouncementMessage(false);
 
         // Alert all players that a vampire has been cured
-        for(Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+        for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
             if (!onlinePlayer.equals(player)) {
                 if (this.vampireManager.isVampire(onlinePlayer)) {
                     onlinePlayer.sendMessage(messageToVampires);

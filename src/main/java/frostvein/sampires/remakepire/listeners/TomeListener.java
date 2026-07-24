@@ -174,7 +174,7 @@ public class TomeListener implements Listener {
 
                             if (meta != null && meta.getDisplayName() != null) {
                                 if (meta.hasLore()) {
-                                    for(String line : meta.getLore()) {
+                                    for (String line : meta.getLore()) {
                                         if (line.startsWith("§8[CURE_BOOK:")) {
                                             String tag = line.substring("§8[CURE_BOOK:".length(), line.length() - 1);
                                             this.handleCureBookClick(admin, target, tag);

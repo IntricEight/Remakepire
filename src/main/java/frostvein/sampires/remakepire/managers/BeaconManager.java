@@ -139,7 +139,7 @@ public class BeaconManager {
     private void forceLoadBeaconChunks() {
         int chunksLoaded = 0;
 
-        for(BeaconSite beacon : this.beacons.values()) {
+        for (BeaconSite beacon : this.beacons.values()) {
             Location location = beacon.getLocation();
 
             if (location != null && location.getWorld() != null && !location.getWorld().isChunkLoaded(location.getBlockX() >> 4, location.getBlockZ() >> 4)) {
@@ -981,7 +981,7 @@ public class BeaconManager {
         double radius = 1.5;
 
         for(int i = 0; i < 8; ++i) {
-            double angle = (Math.PI * 2D) * i / 8.0;
+            double angle = (Math.PI * 2.0) * i / 8.0;
             Location particleLoc = location.clone().add(Math.cos(angle) * radius, Math.sin(System.currentTimeMillis() / 1000.0) * 0.3, Math.sin(angle) * radius);
             location.getWorld().spawnParticle(Particle.WHITE_ASH, particleLoc, 2, 0.1, 0.1, 0.1, 0.01);
         }
@@ -1004,7 +1004,7 @@ public class BeaconManager {
         double radius = 1.2;
 
         for(int i = 0; i < 6; ++i) {
-            double angle = (Math.PI * 2D) * i / 6.0;
+            double angle = (Math.PI * 2.0) * i / 6.0;
 
             Location particleLoc = location.clone().add(Math.cos(angle) * radius, -Math.sin(System.currentTimeMillis() / 800.0) * 0.2, Math.sin(angle) * radius);
             Particle.DustOptions dustOptions = new Particle.DustOptions(Color.fromRGB(139, 0, 0), 1.0F);
@@ -1028,16 +1028,14 @@ public class BeaconManager {
      */
     private void showConversionRangeCircle(BeaconSite beacon, Location center) {
         if (center != null && center.getWorld() != null) {
-            int circlePoints = 24;
-            double radius = BEACON_CONVERSION_RANGE;
-            long time = System.currentTimeMillis();
+            final int circlePoints = 24;
+            final long time = System.currentTimeMillis();
 
-            int currentPointIndex = (int)(time / 50L % (long)circlePoints);
-            double angle = (Math.PI * 2D) * (double)currentPointIndex / (double)circlePoints;
-            double rotationOffset = (double)time / 8000.0 % (Math.PI * 2D);
+            final int currentPointIndex = (int)(time / 50L % circlePoints);
+            double angle = (Math.PI * 2.0) * (double)currentPointIndex / circlePoints;
+            final double rotationOffset = time / 8000.0 % (Math.PI * 2.0);
             angle += rotationOffset;
-            double x = Math.cos(angle) * radius;
-            double z = Math.sin(angle) * radius;
+            final double x = Math.cos(angle) * BEACON_CONVERSION_RANGE, z = Math.sin(angle) * BEACON_CONVERSION_RANGE;
 
             Location circlePoint = center.clone().add(x, -1.2, z);
             this.showConversionRangeParticle(beacon.getState(), circlePoint);
@@ -1054,15 +1052,14 @@ public class BeaconManager {
      */
     private void showSuppressionRangeCircle(BeaconSite beacon, Location center) {
         if (center != null && center.getWorld() != null) {
-            int circlePoints = 48;
-            double radius = HOLY_SUPPRESSION_RANGE;
-            long time = System.currentTimeMillis();
+            final int circlePoints = 48;
+            final long time = System.currentTimeMillis();
 
-            int currentPointIndex = (int)(time / 50L % (long)circlePoints);
-            double angle = (Math.PI * 2D) * currentPointIndex / (double)circlePoints;
-            double rotationOffset = time / 12000.0 % (Math.PI * 2D);
+            final int currentPointIndex = (int)(time / 50L % (long)circlePoints);
+            double angle = (Math.PI * 2.0) * currentPointIndex / (double)circlePoints;
+            final double rotationOffset = time / 12000.0 % (Math.PI * 2.0);
             angle += rotationOffset;
-            double x = Math.cos(angle) * radius, z = Math.sin(angle) * radius;
+            final double x = Math.cos(angle) * HOLY_SUPPRESSION_RANGE, z = Math.sin(angle) * HOLY_SUPPRESSION_RANGE;
 
             Location circlePoint = center.clone().add(x, 0.0, z);
             Location highestPoint = this.plugin.getWorld().getHighestBlockAt(circlePoint).getLocation();

@@ -6,13 +6,11 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import frostvein.sampires.remakepire.RemakepirePlugin;
 import frostvein.sampires.remakepire.managers.PermadeathManager;
-import frostvein.sampires.remakepire.managers.VampireManager;
 import frostvein.sampires.remakepire.managers.PermadeathManager.PermadeathMode;
 
 public class PermadeathCommand implements CommandExecutor {
     private final RemakepirePlugin plugin;
     private final PermadeathManager permadeathManager;
-    private final VampireManager vampireManager;
 
     /**
      * Create an instance of the plugin's permadeath setting command handler.
@@ -22,7 +20,6 @@ public class PermadeathCommand implements CommandExecutor {
     public PermadeathCommand(RemakepirePlugin plugin) {
         this.plugin = plugin;
         this.permadeathManager = plugin.getPermadeathManager();
-        this.vampireManager = plugin.getVampireManager();
     }
 
     /**
@@ -35,7 +32,7 @@ public class PermadeathCommand implements CommandExecutor {
             sender.sendMessage("§cThis command can only be used by players.");
             return true;
 
-        } else if (!this.vampireManager.isHuman(player)) {
+        } else if (!this.plugin.getVampireManager().isHuman(player)) {
             player.sendMessage("§cOnly humans can use the permadeath setting.");
             return true;
 
@@ -94,10 +91,12 @@ public class PermadeathCommand implements CommandExecutor {
                 player.sendMessage("§7Current setting: §aOFF");
                 player.sendMessage("§7You will become a vampire if turned by one.");
                 break;
+
             case ON:
                 player.sendMessage("§7Current setting: §cON");
                 player.sendMessage("§7You will die permanently if a vampire tries to turn you.");
                 break;
+
             case ABSOLUTE:
                 player.sendMessage("§7Current setting: §4ABSOLUTE");
                 player.sendMessage("§7You will die permanently from ANY cause of death.");

@@ -127,7 +127,7 @@ public class IronWeaknessListener implements Listener {
             List<String> droppedItems = new ArrayList<>();
             ItemStack[] contents = inventory.getContents();
 
-            for(int i = 0; i < contents.length; ++i) {
+            for (int i = 0; i < contents.length; ++i) {
                 ItemStack item = contents[i];
                 if (item != null && !item.getType().isAir() && this.ironMaterials.contains(item.getType())) {
                     player.getWorld().dropItemNaturally(player.getLocation(), item);

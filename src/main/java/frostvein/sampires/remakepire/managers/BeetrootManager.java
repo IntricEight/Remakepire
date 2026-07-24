@@ -151,7 +151,7 @@ public class BeetrootManager {
         Set<UUID> processingToRemove = new HashSet<>(), immunityToRemove = new HashSet<>(), recoveryToRemove = new HashSet<>();
 
         // Handle the manual timers for activating the garlic immunity
-        for(Map.Entry<UUID, Integer> entry : this.processingTimers.entrySet()) {
+        for (Map.Entry<UUID, Integer> entry : this.processingTimers.entrySet()) {
             UUID playerId = entry.getKey();
 
             if (onlinePlayers.contains(playerId)) {

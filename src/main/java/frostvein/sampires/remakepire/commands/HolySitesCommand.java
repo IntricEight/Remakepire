@@ -8,13 +8,9 @@ import org.bukkit.entity.Player;
 import frostvein.sampires.remakepire.RemakepirePlugin;
 import frostvein.sampires.remakepire.beacons.BeaconSite;
 import frostvein.sampires.remakepire.beacons.BeaconSite.BeaconState;
-import frostvein.sampires.remakepire.managers.BeaconManager;
-import frostvein.sampires.remakepire.managers.VampireManager;
 
 public class HolySitesCommand implements CommandExecutor {
     private final RemakepirePlugin plugin;
-    private final BeaconManager beaconManager;
-    private final VampireManager vampireManager;
 
     /**
      * Create an instance of the plugin's global beacon alignment distribution command handler.
@@ -23,8 +19,6 @@ public class HolySitesCommand implements CommandExecutor {
      */
     public HolySitesCommand(RemakepirePlugin plugin) {
         this.plugin = plugin;
-        this.beaconManager = plugin.getBeaconManager();
-        this.vampireManager = plugin.getVampireManager();
     }
 
     /**
@@ -37,17 +31,17 @@ public class HolySitesCommand implements CommandExecutor {
             sender.sendMessage("§cOnly players can use this command.");
             return true;
 
-        } else if (!this.vampireManager.isHuman(player) && !this.vampireManager.isVampire(player)) {
+        } else if (!this.plugin.getVampireManager().isHuman(player) && !this.plugin.getVampireManager().isVampire(player)) {
             player.sendMessage("§cYou sense nothing from the spiritual realm...");
             return true;
 
         } else {
-            Map<BeaconSite.BeaconState, Integer> stateStats = this.beaconManager.getStateStats();
+            Map<BeaconSite.BeaconState, Integer> stateStats = this.plugin.getBeaconManager().getStateStats();
             final int holyCount = stateStats.get(BeaconState.HOLY), desecratedCount = stateStats.get(BeaconState.DESECRATED), neutral = stateStats.get(BeaconState.NEUTRAL);
             int totalCount = holyCount + desecratedCount + neutral;
 
             // Modify the messages based on the player's alignment
-            if (this.vampireManager.isHuman(player)) {
+            if (this.plugin.getVampireManager().isHuman(player)) {
                 player.sendMessage("§6§l=== BEACON STATUS ===");
                 player.sendMessage("§aHoly Beacons: §e" + holyCount);
                 player.sendMessage("§4Desecrated Beacons: §c" + desecratedCount);

@@ -191,7 +191,7 @@ public class VampireSireManager {
                 Map<String, String> rawData = this.gson.fromJson(reader, type);
 
                 if (rawData != null) {
-                    for(Map.Entry<String, String> entry : rawData.entrySet()) {
+                    for (Map.Entry<String, String> entry : rawData.entrySet()) {
                         this.sireMap.put((entry.getKey()).toLowerCase(), entry.getValue());
                     }
 

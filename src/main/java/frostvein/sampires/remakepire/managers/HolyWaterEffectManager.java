@@ -54,7 +54,7 @@ public class HolyWaterEffectManager implements Listener {
             Location splashLocation = waterEvent.getPotion().getLocation();
             final double splashRadius = 4.0;
 
-            for(Entity nearby : splashLocation.getWorld().getNearbyEntities(splashLocation, splashRadius, splashRadius, splashRadius)) {
+            for (Entity nearby : splashLocation.getWorld().getNearbyEntities(splashLocation, splashRadius, splashRadius, splashRadius)) {
                 if (nearby instanceof Player player) {
                     double distance = nearby.getLocation().distance(splashLocation);
 
@@ -69,7 +69,7 @@ public class HolyWaterEffectManager implements Listener {
             ItemStack potionItem = potion.getItem();
 
             if (this.isWaterSplashBottle(potionItem)) {
-                for(LivingEntity entity : event.getAffectedEntities()) {
+                for (LivingEntity entity : event.getAffectedEntities()) {
                     this.processHolyWaterHit(entity);
                 }
             }
@@ -257,7 +257,7 @@ public class HolyWaterEffectManager implements Listener {
      * Clear the holy water ability suppression from all vampires.
      */
     public void clearAllEffects() {
-        for(Map.Entry<UUID, BukkitTask> entry : this.disabledVampires.entrySet()) {
+        for (Map.Entry<UUID, BukkitTask> entry : this.disabledVampires.entrySet()) {
             UUID vampireId = entry.getKey();
             BukkitTask task = entry.getValue();
 
@@ -281,7 +281,7 @@ public class HolyWaterEffectManager implements Listener {
      * Remove the holy water ability suppression from all vampires before shutting down the manager.
      */
     public void shutdown() {
-        for(BukkitTask task : this.disabledVampires.values()) {
+        for (BukkitTask task : this.disabledVampires.values()) {
             if (task != null && !task.isCancelled()) {
                 task.cancel();
             }

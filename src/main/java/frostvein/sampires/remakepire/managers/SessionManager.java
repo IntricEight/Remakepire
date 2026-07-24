@@ -138,7 +138,7 @@ public class SessionManager {
     private void updateActionBarForAllPlayers() {
         String message = this.getSessionStatusMessage();
 
-        for(Player player : Bukkit.getOnlinePlayers()) {
+        for (Player player : Bukkit.getOnlinePlayers()) {
             this.sendActionBar(player, message);
         }
     }
@@ -181,7 +181,7 @@ public class SessionManager {
      * Apply an extreme saturation effect to all players.
      */
     private void applySaturationToAllPlayers() {
-        for(Player player : Bukkit.getOnlinePlayers()) {
+        for (Player player : Bukkit.getOnlinePlayers()) {
             player.addPotionEffect(new PotionEffect(PotionEffectType.SATURATION, 100, 100, false, false));
         }
     }
@@ -190,7 +190,7 @@ public class SessionManager {
      * Fill the food and saturation bars of all players.
      */
     private void setAllPlayersMaxFood() {
-        for(Player player : Bukkit.getOnlinePlayers()) {
+        for (Player player : Bukkit.getOnlinePlayers()) {
             player.setFoodLevel(20);
             player.setSaturation(20.0F);
         }
@@ -203,7 +203,7 @@ public class SessionManager {
         this.pausedFoodLevels.clear();
         this.pausedSaturationLevels.clear();
 
-        for(Player player : Bukkit.getOnlinePlayers()) {
+        for (Player player : Bukkit.getOnlinePlayers()) {
             this.pausedFoodLevels.put(player.getUniqueId(), player.getFoodLevel());
             this.pausedSaturationLevels.put(player.getUniqueId(), player.getSaturation());
         }
@@ -215,7 +215,7 @@ public class SessionManager {
      * Restore the food and saturation levels of all players to their last recorded values.
      */
     private void restorePausedFoodLevels() {
-        for(Player player : Bukkit.getOnlinePlayers()) {
+        for (Player player : Bukkit.getOnlinePlayers()) {
             UUID playerId = player.getUniqueId();
 
             if (this.pausedFoodLevels.containsKey(playerId)) {

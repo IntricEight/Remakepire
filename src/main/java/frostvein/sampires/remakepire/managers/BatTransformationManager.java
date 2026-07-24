@@ -127,7 +127,7 @@ public class BatTransformationManager {
      * Update the visual countdown on the player's remaining time in bat form.
      */
     private void updateBatActionBars() {
-        for(Map.Entry<UUID, BatData> entry : this.activeBats.entrySet()) {
+        for (Map.Entry<UUID, BatData> entry : this.activeBats.entrySet()) {
             UUID playerId = entry.getKey();
             BatData batData = entry.getValue();
             Player player = Bukkit.getPlayer(playerId);
@@ -260,9 +260,9 @@ public class BatTransformationManager {
                 player.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, -1, 0, false, false));
                 player.setAllowFlight(true);
                 player.setFlying(true);
-                final Bat bat = (Bat)player.getWorld().spawn(player.getLocation(), Bat.class);
+                final Bat bat = player.getWorld().spawn(player.getLocation(), Bat.class);
 
-                for(int i = 0; i < 10; ++i) {
+                for (int i = 0; i < 10; ++i) {
                     player.getWorld().spawn(player.getLocation(), Bat.class);
                 }
 
@@ -379,7 +379,7 @@ public class BatTransformationManager {
             ItemStack[] currentArmor = player.getInventory().getArmorContents();
             boolean hasCurrentArmor = false;
 
-            for(ItemStack piece : currentArmor) {
+            for (ItemStack piece : currentArmor) {
                 if (piece != null && piece.getType() != Material.AIR) {
                     hasCurrentArmor = true;
                     break;
@@ -391,7 +391,7 @@ public class BatTransformationManager {
                 this.plugin.getLogger().warning("This should not happen with the fixed armor system. Dropping current armor to prevent duplication.");
                 Location dropLocation = player.getLocation();
 
-                for(ItemStack piece : currentArmor) {
+                for (ItemStack piece : currentArmor) {
                     if (piece != null && piece.getType() != Material.AIR) {
                         player.getWorld().dropItemNaturally(dropLocation, piece);
                         this.plugin.getLogger().warning("Dropped armor piece: " + piece.getType());
@@ -411,7 +411,7 @@ public class BatTransformationManager {
             this.armorStorageManager.clearStoredArmor(playerId);
             int restoredPieces = 0;
 
-            for(ItemStack piece : restoredArmor) {
+            for (ItemStack piece : restoredArmor) {
                 if (piece != null && piece.getType() != Material.AIR) {
                     ++restoredPieces;
                 }
@@ -527,7 +527,7 @@ public class BatTransformationManager {
      */
     private void saveBatStates() {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(this.batStateFile))) {
-            for(Map.Entry<UUID, BatData> entry : this.activeBats.entrySet()) {
+            for (Map.Entry<UUID, BatData> entry : this.activeBats.entrySet()) {
                 UUID playerId = entry.getKey();
                 BatData batData = entry.getValue();
 
@@ -549,11 +549,11 @@ public class BatTransformationManager {
             this.batCheckTask.cancel();
         }
 
-        for(BatData batData : this.activeBats.values()) {
+        for (BatData batData : this.activeBats.values()) {
             this.cleanupBatData(batData);
         }
 
-        for(Player player : Bukkit.getOnlinePlayers()) {
+        for (Player player : Bukkit.getOnlinePlayers()) {
             if (this.isInBatForm(player)) {
                 player.removeScoreboardTag(BAT_FORM_TAG);
                 this.restorePlayerArmor(player);

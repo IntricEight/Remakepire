@@ -79,7 +79,7 @@ public class VampireTrackingManager {
             Location trackedLocation = trackedVampire.getLocation();
             final ConversionAssistant conversionAssistant = new ConversionAssistant();
 
-            for(Player vampire : Bukkit.getOnlinePlayers()) {
+            for (Player vampire : Bukkit.getOnlinePlayers()) {
                 if (this.vampireManager.isVampire(vampire) && !vampire.getUniqueId().equals(trackedVampire.getUniqueId()) && vampire.getWorld().equals(trackedVampire.getWorld()) && (this.plugin.getVampireFeedingManager() == null || !this.plugin.getVampireFeedingManager().isFeeding(vampire))) {
                     String message;
 
@@ -121,7 +121,7 @@ public class VampireTrackingManager {
      * Stop tracking all newly turned vampires.
      */
     public void stopAllTracking() {
-        for(BukkitTask task : this.activeTrackingSessions.values()) {
+        for (BukkitTask task : this.activeTrackingSessions.values()) {
             task.cancel();
         }
 

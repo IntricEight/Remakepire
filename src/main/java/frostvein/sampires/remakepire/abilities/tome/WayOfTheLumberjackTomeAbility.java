@@ -1,5 +1,7 @@
 package frostvein.sampires.remakepire.abilities.tome;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -8,8 +10,6 @@ import java.lang.reflect.Type;
 import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
-
-import frostvein.sampires.remakepire.utils.ConversionAssistant;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -21,8 +21,7 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.inventory.ItemStack;
 import frostvein.sampires.remakepire.RemakepirePlugin;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
+import frostvein.sampires.remakepire.utils.ConversionAssistant;
 
 public class WayOfTheLumberjackTomeAbility extends TomeAbility implements Listener {
     private final Random random = new Random();
@@ -30,7 +29,7 @@ public class WayOfTheLumberjackTomeAbility extends TomeAbility implements Listen
     private final File placedLogsFile;
     private final ConversionAssistant conversionAssistant;
     private Set<String> placedLogs = new HashSet<>();
-    private static final Set<Material> LOG_MATERIALS = Set.of(Material.OAK_LOG, Material.SPRUCE_LOG, Material.BIRCH_LOG, Material.JUNGLE_LOG, Material.ACACIA_LOG, Material.DARK_OAK_LOG, Material.MANGROVE_LOG, Material.CHERRY_LOG, Material.CRIMSON_STEM, Material.WARPED_STEM);;
+    private static final Set<Material> LOG_MATERIALS = Set.of(Material.OAK_LOG, Material.SPRUCE_LOG, Material.BIRCH_LOG, Material.JUNGLE_LOG, Material.ACACIA_LOG, Material.DARK_OAK_LOG, Material.MANGROVE_LOG, Material.CHERRY_LOG, Material.CRIMSON_STEM, Material.WARPED_STEM);
 
     /**
      * Create an instance of the Way of the Land tome ability.
@@ -71,6 +70,7 @@ public class WayOfTheLumberjackTomeAbility extends TomeAbility implements Listen
     public void onBlockPlace(BlockPlaceEvent event) {
         Block block = event.getBlock();
 
+        // Record placed logs to prevent them from triggering the ability
         if (LOG_MATERIALS.contains(block.getType())) {
             String locationKey = this.conversionAssistant.locationToString(block.getLocation());
             this.placedLogs.add(locationKey);

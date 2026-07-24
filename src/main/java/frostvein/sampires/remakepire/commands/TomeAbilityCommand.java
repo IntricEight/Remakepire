@@ -11,12 +11,10 @@ import org.bukkit.entity.Player;
 import frostvein.sampires.remakepire.RemakepirePlugin;
 import frostvein.sampires.remakepire.abilities.tome.TomeAbility;
 import frostvein.sampires.remakepire.managers.TomeManager;
-import frostvein.sampires.remakepire.managers.VampireManager;
 
 public class TomeAbilityCommand implements CommandExecutor, TabCompleter {
     private final RemakepirePlugin plugin;
     private final TomeManager tomeManager;
-    private final VampireManager vampireManager;
 
     /**
      * Create an instance of the plugin's tome ability command handler.
@@ -26,7 +24,6 @@ public class TomeAbilityCommand implements CommandExecutor, TabCompleter {
     public TomeAbilityCommand(RemakepirePlugin plugin) {
         this.plugin = plugin;
         this.tomeManager = plugin.getTomeManager();
-        this.vampireManager = plugin.getVampireManager();
     }
 
     /**
@@ -39,7 +36,7 @@ public class TomeAbilityCommand implements CommandExecutor, TabCompleter {
             sender.sendMessage("§cOnly players can use tome abilities.");
             return true;
 
-        } else if (!this.vampireManager.isHuman(player)) {
+        } else if (!this.plugin.getVampireManager().isHuman(player)) {
             player.sendMessage("§cOnly humans can use tome abilities.");
             return true;
 

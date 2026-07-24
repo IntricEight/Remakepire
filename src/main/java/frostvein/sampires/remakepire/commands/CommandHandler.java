@@ -201,7 +201,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                 this.vampireManager.setPlayerAsHuman(target);
 
                 // Clear the player of all tags before assigning them the human tag
-                for(String tag : new HashSet<>(target.getScoreboardTags())) {
+                for (String tag : new HashSet<>(target.getScoreboardTags())) {
                     target.removeScoreboardTag(tag);
                 }
 
@@ -554,12 +554,11 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                 return true;
             }
         } else {
-            if (!(sender instanceof Player)) {
+            if (!(sender instanceof Player player)) {
                 sender.sendMessage("§cConsole must provide coordinates: /pow admin set_vampire_spawn <x> <y> <z>");
                 return true;
             }
 
-            Player player = (Player)sender;
             Location loc = player.getLocation();
             x = loc.getX();
             y = loc.getY();
@@ -627,7 +626,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
             } else {
                 int playersAffected = 0;
 
-                for(Player player : Bukkit.getOnlinePlayers()) {
+                for (Player player : Bukkit.getOnlinePlayers()) {
                     this.resetPlayerCooldowns(player);
                     player.sendMessage("§aYour vampire ability cooldowns have been reset by an administrator.");
                     ++playersAffected;
@@ -661,7 +660,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
 
         // Handle the cooldown command for individual players
         if (args.length == 0) {
-            for(Player player : Bukkit.getOnlinePlayers()) {
+            for (Player player : Bukkit.getOnlinePlayers()) {
                 if (this.plugin.getVampireManager().isHuman(player)) {
                     TomeAbility.clearAllCooldowns(player);
 
@@ -706,7 +705,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         sender.sendMessage("§ePlaying first warning sound for all players...");
 
         // Send the first warning noise (crows)
-        for(Player player : Bukkit.getOnlinePlayers()) {
+        for (Player player : Bukkit.getOnlinePlayers()) {
             player.playSound(player.getLocation(), "crimson:crimson.sound.crimson_warning_1", SoundCategory.MASTER, 1.0F, 1.0F);
         }
 
@@ -714,7 +713,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
 
         // Send the second warning noise (bells) after 5 minutes
         Bukkit.getScheduler().runTaskLater(this.plugin, () -> {
-            for(Player player : Bukkit.getOnlinePlayers()) {
+            for (Player player : Bukkit.getOnlinePlayers()) {
                 player.playSound(player.getLocation(), "crimson:crimson.sound.crimson_warning_2", SoundCategory.MASTER, 1.0F, 1.0F);
             }
 
@@ -811,7 +810,6 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
 
                 default:
                     sender.sendMessage("§cInvalid action. Use: start, pause, end, prime, resume, or building.");
-                    return true;
             }
         }
 
@@ -1086,11 +1084,9 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
     private boolean handleBeaconAdd(CommandSender sender, String[] args) {
         if (args.length < 2) {
             sender.sendMessage("§cUsage: /pow admin beacon add <name> [radius]");
-            return true;
 
         } else if (!(sender instanceof Player player)) {
             sender.sendMessage("§cOnly players can add beacons.");
-            return true;
 
         } else {
             String name = args[1];
@@ -1131,9 +1127,9 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                     blockLocation.getBlock().setType(Material.AIR);
                 }
             }
-
-            return true;
         }
+
+        return true;
     }
 
     /**
@@ -1459,7 +1455,6 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                                 sender.sendMessage("§cAmount must be between 1 and 64.");
                                 return true;
                             }
-
                         } catch (NumberFormatException e) {
                             sender.sendMessage("§cInvalid amount: '" + args[2] + "'. Must be a number between 1 and 64.");
                             return true;
@@ -2026,7 +2021,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
     }
 
     /**
-     *
+     * Trigger the spawning of passive animals around the map.
      *
      * @return {@code true}
      */

@@ -82,7 +82,7 @@ public class BeaconMajorityManager {
         this.currentVampireBonus = 0;
         double healthBonus = bonusHearts * 2.0;
 
-        for(Player player : Bukkit.getOnlinePlayers()) {
+        for (Player player : Bukkit.getOnlinePlayers()) {
             if (this.vampireManager.isHuman(player)) {
                 this.applyHealthModifier(player, healthBonus, HUMAN_MAJORITY_HEALTH_UUID, "Beacon Majority (Human)");
                 this.applyDeathPenalty(player);
@@ -100,7 +100,7 @@ public class BeaconMajorityManager {
         this.currentHumanBonus = 0;
         double healthBonus = bonusHearts * 2.0;
 
-        for(Player player : Bukkit.getOnlinePlayers()) {
+        for (Player player : Bukkit.getOnlinePlayers()) {
             if (this.vampireManager.isVampire(player)) {
                 this.applyHealthModifier(player, healthBonus, VAMPIRE_MAJORITY_HEALTH_UUID, "Beacon Majority (Vampire)");
             }
@@ -113,7 +113,7 @@ public class BeaconMajorityManager {
     private void removeBonusFromHumans() {
         this.currentHumanBonus = 0;
 
-        for(Player player : Bukkit.getOnlinePlayers()) {
+        for (Player player : Bukkit.getOnlinePlayers()) {
             if (this.vampireManager.isHuman(player)) {
                 this.removeHealthModifier(player, HUMAN_MAJORITY_HEALTH_UUID);
                 this.applyDeathPenalty(player);
@@ -127,7 +127,7 @@ public class BeaconMajorityManager {
     private void removeBonusFromVampires() {
         this.currentVampireBonus = 0;
 
-        for(Player player : Bukkit.getOnlinePlayers()) {
+        for (Player player : Bukkit.getOnlinePlayers()) {
             if (this.vampireManager.isVampire(player)) {
                 this.removeHealthModifier(player, VAMPIRE_MAJORITY_HEALTH_UUID);
             }
@@ -141,7 +141,7 @@ public class BeaconMajorityManager {
         this.currentVampireBonus = 0;
         this.currentHumanBonus = 0;
 
-        for(Player player : Bukkit.getOnlinePlayers()) {
+        for (Player player : Bukkit.getOnlinePlayers()) {
             this.removeHealthModifier(player, HUMAN_MAJORITY_HEALTH_UUID);
             this.removeHealthModifier(player, VAMPIRE_MAJORITY_HEALTH_UUID);
 

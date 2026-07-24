@@ -203,8 +203,7 @@ public class ShoulderBargeTomeAbility extends TomeAbility {
      * Clean up any expired instances of barging effects.
      */
     private void cleanupOldEntries() {
-        final long currentTime = System.currentTimeMillis();
-        this.recentlyBargedEntities.entrySet().removeIf((entry) -> currentTime - entry.getValue() > TARGET_COOLDOWN_MS);
+        this.recentlyBargedEntities.entrySet().removeIf((entry) -> System.currentTimeMillis() - entry.getValue() > TARGET_COOLDOWN_MS);
     }
 
     /**

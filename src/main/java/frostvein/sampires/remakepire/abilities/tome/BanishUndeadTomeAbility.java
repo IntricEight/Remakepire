@@ -43,10 +43,6 @@ public class BanishUndeadTomeAbility extends TomeAbility {
             this.sendCannotUseMessage(player, "Only humans can use tome abilities!");
             return false;
 
-        } else if (player.getWorld() == null) {
-            this.sendCannotUseMessage(player, "World not available!");
-            return false;
-
         } else {
             int mobsKilled = 0;
 
@@ -64,7 +60,8 @@ public class BanishUndeadTomeAbility extends TomeAbility {
             // Inform the player on the effect of their cast
             if (mobsKilled > 0) {
                 player.playSound(player.getLocation(), "minecraft:block.beacon.power_select", 1.0F, 1.2F);
-                this.sendSuccessMessage(player, "Holy light radiates from you, banishing " + mobsKilled + " undead creatures!");
+                this.sendSuccessMessage(player, "Holy light radiates from you, banishing " + mobsKilled + " undead creature" + (mobsKilled > 1 ? "s" : "") + "!");
+
             } else {
                 player.playSound(player.getLocation(), "minecraft:block.beacon.ambient", 0.5F, 1.0F);
                 this.sendSuccessMessage(player, "Holy light radiates from you, but no undead creatures were nearby.");
@@ -124,12 +121,11 @@ public class BanishUndeadTomeAbility extends TomeAbility {
     private void createHolyLightRing(final Location center, int ringIndex) {
         final double baseRadius = 5 + ringIndex * 8.0;
         final int particleCount = 40 + ringIndex * 20;
-        final double angleStep = (Math.PI * 2D) / (double)particleCount;
+        final double angleStep = (Math.PI * 2.0) / particleCount;
 
         (new BukkitRunnable() {
             double currentRadius = 0;
-            final double maxRadius = baseRadius;
-            final double radiusStep = this.maxRadius / 10.0;
+            final double maxRadius = baseRadius, radiusStep = this.maxRadius / 10.0;
             int tickCount = 0;
 
             public void run() {

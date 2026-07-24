@@ -59,7 +59,7 @@ public class BeaconSite {
      * Determine if a location is within the beacon's capture range.
      *
      * @param location A location within the world.
-     * @return {@code true}
+     * @return {@code true} if the location is within the capture range of the beacon.
      */
     public boolean isWithinCaptureRadius(Location location) {
         Location beaconLoc = this.getLocation();
@@ -77,17 +77,9 @@ public class BeaconSite {
      *
      * @param newState the new alignment of the beacon.
      * @param changedBy the method that changed the beacon.
-     * @param sessionManager the manager for the session states.
-     * @param cooldownMs how long the beacon will remain inconvertible.
      */
-    public void changeState(BeaconState newState, String changedBy, SessionManager sessionManager, long cooldownMs) {
-        this.state = newState;
-        this.lastChangedBy = changedBy;
-        this.lastStateChangeTime = System.currentTimeMillis();
-
-        if (newState == BeaconSite.BeaconState.HOLY || newState == BeaconSite.BeaconState.DESECRATED) {
-            this.conversionCooldownUntil = sessionManager.getSessionTime() + cooldownMs;
-        }
+    public void changeState(BeaconState newState, String changedBy) {
+        this.changeState(newState, changedBy, 3600000L);
     }
 
     /**
@@ -123,9 +115,17 @@ public class BeaconSite {
      *
      * @param newState the new alignment of the beacon.
      * @param changedBy the method that changed the beacon.
+     * @param sessionManager the manager for the session states.
+     * @param cooldownMs how long the beacon will remain inconvertible.
      */
-    public void changeState(BeaconState newState, String changedBy) {
-        this.changeState(newState, changedBy, 3600000L);
+    public void changeState(BeaconState newState, String changedBy, SessionManager sessionManager, long cooldownMs) {
+        this.state = newState;
+        this.lastChangedBy = changedBy;
+        this.lastStateChangeTime = System.currentTimeMillis();
+
+        if (newState == BeaconSite.BeaconState.HOLY || newState == BeaconSite.BeaconState.DESECRATED) {
+            this.conversionCooldownUntil = sessionManager.getSessionTime() + cooldownMs;
+        }
     }
 
     /**
@@ -138,8 +138,11 @@ public class BeaconSite {
         return sessionManager.getSessionTime() < this.conversionCooldownUntil;
     }
 
-    /** @deprecated */
-    @Deprecated
+    /**
+     * Determine if the beacon's conversion cooldown has elapsed.
+     *
+     * @return {@code true} if the beacon's conversation cooldown is active.
+     */
     public boolean isOnConversionCooldown() {
         return System.currentTimeMillis() < this.conversionCooldownUntil;
     }

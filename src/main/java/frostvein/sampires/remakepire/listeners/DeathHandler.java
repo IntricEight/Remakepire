@@ -136,7 +136,7 @@ public class DeathHandler implements Listener {
             VampireManager vampireManager = plugin.getVampireManager();
             int aliveHumans = 0, aliveVampires = 0;
 
-            for(Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+            for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
                 if (onlinePlayer.getGameMode() == GameMode.SURVIVAL) {
                     if (vampireManager.isHuman(onlinePlayer)) {
                         ++aliveHumans;
@@ -167,7 +167,7 @@ public class DeathHandler implements Listener {
         boolean allBeaconsDesecrated = totalBeacons > 0 && evilBeacons == totalBeacons;
         String townName = plugin.getConfigManager().getTownName();
 
-        for(Player player : Bukkit.getOnlinePlayers()) {
+        for (Player player : Bukkit.getOnlinePlayers()) {
             player.sendTitle("§cThe last human has fallen.", "", 20, 100, 40);
             player.sendMessage("");
             player.sendMessage("§cThe last defender of humanity has fallen...");
@@ -198,7 +198,7 @@ public class DeathHandler implements Listener {
         boolean trappedWhenPermanentlyCorrupted = plugin.getConfigManager().doCorruptedBeaconsTrapHumans();
         String townName = plugin.getConfigManager().getTownName();
 
-        for(Player player : Bukkit.getOnlinePlayers()) {
+        for (Player player : Bukkit.getOnlinePlayers()) {
             player.sendTitle("§aThe last vampire has fallen.", "", 20, 100, 40);
             player.sendMessage("");
             player.sendMessage("§aThe last creature of darkness has fallen...");
@@ -350,7 +350,7 @@ public class DeathHandler implements Listener {
         }
 
         // Send the curated death message to all online players
-        for(Player player : Bukkit.getOnlinePlayers()) {
+        for (Player player : Bukkit.getOnlinePlayers()) {
             // Don't send the message to the player who died
             if (!player.getUniqueId().equals(victim.getUniqueId())) {
                 if (this.vampireManager.isVampire(player)) {

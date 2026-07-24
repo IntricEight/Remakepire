@@ -69,7 +69,7 @@ public class VampireFeedingManager implements Listener {
      * Manage a vampire's feeding attempt.
      */
     private void checkFeedingSessions() {
-        for(FeedingSession session : this.activeSessions.values().toArray(new FeedingSession[0])) {
+        for (FeedingSession session : this.activeSessions.values().toArray(new FeedingSession[0])) {
             Player vampire = Bukkit.getPlayer(session.vampireId), target = Bukkit.getPlayer(session.targetId);
 
             if (vampire != null && target != null && vampire.isOnline() && target.isOnline() && vampire.getGameMode() != GameMode.SPECTATOR) {
@@ -341,14 +341,15 @@ public class VampireFeedingManager implements Listener {
                     if (currentSessionThirst >= this.configManager.getMaxFeedingThirstPerSession()) {
                         vampire.sendMessage("§cYour thirst is quenched, for now. You are unable to drink any more blood from feeding until the next session.");
                     } else {
-                        int humansChecked = 0;
+                        double distance;
+                        boolean isHuman, isVampire, inRange;
 
-                        for(Player nearbyPlayer : vampire.getWorld().getPlayers()) {
+                        for (Player nearbyPlayer : vampire.getWorld().getPlayers()) {
                             if (!nearbyPlayer.equals(vampire) && nearbyPlayer.getGameMode() == GameMode.SURVIVAL) {
-                                ++humansChecked;
-                                double distance = vampire.getLocation().distance(nearbyPlayer.getLocation());
-                                boolean isHuman = this.vampireManager.isHuman(nearbyPlayer), isVampire = this.vampireManager.isVampire(nearbyPlayer);
-                                boolean inRange = this.isInFeedingRange(vampire, nearbyPlayer);
+                                distance = vampire.getLocation().distance(nearbyPlayer.getLocation());
+                                isHuman = this.vampireManager.isHuman(nearbyPlayer);
+                                isVampire = this.vampireManager.isVampire(nearbyPlayer);
+                                inRange = this.isInFeedingRange(vampire, nearbyPlayer);
 
                                 if ((isHuman || isVampire) && inRange) {
                                     if (isVampire && nearbyPlayer.getExp() <= 0.1F) {
@@ -401,7 +402,7 @@ public class VampireFeedingManager implements Listener {
     public void cancelFeedingSessionByTarget(Player target) {
         UUID targetId = target.getUniqueId();
 
-        for(FeedingSession session : this.activeSessions.values().toArray(new FeedingSession[0])) {
+        for (FeedingSession session : this.activeSessions.values().toArray(new FeedingSession[0])) {
             if (session.targetId.equals(targetId)) {
                 this.cancelFeedingSession(session);
                 return;
@@ -453,7 +454,7 @@ public class VampireFeedingManager implements Listener {
             this.cancelFeedingSession(session);
         }
 
-        for(FeedingSession activeSession : this.activeSessions.values().toArray(new FeedingSession[0])) {
+        for (FeedingSession activeSession : this.activeSessions.values().toArray(new FeedingSession[0])) {
             if (activeSession.targetId.equals(playerId)) {
                 this.cancelFeedingSession(activeSession);
             }

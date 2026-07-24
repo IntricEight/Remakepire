@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
@@ -53,19 +54,20 @@ public class BeaconTeleportAbility extends VampireAbility {
         } else if (player.getHealth() < player.getMaxHealth()) {
             player.sendMessage("§cYou find yourself too weak to use that ability... Rest up and heal first.");
             return false;
+
         } else {
             List<BeaconSite> desecratedBeacons = plugin.getBeaconManager().getDesecratedBeacons();
 
             if (desecratedBeacons.isEmpty()) {
                 player.sendMessage("§cNo desecrated beacons are available for beacon travel.");
                 player.sendMessage("§7Beacons must be desecrated to connect to the beacon network.");
-                return false;
 
             } else {
                 this.openBeaconTeleportGUI(player, desecratedBeacons, plugin);
                 player.sendMessage("§5The shadows whisper of distant beacons...");
-                return false;
             }
+
+            return false;
         }
     }
 
@@ -81,7 +83,7 @@ public class BeaconTeleportAbility extends VampireAbility {
         slots = Math.min(54, slots);
         Inventory inventory = Bukkit.createInventory(null, slots, INVENTORY_TITLE);
 
-        for(int i = 0; i < desecratedBeacons.size() && i < slots; ++i) {
+        for (int i = 0; i < desecratedBeacons.size() && i < slots; ++i) {
             BeaconSite beacon = desecratedBeacons.get(i);
             ItemStack item = this.createBeaconItem(beacon, player);
             inventory.setItem(i, item);
@@ -108,9 +110,7 @@ public class BeaconTeleportAbility extends VampireAbility {
             lore.add("§7Location: §f" + beacon.getLocation().getWorld().getName());
             lore.add("§7Coordinates: §f" + beacon.getLocation().getBlockX() + ", " + beacon.getLocation().getBlockY() + ", " + beacon.getLocation().getBlockZ());
             lore.add("§7State: " + beacon.getState().getColorCode() + beacon.getState().getDisplayName());
-
-            double distance = beacon.getLocation().distance(player.getLocation());
-            lore.add("§7Distance: §e" + Math.round(distance) + " blocks");
+            lore.add("§7Distance: §e" + Math.round(beacon.getLocation().distance(player.getLocation())) + " blocks");
             lore.add("");
             lore.add("§5⚡ Desecrated Energy");
             lore.add("§8The beacon pulses with dark power,");

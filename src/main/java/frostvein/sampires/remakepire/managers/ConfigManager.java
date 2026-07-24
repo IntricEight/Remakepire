@@ -41,7 +41,7 @@ public class ConfigManager {
             this.plugin.getLogger().severe("World '" + RemakepirePlugin.WORLD_NAME + "' not found! Cannot load tome chest locations.");
 
         } else {
-            for(String locString : locationStrings) {
+            for (String locString : locationStrings) {
                 try {
                     String[] parts = locString.split(",");
 

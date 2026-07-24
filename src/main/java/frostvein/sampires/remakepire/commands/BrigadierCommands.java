@@ -233,6 +233,7 @@ public class BrigadierCommands {
                                                     int x = IntegerArgumentType.getInteger(ctx, "x");
                                                     int y = IntegerArgumentType.getInteger(ctx, "y");
                                                     int z = IntegerArgumentType.getInteger(ctx, "z");
+
                                                     return this.executePowCommand(ctx, "admin", "set_vampire_spawn", String.valueOf(x), String.valueOf(y), String.valueOf(z));
                                                 }))))
                         )
@@ -244,12 +245,12 @@ public class BrigadierCommands {
      */
     private LiteralArgumentBuilder<CommandSourceStack> buildVampireAbilitySubcommand() {
         return Commands.literal("vability")
-                    .then(Commands.literal("list").executes((ctx) -> this.executePowCommand(ctx, "vability", "list")))
-                    .then(Commands.literal("all").executes((ctx) -> this.executePowCommand(ctx, "vability", "all")))
-                    .then(Commands.argument("ability", StringArgumentType.word()).suggests((ctx, builder) -> this.suggestVampireAbilities(builder)).executes((ctx) -> {
-                        String ability = StringArgumentType.getString(ctx, "ability");
-                        return this.executePowCommand(ctx, "vability", ability);
-                    }));
+                .then(Commands.literal("list").executes((ctx) -> this.executePowCommand(ctx, "vability", "list")))
+                .then(Commands.literal("all").executes((ctx) -> this.executePowCommand(ctx, "vability", "all")))
+                .then(Commands.argument("ability", StringArgumentType.word()).suggests((ctx, builder) -> this.suggestVampireAbilities(builder)).executes((ctx) -> {
+                    String ability = StringArgumentType.getString(ctx, "ability");
+                    return this.executePowCommand(ctx, "vability", ability);
+                }));
     }
 
     /**
@@ -257,11 +258,11 @@ public class BrigadierCommands {
      */
     private LiteralArgumentBuilder<CommandSourceStack> buildTomeAbilitySubcommand() {
         return Commands.literal("tome")
-                    .then(Commands.literal("list").executes((ctx) -> this.executePowCommand(ctx, "tome", "list")))
-                    .then(Commands.argument("ability", StringArgumentType.word()).suggests((ctx, builder) -> this.suggestTomeAbilities(ctx, builder)).executes((ctx) -> {
-                        String ability = StringArgumentType.getString(ctx, "ability");
-                        return this.executePowCommand(ctx, "tome", ability);
-                    }));
+                .then(Commands.literal("list").executes((ctx) -> this.executePowCommand(ctx, "tome", "list")))
+                .then(Commands.argument("ability", StringArgumentType.word()).suggests((ctx, builder) -> this.suggestTomeAbilities(ctx, builder)).executes((ctx) -> {
+                    String ability = StringArgumentType.getString(ctx, "ability");
+                    return this.executePowCommand(ctx, "tome", ability);
+                }));
     }
 
     /**

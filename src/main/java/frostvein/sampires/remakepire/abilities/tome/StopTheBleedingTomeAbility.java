@@ -25,7 +25,7 @@ public class StopTheBleedingTomeAbility extends TomeAbility {
     // Controls how long the ability takes to conclude (in ticks)
     private static final int HEALING_DURATION_TICKS = 1200;
     // Controls how far the players can be while healing
-    private static final double PROXIMITY_DISTANCE = 2.0;
+    private static final int PROXIMITY_DISTANCE = 2;
     // Controls how frequently particle effects appear (in ticks)
     private static final int PARTICLE_INTERVAL_TICKS = 20;
     private static final String ACTIVE_TAG = "stopthebleeding_active";
@@ -38,7 +38,7 @@ public class StopTheBleedingTomeAbility extends TomeAbility {
      * @param plugin the host plugin object.
      */
     public StopTheBleedingTomeAbility(RemakepirePlugin plugin) {
-        super(plugin, "StopTheBleeding", new String[]{"You learn how to mend the wounds of death itself.", "Crouch within " + (int)PROXIMITY_DISTANCE + " blocks of another player for " + (HEALING_DURATION_TICKS / 20 / 60) + " minute", "to heal one heart for them, restoring their vitality."}, plugin.getConfigManager().getTomeStopTheBleedingCooldown());
+        super(plugin, "StopTheBleeding", new String[]{"You learn how to mend the wounds of death itself.", "Crouch within " + PROXIMITY_DISTANCE + " blocks of another player for " + (HEALING_DURATION_TICKS / 20 / 60) + " minute", "to heal one heart for them, restoring their vitality."}, plugin.getConfigManager().getTomeStopTheBleedingCooldown());
     }
 
     protected boolean useAbility(Player player) {
@@ -183,11 +183,11 @@ public class StopTheBleedingTomeAbility extends TomeAbility {
      */
     private Player findNearestPlayer(Player player, double maxDistance) {
         Player nearest = null;
-        double nearestDistance = maxDistance;
+        double nearestDistance = maxDistance, distance;
 
         for(Player other : Bukkit.getOnlinePlayers()) {
             if (!other.equals(player) && other.getWorld().equals(player.getWorld())) {
-                double distance = player.getLocation().distance(other.getLocation());
+                distance = player.getLocation().distance(other.getLocation());
 
                 if (distance <= maxDistance && distance < nearestDistance) {
                     nearest = other;
@@ -337,7 +337,7 @@ public class StopTheBleedingTomeAbility extends TomeAbility {
 
                                 ++HealingSession.this.particleCounter;
                                 int secondsRemaining = HealingSession.this.ticksRemaining / 20;
-                                String timeDisplay = VampireAbilityManager.formatTime((long)secondsRemaining);
+                                String timeDisplay = VampireAbilityManager.formatTime(secondsRemaining);
 
                                 if (HealingSession.this.isSelfHeal) {
                                     currentHealer.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent("§aHealing yourself... §e" + timeDisplay + " §aremaining"));

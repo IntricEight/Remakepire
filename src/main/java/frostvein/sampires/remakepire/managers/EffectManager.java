@@ -60,7 +60,7 @@ public class EffectManager {
      * Apply the passive effects on players based on their team and the state of the game. This includes final stand and day cycle effects.
      */
     private void applyVampireEffects() {
-        for(Player player : Bukkit.getOnlinePlayers()) {
+        for (Player player : Bukkit.getOnlinePlayers()) {
             if (this.vampireManager.isVampire(player)) {
                 this.applyWaterBreathing(player);
                 this.applyDaylightEffects(player);
@@ -315,7 +315,7 @@ public class EffectManager {
             this.effectTask = null;
         }
 
-        for(Player player : Bukkit.getOnlinePlayers()) {
+        for (Player player : Bukkit.getOnlinePlayers()) {
             this.removeSunWeaknessEffects(player);
             this.removeVampireSafeFall(player);
         }
