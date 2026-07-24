@@ -37,10 +37,6 @@ public class BeaconTeleportAbility extends VampireAbility {
         return 2;
     }
 
-    protected boolean canUseAdditionalRequirements(Player player, VampireManager vampireManager) {
-        return true;
-    }
-
     protected String getAdditionalRequirementMessage(Player player, VampireManager vampireManager) {
         return "The shadow network is unavailable right now.";
     }
@@ -51,7 +47,7 @@ public class BeaconTeleportAbility extends VampireAbility {
             player.sendMessage("§cYour fragile form cannot handle the strain of using the beacon network.");
             return false;
 
-        } else if (player.getHealth() < player.getMaxHealth()) {
+        } else if (player.getHealth() < player.getAttribute(Attribute.MAX_HEALTH).getValue()) {
             player.sendMessage("§cYou find yourself too weak to use that ability... Rest up and heal first.");
             return false;
 
@@ -63,7 +59,7 @@ public class BeaconTeleportAbility extends VampireAbility {
                 player.sendMessage("§7Beacons must be desecrated to connect to the beacon network.");
 
             } else {
-                this.openBeaconTeleportGUI(player, desecratedBeacons, plugin);
+                this.openBeaconTeleportGUI(player, desecratedBeacons);
                 player.sendMessage("§5The shadows whisper of distant beacons...");
             }
 
@@ -76,9 +72,8 @@ public class BeaconTeleportAbility extends VampireAbility {
      *
      * @param player the player using the ability.
      * @param desecratedBeacons a list of corrupted beacons for teleportation.
-     * @param plugin the host plugin object.
      */
-    private void openBeaconTeleportGUI(Player player, List<BeaconSite> desecratedBeacons, RemakepirePlugin plugin) {
+    private void openBeaconTeleportGUI(Player player, List<BeaconSite> desecratedBeacons) {
         int slots = Math.max(9, (desecratedBeacons.size() + 8) / 9 * 9);
         slots = Math.min(54, slots);
         Inventory inventory = Bukkit.createInventory(null, slots, INVENTORY_TITLE);
