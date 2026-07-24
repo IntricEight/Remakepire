@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
 import org.bukkit.Sound;
 import org.bukkit.SoundCategory;
 import org.bukkit.entity.Player;
@@ -99,7 +100,7 @@ public abstract class TomeAbility {
      * @return {@code true} if the {@code player} is human.
      */
     protected boolean canUse(Player player) {
-        return this.plugin.getVampireManager().isHuman(player);
+        return this.plugin.getVampireManager().isHuman(player) && player.getGameMode() != GameMode.SPECTATOR;
     }
 
     /**
