@@ -1,5 +1,6 @@
 package frostvein.sampires.remakepire.listeners;
 
+import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.Bat;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -101,9 +102,9 @@ public class BatTransformationListener implements Listener {
                 if (transformedPlayer != null && transformedPlayer.isOnline()) {
                     transformedPlayer.sendMessage("§c You have taken damage while in bat form, be careful...");
 
-                    double health = bat.getHealth() - event.getFinalDamage();
-                    double maxHealth = bat.getMaxHealth();
-                    double healthPercent = health / maxHealth * 100.0;
+                    final double health = bat.getHealth() - event.getFinalDamage();
+                    final double maxHealth = bat.getAttribute(Attribute.MAX_HEALTH).getValue();
+                    final double healthPercent = health / maxHealth * 100.0;
                     String healthColor;
 
                     if (healthPercent > 60) {
@@ -137,11 +138,11 @@ public class BatTransformationListener implements Listener {
                     if (transformedPlayer != null && transformedPlayer.isOnline() && !(event instanceof EntityDamageByEntityEvent)) {
                         String damageType = event.getCause().name().toLowerCase().replace("_", " ");
                         transformedPlayer.sendMessage("§c You have taken damage while in bat form, be careful...");
-                        double health = bat.getHealth() - event.getFinalDamage();
-                        double maxHealth = bat.getMaxHealth();
+                        final double health = bat.getHealth() - event.getFinalDamage();
+                        final double maxHealth = bat.getAttribute(Attribute.MAX_HEALTH).getValue();
 
                         if (health > 0) {
-                            double healthPercent = health / maxHealth * 100.0;
+                            final double healthPercent = health / maxHealth * 100.0;
                             String healthColor = healthPercent > 50 ? "§a" : (healthPercent > 25 ? "§e" : "§c");
                             transformedPlayer.sendMessage("§7Remaining Health: " + healthColor + String.format("%.1f", health) + "§7/" + String.format("%.1f", maxHealth));
 

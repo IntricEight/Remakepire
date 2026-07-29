@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import org.bukkit.Location;
 import org.bukkit.World;
-import org.bukkit.configuration.file.FileConfiguration;
 import frostvein.sampires.remakepire.RemakepirePlugin;
 import frostvein.sampires.remakepire.beacons.BeaconSite;
 

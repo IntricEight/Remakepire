@@ -161,17 +161,19 @@ public class BeaconMajorityManager {
      */
     private void applyHealthModifier(Player player, double healthBonus, UUID modifierUUID, String name) {
         AttributeInstance healthAttribute = player.getAttribute(Attribute.MAX_HEALTH);
+
         if (healthAttribute != null) {
             this.removeHealthModifier(player, modifierUUID);
             AttributeModifier healthModifier = new AttributeModifier(modifierUUID, name, healthBonus, Operation.ADD_NUMBER);
 
             healthAttribute.addModifier(healthModifier);
             this.healthModifiers.put(player.getUniqueId(), healthModifier);
-            double currentHealth = player.getHealth();
-            double maxHealth = player.getMaxHealth();
+
+            final double currentHealth = player.getHealth();
+            final double maxHealth = player.getAttribute(Attribute.MAX_HEALTH).getValue();
 
             if (currentHealth > 0 && currentHealth >= maxHealth - healthBonus) {
-                player.setHealth(player.getMaxHealth());
+                player.setHealth(player.getAttribute(Attribute.MAX_HEALTH).getValue());
             }
 
             this.plugin.getLogger().fine("Applied +" + healthBonus / 2 + " hearts bonus to " + player.getName());
@@ -194,8 +196,8 @@ public class BeaconMajorityManager {
                 healthAttribute.removeModifier(toRemove);
                 this.healthModifiers.remove(player.getUniqueId());
 
-                if (player.getHealth() > player.getMaxHealth()) {
-                    player.setHealth(player.getMaxHealth());
+                if (player.getHealth() > player.getAttribute(Attribute.MAX_HEALTH).getValue()) {
+                    player.setHealth(player.getAttribute(Attribute.MAX_HEALTH).getValue());
                 }
 
                 this.plugin.getLogger().fine("Removed health modifier from " + player.getName());

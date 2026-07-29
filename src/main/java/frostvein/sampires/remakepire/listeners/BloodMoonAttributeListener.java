@@ -189,7 +189,6 @@ public class BloodMoonAttributeListener implements Listener {
             }
         } catch (Exception e) {
             this.plugin.getLogger().warning("Error during aggressive cleanup of attributes for " + player.getName() + ": " + e.getMessage());
-            e.printStackTrace();
         }
     }
 

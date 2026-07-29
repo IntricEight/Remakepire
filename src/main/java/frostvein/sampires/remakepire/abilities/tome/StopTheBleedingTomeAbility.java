@@ -253,8 +253,7 @@ public class StopTheBleedingTomeAbility extends TomeAbility {
                     this.plugin.getBeaconMajorityManager().updateBeaconMajorityBonuses();
                 }
 
-                double maxHealth = player.getAttribute(Attribute.MAX_HEALTH).getValue();
-                this.plugin.logInfo("Updated max health for " + player.getName() + " to " + maxHealth);
+                this.plugin.logInfo("Updated max health for " + player.getName() + " to " + player.getAttribute(Attribute.MAX_HEALTH).getValue());
             } catch (Exception e) {
                 this.plugin.getLogger().warning("Failed to update max health for " + player.getName() + ": " + e.getMessage());
             }
