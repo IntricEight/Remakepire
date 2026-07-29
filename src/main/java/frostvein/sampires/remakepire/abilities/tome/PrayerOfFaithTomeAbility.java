@@ -125,7 +125,6 @@ public class PrayerOfFaithTomeAbility extends TomeAbility {
                                 if (PrayerSession.this.secondsRemaining <= 10 && PrayerSession.this.secondsRemaining > 0) {
                                     PrayerOfFaithTomeAbility.this.plugin.getSessionManager().sendActionBar(PrayerSession.this.player, "§6Prayer: §e" + VampireAbilityManager.formatTime(PrayerSession.this.secondsRemaining) + "...");
                                 }
-
                             } else {
                                 PrayerOfFaithTomeAbility.this.plugin.getSessionManager().sendActionBar(PrayerSession.this.player, "§6Prayer: §e" + VampireAbilityManager.formatTime(PrayerSession.this.secondsRemaining) + " remaining...");
                             }

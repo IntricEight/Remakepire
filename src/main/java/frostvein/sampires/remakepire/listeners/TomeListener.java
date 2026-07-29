@@ -66,7 +66,7 @@ public class TomeListener implements Listener {
                     String tomeTitle = bookMeta.getTitle();
                     this.plugin.logInfo("Player " + player.getName() + " using tome with title: '" + tomeTitle + "'");
 
-                    int cureBookNumber = CureBookReadingListener.getAuthenticCureBookNumber(item, this.plugin);
+                    int cureBookNumber = this.plugin.getCureBookReadingListener().getAuthenticCureBookNumber(item);
 
                     if (cureBookNumber > 0) {
                         // Prevent the player from reading the fourth cure book if the rest of the trinity has not been read

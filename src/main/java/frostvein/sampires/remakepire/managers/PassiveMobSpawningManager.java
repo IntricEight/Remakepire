@@ -111,7 +111,7 @@ public class PassiveMobSpawningManager {
                     Collections.shuffle(validLocations, this.random);
                     int mobsSpawned = 0;
                     Map<EntityType, Integer> spawnCounts = new HashMap<>();
-                    int mobsToSpawn = this.configManager.getPassiveMobSpawnCount();
+                    int mobsToSpawn = this.getMobsPerCycle();
 
                     for (int i = 0; i < mobsToSpawn && i < validLocations.size(); ++i) {
                         Location spawnLocation = validLocations.get(i);

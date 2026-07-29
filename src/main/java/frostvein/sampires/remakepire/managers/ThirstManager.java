@@ -185,7 +185,7 @@ public class ThirstManager {
      * @param vampire the vampire losing blood.
      */
     private void processVampireThirst(Player vampire) {
-        if (!vampire.getScoreboardTags().contains(THIRST_IMMUNITY_TAG)) {
+        if (!this.hasThirstImmunity(vampire)) {
             float currentThirst = vampire.getExp();
             float newThirst = currentThirst - this.THIRST_PER_SECOND;
 
@@ -426,7 +426,7 @@ public class ThirstManager {
             }
         }
 
-        // Remove the expire immunity timers from the map
+        // Remove the expired immunity timers from the map
         for (UUID uuid : toRemove) {
             this.immunityTimers.remove(uuid);
         }

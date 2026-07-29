@@ -55,9 +55,8 @@ public class PlayerJoinListener implements Listener {
             this.plugin.getBloodMoonAttributeListener().forceCleanupOnJoin(player);
         }
 
-        String sessionStatus = this.getSessionStatusMessage();
+        player.sendMessage("§7" + this.getSessionStatusMessage());
 
-        player.sendMessage("§7" + sessionStatus);
         if (!this.plugin.getSessionManager().playerReturningToGame(player)) {
             player.sendMessage("§cA new game has been initialized since you last played. Resetting your stats accordingly.");
 

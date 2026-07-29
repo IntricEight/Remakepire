@@ -272,7 +272,7 @@ public class HolyWaterEffectManager implements Listener {
             }
         }
 
-        int cleared = this.disabledVampires.size();
+        int cleared = this.getDisabledVampireCount();
         this.disabledVampires.clear();
         this.plugin.logInfo("Cleared holy water effects from " + cleared + " vampires");
     }

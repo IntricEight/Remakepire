@@ -279,10 +279,7 @@ public class IronWeaknessListener implements Listener {
                     // Check if the player is taking an item from a shelf
                     if (event.getClickedBlock() != null && event.getClickedBlock().getState() instanceof Shelf) {
                         // Check if any iron items have entered the player's inventory after they have taken from the shelf
-                        Bukkit.getScheduler().runTaskLater(this.plugin, () -> {
-                            scanAndRemoveIronFromSingleInventory(player);
-                        }, 5L);
-
+                        Bukkit.getScheduler().runTaskLater(this.plugin, () -> scanAndRemoveIronFromSingleInventory(player), 5L);
                         return;
                     }
 

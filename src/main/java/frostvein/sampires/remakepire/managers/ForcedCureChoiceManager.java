@@ -54,7 +54,7 @@ public class ForcedCureChoiceManager {
      * @param target the player who must make the decision.
      */
     public void reopenChoiceGUI(Player target) {
-        ForcedCureData data = this.pendingCures.get(target.getUniqueId());
+        ForcedCureData data = this.getPendingCure(target);
 
         if (data != null) {
             this.applyEffectsAndOpenGUI(target);
@@ -138,7 +138,7 @@ public class ForcedCureChoiceManager {
      * @param target the player who must make the decision.
      */
     public void handleHumanityChoice(Player target) {
-        ForcedCureData data = this.pendingCures.get(target.getUniqueId());
+        ForcedCureData data = this.getPendingCure(target);
 
         if (data != null) {
             target.closeInventory();
@@ -162,7 +162,7 @@ public class ForcedCureChoiceManager {
      * @param target the player who must make the decision.
      */
     public void handleDeathChoice(Player target) {
-        ForcedCureData data = this.pendingCures.get(target.getUniqueId());
+        ForcedCureData data = this.getPendingCure(target);
 
         if (data != null) {
             target.closeInventory();

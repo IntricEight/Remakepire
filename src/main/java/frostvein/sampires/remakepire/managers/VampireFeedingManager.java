@@ -159,6 +159,7 @@ public class VampireFeedingManager implements Listener {
             UUID vampireId = vampire.getUniqueId();
             int currentSessionThirst = this.sessionFeedingThirst.getOrDefault(vampireId, 0);
             int maxFeedingThirst = this.configManager.getMaxFeedingThirstPerSession();
+            int currentSessionThirst = this.getSessionFeedingThirst(vampire);
 
             // Prevent the vampire from draining more blood than the config setting allows
             if (currentSessionThirst >= maxFeedingThirst) {
@@ -332,11 +333,10 @@ public class VampireFeedingManager implements Listener {
      * @param vampire the player feeding.
      */
     private void attemptStartFeeding(Player vampire) {
-        if (!this.activeSessions.containsKey(vampire.getUniqueId())) {
+        if (!this.isFeeding(vampire)) {
             if (vampire.isSneaking()) {
                 if (this.vampireManager.isVampire(vampire)) {
-                    UUID vampireId = vampire.getUniqueId();
-                    int currentSessionThirst = this.sessionFeedingThirst.getOrDefault(vampireId, 0);
+                    int currentSessionThirst = this.getSessionFeedingThirst(vampire);
 
                     if (currentSessionThirst >= this.configManager.getMaxFeedingThirstPerSession()) {
                         vampire.sendMessage("§cYour thirst is quenched, for now. You are unable to drink any more blood from feeding until the next session.");
@@ -471,16 +471,6 @@ public class VampireFeedingManager implements Listener {
     }
 
     /**
-     * Check if a player is feeding.
-     *
-     * @param vampire the player being checked.
-     * @return {@code true} if the vampire is current feeding on another player.
-     */
-    public boolean isVampireFeeding(Player vampire) {
-        return this.activeSessions.containsKey(vampire.getUniqueId());
-    }
-
-    /**
      * Check if a player is being fed upon
      *
      * @param player the player being checked.
@@ -542,15 +532,6 @@ public class VampireFeedingManager implements Listener {
      */
     public int getSessionFeedingThirst(Player vampire) {
         return this.sessionFeedingThirst.getOrDefault(vampire.getUniqueId(), 0);
-    }
-
-    /**
-     * Retrieve the maximum blood that a vampire can get through feeding each session.
-     *
-     * @return The maximum amount of blood points.
-     */
-    public int getMaxFeedingThirstPerSession() {
-        return this.configManager.getMaxFeedingThirstPerSession();
     }
 
     /**

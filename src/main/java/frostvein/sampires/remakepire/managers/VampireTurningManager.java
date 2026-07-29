@@ -39,10 +39,9 @@ public class VampireTurningManager {
      * @return {@code true} if turning is now enabled, {@code false} if turning is now disabled.
      */
     public boolean toggleTurning(Player vampire) {
-        boolean currentState = this.isTurningEnabled(vampire);
-        boolean newState = !currentState;
+        final boolean newState = !this.isTurningEnabled(vampire);
 
-        this.turningEnabled.put(vampire.getUniqueId(), newState);
+        this.setTurningEnabled(vampire, newState);
         this.updateLuckEffect(vampire, newState);
 
         return newState;
@@ -65,7 +64,7 @@ public class VampireTurningManager {
     public void disableAllVampireTurning() {
         for (Player player : Bukkit.getOnlinePlayers()) {
             if (this.plugin.getVampireManager().isVampire(player)) {
-                this.turningEnabled.put(player.getUniqueId(), false);
+                this.setTurningEnabled(player, false);
                 this.updateLuckEffect(player, false);
             }
         }

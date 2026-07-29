@@ -243,14 +243,14 @@ public class BeetrootManager {
             player.sendMessage("§c§lThe garlic burns your throat and causes you to retch...");
             player.addPotionEffect(new PotionEffect(PotionEffectType.NAUSEA, NAUSEA_DURATION, NAUSEA_AMPLIFIER, false, false));
 
-        } else if (player.getScoreboardTags().contains(BEETROOT_USED_TAG)) {
+        } else if (this.hasUsedBeetrootThisSession(player)) {
             player.sendMessage("§eYou have already consumed garlic this session.");
             player.sendMessage("§eYour body cannot process another dose so soon.");
 
-        } else if (player.getScoreboardTags().contains(BEETROOT_PROCESSING_TAG)) {
+        } else if (this.isProcessingBeetroot(player)) {
             player.sendMessage("§eYou are already processing garlic substance...");
 
-        } else if (player.getScoreboardTags().contains(BEETROOT_IMMUNITY_TAG)) {
+        } else if (this.hasBeetrootImmunity(player)) {
             player.sendMessage("§a§You already have garlic immunity.");
 
         } else {
