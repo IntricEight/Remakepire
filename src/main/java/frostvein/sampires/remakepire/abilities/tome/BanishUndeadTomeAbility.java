@@ -47,7 +47,7 @@ public class BanishUndeadTomeAbility extends TomeAbility {
             int mobsKilled = 0;
 
             // Search and kill all undead entities within a (RADIUS * 2)^3 cube
-            for(Entity entity : player.getNearbyEntities(RADIUS, RADIUS, RADIUS)) {
+            for (Entity entity : player.getNearbyEntities(RADIUS, RADIUS, RADIUS)) {
                 if (this.isUndeadMob(entity) && entity instanceof LivingEntity livingEntity) {
                     livingEntity.setHealth(0);
                     ++mobsKilled;
@@ -79,7 +79,7 @@ public class BanishUndeadTomeAbility extends TomeAbility {
      * @return {@code true} if the {@code entity} is considered undead.
      */
     private boolean isUndeadMob(Entity entity) {
-        for(Class<? extends Entity> mobType : this.undeadMobTypes) {
+        for (Class<? extends Entity> mobType : this.undeadMobTypes) {
             if (mobType.isInstance(entity)) {
                 return true;
             }
@@ -130,7 +130,7 @@ public class BanishUndeadTomeAbility extends TomeAbility {
 
             public void run() {
                 if (!(this.currentRadius >= this.maxRadius) && this.tickCount < 15) {
-                    for(int i = 0; i < particleCount; ++i) {
+                    for (int i = 0; i < particleCount; ++i) {
                         double angle = i * angleStep;
                         double x = center.getX() + this.currentRadius * Math.cos(angle);
                         double z = center.getZ() + this.currentRadius * Math.sin(angle);

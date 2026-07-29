@@ -111,6 +111,7 @@ public class EffectManager {
                     if (stage == 2) {
                         player.addPotionEffect(new PotionEffect(PotionEffectType.TRIAL_OMEN, 6000, 0, false, false, true));
                         this.lastTrialOmenApplied.put(playerUUID, currentTime);
+
                     } else if (stage == 3) {
                         player.addPotionEffect(new PotionEffect(PotionEffectType.TRIAL_OMEN, 6000, 1, false, false, true));
                         this.lastTrialOmenApplied.put(playerUUID, currentTime);
@@ -140,11 +141,10 @@ public class EffectManager {
         AttributeInstance speedAttribute = player.getAttribute(Attribute.MOVEMENT_SPEED);
 
         if (speedAttribute != null) {
-            boolean hasModifier = speedAttribute.getModifiers().stream().anyMatch(modifier -> SUN_WEAKNESS_SPEED_KEY.equals(modifier.getKey()));
+            final boolean hasModifier = speedAttribute.getModifiers().stream().anyMatch(modifier -> SUN_WEAKNESS_SPEED_KEY.equals(modifier.getKey()));
 
             if (!hasModifier) {
                 AttributeModifier speedReduction = new AttributeModifier(SUN_WEAKNESS_SPEED_KEY, -0.03, AttributeModifier.Operation.ADD_NUMBER);
-
                 speedAttribute.addModifier(speedReduction);
             }
         }
@@ -175,7 +175,7 @@ public class EffectManager {
         AttributeInstance safeFallAttribute = player.getAttribute(Attribute.SAFE_FALL_DISTANCE);
 
         if (safeFallAttribute != null) {
-            boolean hasModifier = safeFallAttribute.getModifiers().stream().anyMatch(modifier -> VAMPIRE_SAFE_FALL_KEY.equals(modifier.getKey()));
+            final boolean hasModifier = safeFallAttribute.getModifiers().stream().anyMatch(modifier -> VAMPIRE_SAFE_FALL_KEY.equals(modifier.getKey()));
 
             if (!hasModifier) {
                 AttributeModifier safeFallIncrease = new AttributeModifier(VAMPIRE_SAFE_FALL_KEY, 5.0, AttributeModifier.Operation.ADD_NUMBER);
@@ -218,7 +218,7 @@ public class EffectManager {
      * @return {@code true} if it is daytime.
      */
     public boolean isDaytime(World world) {
-        long time = world.getTime();
+        final long time = world.getTime();
         return time >= 0L && time < 12000L;
     }
 

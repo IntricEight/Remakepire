@@ -162,10 +162,11 @@ public class DeathHandler implements Listener {
     private static void announceAllHumansDeadStatic(RemakepirePlugin plugin) {
         plugin.logInfo("ALL HUMANS ELIMINATED");
 
-        int totalBeacons = plugin.getBeaconManager().getAllBeacons().size();
-        int evilBeacons = plugin.getBeaconManager().getAllEvilBeacons().size();
-        boolean allBeaconsDesecrated = totalBeacons > 0 && evilBeacons == totalBeacons;
-        String townName = plugin.getConfigManager().getTownName();
+        // Retrieve the current state of the beacon network
+        final int totalBeacons = plugin.getBeaconManager().getAllBeacons().size();
+        final int evilBeacons = plugin.getBeaconManager().getAllEvilBeacons().size();
+        final boolean allBeaconsDesecrated = totalBeacons > 0 && evilBeacons == totalBeacons;
+        final String townName = plugin.getConfigManager().getTownName();
 
         for (Player player : Bukkit.getOnlinePlayers()) {
             player.sendTitle("§cThe last human has fallen.", "", 20, 100, 40);
@@ -191,12 +192,12 @@ public class DeathHandler implements Listener {
     private static void announceHumansWinStatic(RemakepirePlugin plugin) {
         plugin.logInfo("ALL VAMPIRES ELIMINATED");
 
-        int totalBeacons = plugin.getBeaconManager().getAllBeacons().size();
-        int holyBeacons = plugin.getBeaconManager().getHolyBeacons().size();
-        boolean allBeaconsHoly = totalBeacons > 0 && holyBeacons == totalBeacons;
-        boolean anyPermanentlyCorrupted = plugin.getBeaconManager().getAllBeacons().stream().anyMatch((beacon) -> beacon.getState() == BeaconState.PERMANENTLY_DESECRATED);
-        boolean trappedWhenPermanentlyCorrupted = plugin.getConfigManager().doCorruptedBeaconsTrapHumans();
-        String townName = plugin.getConfigManager().getTownName();
+        final int totalBeacons = plugin.getBeaconManager().getAllBeacons().size();
+        final int holyBeacons = plugin.getBeaconManager().getHolyBeacons().size();
+        final boolean allBeaconsHoly = totalBeacons > 0 && holyBeacons == totalBeacons;
+        final boolean anyPermanentlyCorrupted = plugin.getBeaconManager().getAllBeacons().stream().anyMatch((beacon) -> beacon.getState() == BeaconState.PERMANENTLY_DESECRATED);
+        final boolean trappedWhenPermanentlyCorrupted = plugin.getConfigManager().doCorruptedBeaconsTrapHumans();
+        final String townName = plugin.getConfigManager().getTownName();
 
         for (Player player : Bukkit.getOnlinePlayers()) {
             player.sendTitle("§aThe last vampire has fallen.", "", 20, 100, 40);

@@ -307,7 +307,7 @@ public class BeaconMajorityManager {
      * Remove the health modifiers before shutting down the manager.
      */
     public void shutdown() {
-        for(Player player : Bukkit.getOnlinePlayers()) {
+        for (Player player : Bukkit.getOnlinePlayers()) {
             this.removeBonusesFromPlayer(player);
         }
 

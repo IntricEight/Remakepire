@@ -1,5 +1,7 @@
 package frostvein.sampires.remakepire.managers;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -10,8 +12,6 @@ import java.util.Map;
 import java.util.UUID;
 import org.bukkit.entity.Player;
 import frostvein.sampires.remakepire.RemakepirePlugin;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 
 public class PermadeathManager {
     private final RemakepirePlugin plugin;
@@ -228,9 +228,9 @@ public class PermadeathManager {
         this.plugin.logInfo("PermadeathManager: Shutdown complete");
     }
 
-    public static enum PermadeathMode {
+    public enum PermadeathMode {
         OFF,
         ON,
-        ABSOLUTE;
+        ABSOLUTE
     }
 }

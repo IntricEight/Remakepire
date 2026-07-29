@@ -93,6 +93,7 @@ public class FeedingListener implements Listener {
 
             this.plugin.getSessionManager().sendActionBar(killer, "§cThe creatures blood pours freely into your open bottle.");
             return true;
+
         } else {
             return false;
         }

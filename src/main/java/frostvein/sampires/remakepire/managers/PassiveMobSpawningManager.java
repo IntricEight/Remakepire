@@ -10,8 +10,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
-
-import frostvein.sampires.remakepire.utils.ConversionAssistant;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -22,6 +20,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.scheduler.BukkitTask;
 import frostvein.sampires.remakepire.RemakepirePlugin;
+import frostvein.sampires.remakepire.utils.ConversionAssistant;
 
 public class PassiveMobSpawningManager {
     private final RemakepirePlugin plugin;
@@ -53,6 +52,7 @@ public class PassiveMobSpawningManager {
         if (configManager.isPassiveMobAutoSpawnEnabled()) {
             this.startAutoSpawnTask();
             plugin.logInfo("PassiveMobSpawningManager: Initialized with automatic morning spawning (threshold: " + configManager.getPassiveMobMinimumThreshold() + " animals)");
+
         } else {
             plugin.logInfo("PassiveMobSpawningManager: Initialized (manual spawning only)");
         }
@@ -150,6 +150,7 @@ public class PassiveMobSpawningManager {
         List<Location> validLocations = new ArrayList<>();
         final int maxLocationsToCheck = 500;
         int locationsChecked = 0, x, z;
+
         List<Chunk> chunkList = Arrays.asList(loadedChunks);
         Collections.shuffle(chunkList, this.random);
 
@@ -213,7 +214,7 @@ public class PassiveMobSpawningManager {
         final int roll = this.random.nextInt(100);
         int cumulative = 0;
 
-        for(Map.Entry<EntityType, Integer> entry : this.mobTypeWeights.entrySet()) {
+        for (Map.Entry<EntityType, Integer> entry : this.mobTypeWeights.entrySet()) {
             cumulative += entry.getValue();
 
             if (roll < cumulative) {
@@ -260,19 +261,19 @@ public class PassiveMobSpawningManager {
             boolean isMorning = worldTime >= MORNING_START && worldTime <= MORNING_END;
 
             if (isMorning && currentDay != this.lastDaySpawned) {
-                int animalCount = this.countPassiveAnimalsInLoadedChunks(world);
-                int threshold = this.configManager.getPassiveMobMinimumThreshold();
+                final int animalCount = this.countPassiveAnimalsInLoadedChunks(world);
+                final int threshold = this.configManager.getPassiveMobMinimumThreshold();
                 this.plugin.logInfo("PassiveMobSpawningManager: Morning check - Found " + animalCount + " animals (threshold: " + threshold + ")");
 
                 if (animalCount < threshold) {
                     this.plugin.logInfo("PassiveMobSpawningManager: Animal count below threshold, spawning animals...");
                     this.spawnPassiveMobs();
-                    this.lastDaySpawned = currentDay;
 
                 } else {
                     this.plugin.logInfo("PassiveMobSpawningManager: Animal count sufficient, skipping spawn");
-                    this.lastDaySpawned = currentDay;
                 }
+
+                this.lastDaySpawned = currentDay;
             }
         }
     }
@@ -287,8 +288,8 @@ public class PassiveMobSpawningManager {
         int count = 0;
         Chunk[] loadedChunks = world.getLoadedChunks();
 
-        for(Chunk chunk : loadedChunks) {
-            for(Entity entity : chunk.getEntities()) {
+        for (Chunk chunk : loadedChunks) {
+            for (Entity entity : chunk.getEntities()) {
                 EntityType type = entity.getType();
 
                 if (type == EntityType.COW || type == EntityType.PIG || type == EntityType.SHEEP || type == EntityType.CHICKEN) {

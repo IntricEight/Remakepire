@@ -557,7 +557,7 @@ public class VampireFeedingManager implements Listener {
      * Cancel the feeding processes before shutting down the manager.
      */
     public void shutdown() {
-        for(FeedingSession session : this.activeSessions.values().toArray(new FeedingSession[0])) {
+        for (FeedingSession session : this.activeSessions.values().toArray(new FeedingSession[0])) {
             this.cancelFeedingSession(session);
         }
 
@@ -590,8 +590,8 @@ public class VampireFeedingManager implements Listener {
         }
     }
 
-    private static enum FeedingPhase {
+    private enum FeedingPhase {
         PREPARATION,
-        ACTIVE_FEEDING;
+        ACTIVE_FEEDING
     }
 }

@@ -86,7 +86,7 @@ public class PlayerJoinListener implements Listener {
                 player.sendMessage("");
                 player.sendMessage("§c§l[CONFIG WARNING] §eThe following locations are outside the border:");
 
-                for(String warning : warnings) {
+                for (String warning : warnings) {
                     player.sendMessage("§c  - " + warning);
                 }
 
@@ -158,7 +158,6 @@ public class PlayerJoinListener implements Listener {
             }
         } catch (Exception e) {
             this.plugin.getLogger().severe("Failed to add player " + player.getName() + " to CastTeam: " + e.getMessage());
-            e.printStackTrace();
         }
     }
 

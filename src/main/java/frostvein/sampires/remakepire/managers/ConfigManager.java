@@ -1036,7 +1036,7 @@ public class ConfigManager {
                 warnings.add("Vampire respawn (" + vampireSpawn.getBlockX() + ", " + vampireSpawn.getBlockZ() + ")");
             }
 
-            for(Location loc : this.getTomeChestLocations()) {
+            for (Location loc : this.getTomeChestLocations()) {
                 if (!this.isLocationWithinBorder(loc.getX(), loc.getZ())) {
                     warnings.add("Tome chest at (" + loc.getBlockX() + ", " + loc.getBlockZ() + ")");
                 }
@@ -1044,7 +1044,7 @@ public class ConfigManager {
         }
 
         if (beaconManager != null) {
-            for(BeaconSite beacon : beaconManager.getAllBeacons()) {
+            for (BeaconSite beacon : beaconManager.getAllBeacons()) {
                 Location loc = beacon.getLocation();
                 if (!this.isLocationWithinBorder(loc.getX(), loc.getZ())) {
                     warnings.add("Beacon '" + beacon.getName() + "' (" + loc.getBlockX() + ", " + loc.getBlockZ() + ")");

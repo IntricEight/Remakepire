@@ -193,7 +193,7 @@ public class TomeListener implements Listener {
                                     cleanName = cleanName.replace(" (Already has)", "");
                                 }
 
-                                String abilityName = cleanName.replace(" ", "").toLowerCase();
+                                final String abilityName = cleanName.replace(" ", "").toLowerCase();
 
                                 if (this.tomeManager.hasAbility(target, abilityName)) {
                                     this.tomeManager.removeAbility(target, abilityName);

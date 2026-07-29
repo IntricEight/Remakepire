@@ -212,16 +212,19 @@ public class InitGameManager {
             }
 
             if (currentPage > 0) {
+                // Create the button to return to the previous page
                 ItemStack prevButton = new ItemStack(Material.ARROW);
                 ItemMeta prevMeta = prevButton.getItemMeta();
                 prevMeta.setDisplayName("§e« Previous Page");
                 List<String> prevLore = new ArrayList<>();
                 prevLore.add("§7Go to page " + currentPage);
                 prevMeta.setLore(prevLore);
+
                 prevButton.setItemMeta(prevMeta);
                 inventory.setItem(45, prevButton);
             }
 
+            // Create a current page number item
             ItemStack pageIndicator = new ItemStack(Material.PAPER);
             ItemMeta pageMeta = pageIndicator.getItemMeta();
             pageMeta.setDisplayName("§fPage " + (currentPage + 1) + " of " + totalPages);
@@ -229,20 +232,24 @@ public class InitGameManager {
             pageLore.add("§7" + playerCount + " players total");
             pageLore.add("§7" + data.selectedVampires.size() + " selected as vampires");
             pageMeta.setLore(pageLore);
+
             pageIndicator.setItemMeta(pageMeta);
             inventory.setItem(49, pageIndicator);
 
             if (currentPage < totalPages - 1) {
+                // Create the button to progress to the next page
                 ItemStack nextButton = new ItemStack(Material.ARROW);
                 ItemMeta nextMeta = nextButton.getItemMeta();
                 nextMeta.setDisplayName("§eNext Page »");
                 List<String> nextLore = new ArrayList<>();
                 nextLore.add("§7Go to page " + (currentPage + 2));
                 nextMeta.setLore(nextLore);
+
                 nextButton.setItemMeta(nextMeta);
                 inventory.setItem(50, nextButton);
             }
 
+            // Create a confirmation button to move forward
             ItemStack confirmButton = new ItemStack(Material.LIME_CONCRETE);
             ItemMeta confirmMeta = confirmButton.getItemMeta();
             confirmMeta.setDisplayName("§a§lCONFIRM SELECTION");
@@ -250,6 +257,7 @@ public class InitGameManager {
             confirmLore.add("§7Click to proceed with these selections");
             confirmLore.add("§7Selected: §e" + data.selectedVampires.size() + " vampires");
             confirmMeta.setLore(confirmLore);
+
             confirmButton.setItemMeta(confirmMeta);
             inventory.setItem(53, confirmButton);
             admin.openInventory(inventory);
@@ -336,12 +344,12 @@ public class InitGameManager {
 
                 if (min < 0) {
                     admin.sendMessage("§cThe minimum must be 0 or more. Please try again:");
-                    return true;
 
                 } else {
                     InitData data = this.adminData.get(adminId);
                     data.minVampires = min;
                     this.adminStates.put(adminId, InitGameManager.InitState.AWAITING_MAX_VAMPIRES);
+
                     admin.sendMessage("§a✓ Minimum vampires set to: §e" + min);
                     admin.sendMessage("");
                     admin.sendMessage("§e§l========================================");
@@ -350,8 +358,10 @@ public class InitGameManager {
                     admin.sendMessage("§7Type §e/pow admin init cancel §7to cancel.");
                     admin.sendMessage("§e§l========================================");
                     admin.sendMessage("");
-                    return true;
                 }
+
+                return true;
+
             } catch (NumberFormatException e) {
                 admin.sendMessage("§c'" + input + "' is not a valid number. Please try again:");
                 return true;
@@ -380,7 +390,6 @@ public class InitGameManager {
 
                 if (max < data.minVampires) {
                     admin.sendMessage("§cThe maximum must be " + data.minVampires + " or more. Please try again:");
-                    return true;
 
                 } else {
                     data.maxVampires = max;
@@ -388,8 +397,9 @@ public class InitGameManager {
                     admin.sendMessage("§a✓ Maximum vampires set to: §e" + max);
                     admin.sendMessage("");
                     this.showFinalConfirmation(admin);
-                    return true;
                 }
+
+                return true;
             } catch (NumberFormatException e) {
                 admin.sendMessage("§c'" + input + "' is not a valid number. Please try again:");
                 return true;
@@ -593,6 +603,7 @@ public class InitGameManager {
                     int vampireCount = ThreadLocalRandom.current().nextInt(data.minVampires, data.maxVampires + 1);
                     List<Player> availablePlayers = new ArrayList<>(onlinePlayers);
                     Collections.shuffle(availablePlayers);
+
                     vampireCount = Math.min(vampireCount, availablePlayers.size());
                     playersToConvert = availablePlayers.subList(0, vampireCount);
 
@@ -645,8 +656,8 @@ public class InitGameManager {
 
                 admin.sendMessage("§7[9/11] Starting session...");
                 this.plugin.getSessionManager().startSession();
-                admin.sendMessage("§7[10/11] Distributing tomes to chests...");
 
+                admin.sendMessage("§7[10/11] Distributing tomes to chests...");
                 if (this.plugin.getTomeDistributionManager().getTomeLocations().isEmpty()) {
                     admin.sendMessage("§e  → No tome chest locations configured, skipping tome distribution");
                 } else {
@@ -663,6 +674,7 @@ public class InitGameManager {
                 }
 
                 this.plugin.getVampireTurningManager().enableAllVampireTurning();
+
                 admin.sendMessage("");
                 admin.sendMessage("§a§l========================================");
                 admin.sendMessage("§a§lGAME INITIALIZED SUCCESSFULLY.");
@@ -671,6 +683,7 @@ public class InitGameManager {
                 admin.sendMessage("§7Vampires: §c" + playersToConvert.size());
                 admin.sendMessage("§7Humans: §a" + (onlinePlayers.size() - playersToConvert.size()));
                 admin.sendMessage("§a§l========================================");
+
                 this.adminStates.remove(adminId);
                 this.adminData.remove(adminId);
             }
@@ -751,15 +764,19 @@ public class InitGameManager {
                 case "confirm1":
                     this.handleFirstConfirmation(admin);
                     return true;
+
                 case "mode_random":
                     this.handleRandomMode(admin);
                     return true;
+
                 case "mode_selected":
                     this.handleSelectedMode(admin);
                     return true;
+
                 case "execute":
                     this.executeInitialization(admin);
                     return true;
+
                 default:
                     return false;
             }

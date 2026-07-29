@@ -67,14 +67,14 @@ public class TomeAbilityCommand implements CommandExecutor, TabCompleter {
         } else {
             player.sendMessage("§6§l=== YOUR TOME ABILITIES ===");
 
-            for(String abilityName : playerAbilities) {
+            for (String abilityName : playerAbilities) {
                 TomeAbility ability = this.tomeManager.getAbility(abilityName);
                 player.sendMessage("§e" + abilityName);
 
                 if (ability != null) {
                     String[] descriptionLines = ability.getDescriptionLines();
 
-                    for(String line : descriptionLines) {
+                    for (String line : descriptionLines) {
                         player.sendMessage("§7  " + line);
                     }
                 } else {

@@ -12,63 +12,8 @@ import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
 import frostvein.sampires.remakepire.commands.BrigadierCommands;
-import frostvein.sampires.remakepire.listeners.BatTransformationListener;
-import frostvein.sampires.remakepire.listeners.BeaconConversionListener;
-import frostvein.sampires.remakepire.listeners.BeaconTeleportListener;
-import frostvein.sampires.remakepire.listeners.BeetrootHarvestListener;
-import frostvein.sampires.remakepire.listeners.BeetrootListener;
-import frostvein.sampires.remakepire.listeners.BlockListener;
-import frostvein.sampires.remakepire.listeners.BloodMoonAttributeListener;
-import frostvein.sampires.remakepire.listeners.CombatListener;
-import frostvein.sampires.remakepire.listeners.ConfigGuiListener;
-import frostvein.sampires.remakepire.listeners.CureBookReadingListener;
-import frostvein.sampires.remakepire.listeners.DamageSuppressionListener;
-import frostvein.sampires.remakepire.listeners.DeathHandler;
-import frostvein.sampires.remakepire.listeners.EndermanRemovalListener;
-import frostvein.sampires.remakepire.listeners.ExperienceBottleListener;
-import frostvein.sampires.remakepire.listeners.FeedingListener;
-import frostvein.sampires.remakepire.listeners.ForcedCureChoiceListener;
-import frostvein.sampires.remakepire.listeners.FourthBookRevealListener;
-import frostvein.sampires.remakepire.listeners.InitGameListener;
-import frostvein.sampires.remakepire.listeners.InteractionListener;
-import frostvein.sampires.remakepire.listeners.IronWeaknessListener;
-import frostvein.sampires.remakepire.listeners.MovementBoundaryListener;
-import frostvein.sampires.remakepire.listeners.MountTeamsListener;
-import frostvein.sampires.remakepire.listeners.NoSleepListener;
-import frostvein.sampires.remakepire.listeners.PlayerJoinListener;
-import frostvein.sampires.remakepire.listeners.ThirstEffectsListener;
-import frostvein.sampires.remakepire.listeners.TomeListener;
-import frostvein.sampires.remakepire.listeners.TomeVampireRestrictionListener;
-import frostvein.sampires.remakepire.listeners.VampireCraftBlocker;
-import frostvein.sampires.remakepire.listeners.VampireFallDamageListener;
-import frostvein.sampires.remakepire.listeners.WeaponDropRemover;
-import frostvein.sampires.remakepire.managers.BatTransformationManager;
-import frostvein.sampires.remakepire.managers.BeaconMajorityManager;
-import frostvein.sampires.remakepire.managers.BeaconManager;
-import frostvein.sampires.remakepire.managers.BeetrootManager;
-import frostvein.sampires.remakepire.managers.BloodMoonManager;
-import frostvein.sampires.remakepire.managers.ConfigGuiManager;
-import frostvein.sampires.remakepire.managers.ConfigManager;
-import frostvein.sampires.remakepire.managers.CureBookManager;
-import frostvein.sampires.remakepire.managers.EffectManager;
-import frostvein.sampires.remakepire.managers.ForcedCureChoiceManager;
-import frostvein.sampires.remakepire.managers.HolyWaterEffectManager;
-import frostvein.sampires.remakepire.managers.InitGameManager;
-import frostvein.sampires.remakepire.managers.MobTeamManager;
-import frostvein.sampires.remakepire.managers.PassiveMobSpawningManager;
-import frostvein.sampires.remakepire.managers.PermadeathManager;
-import frostvein.sampires.remakepire.managers.PlayerChatManager;
-import frostvein.sampires.remakepire.managers.SessionManager;
-import frostvein.sampires.remakepire.managers.ThirstManager;
-import frostvein.sampires.remakepire.managers.TomeDistributionManager;
-import frostvein.sampires.remakepire.managers.TomeManager;
-import frostvein.sampires.remakepire.managers.VampireAbilityManager;
-import frostvein.sampires.remakepire.managers.VampireFeedingManager;
-import frostvein.sampires.remakepire.managers.VampireManager;
-import frostvein.sampires.remakepire.managers.VampireSireManager;
-import frostvein.sampires.remakepire.managers.VampireTexturePackManager;
-import frostvein.sampires.remakepire.managers.VampireTrackingManager;
-import frostvein.sampires.remakepire.managers.VampireTurningManager;
+import frostvein.sampires.remakepire.listeners.*;
+import frostvein.sampires.remakepire.managers.*;
 
 public final class RemakepirePlugin extends JavaPlugin {
     public static final String WORLD_NAME = "world";
@@ -117,7 +62,7 @@ public final class RemakepirePlugin extends JavaPlugin {
     private FileConfiguration textConfig;
 
     /**
-     * Enable the Remakepires plugin on the server.
+     * Enable the Remakepire plugin on the server.
      */
     public void onEnable() {
         this.saveDefaultConfig();
@@ -217,7 +162,7 @@ public final class RemakepirePlugin extends JavaPlugin {
     }
 
     /**
-     * Disable the Remakepires plugin on the server.
+     * Disable the Remakepire plugin on the server.
      */
     public void onDisable() {
         if (this.effectManager != null) {
@@ -405,6 +350,7 @@ public final class RemakepirePlugin extends JavaPlugin {
 
                 if ("deathCount".equals(criteria)) {
                     this.logInfo("Migrating death scoreboard from 'deathCount' to 'dummy' criteria...");
+
                     existingObjective.unregister();
                     mainScoreboard.registerNewObjective(objectiveName, "dummy", "Deaths");
                     this.logInfo("Migration complete - death scoreboard now uses 'dummy' criteria.");

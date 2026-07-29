@@ -63,7 +63,7 @@ public class StormCallAbility extends VampireAbility {
         if (player.getWorld() != null) {
             double angle, radius, x, y, z;
 
-            for(int i = 0; i < 50; ++i) {
+            for (int i = 0; i < 50; ++i) {
                 angle = i * 0.3;
                 radius = 2.0;
                 x = Math.cos(angle) * radius;
@@ -109,7 +109,7 @@ public class StormCallAbility extends VampireAbility {
         String message = "§8§lDark clouds gather across the sky...";
         String casterMessage = "§7§o A vampire has called upon an ancient storm...";
 
-        for(Player player : world.getPlayers()) {
+        for (Player player : world.getPlayers()) {
             player.sendMessage(message);
 
             if (!player.equals(caster)) {
@@ -175,7 +175,7 @@ public class StormCallAbility extends VampireAbility {
         String message = "§f§lThe storm clouds part, revealing clear skies once more...";
         String casterMessage = "§7§oYour dominion over the weather comes to an end.";
 
-        for(Player worldPlayer : world.getPlayers()) {
+        for (Player worldPlayer : world.getPlayers()) {
             worldPlayer.sendMessage(message);
 
             if (worldPlayer.equals(player)) {

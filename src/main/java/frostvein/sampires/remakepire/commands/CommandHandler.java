@@ -1032,7 +1032,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         } else {
             sender.sendMessage("§6=== BEACON DISPLAY DEBUG INFO ===");
 
-            for(BeaconSite beacon : this.beaconManager.getAllBeacons()) {
+            for (BeaconSite beacon : this.beaconManager.getAllBeacons()) {
                 sender.sendMessage(this.beaconManager.getBeaconDisplayDebugInfo(beacon.getName()));
             }
         }
@@ -1189,7 +1189,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
      * @return {@code true}
      */
     private boolean handleBeaconList(CommandSender sender, String[] args) {
-        for(String line : this.beaconManager.getBeaconList()) {
+        for (String line : this.beaconManager.getBeaconList()) {
             sender.sendMessage(line);
         }
 
@@ -1221,7 +1221,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         sender.sendMessage("");
         sender.sendMessage("§f§l=== SPIRITUAL INFLUENCE ===");
 
-        for(BeaconSite.BeaconState state : BeaconState.values()) {
+        for (BeaconSite.BeaconState state : BeaconState.values()) {
             int count = stateStats.get(state);
             double percentage = total > 0 ? count * 100.0 / (double)total : 0;
             String icon = "";
@@ -1474,7 +1474,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                             List<String> lore = new ArrayList<>();
                             String[] descriptionLines = ability.getDescriptionLines();
 
-                            for(String line : descriptionLines) {
+                            for (String line : descriptionLines) {
                                 lore.add("§7" + line);
                             }
 
@@ -1491,7 +1491,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                         if (ability != null) {
                             String[] descriptionLines = ability.getDescriptionLines();
 
-                            for(String line : descriptionLines) {
+                            for (String line : descriptionLines) {
                                 pageContent.append("§7").append(line).append("\n");
                             }
                         } else {
@@ -1721,7 +1721,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
             List<Location> tomeLocations = this.plugin.getTomeDistributionManager().getTomeLocations();
             double nearestDistance = Double.MAX_VALUE, distance;
 
-            for(Location loc : tomeLocations) {
+            for (Location loc : tomeLocations) {
                 if (loc.getWorld() != null && loc.getWorld().equals(playerLocation.getWorld())) {
                     distance = playerLocation.distance(loc);
 
@@ -1775,7 +1775,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         } else {
             int index = 1;
 
-            for(Location loc : tomeLocations) {
+            for (Location loc : tomeLocations) {
                 boolean hasChest = loc.getWorld() != null && loc.getBlock().getType() == Material.CHEST;
                 String chestStatus = hasChest ? "§a✔" : "§c✖";
                 String tpCommand = String.format("/tp %d %d %d", loc.getBlockX(), loc.getBlockY(), loc.getBlockZ());
@@ -1819,7 +1819,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
             if (target.equals("all")) {
                 int playersAffected = 0;
 
-                for(Player player : Bukkit.getOnlinePlayers()) {
+                for (Player player : Bukkit.getOnlinePlayers()) {
                     this.plugin.getBloodMoonAttributeListener().forceRemoveBloodMoonAttributes(player);
                     ++playersAffected;
                 }
@@ -1898,7 +1898,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
             if (target.equals("all")) {
                 int playersAffected = 0;
 
-                for(Player player : Bukkit.getOnlinePlayers()) {
+                for (Player player : Bukkit.getOnlinePlayers()) {
                     this.plugin.getBloodMoonAttributeListener().forceCleanupOnJoin(player);
                     ++playersAffected;
                 }
@@ -1994,7 +1994,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
 
                 int itemsGiven = 0, itemsDropped = 0;
 
-                for(ItemStack item : starterItems) {
+                for (ItemStack item : starterItems) {
                     if (target.getInventory().firstEmpty() != -1) {
                         target.getInventory().addItem(item);
                         ++itemsGiven;
@@ -2113,7 +2113,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                     completions.addAll(Arrays.asList("reset", "clear"));
 
                 } else if (args.length == 2 && (args[0].equalsIgnoreCase("reset") || args[0].equalsIgnoreCase("clear"))) {
-                    for(Player player : Bukkit.getOnlinePlayers()) {
+                    for (Player player : Bukkit.getOnlinePlayers()) {
                         completions.add(player.getName());
                     }
                 }
@@ -2122,7 +2122,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
 
             } else if (command.getName().equalsIgnoreCase("givetome")) {
                 if (args.length == 1) {
-                    for(Player player : Bukkit.getOnlinePlayers()) {
+                    for (Player player : Bukkit.getOnlinePlayers()) {
                         completions.add(player.getName());
                     }
                 } else if (args.length == 2) {
@@ -2152,7 +2152,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                 if (args.length == 1) {
                     completions.add("all");
 
-                    for(Player player : Bukkit.getOnlinePlayers()) {
+                    for (Player player : Bukkit.getOnlinePlayers()) {
                         completions.add(player.getName());
                     }
                 }
@@ -2162,7 +2162,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                 }
             } else if (command.getName().equalsIgnoreCase("setupplayer")) {
                 if (args.length == 1) {
-                    for(Player player : Bukkit.getOnlinePlayers()) {
+                    for (Player player : Bukkit.getOnlinePlayers()) {
                         completions.add(player.getName());
                     }
                 }

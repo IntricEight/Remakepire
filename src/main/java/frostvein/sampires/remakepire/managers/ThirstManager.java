@@ -28,6 +28,7 @@ public class ThirstManager {
     private final SessionManager sessionManager;
     private final ConfigManager configManager;
     private final float THIRST_PER_SECOND;
+    // The number of minutes that vampires will not lose blood naturally during after a stage change
     private final int IMMUNITY_DURATION_MINUTES = 15;
     private File immunityFile;
     private Map<UUID, Integer> immunityTimers = new HashMap<>();
@@ -440,12 +441,11 @@ public class ThirstManager {
      */
     public void regenerateFood(Player vampire) {
         if (!this.plugin.getHolyWaterEffectManager().isAbilitiesDisabled(vampire)) {
-            int currentFoodLevel = vampire.getFoodLevel();
+            final int currentFoodLevel = vampire.getFoodLevel();
 
             if (currentFoodLevel < 20) {
-                int foodToRegen = Math.min(1, 20 - currentFoodLevel);
-                float thirstCost = (float)foodToRegen * 0.0105F;
-                float currentThirst = vampire.getExp();
+                final int foodToRegen = Math.min(1, 20 - currentFoodLevel);
+                final float thirstCost = foodToRegen * 0.0105F, currentThirst = vampire.getExp();
 
                 if (currentThirst < thirstCost) {
                     if (this.vampireManager.getVampireStage(vampire) > 1) {

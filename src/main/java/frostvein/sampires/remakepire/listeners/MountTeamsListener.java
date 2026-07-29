@@ -74,7 +74,7 @@ public class MountTeamsListener implements Listener {
      */
     private boolean isLivingMount(Entity entity) {
         // Determine if the entity is a living mountable mob
-        for(Class<? extends Entity> mobType : this.livingMountTypes) {
+        for (Class<? extends Entity> mobType : this.livingMountTypes) {
             if (mobType.isInstance(entity)) {
                 return true;
             }
@@ -91,7 +91,7 @@ public class MountTeamsListener implements Listener {
      */
     private boolean isUndeadMount(Entity entity) {
         // Determine if the entity is an undead mountable mob
-        for(Class<? extends Entity> mobType : this.undeadMountTypes) {
+        for (Class<? extends Entity> mobType : this.undeadMountTypes) {
             if (mobType.isInstance(entity)) {
                 return true;
             }

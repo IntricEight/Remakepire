@@ -188,6 +188,7 @@ public class ForcedCureChoiceManager {
      * @param holyBeacon the beacon being used for the cure.
      */
     private void performCure(Player caster, Player target, BeaconSite holyBeacon) {
+        // Inform the cure caster that the forced cure was successful
         caster.sendMessage("§6" + target.getName() + " has chosen to return to humanity...");
         caster.sendMessage("§7The creature of darkness accepts their redemption...");
         caster.sendMessage("§aYou have sanctified " + target.getName() + ", and they have accepted.");
@@ -256,6 +257,7 @@ public class ForcedCureChoiceManager {
      * @param holyBeacon the beacon being used for the cure.
      */
     private void performPermadeath(Player caster, Player target, BeaconSite holyBeacon) {
+        // Inform the cure caster that the forced cure was rejected
         caster.sendMessage("§4" + target.getName() + " has refused redemption...");
         caster.sendMessage("§7The creature chooses death over humanity...");
         caster.sendMessage("§8Their wish is granted...");

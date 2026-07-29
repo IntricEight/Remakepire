@@ -31,7 +31,7 @@ public class ExperienceBottleListener implements Listener {
     }
 
     /**
-     *
+     * Handle a vampire's attempt to drink from a blood bottle.
      *
      * @param event a player interacts with an object.
      */

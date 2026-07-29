@@ -140,7 +140,7 @@ public class VampireAbilityCommand implements CommandExecutor, TabCompleter {
 
                 player.sendMessage("");
 
-                for(VampireAbility ability : availableAbilities) {
+                for (VampireAbility ability : availableAbilities) {
                     this.displayAbility(player, ability, true);
                 }
 
@@ -169,7 +169,7 @@ public class VampireAbilityCommand implements CommandExecutor, TabCompleter {
 
             player.sendMessage("");
 
-            for(VampireAbility ability : this.abilityManager.getAllAbilities()) {
+            for (VampireAbility ability : this.abilityManager.getAllAbilities()) {
                 boolean canUse = ability.canUse(player, this.plugin.getVampireManager());
                 this.displayAbility(player, ability, canUse);
             }

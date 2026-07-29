@@ -102,7 +102,7 @@ public class SessionManager {
     private void startSaturationTask() {
         (new BukkitRunnable() {
             public void run() {
-                int sessionState = SessionManager.this.getSessionState();
+                final int sessionState = SessionManager.this.getSessionState();
 
                 if (sessionState == PAUSED) {
                     SessionManager.this.restorePausedFoodLevels();
@@ -136,7 +136,7 @@ public class SessionManager {
      * Display the current session status when the session is not in an active game.
      */
     private void updateActionBarForAllPlayers() {
-        String message = this.getSessionStatusMessage();
+        final String message = this.getSessionStatusMessage();
 
         for (Player player : Bukkit.getOnlinePlayers()) {
             this.sendActionBar(player, message);
@@ -493,7 +493,7 @@ public class SessionManager {
     public void updateAllPlayersSessionIDs() {
         int session_id = this.sessionIDObjective.getScore(SESSION_ID_HOLDER).getScore();
 
-        for(Player player : this.plugin.getWorld().getPlayers()) {
+        for (Player player : this.plugin.getWorld().getPlayers()) {
             this.sessionIDObjective.getScore(player.getName()).setScore(session_id);
         }
     }
@@ -501,7 +501,7 @@ public class SessionManager {
     public void updateAllPlayersGameIDs() {
         int game_id = this.gameIDObjective.getScore(GAME_ID_HOLDER).getScore();
 
-        for(Player player : this.plugin.getWorld().getPlayers()) {
+        for (Player player : this.plugin.getWorld().getPlayers()) {
             this.gameIDObjective.getScore(player.getName()).setScore(game_id);
         }
 
@@ -684,7 +684,7 @@ public class SessionManager {
      * Reset the tags of all online players.
      */
     private void resetPlayers() {
-        for(Player player : Bukkit.getOnlinePlayers()) {
+        for (Player player : Bukkit.getOnlinePlayers()) {
             this.resetPlayer(player);
         }
     }
@@ -709,7 +709,7 @@ public class SessionManager {
         double actualMaxHealth = player.getAttribute(Attribute.MAX_HEALTH).getValue();
         player.setHealth(actualMaxHealth);
 
-        for(String string : INFORMED_CONSTANTS) {
+        for (String string : INFORMED_CONSTANTS) {
             player.removeScoreboardTag(string);
         }
 

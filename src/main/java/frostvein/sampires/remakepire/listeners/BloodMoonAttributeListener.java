@@ -162,7 +162,7 @@ public class BloodMoonAttributeListener implements Listener {
             int removedCount = 0;
 
             if (speedAttribute != null) {
-                for(AttributeModifier mod : speedAttribute.getModifiers().stream().filter((modx) -> modx.getAmount() > 0.05 || modx.getName().contains("BloodMoon") || modx.getName().contains("Vampire")).toList()) {
+                for (AttributeModifier mod : speedAttribute.getModifiers().stream().filter((modx) -> modx.getAmount() > 0.05 || modx.getName().contains("BloodMoon") || modx.getName().contains("Vampire")).toList()) {
                     speedAttribute.removeModifier(mod);
                     this.plugin.logInfo("Removed speed modifier: " + mod.getName() + " (" + mod.getAmount() + ")");
                     ++removedCount;
@@ -170,7 +170,7 @@ public class BloodMoonAttributeListener implements Listener {
             }
 
             if (strengthAttribute != null) {
-                for(AttributeModifier mod : strengthAttribute.getModifiers().stream().filter((modx) -> modx.getName().contains("BloodMoon") || modx.getName().contains("Vampire")).toList()) {
+                for (AttributeModifier mod : strengthAttribute.getModifiers().stream().filter((modx) -> modx.getName().contains("BloodMoon") || modx.getName().contains("Vampire")).toList()) {
                     strengthAttribute.removeModifier(mod);
                     this.plugin.logInfo("Removed strength modifier: " + mod.getName() + " (" + mod.getAmount() + ")");
                     ++removedCount;
@@ -197,7 +197,7 @@ public class BloodMoonAttributeListener implements Listener {
      * Remove the blood moon effects before shutting down the listener.
      */
     public void shutdown() {
-        for(Player player : Bukkit.getOnlinePlayers()) {
+        for (Player player : Bukkit.getOnlinePlayers()) {
             if (this.playersWithBloodMoonAttributes.getOrDefault(player.getUniqueId(), false)) {
                 this.removeBloodMoonAttributes(player);
             }

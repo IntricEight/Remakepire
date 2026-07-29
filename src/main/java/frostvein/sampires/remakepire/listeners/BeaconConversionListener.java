@@ -76,7 +76,7 @@ public class BeaconConversionListener implements Listener {
     }
 
     /**
-     * Handle the beacon interaction as a player moves.
+     * Handle the player's proximity to the beacons as they move while sneaking.
      *
      * @param event a player moving.
      */
@@ -107,7 +107,7 @@ public class BeaconConversionListener implements Listener {
     private void handlePlayerStartCrouching(Player player) {
         if (this.vampireManager.isHuman(player) || this.vampireManager.isVampire(player)) {
             if (player.getGameMode() != GameMode.SPECTATOR) {
-                for(BeaconSite beacon : this.beaconManager.getBeaconsInRange(player.getLocation(), BEACON_CONVERSION_RANGE)) {
+                for (BeaconSite beacon : this.beaconManager.getBeaconsInRange(player.getLocation(), BEACON_CONVERSION_RANGE)) {
                     if (!this.sessionManager.isSessionActive()) {
                         player.sendMessage("§c⚠ Cannot convert beacons - no session is currently active.");
                         return;
@@ -154,7 +154,7 @@ public class BeaconConversionListener implements Listener {
      * @param player the player near the beacon.
      */
     private void checkPlayerProximityToConversions(Player player) {
-        for(Map.Entry<String, ConversionData> entry : this.activeConversions.entrySet()) {
+        for (Map.Entry<String, ConversionData> entry : this.activeConversions.entrySet()) {
             ConversionData data = entry.getValue();
             BeaconSite beacon = this.beaconManager.getBeacon(entry.getKey());
 
@@ -226,17 +226,17 @@ public class BeaconConversionListener implements Listener {
             return false;
 
         } else {
-            boolean isOneHumanLeftActive = this.plugin.getSessionManager().isOneHumanLeftActive();
-            boolean isPlayerHuman = this.vampireManager.isHuman(player);
+            final boolean isOneHumanLeftActive = this.plugin.getSessionManager().isOneHumanLeftActive();
+            final boolean isPlayerHuman = this.vampireManager.isHuman(player);
 
             if (!beacon.isOnConversionCooldown(this.sessionManager) || isOneHumanLeftActive && isPlayerHuman) {
                 if (this.activeConversions.containsKey(beacon.getName().toLowerCase())) {
-                    ConversionData existing = (ConversionData)this.activeConversions.get(beacon.getName().toLowerCase());
-                    boolean playerIsVampire = this.vampireManager.isVampire(player);
+                    ConversionData existing = this.activeConversions.get(beacon.getName().toLowerCase());
+                    final boolean playerIsVampire = this.vampireManager.isVampire(player);
                     return existing.isVampireConversion() == playerIsVampire;
 
                 } else {
-                    boolean playerIsVampire = this.vampireManager.isVampire(player);
+                    final boolean playerIsVampire = this.vampireManager.isVampire(player);
                     BeaconSite.BeaconState currentState = beacon.getState();
 
                     if (playerIsVampire && currentState == BeaconState.DESECRATED) {
@@ -244,10 +244,10 @@ public class BeaconConversionListener implements Listener {
                     } else if (!playerIsVampire && currentState == BeaconState.HOLY) {
                         return false;
                     } else {
-                        for(Player nearbyPlayer : this.getPlayersInRange(beacon.getLocation(), BEACON_CONVERSION_RANGE)) {
+                        for (Player nearbyPlayer : this.getPlayersInRange(beacon.getLocation(), BEACON_CONVERSION_RANGE)) {
                             if (!nearbyPlayer.equals(player)) {
-                                boolean nearbyIsVampire = this.vampireManager.isVampireStage2OrHigher(nearbyPlayer);
-                                boolean nearbyIsHuman = this.vampireManager.isHuman(nearbyPlayer);
+                                final boolean nearbyIsVampire = this.vampireManager.isVampireStage2OrHigher(nearbyPlayer);
+                                final boolean nearbyIsHuman = this.vampireManager.isHuman(nearbyPlayer);
 
                                 if ((!nearbyIsVampire || !nearbyPlayer.hasPotionEffect(PotionEffectType.INVISIBILITY)) && (playerIsVampire && nearbyIsHuman || !playerIsVampire && nearbyIsVampire)) {
                                     if (playerIsVampire) {
@@ -318,16 +318,14 @@ public class BeaconConversionListener implements Listener {
         List<Player> players = new ArrayList<>();
 
         if (center != null && center.getWorld() != null) {
-            for(Player player : center.getWorld().getPlayers()) {
+            for (Player player : center.getWorld().getPlayers()) {
                 if (player.getGameMode() == GameMode.SURVIVAL && center.distance(player.getLocation()) <= range) {
                     players.add(player);
                 }
             }
-
-            return players;
-        } else {
-            return players;
         }
+
+        return players;
     }
 
     /**
@@ -340,7 +338,7 @@ public class BeaconConversionListener implements Listener {
         Location beaconLoc = beacon.getLocation();
 
         if (beaconLoc != null) {
-            for(Player player : this.getPlayersInRange(beaconLoc, beacon.getCaptureRadius() * 2)) {
+            for (Player player : this.getPlayersInRange(beaconLoc, beacon.getCaptureRadius() * 2)) {
                 player.sendMessage(message);
             }
         }
@@ -374,7 +372,7 @@ public class BeaconConversionListener implements Listener {
      * @param newState the beacon's new alignment.
      */
     private void broadcastBeaconGainToTeam(BeaconSite beacon, BeaconSite.BeaconState newState) {
-        for(Player player : this.plugin.getServer().getOnlinePlayers()) {
+        for (Player player : this.plugin.getServer().getOnlinePlayers()) {
             if (newState == BeaconState.HOLY) {
                 player.sendMessage("§aBeacon §e" + beacon.getName() + " §ahas been blessed with divine energy.");
             } else if (newState == BeaconState.DESECRATED) {
@@ -409,8 +407,8 @@ public class BeaconConversionListener implements Listener {
      * Trigger the holy control final stand scenario if all functioning beacons are currently consecrated.
      */
     public void triggerIfAllBeaconsHoly() {
-        int holyCount = this.beaconManager.getHolyBeacons().size();
-        int totalBeacons = this.beaconManager.getAllBeacons().size();
+        final int holyCount = this.beaconManager.getHolyBeacons().size();
+        final int totalBeacons = this.beaconManager.getAllBeacons().size();
 
         if (holyCount >= totalBeacons && totalBeacons > 0 && !this.plugin.getSessionManager().isVampiresEternalNightActive()) {
             this.plugin.getBeaconConversionListener().triggerVampiresEternalNight();
@@ -465,7 +463,7 @@ public class BeaconConversionListener implements Listener {
         }
 
         // Reduce the vampires' max health while the final stand is active
-        for(Player player : this.plugin.getServer().getOnlinePlayers()) {
+        for (Player player : this.plugin.getServer().getOnlinePlayers()) {
             this.plugin.getEffectManager().applyHumansFinalStandHealthReduction(player);
         }
 
@@ -485,7 +483,7 @@ public class BeaconConversionListener implements Listener {
         }
 
         // Restore the vampires' max health
-        for(Player player : this.plugin.getServer().getOnlinePlayers()) {
+        for (Player player : this.plugin.getServer().getOnlinePlayers()) {
             if (this.vampireManager.isVampire(player)) {
                 this.plugin.getEffectManager().removeHumansFinalStandHealthReduction(player);
             }
@@ -500,6 +498,7 @@ public class BeaconConversionListener implements Listener {
     public void triggerVampiresEternalNight() {
         this.plugin.logInfo("VAMPIRES ETERNAL NIGHT TRIGGERED - All 7 beacons are desecrated!");
 
+        // Activate the eternal night
         this.plugin.getSessionManager().setVampiresEternalNightActive(true);
 
         for(Player player : this.plugin.getServer().getOnlinePlayers()) {
@@ -509,7 +508,7 @@ public class BeaconConversionListener implements Listener {
         }
 
         // Blind all humans while the final stand is active
-        for(Player player : this.plugin.getServer().getOnlinePlayers()) {
+        for (Player player : this.plugin.getServer().getOnlinePlayers()) {
             this.plugin.getEffectManager().applyEternalNightDarkness(player);
         }
     }
@@ -529,7 +528,7 @@ public class BeaconConversionListener implements Listener {
         }
 
         // Remove the blindness effect from humans
-        for(Player player : this.plugin.getServer().getOnlinePlayers()) {
+        for (Player player : this.plugin.getServer().getOnlinePlayers()) {
             if (this.vampireManager.isHuman(player)) {
                 this.plugin.getEffectManager().removeEternalNightDarkness(player);
             }
@@ -542,7 +541,7 @@ public class BeaconConversionListener implements Listener {
     public void shutdown() {
         int conversionCount = this.activeConversions.size();
 
-        for(ConversionData data : this.activeConversions.values()) {
+        for (ConversionData data : this.activeConversions.values()) {
             data.cleanup();
         }
 
@@ -670,19 +669,19 @@ public class BeaconConversionListener implements Listener {
          * Calculate the time needed to convert the beacon.
          */
         public void recalculateConversionTime() {
-            long currentTime = System.currentTimeMillis(), existingElapsed = currentTime - this.phaseStartTime;
-            double currentProgress = Math.min(1.0, (double)existingElapsed / (double)this.adjustedConversionTime);
+            final long currentTime = System.currentTimeMillis(), existingElapsed = currentTime - this.phaseStartTime;
+            final double currentProgress = Math.min(1.0, (double)existingElapsed / (double)this.adjustedConversionTime);
             long oldAdjustedTime = this.adjustedConversionTime;
 
             // Get the conversion multipliers for the two teams
-            double speedMultiplier = (double)this.converters.size();
-            double humanSpeedMultiplier = BeaconConversionListener.this.plugin.getConfigManager().getBeaconHumanSpeedMultiplier();
+            double speedMultiplier = this.converters.size();
+            final double humanSpeedMultiplier = BeaconConversionListener.this.plugin.getConfigManager().getBeaconHumanSpeedMultiplier();
 
             if (!this.isVampireConversion) {
                 speedMultiplier *= humanSpeedMultiplier;
             }
 
-            double finalStandMultiplier = BeaconConversionListener.this.plugin.getConfigManager().getBeaconFinalStandMultiplier();
+            final double finalStandMultiplier = BeaconConversionListener.this.plugin.getConfigManager().getBeaconFinalStandMultiplier();
             if (!this.isVampireConversion && BeaconConversionListener.this.plugin.getSessionManager().isHumansFinalStandActive() && this.converters.size() == 1) {
                 speedMultiplier = finalStandMultiplier * humanSpeedMultiplier;
             }
@@ -707,7 +706,7 @@ public class BeaconConversionListener implements Listener {
                     BeaconConversionListener.this.cancelConversion(this.beacon.getName().toLowerCase(), this);
                     BeaconConversionListener.this.activeConversions.remove(this.beacon.getName().toLowerCase());
 
-                    for(UUID converterId : this.converters) {
+                    for (UUID converterId : this.converters) {
                         Player converter = BeaconConversionListener.this.plugin.getServer().getPlayer(converterId);
                         if (converter != null && converter.isOnline()) {
                             converter.sendMessage("§c⚠ Beacon conversion cancelled - session is not active.");
@@ -719,8 +718,8 @@ public class BeaconConversionListener implements Listener {
                     BeaconConversionListener.this.activeConversions.remove(this.beacon.getName().toLowerCase());
 
                 } else {
-                    long elapsed = System.currentTimeMillis() - this.phaseStartTime;
-                    double rawProgress = Math.min(1.0, (double)elapsed / (double)this.adjustedConversionTime);
+                    final long elapsed = System.currentTimeMillis() - this.phaseStartTime;
+                    final double rawProgress = Math.min(1.0, elapsed / (double)this.adjustedConversionTime);
 
                     double displayProgress;
                     String currentPhase;
@@ -758,14 +757,14 @@ public class BeaconConversionListener implements Listener {
             this.adjustedConversionTime = BeaconConversionListener.this.BASE_CONVERSION_TIME;
 
             // Get the conversion multipliers for the two teams
-            double speedMultiplier = (double)this.converters.size();
-            double humanSpeedMultiplier = BeaconConversionListener.this.plugin.getConfigManager().getBeaconHumanSpeedMultiplier();
+            double speedMultiplier = this.converters.size();
+            final double humanSpeedMultiplier = BeaconConversionListener.this.plugin.getConfigManager().getBeaconHumanSpeedMultiplier();
 
             if (!this.isVampireConversion) {
                 speedMultiplier *= humanSpeedMultiplier;
             }
 
-            double finalStandMultiplier = BeaconConversionListener.this.plugin.getConfigManager().getBeaconFinalStandMultiplier();
+            final double finalStandMultiplier = BeaconConversionListener.this.plugin.getConfigManager().getBeaconFinalStandMultiplier();
             if (!this.isVampireConversion && BeaconConversionListener.this.plugin.getSessionManager().isHumansFinalStandActive() && this.converters.size() == 1) {
                 speedMultiplier = finalStandMultiplier * humanSpeedMultiplier;
             }
@@ -790,7 +789,7 @@ public class BeaconConversionListener implements Listener {
          * Convert the beacon into one of its captured states.
          */
         private void completeConversion() {
-            BeaconState newState = this.isVampireConversion ? BeaconState.DESECRATED : BeaconState.HOLY;
+            final BeaconState newState = this.isVampireConversion ? BeaconState.DESECRATED : BeaconState.HOLY;
             BeaconConversionListener.this.beaconManager.cancelPendingNeutralBroadcast(this.beacon.getName());
 
             long cooldownMs = BeaconConversionListener.this.plugin.getConfigManager().getBeaconConversionCooldownMs();

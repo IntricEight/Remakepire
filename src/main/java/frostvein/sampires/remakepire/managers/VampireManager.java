@@ -34,6 +34,7 @@ public class VampireManager {
     private final Map<UUID, Double> lungingPlayers = new HashMap<>();
     private final Map<UUID, Integer> stageCaps = new HashMap<>();
     private static final long LEVEL_CHANGE_COOLDOWN = 5000L, LEVEL_CHANGE_TIMEOUT = 10000L, PROTECTION_DURATION = 10000L;
+    // Vampire state tags
     public static final String HUMAN_TAG = "human", VAMPIRE_TAG = "vampire";
     public static final String VAMPIRE_STAGE1_TAG = "vampire_stage1", VAMPIRE_STAGE2_TAG = "vampire_stage2", VAMPIRE_STAGE3_TAG = "vampire_stage3";
     public static final String PROMOTION_BAN_TAG = "promotion_ban";
@@ -256,14 +257,17 @@ public class VampireManager {
                     player.addScoreboardTag(VAMPIRE_STAGE1_TAG);
                     player.setLevel(1);
                     break;
+
                 case 2:
                     player.addScoreboardTag(VAMPIRE_STAGE2_TAG);
                     player.setLevel(2);
                     break;
+
                 case 3:
                     player.addScoreboardTag(VAMPIRE_STAGE3_TAG);
                     player.setLevel(3);
                     break;
+
                 default:
                     player.addScoreboardTag(VAMPIRE_STAGE1_TAG);
                     player.setLevel(1);
@@ -349,6 +353,7 @@ public class VampireManager {
         this.applyTurningEffects(target);
         target.sendTitle("§4§lTURNED", "", 10, 60, 20);
 
+        // Inform the new sire of their fledgling's creation
         if (turner != null) {
             turner.sendTitle("§4§lNEW BLOOD", "", 10, 60, 20);
             turner.playSound(turner.getLocation(), Sound.ENTITY_ZOMBIE_VILLAGER_CURE, 0.5F, 1.2F);

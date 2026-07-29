@@ -111,7 +111,7 @@ public class ForcedCureChoiceListener implements Listener {
     }
 
     /**
-     * Prevent the player from moving once a force cure has been used on them until a choice is maded.
+     * Prevent the player from moving once a force cure has been used on them until a choice is made.
      *
      * @param event a player moving.
      */

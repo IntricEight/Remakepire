@@ -155,7 +155,7 @@ public class BatTransformationListener implements Listener {
     }
 
     /**
-     * Check if a player is in bat form when they change game modes.
+     * Ensure a player can still fly if they change game modes away from one with flight.
      *
      * @param event a player's game mode changing.
      */

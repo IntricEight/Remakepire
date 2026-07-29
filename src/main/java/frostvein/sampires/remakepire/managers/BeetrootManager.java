@@ -171,12 +171,12 @@ public class BeetrootManager {
         }
 
         // Remove any players whose processing timer has elapsed from the set of processing timers.
-        for(UUID uuid : processingToRemove) {
+        for (UUID uuid : processingToRemove) {
             this.processingTimers.remove(uuid);
         }
 
         // Handle the manual timers for the garlic immunity duration
-        for(Map.Entry<UUID, Integer> entry : this.immunityTimers.entrySet()) {
+        for (Map.Entry<UUID, Integer> entry : this.immunityTimers.entrySet()) {
             UUID playerId = entry.getKey();
 
             if (onlinePlayers.contains(playerId)) {
@@ -196,12 +196,12 @@ public class BeetrootManager {
         }
 
         // Remove any players whose immunity timer has elapsed from the set of immunity timers
-        for(UUID uuid : immunityToRemove) {
+        for (UUID uuid : immunityToRemove) {
             this.immunityTimers.remove(uuid);
         }
 
         // Handle the manual timers for the garlic recovery duration
-        for(Map.Entry<UUID, Integer> entry : this.recoveryTimers.entrySet()) {
+        for (Map.Entry<UUID, Integer> entry : this.recoveryTimers.entrySet()) {
             UUID playerId = entry.getKey();
 
             if (onlinePlayers.contains(playerId)) {
@@ -221,7 +221,7 @@ public class BeetrootManager {
         }
 
         // Remove any players whose recovery timer has elapsed from the set of recovery timers
-        for(UUID uuid : recoveryToRemove) {
+        for (UUID uuid : recoveryToRemove) {
             this.recoveryTimers.remove(uuid);
         }
 

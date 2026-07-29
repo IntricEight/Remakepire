@@ -166,7 +166,7 @@ public class BeaconManager {
             if (timePassed >= 500L) {
                 boolean cooldownsChanged = false;
 
-                for(BeaconSite beacon : this.beacons.values()) {
+                for (BeaconSite beacon : this.beacons.values()) {
                     if (beacon.isOnConversionCooldown()) {
                         beacon.reduceCooldown(timePassed);
                         cooldownsChanged = true;
@@ -188,7 +188,7 @@ public class BeaconManager {
     public void clearAllBeaconCooldownsForNewSession() {
         int clearedBeacons = 0;
 
-        for(BeaconSite beacon : this.beacons.values()) {
+        for (BeaconSite beacon : this.beacons.values()) {
             if (beacon.getConversionCooldownUntil() > 0L) {
                 beacon.setConversionCooldownUntil(0L);
                 ++clearedBeacons;
@@ -222,7 +222,7 @@ public class BeaconManager {
      * Apply regeneration to nearby humans from a holy beacon.
      */
     private void applyHolyRegeneration() {
-        for(Player player : this.plugin.getServer().getOnlinePlayers()) {
+        for (Player player : this.plugin.getServer().getOnlinePlayers()) {
             if (this.plugin.getVampireManager().isHuman(player)) {
                 BeaconSite nearestHolyBeacon = this.getNearestHolyBeacon(player.getLocation());
 
@@ -256,7 +256,7 @@ public class BeaconManager {
                 pumpkinItem.setItemMeta(meta);
             }
 
-            pumpkinItem.setData(DataComponentTypes.CUSTOM_MODEL_DATA, (CustomModelData)CustomModelData.customModelData().addString(expectedCMD).build());
+            pumpkinItem.setData(DataComponentTypes.CUSTOM_MODEL_DATA, CustomModelData.customModelData().addString(expectedCMD).build());
 
             ItemDisplay display = displayLoc.getWorld().spawn(displayLoc, ItemDisplay.class);
             display.setItemStack(pumpkinItem);
@@ -318,7 +318,7 @@ public class BeaconManager {
         } else if (fallbackLocation != null && fallbackLocation.getWorld() != null) {
             int removed = 0;
 
-            for(Entity entity : fallbackLocation.getWorld().getNearbyEntities(fallbackLocation, 5.0, 5.0, 5.0)) {
+            for (Entity entity : fallbackLocation.getWorld().getNearbyEntities(fallbackLocation, 5.0, 5.0, 5.0)) {
                 if (entity instanceof ItemDisplay) {
                     entity.remove();
                     ++removed;
@@ -356,7 +356,7 @@ public class BeaconManager {
         this.beaconDisplays.clear();
 
         this.plugin.getServer().getScheduler().runTaskLater(this.plugin, () -> {
-            for(BeaconSite beacon : this.beacons.values()) {
+            for (BeaconSite beacon : this.beacons.values()) {
                 this.createBeaconDisplay(beacon);
             }
 
@@ -368,7 +368,7 @@ public class BeaconManager {
      * Clear the beacon displays.
      */
     public void cleanupAllDisplays() {
-        for(ItemDisplay display : this.beaconDisplays.values()) {
+        for (ItemDisplay display : this.beaconDisplays.values()) {
             if (display != null && display.isValid()) {
                 display.remove();
             }
@@ -385,11 +385,11 @@ public class BeaconManager {
     private void aggressiveCleanupItemDisplays() {
         int totalRemoved = 0;
 
-        for(BeaconSite beacon : this.beacons.values()) {
+        for (BeaconSite beacon : this.beacons.values()) {
             Location location = beacon.getLocation();
 
             if (location != null && location.getWorld() != null) {
-                for(Entity entity : location.getWorld().getNearbyEntities(location, 5.0, 5.0, 5.0)) {
+                for (Entity entity : location.getWorld().getNearbyEntities(location, 5.0, 5.0, 5.0)) {
                     if (entity instanceof ItemDisplay) {
                         entity.remove();
                         ++totalRemoved;
@@ -409,7 +409,7 @@ public class BeaconManager {
     public void forceRefreshAllDisplays() {
         int refreshed = 0;
 
-        for(BeaconSite beacon : this.beacons.values()) {
+        for (BeaconSite beacon : this.beacons.values()) {
             this.updateBeaconDisplay(beacon);
             ++refreshed;
         }
@@ -427,7 +427,7 @@ public class BeaconManager {
         this.plugin.getServer().getScheduler().runTaskLater(this.plugin, () -> {
             int created = 0;
 
-            for(BeaconSite beacon : this.beacons.values()) {
+            for (BeaconSite beacon : this.beacons.values()) {
                 this.createBeaconDisplay(beacon);
                 ++created;
             }
@@ -467,8 +467,8 @@ public class BeaconManager {
                         info.append("  §cItem has no metadata!");
 
                     } else {
-                        CustomModelData cmdComponent = (CustomModelData)item.getData(DataComponentTypes.CUSTOM_MODEL_DATA);
-                        String actualCMD = cmdComponent != null && !cmdComponent.strings().isEmpty() ? (String)cmdComponent.strings().get(0) : "none";
+                        CustomModelData cmdComponent = item.getData(DataComponentTypes.CUSTOM_MODEL_DATA);
+                        String actualCMD = cmdComponent != null && !cmdComponent.strings().isEmpty() ? cmdComponent.strings().getFirst() : "none";
                         String expectedCMD = this.getCustomModelDataForState(beacon.getState());
                         info.append("  §7Actual CMD: §f").append(actualCMD);
 
@@ -500,7 +500,7 @@ public class BeaconManager {
             BeaconSite nearestHolyBeacon = null;
             double nearestDistance = Double.MAX_VALUE;
 
-            for(BeaconSite beacon : this.beacons.values()) {
+            for (BeaconSite beacon : this.beacons.values()) {
                 if (beacon.getState() == BeaconState.HOLY) {
                     Location beaconLoc = beacon.getLocation();
 
@@ -533,7 +533,7 @@ public class BeaconManager {
             BeaconSite nearestHolyBeacon = null;
             double nearestDistance = Double.MAX_VALUE;
 
-            for(BeaconSite beacon : this.beacons.values()) {
+            for (BeaconSite beacon : this.beacons.values()) {
                 if (beacon.getState() == BeaconState.HOLY) {
                     Location beaconLoc = beacon.getLocation();
 
@@ -568,7 +568,7 @@ public class BeaconManager {
      * Show all passive beacon-affiliated particles to indicate the suppression and conversion circles.
      */
     private void showAllConversionAndSuppressionCircles() {
-        for(BeaconSite beacon : this.beacons.values()) {
+        for (BeaconSite beacon : this.beacons.values()) {
             Location particleLoc = beacon.getParticleLocation();
 
             if (particleLoc != null && particleLoc.getWorld() != null) {
@@ -739,7 +739,7 @@ public class BeaconManager {
                 this.plugin.logInfo("ETERNAL NIGHT LIFTED - Not all beacons are evil anymore!");
                 this.plugin.getSessionManager().setVampiresEternalNightActive(false);
 
-                for(Player player : Bukkit.getOnlinePlayers()) {
+                for (Player player : Bukkit.getOnlinePlayers()) {
                     if (this.plugin.getVampireManager().isHuman(player)) {
                         this.plugin.getEffectManager().removeEternalNightDarkness(player);
                     }
@@ -747,7 +747,7 @@ public class BeaconManager {
                     player.sendMessage("§6A beacon has been reclaimed by the light... The eternal darkness recedes.");
                 }
 
-                for(Player player : Bukkit.getOnlinePlayers()) {
+                for (Player player : Bukkit.getOnlinePlayers()) {
                     player.playSound(player.getLocation(), Sound.BLOCK_BEACON_POWER_SELECT, SoundCategory.MASTER, 1.0F, 1.0F);
                 }
             }
@@ -775,7 +775,7 @@ public class BeaconManager {
                 farMessage = "§6A holy beacon has been activated somewhere amongst the land, you feel its divine presence radiate through the earth. \n§7But just as soon after, a chill runs through your spine, like a strange dark force is moving in to snuff the light. Probably just your nerves...\n";
             }
 
-            for(Player player : Bukkit.getOnlinePlayers()) {
+            for (Player player : Bukkit.getOnlinePlayers()) {
                 player.playSound(player.getLocation(), Sound.ENTITY_WITHER_SPAWN, SoundCategory.MASTER, 0.8F, 0.7F);
                 player.addPotionEffect(new PotionEffect(PotionEffectType.DARKNESS, 60, 0, false, false));
 
@@ -902,7 +902,7 @@ public class BeaconManager {
             if (this.getHolyBeacons().size() < this.getAllBeacons().size()) {
                 this.plugin.logInfo("HUMANS FINAL STAND ENDED - Not all beacons are holy anymore!");
 
-                for(Player player : Bukkit.getOnlinePlayers()) {
+                for (Player player : Bukkit.getOnlinePlayers()) {
                     if (this.plugin.getVampireManager().isVampire(player)) {
                         this.plugin.getEffectManager().removeHumansFinalStandHealthReduction(player);
                     }
@@ -910,7 +910,7 @@ public class BeaconManager {
                     player.sendMessage("§4A beacon has fallen to darkness... The humans' final stand wavers.");
                 }
 
-                for(Player player : Bukkit.getOnlinePlayers()) {
+                for (Player player : Bukkit.getOnlinePlayers()) {
                     player.playSound(player.getLocation(), Sound.ENTITY_WITHER_AMBIENT, SoundCategory.MASTER, 1.0F, 0.8F);
                 }
 
@@ -931,7 +931,7 @@ public class BeaconManager {
      * Generate the team alignment particles around the beacons.
      */
     private void showBeaconParticles() {
-        for(BeaconSite beacon : this.beacons.values()) {
+        for (BeaconSite beacon : this.beacons.values()) {
             Location particleLoc = beacon.getParticleLocation();
 
             if (particleLoc != null && particleLoc.getWorld() != null && beacon.shouldShowParticles()) {
@@ -978,9 +978,9 @@ public class BeaconManager {
      * @param location the center of the particle spawns.
      */
     private void showHolyParticles(Location location) {
-        double radius = 1.5;
+        final double radius = 1.5;
 
-        for(int i = 0; i < 8; ++i) {
+        for (int i = 0; i < 8; ++i) {
             double angle = (Math.PI * 2.0) * i / 8.0;
             Location particleLoc = location.clone().add(Math.cos(angle) * radius, Math.sin(System.currentTimeMillis() / 1000.0) * 0.3, Math.sin(angle) * radius);
             location.getWorld().spawnParticle(Particle.WHITE_ASH, particleLoc, 2, 0.1, 0.1, 0.1, 0.01);
@@ -1001,9 +1001,9 @@ public class BeaconManager {
      */
     private void showDesecratedParticles(Location location) {
         location.getWorld().spawnParticle(Particle.LARGE_SMOKE, location, 3, 0.3, 0.1, 0.3, 0.02);
-        double radius = 1.2;
+        final double radius = 1.2;
 
-        for(int i = 0; i < 6; ++i) {
+        for (int i = 0; i < 6; ++i) {
             double angle = (Math.PI * 2.0) * i / 6.0;
 
             Location particleLoc = location.clone().add(Math.cos(angle) * radius, -Math.sin(System.currentTimeMillis() / 800.0) * 0.2, Math.sin(angle) * radius);
@@ -1083,7 +1083,7 @@ public class BeaconManager {
             int maxY = location.getWorld().getMaxHeight() - 1;
             int minY = location.getWorld().getMinHeight();
 
-            for(int y = maxY; y >= minY; --y) {
+            for (int y = maxY; y >= minY; --y) {
                 highest.setY(y);
                 Material blockType = highest.getBlock().getType();
 
@@ -1126,7 +1126,7 @@ public class BeaconManager {
     /**
      * Spawn a particle for the beacon's suppression range.
      *
-     * @param location
+     * @param location The location of a particle indicating the edge of the holy beacon's suppression range.
      */
     private void showSuppressionRangeParticle(Location location) {
         if (location != null && location.getWorld() != null) {
@@ -1141,13 +1141,13 @@ public class BeaconManager {
     /**
      * Return the highest solid block within 5 vertical blocks of the location.
      *
-     * @param location a location.
+     * @param location a location with ground beneath it.
      * @return A location of the first solid block at or under (within 5 blocks) the location.
      */
     private Location findGroundLevel(Location location) {
         Location ground = location.clone();
 
-        for(int y = 0; y >= -5; --y) {
+        for (int y = 0; y >= -5; --y) {
             ground.setY(location.getY() + y);
 
             if (ground.getBlock().getType().isSolid()) {
@@ -1168,7 +1168,7 @@ public class BeaconManager {
     public List<BeaconSite> getBeaconsInRange(Location location, double range) {
         List<BeaconSite> nearby = new ArrayList<>();
 
-        for(BeaconSite beacon : this.beacons.values()) {
+        for (BeaconSite beacon : this.beacons.values()) {
             Location beaconLoc = beacon.getLocation();
 
             if (beaconLoc != null && beaconLoc.getWorld().equals(location.getWorld()) && beaconLoc.distance(location) <= range) {
@@ -1190,7 +1190,7 @@ public class BeaconManager {
             BeaconSite closestHolyBeacon = null;
             double closestDistance = Double.MAX_VALUE;
 
-            for(BeaconSite beacon : this.beacons.values()) {
+            for (BeaconSite beacon : this.beacons.values()) {
                 if (beacon.getState() == BeaconState.HOLY) {
                     Location beaconLoc = beacon.getLocation();
 
@@ -1218,9 +1218,9 @@ public class BeaconManager {
      */
     public List<String> getBeaconList() {
         List<String> list = new ArrayList<>();
+
         if (this.beacons.isEmpty()) {
             list.add("§7No beacons configured.");
-            return list;
 
         } else {
             list.add("§6§l=== BEACON SITES ===");
@@ -1228,15 +1228,15 @@ public class BeaconManager {
             list.add("");
             Map<BeaconSite.BeaconState, List<BeaconSite>> grouped = new HashMap<>();
 
-            for(BeaconSite.BeaconState state : BeaconState.values()) {
+            for (BeaconSite.BeaconState state : BeaconState.values()) {
                 grouped.put(state, new ArrayList<>());
             }
 
-            for(BeaconSite beacon : this.beacons.values()) {
+            for (BeaconSite beacon : this.beacons.values()) {
                 (grouped.get(beacon.getState())).add(beacon);
             }
 
-            for(BeaconSite.BeaconState state : BeaconState.values()) {
+            for (BeaconSite.BeaconState state : BeaconState.values()) {
                 List<BeaconSite> stateBeacons = grouped.get(state);
 
                 if (!stateBeacons.isEmpty()) {
@@ -1246,29 +1246,33 @@ public class BeaconManager {
                         case HOLY:
                             icon = "✦ ";
                             break;
+
                         case DESECRATED:
                             icon = "☠ ";
+
                         case PERMANENTLY_DESECRATED:
                             break;
+
                         case NEUTRAL:
                             icon = "◯ ";
                             break;
+
                         default:
                             break;
                     }
 
                     list.add(state.getColorCode() + "§l" + icon + state.getDisplayName() + " Beacons: §r§7(" + stateBeacons.size() + ")");
 
-                    for(BeaconSite beacon : stateBeacons) {
+                    for (BeaconSite beacon : stateBeacons) {
                         list.add("  " + beacon.getStatusString().replace("\n", "\n  "));
                     }
 
                     list.add("");
                 }
             }
-
-            return list;
         }
+
+        return list;
     }
 
     /**
@@ -1279,7 +1283,7 @@ public class BeaconManager {
             try {
                 this.plugin.getLogger().fine("Saving " + this.beacons.size() + " beacons to file...");
 
-                for(Map.Entry<String, BeaconSite> entry : this.beacons.entrySet()) {
+                for (Map.Entry<String, BeaconSite> entry : this.beacons.entrySet()) {
                     BeaconSite beacon = entry.getValue();
 
                     if (beacon == null) {
@@ -1452,19 +1456,22 @@ public class BeaconManager {
                         }
                     }
 
-                    Type type = (new TypeToken<Map<String, BeaconSite>>() {
-                    }).getType();
+                    Type type = (new TypeToken<Map<String, BeaconSite>>() {}).getType();
                     Map<String, BeaconSite> loadedBeacons = this.gson.fromJson(fileContent, type);
+
                     if (loadedBeacons != null) {
                         int validBeacons = 0, invalidBeacons = 0;
 
-                        for(Map.Entry<String, BeaconSite> entry : loadedBeacons.entrySet()) {
+                        for (Map.Entry<String, BeaconSite> entry : loadedBeacons.entrySet()) {
                             BeaconSite beacon = entry.getValue();
+
                             if (beacon == null) {
                                 this.plugin.getLogger().warning("Beacon with key '" + entry.getKey() + "' is null");
                                 ++invalidBeacons;
+
                             } else if (beacon.getName() != null && beacon.getWorldName() != null) {
                                 ++validBeacons;
+
                             } else {
                                 this.plugin.getLogger().warning("Beacon '" + entry.getKey() + "' has null fields");
                                 ++invalidBeacons;
@@ -1474,6 +1481,7 @@ public class BeaconManager {
                         this.beacons.clear();
                         this.beacons.putAll(loadedBeacons);
 
+                        // Refresh the beacon displays
                         this.plugin.getServer().getScheduler().runTaskLater(this.plugin, () -> {
                             this.recreateAllDisplays();
                             this.validateDisplays();
@@ -1485,8 +1493,6 @@ public class BeaconManager {
 
                     this.plugin.getLogger().severe("Gson returned null when parsing beacons file!");
                 }
-
-                return;
 
             } catch (IOException e) {
                 this.plugin.getLogger().severe("Failed to load beacons: " + e.getMessage());
@@ -1528,16 +1534,16 @@ public class BeaconManager {
      */
     private void migrateBeaconCooldownsToSessionTime() {
         this.plugin.logInfo("Migrating existing beacon cooldowns from system time to session time...");
-        long currentSystemTime = System.currentTimeMillis();
-        long currentSessionTime = this.plugin.getSessionManager().getSessionTime();
+        final long currentSystemTime = System.currentTimeMillis();
+        final long currentSessionTime = this.plugin.getSessionManager().getSessionTime();
         int migratedBeacons = 0;
 
-        for(BeaconSite beacon : this.beacons.values()) {
+        for (BeaconSite beacon : this.beacons.values()) {
             long systemCooldownUntil = beacon.getConversionCooldownUntil();
 
             if (systemCooldownUntil > currentSystemTime) {
-                long remainingSystemTime = systemCooldownUntil - currentSystemTime;
-                long newSessionCooldownUntil = currentSessionTime + remainingSystemTime / 2L;
+                final long remainingSystemTime = systemCooldownUntil - currentSystemTime;
+                final long newSessionCooldownUntil = currentSessionTime + remainingSystemTime / 2L;
                 beacon.setConversionCooldownUntil(newSessionCooldownUntil);
                 ++migratedBeacons;
             }
@@ -1559,12 +1565,12 @@ public class BeaconManager {
         Map<BeaconSite.BeaconState, Integer> stats = new HashMap<>();
 
         // Set the number of each alignment to 0
-        for(BeaconSite.BeaconState state : BeaconState.values()) {
+        for (BeaconSite.BeaconState state : BeaconState.values()) {
             stats.put(state, 0);
         }
 
         // Increment the alignment's counter when a beacon is found to match it
-        for(BeaconSite beacon : this.beacons.values()) {
+        for (BeaconSite beacon : this.beacons.values()) {
             stats.put(beacon.getState(), stats.get(beacon.getState()) + 1);
         }
 
@@ -1577,7 +1583,7 @@ public class BeaconManager {
     public void validateBeacons() {
         List<String> invalidBeacons = new ArrayList<>();
 
-        for(Map.Entry<String, BeaconSite> entry : this.beacons.entrySet()) {
+        for (Map.Entry<String, BeaconSite> entry : this.beacons.entrySet()) {
             if ((entry.getValue()).getLocation() == null) {
                 invalidBeacons.add(entry.getKey());
             }
@@ -1586,7 +1592,7 @@ public class BeaconManager {
         if (!invalidBeacons.isEmpty()) {
             this.plugin.getLogger().warning("Found " + invalidBeacons.size() + " beacons with invalid worlds:");
 
-            for(String name : invalidBeacons) {
+            for (String name : invalidBeacons) {
                 this.plugin.getLogger().warning("  - " + name + " (world: " + (this.beacons.get(name)).getWorldName() + ")");
             }
         }
@@ -1634,7 +1640,7 @@ public class BeaconManager {
             this.plugin.logInfo("Stopped holy beacon regeneration task");
         }
 
-        for(BukkitTask task : this.pendingNeutralBroadcasts.values()) {
+        for (BukkitTask task : this.pendingNeutralBroadcasts.values()) {
             if (task != null) {
                 task.cancel();
             }
@@ -1669,7 +1675,7 @@ public class BeaconManager {
                     message = "§7Beacon §e" + beacon.getName() + " §7is now neutral.";
                 }
 
-                for(Player player : this.plugin.getServer().getOnlinePlayers()) {
+                for (Player player : this.plugin.getServer().getOnlinePlayers()) {
                     player.sendMessage(message);
                 }
             }
@@ -1711,7 +1717,7 @@ public class BeaconManager {
             return;
         }
 
-        for(Player player : this.plugin.getServer().getOnlinePlayers()) {
+        for (Player player : this.plugin.getServer().getOnlinePlayers()) {
             player.sendMessage(message);
         }
     }
@@ -1723,7 +1729,7 @@ public class BeaconManager {
         if (!this.beacons.isEmpty()) {
             boolean allDesecrated = true, allHoly = true;
 
-            for(BeaconSite beacon : this.beacons.values()) {
+            for (BeaconSite beacon : this.beacons.values()) {
                 if (beacon.getState() != BeaconState.DESECRATED && beacon.getState() != BeaconState.PERMANENTLY_DESECRATED) {
                     allDesecrated = false;
                 }
@@ -1736,7 +1742,7 @@ public class BeaconManager {
             if (allDesecrated) {
                 boolean humansRemain = false;
 
-                for(Player player : this.plugin.getServer().getOnlinePlayers()) {
+                for (Player player : this.plugin.getServer().getOnlinePlayers()) {
                     if (player.getGameMode() == GameMode.SURVIVAL && this.plugin.getVampireManager().isHuman(player)) {
                         humansRemain = true;
                         break;
@@ -1750,7 +1756,7 @@ public class BeaconManager {
                     message = "§cYou are free of your chains, creatures of the night...";
                 }
 
-                for(Player player : this.plugin.getServer().getOnlinePlayers()) {
+                for (Player player : this.plugin.getServer().getOnlinePlayers()) {
                     if (this.plugin.getVampireManager().isVampire(player)) {
                         player.sendMessage(message);
                     }
@@ -1758,7 +1764,7 @@ public class BeaconManager {
             } else if (allHoly) {
                 boolean vampiresRemain = false;
 
-                for(Player player : this.plugin.getServer().getOnlinePlayers()) {
+                for (Player player : this.plugin.getServer().getOnlinePlayers()) {
                     if (player.getGameMode() == GameMode.SURVIVAL && this.plugin.getVampireManager().isVampire(player)) {
                         vampiresRemain = true;
                         break;
@@ -1766,7 +1772,7 @@ public class BeaconManager {
                 }
 
                 if (vampiresRemain) {
-                    for(Player player : this.plugin.getServer().getOnlinePlayers()) {
+                    for (Player player : this.plugin.getServer().getOnlinePlayers()) {
                         if (this.plugin.getVampireManager().isHuman(player)) {
                             player.sendMessage("§aBut while vampires remain... Now only the vampires lie between you and freedom...");
                         }
@@ -1774,7 +1780,7 @@ public class BeaconManager {
                 } else {
                     String townName = plugin.getConfigManager().getTownName();
 
-                    for(Player player : this.plugin.getServer().getOnlinePlayers()) {
+                    for (Player player : this.plugin.getServer().getOnlinePlayers()) {
                         if (this.plugin.getVampireManager().isVampire(player)) {
                             player.sendTitle("§c§lDEFEAT", "§7The light has prevailed", 20, 100, 40);
                             player.sendMessage("");

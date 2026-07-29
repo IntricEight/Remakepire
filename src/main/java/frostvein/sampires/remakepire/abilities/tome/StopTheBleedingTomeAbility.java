@@ -185,7 +185,7 @@ public class StopTheBleedingTomeAbility extends TomeAbility {
         Player nearest = null;
         double nearestDistance = maxDistance, distance;
 
-        for(Player other : Bukkit.getOnlinePlayers()) {
+        for (Player other : Bukkit.getOnlinePlayers()) {
             if (!other.equals(player) && other.getWorld().equals(player.getWorld())) {
                 distance = player.getLocation().distance(other.getLocation());
 
@@ -339,6 +339,7 @@ public class StopTheBleedingTomeAbility extends TomeAbility {
                                 int secondsRemaining = HealingSession.this.ticksRemaining / 20;
                                 String timeDisplay = VampireAbilityManager.formatTime(secondsRemaining);
 
+                                // Let the player(s) involved know what's going on
                                 if (HealingSession.this.isSelfHeal) {
                                     currentHealer.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent("§aHealing yourself... §e" + timeDisplay + " §aremaining"));
                                 } else {

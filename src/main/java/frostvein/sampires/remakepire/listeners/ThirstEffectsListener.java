@@ -35,6 +35,9 @@ public class ThirstEffectsListener implements Listener {
         this.thirstManager = plugin.getThirstManager();
     }
 
+    /**
+     * Begin running the custom food regeneration process.
+     */
     public void startTasks() {
         this.startFoodRegenerationTask();
     }

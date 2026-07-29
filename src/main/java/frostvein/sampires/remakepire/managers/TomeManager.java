@@ -128,7 +128,7 @@ public class TomeManager {
                 this.playerTomeUsageSession.put(player.getUniqueId(), currentSessionId);
 
                 // Set a timer to remove the player from the tome prevention list after the timer elapses
-                BukkitTask absorptionCooldonTask = Bukkit.getScheduler().runTaskLater(this.plugin, () -> {
+                BukkitTask absorptionCooldownTask = Bukkit.getScheduler().runTaskLater(this.plugin, () -> {
                     // Only remove the player if tome capping is not enabled. After the timer elapses
                     if (!plugin.getConfigManager().isTomeAbsorptionCapped()) {
                         this.playerTomeUsageSession.remove(player.getUniqueId());
@@ -252,8 +252,8 @@ public class TomeManager {
             ItemMeta meta = book.getItemMeta();
 
             if (meta != null) {
-                String displayName = this.formatAbilityName(abilityName);
-                boolean hasAbility = this.hasAbility(target, abilityName);
+                final String displayName = this.formatAbilityName(abilityName);
+                final boolean hasAbility = this.hasAbility(target, abilityName);
 
                 if (hasAbility) {
                     meta.setDisplayName("§a✓ " + displayName + " §7(Already has)");
@@ -307,7 +307,7 @@ public class TomeManager {
         ItemMeta meta = book.getItemMeta();
 
         if (meta != null) {
-            boolean hasTag = target.getScoreboardTags().contains(tag);
+            final boolean hasTag = target.getScoreboardTags().contains(tag);
 
             if (hasTag) {
                 meta.setDisplayName("§a✓ " + displayName + " §7(Read)");

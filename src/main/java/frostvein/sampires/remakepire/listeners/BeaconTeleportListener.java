@@ -49,6 +49,7 @@ public class BeaconTeleportListener implements Listener {
             if (event.getWhoClicked() instanceof Player player) {
                 ItemStack clickedItem = event.getCurrentItem();
 
+                // Check that the player clicked a valid slot in the inventory GUI
                 if (clickedItem != null && clickedItem.getType() == Material.BEACON) {
                     ItemMeta meta = clickedItem.getItemMeta();
 
@@ -206,8 +207,7 @@ public class BeaconTeleportListener implements Listener {
         UUID playerId = player.getUniqueId();
 
         if (this.channelingPlayers.containsKey(playerId)) {
-            Location from = event.getFrom();
-            Location to = event.getTo();
+            Location from = event.getFrom(), to = event.getTo();
 
             if (to != null && (from.getX() != to.getX() || from.getY() != to.getY() || from.getZ() != to.getZ())) {
                 this.cancelChanneling(playerId, true);
@@ -222,8 +222,7 @@ public class BeaconTeleportListener implements Listener {
      */
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
-        UUID playerId = event.getPlayer().getUniqueId();
-        this.cancelChanneling(playerId, false);
+        this.cancelChanneling(event.getPlayer().getUniqueId(), false);
     }
 
     /**
@@ -266,7 +265,6 @@ public class BeaconTeleportListener implements Listener {
 
                 } else {
                     player.sendMessage("§cBeacon travel failed. The destination may be unsafe or blocked.");
-//                    BeaconTeleportListener.this.plugin.getLogger().warning("Beacon travel failed for " + player.getName() + " to beacon: " + beacon.getName());
                     plugin.getLogger().warning("Beacon travel failed for " + player.getName() + " to beacon: " + beacon.getName());
                 }
             }

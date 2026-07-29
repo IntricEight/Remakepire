@@ -29,6 +29,7 @@ public class NoSleepListener implements Listener {
 
         if (this.plugin.getVampireManager().isVampire(player)) {
             player.sendMessage("§cYou close your eyes... And are left disappointed. Once again, you find it impossible to fall asleep.");
+
         } else if (this.plugin.getVampireManager().isHuman(player)) {
             player.sendMessage("§cYou close your eyes... And are left disappointed. You feel too uneasy to sleep.");
         }

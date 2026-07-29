@@ -12,9 +12,9 @@ import org.bukkit.scheduler.BukkitTask;
 import frostvein.sampires.remakepire.RemakepirePlugin;
 
 public class BloodMoonManager {
-    private boolean isBloodMoonActive = false;
     private RemakepirePlugin plugin;
     private BukkitTask vampireBuffTask;
+    private boolean isBloodMoonActive = false;
 
     /**
      * Create an instance of the Blood Moon manager.
@@ -35,9 +35,9 @@ public class BloodMoonManager {
      * Begin or end the blood moon depending on the time of day and moon phase
      */
     private void checkTimeAndMoon() {
-        long fullTime = this.plugin.getWorld().getFullTime();
-        boolean isNight = !this.plugin.getEffectManager().isDaytime(this.plugin.getWorld());
-        boolean isFullMoon = fullTime % 192000L < 24000L;
+        final long fullTime = this.plugin.getWorld().getFullTime();
+        final boolean isNight = !this.plugin.getEffectManager().isDaytime(this.plugin.getWorld());
+        final boolean isFullMoon = fullTime % 192000L < 24000L;
 
         if (isNight && isFullMoon && !this.isBloodMoonActive) {
             this.startBloodMoon(this.plugin.getWorld());
@@ -106,6 +106,7 @@ public class BloodMoonManager {
                     if (this.plugin.getEffectManager().canPlayerSeeSky(player)) {
                         player.addPotionEffect(new PotionEffect(PotionEffectType.UNLUCK, 240, 0, false, false), false);
 
+                        // Inform the vampire of the Blood Moon's influence
                         if (!player.getScoreboardTags().contains(SessionManager.INFORMED_BLOOD_MOON)) {
                             player.addScoreboardTag(SessionManager.INFORMED_BLOOD_MOON);
                             player.playSound(player, Sound.AMBIENT_NETHER_WASTES_MOOD, 1.0F, 1.0F);

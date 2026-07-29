@@ -373,7 +373,7 @@ public class CombatListener implements Listener {
 
                                     victim.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 200, 1, false, false));
                                     attacker.sendMessage("§5You have turned " + victim.getName() + " into a vampire.");
-                                    int killThirst = this.plugin.getThirstManager().getKillThirstReward(attacker, victim);
+                                    final int killThirst = this.plugin.getThirstManager().getKillThirstReward(attacker, victim);
                                     this.plugin.getThirstManager().modifyQuench(attacker, killThirst, true);
 
                                     attacker.sendMessage("§cThe taste of fresh blood coats your throat as you feed, you have successfully turned " + victim.getName() + " into a creature of the night");
@@ -392,10 +392,10 @@ public class CombatListener implements Listener {
                                 boolean killedWithWoodenSword = weaponType == Material.WOODEN_SWORD;
 
                                 if (victim.getHealth() - event.getFinalDamage() <= 0.0) {
-                                    int vampireStage = this.vampireManager.getVampireStage(victim);
-                                    int maximumStakeableStage = this.plugin.getConfigManager().getPermadeathMinimumStage();
+                                    final int vampireStage = this.vampireManager.getVampireStage(victim);
+                                    final int maximumStakeableStage = this.plugin.getConfigManager().getPermadeathMinimumStage();
+                                    final boolean canBeStaked = killedWithWoodenSword && vampireStage <= maximumStakeableStage;
 
-                                    boolean canBeStaked = killedWithWoodenSword && vampireStage <= maximumStakeableStage;
                                     if (!killedWithIronWeapon && !canBeStaked) {
                                         event.setCancelled(true);
                                         victim.setHealth(1.0);
@@ -465,7 +465,7 @@ public class CombatListener implements Listener {
                             player.setHealth(1.0);
                         }
                     } else if (this.vampireManager.isHuman(player)) {
-                        // If the config is set to allow non-vampire kill sources on humans, check if the human has ran out of lives
+                        // If the config is set to allow non-vampire kill sources on humans, check if the human has run out of lives
                         if (plugin.getConfigManager().isLifeLimitEnforced() && player.getHealth() - event.getFinalDamage() <= 0) {
                             try {
                                 Scoreboard mainScoreboard = Bukkit.getScoreboardManager().getMainScoreboard();

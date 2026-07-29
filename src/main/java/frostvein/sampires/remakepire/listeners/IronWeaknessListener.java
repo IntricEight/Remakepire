@@ -43,7 +43,7 @@ public class IronWeaknessListener implements Listener {
     private final Map<UUID, Long> knockbackCooldowns;
     // Controls how close a vampire has to get to be repelled or weakened.
     private final double REPEL_DISTANCE = 2.0;
-    private final double WEAKNESSS_DISTANCE = 5.0;
+    private final double WEAKNESS_DISTANCE = 5.0;
     // Controls how far and quickly a vampire gets thrown back.
     private final double REPEL_STRENGTH = 0.5;
 
@@ -139,7 +139,7 @@ public class IronWeaknessListener implements Listener {
 
             ItemStack[] armor = inventory.getArmorContents();
 
-            for(int i = 0; i < armor.length; ++i) {
+            for (int i = 0; i < armor.length; ++i) {
                 ItemStack item = armor[i];
 
                 if (item != null && !item.getType().isAir() && this.ironMaterials.contains(item.getType())) {
@@ -170,7 +170,7 @@ public class IronWeaknessListener implements Listener {
      * Remove silver items from the inventories of higher vampires.
      */
     private void scanAndRemoveIronFromInventories() {
-        for(Player player : Bukkit.getOnlinePlayers()) {
+        for (Player player : Bukkit.getOnlinePlayers()) {
             scanAndRemoveIronFromSingleInventory(player);
         }
     }
@@ -373,9 +373,9 @@ public class IronWeaknessListener implements Listener {
         double nearestDistance = Double.MAX_VALUE;
 
         // Search for the silver block within a cube around the player
-        for(int dx = (int)(-1 * REPEL_DISTANCE); dx <= (int)(REPEL_DISTANCE); ++dx) {
-            for(int dy = (int)(-1 * REPEL_DISTANCE); dy <= (int)(REPEL_DISTANCE); ++dy) {
-                for(int dz = (int)(-1 * REPEL_DISTANCE); dz <= (int)(REPEL_DISTANCE); ++dz) {
+        for (int dx = (int)(-1 * REPEL_DISTANCE); dx <= (int)(REPEL_DISTANCE); ++dx) {
+            for (int dy = (int)(-1 * REPEL_DISTANCE); dy <= (int)(REPEL_DISTANCE); ++dy) {
+                for (int dz = (int)(-1 * REPEL_DISTANCE); dz <= (int)(REPEL_DISTANCE); ++dz) {
                     Block block = location.getWorld().getBlockAt(x + dx, y + dy, z + dz);
 
                     if (this.ironMaterials.contains(block.getType())) {
@@ -402,11 +402,11 @@ public class IronWeaknessListener implements Listener {
      * Determine if the vampire should be weakened by nearby silver.
      */
     public void checkIronProximity() {
-        for(Player player : Bukkit.getOnlinePlayers()) {
+        for (Player player : Bukkit.getOnlinePlayers()) {
             if (this.vampireManager.isVampire(player)) {
                 Location playerLoc = player.getLocation();
 
-                if (this.isNearIronBlock(playerLoc, WEAKNESSS_DISTANCE)) {
+                if (this.isNearIronBlock(playerLoc, WEAKNESS_DISTANCE)) {
                     this.applyIronEffects(player);
                 }
             }
@@ -423,9 +423,9 @@ public class IronWeaknessListener implements Listener {
     private boolean isNearIronBlock(Location location, double radius) {
         int x = location.getBlockX(), y = location.getBlockY(), z = location.getBlockZ();
 
-        for(double dx = -radius; dx <= radius; ++dx) {
-            for(double dy = -radius; dy <= radius; ++dy) {
-                for(double dz = -radius; dz <= radius; ++dz) {
+        for (double dx = -radius; dx <= radius; ++dx) {
+            for (double dy = -radius; dy <= radius; ++dy) {
+                for (double dz = -radius; dz <= radius; ++dz) {
                     Block block = location.getWorld().getBlockAt((int)(x + dx), (int)(y + dy), (int)(z + dz));
 
                     if (this.ironMaterials.contains(block.getType())) {

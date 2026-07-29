@@ -56,7 +56,7 @@ public class HolyWaterEffectManager implements Listener {
 
             for (Entity nearby : splashLocation.getWorld().getNearbyEntities(splashLocation, splashRadius, splashRadius, splashRadius)) {
                 if (nearby instanceof Player player) {
-                    double distance = nearby.getLocation().distance(splashLocation);
+                    final double distance = nearby.getLocation().distance(splashLocation);
 
                     if (distance <= splashRadius) {
                         this.processHolyWaterHit(player);

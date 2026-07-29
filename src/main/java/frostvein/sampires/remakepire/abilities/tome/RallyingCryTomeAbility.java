@@ -40,14 +40,14 @@ public class RallyingCryTomeAbility extends TomeAbility {
                     .filter((entity) -> entity instanceof Player).map((entity) -> (Player)entity).filter((nearbyPlayer) -> !this.plugin.getVampireManager().isHuman(nearbyPlayer)).toList();
 
             // Give nearby humans the strength effect
-            for(Player nearbyHuman : nearbyHumans) {
+            for (Player nearbyHuman : nearbyHumans) {
                 nearbyHuman.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH, STRENGTH_DURATION, STRENGTH_AMPLIFIER, false, false));
                 nearbyHuman.sendMessage("§6" + player.getName() + "'s rallying cry fills you with strength.");
                 othersAffected = true;
             }
 
             // Inform nearby vampires of their inhumanity
-            for(Player nearbyVampire : nearbyVampires) {
+            for (Player nearbyVampire : nearbyVampires) {
                 nearbyVampire.sendMessage("§7A human nearby rallies strength to their comrades. The words find no purchase in your cold dead heart.");
             }
 

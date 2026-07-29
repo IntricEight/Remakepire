@@ -89,7 +89,7 @@ public class TomeVampireRestrictionListener implements Listener {
     private void startTomeCheckTask() {
         (new BukkitRunnable() {
             public void run() {
-                for(Player player : Bukkit.getOnlinePlayers()) {
+                for (Player player : Bukkit.getOnlinePlayers()) {
                     if (TomeVampireRestrictionListener.this.isRestrictedVampire(player)) {
                         TomeVampireRestrictionListener.this.checkAndDropTomes(player);
                     }
@@ -106,7 +106,7 @@ public class TomeVampireRestrictionListener implements Listener {
     private void checkAndDropTomes(Player player) {
         boolean foundTome = false;
 
-        for(int i = 0; i < player.getInventory().getSize(); ++i) {
+        for (int i = 0; i < player.getInventory().getSize(); ++i) {
             ItemStack item = player.getInventory().getItem(i);
 
             if (this.isTome(item)) {

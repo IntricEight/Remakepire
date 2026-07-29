@@ -22,8 +22,7 @@ import frostvein.sampires.remakepire.beacons.BeaconSite;
 import frostvein.sampires.remakepire.managers.SessionManager;
 import frostvein.sampires.remakepire.managers.VampireManager;
 
-public class MovementBoundaryListener
-implements Listener {
+public class MovementBoundaryListener implements Listener {
     private final RemakepirePlugin plugin;
     private final FileConfiguration textConfig;
     private final String TOWN_NAME;
@@ -75,7 +74,7 @@ implements Listener {
         }
 
         // Determine the condition of the player's movement attempt regarding the border
-        boolean wasInsideBoundary = this.isInsideBoundary(from), isOutsideBoundary = !this.isInsideBoundary(to);
+        final boolean wasInsideBoundary = this.isInsideBoundary(from), isOutsideBoundary = !this.isInsideBoundary(to);
 
         // End the event check early if the player is still inside the border
         if (!isOutsideBoundary) {
@@ -83,7 +82,7 @@ implements Listener {
         }
 
         // Tune the freedom message based on the game's condition and player's alignment
-        boolean canLeave = this.meetsLeaveCondition(player);
+        final boolean canLeave = this.meetsLeaveCondition(player);
 
         // Send the leave message to the player if they have legally escaped beyond the border
         if (canLeave && wasInsideBoundary && isOutsideBoundary) {
