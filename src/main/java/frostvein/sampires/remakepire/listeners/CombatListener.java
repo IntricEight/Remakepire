@@ -25,7 +25,6 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Scoreboard;
 import frostvein.sampires.remakepire.RemakepirePlugin;
-import frostvein.sampires.remakepire.managers.BeetrootManager;
 import frostvein.sampires.remakepire.managers.SessionManager;
 import frostvein.sampires.remakepire.managers.VampireAbilityManager;
 import frostvein.sampires.remakepire.managers.VampireManager;
@@ -34,7 +33,6 @@ public class CombatListener implements Listener {
     private final RemakepirePlugin plugin;
     private final VampireManager vampireManager;
     private final VampireAbilityManager vampireAbilityManager;
-    private final BeetrootManager beetrootManager;
     private final Random random;
 
     /**
@@ -46,7 +44,6 @@ public class CombatListener implements Listener {
         this.plugin = plugin;
         this.vampireManager = plugin.getVampireManager();
         this.vampireAbilityManager = plugin.getVampireAbilityManager();
-        this.beetrootManager = plugin.getBeetrootManager();
         this.random = new Random();
     }
 
@@ -268,7 +265,7 @@ public class CombatListener implements Listener {
                                     }
 
                                     // Apply the effect of active garlic on death
-                                    if (this.beetrootManager.hasBeetrootImmunity(victim)) {
+                                    if (this.plugin.getBeetrootManager().hasBeetrootImmunity(victim)) {
                                         event.setCancelled(true);
                                         attacker.sendMessage("§cThe sting of garlic sears at your gums, protecting your meal from your bite.");
 

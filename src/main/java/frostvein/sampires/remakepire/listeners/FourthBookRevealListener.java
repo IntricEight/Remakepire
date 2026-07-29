@@ -12,11 +12,9 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BookMeta;
 import frostvein.sampires.remakepire.RemakepirePlugin;
-import frostvein.sampires.remakepire.managers.ConfigManager;
 
 public class FourthBookRevealListener implements Listener {
     private final RemakepirePlugin plugin;
-    private final ConfigManager configManager;
     private final List<Location> tomeChestLocations;
     private final Location townChestLocation;
 
@@ -27,8 +25,7 @@ public class FourthBookRevealListener implements Listener {
      */
     public FourthBookRevealListener(RemakepirePlugin plugin) {
         this.plugin = plugin;
-        this.configManager = plugin.getConfigManager();
-        this.tomeChestLocations = configManager.getTomeChestLocations();
+        this.tomeChestLocations = plugin.getConfigManager().getTomeChestLocations();
 
         if (plugin.getWorld() != null) {
             this.townChestLocation = new Location(plugin.getWorld(), 76.0, 80.0, 407.0);

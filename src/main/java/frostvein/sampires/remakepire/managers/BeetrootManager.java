@@ -26,8 +26,6 @@ import frostvein.sampires.remakepire.RemakepirePlugin;
 
 public class BeetrootManager {
     private final RemakepirePlugin plugin;
-    private final VampireManager vampireManager;
-    private final SessionManager sessionManager;
     private final ConfigManager configManager;
     public static final String BEETROOT_USED_TAG = "beetroot_used_session", BEETROOT_PROCESSING_TAG = "beetroot_processing", BEETROOT_IMMUNITY_TAG = "beetroot_immunity";
     // Controls the duration of vampire nausea when eating garlic
@@ -45,8 +43,6 @@ public class BeetrootManager {
      */
     public BeetrootManager(RemakepirePlugin plugin) {
         this.plugin = plugin;
-        this.vampireManager = plugin.getVampireManager();
-        this.sessionManager = plugin.getSessionManager();
         this.configManager = plugin.getConfigManager();
         this.setupPersistenceSystem();
         this.startBeetrootTask();
@@ -134,7 +130,7 @@ public class BeetrootManager {
     private void startBeetrootTask() {
         this.beetrootTask = (new BukkitRunnable() {
             public void run() {
-                if (BeetrootManager.this.sessionManager.isSessionActive()) {
+                if (BeetrootManager.this.plugin.getSessionManager().isSessionActive()) {
                     Set<UUID> onlinePlayers = Bukkit.getOnlinePlayers().stream().map(OfflinePlayer::getUniqueId).collect(Collectors.toSet());
                     BeetrootManager.this.processTimersForOnlinePlayers(onlinePlayers);
                 }
@@ -239,7 +235,7 @@ public class BeetrootManager {
      * @param player the player who ate the garlic.
      */
     public void handleBeetrootConsumption(Player player) {
-        if (!this.vampireManager.isHuman(player)) {
+        if (!this.plugin.getVampireManager().isHuman(player)) {
             player.sendMessage("§c§lThe garlic burns your throat and causes you to retch...");
             player.addPotionEffect(new PotionEffect(PotionEffectType.NAUSEA, NAUSEA_DURATION, NAUSEA_AMPLIFIER, false, false));
 
@@ -288,7 +284,7 @@ public class BeetrootManager {
         this.immunityTimers.put(playerId, immunitySeconds);
         this.saveTimerData();
 
-        if (this.vampireManager.isHuman(player)) {
+        if (this.plugin.getVampireManager().isHuman(player)) {
             player.sendMessage("§aThe garlic should have made its way into your system by now... You feel protected from the creatures of the night, should such things even exist.");
             player.sendMessage("§aImmunity will last for §2" + minImmunity / 60 + "-" + maxImmunity / 60 + " minutes§a.");
         }
@@ -312,7 +308,7 @@ public class BeetrootManager {
         this.recoveryTimers.put(playerId, recoverySeconds);
         this.saveTimerData();
 
-        if (this.vampireManager.isHuman(player)) {
+        if (this.plugin.getVampireManager().isHuman(player)) {
             player.sendMessage("§cYou imagine by now that the effects of the garlic have worn off...");
             player.sendMessage("§cThe strain on your body is severe. You cannot handle more garlic for §4" + minRecovery / 60 + "-" + maxRecovery / 60 + " minutes§a.");
         }
@@ -328,7 +324,7 @@ public class BeetrootManager {
     private void endRecoveryPeriod(Player player) {
         player.removeScoreboardTag(BEETROOT_USED_TAG);
 
-        if (this.vampireManager.isHuman(player)) {
+        if (this.plugin.getVampireManager().isHuman(player)) {
             player.sendMessage("§aYour body seems to have recovered from the lingering effects of the garlic.");
         }
 

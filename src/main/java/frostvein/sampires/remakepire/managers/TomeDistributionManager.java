@@ -342,7 +342,8 @@ public class TomeDistributionManager {
         ItemStack cureBook = this.createRandomCureBook();
         chestInventory.addItem(cureBook);
 
-        this.plugin.logInfo("TomeDistributionManager: Replaced chest contents with cure book (" + cureBook.getItemMeta().getDisplayName() + ") at " + this.conversionAssistant.locationToString(location));
+        this.plugin.logInfo("TomeDistributionManager: Replaced chest contents with cure book (" +
+                cureBook.getItemMeta().getDisplayName() + ") at " + this.conversionAssistant.locationToString(location));
     }
 
     /**

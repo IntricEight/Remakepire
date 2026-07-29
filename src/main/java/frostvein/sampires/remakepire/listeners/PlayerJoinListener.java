@@ -1,8 +1,6 @@
 package frostvein.sampires.remakepire.listeners;
 
 import java.util.List;
-
-import frostvein.sampires.remakepire.managers.*;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -11,12 +9,12 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.scoreboard.Team;
 import frostvein.sampires.remakepire.RemakepirePlugin;
 import frostvein.sampires.remakepire.abilities.tome.TurnUndeadTomeAbility;
+import frostvein.sampires.remakepire.managers.SessionManager;
+import frostvein.sampires.remakepire.managers.VampireManager;
 
 public class PlayerJoinListener implements Listener {
     private final RemakepirePlugin plugin;
     private final VampireManager vampireManager;
-    private final EffectManager effectManager;
-    private final BeetrootManager beetrootManager;
 
     /**
      * Create an instance of the Player Join listener.
@@ -26,8 +24,6 @@ public class PlayerJoinListener implements Listener {
     public PlayerJoinListener(RemakepirePlugin plugin) {
         this.plugin = plugin;
         this.vampireManager = plugin.getVampireManager();
-        this.effectManager = plugin.getEffectManager();
-        this.beetrootManager = plugin.getBeetrootManager();
     }
 
     /**
@@ -43,8 +39,8 @@ public class PlayerJoinListener implements Listener {
 
         this.vampireManager.initializeNewPlayer(player);
         this.vampireManager.ensureVampireTagConsistency(player);
-        this.effectManager.applyJoinEffects(player);
-        this.beetrootManager.restorePlayerState(player);
+        this.plugin.getEffectManager().applyJoinEffects(player);
+        this.plugin.getBeetrootManager().restorePlayerState(player);
 
         this.plugin.getBeaconMajorityManager().applyBonusesToPlayer(player);
         if (this.plugin.getVampireTexturePackManager() != null && (this.vampireManager.isVampire(player) || player.getScoreboardTags().contains(VampireManager.CURED_VAMPIRE_TAG))) {

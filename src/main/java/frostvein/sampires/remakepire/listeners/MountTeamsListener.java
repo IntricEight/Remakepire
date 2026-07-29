@@ -16,11 +16,9 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityMountEvent;
 import frostvein.sampires.remakepire.RemakepirePlugin;
-import frostvein.sampires.remakepire.managers.VampireManager;
 
 public class MountTeamsListener implements Listener {
     private final RemakepirePlugin plugin;
-    private final VampireManager vampireManager;
     // List all the entities that are included in the alignment checks
     private final Set<Class<? extends Entity>> livingMountTypes = Set.of(Pig.class, Horse.class, Donkey.class, Mule.class, Llama.class, TraderLlama.class, Camel.class);
     private final Set<Class<? extends Entity>> undeadMountTypes = Set.of(SkeletonHorse.class, ZombieHorse.class);
@@ -32,7 +30,6 @@ public class MountTeamsListener implements Listener {
      */
     public MountTeamsListener(RemakepirePlugin plugin) {
         this.plugin = plugin;
-        this.vampireManager = plugin.getVampireManager();
     }
 
     /**
@@ -56,11 +53,11 @@ public class MountTeamsListener implements Listener {
         Entity mount = event.getMount();
 
         // Prevent humans from riding undead mounts and higher vampires from riding living mounts
-        if (this.vampireManager.isHuman(player) && this.isUndeadMount(mount)) {
+        if (this.plugin.getVampireManager().isHuman(player) && this.isUndeadMount(mount)) {
             event.setCancelled(true);
             player.sendMessage("§cThe animal recoils from your warm touch...");
 
-        } else if (this.vampireManager.isVampireStage2OrHigher(player) && this.isLivingMount(mount)) {
+        } else if (this.plugin.getVampireManager().isVampireStage2OrHigher(player) && this.isLivingMount(mount)) {
             event.setCancelled(true);
             player.sendMessage("§cThe animal recoils from you as you extend a hand to it...");
         }

@@ -14,7 +14,6 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BookMeta;
 import frostvein.sampires.remakepire.RemakepirePlugin;
-import frostvein.sampires.remakepire.listeners.CureBookReadingListener;
 
 public class CureBookManager {
     private final RemakepirePlugin plugin;
@@ -65,7 +64,7 @@ public class CureBookManager {
         bookMeta.setAuthor(this.getCureBookAuthor(bookNumber));
         bookMeta.setPages(this.getCureBookPages(bookNumber));
         bookMeta.setLore(this.getCureBookLore(bookNumber));
-        CureBookReadingListener.markAsAuthenticCureBook(bookMeta, bookNumber, this.plugin);
+        this.plugin.getCureBookReadingListener().markAsAuthenticCureBook(bookMeta, bookNumber);
 
         return bookMeta;
     }

@@ -11,13 +11,11 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import frostvein.sampires.remakepire.RemakepirePlugin;
-import frostvein.sampires.remakepire.managers.ThirstManager;
 import frostvein.sampires.remakepire.managers.VampireManager;
 
 public class ExperienceBottleListener implements Listener {
     private final RemakepirePlugin plugin;
     private final VampireManager vampireManager;
-    private final ThirstManager thirstManager;
 
     /**
      * Create an instance of the Experience Bottle listener.
@@ -27,7 +25,6 @@ public class ExperienceBottleListener implements Listener {
     public ExperienceBottleListener(RemakepirePlugin plugin) {
         this.plugin = plugin;
         this.vampireManager = plugin.getVampireManager();
-        this.thirstManager = plugin.getThirstManager();
     }
 
     /**
@@ -71,6 +68,8 @@ public class ExperienceBottleListener implements Listener {
                             int experienceGained = 8;
                             this.thirstManager.quenchThirst(player, experienceGained);
                             player.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent("§cYou drain the essence from the bottle, satisfying your vampiric thirst..."));
+                            final int experienceGained = 8;
+                            this.plugin.getThirstManager().quenchThirst(player, experienceGained);
                         }
                     }
                 }

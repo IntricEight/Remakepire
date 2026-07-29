@@ -25,8 +25,6 @@ import frostvein.sampires.remakepire.RemakepirePlugin;
 public class ThirstManager {
     private final RemakepirePlugin plugin;
     private final VampireManager vampireManager;
-    private final SessionManager sessionManager;
-    private final ConfigManager configManager;
     private final float THIRST_PER_SECOND;
     // The number of minutes that vampires will not lose blood naturally during after a stage change
     private final int IMMUNITY_DURATION_MINUTES = 15;
@@ -44,11 +42,9 @@ public class ThirstManager {
      */
     public ThirstManager(RemakepirePlugin plugin) {
         this.plugin = plugin;
-        this.configManager = plugin.getConfigManager();
         this.vampireManager = plugin.getVampireManager();
-        this.sessionManager = plugin.getSessionManager();
         this.thirstQuenchers = this.initializeThirstQuenchers();
-        this.THIRST_PER_SECOND = 1.0F / (float)configManager.getThirstDepletionMinutes() / 60.0F;
+        this.THIRST_PER_SECOND = 1.0F / (float)plugin.getConfigManager().getThirstDepletionMinutes() / 60.0F;
         this.setupImmunitySystem();
         this.startThirstTask();
     }
@@ -161,7 +157,7 @@ public class ThirstManager {
     private void startThirstTask() {
         this.thirstTask = (new BukkitRunnable() {
             public void run() {
-                if (ThirstManager.this.sessionManager.isSessionActive()) {
+                if (ThirstManager.this.plugin.getSessionManager().isSessionActive()) {
                     for (Player player : Bukkit.getOnlinePlayers()) {
                         if (ThirstManager.this.vampireManager.isVampire(player)) {
                             ThirstManager.this.processVampireThirst(player);

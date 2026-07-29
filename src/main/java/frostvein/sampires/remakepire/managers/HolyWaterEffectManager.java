@@ -25,7 +25,6 @@ import frostvein.sampires.remakepire.RemakepirePlugin;
 
 public class HolyWaterEffectManager implements Listener {
     private final RemakepirePlugin plugin;
-    private final VampireManager vampireManager;
     private final ConfigManager configManager;
     private final Map<UUID, BukkitTask> disabledVampires = new HashMap<>();
 
@@ -36,7 +35,6 @@ public class HolyWaterEffectManager implements Listener {
      */
     public HolyWaterEffectManager(RemakepirePlugin plugin) {
         this.plugin = plugin;
-        this.vampireManager = plugin.getVampireManager();
         this.configManager = plugin.getConfigManager();
 
         Bukkit.getPluginManager().registerEvents(this, plugin);
@@ -83,7 +81,7 @@ public class HolyWaterEffectManager implements Listener {
      */
     private void processHolyWaterHit(LivingEntity entity) {
         if (entity instanceof Player player) {
-            if (player.getGameMode() != GameMode.SPECTATOR && this.vampireManager.isVampire(player) && this.vampireManager.isVampireStage2OrHigher(player)) {
+            if (player.getGameMode() != GameMode.SPECTATOR && this.plugin.getVampireManager().isVampire(player) && this.plugin.getVampireManager().isVampireStage2OrHigher(player)) {
                 this.applyHolyWaterEffect(player);
             }
         }

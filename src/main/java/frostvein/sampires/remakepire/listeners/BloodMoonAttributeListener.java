@@ -16,11 +16,9 @@ import org.bukkit.event.entity.EntityPotionEffectEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.potion.PotionEffectType;
 import frostvein.sampires.remakepire.RemakepirePlugin;
-import frostvein.sampires.remakepire.managers.VampireManager;
 
 public class BloodMoonAttributeListener implements Listener {
     private final RemakepirePlugin plugin;
-    private final VampireManager vampireManager;
     private final Map<UUID, Boolean> playersWithBloodMoonAttributes = new HashMap<>();
     private final Map<UUID, AttributeModifier> speedModifiers = new HashMap<>();
     private final Map<UUID, AttributeModifier> strengthModifiers = new HashMap<>();
@@ -36,7 +34,7 @@ public class BloodMoonAttributeListener implements Listener {
      */
     public BloodMoonAttributeListener(RemakepirePlugin plugin) {
         this.plugin = plugin;
-        this.vampireManager = plugin.getVampireManager();
+
         Bukkit.getPluginManager().registerEvents(this, plugin);
         plugin.logInfo("BloodMoonAttributeListener initialized");
     }
@@ -51,7 +49,7 @@ public class BloodMoonAttributeListener implements Listener {
         Entity entity = event.getEntity();
 
         if (entity instanceof Player player) {
-            if (this.vampireManager.isVampireStage2OrHigher(player)) {
+            if (this.plugin.getVampireManager().isVampireStage2OrHigher(player)) {
                 if (event.getNewEffect() != null && event.getNewEffect().getType() == PotionEffectType.UNLUCK) {
                     this.applyBloodMoonAttributes(player);
                 } else if (event.getOldEffect() != null && event.getOldEffect().getType() == PotionEffectType.UNLUCK) {
@@ -59,7 +57,7 @@ public class BloodMoonAttributeListener implements Listener {
                 }
 
                 // Remove the blood moon attributes from the player if they don't qualify for it
-                if (!this.vampireManager.isVampireStage2OrHigher(player) && this.playersWithBloodMoonAttributes.getOrDefault(player.getUniqueId(), false)) {
+                if (!this.plugin.getVampireManager().isVampireStage2OrHigher(player) && this.playersWithBloodMoonAttributes.getOrDefault(player.getUniqueId(), false)) {
                     this.removeBloodMoonAttributes(player);
                 }
             }

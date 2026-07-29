@@ -16,13 +16,11 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import frostvein.sampires.remakepire.RemakepirePlugin;
-import frostvein.sampires.remakepire.managers.ThirstManager;
 import frostvein.sampires.remakepire.managers.VampireManager;
 
 public class ThirstEffectsListener implements Listener {
     private final RemakepirePlugin plugin;
     private final VampireManager vampireManager;
-    private final ThirstManager thirstManager;
 
     /**
      * Create an instance of the Thirst Effects listener.
@@ -32,7 +30,6 @@ public class ThirstEffectsListener implements Listener {
     public ThirstEffectsListener(RemakepirePlugin plugin) {
         this.plugin = plugin;
         this.vampireManager = plugin.getVampireManager();
-        this.thirstManager = plugin.getThirstManager();
     }
 
     /**
@@ -105,8 +102,9 @@ public class ThirstEffectsListener implements Listener {
             }
 
             vampire.playSound(vampire.getLocation(), Sound.ENTITY_GENERIC_EAT, SoundCategory.PLAYERS, 1.0F, 1.0F);
-            this.thirstManager.quenchThirst(vampire, 4);
-            this.plugin.getSessionManager().sendActionBar(vampire, "§cThe raw flesh satisfies your vampiric hunger...");
+            this.plugin.getThirstManager().quenchThirst(vampire, 4);
+
+            vampire.sendActionBar(Component.text("The raw flesh satisfies your vampiric hunger...", NamedTextColor.RED));
         }
     }
 
@@ -213,7 +211,8 @@ public class ThirstEffectsListener implements Listener {
         double currentHealth = vampire.getHealth(), maxHealth = vampire.getAttribute(Attribute.MAX_HEALTH).getValue();
 
         if (currentFoodLevel < 20) {
-            this.thirstManager.regenerateFood(vampire);
+            this.plugin.getThirstManager().regenerateFood(vampire);
+
         } else if (currentFoodLevel >= 20 && currentHealth < maxHealth && !vampire.isDead() && vampire.getHealth() > 0) {
             vampire.setFoodLevel(currentFoodLevel - 1);
             float currentSaturation = vampire.getSaturation();

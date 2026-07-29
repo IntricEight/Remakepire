@@ -21,7 +21,6 @@ import frostvein.sampires.remakepire.listeners.CureBookReadingListener;
 
 public class TomeManager {
     private final RemakepirePlugin plugin;
-    private final VampireManager vampireManager;
     private final Map<String, TomeAbility> abilities;
     private final Map<UUID, Integer> playerTomeUsageSession = new HashMap<>();
     private final Map<UUID, UUID> tomeSelectionTargets = new HashMap<>();
@@ -35,7 +34,6 @@ public class TomeManager {
      */
     public TomeManager(RemakepirePlugin plugin) {
         this.plugin = plugin;
-        this.vampireManager = plugin.getVampireManager();
         this.abilities = new HashMap<>();
         this.registerTomeAbilities();
     }
@@ -101,7 +99,7 @@ public class TomeManager {
      * @return {@code true} if the player gains the ability.
      */
     public boolean grantAbility(Player player, String abilityName) {
-        if (!this.vampireManager.isHuman(player)) {
+        if (!this.plugin.getVampireManager().isHuman(player)) {
             return false;
 
         } else if (!this.isValidAbility(abilityName)) {
@@ -209,7 +207,7 @@ public class TomeManager {
      * @return {@code true} if the ability was successfully used.
      */
     public boolean useAbility(Player player, String abilityName) {
-        if (!this.vampireManager.isHuman(player)) {
+        if (!this.plugin.getVampireManager().isHuman(player)) {
             player.sendMessage("§cOnly humans can use tome abilities.");
             return false;
 

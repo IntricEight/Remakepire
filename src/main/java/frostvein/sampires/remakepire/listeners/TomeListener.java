@@ -20,11 +20,9 @@ import org.bukkit.inventory.meta.BookMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 import frostvein.sampires.remakepire.RemakepirePlugin;
 import frostvein.sampires.remakepire.managers.TomeManager;
-import frostvein.sampires.remakepire.managers.VampireManager;
 
 public class TomeListener implements Listener {
     private final RemakepirePlugin plugin;
-    private final VampireManager vampireManager;
     private final TomeManager tomeManager;
 
     /**
@@ -34,7 +32,6 @@ public class TomeListener implements Listener {
      */
     public TomeListener(RemakepirePlugin plugin) {
         this.plugin = plugin;
-        this.vampireManager = plugin.getVampireManager();
         this.tomeManager = plugin.getTomeManager();
     }
 
@@ -89,7 +86,7 @@ public class TomeListener implements Listener {
                     } else if (!this.tomeManager.isValidAbility(tomeTitle)) {
                         this.plugin.logInfo("Invalid tome ability: '" + tomeTitle + "'");
 
-                    } else if (!this.vampireManager.isHuman(player)) {
+                    } else if (!this.plugin.getVampireManager().isHuman(player)) {
                         event.setCancelled(true);
                         player.sendMessage("§cThe ancient knowledge within this tome is beyond your vampiric comprehension...");
 

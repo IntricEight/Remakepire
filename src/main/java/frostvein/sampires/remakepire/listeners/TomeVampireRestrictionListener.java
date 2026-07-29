@@ -16,13 +16,9 @@ import org.bukkit.inventory.meta.BookMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.scheduler.BukkitRunnable;
 import frostvein.sampires.remakepire.RemakepirePlugin;
-import frostvein.sampires.remakepire.managers.TomeManager;
-import frostvein.sampires.remakepire.managers.VampireManager;
 
 public class TomeVampireRestrictionListener implements Listener {
     private final RemakepirePlugin plugin;
-    private final VampireManager vampireManager;
-    private final TomeManager tomeManager;
 
     /**
      * Create an instance of the Tome Vampire Restriction listener.
@@ -31,8 +27,6 @@ public class TomeVampireRestrictionListener implements Listener {
      */
     public TomeVampireRestrictionListener(RemakepirePlugin plugin) {
         this.plugin = plugin;
-        this.vampireManager = plugin.getVampireManager();
-        this.tomeManager = plugin.getTomeManager();
         this.startTomeCheckTask();
     }
 
@@ -136,7 +130,7 @@ public class TomeVampireRestrictionListener implements Listener {
      * @return {@code true} if the player is a higher vampire.
      */
     private boolean isRestrictedVampire(Player player) {
-        return this.vampireManager.isVampireStage2OrHigher(player);
+        return this.plugin.getVampireManager().isVampireStage2OrHigher(player);
     }
 
     /**
@@ -189,8 +183,7 @@ public class TomeVampireRestrictionListener implements Listener {
 
                 if (item.getType() == Material.WRITTEN_BOOK && meta instanceof BookMeta bookMeta) {
                     if (bookMeta.hasTitle()) {
-                        String title = bookMeta.getTitle();
-                        return this.tomeManager.isValidAbility(title);
+                        return this.plugin.getTomeManager().isValidAbility(bookMeta.getTitle());
                     }
                 }
             }

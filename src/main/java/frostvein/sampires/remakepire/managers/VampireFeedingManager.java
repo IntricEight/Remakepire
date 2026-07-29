@@ -25,7 +25,6 @@ public class VampireFeedingManager implements Listener {
     private final RemakepirePlugin plugin;
     private final VampireManager vampireManager;
     private final ThirstManager thirstManager;
-    private final ConfigManager configManager;
     // Controls the distance players can be while feeding
     private static final double FEEDING_RANGE = 1.5;
     // Controls the time a vampire needs to be crouching nearby before feeding begins
@@ -47,7 +46,6 @@ public class VampireFeedingManager implements Listener {
         this.plugin = plugin;
         this.vampireManager = plugin.getVampireManager();
         this.thirstManager = plugin.getThirstManager();
-        this.configManager = plugin.getConfigManager();
 
         Bukkit.getPluginManager().registerEvents(this, plugin);
         this.startFeedingDetectionTask();
@@ -157,9 +155,8 @@ public class VampireFeedingManager implements Listener {
 
         if (this.vampireManager.isHuman(target)) {
             UUID vampireId = vampire.getUniqueId();
-            int currentSessionThirst = this.sessionFeedingThirst.getOrDefault(vampireId, 0);
-            int maxFeedingThirst = this.configManager.getMaxFeedingThirstPerSession();
             int currentSessionThirst = this.getSessionFeedingThirst(vampire);
+            int maxFeedingThirst = this.plugin.getConfigManager().getMaxFeedingThirstPerSession();
 
             // Prevent the vampire from draining more blood than the config setting allows
             if (currentSessionThirst >= maxFeedingThirst) {
@@ -338,7 +335,7 @@ public class VampireFeedingManager implements Listener {
                 if (this.vampireManager.isVampire(vampire)) {
                     int currentSessionThirst = this.getSessionFeedingThirst(vampire);
 
-                    if (currentSessionThirst >= this.configManager.getMaxFeedingThirstPerSession()) {
+                    if (currentSessionThirst >= this.plugin.getConfigManager().getMaxFeedingThirstPerSession()) {
                         vampire.sendMessage("§cYour thirst is quenched, for now. You are unable to drink any more blood from feeding until the next session.");
                     } else {
                         double distance;
