@@ -811,9 +811,7 @@ public class BeaconConversionListener implements Listener {
             BeaconConversionListener.this.plugin.getBeaconMajorityManager().updateBeaconMajorityBonuses();
 
             // Check if this conversion is the first in the game lifetime
-            if (newState == BeaconSite.BeaconState.HOLY || newState == BeaconSite.BeaconState.DESECRATED) {
-                BeaconConversionListener.this.beaconManager.triggerFirstBeaconConvertedEffects(this.beacon, this.isVampireConversion);
-            }
+            BeaconConversionListener.this.beaconManager.triggerFirstBeaconConvertedEffects(this.beacon, this.isVampireConversion);
 
             // Inform the players that a beacon has been given to a team
             BeaconConversionListener.this.broadcastBeaconGainToTeam(this.beacon, newState);
