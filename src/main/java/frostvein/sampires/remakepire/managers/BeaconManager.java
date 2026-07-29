@@ -1778,7 +1778,27 @@ public class BeaconManager {
                         }
                     }
                 } else {
-                    String townName = plugin.getConfigManager().getTownName();
+                    final String townName = plugin.getConfigManager().getTownName();
+
+                    Title defeatTitle = Title.title(
+                            Component.text("DEFEAT", NamedTextColor.RED)
+                                    .decorate(TextDecoration.BOLD),
+                            Component.text("The light has prevailed", NamedTextColor.GRAY),
+                            Title.Times.times(
+                                    Duration.ofSeconds(1),
+                                    Duration.ofSeconds(5),
+                                    Duration.ofSeconds(2)
+                            ));
+                    Title victoryTitle = Title.title(
+                            Component.text("VICTORY", NamedTextColor.GREEN)
+                                    .decorate(TextDecoration.BOLD),
+                            Component.text("The darkness has been vanquished", NamedTextColor.YELLOW),
+                            Title.Times.times(
+                                    Duration.ofSeconds(1),
+                                    Duration.ofSeconds(5),
+                                    Duration.ofSeconds(2)
+                            )
+                    );
 
                     for (Player player : this.plugin.getServer().getOnlinePlayers()) {
                         if (this.plugin.getVampireManager().isVampire(player)) {

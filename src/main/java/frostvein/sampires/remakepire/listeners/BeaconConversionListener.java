@@ -454,9 +454,20 @@ public class BeaconConversionListener implements Listener {
     private void triggerHumansFinalStand() {
         this.plugin.logInfo("HUMANS FINAL STAND TRIGGERED - All 7 beacons are holy!");
 
-        // Alert all online players of the final stand
-        for(Player player : this.plugin.getServer().getOnlinePlayers()) {
-            player.sendTitle("§c§lALL BEACONS SANCTIFIED", "§eThe divine light weakens all creatures of darkness", 20, 100, 40);
+        // A display for all the online players to see
+        Title title = Title.title(
+                Component.text("ALL BEACONS SANCTIFIED", NamedTextColor.RED)
+                        .decorate(TextDecoration.BOLD),
+                Component.text("The divine light weakens all creatures of darkness", NamedTextColor.YELLOW),
+                Title.Times.times(
+                        Duration.ofSeconds(1),
+                        Duration.ofSeconds(5),
+                        Duration.ofSeconds(2)
+                ));
+
+        // Alert all online players of the holy beacon total control
+        for (Player player : this.plugin.getServer().getOnlinePlayers()) {
+            player.showTitle(title);
             player.sendMessage("§e All beacons now shine with divine energy.");
             player.sendMessage("§e Evil has been weakened by the overwhelming holy presence.");
             player.playSound(player.getLocation(), Sound.BLOCK_BEACON_ACTIVATE, SoundCategory.MASTER, 1.0F, 0.7F);

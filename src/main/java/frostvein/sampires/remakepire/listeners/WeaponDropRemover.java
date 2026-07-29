@@ -48,7 +48,7 @@ public class WeaponDropRemover implements Listener {
             while(dropIterator.hasNext()) {
                 ItemStack drop = dropIterator.next();
 
-                if (drop != null && WEAPON_MATERIALS.contains(drop.getType())) {
+                if (drop != null && isWeapon(drop.getType())) {
                     dropIterator.remove();
                     ++weaponsRemoved;
                 }
@@ -71,7 +71,7 @@ public class WeaponDropRemover implements Listener {
             if (event.getCaught() instanceof Item caughtItem) {
                 ItemStack itemStack = caughtItem.getItemStack();
 
-                if (itemStack != null && WEAPON_MATERIALS.contains(itemStack.getType())) {
+                if (itemStack != null && isWeapon(itemStack.getType())) {
                     Material replacement = this.getRandomFishingReplacement();
                     ItemStack replacementItem = new ItemStack(replacement, 1);
                     caughtItem.setItemStack(replacementItem);
