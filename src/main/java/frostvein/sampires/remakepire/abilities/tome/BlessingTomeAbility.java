@@ -90,8 +90,7 @@ public class BlessingTomeAbility extends TomeAbility {
                     : durationSeconds + " second" + (durationSeconds != 1 ? "s" : "");
 
             potionMeta.setBasePotionType(PotionType.WATER);
-            potionMeta.setDisplayName("§aHoly Water");
-            potionMeta.setLore(Arrays.asList("§7Throw this on an evil creature to disable their powers for " + durationText + "!"));
+            potionMeta.customName(Component.text("Holy Water", NamedTextColor.GREEN).decoration(TextDecoration.ITALIC, false));
             potionMeta.lore(List.of(Component.text("Throw this on an evil creature to disable their powers for " + durationText + "!").decoration(TextDecoration.ITALIC, false)));
 
             item.setItemMeta(potionMeta);

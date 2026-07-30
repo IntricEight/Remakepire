@@ -103,7 +103,10 @@ public class BloodMoonManager {
             for (Player player : Bukkit.getOnlinePlayers()) {
                 if (this.plugin.getVampireManager().isVampireStage2(player) || this.plugin.getVampireManager().isVampireStage3(player)) {
                     if (this.plugin.getEffectManager().canPlayerSeeSky(player)) {
-                        player.addPotionEffect(new PotionEffect(PotionEffectType.UNLUCK, 240, 0, false, false), false);
+                        // Dev note: Newer standards are to remove and replace the potion effect if I need to guarantee it is applied,
+                        // instead of using the addPotionEffect variant that forces this behavior (Which has since been deprecated)
+                        player.removePotionEffect(PotionEffectType.UNLUCK);
+                        player.addPotionEffect(new PotionEffect(PotionEffectType.UNLUCK, 240, 0, false,false));
 
                         // Inform the vampire of the Blood Moon's influence
                         if (!player.getScoreboardTags().contains(SessionManager.INFORMED_BLOOD_MOON)) {

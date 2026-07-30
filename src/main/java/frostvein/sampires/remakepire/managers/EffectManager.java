@@ -83,8 +83,7 @@ public class EffectManager {
      * @param player the player gaining the status.
      */
     private void applyWaterBreathing(Player player) {
-        PotionEffect waterBreathing = new PotionEffect(PotionEffectType.WATER_BREATHING, 1000, 0, false, false, false);
-        player.addPotionEffect(waterBreathing);
+        player.addPotionEffect(new PotionEffect(PotionEffectType.WATER_BREATHING, 1000, 0, false, false, false));
     }
 
     /**
