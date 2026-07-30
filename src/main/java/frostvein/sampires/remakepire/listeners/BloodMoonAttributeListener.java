@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import org.bukkit.Bukkit;
+import org.bukkit.NamespacedKey;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.attribute.AttributeModifier;
@@ -14,6 +15,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityPotionEffectEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.inventory.EquipmentSlotGroup;
 import org.bukkit.potion.PotionEffectType;
 import frostvein.sampires.remakepire.RemakepirePlugin;
 
@@ -76,7 +78,11 @@ public class BloodMoonAttributeListener implements Listener {
             AttributeInstance speedAttribute = player.getAttribute(Attribute.MOVEMENT_SPEED);
 
             if (speedAttribute != null) {
-                AttributeModifier speedModifier = new AttributeModifier("BloodMoon_Speed", SPEED_MODIFIER, Operation.MULTIPLY_SCALAR_1);
+                AttributeModifier speedModifier = new AttributeModifier(
+                        new NamespacedKey(this.plugin, "BloodMoon_Speed"),
+                        SPEED_MODIFIER, Operation.MULTIPLY_SCALAR_1, EquipmentSlotGroup.ANY
+                );
+
                 speedAttribute.addModifier(speedModifier);
                 this.speedModifiers.put(playerId, speedModifier);
             }
@@ -84,7 +90,11 @@ public class BloodMoonAttributeListener implements Listener {
             AttributeInstance strengthAttribute = player.getAttribute(Attribute.ATTACK_DAMAGE);
 
             if (strengthAttribute != null) {
-                AttributeModifier strengthModifier = new AttributeModifier("BloodMoon_Strength", STRENGTH_MODIFIER, Operation.MULTIPLY_SCALAR_1);
+                AttributeModifier strengthModifier = new AttributeModifier(
+                        new NamespacedKey(this.plugin, "BloodMoon_Strength"),
+                        STRENGTH_MODIFIER, Operation.MULTIPLY_SCALAR_1, EquipmentSlotGroup.ANY
+                );
+
                 strengthAttribute.addModifier(strengthModifier);
                 this.strengthModifiers.put(playerId, strengthModifier);
             }
