@@ -314,7 +314,7 @@ public class DeathHandler implements Listener {
      */
     private void handlePvPDeath(Player victim, Player killer, PlayerDeathEvent event) {
         ItemStack weapon = killer.getInventory().getItemInMainHand();
-        boolean killedWithWoodenWeapon = this.isWoodenWeapon(weapon);
+        boolean killedWithWoodenWeapon = this.isWoodenWeapon(weapon.getType());
         Material lastWeapon = this.lastWeaponUsed.get(victim.getUniqueId());
 
         if (!killedWithWoodenWeapon && lastWeapon != null) {
@@ -392,17 +392,16 @@ public class DeathHandler implements Listener {
     /**
      * Determine if the item is a wooden weapon.
      *
-     * @param item the item to check.
+     * @param type the item to check.
      * @return {@code true} if the item is a wooden sword or axe.
      */
-    private boolean isWoodenWeapon(ItemStack item) {
-        if (item == null) {
+    private boolean isWoodenWeapon(Material type) {
+        if (type == null) {
             this.plugin.logInfo("DEBUG: Weapon is null");
             return false;
 
         } else {
-            Material type = item.getType();
-            boolean isWooden = type == Material.WOODEN_SWORD || type == Material.WOODEN_AXE;
+            final boolean isWooden = type == Material.WOODEN_SWORD || type == Material.WOODEN_AXE;
             this.plugin.logInfo("DEBUG: Weapon type: " + type + ", Is wooden: " + isWooden);
             return isWooden;
         }
