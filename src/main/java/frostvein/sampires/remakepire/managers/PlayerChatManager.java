@@ -2,22 +2,16 @@ package frostvein.sampires.remakepire.managers;
 
 import java.util.HashMap;
 import java.util.Map;
-import net.md_5.bungee.api.chat.ClickEvent;
-import net.md_5.bungee.api.chat.ComponentBuilder;
-import net.md_5.bungee.api.chat.HoverEvent;
-import net.md_5.bungee.api.chat.TextComponent;
-import net.md_5.bungee.api.chat.ClickEvent.Action;
+import io.papermc.paper.event.player.AsyncChatEvent;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.ChatColor;
-import org.bukkit.Server;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.AsyncPlayerChatEvent;
 import frostvein.sampires.remakepire.RemakepirePlugin;
 
 public class PlayerChatManager implements Listener {
@@ -59,17 +53,20 @@ public class PlayerChatManager implements Listener {
     @EventHandler(
             ignoreCancelled = true
     )
-    public void onAsyncPlayerChat(AsyncPlayerChatEvent event) {
+    public void onAsyncPlayerChat(AsyncChatEvent event) {
         Player player = event.getPlayer();
 
         if (this.plugin.getConfigManager().isFirstMessageBlockingEnabled()) {
             if (event.getPlayer().getScoreboardTags().contains("ChatPrevented")) {
                 event.setCancelled(true);
-                player.getServer().broadcastMessage("<" + player.getName() + "> " + event.getMessage());
+                String message = PlainTextComponentSerializer.plainText().serialize(event.message());
+
+                player.getServer().broadcast(Component.text("<" + player.getName() + "> " + message));
 
             } else {
                 event.setCancelled(true);
-                String originalMessage = event.getMessage();
+                String originalMessage = PlainTextComponentSerializer.plainText().serialize(event.message());
+
                 this.pendingMessages.put(player, originalMessage);
                 this.sendPreventionMessage(player, originalMessage);
             }
