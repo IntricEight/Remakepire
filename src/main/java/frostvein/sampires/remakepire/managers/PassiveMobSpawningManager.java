@@ -74,12 +74,7 @@ public class PassiveMobSpawningManager {
         this.blacklistedBiomes.add(Biome.RIVER);
         this.blacklistedBiomes.add(Biome.FROZEN_RIVER);
         this.blacklistedBiomes.add(Biome.MUSHROOM_FIELDS);
-
-        try {
-            Biome paleOakForest = Biome.valueOf("PALE_GARDEN");
-            this.blacklistedBiomes.add(paleOakForest);
-        } catch (IllegalArgumentException e) {}
-
+        this.blacklistedBiomes.add(Biome.PALE_GARDEN);
         this.blacklistedBiomes.add(Biome.DEEP_DARK);
         this.blacklistedBiomes.add(Biome.DRIPSTONE_CAVES);
         this.blacklistedBiomes.add(Biome.LUSH_CAVES);
