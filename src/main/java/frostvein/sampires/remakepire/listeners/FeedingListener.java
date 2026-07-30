@@ -114,13 +114,4 @@ public class FeedingListener implements Listener {
             }
         }
     }
-
-    /**
-     * Handle any unexpected or special methods of gaining experience points.
-     *
-     * @param vampire the player generating the xp.
-     * @param amount the amount of xp.
-     * @param source the source of the xp.
-     */
-    private void handleSpecialExperienceSource(Player vampire, int amount, String source) {}
 }

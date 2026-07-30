@@ -411,7 +411,7 @@ public class BeetrootManager {
             player.addScoreboardTag(BEETROOT_USED_TAG);
             player.addScoreboardTag(BEETROOT_PROCESSING_TAG);
             timeLeft = this.processingTimers.get(playerId);
-            player.sendMessage("Garlic you have previously ingested is still processing...");
+            player.sendMessage("The garlic you previously ingested is still processing...");
         }
 
         if (this.immunityTimers.containsKey(playerId)) {
@@ -443,14 +443,14 @@ public class BeetrootManager {
 
         if (this.processingTimers.containsKey(playerId)) {
             int timeLeft = this.processingTimers.get(playerId);
-            return "§eProcessing beetroot... " + timeLeft / 60 + "m " + timeLeft % 60 + "s remaining";
+            return "§eProcessing garlic... " + timeLeft / 60 + "m " + timeLeft % 60 + "s remaining";
 
         } else if (this.immunityTimers.containsKey(playerId)) {
             int timeLeft = this.immunityTimers.get(playerId);
             return "§aImmune to vampire turning " + timeLeft / 60 + "m " + timeLeft % 60 + "s remaining";
 
         } else {
-            return this.hasUsedBeetrootThisSession(player) ? "§cBeetroot used this session (no longer immune)" : "§7No beetroot consumed this session";
+            return this.hasUsedBeetrootThisSession(player) ? "§cGarlic used this session (no longer immune)" : "§7No garlic consumed this session";
         }
     }
 }

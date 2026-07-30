@@ -2,7 +2,6 @@ package frostvein.sampires.remakepire.listeners;
 
 import java.util.List;
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.block.Chest;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -10,7 +9,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.BookMeta;
 import frostvein.sampires.remakepire.RemakepirePlugin;
 
 public class FourthBookRevealListener implements Listener {
