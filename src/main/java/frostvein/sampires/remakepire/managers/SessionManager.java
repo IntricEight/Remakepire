@@ -11,11 +11,11 @@ import org.bukkit.GameMode;
 import org.bukkit.GameRule;
 import org.bukkit.World;
 import org.bukkit.attribute.Attribute;
-import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scoreboard.Criteria;
 import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Score;
 import org.bukkit.scoreboard.Scoreboard;
@@ -404,20 +404,23 @@ public class SessionManager {
         this.sessionObjective = mainScoreboard.getObjective("smp_session");
 
         if (this.sessionObjective == null) {
-            this.sessionObjective = mainScoreboard.registerNewObjective("smp_session", "dummy", "SMP Session State");
+            this.sessionObjective = mainScoreboard.registerNewObjective("smp_session", Criteria.DUMMY, Component.text("SMP Session State"));
+
             Score sessionScore = this.sessionObjective.getScore("state");
             sessionScore.setScore(BEFORE_SESSION);
         }
 
         this.sessionIDObjective = mainScoreboard.getObjective("vsmp_session_id");
         if (this.sessionIDObjective == null) {
-            this.sessionIDObjective = mainScoreboard.registerNewObjective("vsmp_session_id", "dummy");
+            this.sessionIDObjective = mainScoreboard.registerNewObjective("vsmp_session_id", Criteria.DUMMY, Component.empty());
+
             this.sessionIDObjective.getScore(SESSION_ID_HOLDER).setScore(1);
         }
 
         this.gameIDObjective = mainScoreboard.getObjective("vsmp_game_id");
         if (this.gameIDObjective == null) {
-            this.gameIDObjective = mainScoreboard.registerNewObjective("vsmp_game_id", "dummy");
+            this.gameIDObjective = mainScoreboard.registerNewObjective("vsmp_game_id", Criteria.DUMMY, Component.empty());
+
             this.gameIDObjective.getScore(GAME_ID_HOLDER).setScore(1);
         }
 

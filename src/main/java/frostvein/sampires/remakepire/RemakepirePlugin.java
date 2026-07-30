@@ -9,7 +9,7 @@ import org.bukkit.World;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.scoreboard.NameTagVisibility;
+import org.bukkit.scoreboard.Criteria;
 import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
@@ -348,19 +348,20 @@ public final class RemakepirePlugin extends JavaPlugin {
             Objective existingObjective = mainScoreboard.getObjective(objectiveName);
 
             if (existingObjective != null) {
-                String criteria = existingObjective.getCriteria();
+                Criteria criteria = existingObjective.getTrackedCriteria();
 
-                if ("deathCount".equals(criteria)) {
+                if (Criteria.DEATH_COUNT.equals(criteria)) {
                     this.logInfo("Migrating death scoreboard from 'deathCount' to 'dummy' criteria...");
 
                     existingObjective.unregister();
-                    mainScoreboard.registerNewObjective(objectiveName, "dummy", "Deaths");
+                    mainScoreboard.registerNewObjective(objectiveName, Criteria.DUMMY, Component.text("Deaths"));
+
                     this.logInfo("Migration complete - death scoreboard now uses 'dummy' criteria.");
                 } else {
                     this.logInfo("Found existing death scoreboard objective with correct criteria.");
                 }
             } else {
-                mainScoreboard.registerNewObjective(objectiveName, "dummy", "Deaths");
+                mainScoreboard.registerNewObjective(objectiveName, Criteria.DUMMY, Component.text("Deaths"));
                 this.logInfo("Created new death scoreboard objective with 'dummy' criteria.");
             }
         } catch (Exception e) {

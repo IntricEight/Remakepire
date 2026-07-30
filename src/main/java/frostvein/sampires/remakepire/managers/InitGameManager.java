@@ -31,6 +31,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+import org.bukkit.scoreboard.Criteria;
 import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Scoreboard;
 import frostvein.sampires.remakepire.RemakepirePlugin;
@@ -523,10 +524,11 @@ public class InitGameManager {
                 for (Objective obj : new HashSet<>(mainScoreboard.getObjectives())) {
                     if (obj.getName().startsWith("vsmp_")) {
                         String name = obj.getName();
-                        String displayName = obj.getDisplayName();
-                        String criteria = obj.getCriteria();
+                        Component displayName = obj.displayName();
+
+                        Criteria criteria = obj.getTrackedCriteria();
                         obj.unregister();
-                        mainScoreboard.registerNewObjective(name, criteria, displayName);
+                        mainScoreboard.registerNewObjective(name,criteria, displayName);
                     }
                 }
 
