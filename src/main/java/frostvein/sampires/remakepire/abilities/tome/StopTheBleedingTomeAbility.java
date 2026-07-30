@@ -5,8 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import net.md_5.bungee.api.ChatMessageType;
-import net.md_5.bungee.api.chat.TextComponent;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
@@ -340,12 +340,26 @@ public class StopTheBleedingTomeAbility extends TomeAbility {
 
                                 // Let the player(s) involved know what's going on
                                 if (HealingSession.this.isSelfHeal) {
-                                    currentHealer.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent("§aHealing yourself... §e" + timeDisplay + " §aremaining"));
+                                    // Let the player know they are healing themselves successfully
+                                    currentHealer.sendActionBar(
+                                            Component.text("Healing yourself... ", NamedTextColor.GREEN)
+                                                    .append(Component.text(timeDisplay, NamedTextColor.YELLOW))
+                                                    .append(Component.text(" remaining", NamedTextColor.GREEN))
+                                    );
                                 } else {
                                     // Let the healer know how much time remains
-                                    currentHealer.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent("§aHealing " + currentTarget.getName() + "... §e" + timeDisplay + " §aremaining"));
+                                    currentHealer.sendActionBar(
+                                            Component.text("Healing " + currentTarget.getName() + "... ", NamedTextColor.GREEN)
+                                                    .append(Component.text(timeDisplay, NamedTextColor.YELLOW))
+                                                    .append(Component.text(" remaining", NamedTextColor.GREEN))
+                                    );
+
                                     // Let the receiving player know how much time remains
-                                    currentTarget.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent("§aBeing healed by " + currentHealer.getName() + "... §e" + timeDisplay + " §aremaining"));
+                                    currentTarget.sendActionBar(
+                                            Component.text("Being healed by " + currentHealer.getName() + "... ", NamedTextColor.GREEN)
+                                                    .append(Component.text(timeDisplay, NamedTextColor.YELLOW))
+                                                    .append(Component.text(" remaining", NamedTextColor.GREEN))
+                                    );
                                 }
 
                                 if (HealingSession.this.ticksRemaining % 200 == 0 && HealingSession.this.ticksRemaining > 0 && HealingSession.this.ticksRemaining < HEALING_DURATION_TICKS) {

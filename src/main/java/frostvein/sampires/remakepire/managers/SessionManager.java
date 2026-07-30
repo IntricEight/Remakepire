@@ -5,8 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import net.md_5.bungee.api.ChatMessageType;
-import net.md_5.bungee.api.chat.TextComponent;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.GameRule;
@@ -139,25 +138,7 @@ public class SessionManager {
         final String message = this.getSessionStatusMessage();
 
         for (Player player : Bukkit.getOnlinePlayers()) {
-            this.sendActionBar(player, message);
-        }
-    }
-
-    /**
-     * Update the words above the player's hotbar.
-     *
-     * @param player the player who is receiving the message.
-     * @param message the message to be placed above the hotbar.
-     */
-    public void sendActionBar(Player player, String message) {
-        try {
-            player.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(message));
-        } catch (Exception e) {
-            try {
-                player.sendTitle("", message, 0, 25, 5);
-            } catch (Exception e1) {
-                player.sendMessage("§8[§6Session§8] " + message);
-            }
+            player.sendActionBar(Component.text(message));
         }
     }
 
@@ -776,6 +757,6 @@ public class SessionManager {
      * @param message the message to broadcast.
      */
     private void broadcastMessage(String message) {
-        Bukkit.broadcastMessage(message);
+        Bukkit.broadcast(Component.text(message));
     }
 }

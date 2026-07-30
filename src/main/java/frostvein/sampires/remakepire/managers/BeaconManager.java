@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -17,6 +18,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.title.Title;
 import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.GameMode;
@@ -26,7 +31,6 @@ import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.SoundCategory;
 import org.bukkit.World;
-import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.ItemDisplay;
 import org.bukkit.entity.Player;
@@ -252,7 +256,7 @@ public class BeaconManager {
             String expectedCMD = this.getCustomModelDataForState(beacon.getState());
 
             if (meta != null) {
-                meta.setDisplayName("§6Beacon: " + beacon.getName());
+                meta.customName(Component.text("Beacon: " + beacon.getName(), NamedTextColor.GOLD));
                 pumpkinItem.setItemMeta(meta);
             }
 
@@ -285,7 +289,7 @@ public class BeaconManager {
             String expectedCMD = this.getCustomModelDataForState(beacon.getState());
 
             if (meta != null) {
-                meta.setDisplayName("§6Beacon: " + beacon.getName());
+                meta.customName(Component.text("Beacon: " + beacon.getName(), NamedTextColor.GOLD));
                 pumpkinItem.setItemMeta(meta);
             }
 
@@ -1802,13 +1806,13 @@ public class BeaconManager {
 
                     for (Player player : this.plugin.getServer().getOnlinePlayers()) {
                         if (this.plugin.getVampireManager().isVampire(player)) {
-                            player.sendTitle("§c§lDEFEAT", "§7The light has prevailed", 20, 100, 40);
+                            player.showTitle(defeatTitle);
                             player.sendMessage("");
                             player.sendMessage("§cAll beacons shine with divine light...");
                             player.sendMessage("§cLight reigns supreme over " + townName + ". You have lost.");
 
                         } else {
-                            player.sendTitle("§a§lVICTORY", "§eThe darkness has been vanquished", 20, 100, 40);
+                            player.showTitle(victoryTitle);
                             player.sendMessage("");
                             player.sendMessage("§aAll beacons shine with divine light...");
                             player.sendMessage("§aLight reigns supreme over " + townName + ". You are free.");

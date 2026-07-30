@@ -1,7 +1,7 @@
 package frostvein.sampires.remakepire.listeners;
 
-import net.md_5.bungee.api.ChatMessageType;
-import net.md_5.bungee.api.chat.TextComponent;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -65,11 +65,9 @@ public class ExperienceBottleListener implements Listener {
                                 player.getWorld().dropItemNaturally(player.getLocation(), glassBottle);
                             }
 
-                            int experienceGained = 8;
-                            this.thirstManager.quenchThirst(player, experienceGained);
-                            player.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent("§cYou drain the essence from the bottle, satisfying your vampiric thirst..."));
                             final int experienceGained = 8;
                             this.plugin.getThirstManager().quenchThirst(player, experienceGained);
+                            player.sendActionBar(Component.text("You drain the essence from the bottle, satisfying your vampiric thirst...", NamedTextColor.RED));
                         }
                     }
                 }

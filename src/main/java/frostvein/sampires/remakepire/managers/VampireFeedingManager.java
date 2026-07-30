@@ -3,6 +3,8 @@ package frostvein.sampires.remakepire.managers;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Sound;
@@ -113,17 +115,17 @@ public class VampireFeedingManager implements Listener {
         String preparationMessage;
 
         if (this.vampireManager.isHuman(target)) {
-            preparationMessage = "§8Preparing to feed... " + VampireAbilityManager.formatTime(session.preparationSecondsRemaining) + " remaining";
+            preparationMessage = "Preparing to feed... " + VampireAbilityManager.formatTime(session.preparationSecondsRemaining) + " remaining";
         } else {
-            preparationMessage = "§8Preparing to siphon... " + VampireAbilityManager.formatTime(session.preparationSecondsRemaining) + " remaining";
+            preparationMessage = "Preparing to siphon... " + VampireAbilityManager.formatTime(session.preparationSecondsRemaining) + " remaining";
         }
 
-        this.plugin.getSessionManager().sendActionBar(vampire, preparationMessage);
+        vampire.sendActionBar(Component.text(preparationMessage, NamedTextColor.DARK_GRAY));
 
         // Alert the players that the feeding has begun.
         if (session.preparationSecondsRemaining <= 0) {
             session.phase = VampireFeedingManager.FeedingPhase.ACTIVE_FEEDING;
-            this.plugin.getSessionManager().sendActionBar(vampire, "");
+            vampire.sendActionBar(Component.text(""));
 
             if (this.vampireManager.isHuman(target)) {
                 vampire.sendMessage("§4§lYou begin feeding on " + target.getName() + "!");
@@ -182,8 +184,8 @@ public class VampireFeedingManager implements Listener {
             this.thirstManager.modifyQuench(vampire, thirstToGive);
             this.sessionFeedingThirst.put(vampireId, currentSessionThirst + thirstToGive);
 
-            this.plugin.getSessionManager().sendActionBar(vampire, "§4Feeding...");
-            this.plugin.getSessionManager().sendActionBar(target, "§cYour life force is being drained...");
+            vampire.sendActionBar(Component.text("Feeding...", NamedTextColor.DARK_RED));
+            target.sendActionBar(Component.text("Your life force is being drained...", NamedTextColor.RED));
 
         } else {
             // Prevent the vampire from feeding on vampires without low on blood
@@ -195,8 +197,9 @@ public class VampireFeedingManager implements Listener {
 
             this.thirstManager.modifyQuench(target, -1 * THIRST_GAIN_PER_SECOND);
             this.thirstManager.modifyQuench(vampire, THIRST_GAIN_PER_SECOND);
-            this.plugin.getSessionManager().sendActionBar(vampire, "§4Siphoning...");
-            this.plugin.getSessionManager().sendActionBar(target, "§cYour vampiric essence is being siphoned...");
+
+            vampire.sendActionBar(Component.text("Siphoning...", NamedTextColor.DARK_RED));
+            target.sendActionBar(Component.text("Your vampiric essence is being siphoned...", NamedTextColor.RED));
         }
 
         // Create the custom drinking sound effect

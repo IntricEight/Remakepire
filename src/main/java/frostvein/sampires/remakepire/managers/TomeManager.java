@@ -7,6 +7,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
 import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.GameMode;
@@ -235,7 +238,7 @@ public class TomeManager {
      */
     public void openTomeSelectionGUI(Player admin, Player target) {
         this.tomeSelectionTargets.put(admin.getUniqueId(), target.getUniqueId());
-        Inventory gui = Bukkit.createInventory(null, 54, TOME_SELECTION_GUI_TITLE);
+        Inventory gui = Bukkit.createInventory(null, 54, Component.text(TOME_SELECTION_GUI_TITLE));
         List<String> abilityNames = new ArrayList<>(this.abilities.keySet());
         abilityNames.sort(String::compareToIgnoreCase);
         int slot = 0;
@@ -254,9 +257,13 @@ public class TomeManager {
                 final boolean hasAbility = this.hasAbility(target, abilityName);
 
                 if (hasAbility) {
-                    meta.setDisplayName("§a✓ " + displayName + " §7(Already has)");
+                    meta.customName(Component.text("✓ " + displayName, NamedTextColor.GREEN)
+                            .append(Component.text(" (Already has)", NamedTextColor.GRAY))
+                            .decoration(TextDecoration.ITALIC, false)
+                    );
                 } else {
-                    meta.setDisplayName("§e" + displayName);
+                    meta.customName(Component.text(displayName, NamedTextColor.YELLOW)
+                            .decoration(TextDecoration.ITALIC, false));
                 }
 
                 List<String> lore = new ArrayList<>();
@@ -308,9 +315,13 @@ public class TomeManager {
             final boolean hasTag = target.getScoreboardTags().contains(tag);
 
             if (hasTag) {
-                meta.setDisplayName("§a✓ " + displayName + " §7(Read)");
+                meta.customName(Component.text("✓ " + displayName, NamedTextColor.GREEN)
+                        .append(Component.text(" (Read)", NamedTextColor.GRAY))
+                        .decoration(TextDecoration.ITALIC, false)
+                );
             } else {
-                meta.setDisplayName(displayName);
+                meta.customName(Component.text(displayName)
+                        .decoration(TextDecoration.ITALIC, false));
             }
 
             List<String> lore = new ArrayList<>();

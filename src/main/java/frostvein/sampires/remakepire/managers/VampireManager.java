@@ -1,13 +1,15 @@
 package frostvein.sampires.remakepire.managers;
 
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import net.md_5.bungee.api.chat.ClickEvent;
-import net.md_5.bungee.api.chat.ComponentBuilder;
-import net.md_5.bungee.api.chat.HoverEvent;
-import net.md_5.bungee.api.chat.TextComponent;
-import net.md_5.bungee.api.chat.ClickEvent.Action;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.event.HoverEvent;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.title.Title;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
@@ -351,11 +353,30 @@ public class VampireManager {
         target.addScoreboardTag("ImmuneToThirst");
         target.setRespawnLocation(this.plugin.getVampireRespawnLocation());
         this.applyTurningEffects(target);
-        target.sendTitle("§4§lTURNED", "", 10, 60, 20);
+        target.showTitle(Title.title(
+                Component.text("TURNED", NamedTextColor.DARK_RED)
+                        .decorate(TextDecoration.BOLD),
+                Component.empty(),
+                Title.Times.times(
+                        Duration.ofMillis(500),
+                        Duration.ofSeconds(3),
+                        Duration.ofSeconds(1)
+                )
+        ));
 
         // Inform the new sire of their fledgling's creation
         if (turner != null) {
-            turner.sendTitle("§4§lNEW BLOOD", "", 10, 60, 20);
+            turner.showTitle(Title.title(
+                    Component.text("NEW BLOOD", NamedTextColor.DARK_RED)
+                            .decorate(TextDecoration.BOLD),
+                    Component.empty(),
+                    Title.Times.times(
+                            Duration.ofMillis(500),
+                            Duration.ofSeconds(3),
+                            Duration.ofSeconds(1)
+                    )
+            ));
+
             turner.playSound(turner.getLocation(), Sound.ENTITY_ZOMBIE_VILLAGER_CURE, 0.5F, 1.2F);
         }
 
@@ -412,18 +433,15 @@ public class VampireManager {
         target.sendMessage("§cYou are now a Stage 1 vampire.");
         target.sendMessage("");
 
-        TextComponent prefixText = new TextComponent("§7When you are ready to accept your new self, ");
-        TextComponent clickableText = new TextComponent("§e§n[CLICK HERE]");
-        clickableText.setClickEvent(new ClickEvent(Action.RUN_COMMAND, "/pow texture"));
-        clickableText.setHoverEvent(new HoverEvent(net.md_5.bungee.api.chat.HoverEvent.Action.SHOW_TEXT, (new ComponentBuilder("§7Click to apply the Creature Of The Night texture pack")).create()));
-        TextComponent suffixText = new TextComponent("§7 to have the Creature Of The Night texture pack applied.");
-        TextComponent fullMessage = new TextComponent("");
+        Component fullMessage = Component.text("When you are ready to accept your new self, ", NamedTextColor.GRAY)
+                .append(Component.text("[CLICK HERE]", NamedTextColor.YELLOW)
+                        .decorate(TextDecoration.UNDERLINED)
+                        .clickEvent(ClickEvent.runCommand("/pow texture"))
+                        .hoverEvent(HoverEvent.showText(Component.text("Click to apply the Creature Of The Night texture pack", NamedTextColor.GRAY)))
+                )
+                .append(Component.text(" to have the Creature Of The Night texture pack applied.", NamedTextColor.GRAY));
 
-        fullMessage.addExtra(prefixText);
-        fullMessage.addExtra(clickableText);
-        fullMessage.addExtra(suffixText);
-
-        target.spigot().sendMessage(fullMessage);
+        target.sendMessage(fullMessage);
         target.sendMessage("");
     }
 
@@ -502,7 +520,17 @@ public class VampireManager {
             player.setGameMode(GameMode.SPECTATOR);
             player.addScoreboardTag(DeathHandler.PERMAKILLED_TAG);
 
-            player.sendTitle("§4§lFINAL DEATH", "§7Your journey has ended", 10, 100, 30);
+            player.showTitle(Title.title(
+                    Component.text("FINAL DEATH", NamedTextColor.DARK_RED)
+                            .decorate(TextDecoration.BOLD),
+                    Component.text("Your journey has ended", NamedTextColor.GRAY),
+                    Title.Times.times(
+                            Duration.ofMillis(500),
+                            Duration.ofSeconds(5),
+                            Duration.ofMillis(1500)
+                    )
+            ));
+
             player.sendMessage("");
             player.sendMessage("§4§lPERMANENTLY KILLED");
             player.sendMessage("");

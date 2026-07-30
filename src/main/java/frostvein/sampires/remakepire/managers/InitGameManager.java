@@ -1,5 +1,6 @@
 package frostvein.sampires.remakepire.managers;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -10,11 +11,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
-import net.md_5.bungee.api.chat.ClickEvent;
-import net.md_5.bungee.api.chat.ComponentBuilder;
-import net.md_5.bungee.api.chat.HoverEvent;
-import net.md_5.bungee.api.chat.TextComponent;
-import net.md_5.bungee.api.chat.ClickEvent.Action;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.event.HoverEvent;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.title.Title;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
@@ -76,13 +78,15 @@ public class InitGameManager {
         admin.sendMessage("§7  • Assign new vampires");
         admin.sendMessage("");
 
-        TextComponent confirmMessage = new TextComponent("§7Are you sure? ");
-        TextComponent clickableText = new TextComponent("§e§n[CLICK HERE TO CONTINUE]");
-        clickableText.setClickEvent(new ClickEvent(Action.RUN_COMMAND, COMMAND_PREFIX + "confirm1"));
-        clickableText.setHoverEvent(new HoverEvent(net.md_5.bungee.api.chat.HoverEvent.Action.SHOW_TEXT, (new ComponentBuilder("§7Click to proceed with initialization")).create()));
-        confirmMessage.addExtra(clickableText);
+        Component confirmMessage = Component.text("Are you sure? ", NamedTextColor.GRAY)
+                .append(Component.text("[CLICK HERE TO CONTINUE]", NamedTextColor.YELLOW)
+                        .decorate(TextDecoration.UNDERLINED)
+                        .clickEvent(ClickEvent.runCommand(COMMAND_PREFIX + "confirm1"))
+                        .hoverEvent(HoverEvent.showText(Component.text("Click to proceed with initialization", NamedTextColor.GRAY)))
+                );
 
-        admin.spigot().sendMessage(confirmMessage);
+        admin.sendMessage(confirmMessage);
+
         admin.sendMessage("");
         admin.sendMessage("§7Type §e/pow admin init cancel §7at any time to cancel.");
         admin.sendMessage("§c§l========================================");
@@ -110,19 +114,19 @@ public class InitGameManager {
             admin.sendMessage("§7Type §e/pow admin init cancel §7to cancel.");
             admin.sendMessage("");
 
-            TextComponent randomButton = new TextComponent("§a§l[RANDOM] ");
-            randomButton.setClickEvent(new ClickEvent(Action.RUN_COMMAND, COMMAND_PREFIX + "mode_random"));
-            randomButton.setHoverEvent(new HoverEvent(net.md_5.bungee.api.chat.HoverEvent.Action.SHOW_TEXT, (new ComponentBuilder("§7Randomly select vampires from online players")).create()));
+            Component buttonMessage = Component.text("[RANDOM] ", NamedTextColor.GREEN)
+                    .decorate(TextDecoration.BOLD)
+                    .clickEvent(ClickEvent.runCommand(COMMAND_PREFIX + "mode_random"))
+                    .hoverEvent(HoverEvent.showText(Component.text("Randomly select vampires from online players", NamedTextColor.GRAY)))
 
-            TextComponent selectedButton = new TextComponent("§b§l[SELECTED]");
-            selectedButton.setClickEvent(new ClickEvent(Action.RUN_COMMAND, COMMAND_PREFIX + "mode_selected"));
-            selectedButton.setHoverEvent(new HoverEvent(net.md_5.bungee.api.chat.HoverEvent.Action.SHOW_TEXT, (new ComponentBuilder("§7Manually choose which players become vampires")).create()));
+                    .append(Component.text("[SELECTED]", NamedTextColor.AQUA)
+                            .decorate(TextDecoration.BOLD)
+                            .clickEvent(ClickEvent.runCommand(COMMAND_PREFIX + "mode_selected"))
+                            .hoverEvent(HoverEvent.showText(Component.text("Manually choose which players become vampires", NamedTextColor.GRAY)))
+                    );
 
-            TextComponent buttonMessage = new TextComponent("");
-            buttonMessage.addExtra(randomButton);
-            buttonMessage.addExtra(selectedButton);
+            admin.sendMessage(buttonMessage);
 
-            admin.spigot().sendMessage(buttonMessage);
             admin.sendMessage("");
         }
     }
@@ -189,7 +193,7 @@ public class InitGameManager {
             int totalPages = (int)Math.ceil((double) playerCount / PLAYERS_PER_PAGE), currentPage = Math.min(data.currentPage, totalPages - 1);
             data.currentPage = currentPage;
             int slot = 0, startIndex = currentPage * PLAYERS_PER_PAGE, endIndex = Math.min(startIndex + PLAYERS_PER_PAGE, playerCount);
-            Inventory inventory = Bukkit.createInventory(null, INVENTORY_SIZE, "§4§lSelect Vampires");
+            Inventory inventory = Bukkit.createInventory(null, INVENTORY_SIZE, Component.text(SELECT_VAMPIRES_GUI_TITLE));
 
             for (int i = startIndex; i < endIndex; ++i) {
                 Player player = onlinePlayers.get(i);
@@ -198,9 +202,9 @@ public class InitGameManager {
                 ItemMeta meta = item.getItemMeta();
 
                 if (isVampire) {
-                    meta.setDisplayName("§4" + player.getName() + " - Vampire");
+                    meta.customName(Component.text(player.getName() + " - Vampire", NamedTextColor.DARK_RED));
                 } else {
-                    meta.setDisplayName("§a" + player.getName() + " - Human");
+                    meta.customName(Component.text(player.getName() + " - Human", NamedTextColor.GREEN));
                 }
 
                 List<String> lore = new ArrayList<>();
@@ -215,7 +219,9 @@ public class InitGameManager {
                 // Create the button to return to the previous page
                 ItemStack prevButton = new ItemStack(Material.ARROW);
                 ItemMeta prevMeta = prevButton.getItemMeta();
-                prevMeta.setDisplayName("§e« Previous Page");
+                prevMeta.customName(Component.text("« Previous Page", NamedTextColor.YELLOW));
+
+                // Inform the reader of what page number the previous button will take them to
                 List<String> prevLore = new ArrayList<>();
                 prevLore.add("§7Go to page " + currentPage);
                 prevMeta.setLore(prevLore);
@@ -227,7 +233,9 @@ public class InitGameManager {
             // Create a current page number item
             ItemStack pageIndicator = new ItemStack(Material.PAPER);
             ItemMeta pageMeta = pageIndicator.getItemMeta();
-            pageMeta.setDisplayName("§fPage " + (currentPage + 1) + " of " + totalPages);
+            pageMeta.customName(Component.text("Page " + (currentPage + 1) + " of " + totalPages, NamedTextColor.WHITE));
+
+            // Note how many players have been chosen as vampires currently
             List<String> pageLore = new ArrayList<>();
             pageLore.add("§7" + playerCount + " players total");
             pageLore.add("§7" + data.selectedVampires.size() + " selected as vampires");
@@ -240,7 +248,9 @@ public class InitGameManager {
                 // Create the button to progress to the next page
                 ItemStack nextButton = new ItemStack(Material.ARROW);
                 ItemMeta nextMeta = nextButton.getItemMeta();
-                nextMeta.setDisplayName("§eNext Page »");
+                nextMeta.customName(Component.text("Next Page »", NamedTextColor.YELLOW));
+
+                // Inform the reader of what page number the next button will take them to
                 List<String> nextLore = new ArrayList<>();
                 nextLore.add("§7Go to page " + (currentPage + 2));
                 nextMeta.setLore(nextLore);
@@ -252,7 +262,11 @@ public class InitGameManager {
             // Create a confirmation button to move forward
             ItemStack confirmButton = new ItemStack(Material.LIME_CONCRETE);
             ItemMeta confirmMeta = confirmButton.getItemMeta();
-            confirmMeta.setDisplayName("§a§lCONFIRM SELECTION");
+            confirmMeta.customName(Component.text("CONFIRM SELECTION", NamedTextColor.GREEN)
+                    .decorate(TextDecoration.BOLD)
+            );
+
+            // Let the admin know how many vampires they will proceed with
             List<String> confirmLore = new ArrayList<>();
             confirmLore.add("§7Click to proceed with these selections");
             confirmLore.add("§7Selected: §e" + data.selectedVampires.size() + " vampires");
@@ -436,13 +450,15 @@ public class InitGameManager {
         admin.sendMessage("§7This will reset the entire game state.");
         admin.sendMessage("");
 
-        TextComponent confirmMessage = new TextComponent("§7Ready to begin? ");
-        TextComponent clickableText = new TextComponent("§a§l§n[START GAME]");
-        clickableText.setClickEvent(new ClickEvent(Action.RUN_COMMAND, COMMAND_PREFIX + "execute"));
-        clickableText.setHoverEvent(new HoverEvent(net.md_5.bungee.api.chat.HoverEvent.Action.SHOW_TEXT, (new ComponentBuilder("§7Click to initialize the game")).create()));
-        confirmMessage.addExtra(clickableText);
+        Component confirmMessage = Component.text("Ready to begin? ", NamedTextColor.GRAY)
+                .append(Component.text("[START GAME]", NamedTextColor.GREEN)
+                        .decorate(TextDecoration.BOLD)
+                        .decorate(TextDecoration.UNDERLINED)
+                        .clickEvent(ClickEvent.runCommand(COMMAND_PREFIX + "execute"))
+                        .hoverEvent(HoverEvent.showText(Component.text("Click to initialize the game", NamedTextColor.GRAY)))
+                );
 
-        admin.spigot().sendMessage(confirmMessage);
+        admin.sendMessage(confirmMessage);
         admin.sendMessage("§a§l========================================");
     }
 
@@ -616,13 +632,22 @@ public class InitGameManager {
                 }
 
                 Set<UUID> vampireIds = new HashSet<>();
+                Title startingVampireTitle = Title.title(
+                        Component.text("Vampire", NamedTextColor.DARK_RED)
+                                .decorate(TextDecoration.BOLD),
+                        Component.empty(),
+                        Title.Times.times(
+                                Duration.ofMillis(500),     // 1/2 second
+                                Duration.ofSeconds(5),
+                                Duration.ofSeconds(1)
+                        ));
 
                 for (Player player : playersToConvert) {
                     this.plugin.getVampireManager().setPlayerAsVampire(player, 1);
                     vampireIds.add(player.getUniqueId());
 
                     player.setExp(0.5F);
-                    player.sendTitle("§4§lVampire", "", 10, 100, 20);
+                    player.showTitle(startingVampireTitle);
                     player.sendMessage("");
                     player.sendMessage("§4§l========================================");
                     player.sendMessage("§cYou are a creature of the night, and it is time to feed.");
@@ -631,21 +656,32 @@ public class InitGameManager {
                     player.sendMessage("§4§l========================================");
                     player.sendMessage("");
 
-                    TextComponent textureMessage = new TextComponent("§7Apply the vampire texture pack: ");
-                    TextComponent clickableText = new TextComponent("§c§n[CLICK HERE]");
-                    clickableText.setClickEvent(new ClickEvent(Action.RUN_COMMAND, "/pow texture vampire"));
-                    clickableText.setHoverEvent(new HoverEvent(net.md_5.bungee.api.chat.HoverEvent.Action.SHOW_TEXT, (new ComponentBuilder("§7Click to apply the vampire texture pack")).create()));
-                    textureMessage.addExtra(clickableText);
+                    Component textureMessage = Component.text("Apply the vampire texture pack: ", NamedTextColor.GRAY)
+                            .append(Component.text("[CLICK HERE]", NamedTextColor.RED)
+                                    .decorate(TextDecoration.UNDERLINED)
+                                    .clickEvent(ClickEvent.runCommand("/pow texture vampire"))
+                                    .hoverEvent(HoverEvent.showText(Component.text("Click to apply the vampire texture pack",NamedTextColor.GRAY)))
+                            );
 
-                    player.spigot().sendMessage(textureMessage);
+                    player.sendMessage(textureMessage);
                 }
 
                 admin.sendMessage("§7  → Converted " + playersToConvert.size() + " players to vampires");
 
+                Title startingHumanTitle = Title.title(
+                        Component.text("Human", NamedTextColor.YELLOW)
+                                .decorate(TextDecoration.BOLD),
+                        Component.empty(),
+                        Title.Times.times(
+                                Duration.ofMillis(500),
+                                Duration.ofSeconds(5),
+                                Duration.ofSeconds(1)
+                        ));
+
                 for (Player player : onlinePlayers) {
                     if (!vampireIds.contains(player.getUniqueId())) {
                         player.addScoreboardTag(VampireManager.HUMAN_TAG);
-                        player.sendTitle("§e§lHuman", "", 10, 100, 20);
+                        player.showTitle(startingHumanTitle);
                         player.sendMessage("");
                         player.sendMessage("§e§l========================================");
                         player.sendMessage("§7Welcome to " + plugin.getConfigManager().getTownName() + ". Survive, consecrate beacons, find tomes, and above all: Fear the night.");
@@ -810,7 +846,17 @@ public class InitGameManager {
      * @return {@code true} if the current event has the admin manually selecting vampires.
      */
     public boolean isPlayerSelectionGUI(String title) {
-        return title.equals("§4§lSelect Vampires");
+        return title.equals(SELECT_VAMPIRES_GUI_TITLE);
+    }
+
+    /**
+     * Retrieve if the player is manually selecting the starting vampires.
+     *
+     * @param title the name of the current event.
+     * @return {@code true} if the current event has the admin manually selecting vampires.
+     */
+    public boolean isPlayerSelectionGUI(Component title) {
+        return title.equals(Component.text(SELECT_VAMPIRES_GUI_TITLE));
     }
 
     /**

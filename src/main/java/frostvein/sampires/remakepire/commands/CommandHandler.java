@@ -6,11 +6,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import net.md_5.bungee.api.chat.ClickEvent;
-import net.md_5.bungee.api.chat.ComponentBuilder;
-import net.md_5.bungee.api.chat.HoverEvent;
-import net.md_5.bungee.api.chat.TextComponent;
-import net.md_5.bungee.api.chat.ClickEvent.Action;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.event.HoverEvent;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
@@ -1777,21 +1777,21 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
 
             for (Location loc : tomeLocations) {
                 boolean hasChest = loc.getWorld() != null && loc.getBlock().getType() == Material.CHEST;
-                String chestStatus = hasChest ? "§a✔" : "§c✖";
+                Component chestStatus = hasChest ?
+                        Component.text("✔", NamedTextColor.GREEN) :
+                        Component.text("✖", NamedTextColor.RED);
                 String tpCommand = String.format("/tp %d %d %d", loc.getBlockX(), loc.getBlockY(), loc.getBlockZ());
 
-                TextComponent indexPart = new TextComponent(String.format("§7%d. ", index));
-                TextComponent coordsPart = new TextComponent(String.format("§e%d, %d, %d", loc.getBlockX(), loc.getBlockY(), loc.getBlockZ()));
-                coordsPart.setClickEvent(new ClickEvent(Action.RUN_COMMAND, tpCommand));
-                coordsPart.setHoverEvent(new HoverEvent(net.md_5.bungee.api.chat.HoverEvent.Action.SHOW_TEXT, (new ComponentBuilder("§aClick to teleport to this location")).create()));
-                TextComponent statusPart = new TextComponent(String.format(" §7(chest: %s§7)", chestStatus));
+                Component message = Component.text(index + ". ", NamedTextColor.GRAY)
+                        .append(Component.text(String.format("%d, %d, %d", loc.getBlockX(), loc.getBlockY(), loc.getBlockZ()), NamedTextColor.YELLOW)
+                                .clickEvent(ClickEvent.runCommand(tpCommand))
+                                .hoverEvent(HoverEvent.showText(Component.text("Click to teleport to this location", NamedTextColor.GREEN)))
+                        )
+                        .append(Component.text(" (chest: ", NamedTextColor.GRAY))
+                        .append(chestStatus)
+                        .append(Component.text(")", NamedTextColor.GRAY));
 
-                if (sender instanceof Player player) {
-                    player.spigot().sendMessage(indexPart, coordsPart, statusPart);
-
-                } else {
-                    sender.sendMessage(String.format("§7%d. §e%d, %d, %d §7(chest: %s§7)", index, loc.getBlockX(), loc.getBlockY(), loc.getBlockZ(), chestStatus));
-                }
+                sender.sendMessage(message);
 
                 ++index;
             }
@@ -2195,13 +2195,13 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
      * @param player the player changing to the vampire texture pack.
      */
     private void sendVampireTexturePackPrompt(Player player) {
-        TextComponent textureMessage = new TextComponent("§7Apply the vampire texture pack: ");
-        TextComponent clickableText = new TextComponent("§c§n[CLICK HERE]");
+        Component textureMessage = Component.text("Apply the vampire texture pack: ", NamedTextColor.GRAY)
+                .append(Component.text("[CLICK HERE]", NamedTextColor.RED)
+                        .decorate(TextDecoration.UNDERLINED)
+                        .clickEvent(ClickEvent.runCommand("/pow texture vampire"))
+                        .hoverEvent(HoverEvent.showText(Component.text("Click to apply the vampire texture pack", NamedTextColor.GRAY)))
+                );
 
-        clickableText.setClickEvent(new ClickEvent(Action.RUN_COMMAND, "/pow texture vampire"));
-        clickableText.setHoverEvent(new HoverEvent(net.md_5.bungee.api.chat.HoverEvent.Action.SHOW_TEXT, (new ComponentBuilder("§7Click to apply the vampire texture pack")).create()));
-
-        textureMessage.addExtra(clickableText);
-        player.spigot().sendMessage(textureMessage);
+        player.sendMessage(textureMessage);
     }
 }

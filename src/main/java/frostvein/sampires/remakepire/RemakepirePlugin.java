@@ -1,6 +1,8 @@
 package frostvein.sampires.remakepire;
 
 import java.io.File;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -324,9 +326,9 @@ public final class RemakepirePlugin extends JavaPlugin {
                 this.logInfo("Created new CastTeam for name tag management.");
             }
 
-            this.castTeam.setNameTagVisibility(NameTagVisibility.NEVER);
-            this.castTeam.setDisplayName("§6Human Team");
+            this.castTeam.setOption(Team.Option.NAME_TAG_VISIBILITY, Team.OptionStatus.NEVER);
             this.castTeam.setCanSeeFriendlyInvisibles(false);
+            this.castTeam.displayName(Component.text("Human Team", NamedTextColor.GOLD));
 
             this.logInfo("CastTeam initialized successfully with hidden name tags.");
 
@@ -383,9 +385,9 @@ public final class RemakepirePlugin extends JavaPlugin {
                 this.logInfo("Created new VampireCastTeam for name tag management.");
             }
 
-            this.vampireCastTeam.setNameTagVisibility(NameTagVisibility.NEVER);
+            this.vampireCastTeam.setOption(Team.Option.NAME_TAG_VISIBILITY, Team.OptionStatus.NEVER);
+            this.vampireCastTeam.displayName(Component.text("Vampire Team", NamedTextColor.DARK_RED));
             this.vampireCastTeam.setCanSeeFriendlyInvisibles(false);
-            this.vampireCastTeam.setDisplayName("§4Vampire Team");
 
             this.logInfo("VampireCastTeam initialized successfully with hidden name tags.");
 

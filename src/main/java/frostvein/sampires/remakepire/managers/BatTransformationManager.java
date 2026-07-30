@@ -10,8 +10,9 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import net.md_5.bungee.api.ChatMessageType;
-import net.md_5.bungee.api.chat.TextComponent;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
@@ -133,10 +134,11 @@ public class BatTransformationManager {
             Player player = Bukkit.getPlayer(playerId);
 
             if (player != null && player.isOnline()) {
-                int remainingSeconds = batData.getRemainingSeconds();
-                int minutes = remainingSeconds / 60, seconds = remainingSeconds % 60;
-                String actionBar = "§8Bat Form: §c§l" + String.format("%d:%02d", minutes, seconds);
-                player.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText(actionBar));
+                final int remainingSeconds = batData.getRemainingSeconds();
+                final int minutes = remainingSeconds / 60, seconds = remainingSeconds % 60;
+                player.sendActionBar(Component.text("Bat Form: ", NamedTextColor.DARK_GRAY)
+                        .append(Component.text(String.format("%d:%02d", minutes, seconds), NamedTextColor.RED, TextDecoration.BOLD))
+                );
             }
         }
     }
