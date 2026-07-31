@@ -21,7 +21,7 @@ to follow the steps in order to avoid losing important game data.
 The process of getting the plugin running on your server is identical to running the _VampireSMP_ plugin.
 This process may vary platform by platform, so check out a platform-specific tutorial if you are getting
 confuse. Here is what works at the most basic level:
-- After dragging _Remakepire-1.1.0.jar_ into your plugins folder, run the server and it will create a folder
+- After dragging Remakepire .jar into your plugins folder, run the server and it will create a folder
   containing core files like the sire map, config, and beacons.
 - Once the server has booted up and its folder has been created, turn off the server.
 - Open the _config.yml_ file and begin changing the plugin values. This is the time you would bring in any existing files
