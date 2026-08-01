@@ -12,7 +12,7 @@ import frostvein.sampires.remakepire.RemakepirePlugin;
 import frostvein.sampires.remakepire.managers.SessionManager;
 
 public class VampireCraftBlocker implements Listener {
-    RemakepirePlugin plugin;
+    private RemakepirePlugin plugin;
     private static final Set<Material> BLOCKED_WEAPONS = EnumSet.of(Material.WOODEN_SWORD, Material.STONE_SWORD, Material.IRON_SWORD, Material.GOLDEN_SWORD, Material.DIAMOND_SWORD, Material.NETHERITE_SWORD, Material.WOODEN_AXE, Material.STONE_AXE, Material.IRON_AXE, Material.GOLDEN_AXE, Material.DIAMOND_AXE, Material.NETHERITE_AXE, Material.BOW, Material.CROSSBOW, Material.MACE, Material.TRIDENT);
 
     /**
