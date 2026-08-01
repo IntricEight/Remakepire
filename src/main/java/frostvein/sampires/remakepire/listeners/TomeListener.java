@@ -2,7 +2,6 @@ package frostvein.sampires.remakepire.listeners;
 
 import java.util.UUID;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -149,7 +148,7 @@ public class TomeListener implements Listener {
      */
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
-        if (event.getView().title().equals(Component.text(TomeManager.TOME_SELECTION_GUI_TITLE))) {
+        if (event.getView().title().equals(TomeManager.TOME_SELECTION_GUI_TITLE)) {
             event.setCancelled(true);
 
             if (event.getWhoClicked() instanceof Player admin) {
@@ -259,10 +258,10 @@ public class TomeListener implements Listener {
      */
     @EventHandler
     public void onInventoryClose(InventoryCloseEvent event) {
-        if (event.getView().title().equals(Component.text(TomeManager.TOME_SELECTION_GUI_TITLE))) {
+        if (event.getView().title().equals(TomeManager.TOME_SELECTION_GUI_TITLE)) {
             if (event.getPlayer() instanceof Player player) {
                 Bukkit.getScheduler().runTaskLater(this.plugin, () -> {
-                    if (player.getOpenInventory() == null || player.getOpenInventory().title() == null || !player.getOpenInventory().title().equals(Component.text(TomeManager.TOME_SELECTION_GUI_TITLE))) {
+                    if (player.getOpenInventory() == null || player.getOpenInventory().title() == null || !player.getOpenInventory().title().equals(TomeManager.TOME_SELECTION_GUI_TITLE)) {
                         this.tomeManager.removeTomeSelectionTarget(player.getUniqueId());
                     }
                 }, 1L);

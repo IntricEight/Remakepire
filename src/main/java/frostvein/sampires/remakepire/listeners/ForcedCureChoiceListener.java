@@ -36,7 +36,7 @@ public class ForcedCureChoiceListener implements Listener {
      */
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
-        if (event.getView().title().equals(Component.text(ForcedCureChoiceManager.CURE_CHOICE_TITLE))) {
+        if (event.getView().title().equals(ForcedCureChoiceManager.CURE_CHOICE_GUI_TITLE)) {
             event.setCancelled(true);
 
             if (event.getWhoClicked() instanceof Player player) {
@@ -64,7 +64,7 @@ public class ForcedCureChoiceListener implements Listener {
      */
     @EventHandler
     public void onInventoryClose(InventoryCloseEvent event) {
-        if (event.getView().title().equals(Component.text(ForcedCureChoiceManager.CURE_CHOICE_TITLE))) {
+        if (event.getView().title().equals(ForcedCureChoiceManager.CURE_CHOICE_GUI_TITLE)) {
             if (event.getPlayer() instanceof Player player) {
                 if (this.plugin.getForcedCureChoiceManager().hasPendingCure(player)) {
                     player.sendMessage("");

@@ -3,6 +3,8 @@ package frostvein.sampires.remakepire.managers;
 import java.util.ArrayList;
 import java.util.List;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -16,7 +18,9 @@ public class ConfigGuiManager {
     private final RemakepirePlugin plugin;
     private final ConfigManager configManager;
     private final SessionManager sessionManager;
-    public static final String CONFIG_GUI_TITLE = "§8§lConfiguration Options";
+    public static final Component CONFIG_GUI_TITLE = Component.text("Configuration Options", NamedTextColor.DARK_GRAY)
+            .decorate(TextDecoration.BOLD)
+            .decoration(TextDecoration.ITALIC, false);
     private Inventory configGui;
 
     public ConfigGuiManager(RemakepirePlugin plugin) {
@@ -42,7 +46,7 @@ public class ConfigGuiManager {
                 "one_human_left", "border_active" };
         final int ROWS = 5;
 
-        this.configGui = Bukkit.createInventory(null, 9 * ROWS, Component.text(CONFIG_GUI_TITLE));
+        this.configGui = Bukkit.createInventory(null, 9 * ROWS, CONFIG_GUI_TITLE);
 
         for (String commandName : commandsInGui) {
             this.configGui.setItem(getCommandPositionInGui(commandName), this.getGuiItem(commandName));

@@ -1,6 +1,5 @@
 package frostvein.sampires.remakepire.listeners;
 
-import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
