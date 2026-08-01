@@ -45,7 +45,9 @@ public class InitGameManager {
     private final Map<UUID, InitData> adminData = new HashMap<>();
     private final Map<UUID, Boolean> guiRefreshInProgress = new HashMap<>();
     private static final int PLAYERS_PER_PAGE = 45, INVENTORY_SIZE = 54;
-    public static final String SELECT_VAMPIRES_GUI_TITLE = "§4§lSelect Vampires";
+    public static final Component SELECT_VAMPIRES_GUI_TITLE = Component.text("Select Vampires", NamedTextColor.DARK_RED)
+            .decorate(TextDecoration.BOLD)
+            .decoration(TextDecoration.ITALIC, false);
 
     /**
      * Create an instance of the Initialize Game manager.
@@ -194,7 +196,7 @@ public class InitGameManager {
             int totalPages = (int)Math.ceil((double) playerCount / PLAYERS_PER_PAGE), currentPage = Math.min(data.currentPage, totalPages - 1);
             data.currentPage = currentPage;
             int slot = 0, startIndex = currentPage * PLAYERS_PER_PAGE, endIndex = Math.min(startIndex + PLAYERS_PER_PAGE, playerCount);
-            Inventory inventory = Bukkit.createInventory(null, INVENTORY_SIZE, Component.text(SELECT_VAMPIRES_GUI_TITLE));
+            Inventory inventory = Bukkit.createInventory(null, INVENTORY_SIZE, SELECT_VAMPIRES_GUI_TITLE);
 
             for (int i = startIndex; i < endIndex; ++i) {
                 Player player = onlinePlayers.get(i);
@@ -844,21 +846,11 @@ public class InitGameManager {
     /**
      * Retrieve if the player is manually selecting the starting vampires.
      *
-     * @param title the name of the current event.
-     * @return {@code true} if the current event has the admin manually selecting vampires.
-     */
-    public boolean isPlayerSelectionGUI(String title) {
-        return title.equals(SELECT_VAMPIRES_GUI_TITLE);
-    }
-
-    /**
-     * Retrieve if the player is manually selecting the starting vampires.
-     *
-     * @param title the name of the current event.
+     * @param title the name of an inventory menu.
      * @return {@code true} if the current event has the admin manually selecting vampires.
      */
     public boolean isPlayerSelectionGUI(Component title) {
-        return title.equals(Component.text(SELECT_VAMPIRES_GUI_TITLE));
+        return title.equals(SELECT_VAMPIRES_GUI_TITLE);
     }
 
     /**

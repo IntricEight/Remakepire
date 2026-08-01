@@ -7,7 +7,7 @@ import org.bukkit.event.player.PlayerBedEnterEvent;
 import frostvein.sampires.remakepire.RemakepirePlugin;
 
 public class NoSleepListener implements Listener {
-    RemakepirePlugin plugin;
+    private RemakepirePlugin plugin;
 
     /**
      * Create an instance of the No Sleep (sleep prevention) listener.

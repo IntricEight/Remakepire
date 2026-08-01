@@ -17,7 +17,8 @@ import frostvein.sampires.remakepire.beacons.BeaconSite;
 import frostvein.sampires.remakepire.managers.VampireManager;
 
 public class BeaconTeleportAbility extends VampireAbility {
-    public static final String INVENTORY_TITLE = "§4Desecrated Beacon Network";
+    public static final Component INVENTORY_GUI_TITLE = Component.text("Desecrated Beacon Network", NamedTextColor.DARK_RED)
+            .decoration(TextDecoration.ITALIC, false);
 
     public String getName() {
         return "beacontravel";
@@ -78,7 +79,7 @@ public class BeaconTeleportAbility extends VampireAbility {
     private void openBeaconTeleportGUI(Player player, List<BeaconSite> desecratedBeacons) {
         int slots = Math.max(9, (desecratedBeacons.size() + 8) / 9 * 9);
         slots = Math.min(54, slots);
-        Inventory inventory = Bukkit.createInventory(null, slots, Component.text(INVENTORY_TITLE));
+        Inventory inventory = Bukkit.createInventory(null, slots, INVENTORY_GUI_TITLE);
 
         for (int i = 0; i < desecratedBeacons.size() && i < slots; ++i) {
             BeaconSite beacon = desecratedBeacons.get(i);

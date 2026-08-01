@@ -3,7 +3,6 @@ package frostvein.sampires.remakepire.listeners;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -45,7 +44,7 @@ public class BeaconTeleportListener implements Listener {
      */
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
-        if (event.getView().title().equals(Component.text(BeaconTeleportAbility.INVENTORY_TITLE))) {
+        if (event.getView().title().equals(BeaconTeleportAbility.INVENTORY_GUI_TITLE)) {
             event.setCancelled(true);
 
             if (event.getWhoClicked() instanceof Player player) {

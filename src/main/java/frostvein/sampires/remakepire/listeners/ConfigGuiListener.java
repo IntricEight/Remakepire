@@ -23,7 +23,7 @@ public class ConfigGuiListener  implements Listener {
      */
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
-        if (event.getView().title().equals(Component.text(ConfigGuiManager.CONFIG_GUI_TITLE))) {
+        if (event.getView().title().equals(ConfigGuiManager.CONFIG_GUI_TITLE)) {
             event.setCancelled(true);
 
             ItemStack clickedItem = event.getCurrentItem();

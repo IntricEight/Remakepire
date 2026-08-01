@@ -28,7 +28,9 @@ public class TomeManager {
     private final Map<UUID, Integer> playerTomeUsageSession = new HashMap<>();
     private final Map<UUID, UUID> tomeSelectionTargets = new HashMap<>();
     public static final String TOME_TAG_PREFIX = "tome_ability_";
-    public static final String TOME_SELECTION_GUI_TITLE = "§6§lSelect Tome Abilities";
+    public static final Component TOME_SELECTION_GUI_TITLE = Component.text("Select Tome Abilities", NamedTextColor.GOLD)
+            .decorate(TextDecoration.BOLD)
+            .decoration(TextDecoration.ITALIC, false);
 
     /**
      * Create an instance of the Tome manager.
@@ -238,7 +240,7 @@ public class TomeManager {
      */
     public void openTomeSelectionGUI(Player admin, Player target) {
         this.tomeSelectionTargets.put(admin.getUniqueId(), target.getUniqueId());
-        Inventory gui = Bukkit.createInventory(null, 54, Component.text(TOME_SELECTION_GUI_TITLE));
+        Inventory gui = Bukkit.createInventory(null, 54, TOME_SELECTION_GUI_TITLE);
         List<String> abilityNames = new ArrayList<>(this.abilities.keySet());
         abilityNames.sort(String::compareToIgnoreCase);
         int slot = 0;
