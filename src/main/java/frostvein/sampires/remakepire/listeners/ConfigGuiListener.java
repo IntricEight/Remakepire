@@ -1,5 +1,6 @@
 package frostvein.sampires.remakepire.listeners;
 
+import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -22,7 +23,7 @@ public class ConfigGuiListener  implements Listener {
      */
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
-        if (event.getView().getTitle().equals(ConfigGuiManager.CONFIG_GUI_TITLE)) {
+        if (event.getView().title().equals(Component.text(ConfigGuiManager.CONFIG_GUI_TITLE))) {
             event.setCancelled(true);
 
             ItemStack clickedItem = event.getCurrentItem();

@@ -1,5 +1,6 @@
 package frostvein.sampires.remakepire.listeners;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -8,13 +9,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.title.Title;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.SoundCategory;
 import org.bukkit.boss.BarColor;
-import org.bukkit.boss.BarFlag;
 import org.bukkit.boss.BarStyle;
 import org.bukkit.boss.BossBar;
 import org.bukkit.entity.Player;
@@ -487,8 +491,20 @@ public class BeaconConversionListener implements Listener {
     private void disableHumansFinalStand() {
         this.plugin.logInfo("HUMANS FINAL STAND ENDED - A vampire has converted a beacon!");
 
-        for(Player player : this.plugin.getServer().getOnlinePlayers()) {
-            player.sendTitle("§4§lFINAL STAND BROKEN", "§cDarkness pushes back against the light", 20, 80, 20);
+        // A display for all the online players to see
+        Title title = Title.title(
+                Component.text("FINAL STAND BROKEN", NamedTextColor.DARK_RED)
+                        .decorate(TextDecoration.BOLD),
+                Component.text("Darkness pushes back against the light", NamedTextColor.RED),
+                Title.Times.times(
+                        Duration.ofSeconds(1),
+                        Duration.ofSeconds(4),
+                        Duration.ofSeconds(1)
+                ));
+
+        // Inform all online players that the holy control of the beacons has been broken
+        for (Player player : this.plugin.getServer().getOnlinePlayers()) {
+            player.showTitle(title);
             player.sendMessage("§cA vampire has broken through the holy defenses.");
             player.playSound(player.getLocation(), Sound.ENTITY_WITHER_SPAWN, SoundCategory.MASTER, 1.0F, 0.5F);
         }
@@ -512,8 +528,20 @@ public class BeaconConversionListener implements Listener {
         // Activate the eternal night
         this.plugin.getSessionManager().setVampiresEternalNightActive(true);
 
-        for(Player player : this.plugin.getServer().getOnlinePlayers()) {
-            player.sendTitle("§4§lETERNAL NIGHT FALLS", "§cThe darkness consumes all hope", 20, 100, 40);
+        // A display for all the online players to see
+        Title title = Title.title(
+                Component.text("ETERNAL NIGHT FALLS", NamedTextColor.DARK_RED)
+                        .decorate(TextDecoration.BOLD),
+                Component.text("The darkness consumes all hope", NamedTextColor.RED),
+                Title.Times.times(
+                        Duration.ofSeconds(1),
+                        Duration.ofSeconds(5),
+                        Duration.ofSeconds(2)
+                ));
+
+        // Alert all online players of the desecrated beacon total control
+        for (Player player : this.plugin.getServer().getOnlinePlayers()) {
+            player.showTitle(title);
             player.sendMessage("§c All beacons now pulse with unholy energy.");
             player.playSound(player.getLocation(), Sound.ENTITY_WITHER_SPAWN, SoundCategory.MASTER, 1.0F, 0.5F);
         }
@@ -532,8 +560,20 @@ public class BeaconConversionListener implements Listener {
 
         this.plugin.getSessionManager().setVampiresEternalNightActive(false);
 
-        for(Player player : this.plugin.getServer().getOnlinePlayers()) {
-            player.sendTitle("§6§lLIGHT RETURNS", "§eA beacon shines with holy light once more", 20, 80, 20);
+        // A display for all the online players to see
+        Title title = Title.title(
+                Component.text("LIGHT RETURNS", NamedTextColor.GOLD)
+                        .decorate(TextDecoration.BOLD),
+                Component.text("A beacon shines with holy light once more", NamedTextColor.YELLOW),
+                Title.Times.times(
+                        Duration.ofSeconds(1),
+                        Duration.ofSeconds(4),
+                        Duration.ofSeconds(1)
+                ));
+
+        // Inform all online players that the darkness control of the beacons has been broken
+        for (Player player : this.plugin.getServer().getOnlinePlayers()) {
+            player.showTitle(title);
             player.sendMessage("§aA human has broken through the darkness.");
             player.playSound(player.getLocation(), Sound.BLOCK_BEACON_ACTIVATE, SoundCategory.MASTER, 1.0F, 1.2F);
         }
@@ -583,7 +623,6 @@ public class BeaconConversionListener implements Listener {
             this.converters = new HashSet<>();
             this.startTime = System.currentTimeMillis();
             this.phaseStartTime = this.startTime;
-            this.adjustedConversionTime = BeaconConversionListener.this.BASE_CONVERSION_TIME;
             this.neutralStageComplete = beacon.getState() == BeaconState.NEUTRAL;
 
             if (this.neutralStageComplete) {
@@ -631,7 +670,7 @@ public class BeaconConversionListener implements Listener {
             BarColor color = this.isVampireConversion ? BarColor.RED : BarColor.WHITE;
             String title = this.isVampireConversion ? "§4Desecrating Beacon: §f" + beaconName : "§fConsecrating Beacon: §f" + beaconName;
 
-            this.bossBar = BeaconConversionListener.this.plugin.getServer().createBossBar(title, color, BarStyle.SOLID, new BarFlag[0]);
+            this.bossBar = BeaconConversionListener.this.plugin.getServer().createBossBar(title, color, BarStyle.SOLID);
             this.bossBar.setProgress(this.neutralStageComplete ? 0.5 : 0.0);
         }
 

@@ -91,7 +91,7 @@ public class PlayerJoinListener implements Listener {
             }
         }
 
-        event.setJoinMessage(null);
+        event.joinMessage(null);
     }
 
     /**
@@ -123,7 +123,7 @@ public class PlayerJoinListener implements Listener {
             this.plugin.getVampireTexturePackManager().onPlayerQuit(player);
         }
 
-        event.setQuitMessage(null);
+        event.quitMessage(null);
     }
 
     /**

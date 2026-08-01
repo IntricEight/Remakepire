@@ -3,6 +3,8 @@ package frostvein.sampires.remakepire.listeners;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
@@ -43,7 +45,7 @@ public class BeaconTeleportListener implements Listener {
      */
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
-        if (event.getView().getTitle().equals(BeaconTeleportAbility.INVENTORY_TITLE)) {
+        if (event.getView().title().equals(Component.text(BeaconTeleportAbility.INVENTORY_TITLE))) {
             event.setCancelled(true);
 
             if (event.getWhoClicked() instanceof Player player) {
@@ -53,8 +55,9 @@ public class BeaconTeleportListener implements Listener {
                 if (clickedItem != null && clickedItem.getType() == Material.BEACON) {
                     ItemMeta meta = clickedItem.getItemMeta();
 
-                    if (meta != null && meta.getDisplayName() != null) {
-                        String beaconName = meta.getDisplayName().replaceAll("§[0-9a-fklmnor]", "");
+                    if (meta != null && meta.customName() != null) {
+                        // Remove the § code from the front of the beacon names
+                        String beaconName = PlainTextComponentSerializer.plainText().serialize(meta.customName());
                         BeaconSite beacon = this.plugin.getBeaconManager().getBeacon(beaconName);
 
                         if (beacon == null) {

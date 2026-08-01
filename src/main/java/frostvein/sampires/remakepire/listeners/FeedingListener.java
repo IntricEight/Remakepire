@@ -1,5 +1,7 @@
 package frostvein.sampires.remakepire.listeners;
 
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Material;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -85,7 +87,7 @@ public class FeedingListener implements Listener {
                 killer.getWorld().dropItemNaturally(killer.getLocation(), experienceBottle);
             }
 
-            this.plugin.getSessionManager().sendActionBar(killer, "§cThe creatures blood pours freely into your open bottle.");
+            killer.sendActionBar(Component.text("The creatures blood pours freely into your open bottle.", NamedTextColor.RED));
             return true;
 
         } else {
@@ -112,13 +114,4 @@ public class FeedingListener implements Listener {
             }
         }
     }
-
-    /**
-     * Handle any unexpected or special methods of gaining experience points.
-     *
-     * @param vampire the player generating the xp.
-     * @param amount the amount of xp.
-     * @param source the source of the xp.
-     */
-    private void handleSpecialExperienceSource(Player vampire, int amount, String source) {}
 }

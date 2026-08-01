@@ -3,14 +3,16 @@ package frostvein.sampires.remakepire.managers;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-
-import frostvein.sampires.remakepire.utils.ConversionAssistant;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 import frostvein.sampires.remakepire.RemakepirePlugin;
+import frostvein.sampires.remakepire.utils.ConversionAssistant;
 
 public class VampireTrackingManager {
     private final RemakepirePlugin plugin;
@@ -81,7 +83,7 @@ public class VampireTrackingManager {
 
             for (Player vampire : Bukkit.getOnlinePlayers()) {
                 if (this.vampireManager.isVampire(vampire) && !vampire.getUniqueId().equals(trackedVampire.getUniqueId()) && vampire.getWorld().equals(trackedVampire.getWorld()) && (this.plugin.getVampireFeedingManager() == null || !this.plugin.getVampireFeedingManager().isFeeding(vampire))) {
-                    String message;
+                    Component messageComponent;
 
                     // Only give directions if that feature is enabled
                     if (trackLocation) {
@@ -92,12 +94,16 @@ public class VampireTrackingManager {
                         double distance = Math.sqrt(deltaX * deltaX + deltaZ * deltaZ);
 
                         String direction = conversionAssistant.getRelativeDirection(deltaX, deltaZ, vampireLocation.getYaw());
-                        message = String.format("§4New Vampire: §f%s §7(§f%.0f blocks§7)", direction, distance);
+                        messageComponent = Component.text("New Vampire: ", NamedTextColor.DARK_RED)
+                                .append(Component.text(direction, NamedTextColor.WHITE))
+                                .append(Component.text(String.format(" (%.0f blocks)", distance), NamedTextColor.GRAY));
+
                     } else {
-                        message = "§4§lNew Vampire";
+                        messageComponent = Component.text("New Vampire", NamedTextColor.DARK_RED)
+                                .decorate(TextDecoration.BOLD);
                     }
 
-                    this.plugin.getSessionManager().sendActionBar(vampire, message);
+                    vampire.sendActionBar(messageComponent);
                 }
             }
         }

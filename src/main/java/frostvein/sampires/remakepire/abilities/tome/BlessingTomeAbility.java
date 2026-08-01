@@ -1,6 +1,9 @@
 package frostvein.sampires.remakepire.abilities.tome;
 
-import java.util.Arrays;
+import java.util.List;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -87,8 +90,9 @@ public class BlessingTomeAbility extends TomeAbility {
                     : durationSeconds + " second" + (durationSeconds != 1 ? "s" : "");
 
             potionMeta.setBasePotionType(PotionType.WATER);
-            potionMeta.setDisplayName("§aHoly Water");
-            potionMeta.setLore(Arrays.asList("§7Throw this on an evil creature to disable their powers for " + durationText + "!"));
+            potionMeta.customName(Component.text("Holy Water", NamedTextColor.GREEN).decoration(TextDecoration.ITALIC, false));
+            potionMeta.lore(List.of(Component.text("Throw this on an evil creature to disable their powers for " + durationText + "!").decoration(TextDecoration.ITALIC, false)));
+
             item.setItemMeta(potionMeta);
         }
     }

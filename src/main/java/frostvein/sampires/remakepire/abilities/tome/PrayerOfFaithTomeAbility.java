@@ -3,6 +3,8 @@ package frostvein.sampires.remakepire.abilities.tome;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
@@ -123,10 +125,14 @@ public class PrayerOfFaithTomeAbility extends TomeAbility {
 
                             if (PrayerSession.this.secondsRemaining != 45 && PrayerSession.this.secondsRemaining != 30 && PrayerSession.this.secondsRemaining != 15) {
                                 if (PrayerSession.this.secondsRemaining <= 10 && PrayerSession.this.secondsRemaining > 0) {
-                                    PrayerOfFaithTomeAbility.this.plugin.getSessionManager().sendActionBar(PrayerSession.this.player, "§6Prayer: §e" + VampireAbilityManager.formatTime(PrayerSession.this.secondsRemaining) + "...");
+                                    PrayerSession.this.player.sendActionBar(Component.text("Prayer: ", NamedTextColor.GOLD)
+                                            .append(Component.text(VampireAbilityManager.formatTime(PrayerSession.this.secondsRemaining) + "...", NamedTextColor.YELLOW))
+                                    );
                                 }
                             } else {
-                                PrayerOfFaithTomeAbility.this.plugin.getSessionManager().sendActionBar(PrayerSession.this.player, "§6Prayer: §e" + VampireAbilityManager.formatTime(PrayerSession.this.secondsRemaining) + " remaining...");
+                                PrayerSession.this.player.sendActionBar(Component.text("Prayer: ", NamedTextColor.GOLD)
+                                        .append(Component.text(VampireAbilityManager.formatTime(PrayerSession.this.secondsRemaining) + " remaining...", NamedTextColor.YELLOW))
+                                );
                             }
 
                             if (PrayerSession.this.secondsRemaining <= 0) {
@@ -158,7 +164,7 @@ public class PrayerOfFaithTomeAbility extends TomeAbility {
             this.player.addPotionEffect(new PotionEffect(PotionEffectType.ABSORPTION, ABSORPTION_DURATION, ABSORPTION_AMPLIFIER, false, false));
             this.player.playSound(this.player.getLocation(), "minecraft:block.beacon.activate", 1.0F, 1.5F);
             this.player.sendMessage("§7You feel divinely protected with absorption for " + (ABSORPTION_DURATION / 20 / 60) + " minutes.");
-            PrayerOfFaithTomeAbility.this.plugin.getSessionManager().sendActionBar(this.player, "§a✦ Prayer Complete ✦");
+            this.player.sendActionBar(Component.text("✦ Prayer Complete ✦", NamedTextColor.GREEN));
         }
 
         /**

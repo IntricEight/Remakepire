@@ -1,5 +1,10 @@
 package frostvein.sampires.remakepire.commands;
 
+import java.time.Duration;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.title.Title;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -91,7 +96,19 @@ public class VampireCureCommand implements CommandExecutor {
     private void performCure(Player player, ItemStack holyWater, BeaconSite holyBeacon) {
         holyWater.setAmount(holyWater.getAmount() - 1);
 
-        player.sendTitle("§6§lCURED", "§eThe curse is lifted", 10, 60, 20);
+        Title title = Title.title(
+                Component.text("CURED", NamedTextColor.GOLD, TextDecoration.BOLD),
+                Component.text("The curse is lifted", NamedTextColor.YELLOW),
+                Title.Times.times(
+                        // 50 milliseconds in a tick, 20 ticks in a second
+                        Duration.ofMillis(10 * 50),     // 1/2 of a second
+                        Duration.ofSeconds(3),
+                        Duration.ofSeconds(1)
+                )
+        );
+
+        player.showTitle(title);
+
         player.sendMessage("§7The holy water burns through your veins...");
         player.sendMessage("§7The corrupted blood boils away in divine light...");
         player.sendMessage("§aYou feel your humanity returning...");

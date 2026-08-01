@@ -1,6 +1,9 @@
 package frostvein.sampires.remakepire.listeners;
 
 import java.util.List;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.HumanEntity;
@@ -162,9 +165,11 @@ public class TomeVampireRestrictionListener implements Listener {
 
             if (meta != null) {
                 if (meta.hasDisplayName()) {
-                    String displayName = meta.getDisplayName();
+                    Component displayName = meta.customName();
 
-                    if (displayName.startsWith("§6Tome of ")) {
+                    if (displayName instanceof TextComponent textComponent
+                            && NamedTextColor.GOLD.equals(textComponent.color())
+                            && textComponent.content().startsWith("Tome of ")) {
                         return true;
                     }
                 }

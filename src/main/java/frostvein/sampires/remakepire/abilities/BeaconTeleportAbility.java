@@ -2,12 +2,14 @@ package frostvein.sampires.remakepire.abilities;
 
 import java.util.ArrayList;
 import java.util.List;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import frostvein.sampires.remakepire.RemakepirePlugin;
@@ -76,7 +78,7 @@ public class BeaconTeleportAbility extends VampireAbility {
     private void openBeaconTeleportGUI(Player player, List<BeaconSite> desecratedBeacons) {
         int slots = Math.max(9, (desecratedBeacons.size() + 8) / 9 * 9);
         slots = Math.min(54, slots);
-        Inventory inventory = Bukkit.createInventory(null, slots, INVENTORY_TITLE);
+        Inventory inventory = Bukkit.createInventory(null, slots, Component.text(INVENTORY_TITLE));
 
         for (int i = 0; i < desecratedBeacons.size() && i < slots; ++i) {
             BeaconSite beacon = desecratedBeacons.get(i);
@@ -99,7 +101,12 @@ public class BeaconTeleportAbility extends VampireAbility {
         ItemMeta meta = item.getItemMeta();
 
         if (meta != null) {
-            meta.setDisplayName("§4§l" + beacon.getName());
+            meta.customName(
+                    Component.text(beacon.getName(), NamedTextColor.DARK_RED)
+                            .decorate(TextDecoration.BOLD)
+                            .decoration(TextDecoration.ITALIC, false)
+            );
+
             List<String> lore = new ArrayList<>();
 
             lore.add("§7Location: §f" + beacon.getLocation().getWorld().getName());

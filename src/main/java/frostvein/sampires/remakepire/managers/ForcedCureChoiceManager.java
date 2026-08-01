@@ -1,9 +1,14 @@
 package frostvein.sampires.remakepire.managers;
 
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.title.Title;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
@@ -71,12 +76,16 @@ public class ForcedCureChoiceManager {
         target.setFlying(true);
         target.setInvulnerable(true);
 
-        Inventory gui = Bukkit.createInventory(null, 27, CURE_CHOICE_TITLE);
+        Inventory gui = Bukkit.createInventory(null, 27, Component.text(CURE_CHOICE_TITLE));
         ItemStack humanityButton = new ItemStack(Material.PLAYER_HEAD);
         ItemMeta humanityMeta = humanityButton.getItemMeta();
 
         if (humanityMeta != null) {
-            humanityMeta.setDisplayName("§a§lReturn to Humanity");
+            humanityMeta.customName(
+                    Component.text("Return to Humanity", NamedTextColor.GREEN)
+                            .decorate(TextDecoration.BOLD)
+                            .decoration(TextDecoration.ITALIC, false)
+            );
             humanityMeta.setLore(Arrays.asList("§7The holy words have broken your curse.", "§7You can feel your humanity returning...", "", "§eClick to accept your return to mortality."));
             humanityButton.setItemMeta(humanityMeta);
         }
@@ -85,7 +94,11 @@ public class ForcedCureChoiceManager {
         ItemMeta deathMeta = deathButton.getItemMeta();
 
         if (deathMeta != null) {
-            deathMeta.setDisplayName("§4§lFinally Accept Death");
+            deathMeta.customName(
+                    Component.text("Finally Accept Death", NamedTextColor.DARK_RED)
+                            .decorate(TextDecoration.BOLD)
+                            .decoration(TextDecoration.ITALIC, false)
+            );
             deathMeta.setLore(Arrays.asList("§7You have lived too long as a creature", "§7of darkness. Perhaps it is time to rest...", "", "§c§lWARNING: This will result in permadeath!", "§eClick to embrace the eternal sleep."));
             deathButton.setItemMeta(deathMeta);
         }
@@ -193,7 +206,18 @@ public class ForcedCureChoiceManager {
         caster.sendMessage("§7The creature of darkness accepts their redemption...");
         caster.sendMessage("§aYou have sanctified " + target.getName() + ", and they have accepted.");
 
-        target.sendTitle("§6§lREDEEMED", "§eYou have chosen humanity", 10, 60, 20);
+        // Inform the former vampire that they are human once more
+        target.showTitle(Title.title(
+                Component.text("REDEEMED", NamedTextColor.GOLD)
+                        .decorate(TextDecoration.BOLD),
+                Component.text("You have chosen humanity", NamedTextColor.YELLOW),
+                Title.Times.times(
+                        Duration.ofMillis(500),     // 1/2 second
+                        Duration.ofSeconds(3),
+                        Duration.ofSeconds(1)
+                )
+        ));
+
         target.sendMessage("§aYou accept the holy words and choose to return...");
         target.sendMessage("§7The holy water burns through your veins...");
         target.sendMessage("§7Your corrupted blood boils away in divine light...");
@@ -262,7 +286,18 @@ public class ForcedCureChoiceManager {
         caster.sendMessage("§7The creature chooses death over humanity...");
         caster.sendMessage("§8Their wish is granted...");
 
-        target.sendTitle("§4§lETERNAL REST", "§8You embrace the void", 10, 60, 20);
+        // Inform the vampire that they are now dead
+        target.showTitle(Title.title(
+                Component.text("ETERNAL REST", NamedTextColor.DARK_RED)
+                        .decorate(TextDecoration.BOLD),
+                Component.text("You embrace the void", NamedTextColor.DARK_GRAY),
+                Title.Times.times(
+                        Duration.ofMillis(500),     // 1/2 second
+                        Duration.ofSeconds(3),
+                        Duration.ofSeconds(1)
+                )
+        ));
+
         target.sendMessage("§4You refuse the holy words and choose oblivion...");
         target.sendMessage("§8The darkness claims you one final time...");
         target.sendMessage("§8Your journey ends here...");

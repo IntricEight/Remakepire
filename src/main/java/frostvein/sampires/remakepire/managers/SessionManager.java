@@ -5,18 +5,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import net.md_5.bungee.api.ChatMessageType;
-import net.md_5.bungee.api.chat.TextComponent;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.GameRule;
 import org.bukkit.World;
 import org.bukkit.attribute.Attribute;
-import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scoreboard.Criteria;
 import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Score;
 import org.bukkit.scoreboard.Scoreboard;
@@ -139,25 +138,7 @@ public class SessionManager {
         final String message = this.getSessionStatusMessage();
 
         for (Player player : Bukkit.getOnlinePlayers()) {
-            this.sendActionBar(player, message);
-        }
-    }
-
-    /**
-     * Update the words above the player's hotbar.
-     *
-     * @param player the player who is receiving the message.
-     * @param message the message to be placed above the hotbar.
-     */
-    public void sendActionBar(Player player, String message) {
-        try {
-            player.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(message));
-        } catch (Exception e) {
-            try {
-                player.sendTitle("", message, 0, 25, 5);
-            } catch (Exception e1) {
-                player.sendMessage("§8[§6Session§8] " + message);
-            }
+            player.sendActionBar(Component.text(message));
         }
     }
 
@@ -423,20 +404,23 @@ public class SessionManager {
         this.sessionObjective = mainScoreboard.getObjective("smp_session");
 
         if (this.sessionObjective == null) {
-            this.sessionObjective = mainScoreboard.registerNewObjective("smp_session", "dummy", "SMP Session State");
+            this.sessionObjective = mainScoreboard.registerNewObjective("smp_session", Criteria.DUMMY, Component.text("SMP Session State"));
+
             Score sessionScore = this.sessionObjective.getScore("state");
             sessionScore.setScore(BEFORE_SESSION);
         }
 
         this.sessionIDObjective = mainScoreboard.getObjective("vsmp_session_id");
         if (this.sessionIDObjective == null) {
-            this.sessionIDObjective = mainScoreboard.registerNewObjective("vsmp_session_id", "dummy");
+            this.sessionIDObjective = mainScoreboard.registerNewObjective("vsmp_session_id", Criteria.DUMMY, Component.empty());
+
             this.sessionIDObjective.getScore(SESSION_ID_HOLDER).setScore(1);
         }
 
         this.gameIDObjective = mainScoreboard.getObjective("vsmp_game_id");
         if (this.gameIDObjective == null) {
-            this.gameIDObjective = mainScoreboard.registerNewObjective("vsmp_game_id", "dummy");
+            this.gameIDObjective = mainScoreboard.registerNewObjective("vsmp_game_id", Criteria.DUMMY, Component.empty());
+
             this.gameIDObjective.getScore(GAME_ID_HOLDER).setScore(1);
         }
 
@@ -776,6 +760,6 @@ public class SessionManager {
      * @param message the message to broadcast.
      */
     private void broadcastMessage(String message) {
-        Bukkit.broadcastMessage(message);
+        Bukkit.broadcast(Component.text(message));
     }
 }

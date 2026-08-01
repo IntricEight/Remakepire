@@ -1,10 +1,13 @@
 package frostvein.sampires.remakepire.listeners;
 
 import java.util.UUID;
-import net.md_5.bungee.api.chat.ClickEvent;
-import net.md_5.bungee.api.chat.ComponentBuilder;
-import net.md_5.bungee.api.chat.HoverEvent;
-import net.md_5.bungee.api.chat.TextComponent;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.event.HoverEvent;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -83,7 +86,7 @@ public class TomeListener implements Listener {
                         } else {
                             this.plugin.getCureBookReadingListener().onCureBookRead(player, cureBookNumber);
                         }
-                    } else if (!this.tomeManager.isValidAbility(tomeTitle)) {
+                    } else if (tomeTitle == null || !this.tomeManager.isValidAbility(tomeTitle)) {
                         this.plugin.logInfo("Invalid tome ability: '" + tomeTitle + "'");
 
                     } else if (!this.plugin.getVampireManager().isHuman(player)) {
@@ -112,20 +115,16 @@ public class TomeListener implements Listener {
                                 player.sendMessage("§eYou feel ancient knowledge flowing into your mind...");
                                 player.sendMessage("§aYou have learned the ability: §f" + tomeTitle);
 
-                                String command = "/pow tome " + tomeTitle.toLowerCase();
-                                TextComponent prefix = new TextComponent("§7Use ");
-                                TextComponent clickableCommand = new TextComponent("§f§n" + command);
-                                clickableCommand.setClickEvent(new ClickEvent(net.md_5.bungee.api.chat.ClickEvent.Action.COPY_TO_CLIPBOARD, command));
-                                clickableCommand.setHoverEvent(new HoverEvent(net.md_5.bungee.api.chat.HoverEvent.Action.SHOW_TEXT, (new ComponentBuilder("§7Click to copy command to clipboard")).create()));
-                                TextComponent suffix = new TextComponent("§7 to activate this ability.");
-                                TextComponent fullMessage = new TextComponent("");
-
-                                fullMessage.addExtra(prefix);
-                                fullMessage.addExtra(clickableCommand);
-                                fullMessage.addExtra(suffix);
+                                final String command = "/pow tome " + tomeTitle.toLowerCase();
 
                                 player.sendMessage("");
-                                player.spigot().sendMessage(fullMessage);
+                                player.sendMessage(Component.text("Use ", NamedTextColor.GRAY)
+                                        .append(Component.text(command, NamedTextColor.WHITE)
+                                                .decorate(TextDecoration.UNDERLINED)
+                                                .clickEvent(ClickEvent.copyToClipboard(command))
+                                                .hoverEvent(HoverEvent.showText(Component.text("Click to copy command to clipboard", NamedTextColor.GRAY)))
+                                        )
+                                        .append(Component.text(" to activate this ability.", NamedTextColor.GRAY)));
                                 player.sendMessage("");
 
                                 if (item.getAmount() > 1) {
@@ -150,7 +149,7 @@ public class TomeListener implements Listener {
      */
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
-        if (event.getView().getTitle() != null && event.getView().getTitle().equals(TomeManager.TOME_SELECTION_GUI_TITLE)) {
+        if (event.getView().title().equals(Component.text(TomeManager.TOME_SELECTION_GUI_TITLE))) {
             event.setCancelled(true);
 
             if (event.getWhoClicked() instanceof Player admin) {
@@ -169,7 +168,7 @@ public class TomeListener implements Listener {
                         if (target != null && target.isOnline()) {
                             ItemMeta meta = clickedItem.getItemMeta();
 
-                            if (meta != null && meta.getDisplayName() != null) {
+                            if (meta != null && meta.customName() != null) {
                                 if (meta.hasLore()) {
                                     for (String line : meta.getLore()) {
                                         if (line.startsWith("§8[CURE_BOOK:")) {
@@ -180,7 +179,9 @@ public class TomeListener implements Listener {
                                     }
                                 }
 
-                                String displayName = meta.getDisplayName();
+                                String displayName = PlainTextComponentSerializer.plainText().serialize(meta.customName());;
+
+                                // Filter out extra content from the string name
                                 String cleanName = displayName.replaceAll("§[0-9a-fk-or]", "").trim();
                                 if (cleanName.startsWith("✓ ")) {
                                     cleanName = cleanName.substring(2);
@@ -258,10 +259,10 @@ public class TomeListener implements Listener {
      */
     @EventHandler
     public void onInventoryClose(InventoryCloseEvent event) {
-        if (event.getView().getTitle().equals(TomeManager.TOME_SELECTION_GUI_TITLE)) {
+        if (event.getView().title().equals(Component.text(TomeManager.TOME_SELECTION_GUI_TITLE))) {
             if (event.getPlayer() instanceof Player player) {
                 Bukkit.getScheduler().runTaskLater(this.plugin, () -> {
-                    if (player.getOpenInventory() == null || player.getOpenInventory().getTitle() == null || !player.getOpenInventory().getTitle().equals(TomeManager.TOME_SELECTION_GUI_TITLE)) {
+                    if (player.getOpenInventory() == null || player.getOpenInventory().title() == null || !player.getOpenInventory().title().equals(Component.text(TomeManager.TOME_SELECTION_GUI_TITLE))) {
                         this.tomeManager.removeTomeSelectionTarget(player.getUniqueId());
                     }
                 }, 1L);
