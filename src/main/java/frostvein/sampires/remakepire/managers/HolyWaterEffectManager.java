@@ -25,7 +25,6 @@ import frostvein.sampires.remakepire.RemakepirePlugin;
 
 public class HolyWaterEffectManager implements Listener {
     private final RemakepirePlugin plugin;
-    private final VampireManager vampireManager;
     private final ConfigManager configManager;
     private final Map<UUID, BukkitTask> disabledVampires = new HashMap<>();
 
@@ -36,7 +35,6 @@ public class HolyWaterEffectManager implements Listener {
      */
     public HolyWaterEffectManager(RemakepirePlugin plugin) {
         this.plugin = plugin;
-        this.vampireManager = plugin.getVampireManager();
         this.configManager = plugin.getConfigManager();
 
         Bukkit.getPluginManager().registerEvents(this, plugin);
@@ -54,9 +52,9 @@ public class HolyWaterEffectManager implements Listener {
             Location splashLocation = waterEvent.getPotion().getLocation();
             final double splashRadius = 4.0;
 
-            for(Entity nearby : splashLocation.getWorld().getNearbyEntities(splashLocation, splashRadius, splashRadius, splashRadius)) {
+            for (Entity nearby : splashLocation.getWorld().getNearbyEntities(splashLocation, splashRadius, splashRadius, splashRadius)) {
                 if (nearby instanceof Player player) {
-                    double distance = nearby.getLocation().distance(splashLocation);
+                    final double distance = nearby.getLocation().distance(splashLocation);
 
                     if (distance <= splashRadius) {
                         this.processHolyWaterHit(player);
@@ -69,7 +67,7 @@ public class HolyWaterEffectManager implements Listener {
             ItemStack potionItem = potion.getItem();
 
             if (this.isWaterSplashBottle(potionItem)) {
-                for(LivingEntity entity : event.getAffectedEntities()) {
+                for (LivingEntity entity : event.getAffectedEntities()) {
                     this.processHolyWaterHit(entity);
                 }
             }
@@ -83,7 +81,7 @@ public class HolyWaterEffectManager implements Listener {
      */
     private void processHolyWaterHit(LivingEntity entity) {
         if (entity instanceof Player player) {
-            if (player.getGameMode() != GameMode.SPECTATOR && this.vampireManager.isVampire(player) && this.vampireManager.isVampireStage2OrHigher(player)) {
+            if (player.getGameMode() != GameMode.SPECTATOR && this.plugin.getVampireManager().isVampire(player) && this.plugin.getVampireManager().isVampireStage2OrHigher(player)) {
                 this.applyHolyWaterEffect(player);
             }
         }
@@ -257,7 +255,7 @@ public class HolyWaterEffectManager implements Listener {
      * Clear the holy water ability suppression from all vampires.
      */
     public void clearAllEffects() {
-        for(Map.Entry<UUID, BukkitTask> entry : this.disabledVampires.entrySet()) {
+        for (Map.Entry<UUID, BukkitTask> entry : this.disabledVampires.entrySet()) {
             UUID vampireId = entry.getKey();
             BukkitTask task = entry.getValue();
 
@@ -272,7 +270,7 @@ public class HolyWaterEffectManager implements Listener {
             }
         }
 
-        int cleared = this.disabledVampires.size();
+        int cleared = this.getDisabledVampireCount();
         this.disabledVampires.clear();
         this.plugin.logInfo("Cleared holy water effects from " + cleared + " vampires");
     }
@@ -281,7 +279,7 @@ public class HolyWaterEffectManager implements Listener {
      * Remove the holy water ability suppression from all vampires before shutting down the manager.
      */
     public void shutdown() {
-        for(BukkitTask task : this.disabledVampires.values()) {
+        for (BukkitTask task : this.disabledVampires.values()) {
             if (task != null && !task.isCancelled()) {
                 task.cancel();
             }

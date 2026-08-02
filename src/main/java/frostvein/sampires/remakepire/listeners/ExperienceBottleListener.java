@@ -1,7 +1,7 @@
 package frostvein.sampires.remakepire.listeners;
 
-import net.md_5.bungee.api.ChatMessageType;
-import net.md_5.bungee.api.chat.TextComponent;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -11,13 +11,11 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import frostvein.sampires.remakepire.RemakepirePlugin;
-import frostvein.sampires.remakepire.managers.ThirstManager;
 import frostvein.sampires.remakepire.managers.VampireManager;
 
 public class ExperienceBottleListener implements Listener {
     private final RemakepirePlugin plugin;
     private final VampireManager vampireManager;
-    private final ThirstManager thirstManager;
 
     /**
      * Create an instance of the Experience Bottle listener.
@@ -27,11 +25,10 @@ public class ExperienceBottleListener implements Listener {
     public ExperienceBottleListener(RemakepirePlugin plugin) {
         this.plugin = plugin;
         this.vampireManager = plugin.getVampireManager();
-        this.thirstManager = plugin.getThirstManager();
     }
 
     /**
-     *
+     * Handle a vampire's attempt to drink from a blood bottle.
      *
      * @param event a player interacts with an object.
      */
@@ -68,9 +65,9 @@ public class ExperienceBottleListener implements Listener {
                                 player.getWorld().dropItemNaturally(player.getLocation(), glassBottle);
                             }
 
-                            int experienceGained = 8;
-                            this.thirstManager.quenchThirst(player, experienceGained);
-                            player.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent("§cYou drain the essence from the bottle, satisfying your vampiric thirst..."));
+                            final int experienceGained = 8;
+                            this.plugin.getThirstManager().quenchThirst(player, experienceGained);
+                            player.sendActionBar(Component.text("You drain the essence from the bottle, satisfying your vampiric thirst...", NamedTextColor.RED));
                         }
                     }
                 }

@@ -203,7 +203,7 @@ public class VampireTexturePackManager {
     public void ensureAllVampiresHaveTexturePack() {
         int applied = 0;
 
-        for(Player player : Bukkit.getOnlinePlayers()) {
+        for (Player player : Bukkit.getOnlinePlayers()) {
             if (this.vampireManager.isVampire(player)) {
                 long delay = (long)applied * 20L;
                 this.applyVampireTexturePackDelayed(player, delay, "ensure all vampires");
@@ -226,7 +226,7 @@ public class VampireTexturePackManager {
         int len = s.length();
         byte[] data = new byte[len / 2];
 
-        for(int i = 0; i < len; i += 2) {
+        for (int i = 0; i < len; i += 2) {
             data[i / 2] = (byte)((Character.digit(s.charAt(i), 16) << 4) + Character.digit(s.charAt(i + 1), 16));
         }
 

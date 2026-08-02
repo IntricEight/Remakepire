@@ -1,5 +1,10 @@
 package frostvein.sampires.remakepire.commands;
 
+import java.time.Duration;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.title.Title;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -13,13 +18,11 @@ import frostvein.sampires.remakepire.listeners.CureBookReadingListener;
 import frostvein.sampires.remakepire.listeners.DeathHandler;
 import frostvein.sampires.remakepire.managers.BeaconManager;
 import frostvein.sampires.remakepire.managers.VampireManager;
-import frostvein.sampires.remakepire.managers.VampireSireManager;
 
 public class VampireCureCommand implements CommandExecutor {
     private final RemakepirePlugin plugin;
     private final VampireManager vampireManager;
     private final BeaconManager beaconManager;
-    private final VampireSireManager sireManager;
 
     /**
      * Create an instance of the plugin's self cure command handler.
@@ -30,7 +33,6 @@ public class VampireCureCommand implements CommandExecutor {
         this.plugin = plugin;
         this.vampireManager = plugin.getVampireManager();
         this.beaconManager = plugin.getBeaconManager();
-        this.sireManager = plugin.getSireManager();
     }
 
     /**
@@ -70,7 +72,7 @@ public class VampireCureCommand implements CommandExecutor {
                         player.sendMessage("§cYou must be close to a holy beacon to perform this ritual.");
 
                     } else {
-                        if (!this.sireManager.canBeCured(player)) {
+                        if (!this.plugin.getSireManager().canBeCured(player)) {
                             player.sendMessage("§4The curse cannot be broken while your sire still walks the world in mortal form...");
                             player.sendMessage("§4Only through your maker's true death can you find release.");
                         } else {
@@ -94,7 +96,19 @@ public class VampireCureCommand implements CommandExecutor {
     private void performCure(Player player, ItemStack holyWater, BeaconSite holyBeacon) {
         holyWater.setAmount(holyWater.getAmount() - 1);
 
-        player.sendTitle("§6§lCURED", "§eThe curse is lifted", 10, 60, 20);
+        Title title = Title.title(
+                Component.text("CURED", NamedTextColor.GOLD, TextDecoration.BOLD),
+                Component.text("The curse is lifted", NamedTextColor.YELLOW),
+                Title.Times.times(
+                        // 50 milliseconds in a tick, 20 ticks in a second
+                        Duration.ofMillis(10 * 50),     // 1/2 of a second
+                        Duration.ofSeconds(3),
+                        Duration.ofSeconds(1)
+                )
+        );
+
+        player.showTitle(title);
+
         player.sendMessage("§7The holy water burns through your veins...");
         player.sendMessage("§7The corrupted blood boils away in divine light...");
         player.sendMessage("§aYou feel your humanity returning...");
@@ -106,7 +120,7 @@ public class VampireCureCommand implements CommandExecutor {
         final String messageToVampires = this.plugin.getCureBookManager().getSelfCureAnnouncementMessage(false);
 
         // Alert all players that a vampire has been cured
-        for(Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+        for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
             if (!onlinePlayer.equals(player)) {
                 if (this.vampireManager.isVampire(onlinePlayer)) {
                     onlinePlayer.sendMessage(messageToVampires);

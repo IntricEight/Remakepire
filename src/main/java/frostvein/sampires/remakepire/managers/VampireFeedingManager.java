@@ -3,6 +3,8 @@ package frostvein.sampires.remakepire.managers;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Sound;
@@ -25,7 +27,6 @@ public class VampireFeedingManager implements Listener {
     private final RemakepirePlugin plugin;
     private final VampireManager vampireManager;
     private final ThirstManager thirstManager;
-    private final ConfigManager configManager;
     // Controls the distance players can be while feeding
     private static final double FEEDING_RANGE = 1.5;
     // Controls the time a vampire needs to be crouching nearby before feeding begins
@@ -47,7 +48,6 @@ public class VampireFeedingManager implements Listener {
         this.plugin = plugin;
         this.vampireManager = plugin.getVampireManager();
         this.thirstManager = plugin.getThirstManager();
-        this.configManager = plugin.getConfigManager();
 
         Bukkit.getPluginManager().registerEvents(this, plugin);
         this.startFeedingDetectionTask();
@@ -69,7 +69,7 @@ public class VampireFeedingManager implements Listener {
      * Manage a vampire's feeding attempt.
      */
     private void checkFeedingSessions() {
-        for(FeedingSession session : this.activeSessions.values().toArray(new FeedingSession[0])) {
+        for (FeedingSession session : this.activeSessions.values().toArray(new FeedingSession[0])) {
             Player vampire = Bukkit.getPlayer(session.vampireId), target = Bukkit.getPlayer(session.targetId);
 
             if (vampire != null && target != null && vampire.isOnline() && target.isOnline() && vampire.getGameMode() != GameMode.SPECTATOR) {
@@ -115,17 +115,17 @@ public class VampireFeedingManager implements Listener {
         String preparationMessage;
 
         if (this.vampireManager.isHuman(target)) {
-            preparationMessage = "§8Preparing to feed... " + VampireAbilityManager.formatTime(session.preparationSecondsRemaining) + " remaining";
+            preparationMessage = "Preparing to feed... " + VampireAbilityManager.formatTime(session.preparationSecondsRemaining) + " remaining";
         } else {
-            preparationMessage = "§8Preparing to siphon... " + VampireAbilityManager.formatTime(session.preparationSecondsRemaining) + " remaining";
+            preparationMessage = "Preparing to siphon... " + VampireAbilityManager.formatTime(session.preparationSecondsRemaining) + " remaining";
         }
 
-        this.plugin.getSessionManager().sendActionBar(vampire, preparationMessage);
+        vampire.sendActionBar(Component.text(preparationMessage, NamedTextColor.DARK_GRAY));
 
         // Alert the players that the feeding has begun.
         if (session.preparationSecondsRemaining <= 0) {
             session.phase = VampireFeedingManager.FeedingPhase.ACTIVE_FEEDING;
-            this.plugin.getSessionManager().sendActionBar(vampire, "");
+            vampire.sendActionBar(Component.text(""));
 
             if (this.vampireManager.isHuman(target)) {
                 vampire.sendMessage("§4§lYou begin feeding on " + target.getName() + "!");
@@ -157,8 +157,8 @@ public class VampireFeedingManager implements Listener {
 
         if (this.vampireManager.isHuman(target)) {
             UUID vampireId = vampire.getUniqueId();
-            int currentSessionThirst = this.sessionFeedingThirst.getOrDefault(vampireId, 0);
-            int maxFeedingThirst = this.configManager.getMaxFeedingThirstPerSession();
+            int currentSessionThirst = this.getSessionFeedingThirst(vampire);
+            int maxFeedingThirst = this.plugin.getConfigManager().getMaxFeedingThirstPerSession();
 
             // Prevent the vampire from draining more blood than the config setting allows
             if (currentSessionThirst >= maxFeedingThirst) {
@@ -184,8 +184,8 @@ public class VampireFeedingManager implements Listener {
             this.thirstManager.modifyQuench(vampire, thirstToGive);
             this.sessionFeedingThirst.put(vampireId, currentSessionThirst + thirstToGive);
 
-            this.plugin.getSessionManager().sendActionBar(vampire, "§4Feeding...");
-            this.plugin.getSessionManager().sendActionBar(target, "§cYour life force is being drained...");
+            vampire.sendActionBar(Component.text("Feeding...", NamedTextColor.DARK_RED));
+            target.sendActionBar(Component.text("Your life force is being drained...", NamedTextColor.RED));
 
         } else {
             // Prevent the vampire from feeding on vampires without low on blood
@@ -197,8 +197,9 @@ public class VampireFeedingManager implements Listener {
 
             this.thirstManager.modifyQuench(target, -1 * THIRST_GAIN_PER_SECOND);
             this.thirstManager.modifyQuench(vampire, THIRST_GAIN_PER_SECOND);
-            this.plugin.getSessionManager().sendActionBar(vampire, "§4Siphoning...");
-            this.plugin.getSessionManager().sendActionBar(target, "§cYour vampiric essence is being siphoned...");
+
+            vampire.sendActionBar(Component.text("Siphoning...", NamedTextColor.DARK_RED));
+            target.sendActionBar(Component.text("Your vampiric essence is being siphoned...", NamedTextColor.RED));
         }
 
         // Create the custom drinking sound effect
@@ -332,23 +333,23 @@ public class VampireFeedingManager implements Listener {
      * @param vampire the player feeding.
      */
     private void attemptStartFeeding(Player vampire) {
-        if (!this.activeSessions.containsKey(vampire.getUniqueId())) {
+        if (!this.isFeeding(vampire)) {
             if (vampire.isSneaking()) {
                 if (this.vampireManager.isVampire(vampire)) {
-                    UUID vampireId = vampire.getUniqueId();
-                    int currentSessionThirst = this.sessionFeedingThirst.getOrDefault(vampireId, 0);
+                    int currentSessionThirst = this.getSessionFeedingThirst(vampire);
 
-                    if (currentSessionThirst >= this.configManager.getMaxFeedingThirstPerSession()) {
+                    if (currentSessionThirst >= this.plugin.getConfigManager().getMaxFeedingThirstPerSession()) {
                         vampire.sendMessage("§cYour thirst is quenched, for now. You are unable to drink any more blood from feeding until the next session.");
                     } else {
-                        int humansChecked = 0;
+                        double distance;
+                        boolean isHuman, isVampire, inRange;
 
-                        for(Player nearbyPlayer : vampire.getWorld().getPlayers()) {
+                        for (Player nearbyPlayer : vampire.getWorld().getPlayers()) {
                             if (!nearbyPlayer.equals(vampire) && nearbyPlayer.getGameMode() == GameMode.SURVIVAL) {
-                                ++humansChecked;
-                                double distance = vampire.getLocation().distance(nearbyPlayer.getLocation());
-                                boolean isHuman = this.vampireManager.isHuman(nearbyPlayer), isVampire = this.vampireManager.isVampire(nearbyPlayer);
-                                boolean inRange = this.isInFeedingRange(vampire, nearbyPlayer);
+                                distance = vampire.getLocation().distance(nearbyPlayer.getLocation());
+                                isHuman = this.vampireManager.isHuman(nearbyPlayer);
+                                isVampire = this.vampireManager.isVampire(nearbyPlayer);
+                                inRange = this.isInFeedingRange(vampire, nearbyPlayer);
 
                                 if ((isHuman || isVampire) && inRange) {
                                     if (isVampire && nearbyPlayer.getExp() <= 0.1F) {
@@ -401,7 +402,7 @@ public class VampireFeedingManager implements Listener {
     public void cancelFeedingSessionByTarget(Player target) {
         UUID targetId = target.getUniqueId();
 
-        for(FeedingSession session : this.activeSessions.values().toArray(new FeedingSession[0])) {
+        for (FeedingSession session : this.activeSessions.values().toArray(new FeedingSession[0])) {
             if (session.targetId.equals(targetId)) {
                 this.cancelFeedingSession(session);
                 return;
@@ -453,7 +454,7 @@ public class VampireFeedingManager implements Listener {
             this.cancelFeedingSession(session);
         }
 
-        for(FeedingSession activeSession : this.activeSessions.values().toArray(new FeedingSession[0])) {
+        for (FeedingSession activeSession : this.activeSessions.values().toArray(new FeedingSession[0])) {
             if (activeSession.targetId.equals(playerId)) {
                 this.cancelFeedingSession(activeSession);
             }
@@ -467,16 +468,6 @@ public class VampireFeedingManager implements Listener {
      */
     public int getActiveFeedingCount() {
         return this.activeSessions.size();
-    }
-
-    /**
-     * Check if a player is feeding.
-     *
-     * @param vampire the player being checked.
-     * @return {@code true} if the vampire is current feeding on another player.
-     */
-    public boolean isVampireFeeding(Player vampire) {
-        return this.activeSessions.containsKey(vampire.getUniqueId());
     }
 
     /**
@@ -544,19 +535,10 @@ public class VampireFeedingManager implements Listener {
     }
 
     /**
-     * Retrieve the maximum blood that a vampire can get through feeding each session.
-     *
-     * @return The maximum amount of blood points.
-     */
-    public int getMaxFeedingThirstPerSession() {
-        return this.configManager.getMaxFeedingThirstPerSession();
-    }
-
-    /**
      * Cancel the feeding processes before shutting down the manager.
      */
     public void shutdown() {
-        for(FeedingSession session : this.activeSessions.values().toArray(new FeedingSession[0])) {
+        for (FeedingSession session : this.activeSessions.values().toArray(new FeedingSession[0])) {
             this.cancelFeedingSession(session);
         }
 
@@ -589,8 +571,8 @@ public class VampireFeedingManager implements Listener {
         }
     }
 
-    private static enum FeedingPhase {
+    private enum FeedingPhase {
         PREPARATION,
-        ACTIVE_FEEDING;
+        ACTIVE_FEEDING
     }
 }

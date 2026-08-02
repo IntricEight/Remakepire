@@ -1,5 +1,7 @@
 package frostvein.sampires.remakepire.listeners;
 
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Material;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -12,13 +14,9 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import frostvein.sampires.remakepire.RemakepirePlugin;
 import frostvein.sampires.remakepire.managers.SessionManager;
-import frostvein.sampires.remakepire.managers.ThirstManager;
-import frostvein.sampires.remakepire.managers.VampireManager;
 
 public class FeedingListener implements Listener {
     private final RemakepirePlugin plugin;
-    private final VampireManager vampireManager;
-    private final ThirstManager thirstManager;
 
     /**
      * Create an instance of the vampire Feeding listener.
@@ -27,8 +25,6 @@ public class FeedingListener implements Listener {
      */
     public FeedingListener(RemakepirePlugin plugin) {
         this.plugin = plugin;
-        this.vampireManager = plugin.getVampireManager();
-        this.thirstManager = plugin.getThirstManager();
     }
 
     /**
@@ -46,15 +42,15 @@ public class FeedingListener implements Listener {
             if (!(deadEntity instanceof Player)) {
                 Player killer = deadEntity.getKiller();
 
-                if (killer != null && this.vampireManager.isVampire(killer)) {
+                if (killer != null && this.plugin.getVampireManager().isVampire(killer)) {
                     int experienceDropped = event.getDroppedExp();
                     event.setDroppedExp(0);
 
-                    if (this.thirstManager.isThirstQuencher(deadEntity.getType())) {
+                    if (this.plugin.getThirstManager().isThirstQuencher(deadEntity.getType())) {
                         boolean bottleFilled = this.tryFillBottleWithBlood(killer);
 
                         if (!bottleFilled) {
-                            this.thirstManager.handleEntityKill(killer, deadEntity.getType(), experienceDropped);
+                            this.plugin.getThirstManager().handleEntityKill(killer, deadEntity.getType(), experienceDropped);
 
                             if (experienceDropped > 0 && !killer.getScoreboardTags().contains(SessionManager.INFORMED_SUCCESSFUL_FEEDING)) {
                                 killer.addScoreboardTag(SessionManager.INFORMED_SUCCESSFUL_FEEDING);
@@ -91,8 +87,9 @@ public class FeedingListener implements Listener {
                 killer.getWorld().dropItemNaturally(killer.getLocation(), experienceBottle);
             }
 
-            this.plugin.getSessionManager().sendActionBar(killer, "§cThe creatures blood pours freely into your open bottle.");
+            killer.sendActionBar(Component.text("The creatures blood pours freely into your open bottle.", NamedTextColor.RED));
             return true;
+
         } else {
             return false;
         }
@@ -109,7 +106,7 @@ public class FeedingListener implements Listener {
     public void onPlayerExpChange(PlayerExpChangeEvent event) {
         Player player = event.getPlayer();
 
-        if (this.vampireManager.isVampire(player)) {
+        if (this.plugin.getVampireManager().isVampire(player)) {
             event.setAmount(0);
 
             if (event.getAmount() > 0 && Math.random() < 0.1) {
@@ -117,13 +114,4 @@ public class FeedingListener implements Listener {
             }
         }
     }
-
-    /**
-     * Handle any unexpected or special methods of gaining experience points.
-     *
-     * @param vampire the player generating the xp.
-     * @param amount the amount of xp.
-     * @param source the source of the xp.
-     */
-    private void handleSpecialExperienceSource(Player vampire, int amount, String source) {}
 }

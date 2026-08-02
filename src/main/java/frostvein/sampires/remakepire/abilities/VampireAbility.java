@@ -1,5 +1,6 @@
 package frostvein.sampires.remakepire.abilities;
 
+import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 import frostvein.sampires.remakepire.RemakepirePlugin;
 import frostvein.sampires.remakepire.managers.VampireManager;
@@ -52,9 +53,11 @@ public abstract class VampireAbility {
         if (!vampireManager.isVampire(player)) {
             return false;
 
+        } else if (player.getGameMode() == GameMode.SPECTATOR) {
+            return false;
+
         } else {
-            int playerStage = vampireManager.getVampireStage(player);
-            return playerStage >= this.getMinimumStage() && this.canUseAdditionalRequirements(player, vampireManager);
+            return vampireManager.getVampireStage(player) >= this.getMinimumStage() && this.canUseAdditionalRequirements(player, vampireManager);
         }
     }
 

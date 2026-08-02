@@ -3,6 +3,7 @@ package frostvein.sampires.remakepire.listeners;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
@@ -43,17 +44,19 @@ public class BeaconTeleportListener implements Listener {
      */
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
-        if (event.getView().getTitle().equals(BeaconTeleportAbility.INVENTORY_TITLE)) {
+        if (event.getView().title().equals(BeaconTeleportAbility.INVENTORY_GUI_TITLE)) {
             event.setCancelled(true);
 
             if (event.getWhoClicked() instanceof Player player) {
                 ItemStack clickedItem = event.getCurrentItem();
 
+                // Check that the player clicked a valid slot in the inventory GUI
                 if (clickedItem != null && clickedItem.getType() == Material.BEACON) {
                     ItemMeta meta = clickedItem.getItemMeta();
 
-                    if (meta != null && meta.getDisplayName() != null) {
-                        String beaconName = meta.getDisplayName().replaceAll("§[0-9a-fklmnor]", "");
+                    if (meta != null && meta.customName() != null) {
+                        // Remove the § code from the front of the beacon names
+                        String beaconName = PlainTextComponentSerializer.plainText().serialize(meta.customName());
                         BeaconSite beacon = this.plugin.getBeaconManager().getBeacon(beaconName);
 
                         if (beacon == null) {
@@ -206,8 +209,7 @@ public class BeaconTeleportListener implements Listener {
         UUID playerId = player.getUniqueId();
 
         if (this.channelingPlayers.containsKey(playerId)) {
-            Location from = event.getFrom();
-            Location to = event.getTo();
+            Location from = event.getFrom(), to = event.getTo();
 
             if (to != null && (from.getX() != to.getX() || from.getY() != to.getY() || from.getZ() != to.getZ())) {
                 this.cancelChanneling(playerId, true);
@@ -222,8 +224,7 @@ public class BeaconTeleportListener implements Listener {
      */
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
-        UUID playerId = event.getPlayer().getUniqueId();
-        this.cancelChanneling(playerId, false);
+        this.cancelChanneling(event.getPlayer().getUniqueId(), false);
     }
 
     /**
@@ -266,7 +267,6 @@ public class BeaconTeleportListener implements Listener {
 
                 } else {
                     player.sendMessage("§cBeacon travel failed. The destination may be unsafe or blocked.");
-//                    BeaconTeleportListener.this.plugin.getLogger().warning("Beacon travel failed for " + player.getName() + " to beacon: " + beacon.getName());
                     plugin.getLogger().warning("Beacon travel failed for " + player.getName() + " to beacon: " + beacon.getName());
                 }
             }

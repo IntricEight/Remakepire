@@ -6,11 +6,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import net.md_5.bungee.api.chat.ClickEvent;
-import net.md_5.bungee.api.chat.ComponentBuilder;
-import net.md_5.bungee.api.chat.HoverEvent;
-import net.md_5.bungee.api.chat.TextComponent;
-import net.md_5.bungee.api.chat.ClickEvent.Action;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.event.HoverEvent;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
@@ -201,7 +201,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                 this.vampireManager.setPlayerAsHuman(target);
 
                 // Clear the player of all tags before assigning them the human tag
-                for(String tag : new HashSet<>(target.getScoreboardTags())) {
+                for (String tag : new HashSet<>(target.getScoreboardTags())) {
                     target.removeScoreboardTag(tag);
                 }
 
@@ -554,12 +554,11 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                 return true;
             }
         } else {
-            if (!(sender instanceof Player)) {
+            if (!(sender instanceof Player player)) {
                 sender.sendMessage("§cConsole must provide coordinates: /pow admin set_vampire_spawn <x> <y> <z>");
                 return true;
             }
 
-            Player player = (Player)sender;
             Location loc = player.getLocation();
             x = loc.getX();
             y = loc.getY();
@@ -627,7 +626,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
             } else {
                 int playersAffected = 0;
 
-                for(Player player : Bukkit.getOnlinePlayers()) {
+                for (Player player : Bukkit.getOnlinePlayers()) {
                     this.resetPlayerCooldowns(player);
                     player.sendMessage("§aYour vampire ability cooldowns have been reset by an administrator.");
                     ++playersAffected;
@@ -661,7 +660,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
 
         // Handle the cooldown command for individual players
         if (args.length == 0) {
-            for(Player player : Bukkit.getOnlinePlayers()) {
+            for (Player player : Bukkit.getOnlinePlayers()) {
                 if (this.plugin.getVampireManager().isHuman(player)) {
                     TomeAbility.clearAllCooldowns(player);
 
@@ -706,7 +705,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         sender.sendMessage("§ePlaying first warning sound for all players...");
 
         // Send the first warning noise (crows)
-        for(Player player : Bukkit.getOnlinePlayers()) {
+        for (Player player : Bukkit.getOnlinePlayers()) {
             player.playSound(player.getLocation(), "crimson:crimson.sound.crimson_warning_1", SoundCategory.MASTER, 1.0F, 1.0F);
         }
 
@@ -714,7 +713,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
 
         // Send the second warning noise (bells) after 5 minutes
         Bukkit.getScheduler().runTaskLater(this.plugin, () -> {
-            for(Player player : Bukkit.getOnlinePlayers()) {
+            for (Player player : Bukkit.getOnlinePlayers()) {
                 player.playSound(player.getLocation(), "crimson:crimson.sound.crimson_warning_2", SoundCategory.MASTER, 1.0F, 1.0F);
             }
 
@@ -811,7 +810,6 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
 
                 default:
                     sender.sendMessage("§cInvalid action. Use: start, pause, end, prime, resume, or building.");
-                    return true;
             }
         }
 
@@ -1034,7 +1032,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         } else {
             sender.sendMessage("§6=== BEACON DISPLAY DEBUG INFO ===");
 
-            for(BeaconSite beacon : this.beaconManager.getAllBeacons()) {
+            for (BeaconSite beacon : this.beaconManager.getAllBeacons()) {
                 sender.sendMessage(this.beaconManager.getBeaconDisplayDebugInfo(beacon.getName()));
             }
         }
@@ -1086,11 +1084,9 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
     private boolean handleBeaconAdd(CommandSender sender, String[] args) {
         if (args.length < 2) {
             sender.sendMessage("§cUsage: /pow admin beacon add <name> [radius]");
-            return true;
 
         } else if (!(sender instanceof Player player)) {
             sender.sendMessage("§cOnly players can add beacons.");
-            return true;
 
         } else {
             String name = args[1];
@@ -1131,9 +1127,9 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                     blockLocation.getBlock().setType(Material.AIR);
                 }
             }
-
-            return true;
         }
+
+        return true;
     }
 
     /**
@@ -1193,7 +1189,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
      * @return {@code true}
      */
     private boolean handleBeaconList(CommandSender sender, String[] args) {
-        for(String line : this.beaconManager.getBeaconList()) {
+        for (String line : this.beaconManager.getBeaconList()) {
             sender.sendMessage(line);
         }
 
@@ -1225,7 +1221,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         sender.sendMessage("");
         sender.sendMessage("§f§l=== SPIRITUAL INFLUENCE ===");
 
-        for(BeaconSite.BeaconState state : BeaconState.values()) {
+        for (BeaconSite.BeaconState state : BeaconState.values()) {
             int count = stateStats.get(state);
             double percentage = total > 0 ? count * 100.0 / (double)total : 0;
             String icon = "";
@@ -1459,7 +1455,6 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                                 sender.sendMessage("§cAmount must be between 1 and 64.");
                                 return true;
                             }
-
                         } catch (NumberFormatException e) {
                             sender.sendMessage("§cInvalid amount: '" + args[2] + "'. Must be a number between 1 and 64.");
                             return true;
@@ -1479,7 +1474,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                             List<String> lore = new ArrayList<>();
                             String[] descriptionLines = ability.getDescriptionLines();
 
-                            for(String line : descriptionLines) {
+                            for (String line : descriptionLines) {
                                 lore.add("§7" + line);
                             }
 
@@ -1496,7 +1491,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                         if (ability != null) {
                             String[] descriptionLines = ability.getDescriptionLines();
 
-                            for(String line : descriptionLines) {
+                            for (String line : descriptionLines) {
                                 pageContent.append("§7").append(line).append("\n");
                             }
                         } else {
@@ -1726,7 +1721,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
             List<Location> tomeLocations = this.plugin.getTomeDistributionManager().getTomeLocations();
             double nearestDistance = Double.MAX_VALUE, distance;
 
-            for(Location loc : tomeLocations) {
+            for (Location loc : tomeLocations) {
                 if (loc.getWorld() != null && loc.getWorld().equals(playerLocation.getWorld())) {
                     distance = playerLocation.distance(loc);
 
@@ -1780,23 +1775,23 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         } else {
             int index = 1;
 
-            for(Location loc : tomeLocations) {
+            for (Location loc : tomeLocations) {
                 boolean hasChest = loc.getWorld() != null && loc.getBlock().getType() == Material.CHEST;
-                String chestStatus = hasChest ? "§a✔" : "§c✖";
+                Component chestStatus = hasChest ?
+                        Component.text("✔", NamedTextColor.GREEN) :
+                        Component.text("✖", NamedTextColor.RED);
                 String tpCommand = String.format("/tp %d %d %d", loc.getBlockX(), loc.getBlockY(), loc.getBlockZ());
 
-                TextComponent indexPart = new TextComponent(String.format("§7%d. ", index));
-                TextComponent coordsPart = new TextComponent(String.format("§e%d, %d, %d", loc.getBlockX(), loc.getBlockY(), loc.getBlockZ()));
-                coordsPart.setClickEvent(new ClickEvent(Action.RUN_COMMAND, tpCommand));
-                coordsPart.setHoverEvent(new HoverEvent(net.md_5.bungee.api.chat.HoverEvent.Action.SHOW_TEXT, (new ComponentBuilder("§aClick to teleport to this location")).create()));
-                TextComponent statusPart = new TextComponent(String.format(" §7(chest: %s§7)", chestStatus));
+                Component message = Component.text(index + ". ", NamedTextColor.GRAY)
+                        .append(Component.text(String.format("%d, %d, %d", loc.getBlockX(), loc.getBlockY(), loc.getBlockZ()), NamedTextColor.YELLOW)
+                                .clickEvent(ClickEvent.runCommand(tpCommand))
+                                .hoverEvent(HoverEvent.showText(Component.text("Click to teleport to this location", NamedTextColor.GREEN)))
+                        )
+                        .append(Component.text(" (chest: ", NamedTextColor.GRAY))
+                        .append(chestStatus)
+                        .append(Component.text(")", NamedTextColor.GRAY));
 
-                if (sender instanceof Player player) {
-                    player.spigot().sendMessage(indexPart, coordsPart, statusPart);
-
-                } else {
-                    sender.sendMessage(String.format("§7%d. §e%d, %d, %d §7(chest: %s§7)", index, loc.getBlockX(), loc.getBlockY(), loc.getBlockZ(), chestStatus));
-                }
+                sender.sendMessage(message);
 
                 ++index;
             }
@@ -1824,7 +1819,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
             if (target.equals("all")) {
                 int playersAffected = 0;
 
-                for(Player player : Bukkit.getOnlinePlayers()) {
+                for (Player player : Bukkit.getOnlinePlayers()) {
                     this.plugin.getBloodMoonAttributeListener().forceRemoveBloodMoonAttributes(player);
                     ++playersAffected;
                 }
@@ -1903,7 +1898,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
             if (target.equals("all")) {
                 int playersAffected = 0;
 
-                for(Player player : Bukkit.getOnlinePlayers()) {
+                for (Player player : Bukkit.getOnlinePlayers()) {
                     this.plugin.getBloodMoonAttributeListener().forceCleanupOnJoin(player);
                     ++playersAffected;
                 }
@@ -1999,7 +1994,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
 
                 int itemsGiven = 0, itemsDropped = 0;
 
-                for(ItemStack item : starterItems) {
+                for (ItemStack item : starterItems) {
                     if (target.getInventory().firstEmpty() != -1) {
                         target.getInventory().addItem(item);
                         ++itemsGiven;
@@ -2026,7 +2021,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
     }
 
     /**
-     *
+     * Trigger the spawning of passive animals around the map.
      *
      * @return {@code true}
      */
@@ -2118,7 +2113,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                     completions.addAll(Arrays.asList("reset", "clear"));
 
                 } else if (args.length == 2 && (args[0].equalsIgnoreCase("reset") || args[0].equalsIgnoreCase("clear"))) {
-                    for(Player player : Bukkit.getOnlinePlayers()) {
+                    for (Player player : Bukkit.getOnlinePlayers()) {
                         completions.add(player.getName());
                     }
                 }
@@ -2127,7 +2122,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
 
             } else if (command.getName().equalsIgnoreCase("givetome")) {
                 if (args.length == 1) {
-                    for(Player player : Bukkit.getOnlinePlayers()) {
+                    for (Player player : Bukkit.getOnlinePlayers()) {
                         completions.add(player.getName());
                     }
                 } else if (args.length == 2) {
@@ -2157,7 +2152,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                 if (args.length == 1) {
                     completions.add("all");
 
-                    for(Player player : Bukkit.getOnlinePlayers()) {
+                    for (Player player : Bukkit.getOnlinePlayers()) {
                         completions.add(player.getName());
                     }
                 }
@@ -2167,7 +2162,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                 }
             } else if (command.getName().equalsIgnoreCase("setupplayer")) {
                 if (args.length == 1) {
-                    for(Player player : Bukkit.getOnlinePlayers()) {
+                    for (Player player : Bukkit.getOnlinePlayers()) {
                         completions.add(player.getName());
                     }
                 }
@@ -2200,13 +2195,13 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
      * @param player the player changing to the vampire texture pack.
      */
     private void sendVampireTexturePackPrompt(Player player) {
-        TextComponent textureMessage = new TextComponent("§7Apply the vampire texture pack: ");
-        TextComponent clickableText = new TextComponent("§c§n[CLICK HERE]");
+        Component textureMessage = Component.text("Apply the vampire texture pack: ", NamedTextColor.GRAY)
+                .append(Component.text("[CLICK HERE]", NamedTextColor.RED)
+                        .decorate(TextDecoration.UNDERLINED)
+                        .clickEvent(ClickEvent.runCommand("/pow texture vampire"))
+                        .hoverEvent(HoverEvent.showText(Component.text("Click to apply the vampire texture pack", NamedTextColor.GRAY)))
+                );
 
-        clickableText.setClickEvent(new ClickEvent(Action.RUN_COMMAND, "/pow texture vampire"));
-        clickableText.setHoverEvent(new HoverEvent(net.md_5.bungee.api.chat.HoverEvent.Action.SHOW_TEXT, (new ComponentBuilder("§7Click to apply the vampire texture pack")).create()));
-
-        textureMessage.addExtra(clickableText);
-        player.spigot().sendMessage(textureMessage);
+        player.sendMessage(textureMessage);
     }
 }

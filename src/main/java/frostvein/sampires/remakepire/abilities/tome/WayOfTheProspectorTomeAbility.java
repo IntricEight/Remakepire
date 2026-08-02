@@ -15,7 +15,7 @@ import frostvein.sampires.remakepire.RemakepirePlugin;
 
 public class WayOfTheProspectorTomeAbility extends TomeAbility implements Listener {
     private final Random random = new Random();
-    private static final Set<Material> ORE_MATERIALS = Set.of(Material.COAL_ORE, Material.DEEPSLATE_COAL_ORE, Material.IRON_ORE, Material.DEEPSLATE_IRON_ORE, Material.COPPER_ORE, Material.DEEPSLATE_COPPER_ORE, Material.GOLD_ORE, Material.DEEPSLATE_GOLD_ORE, Material.REDSTONE_ORE, Material.DEEPSLATE_REDSTONE_ORE, Material.LAPIS_ORE, Material.DEEPSLATE_LAPIS_ORE, Material.DIAMOND_ORE, Material.DEEPSLATE_DIAMOND_ORE, Material.EMERALD_ORE, Material.DEEPSLATE_EMERALD_ORE, Material.NETHER_GOLD_ORE, Material.NETHER_QUARTZ_ORE, Material.ANCIENT_DEBRIS);;
+    private static final Set<Material> ORE_MATERIALS = Set.of(Material.COAL_ORE, Material.DEEPSLATE_COAL_ORE, Material.IRON_ORE, Material.DEEPSLATE_IRON_ORE, Material.COPPER_ORE, Material.DEEPSLATE_COPPER_ORE, Material.GOLD_ORE, Material.DEEPSLATE_GOLD_ORE, Material.REDSTONE_ORE, Material.DEEPSLATE_REDSTONE_ORE, Material.LAPIS_ORE, Material.DEEPSLATE_LAPIS_ORE, Material.DIAMOND_ORE, Material.DEEPSLATE_DIAMOND_ORE, Material.EMERALD_ORE, Material.DEEPSLATE_EMERALD_ORE, Material.NETHER_GOLD_ORE, Material.NETHER_QUARTZ_ORE, Material.ANCIENT_DEBRIS);
 
     /**
      * Create an instance of the Way of the Land tome ability.
@@ -60,7 +60,7 @@ public class WayOfTheProspectorTomeAbility extends TomeAbility implements Listen
 
                 if (!tool.containsEnchantment(Enchantment.SILK_TOUCH)) {
                     if (this.random.nextDouble() < 0.5) {
-                        for(ItemStack drop : block.getDrops(tool)) {
+                        for (ItemStack drop : block.getDrops(tool)) {
                             if (drop != null && drop.getType() != Material.AIR) {
                                 ItemStack extraDrop = drop.clone();
                                 block.getWorld().dropItemNaturally(block.getLocation(), extraDrop);

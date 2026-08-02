@@ -79,16 +79,13 @@ public class MobTeamManager {
         } else if (this.plugin.getWorld() == null) {
             this.plugin.getLogger().warning("MobTeamManager: World not found!");
         } else {
-            int mobsAdded = 0;
-
-            for(Entity entity : this.plugin.getWorld().getEntities()) {
+            for (Entity entity : this.plugin.getWorld().getEntities()) {
                 if (this.isTargetMob(entity)) {
                     String entityName = entity.getUniqueId().toString();
 
                     if (!vampireTeam.hasEntry(entityName)) {
                         try {
                             vampireTeam.addEntry(entityName);
-                            ++mobsAdded;
 
                         } catch (Exception e) {
                             this.plugin.getLogger().warning("Failed to add mob " + entity.getType() + " to VampireCastTeam: " + e.getMessage());
@@ -106,7 +103,7 @@ public class MobTeamManager {
      * @return {@code true} if the entity is going to align with the vampire players.
      */
     private boolean isTargetMob(Entity entity) {
-        for(Class<? extends Entity> mobType : this.vampireMobTypes) {
+        for (Class<? extends Entity> mobType : this.vampireMobTypes) {
             if (mobType.isInstance(entity)) {
                 return true;
             }
@@ -143,7 +140,7 @@ public class MobTeamManager {
         } else {
             int removedCount = vampireTeam.getSize();
 
-            for(String entry : vampireTeam.getEntries().toArray(new String[0])) {
+            for (String entry : vampireTeam.getEntries().toArray(new String[0])) {
                 vampireTeam.removeEntry(entry);
             }
 

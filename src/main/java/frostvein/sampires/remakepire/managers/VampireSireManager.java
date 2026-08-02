@@ -99,9 +99,11 @@ public class VampireSireManager {
 
         if (sireName == null) {
             return "No sire assigned (can cure freely)";
+
         } else if (vampire.getScoreboardTags().contains("CannotCure")) {
             // If the player is impossible to cure, act as though their sire is alive
             return "No sire assigned, but the player is prevented from being cured.";
+
         } else {
             Player sire = Bukkit.getPlayer(sireName);
 
@@ -191,7 +193,7 @@ public class VampireSireManager {
                 Map<String, String> rawData = this.gson.fromJson(reader, type);
 
                 if (rawData != null) {
-                    for(Map.Entry<String, String> entry : rawData.entrySet()) {
+                    for (Map.Entry<String, String> entry : rawData.entrySet()) {
                         this.sireMap.put((entry.getKey()).toLowerCase(), entry.getValue());
                     }
 

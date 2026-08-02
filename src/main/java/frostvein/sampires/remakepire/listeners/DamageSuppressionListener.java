@@ -30,11 +30,10 @@ public class DamageSuppressionListener implements Listener {
     public void onEntityDamage(EntityDamageEvent event) {
         if (event.getEntity() instanceof Player) {
             try {
-                int suppressionScore = this.plugin.getConfigManager().getDamageSuppression();
+                final int suppressionScore = this.plugin.getConfigManager().getDamageSuppression();
 
                 if (suppressionScore > 0) {
-                    double suppressionPercentage = suppressionScore / 100.0;
-                    double originalDamage = event.getDamage();
+                    final double suppressionPercentage = suppressionScore / 100.0, originalDamage = event.getDamage();
                     event.setDamage(originalDamage * (1.0 - suppressionPercentage));
                 }
             } catch (Exception e) {

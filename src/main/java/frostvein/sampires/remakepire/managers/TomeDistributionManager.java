@@ -182,7 +182,7 @@ public class TomeDistributionManager {
      * Clear the contents of all tome chests.
      */
     private void clearAllTomeChests() {
-        for(Location location : this.tomeLocations) {
+        for (Location location : this.tomeLocations) {
             Block block = location.getBlock();
 
             if (block.getType() == Material.CHEST) {
@@ -252,7 +252,7 @@ public class TomeDistributionManager {
                 List<String> lore = new ArrayList<>();
                 String[] descriptionLines = ability.getDescriptionLines();
 
-                for(String line : descriptionLines) {
+                for (String line : descriptionLines) {
                     lore.add("§7" + line);
                 }
 
@@ -269,7 +269,7 @@ public class TomeDistributionManager {
             if (ability != null) {
                 String[] descriptionLines = ability.getDescriptionLines();
 
-                for(String line : descriptionLines) {
+                for (String line : descriptionLines) {
                     pageContent.append("§7").append(line).append("\n");
                 }
             } else {
@@ -342,7 +342,8 @@ public class TomeDistributionManager {
         ItemStack cureBook = this.createRandomCureBook();
         chestInventory.addItem(cureBook);
 
-        this.plugin.logInfo("TomeDistributionManager: Replaced chest contents with cure book (" + cureBook.getItemMeta().getDisplayName() + ") at " + this.conversionAssistant.locationToString(location));
+        this.plugin.logInfo("TomeDistributionManager: Replaced chest contents with cure book (" +
+                cureBook.getItemMeta().getDisplayName() + ") at " + this.conversionAssistant.locationToString(location));
     }
 
     /**

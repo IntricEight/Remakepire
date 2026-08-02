@@ -1,5 +1,5 @@
 name: Remakepire
-version: 1.1.0
+version: 1.1.2
 main: frostvein.sampires.remakepire.RemakepirePlugin
 api-version: 1.21
 authors:
@@ -13,5 +13,5 @@ permissions:
     default: op
 
   vampiresmp.player:
-    description: Allows access to basic vampire SMP player features
+    description: Allows access to basic Vampire SMP player features
     default: true

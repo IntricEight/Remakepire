@@ -25,7 +25,6 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Scoreboard;
 import frostvein.sampires.remakepire.RemakepirePlugin;
-import frostvein.sampires.remakepire.managers.BeetrootManager;
 import frostvein.sampires.remakepire.managers.SessionManager;
 import frostvein.sampires.remakepire.managers.VampireAbilityManager;
 import frostvein.sampires.remakepire.managers.VampireManager;
@@ -34,7 +33,6 @@ public class CombatListener implements Listener {
     private final RemakepirePlugin plugin;
     private final VampireManager vampireManager;
     private final VampireAbilityManager vampireAbilityManager;
-    private final BeetrootManager beetrootManager;
     private final Random random;
 
     /**
@@ -46,7 +44,6 @@ public class CombatListener implements Listener {
         this.plugin = plugin;
         this.vampireManager = plugin.getVampireManager();
         this.vampireAbilityManager = plugin.getVampireAbilityManager();
-        this.beetrootManager = plugin.getBeetrootManager();
         this.random = new Random();
     }
 
@@ -162,7 +159,7 @@ public class CombatListener implements Listener {
                                 }
                             }
                         // Prevent vampires from using proper weapons while they have access to their claws
-                        } else if (this.isWeaponAffectedByWeakness(weapon) && (this.vampireManager.isVampireStage2(attacker) || this.vampireManager.isVampireStage3(attacker))) {
+                        } else if (this.isWeaponAffectedByWeakness(weapon.getType()) && (this.vampireManager.isVampireStage2(attacker) || this.vampireManager.isVampireStage3(attacker))) {
                             event.setDamage(event.getDamage() * 0.1);
 
                             if (!attacker.getScoreboardTags().contains(SessionManager.INFORMED_WEAPON_WEAKNESS)) {
@@ -244,7 +241,7 @@ public class CombatListener implements Listener {
                             }
 
                             // Reduce a lower stage vampire's weapon damage by 10%
-                            if (this.vampireManager.isVampireStage1(attacker) && this.isSwordOrAxe(attackerWeapon)) {
+                            if (this.vampireManager.isVampireStage1(attacker) && this.isSwordOrAxe(attackerWeapon.getType())) {
                                 event.setDamage(event.getDamage() * 0.9);
                             }
 
@@ -268,7 +265,7 @@ public class CombatListener implements Listener {
                                     }
 
                                     // Apply the effect of active garlic on death
-                                    if (this.beetrootManager.hasBeetrootImmunity(victim)) {
+                                    if (this.plugin.getBeetrootManager().hasBeetrootImmunity(victim)) {
                                         event.setCancelled(true);
                                         attacker.sendMessage("§cThe sting of garlic sears at your gums, protecting your meal from your bite.");
 
@@ -373,7 +370,7 @@ public class CombatListener implements Listener {
 
                                     victim.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 200, 1, false, false));
                                     attacker.sendMessage("§5You have turned " + victim.getName() + " into a vampire.");
-                                    int killThirst = this.plugin.getThirstManager().getKillThirstReward(attacker, victim);
+                                    final int killThirst = this.plugin.getThirstManager().getKillThirstReward(attacker, victim);
                                     this.plugin.getThirstManager().modifyQuench(attacker, killThirst, true);
 
                                     attacker.sendMessage("§cThe taste of fresh blood coats your throat as you feed, you have successfully turned " + victim.getName() + " into a creature of the night");
@@ -388,14 +385,14 @@ public class CombatListener implements Listener {
 
                             // Monitor if a vampire is being damaged by a valid killing tool
                             if (this.vampireManager.isVampire(victim)) {
-                                boolean killedWithIronWeapon = weaponType == Material.IRON_SWORD || weaponType == Material.IRON_AXE;
-                                boolean killedWithWoodenSword = weaponType == Material.WOODEN_SWORD;
+                                final boolean killedWithIronWeapon = isIronWeapon(weaponType);
+                                final boolean killedWithWoodenSword = weaponType == Material.WOODEN_SWORD;
 
                                 if (victim.getHealth() - event.getFinalDamage() <= 0.0) {
-                                    int vampireStage = this.vampireManager.getVampireStage(victim);
-                                    int maximumStakeableStage = this.plugin.getConfigManager().getPermadeathMinimumStage();
+                                    final int vampireStage = this.vampireManager.getVampireStage(victim);
+                                    final int maximumStakeableStage = this.plugin.getConfigManager().getPermadeathMinimumStage();
+                                    final boolean canBeStaked = killedWithWoodenSword && vampireStage <= maximumStakeableStage;
 
-                                    boolean canBeStaked = killedWithWoodenSword && vampireStage <= maximumStakeableStage;
                                     if (!killedWithIronWeapon && !canBeStaked) {
                                         event.setCancelled(true);
                                         victim.setHealth(1.0);
@@ -465,7 +462,7 @@ public class CombatListener implements Listener {
                             player.setHealth(1.0);
                         }
                     } else if (this.vampireManager.isHuman(player)) {
-                        // If the config is set to allow non-vampire kill sources on humans, check if the human has ran out of lives
+                        // If the config is set to allow non-vampire kill sources on humans, check if the human has run out of lives
                         if (plugin.getConfigManager().isLifeLimitEnforced() && player.getHealth() - event.getFinalDamage() <= 0) {
                             try {
                                 Scoreboard mainScoreboard = Bukkit.getScoreboardManager().getMainScoreboard();
@@ -512,14 +509,13 @@ public class CombatListener implements Listener {
     /**
      * Determine if the item is a wooden weapon.
      *
-     * @param item the item being checked.
+     * @param type the item being checked.
      * @return {@code true} if the item is a wooden sword or axe.
      */
-    private boolean isWoodenWeapon(ItemStack item) {
-        if (item == null) {
+    private boolean isWoodenWeapon(Material type) {
+        if (type == null) {
             return false;
         } else {
-            Material type = item.getType();
             return type == Material.WOODEN_SWORD || type == Material.WOODEN_AXE;
         }
     }
@@ -527,14 +523,13 @@ public class CombatListener implements Listener {
     /**
      * Determine if the item is an iron weapon.
      *
-     * @param item the item being checked.
+     * @param type the item being checked.
      * @return {@code true} if the item is a wooden sword or axe.
      */
-    private boolean isIronWeapon(ItemStack item) {
-        if (item == null) {
+    private boolean isIronWeapon(Material type) {
+        if (type == null) {
             return false;
         } else {
-            Material type = item.getType();
             return type == Material.IRON_SWORD || type == Material.IRON_AXE;
         }
     }
@@ -552,15 +547,13 @@ public class CombatListener implements Listener {
     /**
      * Determine if the item is a sword or axe.
      *
-     * @param item the item being checked.
+     * @param type the item being checked.
      * @return {@code true} if the item is a sword or axe.
      */
-    private boolean isSwordOrAxe(ItemStack item) {
-        if (item == null) {
+    private boolean isSwordOrAxe(Material type) {
+        if (type == null) {
             return false;
         } else {
-            Material type = item.getType();
-
             if (type != Material.WOODEN_SWORD && type != Material.STONE_SWORD && type != Material.IRON_SWORD && type != Material.GOLDEN_SWORD && type != Material.DIAMOND_SWORD && type != Material.NETHERITE_SWORD) {
                 return type == Material.WOODEN_AXE || type == Material.STONE_AXE || type == Material.IRON_AXE || type == Material.GOLDEN_AXE || type == Material.DIAMOND_AXE || type == Material.NETHERITE_AXE;
             } else {
@@ -572,14 +565,13 @@ public class CombatListener implements Listener {
     /**
      * Determine if an item should be weakened when a higher vampire uses it.
      *
-     * @param item the item being checked.
+     * @param type the item being checked.
      * @return {@code true} if the weapon should be weakened.
      */
-    private boolean isWeaponAffectedByWeakness(ItemStack item) {
-        if (item == null) {
+    private boolean isWeaponAffectedByWeakness(Material type) {
+        if (type == null) {
             return false;
         } else {
-            Material type = item.getType();
             if (type != Material.WOODEN_SWORD && type != Material.STONE_SWORD && type != Material.IRON_SWORD && type != Material.GOLDEN_SWORD && type != Material.DIAMOND_SWORD && type != Material.NETHERITE_SWORD) {
                 return type == Material.WOODEN_AXE || type == Material.STONE_AXE || type == Material.IRON_AXE || type == Material.GOLDEN_AXE || type == Material.DIAMOND_AXE || type == Material.NETHERITE_AXE;
             } else {

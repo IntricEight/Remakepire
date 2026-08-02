@@ -1,8 +1,12 @@
 package frostvein.sampires.remakepire.listeners;
 
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.title.Title;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
@@ -136,7 +140,7 @@ public class DeathHandler implements Listener {
             VampireManager vampireManager = plugin.getVampireManager();
             int aliveHumans = 0, aliveVampires = 0;
 
-            for(Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+            for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
                 if (onlinePlayer.getGameMode() == GameMode.SURVIVAL) {
                     if (vampireManager.isHuman(onlinePlayer)) {
                         ++aliveHumans;
@@ -162,13 +166,24 @@ public class DeathHandler implements Listener {
     private static void announceAllHumansDeadStatic(RemakepirePlugin plugin) {
         plugin.logInfo("ALL HUMANS ELIMINATED");
 
-        int totalBeacons = plugin.getBeaconManager().getAllBeacons().size();
-        int evilBeacons = plugin.getBeaconManager().getAllEvilBeacons().size();
-        boolean allBeaconsDesecrated = totalBeacons > 0 && evilBeacons == totalBeacons;
-        String townName = plugin.getConfigManager().getTownName();
+        // Retrieve the current state of the beacon network
+        final int totalBeacons = plugin.getBeaconManager().getAllBeacons().size();
+        final int evilBeacons = plugin.getBeaconManager().getAllEvilBeacons().size();
+        final boolean allBeaconsDesecrated = totalBeacons > 0 && evilBeacons == totalBeacons;
+        final String townName = plugin.getConfigManager().getTownName();
 
-        for(Player player : Bukkit.getOnlinePlayers()) {
-            player.sendTitle("§cThe last human has fallen.", "", 20, 100, 40);
+        Title title = Title.title(
+                Component.text("The last human has fallen.", NamedTextColor.RED),
+                Component.empty(),
+                Title.Times.times(
+                        Duration.ofSeconds(1),
+                        Duration.ofSeconds(5),
+                        Duration.ofSeconds(2)
+                ));
+
+        // Inform all players that the last human has been killed/turned
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            player.showTitle(title);
             player.sendMessage("");
             player.sendMessage("§cThe last defender of humanity has fallen...");
 
@@ -191,15 +206,25 @@ public class DeathHandler implements Listener {
     private static void announceHumansWinStatic(RemakepirePlugin plugin) {
         plugin.logInfo("ALL VAMPIRES ELIMINATED");
 
-        int totalBeacons = plugin.getBeaconManager().getAllBeacons().size();
-        int holyBeacons = plugin.getBeaconManager().getHolyBeacons().size();
-        boolean allBeaconsHoly = totalBeacons > 0 && holyBeacons == totalBeacons;
-        boolean anyPermanentlyCorrupted = plugin.getBeaconManager().getAllBeacons().stream().anyMatch((beacon) -> beacon.getState() == BeaconState.PERMANENTLY_DESECRATED);
-        boolean trappedWhenPermanentlyCorrupted = plugin.getConfigManager().doCorruptedBeaconsTrapHumans();
-        String townName = plugin.getConfigManager().getTownName();
+        final int totalBeacons = plugin.getBeaconManager().getAllBeacons().size();
+        final int holyBeacons = plugin.getBeaconManager().getHolyBeacons().size();
+        final boolean allBeaconsHoly = totalBeacons > 0 && holyBeacons == totalBeacons;
+        final boolean anyPermanentlyCorrupted = plugin.getBeaconManager().getAllBeacons().stream().anyMatch((beacon) -> beacon.getState() == BeaconState.PERMANENTLY_DESECRATED);
+        final boolean trappedWhenPermanentlyCorrupted = plugin.getConfigManager().doCorruptedBeaconsTrapHumans();
+        final String townName = plugin.getConfigManager().getTownName();
 
-        for(Player player : Bukkit.getOnlinePlayers()) {
-            player.sendTitle("§aThe last vampire has fallen.", "", 20, 100, 40);
+        Title title = Title.title(
+                Component.text("The last vampire has fallen.", NamedTextColor.GREEN),
+                Component.empty(),
+                Title.Times.times(
+                        Duration.ofSeconds(1),
+                        Duration.ofSeconds(5),
+                        Duration.ofSeconds(2)
+                ));
+
+        // Inform all players that the last vampire has been killed/cured
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            player.showTitle(title);
             player.sendMessage("");
             player.sendMessage("§aThe last creature of darkness has fallen...");
 
@@ -289,7 +314,7 @@ public class DeathHandler implements Listener {
      */
     private void handlePvPDeath(Player victim, Player killer, PlayerDeathEvent event) {
         ItemStack weapon = killer.getInventory().getItemInMainHand();
-        boolean killedWithWoodenWeapon = this.isWoodenWeapon(weapon);
+        boolean killedWithWoodenWeapon = this.isWoodenWeapon(weapon.getType());
         Material lastWeapon = this.lastWeaponUsed.get(victim.getUniqueId());
 
         if (!killedWithWoodenWeapon && lastWeapon != null) {
@@ -350,7 +375,7 @@ public class DeathHandler implements Listener {
         }
 
         // Send the curated death message to all online players
-        for(Player player : Bukkit.getOnlinePlayers()) {
+        for (Player player : Bukkit.getOnlinePlayers()) {
             // Don't send the message to the player who died
             if (!player.getUniqueId().equals(victim.getUniqueId())) {
                 if (this.vampireManager.isVampire(player)) {
@@ -367,17 +392,16 @@ public class DeathHandler implements Listener {
     /**
      * Determine if the item is a wooden weapon.
      *
-     * @param item the item to check.
+     * @param type the item to check.
      * @return {@code true} if the item is a wooden sword or axe.
      */
-    private boolean isWoodenWeapon(ItemStack item) {
-        if (item == null) {
+    private boolean isWoodenWeapon(Material type) {
+        if (type == null) {
             this.plugin.logInfo("DEBUG: Weapon is null");
             return false;
 
         } else {
-            Material type = item.getType();
-            boolean isWooden = type == Material.WOODEN_SWORD || type == Material.WOODEN_AXE;
+            final boolean isWooden = type == Material.WOODEN_SWORD || type == Material.WOODEN_AXE;
             this.plugin.logInfo("DEBUG: Weapon type: " + type + ", Is wooden: " + isWooden);
             return isWooden;
         }

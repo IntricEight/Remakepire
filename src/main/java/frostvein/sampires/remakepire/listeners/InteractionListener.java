@@ -29,7 +29,7 @@ import frostvein.sampires.remakepire.RemakepirePlugin;
 
 public class InteractionListener implements Listener {
     private final RemakepirePlugin plugin;
-    private static final List<Material> FEEDING_ITEMS = Arrays.asList(Material.WHEAT, Material.CARROT, Material.POTATO, Material.BEETROOT, Material.WHEAT_SEEDS, Material.MELON_SEEDS, Material.PUMPKIN_SEEDS, Material.BEETROOT_SEEDS, Material.SWEET_BERRIES, Material.APPLE, Material.GOLDEN_APPLE, Material.GOLDEN_CARROT, Material.BREAD, Material.COOKIE, Material.MELON_SLICE, Material.DRIED_KELP, Material.HAY_BLOCK, Material.SUGAR);;
+    private static final List<Material> FEEDING_ITEMS = Arrays.asList(Material.WHEAT, Material.CARROT, Material.POTATO, Material.BEETROOT, Material.WHEAT_SEEDS, Material.MELON_SEEDS, Material.PUMPKIN_SEEDS, Material.BEETROOT_SEEDS, Material.SWEET_BERRIES, Material.APPLE, Material.GOLDEN_APPLE, Material.GOLDEN_CARROT, Material.BREAD, Material.COOKIE, Material.MELON_SLICE, Material.DRIED_KELP, Material.HAY_BLOCK, Material.SUGAR);
 
     /**
      * Create an instance of the Interactions listener.
@@ -120,7 +120,7 @@ public class InteractionListener implements Listener {
     /**
      * Retrieve if the item is an anvil (in various stages of disrepair).
      *
-     * @param material the type of a block.
+     * @param material the type of block.
      * @return {@code true} if the item is an anvil.
      */
     private boolean isAnvil(Material material) {

@@ -73,7 +73,7 @@ public class EndermanRemovalListener implements Listener {
             Entity[] entities = chunk.getEntities();
             int removedCount = 0;
 
-            for(Entity entity : entities) {
+            for (Entity entity : entities) {
                 if (entity instanceof Enderman) {
                     entity.remove();
                     ++removedCount;
@@ -109,10 +109,10 @@ public class EndermanRemovalListener implements Listener {
     public int removeAllEndermen() {
         int totalRemoved = 0;
 
-        for(Chunk chunk : this.plugin.getWorld().getLoadedChunks()) {
+        for (Chunk chunk : this.plugin.getWorld().getLoadedChunks()) {
             Entity[] entities = chunk.getEntities();
 
-            for(Entity entity : entities) {
+            for (Entity entity : entities) {
                 if (entity instanceof Enderman) {
                     entity.remove();
                     ++totalRemoved;
