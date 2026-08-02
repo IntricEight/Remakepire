@@ -96,7 +96,7 @@ public class ThirstEffectsListener implements Listener {
     public void consumeRawFood(Player vampire) {
         ItemStack itemInHand = vampire.getInventory().getItemInMainHand();
 
-        if (itemInHand != null && itemInHand.getType() != Material.AIR && this.isRaw(itemInHand)) {
+        if (itemInHand.getType() != Material.AIR && this.isRaw(itemInHand)) {
             if (itemInHand.getAmount() > 1) {
                 itemInHand.setAmount(itemInHand.getAmount() - 1);
             } else {

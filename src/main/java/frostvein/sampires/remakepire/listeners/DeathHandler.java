@@ -28,6 +28,7 @@ import org.bukkit.scoreboard.Scoreboard;
 import frostvein.sampires.remakepire.RemakepirePlugin;
 import frostvein.sampires.remakepire.beacons.BeaconSite.BeaconState;
 import frostvein.sampires.remakepire.managers.VampireManager;
+import frostvein.sampires.remakepire.utils.ItemTypeChecking;
 
 public class DeathHandler implements Listener {
     private final RemakepirePlugin plugin;
@@ -257,9 +258,7 @@ public class DeathHandler implements Listener {
         if (event.getEntity() instanceof Player victim && event.getDamager() instanceof Player attacker) {
             ItemStack weapon = attacker.getInventory().getItemInMainHand();
 
-            if (weapon != null) {
-                this.lastWeaponUsed.put(victim.getUniqueId(), weapon.getType());
-            }
+            this.lastWeaponUsed.put(victim.getUniqueId(), weapon.getType());
         }
     }
 
@@ -318,14 +317,14 @@ public class DeathHandler implements Listener {
         Material lastWeapon = this.lastWeaponUsed.get(victim.getUniqueId());
 
         if (!killedWithWoodenWeapon && lastWeapon != null) {
-            killedWithWoodenWeapon = lastWeapon == Material.WOODEN_SWORD || lastWeapon == Material.WOODEN_AXE;
+            killedWithWoodenWeapon = ItemTypeChecking.isWoodenWeapon(lastWeapon);
 
             if (killedWithWoodenWeapon) {
                 this.plugin.logInfo("DEBUG: Using tracked last weapon: " + lastWeapon + " (current weapon broke/dropped)");
             }
         }
 
-        this.plugin.logInfo("DEBUG: PvP Death - Victim: " + victim.getName() + ", CurrentWeapon: " + (weapon != null ? weapon.getType() : "null") + ", LastTrackedWeapon: " + lastWeapon + ", IsWoodenWeapon: " + killedWithWoodenWeapon + ", IsVampire: " + this.vampireManager.isVampire(victim) + ", IsStage1: " + this.vampireManager.isVampireStage1(victim) + ", VictimTags: " + victim.getScoreboardTags());
+        this.plugin.logInfo("DEBUG: PvP Death - Victim: " + victim.getName() + ", CurrentWeapon: " + weapon.getType() + ", LastTrackedWeapon: " + lastWeapon + ", IsWoodenWeapon: " + killedWithWoodenWeapon + ", IsVampire: " + this.vampireManager.isVampire(victim) + ", IsStage1: " + this.vampireManager.isVampireStage1(victim) + ", VictimTags: " + victim.getScoreboardTags());
         this.lastWeaponUsed.remove(victim.getUniqueId());
         this.woodenStakeKills.remove(victim.getUniqueId());
 
@@ -401,7 +400,7 @@ public class DeathHandler implements Listener {
             return false;
 
         } else {
-            final boolean isWooden = type == Material.WOODEN_SWORD || type == Material.WOODEN_AXE;
+            final boolean isWooden = ItemTypeChecking.isWoodenWeapon(type);
             this.plugin.logInfo("DEBUG: Weapon type: " + type + ", Is wooden: " + isWooden);
             return isWooden;
         }

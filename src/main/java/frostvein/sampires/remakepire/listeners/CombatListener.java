@@ -28,6 +28,7 @@ import frostvein.sampires.remakepire.RemakepirePlugin;
 import frostvein.sampires.remakepire.managers.SessionManager;
 import frostvein.sampires.remakepire.managers.VampireAbilityManager;
 import frostvein.sampires.remakepire.managers.VampireManager;
+import frostvein.sampires.remakepire.utils.ItemTypeChecking;
 
 public class CombatListener implements Listener {
     private final RemakepirePlugin plugin;
@@ -128,10 +129,9 @@ public class CombatListener implements Listener {
                 }
 
                 ItemStack attackerWeapon = attacker.getInventory().getItemInMainHand();
-                Material weaponType = attackerWeapon != null ? attackerWeapon.getType() : Material.AIR;
 
                 // Prevent stakes from being used during their cooldown
-                if (weaponType == Material.WOODEN_SWORD && attacker.hasCooldown(Material.WOODEN_SWORD)) {
+                if (ItemTypeChecking.isStake(attackerWeapon.getType()) && attacker.hasCooldown(Material.WOODEN_SWORD)) {
                     event.setCancelled(true);
 
                 } else {
@@ -139,7 +139,7 @@ public class CombatListener implements Listener {
                         ItemStack weapon = attacker.getInventory().getItemInMainHand();
 
                         // Create the vampire claw effect
-                        if (this.isBareFist(weapon)) {
+                        if (ItemTypeChecking.isBareFist(weapon.getType())) {
                             int vampireStage = this.vampireManager.getVampireStage(attacker);
                             double multiplier = this.getVampireFistMultiplier(vampireStage);
 
@@ -180,7 +180,7 @@ public class CombatListener implements Listener {
                         ItemStack weapon = attacker.getInventory().getItemInMainHand();
 
                         // Create the effect of the one-time use stake
-                        if (weapon != null && weapon.getType() == Material.WOODEN_SWORD) {
+                        if (ItemTypeChecking.isStake(weapon.getType())) {
                             attacker.getInventory().setItemInMainHand(new ItemStack(Material.AIR));
                             attacker.sendMessage("§cYour wooden stake breaks apart on impact.");
                             attacker.getWorld().playSound(attacker.getLocation(), Sound.ENTITY_ITEM_BREAK, SoundCategory.PLAYERS, 1.0F, 1.0F);
@@ -191,7 +191,7 @@ public class CombatListener implements Listener {
                         ItemStack weaponCheck = attacker.getInventory().getItemInMainHand();
 
                         // Apply the impact of a stake to a vampire
-                        if (weaponCheck != null && weaponCheck.getType() == Material.WOODEN_SWORD && this.vampireManager.isVampire(victim)) {
+                        if (ItemTypeChecking.isStake(weaponCheck.getType()) && this.vampireManager.isVampire(victim)) {
                             final double WOODEN_STAKE_DAMAGE = 8.0;
                             event.setDamage(WOODEN_STAKE_DAMAGE);
 
@@ -206,7 +206,7 @@ public class CombatListener implements Listener {
 
                         } else {
                             // Create the stake breaking effect when used on a human
-                            if (weaponCheck != null && weaponCheck.getType() == Material.WOODEN_SWORD && this.vampireManager.isHuman(victim)) {
+                            if (ItemTypeChecking.isStake(weaponCheck.getType()) && this.vampireManager.isHuman(victim)) {
                                 attacker.getInventory().setItemInMainHand(new ItemStack(Material.AIR));
                                 attacker.sendMessage("§cYour wooden stake breaks apart on impact.");
                                 attacker.getWorld().playSound(attacker.getLocation(), Sound.ENTITY_ITEM_BREAK, SoundCategory.PLAYERS, 1.0F, 1.0F);
@@ -241,7 +241,7 @@ public class CombatListener implements Listener {
                             }
 
                             // Reduce a lower stage vampire's weapon damage by 10%
-                            if (this.vampireManager.isVampireStage1(attacker) && this.isSwordOrAxe(attackerWeapon.getType())) {
+                            if (this.vampireManager.isVampireStage1(attacker) && this.isWeaponAffectedByWeakness(attackerWeapon.getType())) {
                                 event.setDamage(event.getDamage() * 0.9);
                             }
 
@@ -311,7 +311,7 @@ public class CombatListener implements Listener {
                                         }
 
                                         // Apply the effects of killing a human without turning them
-                                        int killThirst = this.plugin.getThirstManager().getKillThirstReward(attacker, victim);
+                                        final int killThirst = this.plugin.getThirstManager().getKillThirstReward(attacker, victim);
                                         this.plugin.getThirstManager().modifyQuench(attacker, killThirst, true);
                                         attacker.sendMessage("§cYou have killed " + victim.getName() + ". They will respawn as a human, wounded.");
                                         victim.sendMessage("§7You have been slain by a vampire, but they do not turn you...");
@@ -329,7 +329,7 @@ public class CombatListener implements Listener {
                                         victim.sendMessage("§7Your past as a creature of the night cannot reclaim you. You slip into eternal peace...");
                                         victim.addScoreboardTag(DeathHandler.PERMADEATH_CHOSEN_TAG);
 
-                                        int killThirst = this.plugin.getThirstManager().getKillThirstReward(attacker, victim);
+                                        final int killThirst = this.plugin.getThirstManager().getKillThirstReward(attacker, victim);
                                         this.plugin.getThirstManager().modifyQuench(attacker, killThirst, true);
                                         this.plugin.getServer().getScheduler().runTask(this.plugin, () -> victim.setHealth(0.0));
                                         return;
@@ -363,7 +363,7 @@ public class CombatListener implements Listener {
                                             this.plugin.getBeaconMajorityManager().updateBeaconMajorityBonuses();
                                         }
 
-                                        double maxHealth = victim.getAttribute(Attribute.MAX_HEALTH).getValue();
+                                        final double maxHealth = victim.getAttribute(Attribute.MAX_HEALTH).getValue();
                                         victim.setHealth(maxHealth);
                                         this.plugin.logInfo(victim.getName() + " turned into vampire with " + maxHealth + " HP (full health)");
                                     }, 5L);
@@ -385,13 +385,12 @@ public class CombatListener implements Listener {
 
                             // Monitor if a vampire is being damaged by a valid killing tool
                             if (this.vampireManager.isVampire(victim)) {
-                                final boolean killedWithIronWeapon = isIronWeapon(weaponType);
-                                final boolean killedWithWoodenSword = weaponType == Material.WOODEN_SWORD;
+                                final boolean killedWithIronWeapon = ItemTypeChecking.isIronWeapon(attackerWeapon.getType());
+                                final boolean killedWithStake = ItemTypeChecking.isStake(attackerWeapon.getType());
 
                                 if (victim.getHealth() - event.getFinalDamage() <= 0.0) {
-                                    final int vampireStage = this.vampireManager.getVampireStage(victim);
-                                    final int maximumStakeableStage = this.plugin.getConfigManager().getPermadeathMinimumStage();
-                                    final boolean canBeStaked = killedWithWoodenSword && vampireStage <= maximumStakeableStage;
+                                    final int vampireStage = this.vampireManager.getVampireStage(victim), maximumStakeableStage = this.plugin.getConfigManager().getPermadeathMinimumStage();
+                                    final boolean canBeStaked = killedWithStake && vampireStage <= maximumStakeableStage;
 
                                     if (!killedWithIronWeapon && !canBeStaked) {
                                         event.setCancelled(true);
@@ -507,62 +506,6 @@ public class CombatListener implements Listener {
     }
 
     /**
-     * Determine if the item is a wooden weapon.
-     *
-     * @param type the item being checked.
-     * @return {@code true} if the item is a wooden sword or axe.
-     */
-    private boolean isWoodenWeapon(Material type) {
-        if (type == null) {
-            return false;
-        } else {
-            return type == Material.WOODEN_SWORD || type == Material.WOODEN_AXE;
-        }
-    }
-
-    /**
-     * Determine if the item is an iron weapon.
-     *
-     * @param type the item being checked.
-     * @return {@code true} if the item is a wooden sword or axe.
-     */
-    private boolean isIronWeapon(Material type) {
-        if (type == null) {
-            return false;
-        } else {
-            return type == Material.IRON_SWORD || type == Material.IRON_AXE;
-        }
-    }
-
-    /**
-     * Determine if the item is an empty hand.
-     *
-     * @param item the item being checked.
-     * @return {@code true} if the item is air or nonexistent.
-     */
-    private boolean isBareFist(ItemStack item) {
-        return item == null || item.getType() == Material.AIR;
-    }
-
-    /**
-     * Determine if the item is a sword or axe.
-     *
-     * @param type the item being checked.
-     * @return {@code true} if the item is a sword or axe.
-     */
-    private boolean isSwordOrAxe(Material type) {
-        if (type == null) {
-            return false;
-        } else {
-            if (type != Material.WOODEN_SWORD && type != Material.STONE_SWORD && type != Material.IRON_SWORD && type != Material.GOLDEN_SWORD && type != Material.DIAMOND_SWORD && type != Material.NETHERITE_SWORD) {
-                return type == Material.WOODEN_AXE || type == Material.STONE_AXE || type == Material.IRON_AXE || type == Material.GOLDEN_AXE || type == Material.DIAMOND_AXE || type == Material.NETHERITE_AXE;
-            } else {
-                return true;
-            }
-        }
-    }
-
-    /**
      * Determine if an item should be weakened when a higher vampire uses it.
      *
      * @param type the item being checked.
@@ -572,11 +515,7 @@ public class CombatListener implements Listener {
         if (type == null) {
             return false;
         } else {
-            if (type != Material.WOODEN_SWORD && type != Material.STONE_SWORD && type != Material.IRON_SWORD && type != Material.GOLDEN_SWORD && type != Material.DIAMOND_SWORD && type != Material.NETHERITE_SWORD) {
-                return type == Material.WOODEN_AXE || type == Material.STONE_AXE || type == Material.IRON_AXE || type == Material.GOLDEN_AXE || type == Material.DIAMOND_AXE || type == Material.NETHERITE_AXE;
-            } else {
-                return true;
-            }
+            return ItemTypeChecking.isWeapon(type);
         }
     }
 
