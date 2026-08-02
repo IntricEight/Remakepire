@@ -19,6 +19,7 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import frostvein.sampires.remakepire.RemakepirePlugin;
 import frostvein.sampires.remakepire.managers.VampireManager;
+import frostvein.sampires.remakepire.utils.ItemTypeChecking;
 
 public class ThirstEffectsListener implements Listener {
     private final RemakepirePlugin plugin;
@@ -56,8 +57,8 @@ public class ThirstEffectsListener implements Listener {
             if (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK) {
                 ItemStack item = event.getItem();
 
-                if (item != null && item.getType() != Material.AIR) {
-                    if (this.isActualFood(item) && this.isRaw(item)) {
+                if (item != null && !ItemTypeChecking.isBareFist(item.getType())) {
+                    if (ItemTypeChecking.isActualFood(item) && ItemTypeChecking.isRaw(item)) {
                         this.consumeRawFood(player);
                     }
                 }
@@ -78,8 +79,8 @@ public class ThirstEffectsListener implements Listener {
         ItemStack item = event.getItem();
 
         if (this.vampireManager.isVampire(player) && this.plugin.getSessionManager().isSessionActive()) {
-            if (this.isActualFood(item)) {
-                if (!this.isRaw(item)) {
+            if (ItemTypeChecking.isActualFood(item)) {
+                if (!ItemTypeChecking.isRaw(item)) {
                     int vampireStage = this.vampireManager.getVampireStage(player);
                     this.applyFoodConsumptionEffects(player, vampireStage);
                     this.sendFoodConsumptionMessage(player, vampireStage);
@@ -96,7 +97,7 @@ public class ThirstEffectsListener implements Listener {
     public void consumeRawFood(Player vampire) {
         ItemStack itemInHand = vampire.getInventory().getItemInMainHand();
 
-        if (itemInHand.getType() != Material.AIR && this.isRaw(itemInHand)) {
+        if (!ItemTypeChecking.isBareFist(itemInHand.getType()) && ItemTypeChecking.isRaw(itemInHand)) {
             if (itemInHand.getAmount() > 1) {
                 itemInHand.setAmount(itemInHand.getAmount() - 1);
             } else {
@@ -107,41 +108,6 @@ public class ThirstEffectsListener implements Listener {
             this.plugin.getThirstManager().quenchThirst(vampire, 4);
 
             vampire.sendActionBar(Component.text("The raw flesh satisfies your vampiric hunger...", NamedTextColor.RED));
-        }
-    }
-
-    /**
-     * Determine if an item is raw food.
-     *
-     * @param item the item being checked.
-     * @return {@code true} if the item is raw meat.
-     */
-    private boolean isRaw(ItemStack item) {
-        String itemName = item.getType().name();
-
-        if (itemName.contains("RAW")) {
-            return true;
-        } else {
-            return switch (itemName) {
-                case "BEEF", "PORKCHOP", "CHICKEN", "RABBIT", "MUTTON" -> true;
-                default -> false;
-            };
-        }
-    }
-
-    /**
-     * Determine if the item is a proper food item.
-     *
-     * @param item the item being checked.
-     * @return {@code true} if the item is regular food (Check this function for the list of "not-regular" foods)
-     */
-    private boolean isActualFood(ItemStack item) {
-        Material type = item.getType();
-
-        if (!type.isEdible()) {
-            return false;
-        } else {
-            return !type.name().contains("POTION") && type != Material.ENDER_PEARL && type != Material.CHORUS_FRUIT && type != Material.ENCHANTED_GOLDEN_APPLE && type != Material.GOLDEN_APPLE && type != Material.BEETROOT;
         }
     }
 
@@ -215,7 +181,7 @@ public class ThirstEffectsListener implements Listener {
         if (currentFoodLevel < 20) {
             this.plugin.getThirstManager().regenerateFood(vampire);
 
-        } else if (currentFoodLevel >= 20 && currentHealth < maxHealth && !vampire.isDead() && vampire.getHealth() > 0) {
+        } else if (currentHealth < maxHealth && !vampire.isDead() && vampire.getHealth() > 0) {
             vampire.setFoodLevel(currentFoodLevel - 1);
             float currentSaturation = vampire.getSaturation();
             vampire.setSaturation(Math.max(0.0F, currentSaturation - 0.5F));

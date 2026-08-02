@@ -50,7 +50,7 @@ public class ItemTypeChecking {
      * Determine if the item is a wooden stake.
      *
      * @param type the item being checked.
-     * @return {@code true} if the item is a wooden stake.
+     * @return {@code true} if the item is a wooden sword.
      */
     public static boolean isStake(Material type) {
         return type == Material.WOODEN_SWORD;
@@ -111,6 +111,55 @@ public class ItemTypeChecking {
                     return true;
                 }
             }
+        }
+    }
+
+    /**
+     * Determine if the item is a water bottle.
+     *
+     * @param item the item being checked.
+     * @return {@code true} if this item is a water bottle.
+     */
+    public static boolean isWaterBottle(ItemStack item) {
+        if (item.getType() != Material.POTION) {
+            return false;
+        } else {
+            return !item.hasItemMeta() || item.getItemMeta().getPersistentDataContainer().isEmpty();
+        }
+    }
+
+    /**
+     * Determine if an item is raw food.
+     *
+     * @param item the item being checked.
+     * @return {@code true} if the item is raw meat.
+     */
+    public static boolean isRaw(ItemStack item) {
+        String itemName = item.getType().name();
+
+        if (itemName.contains("RAW")) {
+            return true;
+        } else {
+            return switch (itemName) {
+                case "BEEF", "PORKCHOP", "CHICKEN", "RABBIT", "MUTTON" -> true;
+                default -> false;
+            };
+        }
+    }
+
+    /**
+     * Determine if the item is a proper food item.
+     *
+     * @param item the item being checked.
+     * @return {@code true} if the item is regular food (Check this function for the list of "not-regular" foods)
+     */
+    public static boolean isActualFood(ItemStack item) {
+        Material type = item.getType();
+
+        if (!type.isEdible()) {
+            return false;
+        } else {
+            return !type.name().contains("POTION") && type != Material.ENDER_PEARL && type != Material.CHORUS_FRUIT && type != Material.ENCHANTED_GOLDEN_APPLE && type != Material.GOLDEN_APPLE && type != Material.BEETROOT;
         }
     }
 }
