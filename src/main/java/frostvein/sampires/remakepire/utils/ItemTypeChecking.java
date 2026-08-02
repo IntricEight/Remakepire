@@ -57,6 +57,23 @@ public class ItemTypeChecking {
     }
 
     /**
+     * Determine if the item is a bottle of blood.
+     *
+     * @param type the item being checked.
+     * @return {@code true} if the item is an experience bottle.
+     */
+    public static boolean isBloodBottle(Material type) {
+        return type == Material.EXPERIENCE_BOTTLE;
+    }
+
+    /**
+     * Retrieve the item type being used for blood bottles in this plugin.
+     */
+    public static Material getBloodBottleType() {
+        return Material.EXPERIENCE_BOTTLE;
+    }
+
+    /**
      * Determine if the item is a wooden weapon.
      *
      * @param type the item being checked.

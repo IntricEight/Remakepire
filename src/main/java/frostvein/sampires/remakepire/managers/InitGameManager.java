@@ -36,6 +36,7 @@ import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Scoreboard;
 import frostvein.sampires.remakepire.RemakepirePlugin;
 import frostvein.sampires.remakepire.beacons.BeaconSite;
+import frostvein.sampires.remakepire.utils.ItemTypeChecking;
 
 public class InitGameManager {
     private final RemakepirePlugin plugin;
@@ -201,7 +202,7 @@ public class InitGameManager {
             for (int i = startIndex; i < endIndex; ++i) {
                 Player player = onlinePlayers.get(i);
                 boolean isVampire = data.selectedVampires.contains(player.getUniqueId());
-                ItemStack item = new ItemStack(isVampire ? Material.EXPERIENCE_BOTTLE : Material.GLASS_BOTTLE);
+                ItemStack item = new ItemStack(isVampire ? ItemTypeChecking.getBloodBottleType() : Material.GLASS_BOTTLE);
                 ItemMeta meta = item.getItemMeta();
 
                 if (isVampire) {
