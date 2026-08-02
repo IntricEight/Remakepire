@@ -93,7 +93,6 @@ public class PassiveMobSpawningManager {
             this.plugin.getLogger().warning("PassiveMobSpawningManager: World 'world' not found");
         } else {
             Chunk[] loadedChunks = world.getLoadedChunks();
-            final ConversionAssistant conversionAssistant = new ConversionAssistant();
 
             if (loadedChunks.length == 0) {
                 this.plugin.getLogger().warning("PassiveMobSpawningManager: No loaded chunks found");
@@ -118,7 +117,7 @@ public class PassiveMobSpawningManager {
                             spawnCounts.put(mobType, spawnCounts.getOrDefault(mobType, 0) + 1);
 
                         } catch (Exception e) {
-                            this.plugin.getLogger().warning("PassiveMobSpawningManager: Failed to spawn " + mobType + " at " + conversionAssistant.locationToString(spawnLocation) + ": " + e.getMessage());
+                            this.plugin.getLogger().warning("PassiveMobSpawningManager: Failed to spawn " + mobType + " at " + ConversionAssistant.locationToString(spawnLocation) + ": " + e.getMessage());
                         }
                     }
 

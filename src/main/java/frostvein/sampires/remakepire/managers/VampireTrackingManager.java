@@ -79,7 +79,6 @@ public class VampireTrackingManager {
     private void updateTrackingForAllVampires(Player trackedVampire, boolean trackLocation) {
         if (this.mostRecentVampireId == null || trackedVampire.getUniqueId().equals(this.mostRecentVampireId)) {
             Location trackedLocation = trackedVampire.getLocation();
-            final ConversionAssistant conversionAssistant = new ConversionAssistant();
 
             for (Player vampire : Bukkit.getOnlinePlayers()) {
                 if (this.vampireManager.isVampire(vampire) && !vampire.getUniqueId().equals(trackedVampire.getUniqueId()) && vampire.getWorld().equals(trackedVampire.getWorld()) && (this.plugin.getVampireFeedingManager() == null || !this.plugin.getVampireFeedingManager().isFeeding(vampire))) {
@@ -93,7 +92,7 @@ public class VampireTrackingManager {
                         double deltaZ = trackedLocation.getZ() - vampireLocation.getZ();
                         double distance = Math.sqrt(deltaX * deltaX + deltaZ * deltaZ);
 
-                        String direction = conversionAssistant.getRelativeDirection(deltaX, deltaZ, vampireLocation.getYaw());
+                        String direction = ConversionAssistant.getRelativeDirection(deltaX, deltaZ, vampireLocation.getYaw());
                         messageComponent = Component.text("New Vampire: ", NamedTextColor.DARK_RED)
                                 .append(Component.text(direction, NamedTextColor.WHITE))
                                 .append(Component.text(String.format(" (%.0f blocks)", distance), NamedTextColor.GRAY));

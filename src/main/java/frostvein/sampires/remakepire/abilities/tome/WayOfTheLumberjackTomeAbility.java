@@ -26,7 +26,6 @@ public class WayOfTheLumberjackTomeAbility extends TomeAbility implements Listen
     private final Random random = new Random();
     private final Gson gson = new Gson();
     private final File placedLogsFile;
-    private final ConversionAssistant conversionAssistant;
     private Set<String> placedLogs = new HashSet<>();
     private static final Set<Material> LOG_MATERIALS = Set.of(Material.OAK_LOG, Material.SPRUCE_LOG, Material.BIRCH_LOG, Material.JUNGLE_LOG, Material.ACACIA_LOG, Material.DARK_OAK_LOG, Material.MANGROVE_LOG, Material.CHERRY_LOG, Material.CRIMSON_STEM, Material.WARPED_STEM);
 
@@ -39,7 +38,6 @@ public class WayOfTheLumberjackTomeAbility extends TomeAbility implements Listen
         super(plugin, "WayOfTheLumberjack", new String[]{"You gain knowledge on how to fell the forest.", "You permanently gain a 30% chance to harvest", "twice the yield from each harvest."}, 0);
         this.placedLogsFile = new File(plugin.getDataFolder(), "placed_logs.json");
         this.loadPlacedLogs();
-        this.conversionAssistant =  new ConversionAssistant();
         Bukkit.getPluginManager().registerEvents(this, plugin);
     }
 
@@ -71,7 +69,7 @@ public class WayOfTheLumberjackTomeAbility extends TomeAbility implements Listen
 
         // Record placed logs to prevent them from triggering the ability
         if (LOG_MATERIALS.contains(block.getType())) {
-            String locationKey = this.conversionAssistant.locationToString(block.getLocation());
+            String locationKey = ConversionAssistant.locationToString(block.getLocation());
             this.placedLogs.add(locationKey);
             this.savePlacedLogs();
         }
@@ -88,7 +86,7 @@ public class WayOfTheLumberjackTomeAbility extends TomeAbility implements Listen
         Block block = event.getBlock();
 
         if (LOG_MATERIALS.contains(block.getType())) {
-            String locationKey = this.conversionAssistant.locationToString(block.getLocation());
+            String locationKey = ConversionAssistant.locationToString(block.getLocation());
 
             // Prevent placed logs from triggering the ability
             if (this.placedLogs.contains(locationKey)) {

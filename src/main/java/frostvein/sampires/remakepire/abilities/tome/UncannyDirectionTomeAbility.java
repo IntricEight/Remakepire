@@ -27,7 +27,6 @@ public class UncannyDirectionTomeAbility extends TomeAbility {
             final double townCenterX = this.plugin.getConfigManager().getTownCenterX(), townCenterZ = this.plugin.getConfigManager().getTownCenterZ();
 
             (new BukkitRunnable() {
-                final ConversionAssistant conversionAssistant =  new ConversionAssistant();
                 int ticksRemaining = 140;
 
                 public void run() {
@@ -36,7 +35,7 @@ public class UncannyDirectionTomeAbility extends TomeAbility {
                         final double deltaX = townCenterX - currentLocation.getX(), deltaZ = townCenterZ - currentLocation.getZ();
                         final double distance = Math.sqrt(deltaX * deltaX + deltaZ * deltaZ);
 
-                        final String direction = conversionAssistant.getRelativeDirection(deltaX, deltaZ, currentLocation.getYaw());
+                        final String direction = ConversionAssistant.getRelativeDirection(deltaX, deltaZ, currentLocation.getYaw());
                         final Component actionBarMessage = Component.text("Town Center: ", NamedTextColor.GOLD)
                                 .append(Component.text(direction, NamedTextColor.WHITE))
                                 .append(Component.text(" (", NamedTextColor.GRAY))
