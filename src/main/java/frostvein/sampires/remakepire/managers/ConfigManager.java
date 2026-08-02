@@ -842,6 +842,15 @@ public class ConfigManager {
     }
 
     /**
+     * Retrieve whether there are lasting effects on the world when a vampire is cured.
+     *
+     * @return {@code true} if there are lasting effects from a vampire cure.
+     */
+    public boolean doCuresHaveLastingEffects() {
+        return this.plugin.getConfig().getBoolean("cure.cure-aftermath", true);
+    }
+
+    /**
      * Retrieve whether messages that players send will be blocked until they confirm otherwise.
      *
      * @return {@code true} if the message will be blocked.

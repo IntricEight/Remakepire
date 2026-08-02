@@ -118,7 +118,11 @@ public class VampireCureCommand implements CommandExecutor {
 
         this.vampireManager.setPlayerAsHuman(player);
         player.getActivePotionEffects().forEach((effect) -> player.removePotionEffect(effect.getType()));
-        player.addScoreboardTag(VampireManager.CURED_VAMPIRE_TAG);
+
+        // Check if players should be able to leave and are prevented from getting turned again
+        if (plugin.getConfigManager().doCuresHaveLastingEffects()) {
+            player.addScoreboardTag(VampireManager.CURED_VAMPIRE_TAG);
+        }
 
         // Check for and apply the effects of beacon control
         if (this.plugin.getSessionManager().isHumansFinalStandActive()) {
@@ -132,8 +136,12 @@ public class VampireCureCommand implements CommandExecutor {
 
         // Create the visual and audio effects of the cure working on the vampire
         this.plugin.getForcedCureChoiceManager().createCureEffects(player);
-        this.plugin.getForcedCureChoiceManager().createBeaconCorruptionEffects(player, holyBeacon);
-        holyBeacon.setState(BeaconState.PERMANENTLY_DESECRATED);
+
+        // Check if beacons should be damaged by the cure process
+        if (plugin.getConfigManager().doCuresHaveLastingEffects()) {
+            this.plugin.getForcedCureChoiceManager().createBeaconCorruptionEffects(player, holyBeacon);
+            holyBeacon.setState(BeaconState.PERMANENTLY_DESECRATED);
+        }
 
         this.beaconManager.updateBeaconDisplay(holyBeacon);
         this.beaconManager.saveBeacons();
