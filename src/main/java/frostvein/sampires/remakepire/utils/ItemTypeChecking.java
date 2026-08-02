@@ -1,6 +1,9 @@
 package frostvein.sampires.remakepire.utils;
 
 import org.bukkit.Material;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.PotionMeta;
+import org.bukkit.potion.PotionType;
 
 public class ItemTypeChecking {
     /**
@@ -81,5 +84,33 @@ public class ItemTypeChecking {
         }
     }
 
+    /**
+     * Determine if a potion is a splash bottle of water.
+     *
+     * @param item the item being checked.
+     * @return {@code true} if the item does not have potion metadata or is an effectless potion.
+     */
+    public static boolean isHolyWater(ItemStack item) {
+        if (item == null) {
+            return false;
+        } else if (item.getType() != Material.SPLASH_POTION) {
+            return false;
+        } else if (!item.hasItemMeta()) {
+            return true;
+        } else if (!(item.getItemMeta() instanceof PotionMeta potionMeta)) {
+            return true;
+        } else {
+            if (potionMeta.hasCustomEffects()) {
+                return false;
+            } else {
+                PotionType baseType = potionMeta.getBasePotionType();
 
+                if (baseType != null && baseType != PotionType.WATER) {
+                    return baseType == PotionType.AWKWARD || baseType == PotionType.MUNDANE || baseType == PotionType.THICK;
+                } else {
+                    return true;
+                }
+            }
+        }
+    }
 }

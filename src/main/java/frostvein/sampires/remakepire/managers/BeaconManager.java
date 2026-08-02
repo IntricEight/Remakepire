@@ -293,7 +293,7 @@ public class BeaconManager {
                 pumpkinItem.setItemMeta(meta);
             }
 
-            pumpkinItem.setData(DataComponentTypes.CUSTOM_MODEL_DATA, (CustomModelData)CustomModelData.customModelData().addString(expectedCMD).build());
+            pumpkinItem.setData(DataComponentTypes.CUSTOM_MODEL_DATA, CustomModelData.customModelData().addString(expectedCMD).build());
             display.setItemStack(pumpkinItem);
 
         } else {

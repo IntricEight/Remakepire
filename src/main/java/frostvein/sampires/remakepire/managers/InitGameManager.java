@@ -800,26 +800,25 @@ public class InitGameManager {
             return false;
 
         } else {
-            switch (command.substring(COMMAND_PREFIX.length())) {
-                case "confirm1":
+            return switch (command.substring(COMMAND_PREFIX.length())) {
+                case "confirm1" -> {
                     this.handleFirstConfirmation(admin);
-                    return true;
-
-                case "mode_random":
+                    yield true;
+                }
+                case "mode_random" -> {
                     this.handleRandomMode(admin);
-                    return true;
-
-                case "mode_selected":
+                    yield true;
+                }
+                case "mode_selected" -> {
                     this.handleSelectedMode(admin);
-                    return true;
-
-                case "execute":
+                    yield true;
+                }
+                case "execute" -> {
                     this.executeInitialization(admin);
-                    return true;
-
-                default:
-                    return false;
-            }
+                    yield true;
+                }
+                default -> false;
+            };
         }
     }
 

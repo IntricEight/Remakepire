@@ -27,7 +27,6 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
-import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -35,6 +34,7 @@ import org.bukkit.util.Vector;
 import frostvein.sampires.remakepire.RemakepirePlugin;
 import frostvein.sampires.remakepire.managers.SessionManager;
 import frostvein.sampires.remakepire.managers.VampireManager;
+import frostvein.sampires.remakepire.utils.ItemTypeChecking;
 
 public class IronWeaknessListener implements Listener {
     private final RemakepirePlugin plugin;
@@ -248,7 +248,7 @@ public class IronWeaknessListener implements Listener {
         Player player = event.getPlayer();
         Material armorStandItemType = event.getArmorStandItem().getType();
 
-        if (this.vampireManager.isVampireStage2OrHigher(player) && armorStandItemType != null) {
+        if (this.vampireManager.isVampireStage2OrHigher(player)) {
             if (this.ironMaterials.contains(armorStandItemType)) {
                 event.setCancelled(true);
 
@@ -284,14 +284,13 @@ public class IronWeaknessListener implements Listener {
                     }
 
                     // Check if the player is attempting to throw a bottle of holy water
-                    if (item != null && this.isHolyWater(item)) {
+                    if (ItemTypeChecking.isHolyWater(item)) {
                         event.setCancelled(true);
                         player.sendMessage("§cThe Holy Water burns your hand as you try to throw it! You feel unable to bring yourself to use this item...");
-                        return;
                     }
                 }
             }
-        } catch (Exception e) {}
+        } catch (Exception _) {}
     }
 
     /**
@@ -308,7 +307,7 @@ public class IronWeaknessListener implements Listener {
                 if (this.vampireManager.isVampireStage2OrHigher(player)) {
                     ItemStack potionItem = potion.getItem();
 
-                    if (this.isHolyWater(potionItem)) {
+                    if (ItemTypeChecking.isHolyWater(potionItem)) {
                         event.setCancelled(true);
                     }
                 }
@@ -329,30 +328,28 @@ public class IronWeaknessListener implements Listener {
             if (!this.vampireManager.isVampireStage1(player)) {
                 Location to = event.getTo();
 
-                if (to != null) {
-                    UUID playerId = player.getUniqueId();
-                    long currentTime = System.currentTimeMillis();
+                final UUID playerId = player.getUniqueId();
+                final long currentTime = System.currentTimeMillis();
 
-                    if (this.knockbackCooldowns.containsKey(playerId)) {
-                        if (currentTime - this.knockbackCooldowns.get(playerId) < 1000L) {
-                            return;
-                        }
+                if (this.knockbackCooldowns.containsKey(playerId)) {
+                    if (currentTime - this.knockbackCooldowns.get(playerId) < 1000L) {
+                        return;
+                    }
+                }
+
+                if (this.isNearIronBlock(to, this.REPEL_DISTANCE)) {
+                    event.setCancelled(true);
+
+                    if (!player.getScoreboardTags().contains(SessionManager.INFORMED_IRON_BLOCK_REPEL)) {
+                        player.addScoreboardTag(SessionManager.INFORMED_IRON_BLOCK_REPEL);
+                        player.sendMessage("§cA block of silver is repelling you from this area...");
                     }
 
-                    if (this.isNearIronBlock(to, this.REPEL_DISTANCE)) {
-                        event.setCancelled(true);
-
-                        if (!player.getScoreboardTags().contains(SessionManager.INFORMED_IRON_BLOCK_REPEL)) {
-                            player.addScoreboardTag(SessionManager.INFORMED_IRON_BLOCK_REPEL);
-                            player.sendMessage("§cA block of silver is repelling you from this area...");
-                        }
-
-                        Vector knockbackDirection = this.getDirectionAwayFromNearestIron(to);
-                        knockbackDirection.multiply(this.REPEL_STRENGTH);
-                        knockbackDirection.setY(Math.max(0.3, knockbackDirection.getY()));
-                        this.plugin.getServer().getScheduler().runTask(this.plugin, () -> player.setVelocity(knockbackDirection));
-                        this.knockbackCooldowns.put(playerId, currentTime);
-                    }
+                    Vector knockbackDirection = this.getDirectionAwayFromNearestIron(to);
+                    knockbackDirection.multiply(this.REPEL_STRENGTH);
+                    knockbackDirection.setY(Math.max(0.3, knockbackDirection.getY()));
+                    this.plugin.getServer().getScheduler().runTask(this.plugin, () -> player.setVelocity(knockbackDirection));
+                    this.knockbackCooldowns.put(playerId, currentTime);
                 }
             }
         }
@@ -365,7 +362,7 @@ public class IronWeaknessListener implements Listener {
      * @return A {@code Vector} away from the nearest silver block.
      */
     private Vector getDirectionAwayFromNearestIron(Location location) {
-        int x = location.getBlockX(), y = location.getBlockY(), z = location.getBlockZ();
+        final int x = location.getBlockX(), y = location.getBlockY(), z = location.getBlockZ();
         Location nearestIron = null;
         double nearestDistance = Double.MAX_VALUE;
 
@@ -446,27 +443,6 @@ public class IronWeaknessListener implements Listener {
         if (!player.getScoreboardTags().contains(SessionManager.INFORMED_IRON_BLOCK_WEAKNESS)) {
             player.addScoreboardTag(SessionManager.INFORMED_IRON_BLOCK_WEAKNESS);
             player.sendMessage("§cA source of silver nearby is weakening you...");
-        }
-    }
-
-    /**
-     * Determine if an item is a bottle of holy water.
-     *
-     * @param item the item to check.
-     * @return {@code true} if the item is holy water (an effectless splash potion).
-     */
-    private boolean isHolyWater(ItemStack item) {
-        if (item == null) {
-            return false;
-        } else if (item.getType() != Material.SPLASH_POTION) {
-            return false;
-        } else if (!item.hasItemMeta()) {
-            return true;
-        } else if (!(item.getItemMeta() instanceof PotionMeta)) {
-            return true;
-        } else {
-            PotionMeta potionMeta = (PotionMeta)item.getItemMeta();
-            return !potionMeta.hasCustomEffects();
         }
     }
 }
