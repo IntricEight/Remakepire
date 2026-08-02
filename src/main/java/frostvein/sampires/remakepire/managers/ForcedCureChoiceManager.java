@@ -201,7 +201,11 @@ public class ForcedCureChoiceManager {
 
         this.plugin.getVampireManager().setPlayerAsHuman(player);
         player.getActivePotionEffects().forEach((effect) -> player.removePotionEffect(effect.getType()));
-        player.addScoreboardTag("CuredVampire");
+
+        // Check if players are prevented from getting turned again
+        if (plugin.getConfigManager().doCuresHaveLastingEffects()) {
+            player.addScoreboardTag("CuredVampire");
+        }
 
         // Check for and apply the effects of beacon control
         if (this.plugin.getSessionManager().isHumansFinalStandActive()) {
@@ -281,7 +285,11 @@ public class ForcedCureChoiceManager {
 
         this.plugin.getVampireManager().setPlayerAsHuman(target);
         target.getActivePotionEffects().forEach((effect) -> target.removePotionEffect(effect.getType()));
-        target.addScoreboardTag("CuredVampire");
+
+        // Check if players are prevented from getting turned again
+        if (plugin.getConfigManager().doCuresHaveLastingEffects()) {
+            target.addScoreboardTag("CuredVampire");
+        }
 
         // Check for and apply the effects of beacon control
         if (this.plugin.getSessionManager().isHumansFinalStandActive()) {

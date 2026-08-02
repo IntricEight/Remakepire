@@ -259,6 +259,11 @@ cure:
   # Default: true (The spawn's Sire must be permakilled)
   sire-death-requirement: true
 
+  # Control if curing vampires has a lasting effect on the players and world
+  # This controls whether players get the CuredVampire tag, and whether beacons are destroyed by cures
+  # Default: true
+  cure-aftermath: true
+
   # Controls how long a player must apply the self cure before it can take effect
   # Default: 5 seconds
   seconds-to-self-cure: 5
