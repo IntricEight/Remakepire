@@ -1,6 +1,8 @@
 package frostvein.sampires.remakepire.abilities.tome;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import net.md_5.bungee.api.ChatMessageType;
@@ -28,6 +30,7 @@ public class StopTheBleedingTomeAbility extends TomeAbility {
     private static final int PARTICLE_INTERVAL_TICKS = 20;
     private static final String ACTIVE_TAG = "stopthebleeding_active";
     private final Map<UUID, HealingSession> activeHealingSessions = new HashMap<>();
+    private final List<BukkitTask> cooldownTasks = new ArrayList<>();
 
     /**
      * Create an instance of the Stop the Bleeding tome ability.
@@ -41,24 +44,31 @@ public class StopTheBleedingTomeAbility extends TomeAbility {
     protected boolean useAbility(Player player) {
         if (!this.canUse(player)) {
             this.sendCannotUseMessage(player, "Only humans can use tome abilities!");
-            return false;
 
         } else {
             UUID playerId = player.getUniqueId();
 
             if (this.activeHealingSessions.containsKey(playerId)) {
                 this.cancelHealing(player, "You stop focusing on healing.");
-                return false;
-
-            } else if (player.getScoreboardTags().contains(SessionManager.STOPTHEBLEEDING_USED_SESSION)) {
-                this.sendCannotUseMessage(player, "You have already used Stop the Bleeding this session!");
-                return false;
 
             } else {
                 Player target = this.findNearestPlayer(player, PROXIMITY_DISTANCE);
 
+                // If the player is not healing someone, let them heal themselves
                 if (target == null) {
                     target = player;
+                }
+
+                // Prevent a player from being healed too frequently
+                if (target.getScoreboardTags().contains(SessionManager.STOPTHEBLEEDING_USED_SESSION)) {
+                    // Prevent the player from receiving both messages if they are healing themselves
+                    if (target != player) {
+                        this.sendCannotUseMessage(player, target.getName() + " has been healed too recently, it would be dangerous to try again so soon!");
+                    }
+
+                    this.sendCannotUseMessage(target, "Your body still aches from the previous healing session!");
+
+                    return false;
                 }
 
                 if (this.getDeathScore(target) <= 0) {
@@ -67,15 +77,13 @@ public class StopTheBleedingTomeAbility extends TomeAbility {
                     } else {
                         this.sendCannotUseMessage(player, target.getName() + " has no deaths to heal!");
                     }
-
-                    return false;
-
                 } else {
                     this.startHealing(player, target);
-                    return false;
                 }
             }
         }
+
+        return false;
     }
 
     /**
@@ -142,6 +150,7 @@ public class StopTheBleedingTomeAbility extends TomeAbility {
         this.setDeathScore(target, newDeaths);
         this.updateMaxHealth(target);
 
+        // Notify the players of the healing success
         if (!healer.equals(target)) {
             target.sendMessage("§a" + healer.getName() + " has healed one of your wounds.");
             healer.sendMessage("§aYou have successfully healed one of " + target.getName() + "'s wounds.");
@@ -151,7 +160,18 @@ public class StopTheBleedingTomeAbility extends TomeAbility {
 
         healer.playSound(healer.getLocation(), Sound.BLOCK_BEACON_ACTIVATE, SoundCategory.PLAYERS, 1.0F, 1.5F);
         target.playSound(target.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, SoundCategory.PLAYERS, 1.0F, 1.2F);
-        healer.addScoreboardTag(SessionManager.STOPTHEBLEEDING_USED_SESSION);
+
+        // Begin a cooldown to allow the target to be healed again this session
+        target.addScoreboardTag(SessionManager.STOPTHEBLEEDING_USED_SESSION);
+
+        BukkitTask cooldownTask = Bukkit.getScheduler().runTaskLater(this.plugin, () -> {
+            if (target.isOnline()) {
+                target.removeScoreboardTag(SessionManager.STOPTHEBLEEDING_USED_SESSION);
+            }
+
+        }, (long)cooldownSeconds * 20L);
+
+        this.cooldownTasks.add(cooldownTask);
     }
 
     /**
@@ -242,10 +262,11 @@ public class StopTheBleedingTomeAbility extends TomeAbility {
     }
 
     /**
-     * Clean up any healing sessions when the plugin is turned off.
+     * Clean up any healing and cooldown sessions when the plugin is turned off.
      */
     public void cleanup() {
-        for(UUID healerId : (new HashMap<>(this.activeHealingSessions)).keySet()) {
+        // Cancel the active healing sessions
+        for (UUID healerId : (new HashMap<>(this.activeHealingSessions)).keySet()) {
             Player healer = Bukkit.getPlayer(healerId);
 
             if (healer != null) {
@@ -254,6 +275,13 @@ public class StopTheBleedingTomeAbility extends TomeAbility {
         }
 
         this.activeHealingSessions.clear();
+
+        // Cancel the cooldown removal sessions
+        for (BukkitTask task : this.cooldownTasks) {
+            task.cancel();
+        }
+
+        this.cooldownTasks.clear();
     }
 
     private class HealingSession {

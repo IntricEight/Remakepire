@@ -61,8 +61,16 @@ public class CombatListener implements Listener {
     public void onEntityDamageByEntity(EntityDamageByEntityEvent event) {
         Entity reducedDamage = event.getEntity();
 
-        // Modify the damage dealt to vampires
         if (reducedDamage instanceof Player victim) {
+            // Modify the damage dealt to humans
+            if (this.vampireManager.isHuman(victim)) {
+                // Reduce the damage done by mobs
+                if (!(event.getDamager() instanceof Player)) {
+                    event.setDamage(event.getDamage() * 0.5);
+                }
+            }
+
+            // Modify the damage dealt to vampires
             if (this.vampireManager.isVampire(victim)) {
                 // Reduce the damage done by mobs
                 if (!(event.getDamager() instanceof Player)) {
@@ -73,15 +81,6 @@ public class CombatListener implements Listener {
                 if (victim.getScoreboardTags().contains("skin_strength")) {
                     event.setDamage(event.getDamage() * 0.9);
                 }
-            }
-        }
-
-        // Modify the damage dealt to humans
-        reducedDamage = event.getEntity();
-        if (reducedDamage instanceof Player victim) {
-            // Reduce the damage done by mobs
-            if (this.vampireManager.isHuman(victim) && !(event.getDamager() instanceof Player)) {
-                event.setDamage(event.getDamage() * 0.5);
             }
         }
 

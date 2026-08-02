@@ -24,7 +24,6 @@ import frostvein.sampires.remakepire.RemakepirePlugin;
 
 public class SessionManager {
     private final RemakepirePlugin plugin;
-    private FileConfiguration config;
     private final Map<UUID, Integer> pausedFoodLevels = new HashMap<>();
     private final Map<UUID, Float> pausedSaturationLevels = new HashMap<>();
     private Objective sessionObjective, sessionIDObjective, gameIDObjective;
@@ -57,17 +56,6 @@ public class SessionManager {
      */
     public SessionManager(RemakepirePlugin plugin) {
         this.plugin = plugin;
-        this.loadConfig();
-    }
-
-    /**
-     * Retrieve the plugin configuration from the file.
-     */
-    public void loadConfig() {
-        // Can only use the commented code once. Right now, ConfigManager is created earlier, and so should be the single point where those two lines are called
-//        this.plugin.saveDefaultConfig();
-//        this.plugin.reloadConfig();
-        this.config = this.plugin.getConfig();
     }
 
     /**
@@ -258,7 +246,7 @@ public class SessionManager {
      * @return {@code true} if cure books can spawn in tome chests.
      */
     public boolean isCureBooksEnabled() {
-        return this.config.getBoolean("cure_books_enabled", true);
+        return this.plugin.getConfig().getBoolean("cure_books_enabled", true);
     }
 
     /**
@@ -267,7 +255,7 @@ public class SessionManager {
      * @param enabled {@code true} if cure books should spawn in tome chests.
      */
     public void setCureBooksEnabled(boolean enabled) {
-        this.config.set("cure_books_enabled", enabled);
+        this.plugin.getConfig().set("cure_books_enabled", enabled);
         this.plugin.saveConfig();
     }
 
@@ -277,7 +265,7 @@ public class SessionManager {
      * @return {@code true} if the border will trap players.
      */
     public boolean isBorderActive() {
-        return this.config.getBoolean("border_active", true);
+        return this.plugin.getConfig().getBoolean("border_active", true);
     }
 
     /**
@@ -286,7 +274,8 @@ public class SessionManager {
      * @param active {@code true} if the border will trap players.
      */
     public void setBorderActive(boolean active) {
-        this.config.set("border_active", active);
+        this.plugin.getConfig().set("border_active", active);
+        this.plugin.getConfig().set("border_active", active);
         this.plugin.saveConfig();
     }
 
@@ -296,7 +285,7 @@ public class SessionManager {
      * @return {@code true} if the first beacon has been converted since the game was initialized.
      */
     public boolean isFirstBeaconConvertedTriggered() {
-        return this.config.getBoolean("first_beacon_converted", false);
+        return this.plugin.getConfig().getBoolean("first_beacon_converted", false);
     }
 
     /**
@@ -305,7 +294,7 @@ public class SessionManager {
      * @param triggered {@code true} when the first beacon of the game has been converted.
      */
     public void setFirstBeaconConvertedTriggered(boolean triggered) {
-        this.config.set("first_beacon_converted", triggered);
+        this.plugin.getConfig().set("first_beacon_converted", triggered);
         this.plugin.saveConfig();
     }
 
@@ -315,7 +304,7 @@ public class SessionManager {
      * @return {@code true} if the human team controls all beacons.
      */
     public boolean areHumansOwningAllBeacons() {
-        return this.config.getBoolean("humans_own_all_beacons", false);
+        return this.plugin.getConfig().getBoolean("humans_own_all_beacons", false);
     }
 
     /**
@@ -324,7 +313,7 @@ public class SessionManager {
      * @param active {@code true} if all the beacons are holy aligned.
      */
     public void setHumansOwningAllBeacons(boolean active) {
-        this.config.set("humans_own_all_beacons", active);
+        this.plugin.getConfig().set("humans_own_all_beacons", active);
         this.plugin.saveConfig();
     }
 
@@ -334,7 +323,7 @@ public class SessionManager {
      * @return {@code true} if the vampire team controls all beacons.
      */
     public boolean areVampiresOwningAllBeacons() {
-        return this.config.getBoolean("vampires_own_all_beacons", false);
+        return this.plugin.getConfig().getBoolean("vampires_own_all_beacons", false);
     }
 
     /**
@@ -343,7 +332,7 @@ public class SessionManager {
      * @param active {@code true} if all the beacons are darkness aligned.
      */
     public void setVampiresOwningAllBeacons(boolean active) {
-        this.config.set("vampires_own_all_beacons", active);
+        this.plugin.getConfig().set("vampires_own_all_beacons", active);
         this.plugin.saveConfig();
     }
 
@@ -371,7 +360,7 @@ public class SessionManager {
      * @return {@code true} if only one human remains alive.
      */
     public boolean isOneHumanLeftActive() {
-        return this.config.getBoolean("one_human_left", false);
+        return this.plugin.getConfig().getBoolean("one_human_left", false);
     }
 
     /**
@@ -380,7 +369,7 @@ public class SessionManager {
      * @param active {@code true} if there is a single human remaining in the game.
      */
     public void setOneHumanLeftActive(boolean active) {
-        this.config.set("one_human_left", active);
+        this.plugin.getConfig().set("one_human_left", active);
         this.plugin.saveConfig();
     }
 
@@ -411,7 +400,7 @@ public class SessionManager {
         World world = this.plugin.getWorld();
 
         // Update the config's setting with the provided preference
-        this.config.set("enable-npc-mobs", enabled);
+        this.plugin.getConfig().set("enable-npc-mobs", enabled);
         this.plugin.saveConfig();
 
         // Update the world's gamerule state

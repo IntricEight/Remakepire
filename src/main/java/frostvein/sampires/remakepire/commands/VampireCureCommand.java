@@ -21,6 +21,11 @@ public class VampireCureCommand implements CommandExecutor {
     private final BeaconManager beaconManager;
     private final VampireSireManager sireManager;
 
+    /**
+     * Create an instance of the plugin's self cure command handler.
+     *
+     * @param plugin the host plugin object.
+     */
     public VampireCureCommand(RemakepirePlugin plugin) {
         this.plugin = plugin;
         this.vampireManager = plugin.getVampireManager();
@@ -28,24 +33,27 @@ public class VampireCureCommand implements CommandExecutor {
         this.sireManager = plugin.getSireManager();
     }
 
+    /**
+     * Handle the command execution of the self cure.
+     *
+     * @return {@code true}
+     */
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (!(sender instanceof Player player)) {
             sender.sendMessage("§cThis command can only be used by players.");
-            return true;
 
         } else if (!CureBookReadingListener.hasReadAllCureBooks(player)) {
             player.sendMessage("§cYou do not know these ancient words...");
             player.sendMessage("§7You must first read all three cure books to learn the ritual.");
-            return true;
 
         } else if (!this.vampireManager.isVampire(player)) {
             player.sendMessage("§cOnly vampires can use this cure ritual.");
-            return true;
 
         } else {
-            // Only allow a cure during the day
-            if (!this.plugin.getEffectManager().isDaytime(player.getWorld())) {
+            // Only allow a cure during the day (if this setting is enabled)
+            if (this.plugin.getConfigManager().doCuresRequireDaytime() && !this.plugin.getEffectManager().isDaytime(player.getWorld())) {
                 player.sendMessage("§cThis ritual can only be performed during the day.");
+
             } else {
                 ItemStack holyWater = this.plugin.getHolyWaterEffectManager().findHolyWater(player);
 
@@ -71,9 +79,9 @@ public class VampireCureCommand implements CommandExecutor {
                     }
                 }
             }
-
-            return true;
         }
+
+        return true;
     }
 
     /**

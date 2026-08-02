@@ -24,12 +24,22 @@ public class VampireAbilityCommand implements CommandExecutor, TabCompleter {
     private final VampireAbilityManager abilityManager;
     private final BeaconManager beaconManager;
 
+    /**
+     * Create an instance of the plugin's vampire ability command handler.
+     *
+     * @param plugin the host plugin object.
+     */
     public VampireAbilityCommand(RemakepirePlugin plugin) {
         this.plugin = plugin;
         this.abilityManager = plugin.getVampireAbilityManager();
         this.beaconManager = plugin.getBeaconManager();
     }
 
+    /**
+     * Handle the command execution of triggering a vampire ability.
+     *
+     * @return {@code true}
+     */
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (!(sender instanceof Player player)) {
             sender.sendMessage("§cOnly players can use vampire abilities.");
@@ -104,9 +114,15 @@ public class VampireAbilityCommand implements CommandExecutor, TabCompleter {
         }
     }
 
+    /**
+     * Send the user a list of vampire abilities the player can use at their stage.
+     *
+     * @param player The player checking their available abilities.
+     */
     private void listAbilities(Player player) {
         if (!this.plugin.getVampireManager().isVampire(player)) {
             player.sendMessage("§cYou must be a vampire to see abilities.");
+
         } else {
             List<VampireAbility> availableAbilities = this.abilityManager.getAvailableAbilities(player);
             int playerStage = this.plugin.getVampireManager().getVampireStage(player);
@@ -114,6 +130,7 @@ public class VampireAbilityCommand implements CommandExecutor, TabCompleter {
             if (availableAbilities.isEmpty()) {
                 player.sendMessage("§cNo abilities available for Stage " + playerStage + " vampires.");
                 player.sendMessage("§7Use '/pow vability all' to see what abilities you could unlock.");
+
             } else {
                 player.sendMessage("§4§l=== YOUR VAMPIRE ABILITIES ===");
                 player.sendMessage("§7Your Stage: §e" + playerStage);
@@ -134,6 +151,11 @@ public class VampireAbilityCommand implements CommandExecutor, TabCompleter {
         }
     }
 
+    /**
+     * Send the user a list of all vampire abilities available in the plugin.
+     *
+     * @param player The player checking their available abilities.
+     */
     private void listAllAbilities(Player player) {
         if (!this.plugin.getVampireManager().isVampire(player)) {
             player.sendMessage("§cYou must be a vampire to see abilities.");
@@ -153,23 +175,27 @@ public class VampireAbilityCommand implements CommandExecutor, TabCompleter {
                 boolean canUse = ability.canUse(player, this.plugin.getVampireManager());
                 this.displayAbility(player, ability, canUse);
             }
-
         }
     }
 
+    /**
+     * Inform the player of an ability's current status.
+     *
+     * @param player The vampire checking the ability.
+     * @param ability The ability being displayed.
+     * @param canUse {@code true} if the player use this ability.
+     */
     private void displayAbility(Player player, VampireAbility ability, boolean canUse) {
-        String status = "";
-        String nameColor = canUse ? "§e" : "§8";
+        String status = "", nameColor = canUse ? "§e" : "§8";
         BeaconSite suppressingBeacon = this.beaconManager.checkHolySuppression(player.getLocation());
-
         boolean suppressed = suppressingBeacon != null && this.plugin.getVampireManager().isVampire(player);
 
         if (canUse && !suppressed) {
             if (ability.getName().equals("bat") && this.plugin.getBatTransformationManager().isInBatForm(player)) {
                 int remainingTime = this.plugin.getBatTransformationManager().getRemainingTime(player);
-                status = " §a(In Bat Form - " + VampireAbilityManager.formatTime((long)remainingTime) + " remaining)";
+                status = " §a(In Bat Form - " + VampireAbilityManager.formatTime(remainingTime) + " remaining)";
 
-            } else if (ability instanceof StormCallAbility) {
+            } else if (ability instanceof StormCallAbility) {   // If more global abilities are introduced, this will have to change from being hard coded
                 if (this.abilityManager.isOnGlobalCooldown(ability.getName())) {
                     long remaining = this.abilityManager.getRemainingGlobalCooldown(ability.getName());
                     String globalInfo = this.abilityManager.getGlobalCooldownInfo(ability.getName());
@@ -207,11 +233,13 @@ public class VampireAbilityCommand implements CommandExecutor, TabCompleter {
         player.sendMessage("  §7" + ability.getDescription());
         String cooldownInfo = "  §7Required Stage: §e" + ability.getMinimumStage() + " §7| Cooldown: §e" + VampireAbilityManager.formatTime((long)ability.getCooldownSeconds(this.plugin));
 
+        // If more global abilities are introduced, this will have to change from being hard coded
         if (ability instanceof StormCallAbility) {
             cooldownInfo = cooldownInfo + " §c(Global)";
         }
 
         player.sendMessage(cooldownInfo);
+
         if (canUse && !suppressed) {
             if (ability.getName().equals("bat") && this.plugin.getBatTransformationManager().isInBatForm(player)) {
                 player.sendMessage("  §7Usage: §e/pow vability " + ability.getName() + " §7(to transform back)");
@@ -226,6 +254,12 @@ public class VampireAbilityCommand implements CommandExecutor, TabCompleter {
         player.sendMessage("");
     }
 
+    /**
+     * Create the list of autocorrecting options for vability commands as they are written out in the command line.
+     *
+     * @param command the previous word in the argument list.
+     * @return A {@code List} of options for the autocomplete to suggest.
+     */
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         if (!(sender instanceof Player player)) {
             return new ArrayList<>();
@@ -239,7 +273,7 @@ public class VampireAbilityCommand implements CommandExecutor, TabCompleter {
 
                 if (this.plugin.getVampireManager().isVampire(player)) {
                     List<VampireAbility> availableAbilities = this.abilityManager.getAvailableAbilities(player);
-                    completions.addAll((Collection)availableAbilities.stream().map(VampireAbility::getName).collect(Collectors.toList()));
+                    completions.addAll(availableAbilities.stream().map(VampireAbility::getName).toList());
                 }
             }
 

@@ -29,10 +29,11 @@ public class VampireVisionAbility extends VampireAbility {
     }
 
     public boolean execute(Player player, VampireManager vampireManager, RemakepirePlugin plugin) {
-        boolean hasNightVision = player.hasPotionEffect(PotionEffectType.NIGHT_VISION);
-        if (hasNightVision) {
+        // Deactivate the ability if it is in use
+        if (player.hasPotionEffect(PotionEffectType.NIGHT_VISION)) {
             player.removePotionEffect(PotionEffectType.NIGHT_VISION);
             player.sendMessage("§8Your supernatural vision fades... The world returns to natural darkness.");
+
         } else {
             PotionEffect nightVision = new PotionEffect(PotionEffectType.NIGHT_VISION, -1, 0, false, false, false);
             player.addPotionEffect(nightVision);

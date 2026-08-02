@@ -45,6 +45,11 @@ public class PowCommand implements CommandExecutor, TabCompleter {
         this.sendMessageCommand = new PendingMessageCommand(plugin);
     }
 
+    /**
+     * Handle the command execution of the custom plugin commands.
+     *
+     * @return {@code true} if the command didn't trigger a fatal error.
+     */
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (args.length == 0) {
             this.sendHelp(sender);
@@ -56,38 +61,60 @@ public class PowCommand implements CommandExecutor, TabCompleter {
 
             switch (subCommand) {
                 case "admin":
+                    // Access the admin commands
                     return this.handleAdminCommand(sender, subArgs);
+
                 case "vability":
+                    // Access the vampire ability commands
                     return this.abilityCommand.onCommand(sender, command, label, subArgs);
+
                 case "tome":
+                    // Access the tome ability commands
                     return this.tomeCommand.onCommand(sender, command, label, subArgs);
+
                 case "checklives":
+                    // Check how many lives this player has remaining
                     return this.checkLivesCommand.onCommand(sender, command, label, subArgs);
+
                 case "beaconstatus":
                 case "holysites":
                 case "holy":
+                    // Check the status of the beacons in the world
                     return this.beaconStatusCommand.onCommand(sender, command, label, subArgs);
+
                 case "texture":
                 case "texturepack":
                 case "resourcepack":
+                    // Force the application of a plugin texture pack
                     return this.texturePackCommand.onCommand(sender, command, label, subArgs);
+
                 case "toggle_permadeath":
                 case "toggle-permadeath":
                 case "togglepermadeath":
                 case "permadeath":
+                    // Change or check the permadeath setting of this player
                     return this.permadeathCommand.onCommand(sender, command, label, subArgs);
+
                 case "toggle-turning":
                 case "turning":
+                    // Toggle whether vampire killings will attempt to turn the victim into a vampire
                     return this.turningCommand.onCommand(sender, command, label, subArgs);
+
                 case "sendmessage":
                 case "sendpendingmessage":
+                    // Force a message through the message prevention system
                     return this.sendMessageCommand.onCommand(sender, command, label, subArgs);
+
                 case "reopen":
                 case "forcedcure-reopen":
+                    // Reopen the forced cure choice menu
                     return this.forceCureReopenCommand.onCommand(sender, command, label, subArgs);
+
                 case "help":
+                    // Print out a descriptive list of the commands available to this player
                     this.sendHelp(sender);
                     return true;
+
                 default:
                     sender.sendMessage("§cUnknown subcommand: " + subCommand);
                     sender.sendMessage("§7Use §e/pow help §7for a list of commands");
@@ -127,7 +154,7 @@ public class PowCommand implements CommandExecutor, TabCompleter {
     }
 
     /**
-     * Print to the sender a list of available commands they can run using the pow heading command.
+     * Print to the sender a list of available commands they can run using the pow command.
      *
      * @param sender the player sending the command.
      */
@@ -169,7 +196,7 @@ public class PowCommand implements CommandExecutor, TabCompleter {
         sender.sendMessage("§e/pow admin givetome <player> <ability> [amount] §7- Give tome to player");
         sender.sendMessage("§e/pow admin select_tomes <player> §7- Open GUI to grant tome abilities");
         sender.sendMessage("§e/pow admin give_cure_book <player> <1 | 2 | 3 | 4> §7- Give cure book item to player");
-        sender.sendMessage("§e/pow admin stash_cure_book <1 | 2 | 3 | 4> <x> <y> <z> §7- Spawn a cure book inside a tome chest");
+        sender.sendMessage("§e/pow admin stash_cure_book <1 | 2 | 3 | 4> [x y z] §7- Spawn a cure book inside a tome chest. Don't provide coordinates to randomize book spawn location.");
         sender.sendMessage("§e/pow admin distributetomes §7- Manually trigger tome distribution");
         sender.sendMessage("§e/pow admin clearbloodmoonbuffs <all | player> §7- Clear blood moon buffs");
         sender.sendMessage("§e/pow admin fixattributes <all | player> §7- Fix stuck attribute modifiers (health/speed)");
@@ -187,13 +214,11 @@ public class PowCommand implements CommandExecutor, TabCompleter {
     /**
      * Create the list of autocorrecting options for pow commands as they are written out in the command line.
      *
-     * @param sender the player sending the command.
-     * @param command the command that is being created and executed.
-     * @param alias the chosen head for the command.
-     * @param args the arguments attached to the command.
+     * @param command the previous word in the argument list.
      * @return A {@code List} of options for the autocomplete to suggest.
      */
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+        // Stores the autocomplete options that will be displayed
         List<String> completions = new ArrayList<>();
 
         if (args.length == 1) {
@@ -287,7 +312,7 @@ public class PowCommand implements CommandExecutor, TabCompleter {
                 }
 
                 if (args.length == 4 && args[1].equalsIgnoreCase("givetome")) {
-                    List<String> tomeAbilities = Arrays.asList("blessing", "banishundead", "holyword", "enlightenedeye", "lanternthrash", "prayeroffaith", "rallyingcry", "shoulderbarge", "turnundead", "uncannydirection", "unnaturalhaste", "wayoftheland", "wayofthelumberjack", "wayoftheprospector", "stopthebleeding");
+                    List<String> tomeAbilities = BrigadierCommands.TOME_ABILITIES;
                     return tomeAbilities.stream().filter((s) -> s.toLowerCase().startsWith(args[3].toLowerCase())).collect(Collectors.toList());
                 }
 
@@ -352,7 +377,9 @@ public class PowCommand implements CommandExecutor, TabCompleter {
             }
 
             if (args.length == 2 && args[0].equalsIgnoreCase("vability")) {
-                List<String> abilities = Arrays.asList("list", "all", "bat", "lunge", "vanish", "stormcall", "beacontravel", "vision");
+                List<String> abilities = Arrays.asList("list", "all");
+                abilities.addAll(BrigadierCommands.VAMPIRE_ABILITIES);
+
                 return abilities.stream().filter((s) -> s.startsWith(args[1].toLowerCase())).collect(Collectors.toList());
 
             } else if (args.length == 2 && args[0].equalsIgnoreCase("tome")) {

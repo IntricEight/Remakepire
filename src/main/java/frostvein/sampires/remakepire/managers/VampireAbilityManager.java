@@ -27,6 +27,7 @@ import frostvein.sampires.remakepire.abilities.BatAbility;
 import frostvein.sampires.remakepire.abilities.BeaconTeleportAbility;
 import frostvein.sampires.remakepire.abilities.InvisibilityAbility;
 import frostvein.sampires.remakepire.abilities.LungeAbility;
+import frostvein.sampires.remakepire.abilities.RaiseUndeadAbility;
 import frostvein.sampires.remakepire.abilities.StormCallAbility;
 import frostvein.sampires.remakepire.abilities.VampireAbility;
 import frostvein.sampires.remakepire.abilities.VampireVisionAbility;
@@ -99,6 +100,7 @@ public class VampireAbilityManager {
         this.registerAbility(new BeaconTeleportAbility());
         this.registerAbility(new BatAbility());
         this.registerAbility(new VampireVisionAbility());
+        this.registerAbility(new RaiseUndeadAbility());
 
         this.plugin.logInfo("Registered " + this.abilities.size() + " vampire abilities");
     }
@@ -226,10 +228,6 @@ public class VampireAbilityManager {
 
         } else if (player.getGameMode() == GameMode.SPECTATOR) {
             player.sendMessage("§cYou cannot use vampire abilities while in spectator mode.");
-            return false;
-
-        } else if (!this.sessionManager.isSessionActive()) {
-            player.sendMessage("§cAbilities cannot be used while the session is inactive.");
             return false;
 
         } else if (this.plugin.getHolyWaterEffectManager().isAbilitiesDisabled(player)) {

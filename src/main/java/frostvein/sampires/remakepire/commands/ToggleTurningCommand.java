@@ -9,15 +9,24 @@ import frostvein.sampires.remakepire.RemakepirePlugin;
 public class ToggleTurningCommand implements CommandExecutor {
     private final RemakepirePlugin plugin;
 
+    /**
+     * Create an instance of the plugin's toggle vampire turning command handler.
+     *
+     * @param plugin the host plugin object.
+     */
     public ToggleTurningCommand(RemakepirePlugin plugin) {
         this.plugin = plugin;
     }
 
+    /**
+     * Handle the command execution of toggling the vampire turning ability on and off.
+     *
+     * @return {@code true}
+     */
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (sender instanceof Player player) {
             if (!this.plugin.getVampireManager().isVampire(player)) {
                 player.sendMessage("§cOnly vampires can use this command.");
-                return true;
 
             } else {
                 if (this.plugin.getVampireTurningManager().toggleTurning(player)) {
@@ -25,12 +34,11 @@ public class ToggleTurningCommand implements CommandExecutor {
                 } else {
                     player.sendMessage("§cVampire turning disabled. Humans will die normally when you kill them.");
                 }
-
-                return true;
             }
         } else {
             sender.sendMessage("§cThis command can only be used by players.");
-            return true;
         }
+
+        return true;
     }
 }
