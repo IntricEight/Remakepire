@@ -71,6 +71,11 @@ public class FeedingListener implements Listener {
      * @return {@code true} if the bottle was filled.
      */
     private boolean tryFillBottleWithBlood(Player killer) {
+        // Make sure the killer exists
+        if (killer == null) {
+            return false;
+        }
+
         PlayerInventory inventory = killer.getInventory();
         ItemStack offhandItem = inventory.getItemInOffHand();
 
