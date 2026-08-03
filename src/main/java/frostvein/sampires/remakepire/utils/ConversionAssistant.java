@@ -4,11 +4,6 @@ import org.bukkit.Location;
 
 public class ConversionAssistant {
     /**
-     * Create an instance of the Conversion tool that contains conversion and calculation tools used by multiple classes around the project.
-     */
-    public ConversionAssistant() {}
-
-    /**
      * Determine the direction between the player and a target set of coordinates.
      *
      * @param deltaX the difference between the player's X coordinate and the target's.
@@ -16,7 +11,7 @@ public class ConversionAssistant {
      * @param playerYaw the angle that the player is looking.
      * @return A Unicode value of the direction.
      */
-    public String getRelativeDirection(double deltaX, double deltaZ, float playerYaw) {
+    public static String getRelativeDirection(double deltaX, double deltaZ, float playerYaw) {
         double targetAngle = Math.atan2(deltaX, -deltaZ);
         double targetDegrees = Math.toDegrees(targetAngle);
 
@@ -60,7 +55,7 @@ public class ConversionAssistant {
      * @param location a location to convert.
      * @return A {@code String} of the location's coordinates.
      */
-    public String locationToString(Location location) {
+    public static String locationToString(Location location) {
         return location.getWorld().getName() + "," + location.getBlockX() + "," + location.getBlockY() + "," + location.getBlockZ();
     }
 }

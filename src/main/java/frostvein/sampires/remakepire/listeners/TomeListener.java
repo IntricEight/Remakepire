@@ -178,7 +178,7 @@ public class TomeListener implements Listener {
                                     }
                                 }
 
-                                String displayName = PlainTextComponentSerializer.plainText().serialize(meta.customName());;
+                                String displayName = PlainTextComponentSerializer.plainText().serialize(meta.customName());
 
                                 // Filter out extra content from the string name
                                 String cleanName = displayName.replaceAll("§[0-9a-fk-or]", "").trim();

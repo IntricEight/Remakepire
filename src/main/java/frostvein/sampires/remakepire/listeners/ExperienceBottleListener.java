@@ -12,6 +12,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import frostvein.sampires.remakepire.RemakepirePlugin;
 import frostvein.sampires.remakepire.managers.VampireManager;
+import frostvein.sampires.remakepire.utils.ItemTypeChecking;
 
 public class ExperienceBottleListener implements Listener {
     private final RemakepirePlugin plugin;
@@ -37,7 +38,7 @@ public class ExperienceBottleListener implements Listener {
         Player player = event.getPlayer();
         ItemStack item = event.getItem();
 
-        if (item != null && item.getType() == Material.EXPERIENCE_BOTTLE) {
+        if (item != null && ItemTypeChecking.isBloodBottle(item.getType())) {
             if (this.vampireManager.isVampire(player) || this.vampireManager.isHuman(player)) {
                 Action action = event.getAction();
 
@@ -51,7 +52,7 @@ public class ExperienceBottleListener implements Listener {
                         PlayerInventory inventory = player.getInventory();
                         ItemStack heldItem = inventory.getItemInMainHand();
 
-                        if (heldItem.getType() == Material.EXPERIENCE_BOTTLE) {
+                        if (ItemTypeChecking.isBloodBottle(heldItem.getType())) {
                             if (heldItem.getAmount() > 1) {
                                 heldItem.setAmount(heldItem.getAmount() - 1);
                             } else {

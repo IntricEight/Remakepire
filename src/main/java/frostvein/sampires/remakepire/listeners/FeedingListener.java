@@ -14,6 +14,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import frostvein.sampires.remakepire.RemakepirePlugin;
 import frostvein.sampires.remakepire.managers.SessionManager;
+import frostvein.sampires.remakepire.utils.ItemTypeChecking;
 
 public class FeedingListener implements Listener {
     private final RemakepirePlugin plugin;
@@ -70,17 +71,22 @@ public class FeedingListener implements Listener {
      * @return {@code true} if the bottle was filled.
      */
     private boolean tryFillBottleWithBlood(Player killer) {
+        // Make sure the killer exists
+        if (killer == null) {
+            return false;
+        }
+
         PlayerInventory inventory = killer.getInventory();
         ItemStack offhandItem = inventory.getItemInOffHand();
 
-        if (offhandItem != null && offhandItem.getType() == Material.GLASS_BOTTLE) {
+        if (offhandItem.getType() == Material.GLASS_BOTTLE) {
             if (offhandItem.getAmount() > 1) {
                 offhandItem.setAmount(offhandItem.getAmount() - 1);
             } else {
                 inventory.setItemInOffHand(new ItemStack(Material.AIR));
             }
 
-            ItemStack experienceBottle = new ItemStack(Material.EXPERIENCE_BOTTLE, 1);
+            ItemStack experienceBottle = new ItemStack(ItemTypeChecking.getBloodBottleType(), 1);
             if (inventory.firstEmpty() != -1) {
                 inventory.addItem(experienceBottle);
             } else {

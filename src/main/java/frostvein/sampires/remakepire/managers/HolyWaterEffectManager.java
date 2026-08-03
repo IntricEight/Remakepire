@@ -7,7 +7,6 @@ import java.util.UUID;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.SoundCategory;
 import org.bukkit.entity.Entity;
@@ -18,10 +17,9 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PotionSplashEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.PotionMeta;
-import org.bukkit.potion.PotionType;
 import org.bukkit.scheduler.BukkitTask;
 import frostvein.sampires.remakepire.RemakepirePlugin;
+import frostvein.sampires.remakepire.utils.ItemTypeChecking;
 
 public class HolyWaterEffectManager implements Listener {
     private final RemakepirePlugin plugin;
@@ -66,7 +64,7 @@ public class HolyWaterEffectManager implements Listener {
             ThrownPotion potion = event.getPotion();
             ItemStack potionItem = potion.getItem();
 
-            if (this.isWaterSplashBottle(potionItem)) {
+            if (ItemTypeChecking.isHolyWater(potionItem)) {
                 for (LivingEntity entity : event.getAffectedEntities()) {
                     this.processHolyWaterHit(entity);
                 }
@@ -95,44 +93,12 @@ public class HolyWaterEffectManager implements Listener {
      */
     public ItemStack findHolyWater(Player player) {
         for (ItemStack item : player.getInventory()) {
-            if (this.isWaterSplashBottle(item)) {
+            if (ItemTypeChecking.isHolyWater(item)) {
                 return item;
             }
         }
 
         return null;
-    }
-
-    /**
-     * Determine if a potion is a splash bottle of water.
-     *
-     * @param item the item being checked.
-     * @return {@code true} if the item does not have potion metadata or is an effectless potion.
-     */
-    public boolean isWaterSplashBottle(ItemStack item) {
-        if (item == null) {
-            return false;
-        } else if (item.getType() != Material.SPLASH_POTION) {
-            return false;
-        } else if (!item.hasItemMeta()) {
-            return true;
-        } else if (!(item.getItemMeta() instanceof PotionMeta)) {
-            return true;
-        } else {
-            PotionMeta potionMeta = (PotionMeta)item.getItemMeta();
-
-            if (potionMeta.hasCustomEffects()) {
-                return false;
-            } else {
-                PotionType baseType = potionMeta.getBasePotionType();
-
-                if (baseType != null && baseType != PotionType.WATER) {
-                    return baseType == PotionType.AWKWARD || baseType == PotionType.MUNDANE || baseType == PotionType.THICK;
-                } else {
-                    return true;
-                }
-            }
-        }
     }
 
     /**
