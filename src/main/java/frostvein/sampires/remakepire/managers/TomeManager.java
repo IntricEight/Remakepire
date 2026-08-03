@@ -185,22 +185,18 @@ public class TomeManager {
      * @param player the player losing their abilities.
      */
     public void removeAllAbilities(Player player) {
-        Set<String> tagsToRemove = new HashSet<>();
+        int tagsRemoved = 0;
 
-        // Make a list of the player's tome ability tags
+        // Remove the tome ability tags from the player
         for (String tag : player.getScoreboardTags()) {
             if (tag.startsWith(TOME_TAG_PREFIX)) {
-                tagsToRemove.add(tag);
+                player.removeScoreboardTag(tag);
+                ++tagsRemoved;
             }
         }
 
-        // Remove the tome ability tags from the playr
-        for (String tag : tagsToRemove) {
-            player.removeScoreboardTag(tag);
-        }
-
-        if (!tagsToRemove.isEmpty()) {
-            this.plugin.logInfo("Removed " + tagsToRemove.size() + " tome abilities from " + player.getName() + " (converted to vampire)");
+        if (tagsRemoved > 0) {
+            this.plugin.logInfo("Removed " + tagsRemoved + " tome abilities from " + player.getName() + " (converted to vampire)");
         }
     }
 
