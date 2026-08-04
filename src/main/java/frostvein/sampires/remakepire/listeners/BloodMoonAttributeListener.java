@@ -42,7 +42,7 @@ public class BloodMoonAttributeListener implements Listener {
     }
 
     /**
-     *
+     * Apply or remove the blood moon effects from the vampire as they gain or lose the blood moon buff effect.
      *
      * @param event a potion effect changes.
      */

@@ -16,6 +16,7 @@ import org.bukkit.inventory.meta.components.FoodComponent;
 import frostvein.sampires.remakepire.RemakepirePlugin;
 import frostvein.sampires.remakepire.managers.SessionManager;
 import frostvein.sampires.remakepire.managers.TomeManager;
+import frostvein.sampires.remakepire.utils.ConversionAssistant;
 
 public class BeetrootHarvestListener implements Listener {
     private final RemakepirePlugin plugin;
@@ -56,7 +57,7 @@ public class BeetrootHarvestListener implements Listener {
                         event.setDropItems(false);
                         Location dropLocation = event.getBlock().getLocation().add(0.5, 0.5, 0.5);
                         int beetrootQuantity = this.calculateBeetrootQuantity(player);
-                        this.giveAlwaysEdibleBeetroot(player, beetrootQuantity);
+                        this.giveAlwaysEdibleBeetroot(dropLocation, beetrootQuantity);
                         this.dropBeetrootSeeds(dropLocation, player.getInventory().getItemInMainHand());
                     }
                 }
@@ -75,6 +76,24 @@ public class BeetrootHarvestListener implements Listener {
     }
 
     /**
+     * Give the harvested garlic onto the ground where the crop was.<br/>
+     * Make the garlic always edible, not just when a player is hungry.
+     *
+     * @param dropLocation the beetroot plant's location.
+     * @param quantity the amount of garlic that the player will be given.
+     */
+    private void giveAlwaysEdibleBeetroot(Location dropLocation, int quantity) {
+        try {
+            ItemStack beetroot = this.makeBeetrootEdible(new ItemStack(Material.BEETROOT, quantity));
+            dropLocation.getWorld().dropItemNaturally(dropLocation, beetroot);
+            this.plugin.logInfo("Gave " + quantity + " always-edible beetroot(s) at " + ConversionAssistant.locationToString(dropLocation));
+
+        } catch (Exception e) {
+            this.plugin.getLogger().warning("Failed to give always-edible beetroot: " + e.getMessage());
+        }
+    }
+
+    /**
      * Give the harvested garlic items straight into the players inventory, unless it is full.<br/>
      * Make the garlic always edible, not just when a player is hungry.
      *
@@ -84,20 +103,7 @@ public class BeetrootHarvestListener implements Listener {
     private void giveAlwaysEdibleBeetroot(Player harvester, int quantity) {
         try {
             if (harvester != null) {
-                ItemStack beetroot = new ItemStack(Material.BEETROOT, quantity);
-
-                ItemMeta meta = beetroot.getItemMeta();
-                if (meta != null) {
-                    FoodComponent food = meta.getFood();
-
-                    food.setCanAlwaysEat(true);
-                    food.setNutrition(1);
-                    food.setSaturation(1.2f);
-
-                    meta.setFood(food);
-                    beetroot.setItemMeta(meta);
-                }
-
+                ItemStack beetroot = this.makeBeetrootEdible(new ItemStack(Material.BEETROOT, quantity));
                 Map<Integer, ItemStack> leftovers = harvester.getInventory().addItem(beetroot);
 
                 for (ItemStack leftover : leftovers.values()) {
@@ -112,6 +118,29 @@ public class BeetrootHarvestListener implements Listener {
         } catch (Exception e) {
             this.plugin.getLogger().warning("Failed to give always-edible beetroot: " + e.getMessage());
         }
+    }
+
+    /**
+     * Modify a beetroot stack's metadata to create the
+     *
+     * @param beetroot The beetroot items to make edible.
+     * @return An {@code ItemStack} of beetroot plants that are always edible by players.
+     */
+    private ItemStack makeBeetrootEdible(ItemStack beetroot) {
+        ItemMeta meta = beetroot.getItemMeta();
+
+        if (meta != null) {
+            FoodComponent food = meta.getFood();
+
+            food.setCanAlwaysEat(true);
+            food.setNutrition(1);
+            food.setSaturation(1.2f);
+
+            meta.setFood(food);
+            beetroot.setItemMeta(meta);
+        }
+
+        return beetroot;
     }
 
     /**
