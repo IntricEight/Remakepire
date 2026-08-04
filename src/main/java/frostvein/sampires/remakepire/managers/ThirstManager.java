@@ -88,6 +88,7 @@ public class ThirstManager {
         quenchers.add(EntityType.VINDICATOR);
         quenchers.add(EntityType.WANDERING_TRADER);
         quenchers.add(EntityType.WITCH);
+        quenchers.add(EntityType.STRIDER);
 
         return quenchers;
     }
