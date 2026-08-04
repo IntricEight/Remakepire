@@ -13,6 +13,7 @@ import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.potion.PotionType;
 import frostvein.sampires.remakepire.RemakepirePlugin;
 import frostvein.sampires.remakepire.managers.SessionManager;
+import frostvein.sampires.remakepire.utils.ItemTypeChecking;
 
 public class BlessingTomeAbility extends TomeAbility {
     /**
@@ -40,7 +41,7 @@ public class BlessingTomeAbility extends TomeAbility {
             ItemStack mainHandItem = inventory.getItemInMainHand();
 
             // Check if the player is holding a water bottle, and convert it into a splash potion of holy water
-            if (mainHandItem.getType() == Material.POTION && this.isWaterBottle(mainHandItem)) {
+            if (mainHandItem.getType() == Material.POTION && ItemTypeChecking.isWaterBottle(mainHandItem)) {
                 if (mainHandItem.getAmount() > 1) {
                     mainHandItem.setAmount(mainHandItem.getAmount() - 1);
                     ItemStack splashWater = new ItemStack(Material.SPLASH_POTION, 1);
@@ -94,20 +95,6 @@ public class BlessingTomeAbility extends TomeAbility {
             potionMeta.lore(List.of(Component.text("Throw this on an evil creature to disable their powers for " + durationText + "!").decoration(TextDecoration.ITALIC, false)));
 
             item.setItemMeta(potionMeta);
-        }
-    }
-
-    /**
-     * Determine if the item is a water bottle.
-     *
-     * @param item the item being checked.
-     * @return {@code true} if this item is a water bottle.
-     */
-    private boolean isWaterBottle(ItemStack item) {
-        if (item.getType() != Material.POTION) {
-            return false;
-        } else {
-            return !item.hasItemMeta() || item.getItemMeta().getPersistentDataContainer().isEmpty();
         }
     }
 }

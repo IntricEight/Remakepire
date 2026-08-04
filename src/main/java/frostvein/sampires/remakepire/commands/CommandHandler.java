@@ -1984,13 +1984,13 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                 List<ItemStack> starterItems = new ArrayList<>();
 
                 // The items players will start a game with
+                starterItems.add(new ItemStack(Material.STONE_SWORD, 1));
+                starterItems.add(new ItemStack(Material.STONE_PICKAXE, 1));
+                starterItems.add(new ItemStack(Material.STONE_AXE, 1));
                 starterItems.add(new ItemStack(Material.COOKED_CHICKEN, 1 + random.nextInt(4)));
                 starterItems.add(new ItemStack(Material.COOKED_SALMON, 1 + random.nextInt(4)));
                 starterItems.add(new ItemStack(Material.BREAD, 1 + random.nextInt(4)));
                 starterItems.add(new ItemStack(Material.BAKED_POTATO, 1 + random.nextInt(4)));
-                starterItems.add(new ItemStack(Material.STONE_SWORD, 1));
-                starterItems.add(new ItemStack(Material.STONE_PICKAXE, 1));
-                starterItems.add(new ItemStack(Material.STONE_AXE, 1));
 
                 int itemsGiven = 0, itemsDropped = 0;
 
