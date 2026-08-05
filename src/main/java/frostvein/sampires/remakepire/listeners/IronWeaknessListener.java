@@ -290,7 +290,7 @@ public class IronWeaknessListener implements Listener {
                     }
                 }
             }
-        } catch (Exception _) {}
+        } catch (Exception e) {}
     }
 
     /**
