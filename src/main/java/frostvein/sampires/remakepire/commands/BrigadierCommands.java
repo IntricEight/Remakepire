@@ -217,7 +217,10 @@ public class BrigadierCommands {
                                 .then(Commands.literal("all").executes((ctx) -> this.executePowCommand(ctx, "admin", "removeendermen", "all"))))
                                 .then(Commands.literal("toggle").executes((ctx) -> this.executePowCommand(ctx, "admin", "removeendermen", "toggle")))
                                 .then(Commands.literal("status").executes((ctx) -> this.executePowCommand(ctx, "admin", "removeendermen", "status"))))
-
+                        .then((Commands.literal("removecreepers")
+                                .then(Commands.literal("all").executes((ctx) -> this.executePowCommand(ctx, "admin", "removecreepers", "all"))))
+                                .then(Commands.literal("toggle").executes((ctx) -> this.executePowCommand(ctx, "admin", "removecreepers", "toggle")))
+                                .then(Commands.literal("status").executes((ctx) -> this.executePowCommand(ctx, "admin", "removecreepers", "status"))))
 
                         .then(Commands.literal("spawnanimals").executes((ctx) -> this.executePowCommand(ctx, "admin", "spawnanimals")))
 

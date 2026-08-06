@@ -133,6 +133,10 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
             // Control the active removal of endermen spawning
             return this.handleRemoveEndermenCommand(sender, args);
 
+        } else if (command.getName().equalsIgnoreCase("removecreepers")) {
+            // Control the active removal of creeper spawning
+            return this.handleRemoveCreeperCommand(sender, args);
+
         } else if (command.getName().equalsIgnoreCase("setupplayer")) {
             // Give the player the starting equipment for a new game
             return this.handleSetupPlayerCommand(sender, args);
@@ -1938,22 +1942,66 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         } else {
             switch (args[0].toLowerCase()) {
                 case "all":
-                    int removedCount = this.plugin.getEndermanRemovalListener().removeAllEndermen();
+                    int removedCount = this.plugin.getSpawnRemovalListener().removeAllEndermen();
                     sender.sendMessage("§aRemoved §e" + removedCount + " §aendermen from all loaded chunks.");
                     this.plugin.logInfo("Admin " + sender.getName() + " removed " + removedCount + " endermen");
                     break;
 
                 case "toggle":
-                    boolean currentStatus = this.plugin.getEndermanRemovalListener().isEndermanRemovalEnabled();
-                    this.plugin.getEndermanRemovalListener().setEndermanRemovalEnabled(!currentStatus);
+                    boolean currentStatus = this.plugin.getSpawnRemovalListener().isEndermanRemovalEnabled();
+                    this.plugin.getSpawnRemovalListener().setEndermanRemovalEnabled(!currentStatus);
                     String newStatus = !currentStatus ? "ENABLED" : "DISABLED";
                     sender.sendMessage("§aEnderman removal is now §e" + newStatus + "§a.");
                     this.plugin.logInfo("Admin " + sender.getName() + " toggled enderman removal to " + newStatus);
                     break;
 
                 case "status":
-                    String statusMessage = this.plugin.getEndermanRemovalListener().isEndermanRemovalEnabled() ? "§aENABLED" : "§cDISABLED";
+                    String statusMessage = this.plugin.getSpawnRemovalListener().isEndermanRemovalEnabled() ? "§aENABLED" : "§cDISABLED";
                     sender.sendMessage("§7Enderman removal is currently: " + statusMessage);
+                    break;
+
+                default:
+                    sender.sendMessage("§cInvalid action. Use 'all', 'toggle', or 'status'.");
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Toggle or trigger the creeper spawn prevention system.
+     *
+     * @return {@code true}
+     */
+    private boolean handleRemoveCreeperCommand(CommandSender sender, String[] args) {
+        if (args.length == 0) {
+            sender.sendMessage("§cUsage: /removecreepers <all | toggle | status>");
+            sender.sendMessage("§7- /removecreepers all §8- Remove all existing creepers from loaded chunks");
+            sender.sendMessage("§7- /removecreepers toggle §8- Toggle creeper spawn prevention on/off");
+            sender.sendMessage("§7- /removecreepers status §8- Check if creeper removal is enabled");
+
+        } else {
+            switch (args[0].toLowerCase()) {
+                case "all":
+                    final int removedCount = this.plugin.getSpawnRemovalListener().removeAllCreepers();
+                    sender.sendMessage("§aRemoved §e" + removedCount + " §acreepers from all loaded chunks.");
+
+                    this.plugin.logInfo("Admin " + sender.getName() + " removed " + removedCount + " creepers");
+                    break;
+
+                case "toggle":
+                    final boolean currentStatus = this.plugin.getSpawnRemovalListener().isCreeperRemovalEnabled();
+                    this.plugin.getSpawnRemovalListener().setCreeperRemovalEnabled(!currentStatus);
+
+                    final String newStatus = !currentStatus ? "ENABLED" : "DISABLED";
+                    sender.sendMessage("§aCreeper removal is now §e" + newStatus + "§a.");
+
+                    this.plugin.logInfo("Admin " + sender.getName() + " toggled creeper removal to " + newStatus);
+                    break;
+
+                case "status":
+                    final String statusMessage = this.plugin.getSpawnRemovalListener().isCreeperRemovalEnabled() ? "§aENABLED" : "§cDISABLED";
+                    sender.sendMessage("§7Creeper removal is currently: " + statusMessage);
                     break;
 
                 default:

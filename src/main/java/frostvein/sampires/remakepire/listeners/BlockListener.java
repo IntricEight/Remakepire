@@ -1,11 +1,13 @@
 package frostvein.sampires.remakepire.listeners;
 
 import org.bukkit.Material;
+import org.bukkit.entity.Creeper;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.entity.EntityExplodeEvent;
 import frostvein.sampires.remakepire.RemakepirePlugin;
 import frostvein.sampires.remakepire.managers.SessionManager;
 
@@ -100,5 +102,21 @@ public class BlockListener implements Listener {
                 event.getBlock().setType(Material.NETHERITE_BLOCK);
             }
         }
+    }
+
+    /**
+     * Stop creeper explosions from destroying blocks.
+     *
+     * @param event a creeper explodes.
+     */
+    @EventHandler
+    public void onCreeperExplode(EntityExplodeEvent event) {
+        // Only stop the block destruction if it is from a Creeper
+        if (!(event.getEntity() instanceof Creeper)) {
+            return;
+        }
+
+        // Stop blocks from being destroyed in the explosion
+        event.blockList().clear();
     }
 }
