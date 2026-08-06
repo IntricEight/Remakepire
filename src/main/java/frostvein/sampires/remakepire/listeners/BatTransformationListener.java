@@ -138,13 +138,12 @@ public class BatTransformationListener implements Listener {
                     if (transformedPlayer != null && transformedPlayer.isOnline() && !(event instanceof EntityDamageByEntityEvent)) {
                         String damageType = event.getCause().name().toLowerCase().replace("_", " ");
                         transformedPlayer.sendMessage("§c You have taken damage while in bat form, be careful...");
-                        final double health = bat.getHealth() - event.getFinalDamage();
-                        final double maxHealth = bat.getAttribute(Attribute.MAX_HEALTH).getValue();
+                        final double newHealth = bat.getHealth() - event.getFinalDamage(), maxHealth = bat.getAttribute(Attribute.MAX_HEALTH).getValue();
 
-                        if (health > 0) {
-                            final double healthPercent = health / maxHealth * 100.0;
+                        if (newHealth > 0) {
+                            final double healthPercent = newHealth / maxHealth * 100.0;
                             String healthColor = healthPercent > 50 ? "§a" : (healthPercent > 25 ? "§e" : "§c");
-                            transformedPlayer.sendMessage("§7Remaining Health: " + healthColor + String.format("%.1f", health) + "§7/" + String.format("%.1f", maxHealth));
+                            transformedPlayer.sendMessage("§7Remaining Health: " + healthColor + String.format("%.1f", newHealth) + "§7/" + String.format("%.1f", maxHealth));
 
                         } else {
                             transformedPlayer.sendMessage("§cYour bat forms life force, and your own, are growing thin.");

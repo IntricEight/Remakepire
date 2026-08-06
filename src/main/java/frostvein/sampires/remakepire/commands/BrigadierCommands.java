@@ -137,6 +137,11 @@ public class BrigadierCommands {
                                     return this.executePowCommand(ctx, "admin", "make_incurable", player);
                                 })))
 
+                        .then((Commands.literal("playercount")
+                                .then(Commands.literal("all").executes((ctx) -> this.executePowCommand(ctx, "admin", "playercount", "all"))))
+                                .then(Commands.literal("human").executes((ctx) -> this.executePowCommand(ctx, "admin", "playercount", "human")))
+                                .then(Commands.literal("vampire").executes((ctx) -> this.executePowCommand(ctx, "admin", "playercount", "vampire"))))
+
                         .then(Commands.literal("break_warning").executes((ctx) -> this.executePowCommand(ctx, "admin", "break_warning")))
 
                         .then(Commands.literal("givetome")

@@ -34,6 +34,7 @@ import frostvein.sampires.remakepire.RemakepirePlugin;
 import frostvein.sampires.remakepire.abilities.tome.TomeAbility;
 import frostvein.sampires.remakepire.beacons.BeaconSite;
 import frostvein.sampires.remakepire.beacons.BeaconSite.BeaconState;
+import frostvein.sampires.remakepire.listeners.DeathHandler;
 import frostvein.sampires.remakepire.managers.BeaconManager;
 import frostvein.sampires.remakepire.managers.ConfigManager;
 import frostvein.sampires.remakepire.managers.SessionManager;
@@ -161,6 +162,10 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
             // Clear a player's stats, tags, and (optionally) inventory
             return this.handleResetPlayerCommand(sender, args);
 
+        } else if (command.getName().equalsIgnoreCase("resetplayer")) {
+            // Get the number of players on each team
+            return this.handlePlayerCountCommand(sender, args);
+
         } else if (command.getName().equalsIgnoreCase("make_incurable")) {
             // Make a player impossible to cure (Remove the tag CannotCure to reverse this process)
             return this.makePlayerIncurable(sender, args);
@@ -267,6 +272,77 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                 target.sendMessage("§aYou have been reset to a fresh state by an administrator.");
                 target.sendMessage("§7All vampire status, abilities, cooldowns, and death count have been cleared." + (clearInventory ? " Your inventory has also been cleared." : ""));
                 this.plugin.logInfo("Admin " + sender.getName() + " reset player " + target.getName() + " to fresh state");
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Let the admin know the number of humans, vampires, or total living players in the game at the moment.
+     *
+     * @param sender the admin sending the command.
+     * @param args the arguments attached to the command.
+     * @return {@code true}
+     */
+    private boolean handlePlayerCountCommand(CommandSender sender, String[] args) {
+        if (args.length == 0) {
+            sender.sendMessage("§cUsage: /playercount <all | human | vampire>");
+            sender.sendMessage("§7- /playercount all §8- See the number of alive players");
+            sender.sendMessage("§7- /playercount human §8- See the number of alive human players");
+            sender.sendMessage("§7- /playercount vampire §8- See the number of \"alive\" vampire players");
+
+        } else {
+            int playerCount = 0;
+
+            switch (args[0].toLowerCase()) {
+                case "all":
+                    for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+                        // Make sure the player is active in the game
+                        if ((onlinePlayer.getGameMode() == GameMode.SURVIVAL || onlinePlayer.getGameMode() == GameMode.ADVENTURE)
+                                && (!onlinePlayer.getScoreboardTags().contains(DeathHandler.PERMAKILLED_TAG) || onlinePlayer.isDead())
+                        ) {
+                            playerCount++;
+                        }
+                    }
+
+
+                    sender.sendMessage("§fThere are currently §7" + playerCount + " §fplayers in the session.");
+                    this.plugin.logInfo("Admin " + sender.getName() + " checked the game player count");
+                    break;
+
+                case "human":
+                    for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+                        // Make sure the player is active in the game
+                        if ((onlinePlayer.getGameMode() == GameMode.SURVIVAL || onlinePlayer.getGameMode() == GameMode.ADVENTURE)
+                                && (!onlinePlayer.getScoreboardTags().contains(DeathHandler.PERMAKILLED_TAG) || onlinePlayer.isDead())
+                                && this.plugin.getVampireManager().isHuman(onlinePlayer)
+                        ) {
+                            playerCount++;
+                        }
+                    }
+
+                    sender.sendMessage("§fThere are currently §6" + playerCount + " §fhumans in the session.");
+                    this.plugin.logInfo("Admin " + sender.getName() + " checked the human player count");
+                    break;
+
+                case "vampire":
+                    for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+                        // Make sure the player is active in the game
+                        if ((onlinePlayer.getGameMode() == GameMode.SURVIVAL || onlinePlayer.getGameMode() == GameMode.ADVENTURE)
+                                && (!onlinePlayer.getScoreboardTags().contains(DeathHandler.PERMAKILLED_TAG) || onlinePlayer.isDead())
+                                && this.plugin.getVampireManager().isVampire(onlinePlayer)
+                        ) {
+                            playerCount++;
+                        }
+                    }
+
+                    sender.sendMessage("§fThere are currently §c" + playerCount + " §fvampire in the session.");
+                    this.plugin.logInfo("Admin " + sender.getName() + " checked the vampire player count");
+                    break;
+
+                default:
+                    sender.sendMessage("§cInvalid action. Use 'all', 'human', or 'vampire'.");
             }
         }
 
