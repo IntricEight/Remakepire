@@ -23,6 +23,7 @@ public class PowCommand implements CommandExecutor, TabCompleter {
     private final ForcedCureReopenCommand forceCureReopenCommand;
     private final HolySitesCommand beaconStatusCommand;
     private final TexturePackCommand texturePackCommand;
+    private final StakeSelfCommand stakeSelfCommand;
     private final PermadeathCommand permadeathCommand;
     private final ToggleTurningCommand turningCommand;
     private final PendingMessageCommand sendMessageCommand;
@@ -41,6 +42,7 @@ public class PowCommand implements CommandExecutor, TabCompleter {
         this.forceCureReopenCommand = new ForcedCureReopenCommand(plugin);
         this.beaconStatusCommand = new HolySitesCommand(plugin);
         this.texturePackCommand = new TexturePackCommand(plugin);
+        this.stakeSelfCommand = new StakeSelfCommand(plugin);
         this.permadeathCommand = new PermadeathCommand(plugin);
         this.turningCommand = new ToggleTurningCommand(plugin);
         this.sendMessageCommand = new PendingMessageCommand(plugin);
@@ -110,6 +112,10 @@ public class PowCommand implements CommandExecutor, TabCompleter {
                 case "forcedcure-reopen":
                     // Reopen the forced cure choice menu
                     return this.forceCureReopenCommand.onCommand(sender, command, label, subArgs);
+
+                case "stake-myself":
+                    // Allow a vampire to stake themselves
+                    return this.stakeSelfCommand.onCommand(sender, command, label, subArgs);
 
                 case "help":
                     // Print out a descriptive list of the commands available to this player

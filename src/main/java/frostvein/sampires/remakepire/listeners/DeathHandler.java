@@ -329,8 +329,8 @@ public class DeathHandler implements Listener {
         this.woodenStakeKills.remove(victim.getUniqueId());
 
         if (this.vampireManager.isVampire(victim)) {
-            int woodenStakeThreshold = this.plugin.getConfigManager().getPermadeathMinimumStage();
-            int victimStage = this.vampireManager.getVampireStage(victim);
+            final int woodenStakeThreshold = this.plugin.getConfigManager().getPermadeathMinimumStage();
+            final int victimStage = this.vampireManager.getVampireStage(victim);
 
             if (victimStage <= woodenStakeThreshold && killedWithWoodenWeapon) {
                 victim.addScoreboardTag(PERMAKILL_PROCESSING_TAG);
