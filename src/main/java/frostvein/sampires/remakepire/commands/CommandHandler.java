@@ -162,7 +162,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
             // Clear a player's stats, tags, and (optionally) inventory
             return this.handleResetPlayerCommand(sender, args);
 
-        } else if (command.getName().equalsIgnoreCase("resetplayer")) {
+        } else if (command.getName().equalsIgnoreCase("playercount")) {
             // Get the number of players on each team
             return this.handlePlayerCountCommand(sender, args);
 
