@@ -37,13 +37,23 @@ public class ItemTypeChecking {
     }
 
     /**
+     * Determine if the item is a spear.
+     *
+     * @param type the item being checked.
+     * @return {@code true} if the item is a spear.
+     */
+    public static boolean isSpear(Material type) {
+        return type == Material.WOODEN_SPEAR || type == Material.STONE_SPEAR || type == Material.COPPER_SPEAR || type == Material.IRON_SPEAR || type == Material.GOLDEN_SPEAR || type == Material.DIAMOND_SPEAR || type == Material.NETHERITE_SPEAR;
+    }
+
+    /**
      * Determine if the item is classified as a weapon.
      *
      * @param type the item being checked.
      * @return {@code true} if the item is a conventional weapon.
      */
     public static boolean isWeapon(Material type) {
-        return isSword(type) || isAxe(type);
+        return isSword(type) || isAxe(type) || isSpear(type);
     }
 
     /**
@@ -83,7 +93,7 @@ public class ItemTypeChecking {
         if (type == null) {
             return false;
         } else {
-            return type == Material.WOODEN_SWORD || type == Material.WOODEN_AXE;
+            return type == Material.WOODEN_SWORD || type == Material.WOODEN_AXE || type == Material.WOODEN_SPEAR;
         }
     }
 
@@ -97,7 +107,7 @@ public class ItemTypeChecking {
         if (type == null) {
             return false;
         } else {
-            return type == Material.IRON_SWORD || type == Material.IRON_AXE;
+            return type == Material.IRON_SWORD || type == Material.IRON_AXE || type == Material.IRON_SPEAR;
         }
     }
 

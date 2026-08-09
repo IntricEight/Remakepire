@@ -20,7 +20,7 @@ public class WeaponDropRemover implements Listener {
     private final RemakepirePlugin plugin;
     private final Random random;
     private static final Set<Material> FISHING_REPLACEMENTS = EnumSet.of(Material.COD, Material.SALMON, Material.TROPICAL_FISH, Material.PUFFERFISH, Material.KELP, Material.SEAGRASS, Material.STICK, Material.LEATHER, Material.BONE, Material.STRING);
-    private static final Set<Material> WEAPON_MATERIALS = EnumSet.of(Material.WOODEN_SWORD, Material.STONE_SWORD, Material.IRON_SWORD, Material.GOLDEN_SWORD, Material.DIAMOND_SWORD, Material.NETHERITE_SWORD, Material.WOODEN_AXE, Material.STONE_AXE, Material.IRON_AXE, Material.GOLDEN_AXE, Material.DIAMOND_AXE, Material.NETHERITE_AXE, Material.BOW, Material.CROSSBOW, Material.TRIDENT, Material.MACE, Material.ARROW, Material.SPECTRAL_ARROW, Material.TIPPED_ARROW);
+    private static final Set<Material> WEAPON_MATERIALS = EnumSet.of(Material.WOODEN_SWORD, Material.STONE_SWORD, Material.IRON_SWORD, Material.GOLDEN_SWORD, Material.DIAMOND_SWORD, Material.NETHERITE_SWORD, Material.WOODEN_AXE, Material.STONE_AXE, Material.IRON_AXE, Material.GOLDEN_AXE, Material.DIAMOND_AXE, Material.NETHERITE_AXE, Material.WOODEN_SPEAR, Material.STONE_SPEAR, Material.COPPER_SPEAR, Material.IRON_SPEAR, Material.GOLDEN_SPEAR, Material.DIAMOND_SPEAR, Material.NETHERITE_SPEAR, Material.BOW, Material.CROSSBOW, Material.TRIDENT, Material.MACE, Material.ARROW, Material.SPECTRAL_ARROW, Material.TIPPED_ARROW);
 
     /**
      * Create an instance of the Weapon Drop Remover listener.
@@ -71,7 +71,7 @@ public class WeaponDropRemover implements Listener {
             if (event.getCaught() instanceof Item caughtItem) {
                 ItemStack itemStack = caughtItem.getItemStack();
 
-                if (itemStack != null && isWeapon(itemStack.getType())) {
+                if (isWeapon(itemStack.getType())) {
                     Material replacement = this.getRandomFishingReplacement();
                     ItemStack replacementItem = new ItemStack(replacement, 1);
                     caughtItem.setItemStack(replacementItem);
