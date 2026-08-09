@@ -33,7 +33,7 @@ public class ItemTypeChecking {
      * @return {@code true} if the item is an axe.
      */
     public static boolean isAxe(Material type) {
-        return type == Material.WOODEN_AXE || type == Material.STONE_AXE || type == Material.COPPER_AXE || type == Material.IRON_AXE || type == Material.GOLDEN_AXE || type == Material.DIAMOND_AXE || type == Material.NETHERITE_AXE;
+        return type == Material.WOODEN_AXE || type == Material.STONE_AXE || type == Material.COPPER_AXE|| type == Material.IRON_AXE || type == Material.GOLDEN_AXE || type == Material.DIAMOND_AXE || type == Material.NETHERITE_AXE;
     }
 
     /**
