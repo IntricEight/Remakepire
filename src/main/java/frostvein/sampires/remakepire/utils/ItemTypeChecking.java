@@ -23,7 +23,7 @@ public class ItemTypeChecking {
      * @return {@code true} if the item is a sword.
      */
     public static boolean isSword(Material type) {
-        return type == Material.WOODEN_SWORD || type == Material.STONE_SWORD || type == Material.IRON_SWORD || type == Material.GOLDEN_SWORD || type == Material.DIAMOND_SWORD || type == Material.NETHERITE_SWORD;
+        return type == Material.WOODEN_SWORD || type == Material.STONE_SWORD || type == Material.COPPER_SWORD || type == Material.IRON_SWORD || type == Material.GOLDEN_SWORD || type == Material.DIAMOND_SWORD || type == Material.NETHERITE_SWORD;
     }
 
     /**
@@ -33,7 +33,7 @@ public class ItemTypeChecking {
      * @return {@code true} if the item is an axe.
      */
     public static boolean isAxe(Material type) {
-        return type == Material.WOODEN_AXE || type == Material.STONE_AXE || type == Material.IRON_AXE || type == Material.GOLDEN_AXE || type == Material.DIAMOND_AXE || type == Material.NETHERITE_AXE;
+        return type == Material.WOODEN_AXE || type == Material.STONE_AXE || type == Material.COPPER_AXE || type == Material.IRON_AXE || type == Material.GOLDEN_AXE || type == Material.DIAMOND_AXE || type == Material.NETHERITE_AXE;
     }
 
     /**
