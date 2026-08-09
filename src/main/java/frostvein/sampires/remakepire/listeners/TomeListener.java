@@ -82,6 +82,7 @@ public class TomeListener implements Listener {
                             }
 
                             player.openBook(obscuredBook);
+
                         } else {
                             this.plugin.getCureBookReadingListener().onCureBookRead(player, cureBookNumber);
                         }
@@ -90,11 +91,11 @@ public class TomeListener implements Listener {
 
                     } else if (!this.plugin.getVampireManager().isHuman(player)) {
                         event.setCancelled(true);
-                        player.sendMessage("§cThe ancient knowledge within this tome is beyond your vampiric comprehension...");
+                        player.sendMessage(Component.text("The ancient knowledge within this tome is beyond your vampiric comprehension...", NamedTextColor.RED));
 
                     } else if (!this.plugin.getSessionManager().isSessionActive()) {
                         event.setCancelled(true);
-                        player.sendMessage("§cThe tome's magic lies dormant... It can only be absorbed during an active session.");
+                        player.sendMessage(Component.text("The tome's magic lies dormant... It can only be absorbed during an active session.", NamedTextColor.RED));
 
                     } else {
                         this.plugin.logInfo("Valid tome ability: '" + tomeTitle + "'");
@@ -102,7 +103,7 @@ public class TomeListener implements Listener {
 
                         if (this.tomeManager.hasAbility(player, tomeTitle)) {
                             this.plugin.logInfo("Player " + player.getName() + " already has ability: '" + tomeTitle + "'");
-                            player.sendMessage("§7The words seem familiar and hold no new secrets for you.");
+                            player.sendMessage(Component.text("The words seem familiar and hold no new secrets for you.", NamedTextColor.GRAY));
 
                         } else {
                             this.plugin.logInfo("Attempting to grant ability '" + tomeTitle + "' to player " + player.getName());
@@ -110,13 +111,18 @@ public class TomeListener implements Listener {
                             this.plugin.logInfo("Grant result: " + success);
 
                             if (success) {
-                                player.sendMessage("\n§6§lTOME LEARNT");
-                                player.sendMessage("§eYou feel ancient knowledge flowing into your mind...");
-                                player.sendMessage("§aYou have learned the ability: §f" + tomeTitle);
-
                                 final String command = "/pow tome " + tomeTitle.toLowerCase();
 
                                 player.sendMessage("");
+
+                                player.sendMessage(Component.text("TOME LEARNT", NamedTextColor.GOLD)
+                                        .decorate(TextDecoration.BOLD));
+                                player.sendMessage(Component.text("You feel ancient knowledge flowing into your mind...", NamedTextColor.YELLOW));
+                                player.sendMessage(Component.text("You have learned the ability: ", NamedTextColor.GREEN)
+                                        .append(Component.text(tomeTitle, NamedTextColor.WHITE)));
+
+                                player.sendMessage("");
+
                                 player.sendMessage(Component.text("Use ", NamedTextColor.GRAY)
                                         .append(Component.text(command, NamedTextColor.WHITE)
                                                 .decorate(TextDecoration.UNDERLINED)
@@ -124,6 +130,7 @@ public class TomeListener implements Listener {
                                                 .hoverEvent(HoverEvent.showText(Component.text("Click to copy command to clipboard", NamedTextColor.GRAY)))
                                         )
                                         .append(Component.text(" to activate this ability.", NamedTextColor.GRAY)));
+
                                 player.sendMessage("");
 
                                 if (item.getAmount() > 1) {
@@ -158,7 +165,7 @@ public class TomeListener implements Listener {
                     UUID targetUUID = this.tomeManager.getTomeSelectionTarget(admin.getUniqueId());
 
                     if (targetUUID == null) {
-                        admin.sendMessage("§cError: Could not find target player for this selection.");
+                        admin.sendMessage(Component.text("Error: Could not find target player for this selection.", NamedTextColor.RED));
                         admin.closeInventory();
 
                     } else {
@@ -194,21 +201,37 @@ public class TomeListener implements Listener {
 
                                 if (this.tomeManager.hasAbility(target, abilityName)) {
                                     this.tomeManager.removeAbility(target, abilityName);
-                                    admin.sendMessage("§cRemoved §f" + cleanName + " §cfrom §e" + target.getName());
-                                    target.sendMessage("§cThe tome ability §f" + cleanName + " §chas been removed from you.");
+
+                                    admin.sendMessage(Component.text("Removed ", NamedTextColor.RED)
+                                            .append(Component.text(displayName, NamedTextColor.WHITE))
+                                            .append(Component.text(" from ", NamedTextColor.RED))
+                                            .append(Component.text(target.getName(), NamedTextColor.YELLOW))
+                                    );
+                                    target.sendMessage(Component.text("The tome ability ", NamedTextColor.RED)
+                                            .append(Component.text(displayName, NamedTextColor.WHITE))
+                                            .append(Component.text(" has been removed from you.", NamedTextColor.RED))
+                                    );
+
                                     target.playSound(target.getLocation(), Sound.BLOCK_FIRE_EXTINGUISH, 1.0F, 1.0F);
 
                                 } else {
                                     this.tomeManager.forceGrantAbility(target, abilityName);
-                                    admin.sendMessage("§aGranted §f" + cleanName + " §ato §e" + target.getName());
-                                    target.sendMessage("§aYou have been granted the tome ability: §f" + cleanName);
+
+                                    admin.sendMessage(Component.text("Granted ", NamedTextColor.GREEN)
+                                            .append(Component.text(displayName, NamedTextColor.WHITE))
+                                            .append(Component.text(" to ", NamedTextColor.GREEN))
+                                            .append(Component.text(target.getName(), NamedTextColor.YELLOW))
+                                    );
+                                    target.sendMessage(Component.text("You have been granted the tome ability: ", NamedTextColor.GREEN)
+                                            .append(Component.text(displayName, NamedTextColor.WHITE)));
+
                                     target.playSound(target.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.0F, 1.5F);
                                 }
 
                                 this.tomeManager.openTomeSelectionGUI(admin, target);
                             }
                         } else {
-                            admin.sendMessage("§cTarget player is no longer online.");
+                            admin.sendMessage(Component.text("Target player is no longer online.", NamedTextColor.RED));
                             admin.closeInventory();
                         }
                     }
@@ -237,14 +260,32 @@ public class TomeListener implements Listener {
 
         if (hasTag) {
             target.removeScoreboardTag(tag);
-            admin.sendMessage("§cRemoved §5" + friendlyName + " §ctag from §e" + target.getName());
-            target.sendMessage("§cThe §5" + friendlyName + " §ctag has been removed from you.");
+
+            admin.sendMessage(Component.text("Removed ", NamedTextColor.RED)
+                    .append(Component.text(friendlyName, NamedTextColor.DARK_PURPLE))
+                    .append(Component.text(" tag from ", NamedTextColor.RED))
+                    .append(Component.text(target.getName(), NamedTextColor.YELLOW))
+            );
+            target.sendMessage(Component.text("The ", NamedTextColor.RED)
+                    .append(Component.text(friendlyName, NamedTextColor.DARK_PURPLE))
+                    .append(Component.text(" tag has been removed from you.", NamedTextColor.RED))
+            );
+
             target.playSound(target.getLocation(), Sound.BLOCK_FIRE_EXTINGUISH, 1.0F, 1.0F);
 
         } else {
             target.addScoreboardTag(tag);
-            admin.sendMessage("§aGranted §5" + friendlyName + " §atag to §e" + target.getName());
-            target.sendMessage("§aYou have been granted the §5" + friendlyName + " §atag.");
+
+            admin.sendMessage(Component.text("Granted ", NamedTextColor.GREEN)
+                    .append(Component.text(friendlyName, NamedTextColor.DARK_PURPLE))
+                    .append(Component.text(" tag to ", NamedTextColor.GREEN))
+                    .append(Component.text(target.getName(), NamedTextColor.YELLOW))
+            );
+            target.sendMessage(Component.text("You have been granted the ", NamedTextColor.GREEN)
+                    .append(Component.text(friendlyName, NamedTextColor.DARK_PURPLE))
+                    .append(Component.text(" tag.", NamedTextColor.GREEN))
+            );
+
             target.playSound(target.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.0F, 1.5F);
         }
 

@@ -1,5 +1,7 @@
 package frostvein.sampires.remakepire.commands;
 
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -28,7 +30,7 @@ public class CheckLivesCommand implements CommandExecutor {
         if (sender instanceof Player player) {
             // End the command process if the player is a vampire
             if (this.plugin.getVampireManager().isVampire(player)) {
-                sender.sendMessage("§4An immortal creature of darkness such as yourself has no need to concern themselves with \"life counts\"...");
+                sender.sendMessage(Component.text("An immortal creature of darkness such as yourself has no need to concern themselves with \"life counts\"...", NamedTextColor.DARK_RED));
                 return true;
             }
 
@@ -42,9 +44,10 @@ public class CheckLivesCommand implements CommandExecutor {
 
                 // Send a message to the player depending on their life counter
                 if (currentDeaths < maxDeaths) {
-                    sender.sendMessage("§6" + (maxDeaths - currentDeaths) + "§7 lives remaining");
+                    sender.sendMessage(Component.text(maxDeaths - currentDeaths, NamedTextColor.GOLD)
+                            .append(Component.text(" lives remaining", NamedTextColor.GRAY)));
                 } else {
-                    sender.sendMessage("§cNo lives remain... Be careful!");
+                    sender.sendMessage(Component.text("No lives remain... Be careful!", NamedTextColor.RED));
                 }
             }
         }

@@ -459,7 +459,7 @@ public class BeaconConversionListener implements Listener {
         this.plugin.logInfo("HUMANS FINAL STAND TRIGGERED - All 7 beacons are holy!");
 
         // A display for all the online players to see
-        Title title = Title.title(
+        final Title title = Title.title(
                 Component.text("ALL BEACONS SANCTIFIED", NamedTextColor.RED)
                         .decorate(TextDecoration.BOLD),
                 Component.text("The divine light weakens all creatures of darkness", NamedTextColor.YELLOW),
@@ -492,7 +492,7 @@ public class BeaconConversionListener implements Listener {
         this.plugin.logInfo("HUMANS FINAL STAND ENDED - A vampire has converted a beacon!");
 
         // A display for all the online players to see
-        Title title = Title.title(
+        final Title title = Title.title(
                 Component.text("FINAL STAND BROKEN", NamedTextColor.DARK_RED)
                         .decorate(TextDecoration.BOLD),
                 Component.text("Darkness pushes back against the light", NamedTextColor.RED),
@@ -529,7 +529,7 @@ public class BeaconConversionListener implements Listener {
         this.plugin.getSessionManager().setVampiresEternalNightActive(true);
 
         // A display for all the online players to see
-        Title title = Title.title(
+        final Title title = Title.title(
                 Component.text("ETERNAL NIGHT FALLS", NamedTextColor.DARK_RED)
                         .decorate(TextDecoration.BOLD),
                 Component.text("The darkness consumes all hope", NamedTextColor.RED),
@@ -561,7 +561,7 @@ public class BeaconConversionListener implements Listener {
         this.plugin.getSessionManager().setVampiresEternalNightActive(false);
 
         // A display for all the online players to see
-        Title title = Title.title(
+        final Title title = Title.title(
                 Component.text("LIGHT RETURNS", NamedTextColor.GOLD)
                         .decorate(TextDecoration.BOLD),
                 Component.text("A beacon shines with holy light once more", NamedTextColor.YELLOW),
