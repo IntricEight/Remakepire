@@ -10,6 +10,7 @@ import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Sound;
+import org.bukkit.Tag;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -50,10 +51,10 @@ public class TomeListener implements Listener {
 
         if (action == Action.RIGHT_CLICK_AIR || action == Action.RIGHT_CLICK_BLOCK) {
             if (action == Action.RIGHT_CLICK_BLOCK && event.getClickedBlock() != null) {
-                Material blockType = event.getClickedBlock().getType();
+                final Material blockType = event.getClickedBlock().getType();
 
                 // Allow players to open containers while holding a tome book
-                if (blockType == Material.CHEST || blockType == Material.TRAPPED_CHEST || blockType == Material.BARREL || blockType == Material.ENDER_CHEST || blockType == Material.SHULKER_BOX || blockType.name().contains("SHULKER_BOX") || blockType == Material.CRAFTING_TABLE || blockType == Material.FURNACE || blockType == Material.BLAST_FURNACE || blockType == Material.SMOKER || blockType == Material.BREWING_STAND || blockType == Material.ANVIL || blockType == Material.CHIPPED_ANVIL || blockType == Material.DAMAGED_ANVIL || blockType == Material.ENCHANTING_TABLE || blockType == Material.GRINDSTONE || blockType == Material.STONECUTTER || blockType == Material.LOOM || blockType == Material.CARTOGRAPHY_TABLE || blockType == Material.SMITHING_TABLE || blockType == Material.LECTERN || blockType == Material.HOPPER || blockType == Material.DROPPER || blockType == Material.DISPENSER) {
+                if (blockType == Material.CHEST || blockType == Material.TRAPPED_CHEST || blockType == Material.BARREL || blockType == Material.ENDER_CHEST || Tag.WOODEN_SHELVES.isTagged(blockType) || Tag.SHULKER_BOXES.isTagged(blockType) || blockType == Material.CRAFTING_TABLE || blockType == Material.FURNACE || blockType == Material.BLAST_FURNACE || blockType == Material.SMOKER || blockType == Material.BREWING_STAND || Tag.ANVIL.isTagged(blockType) || blockType == Material.ENCHANTING_TABLE || blockType == Material.GRINDSTONE || blockType == Material.STONECUTTER || blockType == Material.LOOM || blockType == Material.CARTOGRAPHY_TABLE || blockType == Material.SMITHING_TABLE || blockType == Material.LECTERN || blockType == Material.HOPPER || blockType == Material.DROPPER || blockType == Material.DISPENSER) {
                     return;
                 }
             }
@@ -62,10 +63,10 @@ public class TomeListener implements Listener {
                 BookMeta bookMeta = (BookMeta)item.getItemMeta();
 
                 if (bookMeta != null && bookMeta.hasTitle()) {
-                    String tomeTitle = bookMeta.getTitle();
+                    final String tomeTitle = bookMeta.getTitle();
                     this.plugin.logInfo("Player " + player.getName() + " using tome with title: '" + tomeTitle + "'");
 
-                    int cureBookNumber = this.plugin.getCureBookReadingListener().getAuthenticCureBookNumber(item);
+                    final int cureBookNumber = this.plugin.getCureBookReadingListener().getAuthenticCureBookNumber(item);
 
                     if (cureBookNumber > 0) {
                         // Prevent the player from reading the fourth cure book if the rest of the trinity has not been read
@@ -162,7 +163,7 @@ public class TomeListener implements Listener {
                 ItemStack clickedItem = event.getCurrentItem();
 
                 if (clickedItem != null && clickedItem.getType() == Material.WRITTEN_BOOK) {
-                    UUID targetUUID = this.tomeManager.getTomeSelectionTarget(admin.getUniqueId());
+                    final UUID targetUUID = this.tomeManager.getTomeSelectionTarget(admin.getUniqueId());
 
                     if (targetUUID == null) {
                         admin.sendMessage(Component.text("Error: Could not find target player for this selection.", NamedTextColor.RED));
@@ -178,7 +179,7 @@ public class TomeListener implements Listener {
                                 if (meta.hasLore()) {
                                     for (String line : meta.getLore()) {
                                         if (line.startsWith("§8[CURE_BOOK:")) {
-                                            String tag = line.substring("§8[CURE_BOOK:".length(), line.length() - 1);
+                                            final String tag = line.substring("§8[CURE_BOOK:".length(), line.length() - 1);
                                             this.handleCureBookClick(admin, target, tag);
                                             return;
                                         }
@@ -188,16 +189,16 @@ public class TomeListener implements Listener {
                                 String displayName = PlainTextComponentSerializer.plainText().serialize(meta.customName());
 
                                 // Filter out extra content from the string name
-                                String cleanName = displayName.replaceAll("§[0-9a-fk-or]", "").trim();
-                                if (cleanName.startsWith("✓ ")) {
-                                    cleanName = cleanName.substring(2);
+                                displayName = displayName.replaceAll("§[0-9a-fk-or]", "").trim();
+                                if (displayName.startsWith("✓ ")) {
+                                    displayName = displayName.substring(2);
                                 }
 
-                                if (cleanName.contains(" (Already has)")) {
-                                    cleanName = cleanName.replace(" (Already has)", "");
+                                if (displayName.contains(" (Already has)")) {
+                                    displayName = displayName.replace(" (Already has)", "");
                                 }
 
-                                final String abilityName = cleanName.replace(" ", "").toLowerCase();
+                                final String abilityName = displayName.replace(" ", "").toLowerCase();
 
                                 if (this.tomeManager.hasAbility(target, abilityName)) {
                                     this.tomeManager.removeAbility(target, abilityName);
