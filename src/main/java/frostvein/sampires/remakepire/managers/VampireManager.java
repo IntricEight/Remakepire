@@ -503,7 +503,7 @@ public class VampireManager {
     /**
      * Permakill a player and inform them of their final death.
      *
-     * @param player the vampire who has been permakilled.
+     * @param player the player who has been permakilled.
      */
     public void killPlayerPermanently(Player player) {
         this.plugin.getServer().getScheduler().runTaskLater(this.plugin, () -> {

@@ -21,6 +21,7 @@ import java.util.stream.Collectors;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.kyori.adventure.title.Title;
 import org.bukkit.Bukkit;
 import org.bukkit.Color;
@@ -465,7 +466,7 @@ public class BeaconManager {
             } else {
                 ItemStack item = display.getItemStack();
 
-                if (item != null && item.getType() == Material.CARVED_PUMPKIN) {
+                if (item.getType() == Material.CARVED_PUMPKIN) {
                     ItemMeta meta = item.getItemMeta();
                     if (meta == null) {
                         info.append("  §cItem has no metadata!");
@@ -482,10 +483,10 @@ public class BeaconManager {
                             info.append(" §a(Correct)");
                         }
 
-                        info.append("\n  §7Display Name: §f").append(meta.hasDisplayName() ? meta.getDisplayName() : "none");
+                        info.append("\n  §7Display Name: §f").append(meta.customName() != null ? PlainTextComponentSerializer.plainText().serialize(meta.customName()) : "none");
                     }
                 } else {
-                    info.append("  §cItem display has wrong item: §f").append(item != null ? item.getType() : "null");
+                    info.append("  §cItem display has wrong item: §f").append(item.getType());
                 }
             }
 

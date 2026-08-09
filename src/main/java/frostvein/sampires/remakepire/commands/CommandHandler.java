@@ -34,6 +34,7 @@ import frostvein.sampires.remakepire.RemakepirePlugin;
 import frostvein.sampires.remakepire.abilities.tome.TomeAbility;
 import frostvein.sampires.remakepire.beacons.BeaconSite;
 import frostvein.sampires.remakepire.beacons.BeaconSite.BeaconState;
+import frostvein.sampires.remakepire.listeners.DeathHandler;
 import frostvein.sampires.remakepire.managers.BeaconManager;
 import frostvein.sampires.remakepire.managers.ConfigManager;
 import frostvein.sampires.remakepire.managers.SessionManager;
@@ -70,7 +71,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (!sender.hasPermission("vampiresmp.admin")) {
             // Prevent players who don't have permission to use admin commands from executing the following functions
-            sender.sendMessage("§cYou don't have permission to use this command.");
+            sender.sendMessage(Component.text("You don't have permission to use this command.", NamedTextColor.RED));
             return true;
 
         } else if (command.getName().equalsIgnoreCase("init")) {
@@ -133,6 +134,10 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
             // Control the active removal of endermen spawning
             return this.handleRemoveEndermenCommand(sender, args);
 
+        } else if (command.getName().equalsIgnoreCase("removecreepers")) {
+            // Control the active removal of creeper spawning
+            return this.handleRemoveCreeperCommand(sender, args);
+
         } else if (command.getName().equalsIgnoreCase("setupplayer")) {
             // Give the player the starting equipment for a new game
             return this.handleSetupPlayerCommand(sender, args);
@@ -156,6 +161,10 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         } else if (command.getName().equalsIgnoreCase("resetplayer")) {
             // Clear a player's stats, tags, and (optionally) inventory
             return this.handleResetPlayerCommand(sender, args);
+
+        } else if (command.getName().equalsIgnoreCase("playercount")) {
+            // Get the number of players on each team
+            return this.handlePlayerCountCommand(sender, args);
 
         } else if (command.getName().equalsIgnoreCase("make_incurable")) {
             // Make a player impossible to cure (Remove the tag CannotCure to reverse this process)
@@ -189,7 +198,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
             Player target = Bukkit.getPlayer(args[0]);
 
             if (target == null) {
-                sender.sendMessage("§cPlayer not found: " + args[0]);
+                sender.sendMessage(Component.text("Player not found: " + args[0], NamedTextColor.RED));
 
             } else {
                 boolean clearInventory = args.length >= 2 && args[1].equalsIgnoreCase("true");
@@ -256,13 +265,96 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                 if (clearInventory) {
                     target.getInventory().clear();
                     target.getEnderChest().clear();
-                    sender.sendMessage("§7Cleared " + target.getName() + "'s inventory and ender chest.");
+                    sender.sendMessage(Component.text("Cleared " + target.getName() + "'s inventory and ender chest.", NamedTextColor.GRAY));
                 }
 
-                sender.sendMessage("§aPlayer " + target.getName() + " has been fully reset to a fresh state.");
-                target.sendMessage("§aYou have been reset to a fresh state by an administrator.");
-                target.sendMessage("§7All vampire status, abilities, cooldowns, and death count have been cleared." + (clearInventory ? " Your inventory has also been cleared." : ""));
+                sender.sendMessage(Component.text("Player " + target.getName() + " has been fully reset to a fresh state.", NamedTextColor.GREEN));
+                target.sendMessage(Component.text("You have been reset to a fresh state by an administrator.", NamedTextColor.GREEN));
+                target.sendMessage(Component.text("All vampire status, abilities, cooldowns, and death count have been cleared." + (clearInventory ? " Your inventory has also been cleared." : ""), NamedTextColor.GRAY));
+
                 this.plugin.logInfo("Admin " + sender.getName() + " reset player " + target.getName() + " to fresh state");
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Let the admin know the number of humans, vampires, or total living players in the game at the moment.
+     *
+     * @param sender the admin sending the command.
+     * @param args the arguments attached to the command.
+     * @return {@code true}
+     */
+    private boolean handlePlayerCountCommand(CommandSender sender, String[] args) {
+        if (args.length == 0) {
+            sender.sendMessage("§cUsage: /playercount <all | human | vampire>");
+            sender.sendMessage("§7- /playercount all §8- See the number of alive players");
+            sender.sendMessage("§7- /playercount human §8- See the number of alive human players");
+            sender.sendMessage("§7- /playercount vampire §8- See the number of \"alive\" vampire players");
+
+        } else {
+            int playerCount = 0;
+
+            switch (args[0].toLowerCase()) {
+                case "all":
+                    for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+                        // Make sure the player is active in the game
+                        if ((onlinePlayer.getGameMode() == GameMode.SURVIVAL || onlinePlayer.getGameMode() == GameMode.ADVENTURE)
+                                && (!onlinePlayer.getScoreboardTags().contains(DeathHandler.PERMAKILLED_TAG) || onlinePlayer.isDead())
+                        ) {
+                            playerCount++;
+                        }
+                    }
+
+                    sender.sendMessage(Component.text("There " + (playerCount == 1 ? "is" : "are") + " currently ", NamedTextColor.WHITE)
+                            .append(Component.text(playerCount, NamedTextColor.GRAY))
+                            .append(Component.text(" player" + (playerCount == 1 ? "" : "s") + " in the session.", NamedTextColor.WHITE))
+                    );
+
+                    this.plugin.logInfo("Admin " + sender.getName() + " checked the game player count");
+                    break;
+
+                case "human":
+                    for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+                        // Make sure the player is active in the game
+                        if ((onlinePlayer.getGameMode() == GameMode.SURVIVAL || onlinePlayer.getGameMode() == GameMode.ADVENTURE)
+                                && (!onlinePlayer.getScoreboardTags().contains(DeathHandler.PERMAKILLED_TAG) || onlinePlayer.isDead())
+                                && this.plugin.getVampireManager().isHuman(onlinePlayer)
+                        ) {
+                            playerCount++;
+                        }
+                    }
+
+                    sender.sendMessage(Component.text("There " + (playerCount == 1 ? "is" : "are") + " currently ", NamedTextColor.WHITE)
+                            .append(Component.text(playerCount, NamedTextColor.GOLD))
+                            .append(Component.text(" human" + (playerCount == 1 ? "" : "s") + " in the session.", NamedTextColor.WHITE))
+                    );
+
+                    this.plugin.logInfo("Admin " + sender.getName() + " checked the human player count");
+                    break;
+
+                case "vampire":
+                    for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+                        // Make sure the player is active in the game
+                        if ((onlinePlayer.getGameMode() == GameMode.SURVIVAL || onlinePlayer.getGameMode() == GameMode.ADVENTURE)
+                                && (!onlinePlayer.getScoreboardTags().contains(DeathHandler.PERMAKILLED_TAG) || onlinePlayer.isDead())
+                                && this.plugin.getVampireManager().isVampire(onlinePlayer)
+                        ) {
+                            playerCount++;
+                        }
+                    }
+
+                    sender.sendMessage(Component.text("There " + (playerCount == 1 ? "is" : "are") + " currently ", NamedTextColor.WHITE)
+                            .append(Component.text(playerCount, NamedTextColor.RED))
+                            .append(Component.text(" vampire" + (playerCount == 1 ? "" : "s") + " in the session.", NamedTextColor.WHITE))
+                    );
+
+                    this.plugin.logInfo("Admin " + sender.getName() + " checked the vampire player count");
+                    break;
+
+                default:
+                    sender.sendMessage(Component.text("Invalid action. Use 'all', 'human', or 'vampire'.", NamedTextColor.RED));
             }
         }
 
@@ -285,6 +377,9 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         * * Execute a change command, updating the value inside the config.yml file.
         */
 
+        // Store and template the update message to send to the player
+        Component senderMessage = null;
+
         if (args.length == 0) {
             // If the command was sent by a player, open up the configuration control GUI
             if (sender instanceof Player admin) {
@@ -298,94 +393,92 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                     break;
 
                 case "alert_on_quit":
-                    sender.sendMessage("§6alert-on-player-leave§r is currently: " + configManager.shouldAlertOnPlayerQuit());
+                    senderMessage = this.configValueMessage("alert-on-player-leave", this.configManager.shouldAlertOnPlayerQuit());
                     break;
 
                 case "holy_water_cap":
-                    sender.sendMessage("§6holy-water-session-capped§r is currently: " + configManager.isHolyWaterSessionCapped());
+                    senderMessage = this.configValueMessage("holy-water-session-capped", this.configManager.isHolyWaterSessionCapped());
                     break;
 
                 case "tome_cap":
-                    sender.sendMessage("§6tome-absorption-capping§r is currently: " + configManager.isTomeAbsorptionCapped());
+                    senderMessage = this.configValueMessage("tome-absorption-capping", this.configManager.isTomeAbsorptionCapped());
                     break;
 
                 case "vampire_level_cap":
-                    sender.sendMessage("§6vampire-level-capping§r is currently: " + configManager.isVampireLevelingCapped());
+                    senderMessage = this.configValueMessage("vampire-level-capping", this.configManager.isVampireLevelingCapped());
                     break;
 
                 case "new_vampire_tracking":
-                    sender.sendMessage("§6new_vampire_tracking§r is currently: " + configManager.canTrackNewVampires());
+                    senderMessage = this.configValueMessage("new_vampire_tracking", this.configManager.canTrackNewVampires());
                     break;
 
                 case "allow_vampire_mounts":
-                    sender.sendMessage("§6allow_vampire_mounts§r is currently: " + configManager.canVampiresRideLivingMounts());
+                    senderMessage = this.configValueMessage("allow_vampire_mounts", this.configManager.canVampiresRideLivingMounts());
                     break;
 
                 case "vampire_health_check":
-                    sender.sendMessage("§6vampire_health_check_ticks§r is currently: " + configManager.getVampireHealthCheckTicks() + " (" + (configManager.getVampireHealthCheckTicks() / 20) + " seconds)");
+                    senderMessage = this.configValueMessage("vampire_health_check_ticks", this.configManager.getVampireHealthCheckTicks() + " (" + (this.configManager.getVampireHealthCheckTicks() / 20) + " seconds)");
                     break;
 
                 case "damage_suppression":
-                    sender.sendMessage("§7Current damage suppression: §e" + configManager.getDamageSuppression() + "%");
+                    senderMessage = Component.text("Current damage suppression: ", NamedTextColor.WHITE)
+                            .append(Component.text(this.configManager.getDamageSuppression() + "%", NamedTextColor.GOLD));
                     break;
 
                 case "cure_requires_dead_sire":
-                    sender.sendMessage("§6sire-death-requirement§r is currently: " + configManager.doCuresRequireSireDeath());
+                    senderMessage = this.configValueMessage("sire-death-requirement", this.configManager.doCuresRequireSireDeath());
                     break;
 
                 case "cure_requires_daylight":
-                    sender.sendMessage("§6daylight-requirement§r is currently: " + configManager.doCuresRequireDaytime());
+                    senderMessage = this.configValueMessage("daylight-requirement", this.configManager.doCuresRequireDaytime());
                     break;
 
                 case "cure_book_spawning":
-                    sender.sendMessage("§6cure_books_enabled§r is currently: " + sessionManager.isCureBooksEnabled());
+                    senderMessage = this.configValueMessage("cure_books_enabled", this.sessionManager.isCureBooksEnabled());
                     break;
 
                 case "enable_npc_mobs":
-                    sender.sendMessage("§6enable-npc-mobs§r is currently: " + configManager.areNpcMobsEnabled());
+                    senderMessage = this.configValueMessage("enable-npc-mobs", this.configManager.areNpcMobsEnabled());
                     break;
 
                 case "breeding_out_of_session":
-                    sender.sendMessage("§6allow-breeding-out-of-session§r is currently: " + configManager.canBreedAnimalsOutOfSession());
+                    senderMessage = this.configValueMessage("allow-breeding-out-of-session", this.configManager.canBreedAnimalsOutOfSession());
                     break;
 
                 case "stake_permadeath_stage":
-                    sender.sendMessage("§6permadeath-minimum-stage§r is currently: " + configManager.getPermadeathMinimumStage());
+                    senderMessage = this.configValueMessage("permadeath-minimum-stage", this.configManager.getPermadeathMinimumStage());
                     break;
 
                 case "human_life_limit":
-                    sender.sendMessage("§6enforce-life-limit§r is currently: " + configManager.isLifeLimitEnforced());
+                    senderMessage = this.configValueMessage("enforce-life-limit", this.configManager.isLifeLimitEnforced());
                     break;
 
                 case "one_human_left":
-                    sender.sendMessage("§6one_human_left§r is currently: " + this.sessionManager.isOneHumanLeftActive());
+                    senderMessage = this.configValueMessage("one_human_left", this.sessionManager.isOneHumanLeftActive());
                     break;
 
                 case "border_active":
-                    sender.sendMessage("§6border_active§r is currently: " + this.sessionManager.isBorderActive());
+                    senderMessage = this.configValueMessage("border_active", this.sessionManager.isBorderActive());
                     break;
 
                 default:
-                    sender.sendMessage("§cInvalid configuration. Use \"/pow admin config help\" for a list of config command options.");
+                    senderMessage = Component.text("Invalid configuration. Use \"/pow admin config help\" for a list of config command options.", NamedTextColor.RED);
             }
         } else {
-            // Store and template the update message to send to the player
-            String senderMessage = "Config for §6";
-
             switch (args[0].toLowerCase()) {
                 case "alert_on_quit":
                     configManager.setAlertOnPlayerQuit(Boolean.parseBoolean(args[1]));
-                    senderMessage += "alert-on-player-leave§r set to: " + Boolean.parseBoolean(args[1]);
+                    senderMessage = this.configUpdateMessage("alert-on-player-leave", Boolean.parseBoolean(args[1]));
                     break;
 
                 case "holy_water_cap":
                     configManager.setHolyWaterCapping(Boolean.parseBoolean(args[1]));
-                    senderMessage += "holy-water-session-capped§r set to: " + Boolean.parseBoolean(args[1]);
+                    senderMessage = this.configUpdateMessage("holy-water-session-capped", Boolean.parseBoolean(args[1]));
                     break;
 
                 case "tome_cap":
                     configManager.setTomeAbsorptionCapping(Boolean.parseBoolean(args[1]));
-                    senderMessage += "tome-absorption-capping§r set to: " + Boolean.parseBoolean(args[1]);
+                    senderMessage = this.configUpdateMessage("tome-absorption-capping", Boolean.parseBoolean(args[1]));
 
                     // Clear the list of tome absorption if the cap is being disabled
                     if (!Boolean.parseBoolean(args[1])) {
@@ -403,29 +496,29 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                         plugin.getVampireManager().clearAllStageCaps();
                     }
 
-                    senderMessage += "vampire-level-capping§r set to: " + Boolean.parseBoolean(args[1]);
+                    senderMessage = this.configUpdateMessage("vampire-level-capping", Boolean.parseBoolean(args[1]));
                     break;
 
                 case "new_vampire_tracking":
                     configManager.setTrackingNewVampires(Boolean.parseBoolean(args[1]));
-                    senderMessage += "new-vampire-tracking§r set to: " + Boolean.parseBoolean(args[1]);
+                    senderMessage = this.configUpdateMessage("new-vampire-tracking", Boolean.parseBoolean(args[1]));
                     break;
 
                 case "allow_vampire_mounts":
                     configManager.setVampiresRideLivingMounts(Boolean.parseBoolean(args[1]));
-                    senderMessage += "allow-vampire-mounts§r set to: " + Boolean.parseBoolean(args[1]);
+                    senderMessage = this.configUpdateMessage("allow-vampire-mounts", Boolean.parseBoolean(args[1]));
                     break;
 
                 case "vampire_health_check":
                     try {
                         if (Integer.parseInt(args[1]) < 1) {
-                            senderMessage = "§cInterval must be at least 1 tick.";
+                            senderMessage = Component.text("Interval must be at least 1 tick.", NamedTextColor.RED);
                         } else {
                             this.configManager.setVampireHealthCheckTicks(Integer.parseInt(args[1]));
-                            senderMessage += "vampire_health_check_ticks§r set to: " + Integer.parseInt(args[1]) + " ticks (" + Integer.parseInt(args[1]) / 20.0 + " seconds)";
+                            senderMessage = this.configUpdateMessage("vampire_health_check_ticks", Integer.parseInt(args[1]) + " ticks (" + Integer.parseInt(args[1]) / 20.0 + " seconds)");
                         }
                     } catch (NumberFormatException e) {
-                        senderMessage = "§cInvalid number: " + args[1];
+                        senderMessage = Component.text("Invalid number: " + args[1], NamedTextColor.RED);
                     }
 
                     break;
@@ -433,78 +526,111 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                 case "damage_suppression":
                     if (Integer.parseInt(args[1]) >= 0 && Integer.parseInt(args[1]) <= 100) {
                         configManager.setDamageSuppression(Integer.parseInt(args[1]));
-
-                        senderMessage += "damage_suppression§r set to: " + Integer.parseInt(args[1]) + "%";
-
+                        senderMessage = this.configUpdateMessage("damage_suppression", Integer.parseInt(args[1]) + "%");
                         this.plugin.logInfo("Admin " + sender.getName() + " set damage suppression to " + Integer.parseInt(args[1]) + "%");
+
                     } else {
-                        senderMessage = "§cPercentage must be between 0 and 100.";
+                        senderMessage = Component.text("Percentage must be between 0 and 100.", NamedTextColor.RED);
                     }
 
                     break;
 
                 case "cure_requires_dead_sire":
                     configManager.setCureRequiresSireDeath(Boolean.parseBoolean(args[1]));
-                    senderMessage += "sire-death-requirement§r set to: " + Boolean.parseBoolean(args[1]);
+                    senderMessage = this.configUpdateMessage("sire-death-requirement", Boolean.parseBoolean(args[1]));
                     break;
 
                 case "cure_requires_daylight":
                     configManager.setCureRequiresDaytime(Boolean.parseBoolean(args[1]));
-                    senderMessage += "daylight-requirement§r set to: " + Boolean.parseBoolean(args[1]);
+                    senderMessage = this.configUpdateMessage("daylight-requirement", Boolean.parseBoolean(args[1]));
                     break;
 
                 case "cure_book_spawning":
                     sessionManager.setCureBooksEnabled(Boolean.parseBoolean(args[1]));
-                    senderMessage += "cure_books_enabled§r set to" + Boolean.parseBoolean(args[1]);
+                    senderMessage = this.configUpdateMessage("cure_books_enabled", Boolean.parseBoolean(args[1]));
                     break;
 
                 case "enable_npc_mobs":
                     sessionManager.setNpcSpawningGamerules(Boolean.parseBoolean(args[1]));
-                    senderMessage += "enable-npc-mobs§r set to: " + Boolean.parseBoolean(args[1]);
+                    senderMessage = this.configUpdateMessage("enable-npc-mobs", Boolean.parseBoolean(args[1]));
                     break;
 
                 case "breeding_out_of_session":
                     configManager.setBreedAnimalsOutOfSession(Boolean.parseBoolean(args[1]));
-                    senderMessage += "allow-breeding-out-of-session§r set to: " + Boolean.parseBoolean(args[1]);
+                    senderMessage = this.configUpdateMessage("allow-breeding-out-of-session", Boolean.parseBoolean(args[1]));
                     break;
 
                 case "stake_permadeath_stage":
                     if (Integer.parseInt(args[1]) >= 1 && Integer.parseInt(args[1]) <= 3) {
                         configManager.setStakePermadeathMinimumStage(Integer.parseInt(args[1]));
-                        senderMessage += "permadeath-minimum-stage§r set to: " + Integer.parseInt(args[1]);
+                        senderMessage = this.configUpdateMessage("permadeath-minimum-stage", Integer.parseInt(args[1]));
                     } else {
-                        senderMessage = "§cInvalid stage! Use 1, 2, or 3";
+                        senderMessage = Component.text("Invalid stage! Use 1, 2, or 3", NamedTextColor.RED);
                     }
 
                     break;
 
                 case "human_life_limit":
                     configManager.setLifeLimitEnforced(Boolean.parseBoolean(args[1]));
-                    senderMessage += "enforce-life-limit§r set to: " + Boolean.parseBoolean(args[1]);
+                    senderMessage = this.configUpdateMessage("enforce-life-limit", Boolean.parseBoolean(args[1]));
                     break;
 
                 case "one_human_left":
                     this.sessionManager.setOneHumanLeftActive(Boolean.parseBoolean(args[1]));
-                    senderMessage += "one_human_left§r set to: " + Boolean.parseBoolean(args[1]);
-                    senderMessage += Boolean.parseBoolean(args[1]) ? "\n§aOne Human Left mode ACTIVATED: Humans no longer have beacon cooldowns" : "\n§cOne Human Left mode DEACTIVATED: Normal beacon cooldowns restored for all players";
+                    senderMessage = this.configUpdateMessage("one_human_left", Boolean.parseBoolean(args[1]))
+                            .append(Component.newline())
+                            .append(Component.text(Boolean.parseBoolean(args[1])
+                                            ? "One Human Left mode ACTIVATED: Humans no longer have beacon cooldowns"
+                                            : "One Human Left mode DEACTIVATED: Normal beacon cooldowns restored for all players",
+                                    Boolean.parseBoolean(args[1])
+                                            ? NamedTextColor.GREEN
+                                            : NamedTextColor.RED
+                            ));
                     break;
 
                 case "border_active":
                     this.sessionManager.setBorderActive(Boolean.parseBoolean(args[1]));
-                    senderMessage += "§6border_active§r set to: " +  Boolean.parseBoolean(args[1]);
+                    senderMessage = this.configUpdateMessage("border_active", Boolean.parseBoolean(args[1]));
                     break;
 
                 default:
-                    senderMessage = "§cInvalid configuration. Use \"/pow admin config help\" for a list of config command options.";
+                    senderMessage = Component.text("Invalid configuration. Use \"/pow admin config help\" for a list of config command options.", NamedTextColor.RED);
             }
 
             // Update the config GUI screen with the updated config value for the item that was changed.
             this.plugin.getConfigGuiManager().refreshConfigGuiItem(args[0].toLowerCase());
+        }
 
+        if (senderMessage != null) {
             sender.sendMessage(senderMessage);
         }
 
         return true;
+    }
+
+    /**
+     * Create a message about the config variable's current setting for the admin.
+     *
+     * @param configName the name of the configuration variable within the config file.
+     * @param configValue the current setting of the configuration variable.
+     * @return A {@code Component} in the format of "[GOLD]<configName>[WHITE] is currently: <configValue>".
+     */
+    private Component configValueMessage(String configName, Object configValue) {
+        return Component.text(configName, NamedTextColor.GOLD)
+                .append(Component.text(" is currently: " + configValue, NamedTextColor.WHITE));
+    }
+
+    /**
+     * Create a message about the config variable's new setting for the admin.
+     *
+     * @param configName the name of the configuration variable within the config file.
+     * @param configValue the current setting of the configuration variable.
+     * @return A {@code Component} in the format of "[WHITE]Config for [GOLD]<configName>[WHITE] set to <configValue>".
+     */
+    private Component configUpdateMessage(String configName, Object configValue) {
+        return Component.text("Config for ", NamedTextColor.WHITE)
+                .append(Component.text(configName, NamedTextColor.GOLD))
+                .append(Component.text(" set to: " + configValue, NamedTextColor.WHITE));
     }
 
     /**
@@ -550,12 +676,12 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                 z = Double.parseDouble(args[2]);
 
             } catch (NumberFormatException e) {
-                sender.sendMessage("§cInvalid coordinates. Usage: /pow admin set_vampire_spawn [x y z]");
+                sender.sendMessage(Component.text("Invalid coordinates. Usage: /pow admin set_vampire_spawn <x> <y> <z>", NamedTextColor.RED));
                 return true;
             }
         } else {
             if (!(sender instanceof Player player)) {
-                sender.sendMessage("§cConsole must provide coordinates: /pow admin set_vampire_spawn <x> <y> <z>");
+                sender.sendMessage(Component.text("Console must provide coordinates: /pow admin set_vampire_spawn <x> <y> <z>", NamedTextColor.RED));
                 return true;
             }
 
@@ -569,7 +695,8 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         this.plugin.getConfigManager().setVampireRespawnLocation(locationStr);
         this.plugin.reloadVampireRespawnLocation();
 
-        sender.sendMessage("§aVampire spawn location set to: §e" + locationStr);
+        sender.sendMessage(Component.text("Vampire spawn location set to: ", NamedTextColor.GREEN)
+                .append(Component.text(locationStr, NamedTextColor.YELLOW)));
         this.plugin.logInfo("Admin " + sender.getName() + " set vampire spawn to " + locationStr);
 
         return true;
@@ -582,7 +709,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
      */
     private boolean handleInitCommand(CommandSender sender, String[] args) {
         if (!(sender instanceof Player admin)) {
-            sender.sendMessage("§cOnly players can use this command.");
+            sender.sendMessage(Component.text("Only players can use this command.", NamedTextColor.RED));
 
         } else if (args.length > 0 && args[0].equalsIgnoreCase("cancel")) {
             this.plugin.getInitGameManager().cancelInitialization(admin);
@@ -1938,22 +2065,66 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         } else {
             switch (args[0].toLowerCase()) {
                 case "all":
-                    int removedCount = this.plugin.getEndermanRemovalListener().removeAllEndermen();
+                    int removedCount = this.plugin.getSpawnRemovalListener().removeAllEndermen();
                     sender.sendMessage("§aRemoved §e" + removedCount + " §aendermen from all loaded chunks.");
                     this.plugin.logInfo("Admin " + sender.getName() + " removed " + removedCount + " endermen");
                     break;
 
                 case "toggle":
-                    boolean currentStatus = this.plugin.getEndermanRemovalListener().isEndermanRemovalEnabled();
-                    this.plugin.getEndermanRemovalListener().setEndermanRemovalEnabled(!currentStatus);
+                    boolean currentStatus = this.plugin.getSpawnRemovalListener().isEndermanRemovalEnabled();
+                    this.plugin.getSpawnRemovalListener().setEndermanRemovalEnabled(!currentStatus);
                     String newStatus = !currentStatus ? "ENABLED" : "DISABLED";
                     sender.sendMessage("§aEnderman removal is now §e" + newStatus + "§a.");
                     this.plugin.logInfo("Admin " + sender.getName() + " toggled enderman removal to " + newStatus);
                     break;
 
                 case "status":
-                    String statusMessage = this.plugin.getEndermanRemovalListener().isEndermanRemovalEnabled() ? "§aENABLED" : "§cDISABLED";
+                    String statusMessage = this.plugin.getSpawnRemovalListener().isEndermanRemovalEnabled() ? "§aENABLED" : "§cDISABLED";
                     sender.sendMessage("§7Enderman removal is currently: " + statusMessage);
+                    break;
+
+                default:
+                    sender.sendMessage("§cInvalid action. Use 'all', 'toggle', or 'status'.");
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Toggle or trigger the creeper spawn prevention system.
+     *
+     * @return {@code true}
+     */
+    private boolean handleRemoveCreeperCommand(CommandSender sender, String[] args) {
+        if (args.length == 0) {
+            sender.sendMessage("§cUsage: /removecreepers <all | toggle | status>");
+            sender.sendMessage("§7- /removecreepers all §8- Remove all existing creepers from loaded chunks");
+            sender.sendMessage("§7- /removecreepers toggle §8- Toggle creeper spawn prevention on/off");
+            sender.sendMessage("§7- /removecreepers status §8- Check if creeper removal is enabled");
+
+        } else {
+            switch (args[0].toLowerCase()) {
+                case "all":
+                    final int removedCount = this.plugin.getSpawnRemovalListener().removeAllCreepers();
+                    sender.sendMessage("§aRemoved §e" + removedCount + " §acreepers from all loaded chunks.");
+
+                    this.plugin.logInfo("Admin " + sender.getName() + " removed " + removedCount + " creepers");
+                    break;
+
+                case "toggle":
+                    final boolean currentStatus = this.plugin.getSpawnRemovalListener().isCreeperRemovalEnabled();
+                    this.plugin.getSpawnRemovalListener().setCreeperRemovalEnabled(!currentStatus);
+
+                    final String newStatus = !currentStatus ? "ENABLED" : "DISABLED";
+                    sender.sendMessage("§aCreeper removal is now §e" + newStatus + "§a.");
+
+                    this.plugin.logInfo("Admin " + sender.getName() + " toggled creeper removal to " + newStatus);
+                    break;
+
+                case "status":
+                    final String statusMessage = this.plugin.getSpawnRemovalListener().isCreeperRemovalEnabled() ? "§aENABLED" : "§cDISABLED";
+                    sender.sendMessage("§7Creeper removal is currently: " + statusMessage);
                     break;
 
                 default:

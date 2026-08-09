@@ -173,7 +173,7 @@ public class DeathHandler implements Listener {
         final boolean allBeaconsDesecrated = totalBeacons > 0 && evilBeacons == totalBeacons;
         final String townName = plugin.getConfigManager().getTownName();
 
-        Title title = Title.title(
+        final Title title = Title.title(
                 Component.text("The last human has fallen.", NamedTextColor.RED),
                 Component.empty(),
                 Title.Times.times(
@@ -186,12 +186,12 @@ public class DeathHandler implements Listener {
         for (Player player : Bukkit.getOnlinePlayers()) {
             player.showTitle(title);
             player.sendMessage("");
-            player.sendMessage("§cThe last defender of humanity has fallen...");
+            player.sendMessage(Component.text("The last defender of humanity has fallen...", NamedTextColor.RED));
 
             if (allBeaconsDesecrated) {
-                player.sendMessage("§cDarkness reigns supreme over " + townName + ". You are free.");
+                player.sendMessage(Component.text("Darkness reigns supreme over " + townName + ". You are free.", NamedTextColor.RED));
             } else {
-                player.sendMessage("§cNow only the beacons lie between you and freedom.");
+                player.sendMessage(Component.text("Now only the beacons lie between you and freedom.", NamedTextColor.RED));
             }
 
             player.sendMessage("");
@@ -214,7 +214,7 @@ public class DeathHandler implements Listener {
         final boolean trappedWhenPermanentlyCorrupted = plugin.getConfigManager().doCorruptedBeaconsTrapHumans();
         final String townName = plugin.getConfigManager().getTownName();
 
-        Title title = Title.title(
+        final Title title = Title.title(
                 Component.text("The last vampire has fallen.", NamedTextColor.GREEN),
                 Component.empty(),
                 Title.Times.times(
@@ -227,20 +227,20 @@ public class DeathHandler implements Listener {
         for (Player player : Bukkit.getOnlinePlayers()) {
             player.showTitle(title);
             player.sendMessage("");
-            player.sendMessage("§aThe last creature of darkness has fallen...");
+            player.sendMessage(Component.text("The last creature of darkness has fallen...", NamedTextColor.GREEN));
 
             if (anyPermanentlyCorrupted) {
-                player.sendMessage("§7But a beacon of light has been permanently corrupted.");
+                player.sendMessage(Component.text("But a beacon of light has been permanently corrupted.", NamedTextColor.GRAY));
 
                 if (trappedWhenPermanentlyCorrupted) {
-                    player.sendMessage("§7The creatures of the night have been vanquished, but you are stuck in " + townName + ", forever.");
+                    player.sendMessage(Component.text("The creatures of the night have been vanquished, but you are stuck in " + townName + ", forever.", NamedTextColor.GRAY));
                 } else {
-                    player.sendMessage("§7The creatures of the night have been vanquished, but does freedom await you?");
+                    player.sendMessage(Component.text("The creatures of the night have been vanquished, but does freedom await you?", NamedTextColor.GRAY));
                 }
             } else if (allBeaconsHoly) {
-                player.sendMessage("§aLight reigns supreme over " + townName + ". You are free.");
+                player.sendMessage(Component.text("Light reigns supreme over " + townName + ". You are free.", NamedTextColor.GREEN));
             } else {
-                player.sendMessage("§7Now only the beacons lie between you and freedom.");
+                player.sendMessage(Component.text("Now only the beacons lie between you and freedom.", NamedTextColor.GRAY));
             }
 
             player.sendMessage("");
@@ -329,12 +329,13 @@ public class DeathHandler implements Listener {
         this.woodenStakeKills.remove(victim.getUniqueId());
 
         if (this.vampireManager.isVampire(victim)) {
-            int woodenStakeThreshold = this.plugin.getConfigManager().getPermadeathMinimumStage();
-            int victimStage = this.vampireManager.getVampireStage(victim);
+            final int woodenStakeThreshold = this.plugin.getConfigManager().getPermadeathMinimumStage();
+            final int victimStage = this.vampireManager.getVampireStage(victim);
 
             if (victimStage <= woodenStakeThreshold && killedWithWoodenWeapon) {
                 victim.addScoreboardTag(PERMAKILL_PROCESSING_TAG);
-                killer.sendMessage("§4You have permanently killed the vampire " + victim.getName() + "!");
+                killer.sendMessage(Component.text("You have permanently killed the vampire " + victim.getName() + "!", NamedTextColor.DARK_RED));
+
                 this.createVampireDeathEffects(victim.getLocation());
                 this.plugin.logInfo("PERMA-KILL: Applied " + PERMAKILL_PROCESSING_TAG + " tag to " + victim.getName() + " (Stage " + victimStage + ", Threshold: " + woodenStakeThreshold + ")");
 

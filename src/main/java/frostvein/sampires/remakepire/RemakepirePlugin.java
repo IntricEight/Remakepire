@@ -46,7 +46,7 @@ public final class RemakepirePlugin extends JavaPlugin {
     private TomeDistributionManager tomeDistributionManager;
     private CureBookManager cureBookManager;
     private VampireTexturePackManager vampireTexturePackManager;
-    private EndermanRemovalListener endermanRemovalListener;
+    private SpawnRemovalListener spawnRemovalListener;
     private DamageSuppressionListener damageSuppressionListener;
     private VampireTrackingManager vampireTrackingManager;
     private PermadeathManager permadeathManager;
@@ -104,7 +104,7 @@ public final class RemakepirePlugin extends JavaPlugin {
         this.tomeDistributionManager = new TomeDistributionManager(this);
         this.cureBookManager = new CureBookManager(this);
         this.vampireTexturePackManager = new VampireTexturePackManager(this);
-        this.endermanRemovalListener = new EndermanRemovalListener(this);
+        this.spawnRemovalListener = new SpawnRemovalListener(this);
         this.damageSuppressionListener = new DamageSuppressionListener(this);
         this.vampireTrackingManager = new VampireTrackingManager(this);
         this.permadeathManager = new PermadeathManager(this);
@@ -143,7 +143,7 @@ public final class RemakepirePlugin extends JavaPlugin {
 
         this.tomeVampireRestrictionListener = new TomeVampireRestrictionListener(this);
         this.getServer().getPluginManager().registerEvents(this.tomeVampireRestrictionListener, this);
-        this.getServer().getPluginManager().registerEvents(this.endermanRemovalListener, this);
+        this.getServer().getPluginManager().registerEvents(this.spawnRemovalListener, this);
         this.getServer().getPluginManager().registerEvents(new MovementBoundaryListener(this), this);
         this.getServer().getPluginManager().registerEvents(new MountTeamsListener(this), this);
         this.getServer().getPluginManager().registerEvents(new FourthBookRevealListener(this), this);
@@ -246,8 +246,8 @@ public final class RemakepirePlugin extends JavaPlugin {
             this.vampireTexturePackManager.shutdown();
         }
 
-        if (this.endermanRemovalListener != null) {
-            this.endermanRemovalListener.shutdown();
+        if (this.spawnRemovalListener != null) {
+            this.spawnRemovalListener.shutdown();
         }
 
         if (this.vampireTrackingManager != null) {
@@ -569,8 +569,8 @@ public final class RemakepirePlugin extends JavaPlugin {
         return this.passiveMobSpawningManager;
     }
 
-    public EndermanRemovalListener getEndermanRemovalListener() {
-        return this.endermanRemovalListener;
+    public SpawnRemovalListener getSpawnRemovalListener() {
+        return this.spawnRemovalListener;
     }
 
     public VampireTurningManager getVampireTurningManager() {

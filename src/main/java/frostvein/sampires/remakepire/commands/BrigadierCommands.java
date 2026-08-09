@@ -121,6 +121,8 @@ public class BrigadierCommands {
                 .then(Commands.literal("reopen").executes((ctx) -> this.executePowCommand(ctx, "reopen")))
                 .then(Commands.literal("forcedcure-reopen").executes((ctx) -> this.executePowCommand(ctx, "reopen")))
 
+                .then(Commands.literal("stake-myself").executes((ctx) -> this.executePowCommand(ctx, "stake-myself")))
+
                 .then(Commands.literal("admin").requires((source) -> source.getSender().hasPermission("vampiresmp.admin"))
                         .then(Commands.literal("init").executes((ctx) -> this.executePowCommand(ctx, "admin", "init"))
                                 .then(Commands.literal("cancel").executes((ctx) -> this.executePowCommand(ctx, "admin", "init", "cancel"))))
@@ -136,6 +138,11 @@ public class BrigadierCommands {
                                     String player = StringArgumentType.getString(ctx, "player");
                                     return this.executePowCommand(ctx, "admin", "make_incurable", player);
                                 })))
+
+                        .then((Commands.literal("playercount")
+                                .then(Commands.literal("all").executes((ctx) -> this.executePowCommand(ctx, "admin", "playercount", "all"))))
+                                .then(Commands.literal("human").executes((ctx) -> this.executePowCommand(ctx, "admin", "playercount", "human")))
+                                .then(Commands.literal("vampire").executes((ctx) -> this.executePowCommand(ctx, "admin", "playercount", "vampire"))))
 
                         .then(Commands.literal("break_warning").executes((ctx) -> this.executePowCommand(ctx, "admin", "break_warning")))
 
@@ -217,7 +224,10 @@ public class BrigadierCommands {
                                 .then(Commands.literal("all").executes((ctx) -> this.executePowCommand(ctx, "admin", "removeendermen", "all"))))
                                 .then(Commands.literal("toggle").executes((ctx) -> this.executePowCommand(ctx, "admin", "removeendermen", "toggle")))
                                 .then(Commands.literal("status").executes((ctx) -> this.executePowCommand(ctx, "admin", "removeendermen", "status"))))
-
+                        .then((Commands.literal("removecreepers")
+                                .then(Commands.literal("all").executes((ctx) -> this.executePowCommand(ctx, "admin", "removecreepers", "all"))))
+                                .then(Commands.literal("toggle").executes((ctx) -> this.executePowCommand(ctx, "admin", "removecreepers", "toggle")))
+                                .then(Commands.literal("status").executes((ctx) -> this.executePowCommand(ctx, "admin", "removecreepers", "status"))))
 
                         .then(Commands.literal("spawnanimals").executes((ctx) -> this.executePowCommand(ctx, "admin", "spawnanimals")))
 

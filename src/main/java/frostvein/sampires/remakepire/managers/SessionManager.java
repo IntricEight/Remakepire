@@ -634,7 +634,6 @@ public class SessionManager {
         world.setGameRule(GameRule.KEEP_INVENTORY, true);
         world.setGameRule(GameRule.ANNOUNCE_ADVANCEMENTS, false);
         world.setGameRule(GameRule.DO_MOB_LOOT, true);
-        world.setGameRule(GameRule.MOB_GRIEFING, false);
         world.setGameRule(GameRule.REDUCED_DEBUG_INFO, true);
         world.setGameRule(GameRule.SHOW_DEATH_MESSAGES, false);
         world.setGameRule(GameRule.DO_INSOMNIA, false);
@@ -655,7 +654,6 @@ public class SessionManager {
         world.setGameRule(GameRule.KEEP_INVENTORY, true);
         world.setGameRule(GameRule.ANNOUNCE_ADVANCEMENTS, false);
         world.setGameRule(GameRule.DO_MOB_LOOT, false);
-        world.setGameRule(GameRule.MOB_GRIEFING, false);
         world.setGameRule(GameRule.REDUCED_DEBUG_INFO, false);
         world.setGameRule(GameRule.SHOW_DEATH_MESSAGES, false);
         world.setGameRule(GameRule.DO_INSOMNIA, false);

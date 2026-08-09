@@ -26,7 +26,7 @@ public class MovementBoundaryListener implements Listener {
     private final RemakepirePlugin plugin;
     private final FileConfiguration textConfig;
     private final String TOWN_NAME;
-    public static final String LEFT_OAKHURST_TAG = "LeftOakhurst";
+    public static final String LEFT_OAKHURST_TAG = "LeftOakhurst", OVERRIDE_TAG = "BorderOverride";
     private final boolean CUSTOM_BORDER_MESSAGES;
 
     /**
@@ -483,7 +483,7 @@ public class MovementBoundaryListener implements Listener {
         // Check if the border is currently enabled
         if (this.plugin.getSessionManager().isBorderActive()) {
             // Each of the following is a leave condition
-            if (player.getScoreboardTags().contains(VampireManager.CURED_VAMPIRE_TAG)) {
+            if (player.getScoreboardTags().contains(OVERRIDE_TAG) || player.getScoreboardTags().contains(VampireManager.CURED_VAMPIRE_TAG)) {
                 return true;
 
             } else if (!this.plugin.getVampireManager().isHuman(player)) {
