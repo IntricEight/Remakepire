@@ -131,7 +131,7 @@ public class CombatListener implements Listener {
                 ItemStack attackerWeapon = attacker.getInventory().getItemInMainHand();
 
                 // Prevent stakes from being used during their cooldown
-                if (ItemTypeChecking.isStake(attackerWeapon.getType()) && attacker.hasCooldown(Material.WOODEN_SWORD)) {
+                if (ItemTypeChecking.isStake(attackerWeapon.getType()) && (attacker.hasCooldown(Material.WOODEN_SWORD) || attacker.hasCooldown(Material.WOODEN_SPEAR))) {
                     event.setCancelled(true);
 
                 } else {
@@ -184,7 +184,12 @@ public class CombatListener implements Listener {
                             attacker.getInventory().setItemInMainHand(new ItemStack(Material.AIR));
                             attacker.sendMessage("§cYour wooden stake breaks apart on impact.");
                             attacker.getWorld().playSound(attacker.getLocation(), Sound.ENTITY_ITEM_BREAK, SoundCategory.PLAYERS, 1.0F, 1.0F);
-                            attacker.setCooldown(Material.WOODEN_SWORD, this.plugin.getConfigManager().getWoodenStakeCooldownTicks());
+
+                            if (weapon.getType() == Material.WOODEN_SWORD) {
+                                attacker.setCooldown(Material.WOODEN_SWORD, this.plugin.getConfigManager().getWoodenStakeCooldownTicks());
+                            } else if (weapon.getType() == Material.WOODEN_SPEAR) {
+                                attacker.setCooldown(Material.WOODEN_SPEAR, this.plugin.getConfigManager().getWoodenStakeCooldownTicks());
+                            }
                         }
 
                     } else {
@@ -192,7 +197,8 @@ public class CombatListener implements Listener {
 
                         // Apply the impact of a stake to a vampire
                         if (ItemTypeChecking.isStake(weaponCheck.getType()) && this.vampireManager.isVampire(victim)) {
-                            final double WOODEN_STAKE_DAMAGE = 8.0;
+                            double WOODEN_STAKE_DAMAGE = 8.0;
+                            // TODO: Double the damage if a spear is using a charge attack
                             event.setDamage(WOODEN_STAKE_DAMAGE);
 
                             this.plugin.getDeathHandler().registerWoodenStakeKill(victim, attacker);

@@ -63,7 +63,7 @@ public class ItemTypeChecking {
      * @return {@code true} if the item is a wooden sword.
      */
     public static boolean isStake(Material type) {
-        return type == Material.WOODEN_SWORD;
+        return type == Material.WOODEN_SWORD || type == Material.WOODEN_SPEAR;
     }
 
     /**
