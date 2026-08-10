@@ -11,6 +11,7 @@ import org.bukkit.GameMode;
 import org.bukkit.GameRule;
 import org.bukkit.World;
 import org.bukkit.attribute.Attribute;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -26,6 +27,7 @@ public class SessionManager {
     private final Map<UUID, Integer> pausedFoodLevels = new HashMap<>();
     private final Map<UUID, Float> pausedSaturationLevels = new HashMap<>();
     private Objective sessionObjective, sessionIDObjective, gameIDObjective;
+    CommandSender silentSender = Bukkit.getServer().createCommandSender(component -> {});
     public static final String SESSION_ID_HOLDER = "session_id_holder", GAME_ID_HOLDER = "game_id_holder";
     public static final int BEFORE_SESSION = 0, IN_SESSION = 1, PAUSED = 2, AFTER_SESSION = 3, PRE_SESSION = 4;
     private long totalSessionTime = 0L, currentPhaseStartTime = 0L;
@@ -73,7 +75,7 @@ public class SessionManager {
     public void executeServerCommand(String command) {
         try {
             Bukkit.getScheduler().runTask(this.plugin, () -> {
-                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command);
+                Bukkit.dispatchCommand(silentSender, command);
                 this.plugin.logInfo("Executed command: /" + command);
             });
         } catch (Exception e) {
