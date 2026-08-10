@@ -6,7 +6,7 @@
 
     <groupId>frostvein.sampires</groupId>
     <artifactId>Remakepire</artifactId>
-    <version>1.1.2-1.21.10</version>
+    <version>1.1.2-26.2</version>
     <packaging>jar</packaging>
 
     <name>Remakepire</name>
@@ -67,7 +67,7 @@
         <dependency>
             <groupId>io.papermc.paper</groupId>
             <artifactId>paper-api</artifactId>
-            <version>1.21.10-R0.1-SNAPSHOT</version>
+            <version>[26.2.build,26.3)</version>
             <scope>provided</scope>
         </dependency>
 
@@ -75,7 +75,7 @@
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
-            <version>2.10.1</version>
+            <version>2.14.0</version>
         </dependency>
     </dependencies>
 </project>

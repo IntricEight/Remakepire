@@ -71,7 +71,7 @@ public class WeaponDropRemover implements Listener {
             if (event.getCaught() instanceof Item caughtItem) {
                 ItemStack itemStack = caughtItem.getItemStack();
 
-                if (itemStack != null && isWeapon(itemStack.getType())) {
+                if (isWeapon(itemStack.getType())) {
                     Material replacement = this.getRandomFishingReplacement();
                     ItemStack replacementItem = new ItemStack(replacement, 1);
                     caughtItem.setItemStack(replacementItem);

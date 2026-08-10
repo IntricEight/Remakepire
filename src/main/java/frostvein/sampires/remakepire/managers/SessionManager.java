@@ -8,7 +8,7 @@ import java.util.UUID;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
-import org.bukkit.GameRule;
+import org.bukkit.GameRules;
 import org.bukkit.World;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.Player;
@@ -628,16 +628,17 @@ public class SessionManager {
     private void setInSessionRules() {
         World world = this.plugin.getWorld();
 
-        world.setGameRule(GameRule.DO_DAYLIGHT_CYCLE, true);
-        world.setGameRule(GameRule.DO_WEATHER_CYCLE, false);
-        world.setGameRule(GameRule.DO_MOB_SPAWNING, true);
-        world.setGameRule(GameRule.KEEP_INVENTORY, true);
-        world.setGameRule(GameRule.ANNOUNCE_ADVANCEMENTS, false);
-        world.setGameRule(GameRule.DO_MOB_LOOT, true);
-        world.setGameRule(GameRule.REDUCED_DEBUG_INFO, true);
-        world.setGameRule(GameRule.SHOW_DEATH_MESSAGES, false);
-        world.setGameRule(GameRule.DO_INSOMNIA, false);
-        world.setGameRule(GameRule.DO_IMMEDIATE_RESPAWN, true);
+        world.setGameRule(GameRules.ADVANCE_TIME, true);
+        world.setGameRule(GameRules.ADVANCE_WEATHER, false);
+        world.setGameRule(GameRules.SPAWN_MOBS, true);
+        world.setGameRule(GameRules.KEEP_INVENTORY, true);
+        world.setGameRule(GameRules.SHOW_ADVANCEMENT_MESSAGES, false);
+        world.setGameRule(GameRules.MOB_DROPS, true);
+        world.setGameRule(GameRules.REDUCED_DEBUG_INFO, true);
+        world.setGameRule(GameRules.SHOW_DEATH_MESSAGES, false);
+        world.setGameRule(GameRules.SPAWN_PHANTOMS, false);
+        world.setGameRule(GameRules.IMMEDIATE_RESPAWN, true);
+        world.setGameRule(GameRules.RAIDS, false);
 
         this.setNpcSpawningGamerules(world, plugin.getConfigManager().areNpcMobsEnabled());
     }
@@ -648,16 +649,17 @@ public class SessionManager {
     private void setOutOfSessionRules() {
         World world = this.plugin.getWorld();
 
-        world.setGameRule(GameRule.DO_DAYLIGHT_CYCLE, false);
-        world.setGameRule(GameRule.DO_WEATHER_CYCLE, false);
-        world.setGameRule(GameRule.DO_MOB_SPAWNING, false);
-        world.setGameRule(GameRule.KEEP_INVENTORY, true);
-        world.setGameRule(GameRule.ANNOUNCE_ADVANCEMENTS, false);
-        world.setGameRule(GameRule.DO_MOB_LOOT, false);
-        world.setGameRule(GameRule.REDUCED_DEBUG_INFO, false);
-        world.setGameRule(GameRule.SHOW_DEATH_MESSAGES, false);
-        world.setGameRule(GameRule.DO_INSOMNIA, false);
-        world.setGameRule(GameRule.DO_IMMEDIATE_RESPAWN, false);
+        world.setGameRule(GameRules.ADVANCE_TIME, false);
+        world.setGameRule(GameRules.ADVANCE_WEATHER, false);
+        world.setGameRule(GameRules.SPAWN_MOBS, false);
+        world.setGameRule(GameRules.KEEP_INVENTORY, true);
+        world.setGameRule(GameRules.SHOW_ADVANCEMENT_MESSAGES, false);
+        world.setGameRule(GameRules.MOB_DROPS, false);
+        world.setGameRule(GameRules.REDUCED_DEBUG_INFO, false);
+        world.setGameRule(GameRules.SHOW_DEATH_MESSAGES, false);
+        world.setGameRule(GameRules.SPAWN_PHANTOMS, false);
+        world.setGameRule(GameRules.IMMEDIATE_RESPAWN, false);
+        world.setGameRule(GameRules.RAIDS, false);
 
         this.setNpcSpawningGamerules(world, false);
     }
@@ -747,9 +749,8 @@ public class SessionManager {
      * @param enabled {@code true} if NPC mobs should be able to spawn naturally.
      */
     private void setNpcSpawningGamerules(World world, boolean enabled) {
-        world.setGameRule(GameRule.DO_TRADER_SPAWNING, enabled);
-        world.setGameRule(GameRule.DO_PATROL_SPAWNING, enabled);
-        world.setGameRule(GameRule.DISABLE_RAIDS, enabled);
+        world.setGameRule(GameRules.SPAWN_WANDERING_TRADERS, enabled);
+        world.setGameRule(GameRules.SPAWN_PATROLS, enabled);
     }
 
     /**
