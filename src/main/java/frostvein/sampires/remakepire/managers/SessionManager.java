@@ -752,6 +752,7 @@ public class SessionManager {
         world.setGameRule(GameRule.DO_TRADER_SPAWNING, enabled);
         world.setGameRule(GameRule.DO_PATROL_SPAWNING, enabled);
         world.setGameRule(GameRule.DISABLE_RAIDS, enabled);
+        this.plugin.getSpawnRemovalListener().setWitchRemovalEnabled(!enabled);
     }
 
     /**
