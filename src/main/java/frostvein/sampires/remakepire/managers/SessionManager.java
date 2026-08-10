@@ -29,7 +29,7 @@ public class SessionManager {
     public static final String SESSION_ID_HOLDER = "session_id_holder", GAME_ID_HOLDER = "game_id_holder";
     public static final int BEFORE_SESSION = 0, IN_SESSION = 1, PAUSED = 2, AFTER_SESSION = 3, PRE_SESSION = 4;
     private long totalSessionTime = 0L, currentPhaseStartTime = 0L;
-    private boolean trackingSessionTime = false;
+    private boolean trackingSessionTime = false, setToDay = false, setToNight = false;
 
     public static final String INFORMED_IRON_BLOCK_REPEL = "informed_iron_block_reply";
     public static final String INFORMED_CRAFTING_ITEMS = "informed_crafting_items";
@@ -61,6 +61,7 @@ public class SessionManager {
      * Begin running regular player status updates depending on the session status.
      */
     public void startBackgroundTasks() {
+        this.startDaylightControlTask();
         this.startSaturationTask();
         this.startActionBarTask();
     }
@@ -93,6 +94,35 @@ public class SessionManager {
      */
     private void unfreezeTick() {
         this.executeServerCommand("tick unfreeze");
+    }
+
+    /**
+     * Change the Daylight cycle's speed depending on the day/night cycle tick and the session state
+     */
+    private void startDaylightControlTask() {
+        (new BukkitRunnable() {
+            public void run() {
+                // Can't use EffectManager's isDayTime function because EffectManager might not have been instantiated yet
+                final long time = SessionManager.this.plugin.getWorld().getTime();
+                final boolean isDay = time >= 0L && time < 12000L;
+
+                // Set the day time speed for day or night time, but avoid doing the full calculation every loop
+                if (!setToDay && isDay) {
+                    setToDay = true;
+                    setToNight = false;
+
+                    SessionManager.this.executeServerCommand("time rate " + 10.0 / SessionManager.this.plugin.getConfig().getDouble("day-length-minutes", 10.0));
+                    SessionManager.this.plugin.logInfo("Setting the DAY cycle speed to the plugin's configuration settings");
+
+                } else if (!setToNight && !isDay) {
+                    setToDay = false;
+                    setToNight = true;
+
+                    SessionManager.this.executeServerCommand("time rate " + 10.0 / SessionManager.this.plugin.getConfig().getDouble("night-length-minutes", 10.0));
+                    SessionManager.this.plugin.logInfo("Setting the NIGHT cycle speed to the plugin's configuration settings");
+                }
+            }
+        }).runTaskTimer(this.plugin, 0L, 20L);
     }
 
     /**
@@ -641,6 +671,10 @@ public class SessionManager {
         world.setGameRule(GameRules.RAIDS, false);
 
         this.setNpcSpawningGamerules(world, plugin.getConfigManager().areNpcMobsEnabled());
+
+        //Trigger the day-night cycle speed adjustments
+        setToDay = false;
+        setToNight = false;
     }
 
     /**
