@@ -397,13 +397,11 @@ public class IronWeaknessListener implements Listener {
 
 
     /**
-     * Retrieve the location of the nearest
-     *
-     * Determine if the player is within a distance of a silver-typed block.
+     * Retrieve the location of the nearest silver-typed block to the player within the radius.
      *
      * @param location the player's location.
      * @param radius the range around the player to search.
-     * @return {@code true} if the player is nearby a silver block.
+     * @return The {@code Location} of the silver block, or {@code null} if none is found.
      */
     private @Nullable Location getNearestIronBlock(Location location, double radius) {
         final int x = location.getBlockX(), y = location.getBlockY(), z = location.getBlockZ();
