@@ -4,6 +4,7 @@ import io.papermc.paper.event.entity.WaterBottleSplashEvent;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import javax.annotation.Nullable;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
@@ -91,7 +92,7 @@ public class HolyWaterEffectManager implements Listener {
      * @param player the player being searched.
      * @return The bottle of holy water, or {@code null} if none is found.
      */
-    public ItemStack findHolyWater(Player player) {
+    public @Nullable ItemStack findHolyWater(Player player) {
         for (ItemStack item : player.getInventory()) {
             if (ItemTypeChecking.isHolyWater(item)) {
                 return item;
