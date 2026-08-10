@@ -13,7 +13,7 @@ public class ItemTypeChecking {
      * @return {@code true} if the item is air or nonexistent.
      */
     public static boolean isBareFist(Material type) {
-        return type == Material.AIR;
+        return type.isAir();
     }
 
     /**
