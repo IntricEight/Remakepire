@@ -2,8 +2,6 @@ package frostvein.sampires.remakepire.commands;
 
 import java.util.ArrayList;
 import java.util.List;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.command.Command;
@@ -42,7 +40,7 @@ public class VampireAbilityCommand implements CommandExecutor, TabCompleter {
      */
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage(Component.text("Only players can use vampire abilities.", NamedTextColor.RED));
+            sender.sendMessage("§cOnly players can use vampire abilities.");
             return true;
 
         } else if (args.length == 0) {

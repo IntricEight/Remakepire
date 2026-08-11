@@ -5,8 +5,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -125,11 +123,8 @@ public class PowCommand implements CommandExecutor, TabCompleter {
                     return true;
 
                 default:
-                    sender.sendMessage(Component.text("Unknown subcommand: " + subCommand, NamedTextColor.RED));
-                    sender.sendMessage(Component.text("Use ", NamedTextColor.GRAY)
-                            .append(Component.text("/pow help", NamedTextColor.YELLOW))
-                            .append(Component.text(" for a list of commands", NamedTextColor.GRAY))
-                    );
+                    sender.sendMessage("§cUnknown subcommand: " + subCommand);
+                    sender.sendMessage("§7Use §e/pow help §7for a list of commands");
                     return true;
             }
         }
@@ -144,7 +139,7 @@ public class PowCommand implements CommandExecutor, TabCompleter {
      */
     private boolean handleAdminCommand(CommandSender sender, String[] args) {
         if (!sender.hasPermission("vampiresmp.admin")) {
-            sender.sendMessage(Component.text("You don't have permission to use admin commands.", NamedTextColor.RED));
+            sender.sendMessage("§cYou don't have permission to use admin commands.");
             return true;
 
         } else if (args.length == 0) {
@@ -175,8 +170,7 @@ public class PowCommand implements CommandExecutor, TabCompleter {
 
         // Only let the sender know about the admin option if they have access to it
         if (sender.hasPermission("vampiresmp.admin")) {
-            sender.sendMessage(Component.text("/pow admin", NamedTextColor.YELLOW)
-                    .append(Component.text(" - Admin commands (requires permission)", NamedTextColor.GRAY)));
+            sender.sendMessage("§e/pow admin §7- Admin commands (requires permission)");
         }
 
         sender.sendMessage("§e/pow vability <name> §7- Use vampire abilities");
