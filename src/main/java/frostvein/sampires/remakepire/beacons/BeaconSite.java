@@ -188,8 +188,10 @@ public class BeaconSite {
     @Deprecated
     public String getRemainingCooldownString() {
         long remaining = this.getRemainingCooldownMs();
+
         if (remaining <= 0L) {
             return "Ready";
+
         } else {
             long minutes = remaining / 60000L;
             long seconds = remaining % 60000L / 1000L;
@@ -215,8 +217,7 @@ public class BeaconSite {
      * @return A {@code String} of the beacon's current details.
      */
     public String getStatusString(SessionManager sessionManager) {
-        String stateColor = this.state.getColorCode();
-        String timeAgo = this.getTimeSinceStateChange();
+        final String stateColor = this.state.getColorCode(), timeAgo = this.getTimeSinceStateChange();
         String status = String.format("§e%s §7at §f(%.0f, %.0f, %.0f) §7in §f%s", this.name, this.x, this.y, this.z, this.worldName);
         status = status + String.format("\n  §7State: %s%s §7| Radius: §e%d blocks", stateColor, this.state.getDisplayName(), this.captureRadius);
 
@@ -237,14 +238,15 @@ public class BeaconSite {
     /** @deprecated */
     @Deprecated
     public String getStatusString() {
-        String stateColor = this.state.getColorCode();
-        String timeAgo = this.getTimeSinceStateChange();
+        final String stateColor = this.state.getColorCode(), timeAgo = this.getTimeSinceStateChange();
         String status = String.format("§e%s §7at §f(%.0f, %.0f, %.0f) §7in §f%s", this.name, this.x, this.y, this.z, this.worldName);
         status = status + String.format("\n  §7State: %s%s §7| Radius: §e%d blocks", stateColor, this.state.getDisplayName(), this.captureRadius);
+
         if (this.lastChangedBy != null) {
             status = status + String.format("\n  §7Last changed by: §f%s §7(%s ago)", this.lastChangedBy, timeAgo);
         }
 
+        // Display the cooldown status
         if (this.isOnConversionCooldown()) {
             status = status + String.format("\n  §c⏰ Conversion cooldown: %s remaining", this.getRemainingCooldownString());
         } else if (this.state != BeaconSite.BeaconState.NEUTRAL) {
