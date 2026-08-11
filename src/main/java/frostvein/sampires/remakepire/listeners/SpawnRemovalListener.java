@@ -16,6 +16,7 @@ import frostvein.sampires.remakepire.RemakepirePlugin;
 public class SpawnRemovalListener implements Listener {
     private final RemakepirePlugin plugin;
     private boolean endermanRemovalEnabled, creeperRemovalEnabled;
+    private boolean witchRemovalEnabled;
 
     /**
      * Create an instance of the Mob Spawn Removal listener.
@@ -27,6 +28,7 @@ public class SpawnRemovalListener implements Listener {
 
         this.endermanRemovalEnabled = this.plugin.getConfig().getBoolean("hostile-mob-spawning.enderman-removal", true);
         this.creeperRemovalEnabled = this.plugin.getConfig().getBoolean("hostile-mob-spawning.creeper-removal", false);
+        this.witchRemovalEnabled = !this.plugin.getConfigManager().areNpcMobsEnabled();
 
         plugin.logInfo("SpawnRemovalListener initialized");
     }
@@ -34,7 +36,8 @@ public class SpawnRemovalListener implements Listener {
     /**
      * Prevent certain entities from spawning in the world:
      * Setting controlled: Creepers, Endermen.<br/>
-     * Prevent chickens from spawning if animal breeding is disabled, and we are out of session.
+     * Config controlled: Witches.<br/>
+     * Prevent chickens from spawning if animal breeding is disabled, and the game is out of session.
      *
      * @param event a non-player entity spawns.
      */
@@ -52,6 +55,9 @@ public class SpawnRemovalListener implements Listener {
         } else if (this.creeperRemovalEnabled && event.getEntityType() == EntityType.CREEPER) {
             event.setCancelled(true);
             this.plugin.logInfo("Prevented Creeper spawn at " + event.getLocation().getBlockX() + ", " + event.getLocation().getBlockY() + ", " + event.getLocation().getBlockZ() + " (Reason: " + event.getSpawnReason() + ")");
+
+        } else if (this.witchRemovalEnabled && event.getEntityType() == EntityType.WITCH) {
+            event.setCancelled(true);
         }
     }
 
@@ -141,6 +147,24 @@ public class SpawnRemovalListener implements Listener {
         this.plugin.saveConfig();
 
         this.plugin.logInfo("Creeper removal " + (enabled ? "ENABLED" : "DISABLED"));
+    }
+
+    /**
+     * Retrieve if Witches should be removed from the game world.
+     *
+     * @return {@code true} if Witch spawning is prevented.
+     */
+    public boolean isWitchRemovalEnabled() {
+        return this.creeperRemovalEnabled;
+    }
+
+    /**
+     * Choose if Witches should be removed from the game world.
+     *
+     * @param enabled should Witch spawning be prevented.
+     */
+    public void setWitchRemovalEnabled(boolean enabled) {
+        this.witchRemovalEnabled = enabled;
     }
 
     /**

@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import javax.annotation.Nullable;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Sound;
@@ -556,7 +557,7 @@ public class VampireAbilityManager {
      * @param abilityName the name of the ability.
      * @return A string description of the ability's condition.
      */
-    public String getGlobalCooldownInfo(String abilityName) {
+    public @Nullable String getGlobalCooldownInfo(String abilityName) {
         GlobalCooldownData data = this.globalCooldowns.get(abilityName.toLowerCase());
 
         if (data != null && this.isOnGlobalCooldown(abilityName)) {

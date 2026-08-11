@@ -4,6 +4,9 @@ import io.papermc.paper.event.entity.WaterBottleSplashEvent;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import javax.annotation.Nullable;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
@@ -14,8 +17,12 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.ThrownPotion;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.PotionSplashEvent;
+import org.bukkit.event.entity.ProjectileLaunchEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitTask;
 import frostvein.sampires.remakepire.RemakepirePlugin;
@@ -73,6 +80,50 @@ public class HolyWaterEffectManager implements Listener {
     }
 
     /**
+     * Prevent higher vampires from throwing bottles of holy water.
+     *
+     * @param event a projectile is released or thrown.
+     */
+    @EventHandler(
+            priority = EventPriority.HIGH
+    )
+    public void onProjectileLaunch(ProjectileLaunchEvent event) {
+        if (event.getEntity() instanceof ThrownPotion potion) {
+            if (potion.getShooter() instanceof Player player) {
+                if (this.plugin.getVampireManager().isVampireStage2OrHigher(player)) {
+                    ItemStack potionItem = potion.getItem();
+
+                    if (ItemTypeChecking.isHolyWater(potionItem)) {
+                        event.setCancelled(true);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Prevent higher vampires from throwing bottles of holy water.
+     *
+     * @param event a player interacts with an object.
+     */
+    @EventHandler
+    public void onPlayerInteract(PlayerInteractEvent event) {
+        Player player = event.getPlayer();
+
+        try {
+            if (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK) {
+                if (this.plugin.getVampireManager().isVampireStage2OrHigher(player)) {
+                    // Check if the player is attempting to throw a bottle of holy water
+                    if (ItemTypeChecking.isHolyWater(event.getItem())) {
+                        event.setCancelled(true);
+                        player.sendMessage(Component.text("The Holy Water burns your hand as you try to throw it! You feel unable to bring yourself to use this item...", NamedTextColor.RED));
+                    }
+                }
+            }
+        } catch (Exception ignored) {}
+    }
+
+    /**
      * Determine if the entity should be effected by holy water.
      *
      * @param entity the entity hit by the holy water.
@@ -91,7 +142,7 @@ public class HolyWaterEffectManager implements Listener {
      * @param player the player being searched.
      * @return The bottle of holy water, or {@code null} if none is found.
      */
-    public ItemStack findHolyWater(Player player) {
+    public @Nullable ItemStack findHolyWater(Player player) {
         for (ItemStack item : player.getInventory()) {
             if (ItemTypeChecking.isHolyWater(item)) {
                 return item;
@@ -185,12 +236,12 @@ public class HolyWaterEffectManager implements Listener {
     private void notifyVampireDisabled(Player vampire) {
         int duration = this.configManager.getHolyWaterDisableDurationSeconds();
 
-        vampire.sendMessage("§cThe holy water sears your vampiric essence!");
+        vampire.sendMessage(Component.text("The holy water sears your vampiric essence!", NamedTextColor.RED));
 
         if (duration >= 60) {
-            vampire.sendMessage("§cYour abilities and blood regeneration have been disabled for " + duration / 60 + " minute" + (duration / 60 != 1 ? "s" : "") + ".");
+            vampire.sendMessage(Component.text("Your abilities and blood regeneration have been disabled for " + duration / 60 + " minute" + (duration / 60 != 1 ? "s" : "") + ".", NamedTextColor.RED));
         } else {
-            vampire.sendMessage("§cYour abilities and blood regeneration have been disabled for " + duration + " second" + (duration != 1 ? "s" : "") + ".");
+            vampire.sendMessage(Component.text("Your abilities and blood regeneration have been disabled for " + duration + " second" + (duration != 1 ? "s" : "") + ".", NamedTextColor.RED));
         }
 
         vampire.playSound(vampire, Sound.ENTITY_GENERIC_HURT, SoundCategory.MASTER, 1.0F, 0.8F);
@@ -204,7 +255,7 @@ public class HolyWaterEffectManager implements Listener {
      * @param vampire the player whose abilities are enable.
      */
     private void notifyVampireEnabled(Player vampire) {
-        vampire.sendMessage("§cYou feel your dark powers flowing through you once more.");
+        vampire.sendMessage(Component.text("You feel your dark powers flowing through you once more.", NamedTextColor.RED));
         vampire.playSound(vampire, Sound.BLOCK_BEACON_ACTIVATE, SoundCategory.MASTER, 0.5F, 0.8F);
     }
 
@@ -232,7 +283,7 @@ public class HolyWaterEffectManager implements Listener {
             Player vampire = Bukkit.getPlayer(vampireId);
 
             if (vampire != null && vampire.isOnline()) {
-                vampire.sendMessage("§aAn admin has restored your vampiric abilities.");
+                vampire.sendMessage(Component.text("An admin has restored your vampiric abilities.", NamedTextColor.RED));
             }
         }
 

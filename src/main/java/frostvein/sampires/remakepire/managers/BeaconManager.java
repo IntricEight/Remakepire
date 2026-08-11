@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import javax.annotation.Nullable;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -447,7 +448,7 @@ public class BeaconManager {
      * @param beaconName the beacon's name.
      * @return A description of the issue with the item display.
      */
-    public String getBeaconDisplayDebugInfo(String beaconName) {
+    public @Nullable String getBeaconDisplayDebugInfo(String beaconName) {
         BeaconSite beacon = this.getBeacon(beaconName);
 
         if (beacon == null) {
@@ -500,7 +501,7 @@ public class BeaconManager {
      * @param location a player's location.
      * @return The {@code BeaconSite} of the nearest beacon within a set distance.
      */
-    public BeaconSite getNearestHolyBeacon(Location location) {
+    public @Nullable BeaconSite getNearestHolyBeacon(Location location) {
         if (location != null && location.getWorld() != null) {
             BeaconSite nearestHolyBeacon = null;
             double nearestDistance = Double.MAX_VALUE;
@@ -533,7 +534,7 @@ public class BeaconManager {
      * @param maxRange the distance to search within.
      * @return The {@code BeaconSite} of the nearest beacon within the given distance.
      */
-    public BeaconSite getNearestHolyBeacon(Location location, double maxRange) {
+    public @Nullable BeaconSite getNearestHolyBeacon(Location location, double maxRange) {
         if (location != null && location.getWorld() != null) {
             BeaconSite nearestHolyBeacon = null;
             double nearestDistance = Double.MAX_VALUE;
@@ -1082,7 +1083,7 @@ public class BeaconManager {
      * @param location the location to check.
      * @return The {@code Location} of the lowest block of surface air.
      */
-    private Location findHighestBlock(Location location) {
+    private @Nullable Location findHighestBlock(Location location) {
         if (location != null && location.getWorld() != null) {
             Location highest = location.clone();
             int maxY = location.getWorld().getMaxHeight() - 1;
@@ -1190,7 +1191,7 @@ public class BeaconManager {
      * @param location a player's location.
      * @return A {@code BeaconSite} of the closest holy beacon to the location.
      */
-    public BeaconSite checkHolySuppression(Location location) {
+    public @Nullable BeaconSite checkHolySuppression(Location location) {
         if (location != null && location.getWorld() != null) {
             BeaconSite closestHolyBeacon = null;
             double closestDistance = Double.MAX_VALUE;
