@@ -1,5 +1,7 @@
 package frostvein.sampires.remakepire.commands;
 
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -28,7 +30,7 @@ public class TexturePackCommand implements CommandExecutor {
      */
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage("§cThis command can only be used by players.");
+            sender.sendMessage(Component.text("This command can only be used by players.", NamedTextColor.RED));
 
         } else {
             if (args.length > 0) {
@@ -37,7 +39,7 @@ public class TexturePackCommand implements CommandExecutor {
                 if (player.hasPermission("vampiresmp.admin")) {
                     if (subCommand.equals("all")) {
                         this.texturePackManager.ensureAllVampiresHaveTexturePack();
-                        player.sendMessage("§aApplied vampire texture pack to all online vampires.");
+                        player.sendMessage(Component.text("Applied vampire texture pack to all online vampires.", NamedTextColor.GREEN));
                         return true;
 
                     } else if (subCommand.equals("force")) {
@@ -57,8 +59,11 @@ public class TexturePackCommand implements CommandExecutor {
             }
 
             if (!this.plugin.getVampireManager().isVampire(player)) {
-                player.sendMessage("§cOnly vampires can apply the vampire texture pack.");
-                player.sendMessage("§7Use §e/pow texture human §7to apply the human texture pack.");
+                player.sendMessage(Component.text("Only vampires can apply the vampire texture pack.", NamedTextColor.RED));
+                player.sendMessage(Component.text("Use ", NamedTextColor.GRAY)
+                        .append(Component.text("/pow texture human", NamedTextColor.YELLOW))
+                        .append(Component.text(" to apply the human texture pack.", NamedTextColor.GRAY))
+                );
 
             } else {
                 this.texturePackManager.manualApplication(player);

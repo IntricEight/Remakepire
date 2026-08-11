@@ -1270,7 +1270,7 @@ public class BeaconManager {
                     list.add(state.getColorCode() + "§l" + icon + state.getDisplayName() + " Beacons: §r§7(" + stateBeacons.size() + ")");
 
                     for (BeaconSite beacon : stateBeacons) {
-                        list.add("  " + beacon.getStatusString().replace("\n", "\n  "));
+                        list.add("  " + beacon.getStatusString(this.plugin.getSessionManager()).replace("\n", "\n  "));
                     }
 
                     list.add("");

@@ -1,6 +1,8 @@
 package frostvein.sampires.remakepire.commands;
 
 import java.util.Map;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -28,11 +30,11 @@ public class HolySitesCommand implements CommandExecutor {
      */
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage("§cOnly players can use this command.");
+            sender.sendMessage(Component.text("Only players can use this command.", NamedTextColor.RED));
             return true;
 
         } else if (!this.plugin.getVampireManager().isHuman(player) && !this.plugin.getVampireManager().isVampire(player)) {
-            player.sendMessage("§cYou sense nothing from the spiritual realm...");
+            player.sendMessage(Component.text("You sense nothing from the spiritual realm...", NamedTextColor.RED));
             return true;
 
         } else {
@@ -49,17 +51,17 @@ public class HolySitesCommand implements CommandExecutor {
                 player.sendMessage("§7Total Beacons: §e" + totalCount);
 
                 if (holyCount == 0 && desecratedCount == 0) {
-                    player.sendMessage("§7Neither light nor shadow has claimed any sites...");
+                    player.sendMessage(Component.text("Neither light nor shadow has claimed any sites...", NamedTextColor.GRAY));
                 } else if (holyCount > 0 && desecratedCount == 0) {
-                    player.sendMessage("§aThe light shines unopposed across the realm.");
+                    player.sendMessage(Component.text("The light shines unopposed across the realm.", NamedTextColor.GREEN));
                 } else if (holyCount > desecratedCount) {
-                    player.sendMessage("§eThe light holds strong, but darkness encroaches.");
+                    player.sendMessage(Component.text("The light holds strong, but darkness encroaches.", NamedTextColor.YELLOW));
                 } else if (holyCount == desecratedCount) {
-                    player.sendMessage("§6The balance of light and shadow is perfectly matched.");
+                    player.sendMessage(Component.text("The balance of light and shadow is perfectly matched.", NamedTextColor.GOLD));
                 } else if (holyCount > 0 && holyCount < desecratedCount) {
-                    player.sendMessage("§cDarkness spreads, but hope remains.");
+                    player.sendMessage(Component.text("Darkness spreads, but hope remains.", NamedTextColor.RED));
                 } else {
-                    player.sendMessage("§4The realm has fallen into shadow... no sanctuaries remain.");
+                    player.sendMessage(Component.text("The realm has fallen into shadow... no sanctuaries remain.", NamedTextColor.DARK_RED));
                 }
             } else {
                 player.sendMessage("§4§l=== BEACON STATUS ===");
@@ -69,17 +71,17 @@ public class HolySitesCommand implements CommandExecutor {
                 player.sendMessage("§7Total Beacons: §e" + totalCount);
 
                 if (desecratedCount == 0 && holyCount == 0) {
-                    player.sendMessage("§7No sites of power have been claimed by either side...");
+                    player.sendMessage(Component.text("No sites of power have been claimed by either side...", NamedTextColor.GRAY));
                 } else if (desecratedCount > 0 && holyCount == 0) {
-                    player.sendMessage("§4Darkness reigns supreme across the land.");
+                    player.sendMessage(Component.text("Darkness reigns supreme across the land.", NamedTextColor.DARK_RED));
                 } else if (desecratedCount > holyCount) {
-                    player.sendMessage("§5The shadow grows strong, but light still resists.");
+                    player.sendMessage(Component.text("The shadow grows strong, but light still resists.", NamedTextColor.DARK_PURPLE));
                 } else if (desecratedCount == holyCount) {
-                    player.sendMessage("§6The forces of darkness and light are evenly matched.");
+                    player.sendMessage(Component.text("The forces of darkness and light are evenly matched.", NamedTextColor.GOLD));
                 } else if (desecratedCount > 0 && desecratedCount < holyCount) {
-                    player.sendMessage("§cThe cursed beacons spread their influence slowly...");
+                    player.sendMessage(Component.text("The cursed beacons spread their influence slowly...", NamedTextColor.RED));
                 } else {
-                    player.sendMessage("§cThe light burns too brightly... our sanctuaries are none.");
+                    player.sendMessage(Component.text("The light burns too brightly... our sanctuaries are none.", NamedTextColor.RED));
                 }
             }
 
