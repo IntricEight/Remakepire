@@ -787,6 +787,8 @@ public class SessionManager {
     private void setNpcSpawningGamerules(World world, boolean enabled) {
         world.setGameRule(GameRules.SPAWN_WANDERING_TRADERS, enabled);
         world.setGameRule(GameRules.SPAWN_PATROLS, enabled);
+        world.setGameRule(GameRules.RAIDS, enabled);
+        this.plugin.getSpawnRemovalListener().setWitchRemovalEnabled(!enabled);
     }
 
     /**
