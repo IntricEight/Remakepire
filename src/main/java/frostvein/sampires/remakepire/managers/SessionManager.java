@@ -785,9 +785,9 @@ public class SessionManager {
      * @param enabled {@code true} if NPC mobs should be able to spawn naturally.
      */
     private void setNpcSpawningGamerules(World world, boolean enabled) {
-        world.setGameRule(GameRule.DO_TRADER_SPAWNING, enabled);
-        world.setGameRule(GameRule.DO_PATROL_SPAWNING, enabled);
-        world.setGameRule(GameRule.DISABLE_RAIDS, !enabled);
+        world.setGameRule(GameRules.SPAWN_WANDERING_TRADERS, enabled);
+        world.setGameRule(GameRules.SPAWN_PATROLS, enabled);
+        world.setGameRule(GameRules.RAIDS, enabled);
         this.plugin.getSpawnRemovalListener().setWitchRemovalEnabled(!enabled);
     }
 
