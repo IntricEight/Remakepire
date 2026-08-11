@@ -29,11 +29,10 @@ public class RallyingCryTomeAbility extends TomeAbility {
             return false;
 
         } else {
-            int affectedCount = 0;
+            boolean othersAffected = false;
 
             // Give the caster the strength effect
             player.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH, STRENGTH_DURATION, STRENGTH_AMPLIFIER, false, false));
-            ++affectedCount;
 
             List<Player> nearbyHumans = player.getNearbyEntities(EFFECT_RADIUS, EFFECT_RADIUS, EFFECT_RADIUS).stream().
                     filter((entity) -> entity instanceof Player).map((entity) -> (Player)entity).filter((nearbyPlayer) -> this.plugin.getVampireManager().isHuman(nearbyPlayer)).toList();
@@ -41,19 +40,26 @@ public class RallyingCryTomeAbility extends TomeAbility {
                     .filter((entity) -> entity instanceof Player).map((entity) -> (Player)entity).filter((nearbyPlayer) -> !this.plugin.getVampireManager().isHuman(nearbyPlayer)).toList();
 
             // Give nearby humans the strength effect
-            for(Player nearbyHuman : nearbyHumans) {
+            for (Player nearbyHuman : nearbyHumans) {
                 nearbyHuman.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH, STRENGTH_DURATION, STRENGTH_AMPLIFIER, false, false));
                 nearbyHuman.sendMessage("§6" + player.getName() + "'s rallying cry fills you with strength.");
-                ++affectedCount;
+                othersAffected = true;
             }
 
             // Inform nearby vampires of their inhumanity
-            for(Player nearbyVampire : nearbyVampires) {
+            for (Player nearbyVampire : nearbyVampires) {
                 nearbyVampire.sendMessage("§7A human nearby rallies strength to their comrades. The words find no purchase in your cold dead heart.");
             }
 
+            // Play a sound to show the ability's activation
             this.plugin.getWorld().playSound(player.getLocation(), "minecraft:entity.pillager.celebrate", 1.0F, 1.0F);
-            this.sendSuccessMessage(player, "Your rallying cry inspires those around you!");
+
+            // Inform the human on whether they buffed any allies near them
+            if (othersAffected) {
+                this.sendSuccessMessage(player, "Your rallying cry inspires those around you!");
+            } else {
+                this.sendSuccessMessage(player, "Your rallying cry echoes around you!");
+            }
 
             return true;
         }

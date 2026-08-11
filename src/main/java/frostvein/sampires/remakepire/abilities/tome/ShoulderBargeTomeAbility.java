@@ -110,7 +110,7 @@ public class ShoulderBargeTomeAbility extends TomeAbility {
         Set<UUID> hitEntities = this.chargeHitEntities.get(playerId);
 
         if (hitEntities != null) {
-            for(Entity entity : player.getNearbyEntities(1.5, 2.0, 1.5)) {
+            for (Entity entity : player.getNearbyEntities(1.5, 2.0, 1.5)) {
                 UUID entityId = entity.getUniqueId();
 
                 // Prevent item entities from being hit by the charge
@@ -203,15 +203,14 @@ public class ShoulderBargeTomeAbility extends TomeAbility {
      * Clean up any expired instances of barging effects.
      */
     private void cleanupOldEntries() {
-        final long currentTime = System.currentTimeMillis();
-        this.recentlyBargedEntities.entrySet().removeIf((entry) -> currentTime - entry.getValue() > TARGET_COOLDOWN_MS);
+        this.recentlyBargedEntities.entrySet().removeIf((entry) -> System.currentTimeMillis() - entry.getValue() > TARGET_COOLDOWN_MS);
     }
 
     /**
      * Clean up any instances of barging effects.
      */
     public void cleanup() {
-        for(BukkitTask task : this.chargingPlayers.values()) {
+        for (BukkitTask task : this.chargingPlayers.values()) {
             if (task != null && !task.isCancelled()) {
                 task.cancel();
             }

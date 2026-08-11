@@ -7,19 +7,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.Shelf;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.ThrownPotion;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityPickupItemEvent;
-import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerArmorStandManipulateEvent;
@@ -27,7 +27,6 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
-import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -42,8 +41,7 @@ public class IronWeaknessListener implements Listener {
     private final Set<Material> ironMaterials;
     private final Map<UUID, Long> knockbackCooldowns;
     // Controls how close a vampire has to get to be repelled or weakened.
-    private final double REPEL_DISTANCE = 2.0;
-    private final double WEAKNESSS_DISTANCE = 5.0;
+    private final double REPEL_DISTANCE = 2.0, WEAKNESS_DISTANCE = 5.0;
     // Controls how far and quickly a vampire gets thrown back.
     private final double REPEL_STRENGTH = 0.5;
 
@@ -127,7 +125,7 @@ public class IronWeaknessListener implements Listener {
             List<String> droppedItems = new ArrayList<>();
             ItemStack[] contents = inventory.getContents();
 
-            for(int i = 0; i < contents.length; ++i) {
+            for (int i = 0; i < contents.length; ++i) {
                 ItemStack item = contents[i];
                 if (item != null && !item.getType().isAir() && this.ironMaterials.contains(item.getType())) {
                     player.getWorld().dropItemNaturally(player.getLocation(), item);
@@ -139,7 +137,7 @@ public class IronWeaknessListener implements Listener {
 
             ItemStack[] armor = inventory.getArmorContents();
 
-            for(int i = 0; i < armor.length; ++i) {
+            for (int i = 0; i < armor.length; ++i) {
                 ItemStack item = armor[i];
 
                 if (item != null && !item.getType().isAir() && this.ironMaterials.contains(item.getType())) {
@@ -153,7 +151,7 @@ public class IronWeaknessListener implements Listener {
             inventory.setArmorContents(armor);
             ItemStack offhand = inventory.getItemInOffHand();
 
-            if (offhand != null && !offhand.getType().isAir() && this.ironMaterials.contains(offhand.getType())) {
+            if (!offhand.getType().isAir() && this.ironMaterials.contains(offhand.getType())) {
                 player.getWorld().dropItemNaturally(player.getLocation(), offhand);
                 inventory.setItemInOffHand(null);
                 droppedItems.add(offhand.getAmount() + "x " + offhand.getType().name().replace("_", " ").toLowerCase());
@@ -161,7 +159,7 @@ public class IronWeaknessListener implements Listener {
             }
 
             if (foundIronItems) {
-                player.sendMessage("§cSilver in your pocket begins to burn your skin through the cloth. You involuntarily drop it to protect yourself");
+                player.sendMessage(Component.text("Silver in your pocket begins to burn your skin through the cloth. You involuntarily drop it to protect yourself", NamedTextColor.RED));
             }
         }
     }
@@ -170,7 +168,7 @@ public class IronWeaknessListener implements Listener {
      * Remove silver items from the inventories of higher vampires.
      */
     private void scanAndRemoveIronFromInventories() {
-        for(Player player : Bukkit.getOnlinePlayers()) {
+        for (Player player : Bukkit.getOnlinePlayers()) {
             scanAndRemoveIronFromSingleInventory(player);
         }
     }
@@ -207,8 +205,8 @@ public class IronWeaknessListener implements Listener {
      * @param event a player clicks inside an inventory menu.
      */
     private void handleShiftClickIntoInventory(Player player, ItemStack item, InventoryClickEvent event) {
-        player.sendMessage("You attempt to grab the item, but it burns your hand as you reach for it.");
         event.setCancelled(true);
+        player.sendMessage(Component.text("You attempt to grab the item, but it burns your hand as you reach for it."));
     }
 
     /**
@@ -227,9 +225,10 @@ public class IronWeaknessListener implements Listener {
                 if (this.ironMaterials.contains(itemType)) {
                     event.setCancelled(true);
 
+                    // Only inform the player of the burning silver a single time
                     if (!player.getScoreboardTags().contains(SessionManager.INFORMED_PICKUP_ITEM)) {
                         player.addScoreboardTag(SessionManager.INFORMED_PICKUP_ITEM);
-                        player.sendMessage("§cThe silver you have tried to pick up burns your fingers as you touch it... Best leave it alone...");
+                        player.sendMessage(Component.text("The silver you have tried to pick up burns your fingers as you touch it... Best leave it alone...", NamedTextColor.RED));
                     }
                 }
             }
@@ -248,13 +247,14 @@ public class IronWeaknessListener implements Listener {
         Player player = event.getPlayer();
         Material armorStandItemType = event.getArmorStandItem().getType();
 
-        if (this.vampireManager.isVampireStage2OrHigher(player) && armorStandItemType != null) {
+        if (this.vampireManager.isVampireStage2OrHigher(player)) {
             if (this.ironMaterials.contains(armorStandItemType)) {
                 event.setCancelled(true);
 
+                // Only inform the player of the burning silver a single time each session
                 if (!player.getScoreboardTags().contains(SessionManager.INFORMED_PICKUP_ITEM)) {
                     player.addScoreboardTag(SessionManager.INFORMED_PICKUP_ITEM);
-                    player.sendMessage("§cThe silver you have tried to pick up burns your fingers as you touch it... Best leave it alone...");
+                    player.sendMessage(Component.text("The silver you have tried to pick up burns your fingers as you touch it... Best leave it alone...", NamedTextColor.RED));
                 }
             }
         }
@@ -274,49 +274,14 @@ public class IronWeaknessListener implements Listener {
         try {
             if (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK) {
                 if (this.vampireManager.isVampireStage2OrHigher(player)) {
-                    ItemStack item = event.getItem();
-
                     // Check if the player is taking an item from a shelf
                     if (event.getClickedBlock() != null && event.getClickedBlock().getState() instanceof Shelf) {
                         // Check if any iron items have entered the player's inventory after they have taken from the shelf
-                        Bukkit.getScheduler().runTaskLater(this.plugin, () -> {
-                            scanAndRemoveIronFromSingleInventory(player);
-                        }, 5L);
-
-                        return;
-                    }
-
-                    // Check if the player is attempting to throw a bottle of holy water
-                    if (item != null && this.isHolyWater(item)) {
-                        event.setCancelled(true);
-                        player.sendMessage("§cThe Holy Water burns your hand as you try to throw it! You feel unable to bring yourself to use this item...");
-                        return;
+                        Bukkit.getScheduler().runTaskLater(this.plugin, () -> scanAndRemoveIronFromSingleInventory(player), 5L);
                     }
                 }
             }
-        } catch (Exception e) {}
-    }
-
-    /**
-     * Prevent higher vampires from throwing bottles of holy water.
-     *
-     * @param event a projectile is released or thrown.
-     */
-    @EventHandler(
-            priority = EventPriority.HIGH
-    )
-    public void onProjectileLaunch(ProjectileLaunchEvent event) {
-        if (event.getEntity() instanceof ThrownPotion potion) {
-            if (potion.getShooter() instanceof Player player) {
-                if (this.vampireManager.isVampireStage2OrHigher(player)) {
-                    ItemStack potionItem = potion.getItem();
-
-                    if (this.isHolyWater(potionItem)) {
-                        event.setCancelled(true);
-                    }
-                }
-            }
-        }
+        } catch (Exception ignored) {}
     }
 
     /**
@@ -332,30 +297,28 @@ public class IronWeaknessListener implements Listener {
             if (!this.vampireManager.isVampireStage1(player)) {
                 Location to = event.getTo();
 
-                if (to != null) {
-                    UUID playerId = player.getUniqueId();
-                    long currentTime = System.currentTimeMillis();
+                final UUID playerId = player.getUniqueId();
+                final long currentTime = System.currentTimeMillis();
 
-                    if (this.knockbackCooldowns.containsKey(playerId)) {
-                        if (currentTime - this.knockbackCooldowns.get(playerId) < 1000L) {
-                            return;
-                        }
+                if (this.knockbackCooldowns.containsKey(playerId)) {
+                    if (currentTime - this.knockbackCooldowns.get(playerId) < 1000L) {
+                        return;
+                    }
+                }
+
+                if (this.isNearIronBlock(to, this.REPEL_DISTANCE)) {
+                    event.setCancelled(true);
+
+                    if (!player.getScoreboardTags().contains(SessionManager.INFORMED_IRON_BLOCK_REPEL)) {
+                        player.addScoreboardTag(SessionManager.INFORMED_IRON_BLOCK_REPEL);
+                        player.sendMessage(Component.text("A block of silver is repelling you from this area...", NamedTextColor.RED));
                     }
 
-                    if (this.isNearIronBlock(to, this.REPEL_DISTANCE)) {
-                        event.setCancelled(true);
-
-                        if (!player.getScoreboardTags().contains(SessionManager.INFORMED_IRON_BLOCK_REPEL)) {
-                            player.addScoreboardTag(SessionManager.INFORMED_IRON_BLOCK_REPEL);
-                            player.sendMessage("§cA block of silver is repelling you from this area...");
-                        }
-
-                        Vector knockbackDirection = this.getDirectionAwayFromNearestIron(to);
-                        knockbackDirection.multiply(this.REPEL_STRENGTH);
-                        knockbackDirection.setY(Math.max(0.3, knockbackDirection.getY()));
-                        this.plugin.getServer().getScheduler().runTask(this.plugin, () -> player.setVelocity(knockbackDirection));
-                        this.knockbackCooldowns.put(playerId, currentTime);
-                    }
+                    Vector knockbackDirection = this.getDirectionAwayFromNearestIron(to);
+                    knockbackDirection.multiply(this.REPEL_STRENGTH);
+                    knockbackDirection.setY(Math.max(0.3, knockbackDirection.getY()));
+                    this.plugin.getServer().getScheduler().runTask(this.plugin, () -> player.setVelocity(knockbackDirection));
+                    this.knockbackCooldowns.put(playerId, currentTime);
                 }
             }
         }
@@ -368,14 +331,14 @@ public class IronWeaknessListener implements Listener {
      * @return A {@code Vector} away from the nearest silver block.
      */
     private Vector getDirectionAwayFromNearestIron(Location location) {
-        int x = location.getBlockX(), y = location.getBlockY(), z = location.getBlockZ();
+        final int x = location.getBlockX(), y = location.getBlockY(), z = location.getBlockZ();
         Location nearestIron = null;
         double nearestDistance = Double.MAX_VALUE;
 
         // Search for the silver block within a cube around the player
-        for(int dx = (int)(-1 * REPEL_DISTANCE); dx <= (int)(REPEL_DISTANCE); ++dx) {
-            for(int dy = (int)(-1 * REPEL_DISTANCE); dy <= (int)(REPEL_DISTANCE); ++dy) {
-                for(int dz = (int)(-1 * REPEL_DISTANCE); dz <= (int)(REPEL_DISTANCE); ++dz) {
+        for (int dx = (int)(-1 * REPEL_DISTANCE); dx <= (int)(REPEL_DISTANCE); ++dx) {
+            for (int dy = (int)(-1 * REPEL_DISTANCE); dy <= (int)(REPEL_DISTANCE); ++dy) {
+                for (int dz = (int)(-1 * REPEL_DISTANCE); dz <= (int)(REPEL_DISTANCE); ++dz) {
                     Block block = location.getWorld().getBlockAt(x + dx, y + dy, z + dz);
 
                     if (this.ironMaterials.contains(block.getType())) {
@@ -402,12 +365,12 @@ public class IronWeaknessListener implements Listener {
      * Determine if the vampire should be weakened by nearby silver.
      */
     public void checkIronProximity() {
-        for(Player player : Bukkit.getOnlinePlayers()) {
+        for (Player player : Bukkit.getOnlinePlayers()) {
             if (this.vampireManager.isVampire(player)) {
                 Location playerLoc = player.getLocation();
 
-                if (this.isNearIronBlock(playerLoc, WEAKNESSS_DISTANCE)) {
-                    this.applyIronEffects(player);
+                if (this.isNearIronBlock(playerLoc, WEAKNESS_DISTANCE)) {
+                    this.applyIronWeakness(player);
                 }
             }
         }
@@ -423,9 +386,9 @@ public class IronWeaknessListener implements Listener {
     private boolean isNearIronBlock(Location location, double radius) {
         int x = location.getBlockX(), y = location.getBlockY(), z = location.getBlockZ();
 
-        for(double dx = -radius; dx <= radius; ++dx) {
-            for(double dy = -radius; dy <= radius; ++dy) {
-                for(double dz = -radius; dz <= radius; ++dz) {
+        for (double dx = -radius; dx <= radius; ++dx) {
+            for (double dy = -radius; dy <= radius; ++dy) {
+                for (double dz = -radius; dz <= radius; ++dz) {
                     Block block = location.getWorld().getBlockAt((int)(x + dx), (int)(y + dy), (int)(z + dz));
 
                     if (this.ironMaterials.contains(block.getType())) {
@@ -441,35 +404,15 @@ public class IronWeaknessListener implements Listener {
     /**
      * Weaken the player with the effect of silver proximity.
      *
-     * @param player the player being weakened.
+     * @param player the vampire being weakened.
      */
-    private void applyIronEffects(Player player) {
+    private void applyIronWeakness(Player player) {
         player.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, 40, 0, false, false));
 
+        // Only inform the player of the silver weakness effect a single time each session
         if (!player.getScoreboardTags().contains(SessionManager.INFORMED_IRON_BLOCK_WEAKNESS)) {
             player.addScoreboardTag(SessionManager.INFORMED_IRON_BLOCK_WEAKNESS);
-            player.sendMessage("§cA source of silver nearby is weakening you...");
-        }
-    }
-
-    /**
-     * Determine if an item is a bottle of holy water.
-     *
-     * @param item the item to check.
-     * @return {@code true} if the item is holy water (an effectless splash potion).
-     */
-    private boolean isHolyWater(ItemStack item) {
-        if (item == null) {
-            return false;
-        } else if (item.getType() != Material.SPLASH_POTION) {
-            return false;
-        } else if (!item.hasItemMeta()) {
-            return true;
-        } else if (!(item.getItemMeta() instanceof PotionMeta)) {
-            return true;
-        } else {
-            PotionMeta potionMeta = (PotionMeta)item.getItemMeta();
-            return !potionMeta.hasCustomEffects();
+            player.sendMessage(Component.text("A source of silver nearby is weakening you...", NamedTextColor.RED));
         }
     }
 }

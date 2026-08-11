@@ -5,18 +5,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import net.md_5.bungee.api.ChatMessageType;
-import net.md_5.bungee.api.chat.TextComponent;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.GameRule;
 import org.bukkit.World;
 import org.bukkit.attribute.Attribute;
-import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scoreboard.Criteria;
 import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Score;
 import org.bukkit.scoreboard.Scoreboard;
@@ -27,6 +27,7 @@ public class SessionManager {
     private final Map<UUID, Integer> pausedFoodLevels = new HashMap<>();
     private final Map<UUID, Float> pausedSaturationLevels = new HashMap<>();
     private Objective sessionObjective, sessionIDObjective, gameIDObjective;
+    CommandSender silentSender = Bukkit.getServer().createCommandSender(component -> {});
     public static final String SESSION_ID_HOLDER = "session_id_holder", GAME_ID_HOLDER = "game_id_holder";
     public static final int BEFORE_SESSION = 0, IN_SESSION = 1, PAUSED = 2, AFTER_SESSION = 3, PRE_SESSION = 4;
     private long totalSessionTime = 0L, currentPhaseStartTime = 0L;
@@ -74,7 +75,7 @@ public class SessionManager {
     public void executeServerCommand(String command) {
         try {
             Bukkit.getScheduler().runTask(this.plugin, () -> {
-                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command);
+                Bukkit.dispatchCommand(silentSender, command);
                 this.plugin.logInfo("Executed command: /" + command);
             });
         } catch (Exception e) {
@@ -102,7 +103,7 @@ public class SessionManager {
     private void startSaturationTask() {
         (new BukkitRunnable() {
             public void run() {
-                int sessionState = SessionManager.this.getSessionState();
+                final int sessionState = SessionManager.this.getSessionState();
 
                 if (sessionState == PAUSED) {
                     SessionManager.this.restorePausedFoodLevels();
@@ -136,28 +137,10 @@ public class SessionManager {
      * Display the current session status when the session is not in an active game.
      */
     private void updateActionBarForAllPlayers() {
-        String message = this.getSessionStatusMessage();
+        final String message = this.getSessionStatusMessage();
 
-        for(Player player : Bukkit.getOnlinePlayers()) {
-            this.sendActionBar(player, message);
-        }
-    }
-
-    /**
-     * Update the words above the player's hotbar.
-     *
-     * @param player the player who is receiving the message.
-     * @param message the message to be placed above the hotbar.
-     */
-    public void sendActionBar(Player player, String message) {
-        try {
-            player.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(message));
-        } catch (Exception e) {
-            try {
-                player.sendTitle("", message, 0, 25, 5);
-            } catch (Exception e1) {
-                player.sendMessage("§8[§6Session§8] " + message);
-            }
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            player.sendActionBar(Component.text(message));
         }
     }
 
@@ -181,7 +164,7 @@ public class SessionManager {
      * Apply an extreme saturation effect to all players.
      */
     private void applySaturationToAllPlayers() {
-        for(Player player : Bukkit.getOnlinePlayers()) {
+        for (Player player : Bukkit.getOnlinePlayers()) {
             player.addPotionEffect(new PotionEffect(PotionEffectType.SATURATION, 100, 100, false, false));
         }
     }
@@ -190,7 +173,7 @@ public class SessionManager {
      * Fill the food and saturation bars of all players.
      */
     private void setAllPlayersMaxFood() {
-        for(Player player : Bukkit.getOnlinePlayers()) {
+        for (Player player : Bukkit.getOnlinePlayers()) {
             player.setFoodLevel(20);
             player.setSaturation(20.0F);
         }
@@ -203,7 +186,7 @@ public class SessionManager {
         this.pausedFoodLevels.clear();
         this.pausedSaturationLevels.clear();
 
-        for(Player player : Bukkit.getOnlinePlayers()) {
+        for (Player player : Bukkit.getOnlinePlayers()) {
             this.pausedFoodLevels.put(player.getUniqueId(), player.getFoodLevel());
             this.pausedSaturationLevels.put(player.getUniqueId(), player.getSaturation());
         }
@@ -215,7 +198,7 @@ public class SessionManager {
      * Restore the food and saturation levels of all players to their last recorded values.
      */
     private void restorePausedFoodLevels() {
-        for(Player player : Bukkit.getOnlinePlayers()) {
+        for (Player player : Bukkit.getOnlinePlayers()) {
             UUID playerId = player.getUniqueId();
 
             if (this.pausedFoodLevels.containsKey(playerId)) {
@@ -423,20 +406,23 @@ public class SessionManager {
         this.sessionObjective = mainScoreboard.getObjective("smp_session");
 
         if (this.sessionObjective == null) {
-            this.sessionObjective = mainScoreboard.registerNewObjective("smp_session", "dummy", "SMP Session State");
+            this.sessionObjective = mainScoreboard.registerNewObjective("smp_session", Criteria.DUMMY, Component.text("SMP Session State"));
+
             Score sessionScore = this.sessionObjective.getScore("state");
             sessionScore.setScore(BEFORE_SESSION);
         }
 
         this.sessionIDObjective = mainScoreboard.getObjective("vsmp_session_id");
         if (this.sessionIDObjective == null) {
-            this.sessionIDObjective = mainScoreboard.registerNewObjective("vsmp_session_id", "dummy");
+            this.sessionIDObjective = mainScoreboard.registerNewObjective("vsmp_session_id", Criteria.DUMMY, Component.empty());
+
             this.sessionIDObjective.getScore(SESSION_ID_HOLDER).setScore(1);
         }
 
         this.gameIDObjective = mainScoreboard.getObjective("vsmp_game_id");
         if (this.gameIDObjective == null) {
-            this.gameIDObjective = mainScoreboard.registerNewObjective("vsmp_game_id", "dummy");
+            this.gameIDObjective = mainScoreboard.registerNewObjective("vsmp_game_id", Criteria.DUMMY, Component.empty());
+
             this.gameIDObjective.getScore(GAME_ID_HOLDER).setScore(1);
         }
 
@@ -493,7 +479,7 @@ public class SessionManager {
     public void updateAllPlayersSessionIDs() {
         int session_id = this.sessionIDObjective.getScore(SESSION_ID_HOLDER).getScore();
 
-        for(Player player : this.plugin.getWorld().getPlayers()) {
+        for (Player player : this.plugin.getWorld().getPlayers()) {
             this.sessionIDObjective.getScore(player.getName()).setScore(session_id);
         }
     }
@@ -501,7 +487,7 @@ public class SessionManager {
     public void updateAllPlayersGameIDs() {
         int game_id = this.gameIDObjective.getScore(GAME_ID_HOLDER).getScore();
 
-        for(Player player : this.plugin.getWorld().getPlayers()) {
+        for (Player player : this.plugin.getWorld().getPlayers()) {
             this.gameIDObjective.getScore(player.getName()).setScore(game_id);
         }
 
@@ -650,7 +636,6 @@ public class SessionManager {
         world.setGameRule(GameRule.KEEP_INVENTORY, true);
         world.setGameRule(GameRule.ANNOUNCE_ADVANCEMENTS, false);
         world.setGameRule(GameRule.DO_MOB_LOOT, true);
-        world.setGameRule(GameRule.MOB_GRIEFING, false);
         world.setGameRule(GameRule.REDUCED_DEBUG_INFO, true);
         world.setGameRule(GameRule.SHOW_DEATH_MESSAGES, false);
         world.setGameRule(GameRule.DO_INSOMNIA, false);
@@ -671,7 +656,6 @@ public class SessionManager {
         world.setGameRule(GameRule.KEEP_INVENTORY, true);
         world.setGameRule(GameRule.ANNOUNCE_ADVANCEMENTS, false);
         world.setGameRule(GameRule.DO_MOB_LOOT, false);
-        world.setGameRule(GameRule.MOB_GRIEFING, false);
         world.setGameRule(GameRule.REDUCED_DEBUG_INFO, false);
         world.setGameRule(GameRule.SHOW_DEATH_MESSAGES, false);
         world.setGameRule(GameRule.DO_INSOMNIA, false);
@@ -684,7 +668,7 @@ public class SessionManager {
      * Reset the tags of all online players.
      */
     private void resetPlayers() {
-        for(Player player : Bukkit.getOnlinePlayers()) {
+        for (Player player : Bukkit.getOnlinePlayers()) {
             this.resetPlayer(player);
         }
     }
@@ -709,7 +693,7 @@ public class SessionManager {
         double actualMaxHealth = player.getAttribute(Attribute.MAX_HEALTH).getValue();
         player.setHealth(actualMaxHealth);
 
-        for(String string : INFORMED_CONSTANTS) {
+        for (String string : INFORMED_CONSTANTS) {
             player.removeScoreboardTag(string);
         }
 
@@ -767,7 +751,8 @@ public class SessionManager {
     private void setNpcSpawningGamerules(World world, boolean enabled) {
         world.setGameRule(GameRule.DO_TRADER_SPAWNING, enabled);
         world.setGameRule(GameRule.DO_PATROL_SPAWNING, enabled);
-        world.setGameRule(GameRule.DISABLE_RAIDS, enabled);
+        world.setGameRule(GameRule.DISABLE_RAIDS, !enabled);
+        this.plugin.getSpawnRemovalListener().setWitchRemovalEnabled(!enabled);
     }
 
     /**
@@ -776,6 +761,6 @@ public class SessionManager {
      * @param message the message to broadcast.
      */
     private void broadcastMessage(String message) {
-        Bukkit.broadcastMessage(message);
+        Bukkit.broadcast(Component.text(message));
     }
 }

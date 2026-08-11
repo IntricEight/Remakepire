@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -22,6 +25,7 @@ public class PowCommand implements CommandExecutor, TabCompleter {
     private final ForcedCureReopenCommand forceCureReopenCommand;
     private final HolySitesCommand beaconStatusCommand;
     private final TexturePackCommand texturePackCommand;
+    private final StakeSelfCommand stakeSelfCommand;
     private final PermadeathCommand permadeathCommand;
     private final ToggleTurningCommand turningCommand;
     private final PendingMessageCommand sendMessageCommand;
@@ -40,6 +44,7 @@ public class PowCommand implements CommandExecutor, TabCompleter {
         this.forceCureReopenCommand = new ForcedCureReopenCommand(plugin);
         this.beaconStatusCommand = new HolySitesCommand(plugin);
         this.texturePackCommand = new TexturePackCommand(plugin);
+        this.stakeSelfCommand = new StakeSelfCommand(plugin);
         this.permadeathCommand = new PermadeathCommand(plugin);
         this.turningCommand = new ToggleTurningCommand(plugin);
         this.sendMessageCommand = new PendingMessageCommand(plugin);
@@ -110,14 +115,21 @@ public class PowCommand implements CommandExecutor, TabCompleter {
                     // Reopen the forced cure choice menu
                     return this.forceCureReopenCommand.onCommand(sender, command, label, subArgs);
 
+                case "stake-myself":
+                    // Allow a vampire to stake themselves
+                    return this.stakeSelfCommand.onCommand(sender, command, label, subArgs);
+
                 case "help":
                     // Print out a descriptive list of the commands available to this player
                     this.sendHelp(sender);
                     return true;
 
                 default:
-                    sender.sendMessage("§cUnknown subcommand: " + subCommand);
-                    sender.sendMessage("§7Use §e/pow help §7for a list of commands");
+                    sender.sendMessage(Component.text("Unknown subcommand: " + subCommand, NamedTextColor.RED));
+                    sender.sendMessage(Component.text("Use ", NamedTextColor.GRAY)
+                            .append(Component.text("/pow help", NamedTextColor.YELLOW))
+                            .append(Component.text(" for a list of commands", NamedTextColor.GRAY))
+                    );
                     return true;
             }
         }
@@ -132,7 +144,7 @@ public class PowCommand implements CommandExecutor, TabCompleter {
      */
     private boolean handleAdminCommand(CommandSender sender, String[] args) {
         if (!sender.hasPermission("vampiresmp.admin")) {
-            sender.sendMessage("§cYou don't have permission to use admin commands.");
+            sender.sendMessage(Component.text("You don't have permission to use admin commands.", NamedTextColor.RED));
             return true;
 
         } else if (args.length == 0) {
@@ -163,7 +175,8 @@ public class PowCommand implements CommandExecutor, TabCompleter {
 
         // Only let the sender know about the admin option if they have access to it
         if (sender.hasPermission("vampiresmp.admin")) {
-            sender.sendMessage("§e/pow admin §7- Admin commands (requires permission)");
+            sender.sendMessage(Component.text("/pow admin", NamedTextColor.YELLOW)
+                    .append(Component.text(" - Admin commands (requires permission)", NamedTextColor.GRAY)));
         }
 
         sender.sendMessage("§e/pow vability <name> §7- Use vampire abilities");
@@ -202,6 +215,7 @@ public class PowCommand implements CommandExecutor, TabCompleter {
         sender.sendMessage("§e/pow admin fixattributes <all | player> §7- Fix stuck attribute modifiers (health/speed)");
         sender.sendMessage("§e/pow admin make_incurable [player] §7- Makes the player incapable of being cured.");
         sender.sendMessage("§e/pow admin removeendermen <all | toggle | status> §7- Manage enderman removal");
+        sender.sendMessage("§e/pow admin removecreepers <all | toggle | status> §7- Manage creeper removal");
         sender.sendMessage("§e/pow admin setupplayer <player> §7- Give starter items to player");
         sender.sendMessage("§e/pow admin spawnanimals §7- Manually trigger passive mob spawning");
         sender.sendMessage("§e/pow admin addtomechest §7- Add current location as tome chest spawn");
@@ -223,8 +237,13 @@ public class PowCommand implements CommandExecutor, TabCompleter {
 
         if (args.length == 1) {
             List<String> subCommands = new ArrayList<>(Arrays.asList("vability", "tome", "checklives", "beaconstatus", "permadeath", "toggle-turning", "help"));
+
+            if (sender instanceof Player player && this.plugin.getVampireManager().isVampire(player)) {
+                subCommands.add("stake-myself");
+            }
+
             if (sender.hasPermission("vampiresmp.admin")) {
-                subCommands.add(0, "admin");
+                subCommands.addFirst("admin");
             }
 
             return subCommands.stream().filter((s) -> s.startsWith(args[0].toLowerCase())).collect(Collectors.toList());
@@ -240,7 +259,7 @@ public class PowCommand implements CommandExecutor, TabCompleter {
                 }
 
                 if (args.length == 2) {
-                    List<String> adminCommands = Arrays.asList("init", "session", "vampire", "beacon", "vampirecooldowns", "resettomecooldowns", "break_warning", "givetome", "select_tomes", "give_cure_book", "stash_cure_book", "distributetomes", "clearbloodmoonbuffs", "make_incurable", "fixattributes", "removeendermen", "setupplayer", "spawnanimals", "addtomechest", "removetomechest", "listtomechests", "resetplayer", "set_vampire_spawn", "config");
+                    List<String> adminCommands = Arrays.asList("init", "session", "vampire", "beacon", "vampirecooldowns", "resettomecooldowns", "break_warning", "givetome", "select_tomes", "give_cure_book", "stash_cure_book", "distributetomes", "clearbloodmoonbuffs", "make_incurable", "fixattributes", "removeendermen", "removecreepers", "setupplayer", "spawnanimals", "addtomechest", "removetomechest", "listtomechests", "resetplayer", "set_vampire_spawn", "config");
                     return adminCommands.stream().filter((s) -> s.startsWith(args[1].toLowerCase())).collect(Collectors.toList());
                 }
 
@@ -291,7 +310,7 @@ public class PowCommand implements CommandExecutor, TabCompleter {
                     }
 
                     if (subCommand.equals("add")) {
-                        return Arrays.asList("[name]");
+                        return List.of("[name]");
                     }
                 }
 
@@ -300,7 +319,7 @@ public class PowCommand implements CommandExecutor, TabCompleter {
                 }
 
                 if (args.length == 3 && args[1].equalsIgnoreCase("vampirecooldowns")) {
-                    return Arrays.asList("reset", "clear").stream().filter((s) -> s.startsWith(args[2].toLowerCase())).collect(Collectors.toList());
+                    return Stream.of("reset", "clear").filter((s) -> s.startsWith(args[2].toLowerCase())).collect(Collectors.toList());
                 }
 
                 if (args.length == 4 && args[1].equalsIgnoreCase("vampirecooldowns") && (args[2].equalsIgnoreCase("reset") || args[2].equalsIgnoreCase("clear"))) {
@@ -329,11 +348,11 @@ public class PowCommand implements CommandExecutor, TabCompleter {
                 }
 
                 if (args.length == 4 && args[1].equalsIgnoreCase("give_cure_book")) {
-                    return Arrays.asList("1", "2", "3", "4").stream().filter((s) -> s.startsWith(args[3])).collect(Collectors.toList());
+                    return Stream.of("1", "2", "3", "4").filter((s) -> s.startsWith(args[3])).collect(Collectors.toList());
                 }
 
                 if (args.length == 3 && args[1].equalsIgnoreCase("stash_cure_book")) {
-                    return Arrays.asList("1", "2", "3", "4").stream().filter((s) -> s.startsWith(args[2])).collect(Collectors.toList());
+                    return Stream.of("1", "2", "3", "4").filter((s) -> s.startsWith(args[2])).collect(Collectors.toList());
                 }
 
                 if (args.length == 3 && args[1].equalsIgnoreCase("clearbloodmoonbuffs")) {
@@ -353,7 +372,7 @@ public class PowCommand implements CommandExecutor, TabCompleter {
                 }
 
                 if (args.length == 4 && args[1].equalsIgnoreCase("resetplayer")) {
-                    return Arrays.asList("true", "false").stream().filter((s) -> s.startsWith(args[3].toLowerCase())).collect(Collectors.toList());
+                    return Stream.of("true", "false").filter((s) -> s.startsWith(args[3].toLowerCase())).collect(Collectors.toList());
                 }
 
                 if (args.length == 3 && args[1].equalsIgnoreCase("fixattributes")) {
@@ -363,8 +382,8 @@ public class PowCommand implements CommandExecutor, TabCompleter {
                     return options.stream().filter((s) -> s.toLowerCase().startsWith(args[2].toLowerCase())).collect(Collectors.toList());
                 }
 
-                if (args.length == 3 && args[1].equalsIgnoreCase("removeendermen")) {
-                    return Arrays.asList("all", "toggle", "status").stream().filter((s) -> s.startsWith(args[2].toLowerCase())).collect(Collectors.toList());
+                if (args.length == 3 && ( args[1].equalsIgnoreCase("removeendermen") || args[1].equalsIgnoreCase("removecreepers") )) {
+                    return Stream.of("all", "toggle", "status").filter((s) -> s.startsWith(args[2].toLowerCase())).collect(Collectors.toList());
                 }
 
                 if (args.length == 3 && args[1].equalsIgnoreCase("setupplayer")) {
@@ -372,7 +391,7 @@ public class PowCommand implements CommandExecutor, TabCompleter {
                 }
 
                 if (args.length == 3 && args[1].equalsIgnoreCase("init")) {
-                    return Arrays.asList("cancel").stream().filter((s) -> s.startsWith(args[2].toLowerCase())).collect(Collectors.toList());
+                    return Stream.of("cancel").filter((s) -> s.startsWith(args[2].toLowerCase())).collect(Collectors.toList());
                 }
             }
 

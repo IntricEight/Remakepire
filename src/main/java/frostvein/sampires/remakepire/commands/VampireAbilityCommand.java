@@ -1,9 +1,9 @@
 package frostvein.sampires.remakepire.commands;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.command.Command;
@@ -42,7 +42,7 @@ public class VampireAbilityCommand implements CommandExecutor, TabCompleter {
      */
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage("§cOnly players can use vampire abilities.");
+            sender.sendMessage(Component.text("Only players can use vampire abilities.", NamedTextColor.RED));
             return true;
 
         } else if (args.length == 0) {
@@ -142,7 +142,7 @@ public class VampireAbilityCommand implements CommandExecutor, TabCompleter {
 
                 player.sendMessage("");
 
-                for(VampireAbility ability : availableAbilities) {
+                for (VampireAbility ability : availableAbilities) {
                     this.displayAbility(player, ability, true);
                 }
 
@@ -171,7 +171,7 @@ public class VampireAbilityCommand implements CommandExecutor, TabCompleter {
 
             player.sendMessage("");
 
-            for(VampireAbility ability : this.abilityManager.getAllAbilities()) {
+            for (VampireAbility ability : this.abilityManager.getAllAbilities()) {
                 boolean canUse = ability.canUse(player, this.plugin.getVampireManager());
                 this.displayAbility(player, ability, canUse);
             }
@@ -186,7 +186,7 @@ public class VampireAbilityCommand implements CommandExecutor, TabCompleter {
      * @param canUse {@code true} if the player use this ability.
      */
     private void displayAbility(Player player, VampireAbility ability, boolean canUse) {
-        String status = "", nameColor = canUse ? "§e" : "§8";
+        String status, nameColor = canUse ? "§e" : "§8";
         BeaconSite suppressingBeacon = this.beaconManager.checkHolySuppression(player.getLocation());
         boolean suppressed = suppressingBeacon != null && this.plugin.getVampireManager().isVampire(player);
 
@@ -195,7 +195,7 @@ public class VampireAbilityCommand implements CommandExecutor, TabCompleter {
                 int remainingTime = this.plugin.getBatTransformationManager().getRemainingTime(player);
                 status = " §a(In Bat Form - " + VampireAbilityManager.formatTime(remainingTime) + " remaining)";
 
-            } else if (ability instanceof StormCallAbility) {   // If more global abilities are introduced, this will have to change from being hard coded
+            } else if (ability instanceof StormCallAbility) {   // If more global abilities are introduced, this will have to change from being hard-coded
                 if (this.abilityManager.isOnGlobalCooldown(ability.getName())) {
                     long remaining = this.abilityManager.getRemainingGlobalCooldown(ability.getName());
                     String globalInfo = this.abilityManager.getGlobalCooldownInfo(ability.getName());
@@ -231,7 +231,7 @@ public class VampireAbilityCommand implements CommandExecutor, TabCompleter {
 
         player.sendMessage(nameColor + ability.getDisplayName() + status);
         player.sendMessage("  §7" + ability.getDescription());
-        String cooldownInfo = "  §7Required Stage: §e" + ability.getMinimumStage() + " §7| Cooldown: §e" + VampireAbilityManager.formatTime((long)ability.getCooldownSeconds(this.plugin));
+        String cooldownInfo = "  §7Required Stage: §e" + ability.getMinimumStage() + " §7| Cooldown: §e" + VampireAbilityManager.formatTime(ability.getCooldownSeconds(this.plugin));
 
         // If more global abilities are introduced, this will have to change from being hard coded
         if (ability instanceof StormCallAbility) {

@@ -43,15 +43,11 @@ public class BanishUndeadTomeAbility extends TomeAbility {
             this.sendCannotUseMessage(player, "Only humans can use tome abilities!");
             return false;
 
-        } else if (player.getWorld() == null) {
-            this.sendCannotUseMessage(player, "World not available!");
-            return false;
-
         } else {
             int mobsKilled = 0;
 
             // Search and kill all undead entities within a (RADIUS * 2)^3 cube
-            for(Entity entity : player.getNearbyEntities(RADIUS, RADIUS, RADIUS)) {
+            for (Entity entity : player.getNearbyEntities(RADIUS, RADIUS, RADIUS)) {
                 if (this.isUndeadMob(entity) && entity instanceof LivingEntity livingEntity) {
                     livingEntity.setHealth(0);
                     ++mobsKilled;
@@ -64,7 +60,8 @@ public class BanishUndeadTomeAbility extends TomeAbility {
             // Inform the player on the effect of their cast
             if (mobsKilled > 0) {
                 player.playSound(player.getLocation(), "minecraft:block.beacon.power_select", 1.0F, 1.2F);
-                this.sendSuccessMessage(player, "Holy light radiates from you, banishing " + mobsKilled + " undead creatures!");
+                this.sendSuccessMessage(player, "Holy light radiates from you, banishing " + mobsKilled + " undead creature" + (mobsKilled > 1 ? "s" : "") + "!");
+
             } else {
                 player.playSound(player.getLocation(), "minecraft:block.beacon.ambient", 0.5F, 1.0F);
                 this.sendSuccessMessage(player, "Holy light radiates from you, but no undead creatures were nearby.");
@@ -82,7 +79,7 @@ public class BanishUndeadTomeAbility extends TomeAbility {
      * @return {@code true} if the {@code entity} is considered undead.
      */
     private boolean isUndeadMob(Entity entity) {
-        for(Class<? extends Entity> mobType : this.undeadMobTypes) {
+        for (Class<? extends Entity> mobType : this.undeadMobTypes) {
             if (mobType.isInstance(entity)) {
                 return true;
             }
@@ -124,17 +121,16 @@ public class BanishUndeadTomeAbility extends TomeAbility {
     private void createHolyLightRing(final Location center, int ringIndex) {
         final double baseRadius = 5 + ringIndex * 8.0;
         final int particleCount = 40 + ringIndex * 20;
-        final double angleStep = (Math.PI * 2D) / (double)particleCount;
+        final double angleStep = (Math.PI * 2.0) / particleCount;
 
         (new BukkitRunnable() {
             double currentRadius = 0;
-            final double maxRadius = baseRadius;
-            final double radiusStep = this.maxRadius / 10.0;
+            final double maxRadius = baseRadius, radiusStep = this.maxRadius / 10.0;
             int tickCount = 0;
 
             public void run() {
                 if (!(this.currentRadius >= this.maxRadius) && this.tickCount < 15) {
-                    for(int i = 0; i < particleCount; ++i) {
+                    for (int i = 0; i < particleCount; ++i) {
                         double angle = i * angleStep;
                         double x = center.getX() + this.currentRadius * Math.cos(angle);
                         double z = center.getZ() + this.currentRadius * Math.sin(angle);

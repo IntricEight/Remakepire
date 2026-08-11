@@ -2,7 +2,10 @@ package frostvein.sampires.remakepire.listeners;
 
 import java.util.Arrays;
 import java.util.List;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Material;
+import org.bukkit.Tag;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Animals;
 import org.bukkit.entity.Bee;
@@ -29,7 +32,7 @@ import frostvein.sampires.remakepire.RemakepirePlugin;
 
 public class InteractionListener implements Listener {
     private final RemakepirePlugin plugin;
-    private static final List<Material> FEEDING_ITEMS = Arrays.asList(Material.WHEAT, Material.CARROT, Material.POTATO, Material.BEETROOT, Material.WHEAT_SEEDS, Material.MELON_SEEDS, Material.PUMPKIN_SEEDS, Material.BEETROOT_SEEDS, Material.SWEET_BERRIES, Material.APPLE, Material.GOLDEN_APPLE, Material.GOLDEN_CARROT, Material.BREAD, Material.COOKIE, Material.MELON_SLICE, Material.DRIED_KELP, Material.HAY_BLOCK, Material.SUGAR);;
+    private static final List<Material> FEEDING_ITEMS = Arrays.asList(Material.WHEAT, Material.CARROT, Material.POTATO, Material.BEETROOT, Material.WHEAT_SEEDS, Material.MELON_SEEDS, Material.PUMPKIN_SEEDS, Material.BEETROOT_SEEDS, Material.SWEET_BERRIES, Material.APPLE, Material.GOLDEN_APPLE, Material.GOLDEN_CARROT, Material.BREAD, Material.COOKIE, Material.MELON_SLICE, Material.DRIED_KELP, Material.HAY_BLOCK, Material.SUGAR);
 
     /**
      * Create an instance of the Interactions listener.
@@ -55,14 +58,14 @@ public class InteractionListener implements Listener {
             // Stop bat players from doing shenanigans
             if (this.plugin.getBatTransformationManager().isInBatForm(player)) {
                 event.setCancelled(true);
-                player.sendMessage("§cYou cannot interact with anything while you are in your bat form.");
+                player.sendMessage(Component.text("You cannot interact with anything while you are in your bat form.", NamedTextColor.RED));
 
             } else if (!(targetEntity instanceof Player)) {
                 // Stop higher vampires from feeding animals
                 if (this.isFeedableMob(targetEntity)) {
                     ItemStack handItem = event.getHand() == EquipmentSlot.OFF_HAND ? player.getInventory().getItemInOffHand() : player.getInventory().getItemInMainHand();
 
-                    if (handItem != null && FEEDING_ITEMS.contains(handItem.getType())) {
+                    if (FEEDING_ITEMS.contains(handItem.getType())) {
                         this.handleVampireFeedingAttempt(player, targetEntity, handItem, event);
                     }
                 }
@@ -92,10 +95,10 @@ public class InteractionListener implements Listener {
         this.plugin.logInfo("Vampire " + vampire.getName() + " attempted to feed " + mob.getType() + " with " + foodItem.getType());
 
         if (this.plugin.getVampireManager().isVampireStage1(vampire)) {
-            vampire.sendMessage("§cThe animal tentatively eats from your hand, eyeing you suspiciously, as if it knows your true nature...");
+            vampire.sendMessage(Component.text("The animal tentatively eats from your hand, eyeing you suspiciously, as if it knows your true nature...", NamedTextColor.RED));
         } else {
-            vampire.sendMessage("§cThe animal recoils from you as you extend a hand to it...");
             event.setCancelled(true);
+            vampire.sendMessage(Component.text("The animal recoils from you as you extend a hand to it...", NamedTextColor.RED));
         }
     }
 
@@ -110,20 +113,10 @@ public class InteractionListener implements Listener {
         Block clickedBlock = event.getClickedBlock();
 
         if (event.getAction() == Action.RIGHT_CLICK_BLOCK) {
-            if (clickedBlock != null && this.isAnvil(clickedBlock.getType()) && this.plugin.getVampireManager().isVampire(player)) {
+            if (clickedBlock != null && Tag.ANVIL.isTagged(clickedBlock.getType()) && this.plugin.getVampireManager().isVampire(player)) {
                 event.setCancelled(true);
-                player.sendMessage("§cYou cannot use anvils as a vampire.");
+                player.sendMessage(Component.text("You cannot use anvils as a vampire.", NamedTextColor.RED));
             }
         }
-    }
-
-    /**
-     * Retrieve if the item is an anvil (in various stages of disrepair).
-     *
-     * @param material the type of a block.
-     * @return {@code true} if the item is an anvil.
-     */
-    private boolean isAnvil(Material material) {
-        return material == Material.ANVIL || material == Material.CHIPPED_ANVIL || material == Material.DAMAGED_ANVIL;
     }
 }

@@ -6,11 +6,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import net.md_5.bungee.api.chat.ClickEvent;
-import net.md_5.bungee.api.chat.ComponentBuilder;
-import net.md_5.bungee.api.chat.HoverEvent;
-import net.md_5.bungee.api.chat.TextComponent;
-import net.md_5.bungee.api.chat.ClickEvent.Action;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.event.HoverEvent;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
@@ -34,6 +34,7 @@ import frostvein.sampires.remakepire.RemakepirePlugin;
 import frostvein.sampires.remakepire.abilities.tome.TomeAbility;
 import frostvein.sampires.remakepire.beacons.BeaconSite;
 import frostvein.sampires.remakepire.beacons.BeaconSite.BeaconState;
+import frostvein.sampires.remakepire.listeners.DeathHandler;
 import frostvein.sampires.remakepire.managers.BeaconManager;
 import frostvein.sampires.remakepire.managers.ConfigManager;
 import frostvein.sampires.remakepire.managers.SessionManager;
@@ -70,7 +71,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (!sender.hasPermission("vampiresmp.admin")) {
             // Prevent players who don't have permission to use admin commands from executing the following functions
-            sender.sendMessage("§cYou don't have permission to use this command.");
+            sender.sendMessage(Component.text("You don't have permission to use this command.", NamedTextColor.RED));
             return true;
 
         } else if (command.getName().equalsIgnoreCase("init")) {
@@ -133,6 +134,10 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
             // Control the active removal of endermen spawning
             return this.handleRemoveEndermenCommand(sender, args);
 
+        } else if (command.getName().equalsIgnoreCase("removecreepers")) {
+            // Control the active removal of creeper spawning
+            return this.handleRemoveCreeperCommand(sender, args);
+
         } else if (command.getName().equalsIgnoreCase("setupplayer")) {
             // Give the player the starting equipment for a new game
             return this.handleSetupPlayerCommand(sender, args);
@@ -156,6 +161,10 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         } else if (command.getName().equalsIgnoreCase("resetplayer")) {
             // Clear a player's stats, tags, and (optionally) inventory
             return this.handleResetPlayerCommand(sender, args);
+
+        } else if (command.getName().equalsIgnoreCase("playercount")) {
+            // Get the number of players on each team
+            return this.handlePlayerCountCommand(sender, args);
 
         } else if (command.getName().equalsIgnoreCase("make_incurable")) {
             // Make a player impossible to cure (Remove the tag CannotCure to reverse this process)
@@ -189,7 +198,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
             Player target = Bukkit.getPlayer(args[0]);
 
             if (target == null) {
-                sender.sendMessage("§cPlayer not found: " + args[0]);
+                sender.sendMessage(Component.text("Player not found: " + args[0], NamedTextColor.RED));
 
             } else {
                 boolean clearInventory = args.length >= 2 && args[1].equalsIgnoreCase("true");
@@ -201,7 +210,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                 this.vampireManager.setPlayerAsHuman(target);
 
                 // Clear the player of all tags before assigning them the human tag
-                for(String tag : new HashSet<>(target.getScoreboardTags())) {
+                for (String tag : new HashSet<>(target.getScoreboardTags())) {
                     target.removeScoreboardTag(tag);
                 }
 
@@ -256,13 +265,96 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                 if (clearInventory) {
                     target.getInventory().clear();
                     target.getEnderChest().clear();
-                    sender.sendMessage("§7Cleared " + target.getName() + "'s inventory and ender chest.");
+                    sender.sendMessage(Component.text("Cleared " + target.getName() + "'s inventory and ender chest.", NamedTextColor.GRAY));
                 }
 
-                sender.sendMessage("§aPlayer " + target.getName() + " has been fully reset to a fresh state.");
-                target.sendMessage("§aYou have been reset to a fresh state by an administrator.");
-                target.sendMessage("§7All vampire status, abilities, cooldowns, and death count have been cleared." + (clearInventory ? " Your inventory has also been cleared." : ""));
+                sender.sendMessage(Component.text("Player " + target.getName() + " has been fully reset to a fresh state.", NamedTextColor.GREEN));
+                target.sendMessage(Component.text("You have been reset to a fresh state by an administrator.", NamedTextColor.GREEN));
+                target.sendMessage(Component.text("All vampire status, abilities, cooldowns, and death count have been cleared." + (clearInventory ? " Your inventory has also been cleared." : ""), NamedTextColor.GRAY));
+
                 this.plugin.logInfo("Admin " + sender.getName() + " reset player " + target.getName() + " to fresh state");
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Let the admin know the number of humans, vampires, or total living players in the game at the moment.
+     *
+     * @param sender the admin sending the command.
+     * @param args the arguments attached to the command.
+     * @return {@code true}
+     */
+    private boolean handlePlayerCountCommand(CommandSender sender, String[] args) {
+        if (args.length == 0) {
+            sender.sendMessage("§cUsage: /playercount <all | human | vampire>");
+            sender.sendMessage("§7- /playercount all §8- See the number of alive players");
+            sender.sendMessage("§7- /playercount human §8- See the number of alive human players");
+            sender.sendMessage("§7- /playercount vampire §8- See the number of \"alive\" vampire players");
+
+        } else {
+            int playerCount = 0;
+
+            switch (args[0].toLowerCase()) {
+                case "all":
+                    for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+                        // Make sure the player is active in the game
+                        if ((onlinePlayer.getGameMode() == GameMode.SURVIVAL || onlinePlayer.getGameMode() == GameMode.ADVENTURE)
+                                && (!onlinePlayer.getScoreboardTags().contains(DeathHandler.PERMAKILLED_TAG) || onlinePlayer.isDead())
+                        ) {
+                            playerCount++;
+                        }
+                    }
+
+                    sender.sendMessage(Component.text("There " + (playerCount == 1 ? "is" : "are") + " currently ", NamedTextColor.WHITE)
+                            .append(Component.text(playerCount, NamedTextColor.GRAY))
+                            .append(Component.text(" player" + (playerCount == 1 ? "" : "s") + " in the session.", NamedTextColor.WHITE))
+                    );
+
+                    this.plugin.logInfo("Admin " + sender.getName() + " checked the game player count");
+                    break;
+
+                case "human":
+                    for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+                        // Make sure the player is active in the game
+                        if ((onlinePlayer.getGameMode() == GameMode.SURVIVAL || onlinePlayer.getGameMode() == GameMode.ADVENTURE)
+                                && (!onlinePlayer.getScoreboardTags().contains(DeathHandler.PERMAKILLED_TAG) || onlinePlayer.isDead())
+                                && this.plugin.getVampireManager().isHuman(onlinePlayer)
+                        ) {
+                            playerCount++;
+                        }
+                    }
+
+                    sender.sendMessage(Component.text("There " + (playerCount == 1 ? "is" : "are") + " currently ", NamedTextColor.WHITE)
+                            .append(Component.text(playerCount, NamedTextColor.GOLD))
+                            .append(Component.text(" human" + (playerCount == 1 ? "" : "s") + " in the session.", NamedTextColor.WHITE))
+                    );
+
+                    this.plugin.logInfo("Admin " + sender.getName() + " checked the human player count");
+                    break;
+
+                case "vampire":
+                    for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+                        // Make sure the player is active in the game
+                        if ((onlinePlayer.getGameMode() == GameMode.SURVIVAL || onlinePlayer.getGameMode() == GameMode.ADVENTURE)
+                                && (!onlinePlayer.getScoreboardTags().contains(DeathHandler.PERMAKILLED_TAG) || onlinePlayer.isDead())
+                                && this.plugin.getVampireManager().isVampire(onlinePlayer)
+                        ) {
+                            playerCount++;
+                        }
+                    }
+
+                    sender.sendMessage(Component.text("There " + (playerCount == 1 ? "is" : "are") + " currently ", NamedTextColor.WHITE)
+                            .append(Component.text(playerCount, NamedTextColor.RED))
+                            .append(Component.text(" vampire" + (playerCount == 1 ? "" : "s") + " in the session.", NamedTextColor.WHITE))
+                    );
+
+                    this.plugin.logInfo("Admin " + sender.getName() + " checked the vampire player count");
+                    break;
+
+                default:
+                    sender.sendMessage(Component.text("Invalid action. Use 'all', 'human', or 'vampire'.", NamedTextColor.RED));
             }
         }
 
@@ -285,6 +377,9 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         * * Execute a change command, updating the value inside the config.yml file.
         */
 
+        // Store and template the update message to send to the player
+        Component senderMessage = null;
+
         if (args.length == 0) {
             // If the command was sent by a player, open up the configuration control GUI
             if (sender instanceof Player admin) {
@@ -298,94 +393,92 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                     break;
 
                 case "alert_on_quit":
-                    sender.sendMessage("§6alert-on-player-leave§r is currently: " + configManager.shouldAlertOnPlayerQuit());
+                    senderMessage = this.configValueMessage("alert-on-player-leave", this.configManager.shouldAlertOnPlayerQuit());
                     break;
 
                 case "holy_water_cap":
-                    sender.sendMessage("§6holy-water-session-capped§r is currently: " + configManager.isHolyWaterSessionCapped());
+                    senderMessage = this.configValueMessage("holy-water-session-capped", this.configManager.isHolyWaterSessionCapped());
                     break;
 
                 case "tome_cap":
-                    sender.sendMessage("§6tome-absorption-capping§r is currently: " + configManager.isTomeAbsorptionCapped());
+                    senderMessage = this.configValueMessage("tome-absorption-capping", this.configManager.isTomeAbsorptionCapped());
                     break;
 
                 case "vampire_level_cap":
-                    sender.sendMessage("§6vampire-level-capping§r is currently: " + configManager.isVampireLevelingCapped());
+                    senderMessage = this.configValueMessage("vampire-level-capping", this.configManager.isVampireLevelingCapped());
                     break;
 
                 case "new_vampire_tracking":
-                    sender.sendMessage("§6new_vampire_tracking§r is currently: " + configManager.canTrackNewVampires());
+                    senderMessage = this.configValueMessage("new_vampire_tracking", this.configManager.canTrackNewVampires());
                     break;
 
                 case "allow_vampire_mounts":
-                    sender.sendMessage("§6allow_vampire_mounts§r is currently: " + configManager.canVampiresRideLivingMounts());
+                    senderMessage = this.configValueMessage("allow_vampire_mounts", this.configManager.canVampiresRideLivingMounts());
                     break;
 
                 case "vampire_health_check":
-                    sender.sendMessage("§6vampire_health_check_ticks§r is currently: " + configManager.getVampireHealthCheckTicks() + " (" + (configManager.getVampireHealthCheckTicks() / 20) + " seconds)");
+                    senderMessage = this.configValueMessage("vampire_health_check_ticks", this.configManager.getVampireHealthCheckTicks() + " (" + (this.configManager.getVampireHealthCheckTicks() / 20) + " seconds)");
                     break;
 
                 case "damage_suppression":
-                    sender.sendMessage("§7Current damage suppression: §e" + configManager.getDamageSuppression() + "%");
+                    senderMessage = Component.text("Current damage suppression: ", NamedTextColor.WHITE)
+                            .append(Component.text(this.configManager.getDamageSuppression() + "%", NamedTextColor.GOLD));
                     break;
 
                 case "cure_requires_dead_sire":
-                    sender.sendMessage("§6sire-death-requirement§r is currently: " + configManager.doCuresRequireSireDeath());
+                    senderMessage = this.configValueMessage("sire-death-requirement", this.configManager.doCuresRequireSireDeath());
                     break;
 
                 case "cure_requires_daylight":
-                    sender.sendMessage("§6daylight-requirement§r is currently: " + configManager.doCuresRequireDaytime());
+                    senderMessage = this.configValueMessage("daylight-requirement", this.configManager.doCuresRequireDaytime());
                     break;
 
                 case "cure_book_spawning":
-                    sender.sendMessage("§6cure_books_enabled§r is currently: " + sessionManager.isCureBooksEnabled());
+                    senderMessage = this.configValueMessage("cure_books_enabled", this.sessionManager.isCureBooksEnabled());
                     break;
 
                 case "enable_npc_mobs":
-                    sender.sendMessage("§6enable-npc-mobs§r is currently: " + configManager.areNpcMobsEnabled());
+                    senderMessage = this.configValueMessage("enable-npc-mobs", this.configManager.areNpcMobsEnabled());
                     break;
 
                 case "breeding_out_of_session":
-                    sender.sendMessage("§6allow-breeding-out-of-session§r is currently: " + configManager.canBreedAnimalsOutOfSession());
+                    senderMessage = this.configValueMessage("allow-breeding-out-of-session", this.configManager.canBreedAnimalsOutOfSession());
                     break;
 
                 case "stake_permadeath_stage":
-                    sender.sendMessage("§6permadeath-minimum-stage§r is currently: " + configManager.getPermadeathMinimumStage());
+                    senderMessage = this.configValueMessage("permadeath-minimum-stage", this.configManager.getPermadeathMinimumStage());
                     break;
 
                 case "human_life_limit":
-                    sender.sendMessage("§6enforce-life-limit§r is currently: " + configManager.isLifeLimitEnforced());
+                    senderMessage = this.configValueMessage("enforce-life-limit", this.configManager.isLifeLimitEnforced());
                     break;
 
                 case "one_human_left":
-                    sender.sendMessage("§6one_human_left§r is currently: " + this.sessionManager.isOneHumanLeftActive());
+                    senderMessage = this.configValueMessage("one_human_left", this.sessionManager.isOneHumanLeftActive());
                     break;
 
                 case "border_active":
-                    sender.sendMessage("§6border_active§r is currently: " + this.sessionManager.isBorderActive());
+                    senderMessage = this.configValueMessage("border_active", this.sessionManager.isBorderActive());
                     break;
 
                 default:
-                    sender.sendMessage("§cInvalid configuration. Use \"/pow admin config help\" for a list of config command options.");
+                    senderMessage = Component.text("Invalid configuration. Use \"/pow admin config help\" for a list of config command options.", NamedTextColor.RED);
             }
         } else {
-            // Store and template the update message to send to the player
-            String senderMessage = "Config for §6";
-
             switch (args[0].toLowerCase()) {
                 case "alert_on_quit":
                     configManager.setAlertOnPlayerQuit(Boolean.parseBoolean(args[1]));
-                    senderMessage += "alert-on-player-leave§r set to: " + Boolean.parseBoolean(args[1]);
+                    senderMessage = this.configUpdateMessage("alert-on-player-leave", Boolean.parseBoolean(args[1]));
                     break;
 
                 case "holy_water_cap":
                     configManager.setHolyWaterCapping(Boolean.parseBoolean(args[1]));
-                    senderMessage += "holy-water-session-capped§r set to: " + Boolean.parseBoolean(args[1]);
+                    senderMessage = this.configUpdateMessage("holy-water-session-capped", Boolean.parseBoolean(args[1]));
                     break;
 
                 case "tome_cap":
                     configManager.setTomeAbsorptionCapping(Boolean.parseBoolean(args[1]));
-                    senderMessage += "tome-absorption-capping§r set to: " + Boolean.parseBoolean(args[1]);
+                    senderMessage = this.configUpdateMessage("tome-absorption-capping", Boolean.parseBoolean(args[1]));
 
                     // Clear the list of tome absorption if the cap is being disabled
                     if (!Boolean.parseBoolean(args[1])) {
@@ -403,29 +496,29 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                         plugin.getVampireManager().clearAllStageCaps();
                     }
 
-                    senderMessage += "vampire-level-capping§r set to: " + Boolean.parseBoolean(args[1]);
+                    senderMessage = this.configUpdateMessage("vampire-level-capping", Boolean.parseBoolean(args[1]));
                     break;
 
                 case "new_vampire_tracking":
                     configManager.setTrackingNewVampires(Boolean.parseBoolean(args[1]));
-                    senderMessage += "new-vampire-tracking§r set to: " + Boolean.parseBoolean(args[1]);
+                    senderMessage = this.configUpdateMessage("new-vampire-tracking", Boolean.parseBoolean(args[1]));
                     break;
 
                 case "allow_vampire_mounts":
                     configManager.setVampiresRideLivingMounts(Boolean.parseBoolean(args[1]));
-                    senderMessage += "allow-vampire-mounts§r set to: " + Boolean.parseBoolean(args[1]);
+                    senderMessage = this.configUpdateMessage("allow-vampire-mounts", Boolean.parseBoolean(args[1]));
                     break;
 
                 case "vampire_health_check":
                     try {
                         if (Integer.parseInt(args[1]) < 1) {
-                            senderMessage = "§cInterval must be at least 1 tick.";
+                            senderMessage = Component.text("Interval must be at least 1 tick.", NamedTextColor.RED);
                         } else {
                             this.configManager.setVampireHealthCheckTicks(Integer.parseInt(args[1]));
-                            senderMessage += "vampire_health_check_ticks§r set to: " + Integer.parseInt(args[1]) + " ticks (" + Integer.parseInt(args[1]) / 20.0 + " seconds)";
+                            senderMessage = this.configUpdateMessage("vampire_health_check_ticks", Integer.parseInt(args[1]) + " ticks (" + Integer.parseInt(args[1]) / 20.0 + " seconds)");
                         }
                     } catch (NumberFormatException e) {
-                        senderMessage = "§cInvalid number: " + args[1];
+                        senderMessage = Component.text("Invalid number: " + args[1], NamedTextColor.RED);
                     }
 
                     break;
@@ -433,78 +526,111 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                 case "damage_suppression":
                     if (Integer.parseInt(args[1]) >= 0 && Integer.parseInt(args[1]) <= 100) {
                         configManager.setDamageSuppression(Integer.parseInt(args[1]));
-
-                        senderMessage += "damage_suppression§r set to: " + Integer.parseInt(args[1]) + "%";
-
+                        senderMessage = this.configUpdateMessage("damage_suppression", Integer.parseInt(args[1]) + "%");
                         this.plugin.logInfo("Admin " + sender.getName() + " set damage suppression to " + Integer.parseInt(args[1]) + "%");
+
                     } else {
-                        senderMessage = "§cPercentage must be between 0 and 100.";
+                        senderMessage = Component.text("Percentage must be between 0 and 100.", NamedTextColor.RED);
                     }
 
                     break;
 
                 case "cure_requires_dead_sire":
                     configManager.setCureRequiresSireDeath(Boolean.parseBoolean(args[1]));
-                    senderMessage += "sire-death-requirement§r set to: " + Boolean.parseBoolean(args[1]);
+                    senderMessage = this.configUpdateMessage("sire-death-requirement", Boolean.parseBoolean(args[1]));
                     break;
 
                 case "cure_requires_daylight":
                     configManager.setCureRequiresDaytime(Boolean.parseBoolean(args[1]));
-                    senderMessage += "daylight-requirement§r set to: " + Boolean.parseBoolean(args[1]);
+                    senderMessage = this.configUpdateMessage("daylight-requirement", Boolean.parseBoolean(args[1]));
                     break;
 
                 case "cure_book_spawning":
                     sessionManager.setCureBooksEnabled(Boolean.parseBoolean(args[1]));
-                    senderMessage += "cure_books_enabled§r set to" + Boolean.parseBoolean(args[1]);
+                    senderMessage = this.configUpdateMessage("cure_books_enabled", Boolean.parseBoolean(args[1]));
                     break;
 
                 case "enable_npc_mobs":
                     sessionManager.setNpcSpawningGamerules(Boolean.parseBoolean(args[1]));
-                    senderMessage += "enable-npc-mobs§r set to: " + Boolean.parseBoolean(args[1]);
+                    senderMessage = this.configUpdateMessage("enable-npc-mobs", Boolean.parseBoolean(args[1]));
                     break;
 
                 case "breeding_out_of_session":
                     configManager.setBreedAnimalsOutOfSession(Boolean.parseBoolean(args[1]));
-                    senderMessage += "allow-breeding-out-of-session§r set to: " + Boolean.parseBoolean(args[1]);
+                    senderMessage = this.configUpdateMessage("allow-breeding-out-of-session", Boolean.parseBoolean(args[1]));
                     break;
 
                 case "stake_permadeath_stage":
                     if (Integer.parseInt(args[1]) >= 1 && Integer.parseInt(args[1]) <= 3) {
                         configManager.setStakePermadeathMinimumStage(Integer.parseInt(args[1]));
-                        senderMessage += "permadeath-minimum-stage§r set to: " + Integer.parseInt(args[1]);
+                        senderMessage = this.configUpdateMessage("permadeath-minimum-stage", Integer.parseInt(args[1]));
                     } else {
-                        senderMessage = "§cInvalid stage! Use 1, 2, or 3";
+                        senderMessage = Component.text("Invalid stage! Use 1, 2, or 3", NamedTextColor.RED);
                     }
 
                     break;
 
                 case "human_life_limit":
                     configManager.setLifeLimitEnforced(Boolean.parseBoolean(args[1]));
-                    senderMessage += "enforce-life-limit§r set to: " + Boolean.parseBoolean(args[1]);
+                    senderMessage = this.configUpdateMessage("enforce-life-limit", Boolean.parseBoolean(args[1]));
                     break;
 
                 case "one_human_left":
                     this.sessionManager.setOneHumanLeftActive(Boolean.parseBoolean(args[1]));
-                    senderMessage += "one_human_left§r set to: " + Boolean.parseBoolean(args[1]);
-                    senderMessage += Boolean.parseBoolean(args[1]) ? "\n§aOne Human Left mode ACTIVATED: Humans no longer have beacon cooldowns" : "\n§cOne Human Left mode DEACTIVATED: Normal beacon cooldowns restored for all players";
+                    senderMessage = this.configUpdateMessage("one_human_left", Boolean.parseBoolean(args[1]))
+                            .append(Component.newline())
+                            .append(Component.text(Boolean.parseBoolean(args[1])
+                                            ? "One Human Left mode ACTIVATED: Humans no longer have beacon cooldowns"
+                                            : "One Human Left mode DEACTIVATED: Normal beacon cooldowns restored for all players",
+                                    Boolean.parseBoolean(args[1])
+                                            ? NamedTextColor.GREEN
+                                            : NamedTextColor.RED
+                            ));
                     break;
 
                 case "border_active":
                     this.sessionManager.setBorderActive(Boolean.parseBoolean(args[1]));
-                    senderMessage += "§6border_active§r set to: " +  Boolean.parseBoolean(args[1]);
+                    senderMessage = this.configUpdateMessage("border_active", Boolean.parseBoolean(args[1]));
                     break;
 
                 default:
-                    senderMessage = "§cInvalid configuration. Use \"/pow admin config help\" for a list of config command options.";
+                    senderMessage = Component.text("Invalid configuration. Use \"/pow admin config help\" for a list of config command options.", NamedTextColor.RED);
             }
 
             // Update the config GUI screen with the updated config value for the item that was changed.
             this.plugin.getConfigGuiManager().refreshConfigGuiItem(args[0].toLowerCase());
+        }
 
+        if (senderMessage != null) {
             sender.sendMessage(senderMessage);
         }
 
         return true;
+    }
+
+    /**
+     * Create a message about the config variable's current setting for the admin.
+     *
+     * @param configName the name of the configuration variable within the config file.
+     * @param configValue the current setting of the configuration variable.
+     * @return A {@code Component} in the format of "[GOLD]<configName>[WHITE] is currently: <configValue>".
+     */
+    private Component configValueMessage(String configName, Object configValue) {
+        return Component.text(configName, NamedTextColor.GOLD)
+                .append(Component.text(" is currently: " + configValue, NamedTextColor.WHITE));
+    }
+
+    /**
+     * Create a message about the config variable's new setting for the admin.
+     *
+     * @param configName the name of the configuration variable within the config file.
+     * @param configValue the current setting of the configuration variable.
+     * @return A {@code Component} in the format of "[WHITE]Config for [GOLD]<configName>[WHITE] set to <configValue>".
+     */
+    private Component configUpdateMessage(String configName, Object configValue) {
+        return Component.text("Config for ", NamedTextColor.WHITE)
+                .append(Component.text(configName, NamedTextColor.GOLD))
+                .append(Component.text(" set to: " + configValue, NamedTextColor.WHITE));
     }
 
     /**
@@ -550,16 +676,15 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                 z = Double.parseDouble(args[2]);
 
             } catch (NumberFormatException e) {
-                sender.sendMessage("§cInvalid coordinates. Usage: /pow admin set_vampire_spawn [x y z]");
+                sender.sendMessage(Component.text("Invalid coordinates. Usage: /pow admin set_vampire_spawn <x> <y> <z>", NamedTextColor.RED));
                 return true;
             }
         } else {
-            if (!(sender instanceof Player)) {
-                sender.sendMessage("§cConsole must provide coordinates: /pow admin set_vampire_spawn <x> <y> <z>");
+            if (!(sender instanceof Player player)) {
+                sender.sendMessage(Component.text("Console must provide coordinates: /pow admin set_vampire_spawn <x> <y> <z>", NamedTextColor.RED));
                 return true;
             }
 
-            Player player = (Player)sender;
             Location loc = player.getLocation();
             x = loc.getX();
             y = loc.getY();
@@ -570,7 +695,8 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         this.plugin.getConfigManager().setVampireRespawnLocation(locationStr);
         this.plugin.reloadVampireRespawnLocation();
 
-        sender.sendMessage("§aVampire spawn location set to: §e" + locationStr);
+        sender.sendMessage(Component.text("Vampire spawn location set to: ", NamedTextColor.GREEN)
+                .append(Component.text(locationStr, NamedTextColor.YELLOW)));
         this.plugin.logInfo("Admin " + sender.getName() + " set vampire spawn to " + locationStr);
 
         return true;
@@ -583,7 +709,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
      */
     private boolean handleInitCommand(CommandSender sender, String[] args) {
         if (!(sender instanceof Player admin)) {
-            sender.sendMessage("§cOnly players can use this command.");
+            sender.sendMessage(Component.text("Only players can use this command.", NamedTextColor.RED));
 
         } else if (args.length > 0 && args[0].equalsIgnoreCase("cancel")) {
             this.plugin.getInitGameManager().cancelInitialization(admin);
@@ -610,30 +736,34 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         } else {
             String action = args[0].toLowerCase();
             if (!action.equals("reset") && !action.equals("clear")) {
-                sender.sendMessage("§cInvalid action. Use 'reset' or 'clear'.");
+                sender.sendMessage(Component.text("Invalid action. Use 'reset' or 'clear'.", NamedTextColor.RED));
 
             } else if (args.length >= 2) {
                 Player target = Bukkit.getPlayer(args[1]);
 
                 if (target == null) {
-                    sender.sendMessage("§cPlayer '" + args[1] + "' not found.");
+                    sender.sendMessage(Component.text("Player '" + args[1] + "' not found.", NamedTextColor.RED));
 
                 } else {
                     this.resetPlayerCooldowns(target);
 
-                    sender.sendMessage("§aReset all cooldowns for player: §e" + target.getName());
-                    target.sendMessage("§aYour vampire ability cooldowns have been reset by an administrator.");
+                    sender.sendMessage(Component.text("Reset all cooldowns for player: ", NamedTextColor.GREEN)
+                            .append(Component.text(target.getName(), NamedTextColor.YELLOW)));
+                    target.sendMessage(Component.text("Your vampire ability cooldowns have been reset by an administrator.", NamedTextColor.GREEN));
                 }
             } else {
                 int playersAffected = 0;
 
-                for(Player player : Bukkit.getOnlinePlayers()) {
+                for (Player player : Bukkit.getOnlinePlayers()) {
                     this.resetPlayerCooldowns(player);
-                    player.sendMessage("§aYour vampire ability cooldowns have been reset by an administrator.");
+                    player.sendMessage(Component.text("Your vampire ability cooldowns have been reset by an administrator.", NamedTextColor.GREEN));
                     ++playersAffected;
                 }
 
-                sender.sendMessage("§aReset all vampire ability cooldowns for §e" + playersAffected + " §aonline players.");
+                sender.sendMessage(Component.text("Reset all vampire ability cooldowns for ", NamedTextColor.GREEN)
+                        .append(Component.text(playersAffected, NamedTextColor.YELLOW))
+                        .append(Component.text(" online players.", NamedTextColor.GREEN))
+                );
                 this.plugin.logInfo("Admin " + sender.getName() + " reset cooldowns for " + playersAffected + " players");
             }
         }
@@ -661,14 +791,14 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
 
         // Handle the cooldown command for individual players
         if (args.length == 0) {
-            for(Player player : Bukkit.getOnlinePlayers()) {
+            for (Player player : Bukkit.getOnlinePlayers()) {
                 if (this.plugin.getVampireManager().isHuman(player)) {
                     TomeAbility.clearAllCooldowns(player);
 
                     player.removeScoreboardTag(SessionManager.BLESSING_USED_SESSION);
                     player.removeScoreboardTag(SessionManager.STOPTHEBLEEDING_USED_SESSION);
 
-                    player.sendMessage("§aYour tome ability cooldowns have been reset by an administrator.");
+                    player.sendMessage(Component.text("Your tome ability cooldowns have been reset by an administrator.", NamedTextColor.GREEN));
                     ++humansAffected;
                 }
             }
@@ -682,15 +812,18 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                 target.removeScoreboardTag(SessionManager.BLESSING_USED_SESSION);
                 target.removeScoreboardTag(SessionManager.STOPTHEBLEEDING_USED_SESSION);
 
-                target.sendMessage("§aYour tome ability cooldowns have been reset by an administrator.");
+                target.sendMessage(Component.text("Your tome ability cooldowns have been reset by an administrator.", NamedTextColor.GREEN));
                 ++humansAffected;
             }
         }
 
         if (humansAffected == 0) {
-            sender.sendMessage("§eNo humans online to reset tome cooldowns for.");
+            sender.sendMessage(Component.text("No humans online to reset tome cooldowns for.", NamedTextColor.YELLOW));
         } else {
-            sender.sendMessage("§aReset all tome ability cooldowns for §e" + humansAffected + " §ahuman players.");
+            sender.sendMessage(Component.text("Reset all tome ability cooldowns for ", NamedTextColor.GREEN)
+                    .append(Component.text(humansAffected, NamedTextColor.YELLOW))
+                    .append(Component.text(" human players.", NamedTextColor.GREEN))
+            );
         }
 
         this.plugin.logInfo("Admin " + sender.getName() + " reset tome cooldowns for " + humansAffected + " human players");
@@ -703,18 +836,18 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
      * @return {@code true}
      */
     private boolean handleBreakWarningCommand(CommandSender sender, String[] args) {
-        sender.sendMessage("§ePlaying first warning sound for all players...");
+        sender.sendMessage(Component.text("Playing first warning sound for all players...", NamedTextColor.YELLOW));
 
         // Send the first warning noise (crows)
-        for(Player player : Bukkit.getOnlinePlayers()) {
+        for (Player player : Bukkit.getOnlinePlayers()) {
             player.playSound(player.getLocation(), "crimson:crimson.sound.crimson_warning_1", SoundCategory.MASTER, 1.0F, 1.0F);
         }
 
-        sender.sendMessage("§aFirst warning sound played. Second warning will play in 5 minutes.");
+        sender.sendMessage(Component.text("First warning sound played. Second warning will play in 5 minutes.", NamedTextColor.GREEN));
 
         // Send the second warning noise (bells) after 5 minutes
         Bukkit.getScheduler().runTaskLater(this.plugin, () -> {
-            for(Player player : Bukkit.getOnlinePlayers()) {
+            for (Player player : Bukkit.getOnlinePlayers()) {
                 player.playSound(player.getLocation(), "crimson:crimson.sound.crimson_warning_2", SoundCategory.MASTER, 1.0F, 1.0F);
             }
 
@@ -738,71 +871,71 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                 case "start":
                     int currentState = this.sessionManager.getSessionState();
                     if (currentState == 3) {
-                        sender.sendMessage("§eSession ended - auto-priming for new session...");
+                        sender.sendMessage(Component.text("Session ended - auto-priming for new session...", NamedTextColor.YELLOW));
                         this.sessionManager.primeNewSession();
                         currentState = this.sessionManager.getSessionState();
                     }
 
                     if (currentState != 0 && currentState != 4) {
-                        sender.sendMessage("§cCannot start session. Session must be primed or in building mode first.");
+                        sender.sendMessage(Component.text("Cannot start session. Session must be primed or in building mode first.", NamedTextColor.RED));
                         return true;
                     }
 
                     this.sessionManager.startSession();
-                    sender.sendMessage("§aSession started.");
+                    sender.sendMessage(Component.text("Session started.", NamedTextColor.GREEN));
                     break;
 
                 case "pause":
                     if (this.sessionManager.getSessionState() != 1) {
-                        sender.sendMessage("§cCannot pause session. No session is currently running.");
+                        sender.sendMessage(Component.text("Cannot pause session. No session is currently running.", NamedTextColor.RED));
                         return true;
                     }
 
                     this.sessionManager.pauseSession();
-                    sender.sendMessage("§eSession paused.");
+                    sender.sendMessage(Component.text("Session paused.", NamedTextColor.YELLOW));
                     break;
 
                 case "end":
                     if (this.sessionManager.getSessionState() != 1 && this.sessionManager.getSessionState() != 2) {
-                        sender.sendMessage("§cCannot end session. No session is currently running or paused.");
+                        sender.sendMessage(Component.text("Cannot end session. No session is currently running or paused.", NamedTextColor.RED));
                         return true;
                     }
 
                     this.sessionManager.endSession();
-                    sender.sendMessage("§cSession ended.");
+                    sender.sendMessage(Component.text("Session ended.", NamedTextColor.RED));
                     break;
 
                 case "prime":
                     if (this.sessionManager.getSessionState() == 0) {
-                        sender.sendMessage("§cCannot prime session. A session is already primed. Start it with '/pow admin session start'.");
+                        sender.sendMessage(Component.text("Cannot prime session. A session is already primed. Start it with '/pow admin session start'.", NamedTextColor.RED));
                         return true;
 
                     } else if (this.sessionManager.getSessionState() == 1) {
-                        sender.sendMessage("§cCannot prime session. A session is currently running. End it first with '/pow admin session end'.");
+                        sender.sendMessage(Component.text("Cannot prime session. A session is currently running. End it first with '/pow admin session end'.", NamedTextColor.RED));
                         return true;
 
                     } else if (this.sessionManager.getSessionState() == 2) {
-                        sender.sendMessage("§cCannot prime session. A session is currently paused. Resume it first with '/pow admin session resume'.");
+                        sender.sendMessage(Component.text("Cannot prime session. A session is currently paused. Resume it first with '/pow admin session resume'.", NamedTextColor.RED));
                         return true;
                     }
 
                     this.sessionManager.primeNewSession();
-                    sender.sendMessage("§aSession primed. Use '/pow admin session start' to begin.");
+                    sender.sendMessage(Component.text("Session primed. Use '/pow admin session start' to begin.", NamedTextColor.GREEN));
                     break;
 
                 case "resume":
                     if (this.sessionManager.getSessionState() != 2) {
-                        sender.sendMessage("§cCannot resume session. No session is currently paused.");
+                        sender.sendMessage(Component.text("Cannot resume session. No session is currently paused.", NamedTextColor.RED));
                         return true;
                     }
 
                     this.sessionManager.resumeSession();
-                    sender.sendMessage("§aSession resumed.");
+                    sender.sendMessage(Component.text("Session resumed.", NamedTextColor.GREEN));
                     break;
 
                 case "building":
                     if (this.sessionManager.getSessionState() != 0) {
-                        sender.sendMessage("§cCannot enter building mode. Session must be primed first. Use '/pow admin session prime' to prepare a new session.");
+                        sender.sendMessage(Component.text("Cannot enter building mode. Session must be primed first. Use '/pow admin session prime' to prepare a new session.", NamedTextColor.RED));
                         return true;
                     }
 
@@ -810,8 +943,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                     break;
 
                 default:
-                    sender.sendMessage("§cInvalid action. Use: start, pause, end, prime, resume, or building.");
-                    return true;
+                    sender.sendMessage(Component.text("Invalid action. Use: start, pause, end, prime, resume, or building.", NamedTextColor.RED));
             }
         }
 
@@ -833,7 +965,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
             Player target = Bukkit.getPlayer(args[0]);
 
             if (target == null) {
-                sender.sendMessage("§cPlayer not found.");
+                sender.sendMessage(Component.text("Player not found.", NamedTextColor.RED));
 
             } else {
                 switch (args[1].toLowerCase()) {
@@ -846,8 +978,8 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                         }
 
                         target.setHealth(target.getAttribute(Attribute.MAX_HEALTH).getValue());
-                        sender.sendMessage("§a" + target.getName() + " is now human.");
-                        target.sendMessage("§aYou have been set as human.");
+                        sender.sendMessage(Component.text(target.getName() + " is now human.", NamedTextColor.GREEN));
+                        target.sendMessage(Component.text("You have been set as human.", NamedTextColor.GREEN));
                         break;
 
                     case "1":
@@ -862,8 +994,8 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                         this.applyVampireNightVision(target);
                         target.setExp(0.5F);
 
-                        sender.sendMessage("§5" + target.getName() + " is now a Stage 1 vampire.");
-                        target.sendMessage("§5You have been set as a Stage 1 vampire.");
+                        sender.sendMessage(Component.text(target.getName() + " is now a Stage 1 vampire.", NamedTextColor.DARK_PURPLE));
+                        target.sendMessage(Component.text("You have been set as a Stage 1 vampire.", NamedTextColor.DARK_PURPLE));
                         this.sendVampireTexturePackPrompt(target);
                         break;
 
@@ -879,8 +1011,8 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                         this.applyVampireNightVision(target);
                         target.setExp(0.5F);
 
-                        sender.sendMessage("§5" + target.getName() + " is now a Stage 2 vampire.");
-                        target.sendMessage("§5You have been set as a Stage 2 vampire.");
+                        sender.sendMessage(Component.text(target.getName() + " is now a Stage 2 vampire.", NamedTextColor.DARK_PURPLE));
+                        target.sendMessage(Component.text("You have been set as a Stage 2 vampire.", NamedTextColor.DARK_PURPLE));
                         this.sendVampireTexturePackPrompt(target);
                         break;
 
@@ -896,8 +1028,8 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                         this.applyVampireNightVision(target);
                         target.setExp(0.5F);
 
-                        sender.sendMessage("§5" + target.getName() + " is now a Stage 3 vampire.");
-                        target.sendMessage("§5You have been set as a Stage 3 vampire.");
+                        sender.sendMessage(Component.text(target.getName() + " is now a Stage 3 vampire.", NamedTextColor.DARK_PURPLE));
+                        target.sendMessage(Component.text("You have been set as a Stage 3 vampire.", NamedTextColor.DARK_PURPLE));
                         this.sendVampireTexturePackPrompt(target);
                         break;
 
@@ -910,11 +1042,11 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                             int cap = this.vampireManager.getStageCap(target);
                             this.vampireManager.clearStageCap(target);
 
-                            sender.sendMessage("§aCleared stage cap for " + target.getName() + " (was capped at stage " + cap + ")");
-                            target.sendMessage("§aYour stage cap has been removed by an administrator. You can now level up freely.");
+                            sender.sendMessage(Component.text("Cleared stage cap for " + target.getName() + " (was capped at stage " + cap + ")", NamedTextColor.GREEN));
+                            target.sendMessage(Component.text("Your stage cap has been removed by an administrator. You can now level up freely.", NamedTextColor.GREEN));
 
                         } else {
-                            sender.sendMessage("§c" + target.getName() + " does not have a stage cap.");
+                            sender.sendMessage(Component.text(target.getName() + " does not have a stage cap.", NamedTextColor.RED));
                         }
                         break;
 
@@ -922,16 +1054,16 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                     case "clear_promotion_ban":
                         if (this.vampireManager.hasPromotionBan(target)) {
                             this.vampireManager.clearPromotionBan(target);
-                            sender.sendMessage("§aCleared promotion ban for " + target.getName());
-                            target.sendMessage("§aYour promotion ban has been removed by an administrator. You can now level up.");
+                            sender.sendMessage(Component.text("Cleared promotion ban for " + target.getName(), NamedTextColor.GREEN));
+                            target.sendMessage(Component.text("Your promotion ban has been removed by an administrator. You can now level up.", NamedTextColor.GREEN));
 
                         } else {
-                            sender.sendMessage("§c" + target.getName() + " does not have a promotion ban.");
+                            sender.sendMessage(Component.text(target.getName() + " does not have a promotion ban.", NamedTextColor.RED));
                         }
                         break;
 
                     default:
-                        sender.sendMessage("§cInvalid type. Use: human, 1, 2, 3, turn, clearcap, or clearban.");
+                        sender.sendMessage(Component.text("Invalid type. Use: human, 1, 2, 3, turn, clearcap, or clearban.", NamedTextColor.RED));
                         return true;
                 }
             }
@@ -990,7 +1122,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                 case "clearcooldowns":
                     return this.handleBeaconClearCooldowns(sender, args);
                 default:
-                    sender.sendMessage("§cUnknown beacon command: " + args[0].toLowerCase());
+                    sender.sendMessage(Component.text("Unknown beacon command: " + args[0].toLowerCase(), NamedTextColor.RED));
                     this.sendBeaconHelp(sender);
                     return true;
             }
@@ -1003,9 +1135,9 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
      * @return {@code true}
      */
     private boolean handleBeaconFix(CommandSender sender, String[] args) {
-        sender.sendMessage("§eValidating and repairing beacon displays...");
+        sender.sendMessage(Component.text("Validating and repairing beacon displays...", NamedTextColor.YELLOW));
         this.beaconManager.validateDisplays();
-        sender.sendMessage("§aBeacon display repair complete. Check console for details.");
+        sender.sendMessage(Component.text("Beacon display repair complete. Check console for details.", NamedTextColor.GREEN));
         return true;
     }
 
@@ -1021,21 +1153,21 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                 String debugInfo = this.beaconManager.getBeaconDisplayDebugInfo(beaconName);
 
                 if (debugInfo != null) {
-                    sender.sendMessage("§6=== BEACON DISPLAY DEBUG: " + beaconName.toUpperCase() + " ===");
+                    sender.sendMessage(Component.text("=== BEACON DISPLAY DEBUG: " + beaconName.toUpperCase() + " ===", NamedTextColor.GOLD));
                     sender.sendMessage(debugInfo);
 
                 } else {
-                    sender.sendMessage("§cBeacon '" + beaconName + "' not found.");
+                    sender.sendMessage(Component.text("Beacon '" + beaconName + "' not found.", NamedTextColor.RED));
                 }
 
             } else {
-                sender.sendMessage("§cUsage: /beacon debug [beacon_name]");
+                sender.sendMessage(Component.text("Usage: /beacon debug [beacon_name]", NamedTextColor.RED));
             }
         } else {
-            sender.sendMessage("§6=== BEACON DISPLAY DEBUG INFO ===");
+            sender.sendMessage(Component.text("=== BEACON DISPLAY DEBUG INFO ===", NamedTextColor.GOLD));
 
-            for(BeaconSite beacon : this.beaconManager.getAllBeacons()) {
-                sender.sendMessage(this.beaconManager.getBeaconDisplayDebugInfo(beacon.getName()));
+            for (BeaconSite beacon : this.beaconManager.getAllBeacons()) {
+                sender.sendMessage(Component.text(this.beaconManager.getBeaconDisplayDebugInfo(beacon.getName())));
             }
         }
 
@@ -1048,9 +1180,9 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
      * @return {@code true}
      */
     private boolean handleBeaconRefresh(CommandSender sender, String[] args) {
-        sender.sendMessage("§eForce refreshing all beacon displays...");
+        sender.sendMessage(Component.text("Force refreshing all beacon displays...", NamedTextColor.YELLOW));
         this.beaconManager.forceRefreshAllDisplays();
-        sender.sendMessage("§aBeacon display refresh complete. All displays should now match their beacon states.");
+        sender.sendMessage(Component.text("Beacon display refresh complete. All displays should now match their beacon states.", NamedTextColor.GREEN));
         return true;
     }
 
@@ -1060,9 +1192,14 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
      * @return {@code true}
      */
     private boolean handleBeaconCleanup(CommandSender sender, String[] args) {
-        sender.sendMessage("§c§lWARNING: §ePerforming aggressive cleanup of ALL item displays at beacon locations...");
+        sender.sendMessage(Component.text("WARNING: ", NamedTextColor.RED)
+                .decorate(TextDecoration.BOLD)
+                .append(Component.text("Performing aggressive cleanup of ALL item displays at beacon locations...", NamedTextColor.YELLOW)
+                        .decoration(TextDecoration.BOLD, false))
+        );
+
         this.beaconManager.cleanupAllDisplays();
-        sender.sendMessage("§aAggressive beacon cleanup complete. All item displays at beacon locations have been removed and recreated.");
+        sender.sendMessage(Component.text("Aggressive beacon cleanup complete. All item displays at beacon locations have been removed and recreated.", NamedTextColor.GREEN));
         return true;
     }
 
@@ -1072,9 +1209,9 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
      * @return {@code true}
      */
     private boolean handleBeaconClearCooldowns(CommandSender sender, String[] args) {
-        sender.sendMessage("§eClearing all beacon conversion cooldowns...");
+        sender.sendMessage(Component.text("Clearing all beacon conversion cooldowns...", NamedTextColor.YELLOW));
         this.beaconManager.clearAllBeaconCooldownsForNewSession();
-        sender.sendMessage("§aAll beacon conversion cooldowns have been cleared. Beacons can now be converted immediately.");
+        sender.sendMessage(Component.text("All beacon conversion cooldowns have been cleared. Beacons can now be converted immediately.", NamedTextColor.GREEN));
         return true;
     }
 
@@ -1086,17 +1223,15 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
     private boolean handleBeaconAdd(CommandSender sender, String[] args) {
         if (args.length < 2) {
             sender.sendMessage("§cUsage: /pow admin beacon add <name> [radius]");
-            return true;
 
         } else if (!(sender instanceof Player player)) {
-            sender.sendMessage("§cOnly players can add beacons.");
-            return true;
+            sender.sendMessage(Component.text("Only players can add beacons.", NamedTextColor.RED));
 
         } else {
             String name = args[1];
 
             if (this.beaconManager.getBeacon(name) != null) {
-                sender.sendMessage("§cA beacon named '" + name + "' already exists.");
+                sender.sendMessage(Component.text("A beacon named '" + name + "' already exists.", NamedTextColor.RED));
 
             } else {
                 Location playerLocation = player.getLocation();
@@ -1104,9 +1239,10 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                 blockLocation.getBlock().setType(Material.BARRIER);
 
                 if (this.beaconManager.addBeacon(name, blockLocation)) {
-                    sender.sendMessage("§aBeacon '" + name + "' added at your location.");
-                    sender.sendMessage("§7Location: §f" + blockLocation.getWorld().getName() + " (" + blockLocation.getBlockX() + ", " + blockLocation.getBlockY() + ", " + blockLocation.getBlockZ() + ")");
-                    sender.sendMessage("§7An item display beacon has been created at this location.");
+                    sender.sendMessage(Component.text("Beacon '" + name + "' added at your location.", NamedTextColor.GREEN));
+                    sender.sendMessage(Component.text("Location: ", NamedTextColor.GRAY)
+                            .append(Component.text(blockLocation.getWorld().getName() + " (" + blockLocation.getBlockX() + ", " + blockLocation.getBlockY() + ", " + blockLocation.getBlockZ() + ")", NamedTextColor.WHITE)));
+                    sender.sendMessage(Component.text("An item display beacon has been created at this location.", NamedTextColor.GRAY));
                     player.playSound(blockLocation, Sound.BLOCK_BEACON_ACTIVATE, SoundCategory.BLOCKS, 1.0F, 1.0F);
 
                     if (args.length >= 3) {
@@ -1117,23 +1253,24 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                                 BeaconSite beacon = this.beaconManager.getBeacon(name);
                                 beacon.setCaptureRadius(radius);
                                 this.beaconManager.saveBeacons();
-                                sender.sendMessage("§7Capture radius set to: §e" + radius + " blocks");
+                                sender.sendMessage(Component.text("Capture radius set to: ", NamedTextColor.GRAY)
+                                        .append(Component.text(radius + " blocks", NamedTextColor.YELLOW)));
 
                             } else {
-                                sender.sendMessage("§cRadius must be between 1 and 100. Using default radius of 10.");
+                                sender.sendMessage(Component.text("Radius must be between 1 and 100. Using default radius of 10.", NamedTextColor.RED));
                             }
                         } catch (NumberFormatException e) {
-                            sender.sendMessage("§cInvalid radius number. Using default radius of 10.");
+                            sender.sendMessage(Component.text("Invalid radius number. Using default radius of 10.", NamedTextColor.RED));
                         }
                     }
                 } else {
-                    sender.sendMessage("§cFailed to add beacon.");
+                    sender.sendMessage(Component.text("Failed to add beacon.", NamedTextColor.RED));
                     blockLocation.getBlock().setType(Material.AIR);
                 }
             }
-
-            return true;
         }
+
+        return true;
     }
 
     /**
@@ -1150,7 +1287,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
             BeaconSite beacon = this.beaconManager.getBeacon(name);
 
             if (beacon == null) {
-                sender.sendMessage("§cBeacon '" + name + "' not found.");
+                sender.sendMessage(Component.text("Beacon '" + name + "' not found.", NamedTextColor.RED));
 
             } else {
                 if (sender instanceof Player player) {
@@ -1159,17 +1296,17 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                     if (beaconLoc != null && beaconLoc.getWorld() != null) {
                         Location originalLoc = player.getLocation().clone();
                         player.teleport(beaconLoc);
-                        sender.sendMessage("§7Teleported to beacon location to ensure chunk is loaded...");
+                        sender.sendMessage(Component.text("Teleported to beacon location to ensure chunk is loaded...", NamedTextColor.GRAY));
 
                         this.plugin.getServer().getScheduler().runTaskLater(this.plugin, () -> {
                             if (this.beaconManager.removeBeacon(name)) {
-                                sender.sendMessage("§aBeacon '" + name + "' removed.");
+                                sender.sendMessage(Component.text("Beacon '" + name + "' removed.", NamedTextColor.GREEN));
                             } else {
-                                sender.sendMessage("§cFailed to remove beacon '" + name + "'.");
+                                sender.sendMessage(Component.text("Failed to remove beacon '" + name + "'.", NamedTextColor.RED));
                             }
 
                             player.teleport(originalLoc);
-                            sender.sendMessage("§7Teleported back to original location.");
+                            sender.sendMessage(Component.text("Teleported back to original location.", NamedTextColor.GRAY));
                         }, 5L);
 
                         return true;
@@ -1177,9 +1314,9 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                 }
 
                 if (this.beaconManager.removeBeacon(name)) {
-                    sender.sendMessage("§aBeacon '" + name + "' removed.");
+                    sender.sendMessage(Component.text("Beacon '" + name + "' removed.", NamedTextColor.GREEN));
                 } else {
-                    sender.sendMessage("§cFailed to remove beacon '" + name + "'.");
+                    sender.sendMessage(Component.text("Failed to remove beacon '" + name + "'.", NamedTextColor.RED));
                 }
             }
         }
@@ -1193,7 +1330,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
      * @return {@code true}
      */
     private boolean handleBeaconList(CommandSender sender, String[] args) {
-        for(String line : this.beaconManager.getBeaconList()) {
+        for (String line : this.beaconManager.getBeaconList()) {
             sender.sendMessage(line);
         }
 
@@ -1207,7 +1344,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
      */
     private boolean handleBeaconReload(CommandSender sender, String[] args) {
         this.beaconManager.reloadBeacons();
-        sender.sendMessage("§aBeacons reloaded from file.");
+        sender.sendMessage(Component.text("Beacons reloaded from file.", NamedTextColor.GREEN));
         return true;
     }
 
@@ -1218,14 +1355,17 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
      */
     private boolean handleBeaconStats(CommandSender sender, String[] args) {
         Map<BeaconSite.BeaconState, Integer> stateStats = this.beaconManager.getStateStats();
-        sender.sendMessage("§6§l=== BEACON STATISTICS ===");
+        sender.sendMessage(Component.text("=== BEACON STATISTICS ===", NamedTextColor.GOLD)
+                .decorate(TextDecoration.BOLD));
         int total = stateStats.values().stream().mapToInt(Integer::intValue).sum();
 
-        sender.sendMessage("§7Total Beacons: §e" + total);
+        sender.sendMessage(Component.text("Total Beacons: ", NamedTextColor.GRAY)
+                .append(Component.text(total, NamedTextColor.YELLOW)));
         sender.sendMessage("");
-        sender.sendMessage("§f§l=== SPIRITUAL INFLUENCE ===");
+        sender.sendMessage(Component.text("=== SPIRITUAL INFLUENCE ===", NamedTextColor.WHITE)
+                .decorate(TextDecoration.BOLD));
 
-        for(BeaconSite.BeaconState state : BeaconState.values()) {
+        for (BeaconSite.BeaconState state : BeaconState.values()) {
             int count = stateStats.get(state);
             double percentage = total > 0 ? count * 100.0 / (double)total : 0;
             String icon = "";
@@ -1236,7 +1376,11 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                 case NEUTRAL -> icon = "◯ ";
             }
 
-            sender.sendMessage(String.format("%s%s%s: §e%d §7(%.1f%%)", state.getColorCode(), icon, state.getDisplayName(), count, percentage));
+            sender.sendMessage(Component.text(state.getColorCode() + icon + state.getDisplayName())
+                    .append(Component.text(": ", NamedTextColor.WHITE))
+                    .append(Component.text(count, NamedTextColor.YELLOW))
+                    .append(Component.text(String.format(" (%.1f%%)", percentage), NamedTextColor.GRAY))
+            );
         }
 
         return true;
@@ -1256,11 +1400,12 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
             BeaconSite beacon = this.beaconManager.getBeacon(name);
 
             if (beacon == null) {
-                sender.sendMessage("§cBeacon '" + name + "' not found.");
+                sender.sendMessage(Component.text("Beacon '" + name + "' not found.", NamedTextColor.RED));
 
             } else {
-                sender.sendMessage("§6§l=== BEACON INFO ===");
-                sender.sendMessage(beacon.getStatusString());
+                sender.sendMessage(Component.text("=== BEACON INFO ===", NamedTextColor.GOLD)
+                        .decorate(TextDecoration.BOLD));
+                sender.sendMessage(beacon.getStatusString(this.plugin.getSessionManager()));
             }
         }
 
@@ -1274,7 +1419,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
      */
     private boolean handleBeaconValidate(CommandSender sender, String[] args) {
         this.beaconManager.validateBeacons();
-        sender.sendMessage("§aBeacon validation complete. Check console for any issues.");
+        sender.sendMessage(Component.text("Beacon validation complete. Check console for any issues.", NamedTextColor.GREEN));
         return true;
     }
 
@@ -1290,10 +1435,10 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
             String name = args[1];
 
             if (this.beaconManager.setBeaconHoly(name)) {
-                sender.sendMessage("§aBeacon '" + name + "' has been consecrated as holy.");
-                sender.sendMessage("§7The beacon now emanates divine light and protection.");
+                sender.sendMessage(Component.text("Beacon '" + name + "' has been consecrated as holy.", NamedTextColor.GREEN));
+                sender.sendMessage(Component.text("The beacon now emanates divine light and protection.", NamedTextColor.GRAY));
             } else {
-                sender.sendMessage("§cBeacon '" + name + "' not found.");
+                sender.sendMessage(Component.text("Beacon '" + name + "' not found.", NamedTextColor.RED));
             }
         }
 
@@ -1312,10 +1457,10 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
             String name = args[1];
 
             if (this.beaconManager.setBeaconDesecrated(name)) {
-                sender.sendMessage("§4Beacon '" + name + "' has been desecrated by dark forces.");
-                sender.sendMessage("§7The beacon now radiates malevolent energy and shadow.");
+                sender.sendMessage(Component.text("Beacon '" + name + "' has been desecrated by dark forces.", NamedTextColor.DARK_RED));
+                sender.sendMessage(Component.text("The beacon now radiates malevolent energy and shadow.", NamedTextColor.GRAY));
             } else {
-                sender.sendMessage("§cBeacon '" + name + "' not found.");
+                sender.sendMessage(Component.text("Beacon '" + name + "' not found.", NamedTextColor.RED));
             }
         }
 
@@ -1334,10 +1479,10 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
             String name = args[1];
 
             if (this.beaconManager.setBeaconCorrupted(name)) {
-                sender.sendMessage("§4Beacon '" + name + "' has been corrupted by an expulsion of light and dark.");
-                sender.sendMessage("§7A lifeless energy leaks from the beacon.");
+                sender.sendMessage(Component.text("Beacon '" + name + "' has been corrupted by an expulsion of light and dark.", NamedTextColor.DARK_RED));
+                sender.sendMessage(Component.text("A lifeless energy leaks from the beacon.", NamedTextColor.GRAY));
             } else {
-                sender.sendMessage("§cBeacon '" + name + "' not found.");
+                sender.sendMessage(Component.text("Beacon '" + name + "' not found.", NamedTextColor.RED));
             }
         }
 
@@ -1356,10 +1501,10 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
             String name = args[1];
 
             if (this.beaconManager.setBeaconNeutral(name)) {
-                sender.sendMessage("§7Beacon '" + name + "' has been unaligned and set to neutral.");
-                sender.sendMessage("§7The beacon texture has changed. Players will receive a notification in " + this.plugin.getConfigManager().getBeaconNeutralAnnouncementDelaySeconds() + " seconds.");
+                sender.sendMessage(Component.text("Beacon '" + name + "' has been unaligned and set to neutral.", NamedTextColor.GRAY));
+                sender.sendMessage(Component.text("The beacon texture has changed. Players will receive a notification in " + this.plugin.getConfigManager().getBeaconNeutralAnnouncementDelaySeconds() + " seconds.", NamedTextColor.GRAY));
             } else {
-                sender.sendMessage("§cBeacon '" + name + "' not found.");
+                sender.sendMessage(Component.text("Beacon '" + name + "' not found.", NamedTextColor.RED));
             }
         }
 
@@ -1370,7 +1515,8 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
      * Provide the sender with a helpful list of instructions on using POW's plugin commands
      */
     private void sendBeaconHelp(CommandSender sender) {
-        sender.sendMessage("§6§l=== BEACON COMMANDS ===");
+        sender.sendMessage(Component.text("=== BEACON COMMANDS ===", NamedTextColor.GOLD)
+                .decorate(TextDecoration.BOLD));
         sender.sendMessage("§e/pow admin beacon add <name> [radius] §7- Add beacon at your location");
         sender.sendMessage("§e/pow admin beacon remove <name> §7- Remove a beacon");
         sender.sendMessage("§e/pow admin beacon list §7- List all beacons");
@@ -1399,7 +1545,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
      */
     private boolean handleTurnCommand(CommandSender sender, Player target, String[] args) {
         if (!this.vampireManager.isHuman(target)) {
-            sender.sendMessage("§c" + target.getName() + " is not human. Only humans can be turned into vampires.");
+            sender.sendMessage(Component.text(target.getName() + " is not human. Only humans can be turned into vampires.", NamedTextColor.RED));
 
         } else {
             Player turner = null;
@@ -1408,16 +1554,16 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                 turner = Bukkit.getPlayer(args[2]);
 
                 if (turner == null) {
-                    sender.sendMessage("§cTurner player '" + args[2] + "' not found.");
+                    sender.sendMessage(Component.text("Turner player '" + args[2] + "' not found.", NamedTextColor.RED));
                     return true;
                 }
 
                 if (!this.vampireManager.isVampire(turner)) {
-                    sender.sendMessage("§c" + turner.getName() + " is not a vampire. Only vampires can turn humans.");
+                    sender.sendMessage(Component.text(turner.getName() + " is not a vampire. Only vampires can turn humans.", NamedTextColor.RED));
                     return true;
                 }
             } else {
-                sender.sendMessage("§cMissing crucial argument for the turner player.");
+                sender.sendMessage(Component.text("Missing crucial argument for the turner player.", NamedTextColor.RED));
             }
 
             this.plugin.getVampireManager().performVampireTurning(target, turner);
@@ -1439,14 +1585,14 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
             Player target = Bukkit.getPlayer(args[0]);
 
             if (target == null) {
-                sender.sendMessage("§cPlayer '" + args[0] + "' not found.");
+                sender.sendMessage(Component.text("Player '" + args[0] + "' not found.", NamedTextColor.RED));
 
             } else {
                 String abilityName = args[1];
 
                 if (!this.tomeManager.isValidAbility(abilityName)) {
-                    sender.sendMessage("§cUnknown tome ability: '" + abilityName + "'");
-                    sender.sendMessage("§7Available abilities: " + String.join(", ", this.tomeManager.getAllAbilityNames()));
+                    sender.sendMessage(Component.text("Unknown tome ability: '" + abilityName + "'", NamedTextColor.RED));
+                    sender.sendMessage(Component.text("Available abilities: " + String.join(", ", this.tomeManager.getAllAbilityNames()), NamedTextColor.GRAY));
 
                 } else {
                     int amount = 1;
@@ -1456,12 +1602,11 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                             amount = Integer.parseInt(args[2]);
 
                             if (amount < 1 || amount > 64) {
-                                sender.sendMessage("§cAmount must be between 1 and 64.");
+                                sender.sendMessage(Component.text("Amount must be between 1 and 64.", NamedTextColor.RED));
                                 return true;
                             }
-
                         } catch (NumberFormatException e) {
-                            sender.sendMessage("§cInvalid amount: '" + args[2] + "'. Must be a number between 1 and 64.");
+                            sender.sendMessage(Component.text("Invalid amount: '" + args[2] + "'. Must be a number between 1 and 64.", NamedTextColor.RED));
                             return true;
                         }
                     }
@@ -1479,7 +1624,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                             List<String> lore = new ArrayList<>();
                             String[] descriptionLines = ability.getDescriptionLines();
 
-                            for(String line : descriptionLines) {
+                            for (String line : descriptionLines) {
                                 lore.add("§7" + line);
                             }
 
@@ -1496,7 +1641,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                         if (ability != null) {
                             String[] descriptionLines = ability.getDescriptionLines();
 
-                            for(String line : descriptionLines) {
+                            for (String line : descriptionLines) {
                                 pageContent.append("§7").append(line).append("\n");
                             }
                         } else {
@@ -1511,14 +1656,14 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
 
                     if (target.getInventory().firstEmpty() == -1) {
                         target.getWorld().dropItemNaturally(target.getLocation(), tome);
-                        target.sendMessage("§eA mysterious tome appears at your feet...");
+                        target.sendMessage(Component.text("A mysterious tome appears at your feet...", NamedTextColor.YELLOW));
 
                     } else {
                         target.getInventory().addItem(tome);
-                        target.sendMessage("§eA mysterious tome has appeared in your inventory...");
+                        target.sendMessage(Component.text("A mysterious tome has appeared in your inventory...", NamedTextColor.YELLOW));
                     }
 
-                    sender.sendMessage("§aGave " + amount + "x Tome of " + abilityName + " to " + target.getName() + ".");
+                    sender.sendMessage(Component.text("Gave " + amount + "x Tome of " + abilityName + " to " + target.getName() + ".", NamedTextColor.GREEN));
                 }
             }
         }
@@ -1533,7 +1678,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
      */
     private boolean handleSelectTomesCommand(CommandSender sender, String[] args) {
         if (!(sender instanceof Player admin)) {
-            sender.sendMessage("§cThis command can only be used by players.");
+            sender.sendMessage(Component.text("This command can only be used by players.", NamedTextColor.RED));
 
         } else if (args.length < 1) {
             sender.sendMessage("§cUsage: /pow admin select_tomes <player>");
@@ -1542,7 +1687,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
             Player target = Bukkit.getPlayer(args[0]);
 
             if (target == null) {
-                sender.sendMessage("§cPlayer '" + args[0] + "' not found.");
+                sender.sendMessage(Component.text("Player '" + args[0] + "' not found.", NamedTextColor.RED));
             } else {
                 this.tomeManager.openTomeSelectionGUI(admin, target);
             }
@@ -1564,7 +1709,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
             Player target = Bukkit.getPlayer(args[0]);
 
             if (target == null) {
-                sender.sendMessage("§cPlayer '" + args[0] + "' not found.");
+                sender.sendMessage(Component.text("Player '" + args[0] + "' not found.", NamedTextColor.RED));
 
             } else {
                 int bookNum;
@@ -1573,11 +1718,11 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                     bookNum = Integer.parseInt(args[1]);
 
                     if (bookNum < 1 || bookNum > 4) {
-                        sender.sendMessage("§cBook number must be 1, 2, 3, or 4.");
+                        sender.sendMessage(Component.text("Book number must be 1, 2, 3, or 4.", NamedTextColor.RED));
                         return true;
                     }
                 } catch (NumberFormatException e) {
-                    sender.sendMessage("§cInvalid book number: '" + args[1] + "'. Must be 1, 2, 3, or 4.");
+                    sender.sendMessage(Component.text("Invalid book number: '" + args[1] + "'. Must be 1, 2, 3, or 4.", NamedTextColor.RED));
                     return true;
                 }
 
@@ -1585,14 +1730,15 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
 
                 if (target.getInventory().firstEmpty() == -1) {
                     target.getWorld().dropItemNaturally(target.getLocation(), book);
-                    target.sendMessage("§5An ancient tome appears at your feet...");
+                    target.sendMessage(Component.text("An ancient tome appears at your feet...", NamedTextColor.DARK_PURPLE));
 
                 } else {
                     target.getInventory().addItem(book);
-                    target.sendMessage("§5An ancient tome has appeared in your inventory...");
+                    target.sendMessage(Component.text("An ancient tome has appeared in your inventory...", NamedTextColor.DARK_PURPLE));
                 }
 
-                sender.sendMessage("§aGave Cure Book " + bookNum + " to §e" + target.getName());
+                sender.sendMessage(Component.text("Gave Cure Book " + bookNum + " to ", NamedTextColor.GREEN)
+                        .append(Component.text(target.getName(), NamedTextColor.YELLOW)));
             }
         }
 
@@ -1619,13 +1765,13 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
             bookNumber = Integer.parseInt(args[0]);
 
         } catch (NumberFormatException e) {
-            sender.sendMessage("§cInvalid book number. Use whole numbers.");
+            sender.sendMessage(Component.text("Invalid book number. Use whole numbers.", NamedTextColor.RED));
             return true;
         }
 
         // Check a valid cure book number was provided
         if (bookNumber < 1 || bookNumber > 4) {
-            sender.sendMessage("§cInvalid book number. Choose a number between 1 and 4.");
+            sender.sendMessage(Component.text("Invalid book number. Choose a number between 1 and 4.", NamedTextColor.RED));
 
             return true;
         }
@@ -1647,7 +1793,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                 z = Integer.parseInt(args[3]);
 
             } catch (NumberFormatException e) {
-                sender.sendMessage("§cInvalid coordinates. Use whole numbers.");
+                sender.sendMessage(Component.text("Invalid coordinates. Use whole numbers.", NamedTextColor.RED));
                 return true;
             }
         }
@@ -1672,13 +1818,20 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
      */
     private boolean handleDistributeTomesCommand(CommandSender sender, String[] args) {
         if (this.plugin.getTomeDistributionManager().getTomeLocations().isEmpty()) {
-            sender.sendMessage("§c§lWarning: §cNo tome chest locations are configured!");
-            sender.sendMessage("§7Use §e/pow admin addtomechest §7to add tome chest locations first.");
+            sender.sendMessage(Component.text("Warning: ", NamedTextColor.RED)
+                    .decorate(TextDecoration.BOLD)
+                    .append(Component.text("No tome chest locations are configured!", NamedTextColor.RED)
+                            .decoration(TextDecoration.BOLD, false))
+            );
+            sender.sendMessage(Component.text("Use ", NamedTextColor.GRAY)
+                    .append(Component.text("/pow admin addtomechest", NamedTextColor.YELLOW))
+                    .append(Component.text(" to add tome chest locations first.", NamedTextColor.GRAY))
+            );
 
         } else {
-            sender.sendMessage("§eTriggering tome distribution...");
+            sender.sendMessage(Component.text("Triggering tome distribution...", NamedTextColor.YELLOW));
             this.plugin.getTomeDistributionManager().triggerDistribution();
-            sender.sendMessage("§aTome distribution complete. Check the tome locations for new tomes.");
+            sender.sendMessage(Component.text("Tome distribution complete. Check the tome locations for new tomes.", NamedTextColor.GREEN));
         }
 
         return true;
@@ -1691,21 +1844,24 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
      */
     private boolean handleAddTomeChestCommand(CommandSender sender, String[] args) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage("§cThis command can only be used by players.");
+            sender.sendMessage(Component.text("This command can only be used by players.", NamedTextColor.RED));
 
         } else {
             Location location = player.getLocation();
 
             if (this.plugin.getTomeDistributionManager().addTomeLocation(location)) {
                 location.getBlock().setType(Material.CHEST);
-                sender.sendMessage("§a✔ Successfully added tome chest location.");
-                sender.sendMessage("§7Location: §e" + location.getBlockX() + ", " + location.getBlockY() + ", " + location.getBlockZ());
-                sender.sendMessage("§7A chest has been placed at this location.");
-                sender.sendMessage("§7Total tome chest locations: §e" + this.plugin.getTomeDistributionManager().getTomeLocations().size());
+                sender.sendMessage(Component.text("✔ Successfully added tome chest location.", NamedTextColor.GREEN));
+                sender.sendMessage(Component.text("Location: ", NamedTextColor.GRAY)
+                        .append(Component.text(location.getBlockX() + ", " + location.getBlockY() + ", " + location.getBlockZ(), NamedTextColor.YELLOW)));
+                sender.sendMessage(Component.text("A chest has been placed at this location.", NamedTextColor.GRAY));
+                sender.sendMessage(Component.text("Total tome chest locations: ", NamedTextColor.GRAY)
+                        .append(Component.text(this.plugin.getTomeDistributionManager().getTomeLocations().size(),NamedTextColor.YELLOW)));
 
             } else {
-                sender.sendMessage("§c✖ This location already exists in the tome chest list.");
-                sender.sendMessage("§7Location: §e" + location.getBlockX() + ", " + location.getBlockY() + ", " + location.getBlockZ());
+                sender.sendMessage(Component.text("✖ This location already exists in the tome chest list.", NamedTextColor.RED));
+                sender.sendMessage(Component.text("Location: ", NamedTextColor.GRAY)
+                        .append(Component.text(location.getBlockX() + ", " + location.getBlockY() + ", " + location.getBlockZ(), NamedTextColor.YELLOW)));
             }
         }
 
@@ -1719,14 +1875,14 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
      */
     private boolean handleRemoveTomeChestCommand(CommandSender sender, String[] args) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage("§cThis command can only be used by players.");
+            sender.sendMessage(Component.text("This command can only be used by players.", NamedTextColor.RED));
 
         } else {
             Location playerLocation = player.getLocation(), nearestLocation = null;
             List<Location> tomeLocations = this.plugin.getTomeDistributionManager().getTomeLocations();
             double nearestDistance = Double.MAX_VALUE, distance;
 
-            for(Location loc : tomeLocations) {
+            for (Location loc : tomeLocations) {
                 if (loc.getWorld() != null && loc.getWorld().equals(playerLocation.getWorld())) {
                     distance = playerLocation.distance(loc);
 
@@ -1740,21 +1896,24 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
             if (nearestLocation != null && !(nearestDistance > 10)) {
                 if (nearestLocation.getBlock().getType() == Material.CHEST) {
                     nearestLocation.getBlock().setType(Material.AIR);
-                    sender.sendMessage("§7Removed physical chest at location.");
+                    sender.sendMessage(Component.text("Removed physical chest at location.", NamedTextColor.GRAY));
                 }
 
                 if (this.plugin.getTomeDistributionManager().removeTomeLocation(nearestLocation)) {
-                    sender.sendMessage("§a✔ Successfully removed tome chest location.");
-                    sender.sendMessage("§7Location: §e" + nearestLocation.getBlockX() + ", " + nearestLocation.getBlockY() + ", " + nearestLocation.getBlockZ());
-                    sender.sendMessage("§7Distance: §e" + String.format("%.1f", nearestDistance) + " blocks");
-                    sender.sendMessage("§7Total tome chest locations: §e" + this.plugin.getTomeDistributionManager().getTomeLocations().size());
+                    sender.sendMessage(Component.text("✔ Successfully removed tome chest location.", NamedTextColor.GREEN));
+                    sender.sendMessage(Component.text("Location: ", NamedTextColor.GRAY)
+                            .append(Component.text(nearestLocation.getBlockX() + ", " + nearestLocation.getBlockY() + ", "+ nearestLocation.getBlockZ(), NamedTextColor.YELLOW)));
+                    sender.sendMessage(Component.text("Distance: ", NamedTextColor.GRAY)
+                            .append(Component.text(String.format("%.1f", nearestDistance) + " blocks", NamedTextColor.YELLOW)));
+                    sender.sendMessage(Component.text("Total tome chest locations: ", NamedTextColor.GRAY)
+                            .append(Component.text(this.plugin.getTomeDistributionManager().getTomeLocations().size(), NamedTextColor.YELLOW)));
 
                 } else {
-                    sender.sendMessage("§c✖ Failed to remove tome chest location from config.");
+                    sender.sendMessage(Component.text("✖ Failed to remove tome chest location from config.", NamedTextColor.RED));
                 }
             } else {
-                sender.sendMessage("§c✖ No tome chest found within 10 blocks.");
-                sender.sendMessage("§7Move closer to a tome chest location and try again.");
+                sender.sendMessage(Component.text("✖ No tome chest found within 10 blocks.", NamedTextColor.RED));
+                sender.sendMessage(Component.text("Move closer to a tome chest location and try again.", NamedTextColor.GRAY));
             }
         }
 
@@ -1769,40 +1928,48 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
     private boolean handleListTomeChestsCommand(CommandSender sender, String[] args) {
         List<Location> tomeLocations = this.plugin.getTomeDistributionManager().getTomeLocations();
 
-        sender.sendMessage("§6§l=== TOME CHEST LOCATIONS ===");
-        sender.sendMessage("§7Total: §e" + tomeLocations.size() + " locations");
+        sender.sendMessage(Component.text("=== TOME CHEST LOCATIONS ===", NamedTextColor.GOLD)
+                .decorate(TextDecoration.BOLD));
+        sender.sendMessage(Component.text("Total: ", NamedTextColor.GRAY)
+                .append(Component.text(tomeLocations.size() + " locations", NamedTextColor.YELLOW)));
         sender.sendMessage("");
 
         if (tomeLocations.isEmpty()) {
-            sender.sendMessage("§7No tome chest locations configured.");
-            sender.sendMessage("§7Use §e/pow admin addtomechest §7to add a location.");
+            sender.sendMessage(Component.text("No tome chest locations configured.", NamedTextColor.GRAY));
+            sender.sendMessage(Component.text("Use ", NamedTextColor.GRAY)
+                    .append(Component.text("/pow admin addtomechest", NamedTextColor.YELLOW))
+                    .append(Component.text(" to add a location.", NamedTextColor.GRAY))
+            );
 
         } else {
             int index = 1;
 
-            for(Location loc : tomeLocations) {
+            for (Location loc : tomeLocations) {
                 boolean hasChest = loc.getWorld() != null && loc.getBlock().getType() == Material.CHEST;
-                String chestStatus = hasChest ? "§a✔" : "§c✖";
+                Component chestStatus = hasChest ?
+                        Component.text("✔", NamedTextColor.GREEN) :
+                        Component.text("✖", NamedTextColor.RED);
                 String tpCommand = String.format("/tp %d %d %d", loc.getBlockX(), loc.getBlockY(), loc.getBlockZ());
 
-                TextComponent indexPart = new TextComponent(String.format("§7%d. ", index));
-                TextComponent coordsPart = new TextComponent(String.format("§e%d, %d, %d", loc.getBlockX(), loc.getBlockY(), loc.getBlockZ()));
-                coordsPart.setClickEvent(new ClickEvent(Action.RUN_COMMAND, tpCommand));
-                coordsPart.setHoverEvent(new HoverEvent(net.md_5.bungee.api.chat.HoverEvent.Action.SHOW_TEXT, (new ComponentBuilder("§aClick to teleport to this location")).create()));
-                TextComponent statusPart = new TextComponent(String.format(" §7(chest: %s§7)", chestStatus));
+                Component message = Component.text(index + ". ", NamedTextColor.GRAY)
+                        .append(Component.text(String.format("%d, %d, %d", loc.getBlockX(), loc.getBlockY(), loc.getBlockZ()), NamedTextColor.YELLOW)
+                                .clickEvent(ClickEvent.runCommand(tpCommand))
+                                .hoverEvent(HoverEvent.showText(Component.text("Click to teleport to this location", NamedTextColor.GREEN)))
+                        )
+                        .append(Component.text(" (chest: ", NamedTextColor.GRAY))
+                        .append(chestStatus)
+                        .append(Component.text(")", NamedTextColor.GRAY));
 
-                if (sender instanceof Player player) {
-                    player.spigot().sendMessage(indexPart, coordsPart, statusPart);
-
-                } else {
-                    sender.sendMessage(String.format("§7%d. §e%d, %d, %d §7(chest: %s§7)", index, loc.getBlockX(), loc.getBlockY(), loc.getBlockZ(), chestStatus));
-                }
+                sender.sendMessage(message);
 
                 ++index;
             }
 
             sender.sendMessage("");
-            sender.sendMessage("§7Click a location to teleport, or use §e/pow admin removetomechest §7nearby to remove.");
+            sender.sendMessage(Component.text("Click a location to teleport, or use ", NamedTextColor.GRAY)
+                    .append(Component.text("/pow admin removetomechest", NamedTextColor.YELLOW))
+                    .append(Component.text(" nearby to remove.", NamedTextColor.GRAY))
+            );
         }
 
         return true;
@@ -1824,25 +1991,31 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
             if (target.equals("all")) {
                 int playersAffected = 0;
 
-                for(Player player : Bukkit.getOnlinePlayers()) {
+                for (Player player : Bukkit.getOnlinePlayers()) {
                     this.plugin.getBloodMoonAttributeListener().forceRemoveBloodMoonAttributes(player);
                     ++playersAffected;
                 }
 
-                sender.sendMessage("§aCleared blood moon buffs for §e" + playersAffected + " §aonline players.");
+                sender.sendMessage(Component.text("Cleared blood moon buffs for ", NamedTextColor.GREEN)
+                        .append(Component.text(playersAffected, NamedTextColor.YELLOW))
+                        .append(Component.text(" online players.", NamedTextColor.GREEN))
+                );
                 this.plugin.logInfo("Admin " + sender.getName() + " cleared blood moon buffs for all players");
 
             } else {
                 Player targetPlayer = Bukkit.getPlayer(target);
 
                 if (targetPlayer == null) {
-                    sender.sendMessage("§cPlayer '" + target + "' not found or not online.");
+                    sender.sendMessage(Component.text("Player '" + target + "' not found or not online.", NamedTextColor.RED));
                     return true;
                 }
 
                 this.plugin.getBloodMoonAttributeListener().forceRemoveBloodMoonAttributes(targetPlayer);
-                sender.sendMessage("§aCleared blood moon buffs for §e" + targetPlayer.getName() + "§a.");
-                targetPlayer.sendMessage("§aAn admin has cleared your blood moon buffs.");
+                sender.sendMessage(Component.text("Cleared blood moon buffs for ", NamedTextColor.GREEN)
+                        .append(Component.text(targetPlayer.getName(), NamedTextColor.YELLOW))
+                        .append(Component.text(".", NamedTextColor.GREEN))
+                );
+                targetPlayer.sendMessage(Component.text("An admin has cleared your blood moon buffs.", NamedTextColor.GREEN));
                 this.plugin.logInfo("Admin " + sender.getName() + " cleared blood moon buffs for " + targetPlayer.getName());
             }
         }
@@ -1868,14 +2041,17 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
             Player targetPlayer = Bukkit.getPlayer(args[0].toLowerCase());
 
             if (targetPlayer == null) {
-                sender.sendMessage("§cPlayer '" + target + "' not found or not online.");
+                sender.sendMessage(Component.text("Player '" + target + "' not found or not online.", NamedTextColor.RED));
                 return true;
             }
 
             targetPlayer.addScoreboardTag("CannotCure");
 
-            sender.sendMessage("§aMade §e" + targetPlayer.getName() + "§a immune to the cure.");
-            targetPlayer.sendMessage("§aAn admin has made you impossible to cure.");
+            sender.sendMessage(Component.text("Made ", NamedTextColor.GREEN)
+                    .append(Component.text(targetPlayer.getName(), NamedTextColor.YELLOW))
+                    .append(Component.text(" immune to the cure.", NamedTextColor.GREEN))
+            );
+            targetPlayer.sendMessage(Component.text("An admin has made you impossible to cure.", NamedTextColor.GREEN));
             this.plugin.logInfo("Admin " + sender.getName() + " made " + targetPlayer.getName() + "impossible to cure");
         }
 
@@ -1891,7 +2067,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         if (args.length == 0) {
             if (sender instanceof Player) {
                 this.plugin.getBloodMoonAttributeListener().forceCleanupOnJoin((Player)sender);
-                sender.sendMessage("§aAggressively cleaned your attribute modifiers.");
+                sender.sendMessage(Component.text("Aggressively cleaned your attribute modifiers.", NamedTextColor.GREEN));
 
             } else {
                 sender.sendMessage("§cUsage: /fixattributes <player | all>");
@@ -1903,24 +2079,30 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
             if (target.equals("all")) {
                 int playersAffected = 0;
 
-                for(Player player : Bukkit.getOnlinePlayers()) {
+                for (Player player : Bukkit.getOnlinePlayers()) {
                     this.plugin.getBloodMoonAttributeListener().forceCleanupOnJoin(player);
                     ++playersAffected;
                 }
 
-                sender.sendMessage("§aAggressively cleaned attribute modifiers for §e" + playersAffected + " §aonline players.");
+                sender.sendMessage(Component.text("Aggressively cleaned attribute modifiers for ", NamedTextColor.GREEN)
+                        .append(Component.text(playersAffected, NamedTextColor.YELLOW))
+                        .append(Component.text(" online players.", NamedTextColor.GREEN))
+                );
                 this.plugin.logInfo("Admin " + sender.getName() + " fixed attributes for all players");
 
             } else {
                 Player targetPlayer = Bukkit.getPlayer(target);
 
                 if (targetPlayer == null) {
-                    sender.sendMessage("§cPlayer '" + target + "' not found or not online.");
+                    sender.sendMessage(Component.text("Player '" + target + "' not found or not online.", NamedTextColor.RED));
                     return true;
                 }
 
                 this.plugin.getBloodMoonAttributeListener().forceCleanupOnJoin(targetPlayer);
-                sender.sendMessage("§aAggressively cleaned attribute modifiers for §e" + targetPlayer.getName() + "§a.");
+                sender.sendMessage(Component.text("Aggressively cleaned attribute modifiers for ", NamedTextColor.GREEN)
+                        .append(Component.text(targetPlayer.getName(), NamedTextColor.YELLOW))
+                        .append(Component.text(".", NamedTextColor.GREEN))
+                );
                 this.plugin.logInfo("Admin " + sender.getName() + " fixed attributes for " + targetPlayer.getName());
             }
         }
@@ -1943,26 +2125,88 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         } else {
             switch (args[0].toLowerCase()) {
                 case "all":
-                    int removedCount = this.plugin.getEndermanRemovalListener().removeAllEndermen();
-                    sender.sendMessage("§aRemoved §e" + removedCount + " §aendermen from all loaded chunks.");
+                    int removedCount = this.plugin.getSpawnRemovalListener().removeAllEndermen();
+                    sender.sendMessage(Component.text("Removed ", NamedTextColor.GREEN)
+                            .append(Component.text(removedCount, NamedTextColor.YELLOW))
+                            .append(Component.text(" endermen from all loaded chunks.", NamedTextColor.GREEN))
+                    );
                     this.plugin.logInfo("Admin " + sender.getName() + " removed " + removedCount + " endermen");
                     break;
 
                 case "toggle":
-                    boolean currentStatus = this.plugin.getEndermanRemovalListener().isEndermanRemovalEnabled();
-                    this.plugin.getEndermanRemovalListener().setEndermanRemovalEnabled(!currentStatus);
+                    boolean currentStatus = this.plugin.getSpawnRemovalListener().isEndermanRemovalEnabled();
+                    this.plugin.getSpawnRemovalListener().setEndermanRemovalEnabled(!currentStatus);
                     String newStatus = !currentStatus ? "ENABLED" : "DISABLED";
-                    sender.sendMessage("§aEnderman removal is now §e" + newStatus + "§a.");
+                    sender.sendMessage(Component.text("Enderman removal is now ", NamedTextColor.GREEN)
+                            .append(Component.text(newStatus, NamedTextColor.YELLOW))
+                            .append(Component.text(".", NamedTextColor.GREEN))
+                    );
                     this.plugin.logInfo("Admin " + sender.getName() + " toggled enderman removal to " + newStatus);
                     break;
 
                 case "status":
-                    String statusMessage = this.plugin.getEndermanRemovalListener().isEndermanRemovalEnabled() ? "§aENABLED" : "§cDISABLED";
-                    sender.sendMessage("§7Enderman removal is currently: " + statusMessage);
+                    final Component statusMessage = this.plugin.getSpawnRemovalListener().isEndermanRemovalEnabled()
+                            ? Component.text("ENABLED", NamedTextColor.GREEN)
+                            : Component.text("DISABLED", NamedTextColor.RED);
+                    sender.sendMessage(Component.text("Enderman removal is currently: ", NamedTextColor.GRAY)
+                            .append(statusMessage));
                     break;
 
                 default:
-                    sender.sendMessage("§cInvalid action. Use 'all', 'toggle', or 'status'.");
+                    sender.sendMessage(Component.text("Invalid action. Use 'all', 'toggle', or 'status'.", NamedTextColor.RED));
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Toggle or trigger the creeper spawn prevention system.
+     *
+     * @return {@code true}
+     */
+    private boolean handleRemoveCreeperCommand(CommandSender sender, String[] args) {
+        if (args.length == 0) {
+            sender.sendMessage("§cUsage: /removecreepers <all | toggle | status>");
+            sender.sendMessage("§7- /removecreepers all §8- Remove all existing creepers from loaded chunks");
+            sender.sendMessage("§7- /removecreepers toggle §8- Toggle creeper spawn prevention on/off");
+            sender.sendMessage("§7- /removecreepers status §8- Check if creeper removal is enabled");
+
+        } else {
+            switch (args[0].toLowerCase()) {
+                case "all":
+                    final int removedCount = this.plugin.getSpawnRemovalListener().removeAllCreepers();
+                    sender.sendMessage(Component.text("Removed ", NamedTextColor.GREEN)
+                            .append(Component.text(removedCount, NamedTextColor.YELLOW))
+                            .append(Component.text(" creepers from all loaded chunks.", NamedTextColor.GREEN))
+                    );
+
+                    this.plugin.logInfo("Admin " + sender.getName() + " removed " + removedCount + " creepers");
+                    break;
+
+                case "toggle":
+                    final boolean currentStatus = this.plugin.getSpawnRemovalListener().isCreeperRemovalEnabled();
+                    this.plugin.getSpawnRemovalListener().setCreeperRemovalEnabled(!currentStatus);
+
+                    final String newStatus = !currentStatus ? "ENABLED" : "DISABLED";
+                    sender.sendMessage(Component.text("Creeper removal is now ", NamedTextColor.GREEN)
+                            .append(Component.text(newStatus, NamedTextColor.YELLOW))
+                            .append(Component.text(".", NamedTextColor.GREEN))
+                    );
+
+                    this.plugin.logInfo("Admin " + sender.getName() + " toggled creeper removal to " + newStatus);
+                    break;
+
+                case "status":
+                    final Component statusMessage = this.plugin.getSpawnRemovalListener().isCreeperRemovalEnabled()
+                            ? Component.text("ENABLED", NamedTextColor.GREEN)
+                            : Component.text("DISABLED", NamedTextColor.RED);
+                    sender.sendMessage(Component.text("Creeper removal is currently: ", NamedTextColor.GRAY)
+                            .append(statusMessage));
+                    break;
+
+                default:
+                    sender.sendMessage(Component.text("Invalid action. Use 'all', 'toggle', or 'status'.", NamedTextColor.RED));
             }
         }
 
@@ -1982,24 +2226,24 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
             Player target = Bukkit.getPlayer(args[0]);
 
             if (target == null) {
-                sender.sendMessage("§cPlayer '" + args[0] + "' not found.");
+                sender.sendMessage(Component.text("Player '" + args[0] + "' not found.", NamedTextColor.RED));
 
             } else {
                 Random random = new Random();
                 List<ItemStack> starterItems = new ArrayList<>();
 
                 // The items players will start a game with
+                starterItems.add(new ItemStack(Material.STONE_SWORD, 1));
+                starterItems.add(new ItemStack(Material.STONE_PICKAXE, 1));
+                starterItems.add(new ItemStack(Material.STONE_AXE, 1));
                 starterItems.add(new ItemStack(Material.COOKED_CHICKEN, 1 + random.nextInt(4)));
                 starterItems.add(new ItemStack(Material.COOKED_SALMON, 1 + random.nextInt(4)));
                 starterItems.add(new ItemStack(Material.BREAD, 1 + random.nextInt(4)));
                 starterItems.add(new ItemStack(Material.BAKED_POTATO, 1 + random.nextInt(4)));
-                starterItems.add(new ItemStack(Material.STONE_SWORD, 1));
-                starterItems.add(new ItemStack(Material.STONE_PICKAXE, 1));
-                starterItems.add(new ItemStack(Material.STONE_AXE, 1));
 
                 int itemsGiven = 0, itemsDropped = 0;
 
-                for(ItemStack item : starterItems) {
+                for (ItemStack item : starterItems) {
                     if (target.getInventory().firstEmpty() != -1) {
                         target.getInventory().addItem(item);
                         ++itemsGiven;
@@ -2011,14 +2255,14 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                 }
 
                 if (itemsGiven > 0) {
-                    target.sendMessage("§aYou have received starter items. (" + itemsGiven + " items added to inventory)");
+                    target.sendMessage(Component.text("You have received starter items. (" + itemsGiven + " items added to inventory)", NamedTextColor.GREEN));
                 }
 
                 if (itemsDropped > 0) {
-                    target.sendMessage("§eYour inventory was full. " + itemsDropped + " items were dropped at your feet.");
+                    target.sendMessage(Component.text("Your inventory was full. " + itemsDropped + " items were dropped at your feet.", NamedTextColor.YELLOW));
                 }
 
-                sender.sendMessage("§aGave starter items to " + target.getName() + ". (" + itemsGiven + " in inventory, " + itemsDropped + " dropped)");
+                sender.sendMessage(Component.text("Gave starter items to " + target.getName() + ". (" + itemsGiven + " in inventory, " + itemsDropped + " dropped)", NamedTextColor.GREEN));
             }
         }
 
@@ -2026,14 +2270,14 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
     }
 
     /**
-     *
+     * Trigger the spawning of passive animals around the map.
      *
      * @return {@code true}
      */
     private boolean handleSpawnAnimalsCommand(CommandSender sender, String[] args) {
-        sender.sendMessage("§eManually spawning passive animals across the world...");
+        sender.sendMessage(Component.text("Manually spawning passive animals across the world...", NamedTextColor.YELLOW));
         this.plugin.getPassiveMobSpawningManager().triggerSpawning();
-        sender.sendMessage("§aPassive mob spawning complete. Check console for spawn details.");
+        sender.sendMessage(Component.text("Passive mob spawning complete. Check console for spawn details.", NamedTextColor.GREEN));
         return true;
     }
 
@@ -2118,7 +2362,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                     completions.addAll(Arrays.asList("reset", "clear"));
 
                 } else if (args.length == 2 && (args[0].equalsIgnoreCase("reset") || args[0].equalsIgnoreCase("clear"))) {
-                    for(Player player : Bukkit.getOnlinePlayers()) {
+                    for (Player player : Bukkit.getOnlinePlayers()) {
                         completions.add(player.getName());
                     }
                 }
@@ -2127,7 +2371,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
 
             } else if (command.getName().equalsIgnoreCase("givetome")) {
                 if (args.length == 1) {
-                    for(Player player : Bukkit.getOnlinePlayers()) {
+                    for (Player player : Bukkit.getOnlinePlayers()) {
                         completions.add(player.getName());
                     }
                 } else if (args.length == 2) {
@@ -2157,7 +2401,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                 if (args.length == 1) {
                     completions.add("all");
 
-                    for(Player player : Bukkit.getOnlinePlayers()) {
+                    for (Player player : Bukkit.getOnlinePlayers()) {
                         completions.add(player.getName());
                     }
                 }
@@ -2167,7 +2411,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                 }
             } else if (command.getName().equalsIgnoreCase("setupplayer")) {
                 if (args.length == 1) {
-                    for(Player player : Bukkit.getOnlinePlayers()) {
+                    for (Player player : Bukkit.getOnlinePlayers()) {
                         completions.add(player.getName());
                     }
                 }
@@ -2200,13 +2444,11 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
      * @param player the player changing to the vampire texture pack.
      */
     private void sendVampireTexturePackPrompt(Player player) {
-        TextComponent textureMessage = new TextComponent("§7Apply the vampire texture pack: ");
-        TextComponent clickableText = new TextComponent("§c§n[CLICK HERE]");
-
-        clickableText.setClickEvent(new ClickEvent(Action.RUN_COMMAND, "/pow texture vampire"));
-        clickableText.setHoverEvent(new HoverEvent(net.md_5.bungee.api.chat.HoverEvent.Action.SHOW_TEXT, (new ComponentBuilder("§7Click to apply the vampire texture pack")).create()));
-
-        textureMessage.addExtra(clickableText);
-        player.spigot().sendMessage(textureMessage);
+        player.sendMessage(Component.text("Apply the vampire texture pack: ", NamedTextColor.GRAY)
+                .append(Component.text("[CLICK HERE]", NamedTextColor.RED)
+                        .decorate(TextDecoration.UNDERLINED)
+                        .clickEvent(ClickEvent.runCommand("/pow texture vampire"))
+                        .hoverEvent(HoverEvent.showText(Component.text("Click to apply the vampire texture pack", NamedTextColor.GRAY)))
+                ));
     }
 }

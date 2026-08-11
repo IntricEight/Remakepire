@@ -140,14 +140,13 @@ public class CureBookReadingListener implements Listener {
      * Retrieve the cure book's number.
      *
      * @param item an item to inspect.
-     * @param plugin the host plugin object.
      * @return A cure book's number (out of 4).
      */
-    public static int getAuthenticCureBookNumber(ItemStack item, RemakepirePlugin plugin) {
+    public int getAuthenticCureBookNumber(ItemStack item) {
         if (item != null && item.getType() == Material.WRITTEN_BOOK) {
             if (item.hasItemMeta() && item.getItemMeta() instanceof BookMeta bookMeta) {
                 PersistentDataContainer pdc = bookMeta.getPersistentDataContainer();
-                NamespacedKey key = new NamespacedKey(plugin, CURE_BOOK_KEY);
+                NamespacedKey key = getCureBookKey();
 
                 return pdc.has(key, PersistentDataType.INTEGER) ? pdc.get(key, PersistentDataType.INTEGER) : 0;
             }
@@ -161,10 +160,8 @@ public class CureBookReadingListener implements Listener {
      *
      * @param meta the meta info on the book item.
      * @param bookNumber the book's number in the series.
-     * @param plugin the host plugin object.
      */
-    public static void markAsAuthenticCureBook(BookMeta meta, int bookNumber, RemakepirePlugin plugin) {
-        NamespacedKey key = new NamespacedKey(plugin, CURE_BOOK_KEY);
-        meta.getPersistentDataContainer().set(key, PersistentDataType.INTEGER, bookNumber);
+    public void markAsAuthenticCureBook(BookMeta meta, int bookNumber) {
+        meta.getPersistentDataContainer().set(getCureBookKey(), PersistentDataType.INTEGER, bookNumber);
     }
 }

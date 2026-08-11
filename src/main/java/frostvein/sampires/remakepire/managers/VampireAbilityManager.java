@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import javax.annotation.Nullable;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Sound;
@@ -133,7 +134,7 @@ public class VampireAbilityManager {
     private void checkCooldownExpirations() {
         long currentTime = this.sessionManager.getSessionTimeSeconds();
 
-        for(UUID playerId : this.abilityCooldowns.keySet()) {
+        for (UUID playerId : this.abilityCooldowns.keySet()) {
             Player player = Bukkit.getPlayer(playerId);
 
             if (player != null && player.isOnline()) {
@@ -204,7 +205,7 @@ public class VampireAbilityManager {
         VampireAbility ability = this.abilities.get(abilityName.toLowerCase());
 
         if (ability != null) {
-            for(Player player : Bukkit.getOnlinePlayers()) {
+            for (Player player : Bukkit.getOnlinePlayers()) {
                 if (this.vampireManager.isVampire(player) && ability.canUse(player, this.vampireManager)) {
                     player.sendMessage("§6§l⚡ GLOBAL ABILITY READY ⚡");
                     player.sendMessage("§6" + ability.getDisplayName() + " is now available to all vampires.");
@@ -484,7 +485,7 @@ public class VampireAbilityManager {
             this.globalCooldowns.clear();
             this.plugin.logInfo("Cleared " + clearedCount + " global cooldowns for abilities: " + String.join(", ", clearedAbilities));
 
-            for(String abilityName : clearedAbilities) {
+            for (String abilityName : clearedAbilities) {
                 this.notifyGlobalAbilityReady(abilityName);
             }
         }
@@ -498,7 +499,7 @@ public class VampireAbilityManager {
     public void clearAllCooldownsForNewSession() {
         int clearedPersonal = 0, clearedGlobal = 0;
 
-        for(Map<String, Long> playerCooldowns : this.abilityCooldowns.values()) {
+        for (Map<String, Long> playerCooldowns : this.abilityCooldowns.values()) {
             clearedPersonal += playerCooldowns.size();
         }
 
@@ -524,7 +525,7 @@ public class VampireAbilityManager {
     public List<VampireAbility> getAvailableAbilities(Player player) {
         List<VampireAbility> available = new ArrayList<>();
 
-        for(VampireAbility ability : this.abilities.values()) {
+        for (VampireAbility ability : this.abilities.values()) {
             if (ability.canUse(player, this.vampireManager)) {
                 available.add(ability);
             }
@@ -558,7 +559,7 @@ public class VampireAbilityManager {
      * @param abilityName the name of the ability.
      * @return A string description of the ability's condition.
      */
-    public String getGlobalCooldownInfo(String abilityName) {
+    public @Nullable String getGlobalCooldownInfo(String abilityName) {
         GlobalCooldownData data = this.globalCooldowns.get(abilityName.toLowerCase());
 
         if (data != null && this.isOnGlobalCooldown(abilityName)) {
@@ -694,7 +695,7 @@ public class VampireAbilityManager {
             writer.write("VERSION:2");
             writer.newLine();
 
-            for(Map.Entry<String, GlobalCooldownData> entry : this.globalCooldowns.entrySet()) {
+            for (Map.Entry<String, GlobalCooldownData> entry : this.globalCooldowns.entrySet()) {
                 String abilityName = entry.getKey();
                 GlobalCooldownData data = entry.getValue();
                 writer.write(abilityName + ":" + data.endTime + ":" + data.lastUserName + ":" + data.lastUserUUID.toString());

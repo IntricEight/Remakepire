@@ -37,6 +37,7 @@ public class InvisibilityAbility extends VampireAbility {
             return false;
 
         } else if (player.hasPotionEffect(PotionEffectType.INVISIBILITY)) {
+            // Cancel the vanish ability prematurely
             player.removePotionEffect(PotionEffectType.INVISIBILITY);
             plugin.getVampireAbilityManager().clearInvisibilityAttackCount(player);
 
@@ -67,17 +68,11 @@ public class InvisibilityAbility extends VampireAbility {
      * @return the tick duration of the ability.
      */
     private int getInvisibilityDuration(int stage) {
-        switch (stage) {
-            case 2 -> {
-                return 2400;
-            }
-            case 3 -> {
-                return 4800;
-            }
-            default -> {
-                return 1600;
-            }
-        }
+        return switch (stage) {
+            case 2 -> 2400;
+            case 3 -> 4800;
+            default -> 1600;
+        };
     }
 
     /**
@@ -106,7 +101,7 @@ public class InvisibilityAbility extends VampireAbility {
      * @param durationSeconds how long the ability will last (in seconds).
      */
     private void sendVanishMessage(Player player, int stage, int durationSeconds) {
-        player.sendMessage("§8§lYou fade into the shadows... (" + VampireAbilityManager.formatTime((long)durationSeconds) + ")");
+        player.sendMessage("§8§lYou fade into the shadows... (" + VampireAbilityManager.formatTime(durationSeconds) + ")");
     }
 
     /**
@@ -127,14 +122,12 @@ public class InvisibilityAbility extends VampireAbility {
      * @param plugin the host plugin object.
      */
     private void scheduleInvisibilityWarning(Player player, int totalDurationTicks, RemakepirePlugin plugin) {
-        int warningDelay = Math.max(totalDurationTicks - 40, 20);
         plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
             if (player.isOnline() && player.hasPotionEffect(PotionEffectType.INVISIBILITY)) {
                 player.sendMessage("§7§oYour invisibility is fading...");
                 player.playSound(player, Sound.BLOCK_NOTE_BLOCK_CHIME, SoundCategory.MASTER, 0.3F, 0.8F);
             }
-
-        }, (long)warningDelay);
+        }, Math.max(totalDurationTicks - 40, 20));
 
         plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
             if (player.isOnline() && player.isInvisible() && !player.hasPotionEffect(PotionEffectType.INVISIBILITY)) {
@@ -143,7 +136,7 @@ public class InvisibilityAbility extends VampireAbility {
                 this.sendReappearMessage(player);
                 this.playReappearSound(player);
             }
-        }, (long)(totalDurationTicks + 5));
+        }, totalDurationTicks + 5);
     }
 
     /**

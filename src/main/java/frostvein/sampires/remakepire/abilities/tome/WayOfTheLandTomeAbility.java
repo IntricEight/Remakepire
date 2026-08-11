@@ -54,9 +54,10 @@ public class WayOfTheLandTomeAbility extends TomeAbility implements Listener {
 
         if (this.plugin.getTomeManager().hasAbility(player, "wayoftheland")) {
             if (this.isFullyGrownCrop(block)) {
+                // Prevent garlic from receiving the drop rate boost from this source
                 if (block.getType() != Material.BEETROOTS) {
                     if (this.random.nextDouble() < 0.75) {
-                        for(ItemStack drop : block.getDrops(player.getInventory().getItemInMainHand())) {
+                        for (ItemStack drop : block.getDrops(player.getInventory().getItemInMainHand())) {
                             if (drop != null && drop.getType() != Material.AIR) {
                                 ItemStack extraDrop = drop.clone();
                                 block.getWorld().dropItemNaturally(block.getLocation(), extraDrop);

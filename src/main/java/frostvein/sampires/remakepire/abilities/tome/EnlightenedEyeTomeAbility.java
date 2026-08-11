@@ -29,7 +29,7 @@ public class EnlightenedEyeTomeAbility extends TomeAbility {
             player.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION, NIGHT_VISION_DURATION, NIGHT_VISION_AMPLIFIER, false, false));
             player.playSound(player.getLocation(), "minecraft:block.beacon.power_select", 1.0F, 1.5F);
             this.sendSuccessMessage(player, "Your eyes adjust to pierce the darkness...");
-            player.sendMessage("§7You can now see clearly in the shadows for 5 minutes.");
+            player.sendMessage("§7You can now see clearly in the shadows for " + (NIGHT_VISION_DURATION / 20 / 60) + " minutes.");
 
             return true;
         }

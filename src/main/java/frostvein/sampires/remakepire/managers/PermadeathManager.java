@@ -1,5 +1,7 @@
 package frostvein.sampires.remakepire.managers;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -10,8 +12,6 @@ import java.util.Map;
 import java.util.UUID;
 import org.bukkit.entity.Player;
 import frostvein.sampires.remakepire.RemakepirePlugin;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 
 public class PermadeathManager {
     private final RemakepirePlugin plugin;
@@ -118,7 +118,7 @@ public class PermadeathManager {
                 Map<String, String> rawData = this.gson.fromJson(reader, type);
 
                 if (rawData != null) {
-                    for(Map.Entry<String, String> entry : rawData.entrySet()) {
+                    for (Map.Entry<String, String> entry : rawData.entrySet()) {
                         try {
                             UUID playerId = UUID.fromString(entry.getKey());
                             PermadeathMode mode = PermadeathManager.PermadeathMode.valueOf(entry.getValue());
@@ -152,7 +152,7 @@ public class PermadeathManager {
                 Map<String, Boolean> oldData = this.gson.fromJson(reader, type);
 
                 if (oldData != null) {
-                    for(Map.Entry<String, Boolean> entry : oldData.entrySet()) {
+                    for (Map.Entry<String, Boolean> entry : oldData.entrySet()) {
                         try {
                             UUID playerId = UUID.fromString(entry.getKey());
 
@@ -175,7 +175,7 @@ public class PermadeathManager {
                 Map<String, Boolean> oldData = this.gson.fromJson(reader, type);
 
                 if (oldData != null) {
-                    for(Map.Entry<String, Boolean> entry : oldData.entrySet()) {
+                    for (Map.Entry<String, Boolean> entry : oldData.entrySet()) {
                         try {
                             UUID playerId = UUID.fromString(entry.getKey());
                             if (entry.getValue()) {
@@ -208,7 +208,7 @@ public class PermadeathManager {
 
             Map<String, String> rawData = new HashMap<>();
 
-            for(Map.Entry<UUID, PermadeathMode> entry : this.permadeathModes.entrySet()) {
+            for (Map.Entry<UUID, PermadeathMode> entry : this.permadeathModes.entrySet()) {
                 rawData.put((entry.getKey()).toString(), (entry.getValue()).name());
             }
 
@@ -228,9 +228,9 @@ public class PermadeathManager {
         this.plugin.logInfo("PermadeathManager: Shutdown complete");
     }
 
-    public static enum PermadeathMode {
+    public enum PermadeathMode {
         OFF,
         ON,
-        ABSOLUTE;
+        ABSOLUTE
     }
 }

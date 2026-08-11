@@ -1,8 +1,12 @@
 package frostvein.sampires.remakepire.listeners;
 
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.title.Title;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
@@ -24,6 +28,7 @@ import org.bukkit.scoreboard.Scoreboard;
 import frostvein.sampires.remakepire.RemakepirePlugin;
 import frostvein.sampires.remakepire.beacons.BeaconSite.BeaconState;
 import frostvein.sampires.remakepire.managers.VampireManager;
+import frostvein.sampires.remakepire.utils.ItemTypeChecking;
 
 public class DeathHandler implements Listener {
     private final RemakepirePlugin plugin;
@@ -136,7 +141,7 @@ public class DeathHandler implements Listener {
             VampireManager vampireManager = plugin.getVampireManager();
             int aliveHumans = 0, aliveVampires = 0;
 
-            for(Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+            for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
                 if (onlinePlayer.getGameMode() == GameMode.SURVIVAL) {
                     if (vampireManager.isHuman(onlinePlayer)) {
                         ++aliveHumans;
@@ -162,20 +167,31 @@ public class DeathHandler implements Listener {
     private static void announceAllHumansDeadStatic(RemakepirePlugin plugin) {
         plugin.logInfo("ALL HUMANS ELIMINATED");
 
-        int totalBeacons = plugin.getBeaconManager().getAllBeacons().size();
-        int evilBeacons = plugin.getBeaconManager().getAllEvilBeacons().size();
-        boolean allBeaconsDesecrated = totalBeacons > 0 && evilBeacons == totalBeacons;
-        String townName = plugin.getConfigManager().getTownName();
+        // Retrieve the current state of the beacon network
+        final int totalBeacons = plugin.getBeaconManager().getAllBeacons().size();
+        final int evilBeacons = plugin.getBeaconManager().getAllEvilBeacons().size();
+        final boolean allBeaconsDesecrated = totalBeacons > 0 && evilBeacons == totalBeacons;
+        final String townName = plugin.getConfigManager().getTownName();
 
-        for(Player player : Bukkit.getOnlinePlayers()) {
-            player.sendTitle("§cThe last human has fallen.", "", 20, 100, 40);
+        final Title title = Title.title(
+                Component.text("The last human has fallen.", NamedTextColor.RED),
+                Component.empty(),
+                Title.Times.times(
+                        Duration.ofSeconds(1),
+                        Duration.ofSeconds(5),
+                        Duration.ofSeconds(2)
+                ));
+
+        // Inform all players that the last human has been killed/turned
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            player.showTitle(title);
             player.sendMessage("");
-            player.sendMessage("§cThe last defender of humanity has fallen...");
+            player.sendMessage(Component.text("The last defender of humanity has fallen...", NamedTextColor.RED));
 
             if (allBeaconsDesecrated) {
-                player.sendMessage("§cDarkness reigns supreme over " + townName + ". You are free.");
+                player.sendMessage(Component.text("Darkness reigns supreme over " + townName + ". You are free.", NamedTextColor.RED));
             } else {
-                player.sendMessage("§cNow only the beacons lie between you and freedom.");
+                player.sendMessage(Component.text("Now only the beacons lie between you and freedom.", NamedTextColor.RED));
             }
 
             player.sendMessage("");
@@ -191,30 +207,40 @@ public class DeathHandler implements Listener {
     private static void announceHumansWinStatic(RemakepirePlugin plugin) {
         plugin.logInfo("ALL VAMPIRES ELIMINATED");
 
-        int totalBeacons = plugin.getBeaconManager().getAllBeacons().size();
-        int holyBeacons = plugin.getBeaconManager().getHolyBeacons().size();
-        boolean allBeaconsHoly = totalBeacons > 0 && holyBeacons == totalBeacons;
-        boolean anyPermanentlyCorrupted = plugin.getBeaconManager().getAllBeacons().stream().anyMatch((beacon) -> beacon.getState() == BeaconState.PERMANENTLY_DESECRATED);
-        boolean trappedWhenPermanentlyCorrupted = plugin.getConfigManager().doCorruptedBeaconsTrapHumans();
-        String townName = plugin.getConfigManager().getTownName();
+        final int totalBeacons = plugin.getBeaconManager().getAllBeacons().size();
+        final int holyBeacons = plugin.getBeaconManager().getHolyBeacons().size();
+        final boolean allBeaconsHoly = totalBeacons > 0 && holyBeacons == totalBeacons;
+        final boolean anyPermanentlyCorrupted = plugin.getBeaconManager().getAllBeacons().stream().anyMatch((beacon) -> beacon.getState() == BeaconState.PERMANENTLY_DESECRATED);
+        final boolean trappedWhenPermanentlyCorrupted = plugin.getConfigManager().doCorruptedBeaconsTrapHumans();
+        final String townName = plugin.getConfigManager().getTownName();
 
-        for(Player player : Bukkit.getOnlinePlayers()) {
-            player.sendTitle("§aThe last vampire has fallen.", "", 20, 100, 40);
+        final Title title = Title.title(
+                Component.text("The last vampire has fallen.", NamedTextColor.GREEN),
+                Component.empty(),
+                Title.Times.times(
+                        Duration.ofSeconds(1),
+                        Duration.ofSeconds(5),
+                        Duration.ofSeconds(2)
+                ));
+
+        // Inform all players that the last vampire has been killed/cured
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            player.showTitle(title);
             player.sendMessage("");
-            player.sendMessage("§aThe last creature of darkness has fallen...");
+            player.sendMessage(Component.text("The last creature of darkness has fallen...", NamedTextColor.GREEN));
 
             if (anyPermanentlyCorrupted) {
-                player.sendMessage("§7But a beacon of light has been permanently corrupted.");
+                player.sendMessage(Component.text("But a beacon of light has been permanently corrupted.", NamedTextColor.GRAY));
 
                 if (trappedWhenPermanentlyCorrupted) {
-                    player.sendMessage("§7The creatures of the night have been vanquished, but you are stuck in " + townName + ", forever.");
+                    player.sendMessage(Component.text("The creatures of the night have been vanquished, but you are stuck in " + townName + ", forever.", NamedTextColor.GRAY));
                 } else {
-                    player.sendMessage("§7The creatures of the night have been vanquished, but does freedom await you?");
+                    player.sendMessage(Component.text("The creatures of the night have been vanquished, but does freedom await you?", NamedTextColor.GRAY));
                 }
             } else if (allBeaconsHoly) {
-                player.sendMessage("§aLight reigns supreme over " + townName + ". You are free.");
+                player.sendMessage(Component.text("Light reigns supreme over " + townName + ". You are free.", NamedTextColor.GREEN));
             } else {
-                player.sendMessage("§7Now only the beacons lie between you and freedom.");
+                player.sendMessage(Component.text("Now only the beacons lie between you and freedom.", NamedTextColor.GRAY));
             }
 
             player.sendMessage("");
@@ -232,9 +258,7 @@ public class DeathHandler implements Listener {
         if (event.getEntity() instanceof Player victim && event.getDamager() instanceof Player attacker) {
             ItemStack weapon = attacker.getInventory().getItemInMainHand();
 
-            if (weapon != null) {
-                this.lastWeaponUsed.put(victim.getUniqueId(), weapon.getType());
-            }
+            this.lastWeaponUsed.put(victim.getUniqueId(), weapon.getType());
         }
     }
 
@@ -289,28 +313,29 @@ public class DeathHandler implements Listener {
      */
     private void handlePvPDeath(Player victim, Player killer, PlayerDeathEvent event) {
         ItemStack weapon = killer.getInventory().getItemInMainHand();
-        boolean killedWithWoodenWeapon = this.isWoodenWeapon(weapon);
+        boolean killedWithWoodenWeapon = this.isWoodenWeapon(weapon.getType());
         Material lastWeapon = this.lastWeaponUsed.get(victim.getUniqueId());
 
         if (!killedWithWoodenWeapon && lastWeapon != null) {
-            killedWithWoodenWeapon = lastWeapon == Material.WOODEN_SWORD || lastWeapon == Material.WOODEN_AXE;
+            killedWithWoodenWeapon = ItemTypeChecking.isWoodenWeapon(lastWeapon);
 
             if (killedWithWoodenWeapon) {
                 this.plugin.logInfo("DEBUG: Using tracked last weapon: " + lastWeapon + " (current weapon broke/dropped)");
             }
         }
 
-        this.plugin.logInfo("DEBUG: PvP Death - Victim: " + victim.getName() + ", CurrentWeapon: " + (weapon != null ? weapon.getType() : "null") + ", LastTrackedWeapon: " + lastWeapon + ", IsWoodenWeapon: " + killedWithWoodenWeapon + ", IsVampire: " + this.vampireManager.isVampire(victim) + ", IsStage1: " + this.vampireManager.isVampireStage1(victim) + ", VictimTags: " + victim.getScoreboardTags());
+        this.plugin.logInfo("DEBUG: PvP Death - Victim: " + victim.getName() + ", CurrentWeapon: " + weapon.getType() + ", LastTrackedWeapon: " + lastWeapon + ", IsWoodenWeapon: " + killedWithWoodenWeapon + ", IsVampire: " + this.vampireManager.isVampire(victim) + ", IsStage1: " + this.vampireManager.isVampireStage1(victim) + ", VictimTags: " + victim.getScoreboardTags());
         this.lastWeaponUsed.remove(victim.getUniqueId());
         this.woodenStakeKills.remove(victim.getUniqueId());
 
         if (this.vampireManager.isVampire(victim)) {
-            int woodenStakeThreshold = this.plugin.getConfigManager().getPermadeathMinimumStage();
-            int victimStage = this.vampireManager.getVampireStage(victim);
+            final int woodenStakeThreshold = this.plugin.getConfigManager().getPermadeathMinimumStage();
+            final int victimStage = this.vampireManager.getVampireStage(victim);
 
             if (victimStage <= woodenStakeThreshold && killedWithWoodenWeapon) {
                 victim.addScoreboardTag(PERMAKILL_PROCESSING_TAG);
-                killer.sendMessage("§4You have permanently killed the vampire " + victim.getName() + "!");
+                killer.sendMessage(Component.text("You have permanently killed the vampire " + victim.getName() + "!", NamedTextColor.DARK_RED));
+
                 this.createVampireDeathEffects(victim.getLocation());
                 this.plugin.logInfo("PERMA-KILL: Applied " + PERMAKILL_PROCESSING_TAG + " tag to " + victim.getName() + " (Stage " + victimStage + ", Threshold: " + woodenStakeThreshold + ")");
 
@@ -350,7 +375,7 @@ public class DeathHandler implements Listener {
         }
 
         // Send the curated death message to all online players
-        for(Player player : Bukkit.getOnlinePlayers()) {
+        for (Player player : Bukkit.getOnlinePlayers()) {
             // Don't send the message to the player who died
             if (!player.getUniqueId().equals(victim.getUniqueId())) {
                 if (this.vampireManager.isVampire(player)) {
@@ -367,17 +392,16 @@ public class DeathHandler implements Listener {
     /**
      * Determine if the item is a wooden weapon.
      *
-     * @param item the item to check.
+     * @param type the item to check.
      * @return {@code true} if the item is a wooden sword or axe.
      */
-    private boolean isWoodenWeapon(ItemStack item) {
-        if (item == null) {
+    private boolean isWoodenWeapon(Material type) {
+        if (type == null) {
             this.plugin.logInfo("DEBUG: Weapon is null");
             return false;
 
         } else {
-            Material type = item.getType();
-            boolean isWooden = type == Material.WOODEN_SWORD || type == Material.WOODEN_AXE;
+            final boolean isWooden = ItemTypeChecking.isWoodenWeapon(type);
             this.plugin.logInfo("DEBUG: Weapon type: " + type + ", Is wooden: " + isWooden);
             return isWooden;
         }

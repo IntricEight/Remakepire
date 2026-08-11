@@ -21,7 +21,7 @@ public class StormCallAbility extends VampireAbility {
     }
 
     public String getDescription() {
-        return "Summon dark clouds to shroud the world in rain for " + (int)(DURATION / 60) + " minutes. Only the most powerful vampires can command the very skies.";
+        return "Summon dark clouds to shroud the world in rain for " + (DURATION / 60) + " minutes. Only the most powerful vampires can command the very skies.";
     }
 
     public int getCooldownSeconds(RemakepirePlugin plugin) {
@@ -61,11 +61,14 @@ public class StormCallAbility extends VampireAbility {
      */
     private void createStormSummonEffects(Player player) {
         if (player.getWorld() != null) {
-            for(int i = 0; i < 50; ++i) {
-                double angle = i * 0.3, radius = 2.0;
-                double x = Math.cos(angle) * radius;
-                double y = Math.sin(angle) * radius;
-                double z = i * 0.1;
+            double angle, radius, x, y, z;
+
+            for (int i = 0; i < 50; ++i) {
+                angle = i * 0.3;
+                radius = 2.0;
+                x = Math.cos(angle) * radius;
+                y = Math.sin(angle) * radius;
+                z = i * 0.1;
 
                 player.getWorld().spawnParticle(Particle.SMOKE, player.getLocation().add(x, z + 1.0, y), 1, 0.0, 0.0, 0.0, 0.05);
             }
@@ -106,7 +109,7 @@ public class StormCallAbility extends VampireAbility {
         String message = "§8§lDark clouds gather across the sky...";
         String casterMessage = "§7§o A vampire has called upon an ancient storm...";
 
-        for(Player player : world.getPlayers()) {
+        for (Player player : world.getPlayers()) {
             player.sendMessage(message);
 
             if (!player.equals(caster)) {
@@ -147,7 +150,7 @@ public class StormCallAbility extends VampireAbility {
 
                 this.broadcastStormClearing(world, caster);
             }
-        }, (long)(DURATION * 20));
+        }, DURATION * 20);
     }
 
     /**
@@ -172,7 +175,7 @@ public class StormCallAbility extends VampireAbility {
         String message = "§f§lThe storm clouds part, revealing clear skies once more...";
         String casterMessage = "§7§oYour dominion over the weather comes to an end.";
 
-        for(Player worldPlayer : world.getPlayers()) {
+        for (Player worldPlayer : world.getPlayers()) {
             worldPlayer.sendMessage(message);
 
             if (worldPlayer.equals(player)) {
