@@ -379,7 +379,7 @@ hostile-mob-spawning:
   creeper-removal: false
 
 # Allow NPC mobs to spawn during sessions
-# When true, Pillager patrols and Wandering Traders may spawn during active sessions
+# When true, Pillager patrols, Wandering Traders, and Witches may spawn during active sessions
 # Default: false (disabled spawns)
 enable-npc-mobs: false
 
