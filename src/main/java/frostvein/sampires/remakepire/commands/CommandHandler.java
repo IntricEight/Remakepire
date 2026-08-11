@@ -736,30 +736,34 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         } else {
             String action = args[0].toLowerCase();
             if (!action.equals("reset") && !action.equals("clear")) {
-                sender.sendMessage("§cInvalid action. Use 'reset' or 'clear'.");
+                sender.sendMessage(Component.text("Invalid action. Use 'reset' or 'clear'.", NamedTextColor.RED));
 
             } else if (args.length >= 2) {
                 Player target = Bukkit.getPlayer(args[1]);
 
                 if (target == null) {
-                    sender.sendMessage("§cPlayer '" + args[1] + "' not found.");
+                    sender.sendMessage(Component.text("Player '" + args[1] + "' not found.", NamedTextColor.RED));
 
                 } else {
                     this.resetPlayerCooldowns(target);
 
-                    sender.sendMessage("§aReset all cooldowns for player: §e" + target.getName());
-                    target.sendMessage("§aYour vampire ability cooldowns have been reset by an administrator.");
+                    sender.sendMessage(Component.text("Reset all cooldowns for player: ", NamedTextColor.GREEN)
+                            .append(Component.text(target.getName(), NamedTextColor.YELLOW)));
+                    target.sendMessage(Component.text("Your vampire ability cooldowns have been reset by an administrator.", NamedTextColor.GREEN));
                 }
             } else {
                 int playersAffected = 0;
 
                 for (Player player : Bukkit.getOnlinePlayers()) {
                     this.resetPlayerCooldowns(player);
-                    player.sendMessage("§aYour vampire ability cooldowns have been reset by an administrator.");
+                    player.sendMessage(Component.text("Your vampire ability cooldowns have been reset by an administrator.", NamedTextColor.GREEN));
                     ++playersAffected;
                 }
 
-                sender.sendMessage("§aReset all vampire ability cooldowns for §e" + playersAffected + " §aonline players.");
+                sender.sendMessage(Component.text("Reset all vampire ability cooldowns for ", NamedTextColor.GREEN)
+                        .append(Component.text(playersAffected, NamedTextColor.YELLOW))
+                        .append(Component.text(" online players.", NamedTextColor.GREEN))
+                );
                 this.plugin.logInfo("Admin " + sender.getName() + " reset cooldowns for " + playersAffected + " players");
             }
         }
@@ -794,7 +798,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                     player.removeScoreboardTag(SessionManager.BLESSING_USED_SESSION);
                     player.removeScoreboardTag(SessionManager.STOPTHEBLEEDING_USED_SESSION);
 
-                    player.sendMessage("§aYour tome ability cooldowns have been reset by an administrator.");
+                    player.sendMessage(Component.text("Your tome ability cooldowns have been reset by an administrator.", NamedTextColor.GREEN));
                     ++humansAffected;
                 }
             }
@@ -808,15 +812,19 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                 target.removeScoreboardTag(SessionManager.BLESSING_USED_SESSION);
                 target.removeScoreboardTag(SessionManager.STOPTHEBLEEDING_USED_SESSION);
 
-                target.sendMessage("§aYour tome ability cooldowns have been reset by an administrator.");
+                target.sendMessage(Component.text("Your tome ability cooldowns have been reset by an administrator.", NamedTextColor.GREEN));
                 ++humansAffected;
             }
         }
 
         if (humansAffected == 0) {
-            sender.sendMessage("§eNo humans online to reset tome cooldowns for.");
+            sender.sendMessage(Component.text("No humans online to reset tome cooldowns for.", NamedTextColor.YELLOW));
         } else {
             sender.sendMessage("§aReset all tome ability cooldowns for §e" + humansAffected + " §ahuman players.");
+            sender.sendMessage(Component.text("Reset all tome ability cooldowns for ", NamedTextColor.GREEN)
+                    .append(Component.text(humansAffected, NamedTextColor.YELLOW))
+                    .append(Component.text(" human players.", NamedTextColor.GREEN))
+            );
         }
 
         this.plugin.logInfo("Admin " + sender.getName() + " reset tome cooldowns for " + humansAffected + " human players");
