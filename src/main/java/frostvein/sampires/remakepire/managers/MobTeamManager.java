@@ -7,6 +7,7 @@ import org.bukkit.entity.Creeper;
 import org.bukkit.entity.Drowned;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Husk;
+import org.bukkit.entity.Parched;
 import org.bukkit.entity.Phantom;
 import org.bukkit.entity.PigZombie;
 import org.bukkit.entity.Skeleton;
@@ -18,6 +19,7 @@ import org.bukkit.entity.WitherSkeleton;
 import org.bukkit.entity.Zoglin;
 import org.bukkit.entity.Zombie;
 import org.bukkit.entity.ZombieVillager;
+import org.bukkit.entity.ZombieNautilus;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.scoreboard.Team;
@@ -26,7 +28,7 @@ import frostvein.sampires.remakepire.RemakepirePlugin;
 public class MobTeamManager {
     private final RemakepirePlugin plugin;
     private BukkitTask mobTeamTask;
-    private final List<Class<? extends Entity>> vampireMobTypes = Arrays.asList(Zombie.class, ZombieVillager.class, Drowned.class, Husk.class, Skeleton.class, WitherSkeleton.class, Bogged.class, Stray.class, Creeper.class, Spider.class, Witch.class, Phantom.class, Wither.class, PigZombie.class, Zoglin.class);
+    private final List<Class<? extends Entity>> vampireMobTypes = Arrays.asList(Zombie.class, ZombieVillager.class, Drowned.class, Husk.class, ZombieNautilus.class, Skeleton.class, WitherSkeleton.class, Bogged.class, Stray.class, Parched.class, Creeper.class, Spider.class, Witch.class, Phantom.class, Wither.class, PigZombie.class, Zoglin.class);
     // Controls how frequently mobs are assigned to the vampire team
     private final long ASSIGNMENT_INTERVALS = 200L;
 
