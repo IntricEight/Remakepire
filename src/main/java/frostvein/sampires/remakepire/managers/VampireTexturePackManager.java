@@ -12,12 +12,12 @@ public class VampireTexturePackManager {
     private final RemakepirePlugin plugin;
     private final VampireManager vampireManager;
     // Control the vampire texture pack access details.
-    private static final String VAMPIRE_TEXTURE_PACK_URL = "https://download.mc-packs.net/pack/e139890dd34f56724efcd5becb476999651ca43c.zip";
-    private static final String VAMPIRE_TEXTURE_PACK_SHA1_STRING = "e139890dd34f56724efcd5becb476999651ca43c";
+    private static final String VAMPIRE_TEXTURE_PACK_URL = "https://download.mc-packs.net/pack/506aa543b0cd39302fbda398cc83453429b3c3b5.zip";
+    private static final String VAMPIRE_TEXTURE_PACK_SHA1_STRING = "506aa543b0cd39302fbda398cc83453429b3c3b5";
     private static final String VAMPIRE_TEXTURE_PACK_PROMPT = "§5VampireSMP Vampire Pack\n§7This pack enhances your vampire experience!";
     // Control the human texture pack access details.
-    private static final String HUMAN_TEXTURE_PACK_URL = "https://download.mc-packs.net/pack/b1fbd00667c6ad35c11967a385184aa336d605e1.zip";
-    private static final String HUMAN_TEXTURE_PACK_SHA1_STRING = "b1fbd00667c6ad35c11967a385184aa336d605e1";
+    private static final String HUMAN_TEXTURE_PACK_URL = "https://download.mc-packs.net/pack/176c1083aa793b5324ddc604c02ac2309398d6b4.zip";
+    private static final String HUMAN_TEXTURE_PACK_SHA1_STRING = "176c1083aa793b5324ddc604c02ac2309398d6b4";
     private static final String HUMAN_TEXTURE_PACK_PROMPT = "§aVampireSMP Human Pack\n§7This pack enhances your human experience!";
     private final Set<UUID> playersWithVampireTexturePack = new HashSet<>(), playersWithHumanTexturePack = new HashSet<>();
 
