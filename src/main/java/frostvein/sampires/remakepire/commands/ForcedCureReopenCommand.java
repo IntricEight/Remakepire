@@ -1,5 +1,7 @@
 package frostvein.sampires.remakepire.commands;
 
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -28,7 +30,7 @@ public class ForcedCureReopenCommand implements CommandExecutor {
             return true;
 
         } else if (!this.plugin.getForcedCureChoiceManager().hasPendingCure(player)) {
-            player.sendMessage("§cYou do not have a pending cure decision.");
+            player.sendMessage(Component.text("You do not have a pending cure decision.", NamedTextColor.RED));
             return true;
 
         } else {
