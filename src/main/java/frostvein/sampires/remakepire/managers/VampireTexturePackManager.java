@@ -3,6 +3,8 @@ package frostvein.sampires.remakepire.managers;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
@@ -15,10 +17,12 @@ public class VampireTexturePackManager {
     private static final String VAMPIRE_TEXTURE_PACK_URL = "https://download.mc-packs.net/pack/e139890dd34f56724efcd5becb476999651ca43c.zip";
     private static final String VAMPIRE_TEXTURE_PACK_SHA1_STRING = "e139890dd34f56724efcd5becb476999651ca43c";
     private static final String VAMPIRE_TEXTURE_PACK_PROMPT = "§5VampireSMP Vampire Pack\n§7This pack enhances your vampire experience!";
+    private static final UUID VAMPIRE_TEXTURE_PACK_UUID = UUID.randomUUID();
     // Control the human texture pack access details.
     private static final String HUMAN_TEXTURE_PACK_URL = "https://download.mc-packs.net/pack/b1fbd00667c6ad35c11967a385184aa336d605e1.zip";
     private static final String HUMAN_TEXTURE_PACK_SHA1_STRING = "b1fbd00667c6ad35c11967a385184aa336d605e1";
     private static final String HUMAN_TEXTURE_PACK_PROMPT = "§aVampireSMP Human Pack\n§7This pack enhances your human experience!";
+    private static final UUID HUMAN_TEXTURE_PACK_UUID = UUID.randomUUID();
     private final Set<UUID> playersWithVampireTexturePack = new HashSet<>(), playersWithHumanTexturePack = new HashSet<>();
 
     /**
@@ -41,21 +45,18 @@ public class VampireTexturePackManager {
     public void applyVampireTexturePack(Player player, String reason) {
         try {
             byte[] sha1Bytes = hexStringToByteArray(VAMPIRE_TEXTURE_PACK_SHA1_STRING);
-            UUID packId = UUID.randomUUID();
-            player.addResourcePack(packId, VAMPIRE_TEXTURE_PACK_URL, sha1Bytes, VAMPIRE_TEXTURE_PACK_PROMPT, true);
+            player.addResourcePack(VAMPIRE_TEXTURE_PACK_UUID, VAMPIRE_TEXTURE_PACK_URL, sha1Bytes, VAMPIRE_TEXTURE_PACK_PROMPT, true);
             this.playersWithVampireTexturePack.add(player.getUniqueId());
-            player.sendMessage("§7Applying vampire texture pack...");
 
+            player.sendMessage(Component.text("Applying vampire texture pack...", NamedTextColor.GRAY));
             this.plugin.logInfo("Sent vampire texture pack request to " + player.getName() + " - " + reason);
-            this.plugin.logInfo("Pack URL: https://download.mc-packs.net/pack/e139890dd34f56724efcd5becb476999651ca43c.zip");
-            this.plugin.logInfo("Pack SHA1: e139890dd34f56724efcd5becb476999651ca43c");
+            this.plugin.logInfo("Pack URL: " + VAMPIRE_TEXTURE_PACK_URL);
+            this.plugin.logInfo("Pack SHA1: " + VAMPIRE_TEXTURE_PACK_SHA1_STRING);
 
         } catch (Exception e) {
             this.plugin.getLogger().severe("Failed to apply vampire texture pack to " + player.getName() + ": " + e.getMessage());
-            e.printStackTrace();
-            player.sendMessage("§cFailed to apply texture pack. Check server logs for details.");
+            player.sendMessage(Component.text("Failed to apply texture pack. Check server logs for details.", NamedTextColor.RED));
         }
-
     }
 
     /**
@@ -117,18 +118,19 @@ public class VampireTexturePackManager {
     public void applyHumanTexturePack(Player player, String reason) {
         try {
             byte[] sha1Bytes = hexStringToByteArray(HUMAN_TEXTURE_PACK_SHA1_STRING);
-            UUID packId = UUID.randomUUID();
-            player.addResourcePack(packId, HUMAN_TEXTURE_PACK_URL, sha1Bytes, HUMAN_TEXTURE_PACK_PROMPT, true);
-
+            player.addResourcePack(HUMAN_TEXTURE_PACK_UUID, HUMAN_TEXTURE_PACK_URL, sha1Bytes, HUMAN_TEXTURE_PACK_PROMPT, true);
+            player.removeResourcePack(VAMPIRE_TEXTURE_PACK_UUID);
             this.playersWithHumanTexturePack.add(player.getUniqueId());
             this.playersWithVampireTexturePack.remove(player.getUniqueId());
-            player.sendMessage("§7Applying human texture pack...");
+
+            player.sendMessage(Component.text("Applying human texture pack...", NamedTextColor.GRAY));
             this.plugin.logInfo("Sent human texture pack request to " + player.getName() + " - " + reason);
+            this.plugin.logInfo("Pack URL: " + HUMAN_TEXTURE_PACK_URL);
+            this.plugin.logInfo("Pack SHA1: " + HUMAN_TEXTURE_PACK_SHA1_STRING);
 
         } catch (Exception e) {
             this.plugin.getLogger().severe("Failed to apply human texture pack to " + player.getName() + ": " + e.getMessage());
-            e.printStackTrace();
-            player.sendMessage("§cFailed to apply texture pack. Check server logs for details.");
+            player.sendMessage(Component.text("Failed to apply texture pack. Check server logs for details.", NamedTextColor.RED));
         }
     }
 
