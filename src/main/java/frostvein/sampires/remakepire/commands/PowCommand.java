@@ -231,8 +231,13 @@ public class PowCommand implements CommandExecutor, TabCompleter {
 
         if (args.length == 1) {
             List<String> subCommands = new ArrayList<>(Arrays.asList("vability", "tome", "checklives", "beaconstatus", "permadeath", "toggle-turning", "help"));
+
+            if (sender instanceof Player player && this.plugin.getVampireManager().isVampire(player)) {
+                subCommands.add("stake-myself");
+            }
+
             if (sender.hasPermission("vampiresmp.admin")) {
-                subCommands.add(0, "admin");
+                subCommands.addFirst("admin");
             }
 
             return subCommands.stream().filter((s) -> s.startsWith(args[0].toLowerCase())).collect(Collectors.toList());
