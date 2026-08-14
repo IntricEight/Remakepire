@@ -1856,7 +1856,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                         .append(Component.text(location.getBlockX() + ", " + location.getBlockY() + ", " + location.getBlockZ(), NamedTextColor.YELLOW)));
                 sender.sendMessage(Component.text("A chest has been placed at this location.", NamedTextColor.GRAY));
                 sender.sendMessage(Component.text("Total tome chest locations: ", NamedTextColor.GRAY)
-                        .append(Component.text(this.plugin.getTomeDistributionManager().getTomeLocations().size(),NamedTextColor.YELLOW)));
+                        .append(Component.text(this.plugin.getTomeDistributionManager().getTomeLocations().size(), NamedTextColor.YELLOW)));
 
             } else {
                 sender.sendMessage(Component.text("✖ This location already exists in the tome chest list.", NamedTextColor.RED));

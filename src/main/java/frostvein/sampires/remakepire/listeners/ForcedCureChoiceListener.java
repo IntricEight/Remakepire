@@ -72,12 +72,10 @@ public class ForcedCureChoiceListener implements Listener {
                     player.sendMessage("§7The spirits have come knocking, and they are joined by death.");
                     player.sendMessage("§7Say your piece, and when you ready to make your decision,");
 
-                    Component message = Component.text("[CLICK HERE]", NamedTextColor.YELLOW)
+                    player.sendMessage(Component.text("[CLICK HERE]", NamedTextColor.YELLOW)
                             .decorate(TextDecoration.BOLD)
                             .clickEvent(ClickEvent.runCommand("/pow reopen"))
-                            .hoverEvent(HoverEvent.showText(Component.text("Click to reopen the choice menu", NamedTextColor.GOLD)));
-
-                    player.sendMessage(message);
+                            .hoverEvent(HoverEvent.showText(Component.text("Click to reopen the choice menu", NamedTextColor.GOLD))));
                     player.sendMessage("");
                 }
             }
@@ -101,12 +99,10 @@ public class ForcedCureChoiceListener implements Listener {
                     player.sendMessage("§7The spirits have come knocking, and they are joined by death.");
                     player.sendMessage("§7Say your piece, and when you ready to make your decision,");
 
-                    Component message = Component.text("[CLICK HERE]", NamedTextColor.YELLOW)
+                    player.sendMessage(Component.text("[CLICK HERE]", NamedTextColor.YELLOW)
                             .decorate(TextDecoration.BOLD)
                             .clickEvent(ClickEvent.runCommand("/pow reopen"))
-                            .hoverEvent(HoverEvent.showText(Component.text("Click to reopen the choice menu", NamedTextColor.GOLD)));
-
-                    player.sendMessage(message);
+                            .hoverEvent(HoverEvent.showText(Component.text("Click to reopen the choice menu", NamedTextColor.GOLD))));
                     player.sendMessage("");
                 }
             }, 20L);

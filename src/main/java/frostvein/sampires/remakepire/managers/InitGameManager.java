@@ -665,14 +665,12 @@ public class InitGameManager {
                     player.sendMessage("§4§l========================================");
                     player.sendMessage("");
 
-                    Component textureMessage = Component.text("Apply the vampire texture pack: ", NamedTextColor.GRAY)
+                    player.sendMessage(Component.text("Apply the vampire texture pack: ", NamedTextColor.GRAY)
                             .append(Component.text("[CLICK HERE]", NamedTextColor.RED)
                                     .decorate(TextDecoration.UNDERLINED)
                                     .clickEvent(ClickEvent.runCommand("/pow texture vampire"))
                                     .hoverEvent(HoverEvent.showText(Component.text("Click to apply the vampire texture pack", NamedTextColor.GRAY)))
-                            );
-
-                    player.sendMessage(textureMessage);
+                            ));
                 }
 
                 admin.sendMessage("§7  → Converted " + playersToConvert.size() + " players to vampires");

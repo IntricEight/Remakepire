@@ -433,15 +433,13 @@ public class VampireManager {
         target.sendMessage("§cYou are now a Stage 1 vampire.");
         target.sendMessage("");
 
-        Component fullMessage = Component.text("When you are ready to accept your new self, ", NamedTextColor.GRAY)
+        target.sendMessage(Component.text("When you are ready to accept your new self, ", NamedTextColor.GRAY)
                 .append(Component.text("[CLICK HERE]", NamedTextColor.YELLOW)
                         .decorate(TextDecoration.UNDERLINED)
                         .clickEvent(ClickEvent.runCommand("/pow texture"))
                         .hoverEvent(HoverEvent.showText(Component.text("Click to apply the Creature Of The Night texture pack", NamedTextColor.GRAY)))
                 )
-                .append(Component.text(" to have the Creature Of The Night texture pack applied.", NamedTextColor.GRAY));
-
-        target.sendMessage(fullMessage);
+                .append(Component.text(" to have the Creature Of The Night texture pack applied.", NamedTextColor.GRAY)));
         target.sendMessage("");
     }
 

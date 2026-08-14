@@ -774,7 +774,7 @@ public class BeaconConversionListener implements Listener {
                     for (UUID converterId : this.converters) {
                         Player converter = BeaconConversionListener.this.plugin.getServer().getPlayer(converterId);
                         if (converter != null && converter.isOnline()) {
-                            converter.sendMessage("§c⚠ Beacon conversion cancelled - session is not active.");
+                            converter.sendMessage(Component.text("⚠ Beacon conversion cancelled - session is not active.", NamedTextColor.RED));
                         }
                     }
 
