@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.command.Command;
@@ -61,11 +62,11 @@ public class VampireAbilityCommand implements CommandExecutor, TabCompleter {
                 return true;
 
             } else if (!this.plugin.getVampireManager().isVampire(player)) {
-                player.sendMessage("§cOnly vampires can use vampire abilities.");
+                player.sendMessage(Component.text("Only vampires can use vampire abilities.", NamedTextColor.RED));
                 return true;
 
             } else if (player.getGameMode() == GameMode.SPECTATOR) {
-                player.sendMessage("§cYou cannot use vampire abilities while in spectator mode.");
+                player.sendMessage(Component.text("You cannot use vampire abilities while in spectator mode.", NamedTextColor.RED));
                 return true;
 
             } else {
@@ -82,13 +83,13 @@ public class VampireAbilityCommand implements CommandExecutor, TabCompleter {
                     }
 
                     if (!this.abilityManager.useAbility(player, subCommand) && this.abilityManager.getAbility(subCommand) == null) {
-                        player.sendMessage("§cUnknown ability: " + subCommand);
-                        player.sendMessage("§eUse '/pow vability list' to see available abilities.");
+                        player.sendMessage(Component.text("Unknown ability: " + subCommand, NamedTextColor.RED));
+                        player.sendMessage(Component.text("Use '/pow vability list' to see available abilities.", NamedTextColor.YELLOW));
                     }
                 } else {
                     Location beaconLoc = suppressingBeacon.getLocation();
                     beaconLoc.distance(player.getLocation());
-                    player.sendMessage("§7A divine energy interferes with your dark powers, it should be snuffed out.");
+                    player.sendMessage(Component.text("A divine energy interferes with your dark powers, it should be snuffed out.", NamedTextColor.GRAY));
                 }
 
                 return true;
@@ -97,19 +98,28 @@ public class VampireAbilityCommand implements CommandExecutor, TabCompleter {
     }
 
     private void sendHelpMessage(Player player) {
-        player.sendMessage("§6§l=== VAMPIRE ABILITIES ===");
+        player.sendMessage(Component.text("=== VAMPIRE ABILITIES ===", NamedTextColor.GOLD)
+                .decorate(TextDecoration.BOLD));
         player.sendMessage("§e/pow vability list §7- Show your available abilities");
         player.sendMessage("§e/pow vability all §7- Show all abilities (including locked ones)");
         player.sendMessage("§e/pow vability <ability> §7- Use an ability");
-        player.sendMessage("§7Example: §e/pow vability lunge");
+        player.sendMessage(Component.text("Example: ", NamedTextColor.GRAY)
+                .append(Component.text("/pow vability lunge", NamedTextColor.YELLOW)));
 
         if (this.plugin.getVampireManager().isVampire(player)) {
             BeaconSite suppressingBeacon = this.beaconManager.checkHolySuppression(player.getLocation());
 
             if (suppressingBeacon != null) {
                 player.sendMessage("");
-                player.sendMessage("§c WARNING: Holy beacon nearby - abilities suppressed.");
-                player.sendMessage("§7Move away from §f'" + suppressingBeacon.getName() + "' §7to use abilities.");
+                player.sendMessage(Component.text("WARNING:", NamedTextColor.RED)
+                        .decorate(TextDecoration.BOLD)
+                        .append(Component.text(" Holy beacon nearby - abilities suppressed.", NamedTextColor.RED)
+                                .decoration(TextDecoration.BOLD, false))
+                );
+                player.sendMessage(Component.text("Move away from ", NamedTextColor.GRAY)
+                        .append(Component.text(suppressingBeacon.getName(), NamedTextColor.WHITE))
+                        .append(Component.text(" to use your abilities.", NamedTextColor.GRAY))
+                );
             }
         }
     }
@@ -121,23 +131,26 @@ public class VampireAbilityCommand implements CommandExecutor, TabCompleter {
      */
     private void listAbilities(Player player) {
         if (!this.plugin.getVampireManager().isVampire(player)) {
-            player.sendMessage("§cYou must be a vampire to see abilities.");
+            player.sendMessage(Component.text("You must be a vampire to see abilities.", NamedTextColor.RED));
 
         } else {
             List<VampireAbility> availableAbilities = this.abilityManager.getAvailableAbilities(player);
             int playerStage = this.plugin.getVampireManager().getVampireStage(player);
 
             if (availableAbilities.isEmpty()) {
-                player.sendMessage("§cNo abilities available for Stage " + playerStage + " vampires.");
-                player.sendMessage("§7Use '/pow vability all' to see what abilities you could unlock.");
+                player.sendMessage(Component.text("No abilities available for Stage " + playerStage + " vampires.", NamedTextColor.RED));
+                player.sendMessage(Component.text("Use '/pow vability all' to see what abilities you could unlock.", NamedTextColor.GRAY));
 
             } else {
-                player.sendMessage("§4§l=== YOUR VAMPIRE ABILITIES ===");
-                player.sendMessage("§7Your Stage: §e" + playerStage);
+                player.sendMessage(Component.text("=== YOUR VAMPIRE ABILITIES ===", NamedTextColor.DARK_RED)
+                        .decorate(TextDecoration.BOLD));
+                player.sendMessage(Component.text("Your Stage: ", NamedTextColor.GRAY)
+                        .append(Component.text(playerStage, NamedTextColor.YELLOW)));
                 BeaconSite suppressingBeacon = this.beaconManager.checkHolySuppression(player.getLocation());
 
                 if (suppressingBeacon != null) {
-                    player.sendMessage("§c SUPPRESSED by holy beacon: §f" + suppressingBeacon.getName());
+                    player.sendMessage(Component.text(" SUPPRESSED by holy beacon: ", NamedTextColor.RED)
+                            .append(Component.text(suppressingBeacon.getName(), NamedTextColor.WHITE)));
                 }
 
                 player.sendMessage("");
@@ -146,7 +159,7 @@ public class VampireAbilityCommand implements CommandExecutor, TabCompleter {
                     this.displayAbility(player, ability, true);
                 }
 
-                player.sendMessage("§7Use '/pow vability all' to see locked abilities.");
+                player.sendMessage(Component.text("Use '/pow vability all' to see locked abilities.", NamedTextColor.GRAY));
             }
         }
     }
@@ -158,22 +171,24 @@ public class VampireAbilityCommand implements CommandExecutor, TabCompleter {
      */
     private void listAllAbilities(Player player) {
         if (!this.plugin.getVampireManager().isVampire(player)) {
-            player.sendMessage("§cYou must be a vampire to see abilities.");
+            player.sendMessage(Component.text("You must be a vampire to see abilities.", NamedTextColor.RED));
 
         } else {
-            player.sendMessage("§4§l=== ALL VAMPIRE ABILITIES ===");
-            player.sendMessage("§7Your Stage: §e" + this.plugin.getVampireManager().getVampireStage(player));
+            player.sendMessage(Component.text("=== ALL VAMPIRE ABILITIES ===", NamedTextColor.DARK_RED)
+                    .decorate(TextDecoration.BOLD));
+            player.sendMessage(Component.text("Your Stage: ", NamedTextColor.GRAY)
+                    .append(Component.text(this.plugin.getVampireManager().getVampireStage(player), NamedTextColor.YELLOW)));
             BeaconSite suppressingBeacon = this.beaconManager.checkHolySuppression(player.getLocation());
 
             if (suppressingBeacon != null) {
-                player.sendMessage("§c SUPPRESSED by holy beacon: §f" + suppressingBeacon.getName());
+                player.sendMessage(Component.text(" SUPPRESSED by holy beacon: ", NamedTextColor.YELLOW)
+                        .append(Component.text(suppressingBeacon.getName(), NamedTextColor.WHITE)));
             }
 
             player.sendMessage("");
 
             for (VampireAbility ability : this.abilityManager.getAllAbilities()) {
-                boolean canUse = ability.canUse(player, this.plugin.getVampireManager());
-                this.displayAbility(player, ability, canUse);
+                this.displayAbility(player, ability, ability.canUse(player, this.plugin.getVampireManager()));
             }
         }
     }
@@ -248,7 +263,7 @@ public class VampireAbilityCommand implements CommandExecutor, TabCompleter {
                 player.sendMessage("  §7Usage: §e/pow vability " + ability.getName());
             }
         } else if (suppressed) {
-            player.sendMessage("  §c✦ Blocked by holy beacon within 25 blocks");
+            player.sendMessage(Component.text("  ✦ Blocked by holy beacon within " + (this.plugin.getConfigManager().getCureBeaconDistance()) + " blocks", NamedTextColor.RED));
         }
 
         player.sendMessage("");

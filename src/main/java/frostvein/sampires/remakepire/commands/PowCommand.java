@@ -417,4 +417,17 @@ public class PowCommand implements CommandExecutor, TabCompleter {
             }
         }
     }
+
+    /**
+     * Create a message about the command in a help list for players to learn about.
+     *
+     * @param command the exact command that readers are learning about
+     * @param info the details of the command
+     * @return A {@code Component} in the format of "[YELLOW]<command>[GRAY] - <info>".
+     */
+    public static Component formatCommandInstruction(String command, String info) {
+        // TODO: Fill this out to match the expected format. Test that the commands come out looking correct
+        return Component.text(command, NamedTextColor.YELLOW)
+                .append(Component.text(" - " + info, NamedTextColor.GRAY));
+    }
 }
