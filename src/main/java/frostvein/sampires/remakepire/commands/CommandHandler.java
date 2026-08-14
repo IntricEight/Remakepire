@@ -288,7 +288,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
      */
     private boolean handlePlayerCountCommand(CommandSender sender, String[] args) {
         if (args.length == 0) {
-            sender.sendMessage("§cUsage: /playercount <all | human | vampire>");
+            sender.sendMessage(Component.text("Usage: /playercount <all | human | vampire>", NamedTextColor.RED));
             sender.sendMessage("§7- /playercount all §8- See the number of alive players");
             sender.sendMessage("§7- /playercount human §8- See the number of alive human players");
             sender.sendMessage("§7- /playercount vampire §8- See the number of \"alive\" vampire players");

@@ -1,5 +1,7 @@
 package frostvein.sampires.remakepire.listeners;
 
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.Bat;
 import org.bukkit.entity.Player;
@@ -100,22 +102,30 @@ public class BatTransformationListener implements Listener {
                 Player transformedPlayer = this.batManager.getPlayerFromBat(bat);
 
                 if (transformedPlayer != null && transformedPlayer.isOnline()) {
-                    transformedPlayer.sendMessage("§c You have taken damage while in bat form, be careful...");
+                    transformedPlayer.sendMessage(Component.text(" You have taken damage while in bat form, be careful...", NamedTextColor.RED));
 
                     final double health = bat.getHealth() - event.getFinalDamage();
                     final double maxHealth = bat.getAttribute(Attribute.MAX_HEALTH).getValue();
                     final double healthPercent = health / maxHealth * 100.0;
-                    String healthColor;
+                    NamedTextColor healthColor;
 
+                    // Color the health text based on how much remains
                     if (healthPercent > 60) {
-                        healthColor = "§a";
+                        healthColor = NamedTextColor.GREEN;
                     } else if (healthPercent > 30) {
-                        healthColor = "§e";
+                        healthColor = NamedTextColor.YELLOW;
                     } else {
-                        healthColor = "§c";
+                        healthColor = NamedTextColor.RED;
                     }
 
-                    transformedPlayer.sendMessage("§7Bat Health: " + healthColor + String.format("%.1f", health) + "§7/§f" + String.format("%.1f", maxHealth) + " §7(" + healthColor + String.format("%.1f", healthPercent) + "%§7)");
+                    transformedPlayer.sendMessage(Component.text("Bat Health: ", NamedTextColor.GRAY)
+                            .append(Component.text(String.format("%.1f", health), healthColor))
+                            .append(Component.text("/", NamedTextColor.GRAY))
+                            .append(Component.text(String.format("%.1f", maxHealth), NamedTextColor.WHITE))
+                            .append(Component.text(" (", NamedTextColor.GRAY))
+                            .append(Component.text(String.format("%.1f", healthPercent) + "%", healthColor))
+                            .append(Component.text(")", NamedTextColor.GRAY))
+                    );
                 }
             }
         }
@@ -137,16 +147,31 @@ public class BatTransformationListener implements Listener {
 
                     if (transformedPlayer != null && transformedPlayer.isOnline() && !(event instanceof EntityDamageByEntityEvent)) {
                         String damageType = event.getCause().name().toLowerCase().replace("_", " ");
-                        transformedPlayer.sendMessage("§c You have taken damage while in bat form, be careful...");
+                        transformedPlayer.sendMessage(Component.text(" You have taken damage while in bat form, be careful...", NamedTextColor.RED));
+
                         final double newHealth = bat.getHealth() - event.getFinalDamage(), maxHealth = bat.getAttribute(Attribute.MAX_HEALTH).getValue();
 
                         if (newHealth > 0) {
                             final double healthPercent = newHealth / maxHealth * 100.0;
-                            String healthColor = healthPercent > 50 ? "§a" : (healthPercent > 25 ? "§e" : "§c");
-                            transformedPlayer.sendMessage("§7Remaining Health: " + healthColor + String.format("%.1f", newHealth) + "§7/" + String.format("%.1f", maxHealth));
+                            NamedTextColor healthColor;
+
+                            // Color the health text based on how much remains
+                            if (healthPercent > 50) {
+                                healthColor = NamedTextColor.GREEN;
+                            } else if (healthPercent > 25) {
+                                healthColor = NamedTextColor.YELLOW;
+                            } else {
+                                healthColor = NamedTextColor.RED;
+                            }
+
+                            transformedPlayer.sendMessage(Component.text("Remaining Health: ", NamedTextColor.GRAY)
+                                    .append(Component.text(String.format("%.1f", newHealth), healthColor))
+                                    .append(Component.text("/", NamedTextColor.GRAY))
+                                    .append(Component.text(String.format("%.1f", maxHealth), NamedTextColor.GRAY))
+                            );
 
                         } else {
-                            transformedPlayer.sendMessage("§cYour bat forms life force, and your own, are growing thin.");
+                            transformedPlayer.sendMessage(Component.text("Your bat forms life force, and your own, are growing thin.", NamedTextColor.RED));
                         }
                     }
                 }
@@ -187,7 +212,7 @@ public class BatTransformationListener implements Listener {
         Player player = event.getPlayer();
 
         if (this.batManager.isInBatForm(player) && !event.isCancelled() && (event.getCause() == TeleportCause.COMMAND || event.getCause() == TeleportCause.PLUGIN)) {
-            player.sendMessage("§7Your bat form moves with you...");
+            player.sendMessage(Component.text("Your bat form moves with you...", NamedTextColor.GRAY));
         }
     }
 
@@ -204,7 +229,7 @@ public class BatTransformationListener implements Listener {
 
         if (this.batManager.isInBatForm(player)) {
             event.setCancelled(true);
-            player.sendMessage("§cYou cannot use a fishing rod while in bat form.");
+            player.sendMessage(Component.text("You cannot use a fishing rod while in bat form.", NamedTextColor.RED));
         }
     }
 
@@ -220,7 +245,7 @@ public class BatTransformationListener implements Listener {
         if (event.getEntity() instanceof Player player) {
             if (this.batManager.isInBatForm(player)) {
                 event.setCancelled(true);
-                player.sendMessage("§cYou cannot shoot a bow while in bat form.");
+                player.sendMessage(Component.text("You cannot shoot a bow while in bat form.", NamedTextColor.RED));
             }
         }
     }
@@ -242,7 +267,7 @@ public class BatTransformationListener implements Listener {
                 case BOW:
                 case CROSSBOW:
                     event.setCancelled(true);
-                    player.sendMessage("§cYou cannot use " + event.getItem().getType().name().toLowerCase().replace("_", " ") + " while in bat form.");
+                    player.sendMessage(Component.text("You cannot use " + event.getItem().getType().name().toLowerCase().replace("_", " ") + " while in bat form.", NamedTextColor.RED));
             }
         }
     }

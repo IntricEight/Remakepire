@@ -72,7 +72,8 @@ public class PermadeathCommand implements CommandExecutor {
                     break;
 
                 default:
-                    player.sendMessage("§cInvalid option. Use: §e/pow permadeath <on | off | absolute>");
+                    player.sendMessage(Component.text("Invalid option. Use: ", NamedTextColor.RED)
+                            .append(Component.text("/pow permadeath <on | off | absolute>", NamedTextColor.YELLOW)));
                     player.sendMessage("§7  on §8- Die permanently if vampire tries to turn you");
                     player.sendMessage("§7  off §8- Become a vampire if turned (default)");
                     player.sendMessage("§7  absolute §8- Die permanently from ANY death");
