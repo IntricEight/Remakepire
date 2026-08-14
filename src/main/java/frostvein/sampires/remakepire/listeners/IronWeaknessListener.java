@@ -306,21 +306,10 @@ public class IronWeaknessListener implements Listener {
                     }
                 }
 
-                if (this.isNearIronBlock(to, this.REPEL_DISTANCE)) {
+                Location nearestIronBlock = this.getNearestIronBlock(to, this.REPEL_DISTANCE);
+                if (nearestIronBlock != null) {
                     event.setCancelled(true);
-
-                    // TODO: Replace with applyIronRepulsion(player)
-                    // Only inform the player of the silver's repulsion effects once each session
-                    if (!player.getScoreboardTags().contains(SessionManager.INFORMED_IRON_BLOCK_REPEL)) {
-                        player.addScoreboardTag(SessionManager.INFORMED_IRON_BLOCK_REPEL);
-                        player.sendMessage(Component.text("A block of silver is repelling you from this area...", NamedTextColor.RED));
-                    }
-
-                    Vector knockbackDirection = this.getDirectionAwayFromNearestIron(to);
-                    knockbackDirection.multiply(this.REPEL_STRENGTH);
-                    knockbackDirection.setY(Math.max(0.3, knockbackDirection.getY()));
-                    this.plugin.getServer().getScheduler().runTask(this.plugin, () -> player.setVelocity(knockbackDirection));
-                    this.knockbackCooldowns.put(playerId, currentTime);
+                    this.applyIronRepulsion(player, to, nearestIronBlock);
                 }
             }
         }
@@ -333,28 +322,8 @@ public class IronWeaknessListener implements Listener {
      * @return A {@code Vector} away from the nearest silver block.
      */
     private Vector getDirectionAwayFromNearestIron(Location location) {
-        final int x = location.getBlockX(), y = location.getBlockY(), z = location.getBlockZ();
-        Location nearestIron = null;
-        double nearestDistance = Double.MAX_VALUE;
-
-        // Search for the silver block within a cube around the player
-        for (int dx = (int)(-1 * REPEL_DISTANCE); dx <= (int)(REPEL_DISTANCE); ++dx) {
-            for (int dy = (int)(-1 * REPEL_DISTANCE); dy <= (int)(REPEL_DISTANCE); ++dy) {
-                for (int dz = (int)(-1 * REPEL_DISTANCE); dz <= (int)(REPEL_DISTANCE); ++dz) {
-                    Block block = location.getWorld().getBlockAt(x + dx, y + dy, z + dz);
-
-                    if (this.ironMaterials.contains(block.getType())) {
-                        Location ironLoc = block.getLocation().add(0.5, 0.5, 0.5);
-                        double distance = location.distance(ironLoc);
-
-                        if (distance < nearestDistance) {
-                            nearestDistance = distance;
-                            nearestIron = ironLoc;
-                        }
-                    }
-                }
-            }
-        }
+        // Retrieve the nearest iron block to the player
+        Location nearestIron = this.getNearestIronBlock(location, this.REPEL_DISTANCE);
 
         if (nearestIron != null) {
             return location.toVector().subtract(nearestIron.toVector()).normalize();
@@ -364,19 +333,33 @@ public class IronWeaknessListener implements Listener {
     }
 
     /**
-     * Determine if the vampire should be weakened by nearby silver.
+     * Determine the direction the player should be knocked back toward.
+     *
+     * @param playerLocation the player's location.
+     * @param ironLocation the closest silver's location.
+     * @return A {@code Vector} away from the provided silver block.
+     */
+    private Vector getDirectionAwayFromNearestIron(Location playerLocation, Location ironLocation) {
+        if (ironLocation != null) {
+            return playerLocation.toVector().subtract(ironLocation.toVector()).normalize();
+        } else {
+            return new Vector(0, 0, 1);
+        }
+    }
+
+    /**
+     * Determine if the vampire should be repelled or weakened by nearby silver.
      */
     public void checkIronProximity() {
         for (Player player : Bukkit.getOnlinePlayers()) {
             if (this.vampireManager.isVampire(player)) {
-                Location playerLoc = player.getLocation();
-
-                // TODO: Add function to repel the player from the silver block
-                if (this.isNearIronBlock(playerLoc, REPEL_DISTANCE)) {
+                // Repel the player from the silver block
+                if (this.isNearIronBlock(player.getLocation(), REPEL_DISTANCE)) {
                     this.applyIronRepulsion(player);
                 }
 
-                if (this.isNearIronBlock(playerLoc, WEAKNESS_DISTANCE)) {
+                // Weaken the player from the silver block's proximity
+                if (this.isNearIronBlock(player.getLocation(), WEAKNESS_DISTANCE)) {
                     this.applyIronWeakness(player);
                 }
             }
@@ -394,7 +377,6 @@ public class IronWeaknessListener implements Listener {
         return this.getNearestIronBlock(location, radius) != null;
     }
 
-
     /**
      * Retrieve the location of the nearest silver-typed block to the player within the radius.
      *
@@ -410,10 +392,12 @@ public class IronWeaknessListener implements Listener {
         for (double dx = -radius; dx <= radius; ++dx) {
             for (double dy = -radius; dy <= radius; ++dy) {
                 for (double dz = -radius; dz <= radius; ++dz) {
+                    // Check each block within the cube radius to see if it is a silver-type block
                     Block block = location.getWorld().getBlockAt((int)(x + dx), (int)(y + dy), (int)(z + dz));
 
                     if (this.ironMaterials.contains(block.getType())) {
-                        double distanceSquared = Math.pow(dx ,2) + Math.pow(dy ,2) + Math.pow(dz ,2);
+                        // Make sure we are returning the closest silver block to the search location
+                        final double distanceSquared = Math.pow(dx ,2) + Math.pow(dy ,2) + Math.pow(dz ,2);
 
                         if (distanceSquared < nearestDistanceSquared) {
                             nearestDistanceSquared = distanceSquared;
@@ -428,18 +412,32 @@ public class IronWeaknessListener implements Listener {
     }
 
     /**
-     * Toss the player away from the silver block effecting them.
+     * Repel the player away from the silver block effecting them.
      *
-     * @param player the vampire being repulsed.
+     * @param player the vampire being repelled.
      */
     private void applyIronRepulsion(Player player) {
+        this.applyIronRepulsion(player, player.getLocation(), this.getNearestIronBlock(player.getLocation(), REPEL_DISTANCE));
+    }
+
+    /**
+     * Repel the player away from the silver block effecting them.
+     *
+     * @param player the vampire being repelled.
+     * @param newLocation the location a player attempted to move to.
+     * @param ironLocation the repulsing silver block's location.
+     */
+    private void applyIronRepulsion(Player player, Location newLocation, Location ironLocation) {
+        final UUID playerId = player.getUniqueId();
+        final long currentTime = System.currentTimeMillis();
+
         // Only inform the player of the silver's repulsion effects once each session
         if (!player.getScoreboardTags().contains(SessionManager.INFORMED_IRON_BLOCK_REPEL)) {
             player.addScoreboardTag(SessionManager.INFORMED_IRON_BLOCK_REPEL);
             player.sendMessage(Component.text("A block of silver is repelling you from this area...", NamedTextColor.RED));
         }
 
-        Vector knockbackDirection = this.getDirectionAwayFromNearestIron(to);
+        Vector knockbackDirection = this.getDirectionAwayFromNearestIron(newLocation, ironLocation);
         knockbackDirection.multiply(this.REPEL_STRENGTH);
         knockbackDirection.setY(Math.max(0.3, knockbackDirection.getY()));
         this.plugin.getServer().getScheduler().runTask(this.plugin, () -> player.setVelocity(knockbackDirection));
