@@ -69,9 +69,13 @@ public class InitGameManager {
         this.adminStates.put(adminId, InitGameManager.InitState.AWAITING_FIRST_CONFIRM);
         this.adminData.put(adminId, new InitData());
 
-        admin.sendMessage("§c§l========================================");
-        admin.sendMessage("§c§lWARNING: GAME INITIALIZATION");
-        admin.sendMessage("§c§l========================================");
+        admin.sendMessage(Component.text("========================================", NamedTextColor.RED)
+                .decorate(TextDecoration.BOLD));
+        admin.sendMessage(Component.text("WARNING: GAME INITIALIZATION", NamedTextColor.RED)
+                .decorate(TextDecoration.BOLD));
+        admin.sendMessage(Component.text("========================================", NamedTextColor.RED)
+                .decorate(TextDecoration.BOLD));
+
         admin.sendMessage("");
         admin.sendMessage("§7You are about to start a §lbrand new game§7 of Vampires - Remakepire Edition.");
         admin.sendMessage("§7This will:");
@@ -82,18 +86,20 @@ public class InitGameManager {
         admin.sendMessage("§7  • Assign new vampires");
         admin.sendMessage("");
 
-        Component confirmMessage = Component.text("Are you sure? ", NamedTextColor.GRAY)
+        admin.sendMessage(Component.text("Are you sure? ", NamedTextColor.GRAY)
                 .append(Component.text("[CLICK HERE TO CONTINUE]", NamedTextColor.YELLOW)
                         .decorate(TextDecoration.UNDERLINED)
                         .clickEvent(ClickEvent.runCommand(COMMAND_PREFIX + "confirm1"))
-                        .hoverEvent(HoverEvent.showText(Component.text("Click to proceed with initialization", NamedTextColor.GRAY)))
-                );
-
-        admin.sendMessage(confirmMessage);
+                        .hoverEvent(HoverEvent.showText(Component.text("Click to proceed with initialization", NamedTextColor.GRAY))))
+        );
 
         admin.sendMessage("");
-        admin.sendMessage("§7Type §e/pow admin init cancel §7at any time to cancel.");
-        admin.sendMessage("§c§l========================================");
+        admin.sendMessage(Component.text("Type ", NamedTextColor.GRAY)
+                .append(Component.text("/pow admin init cancel", NamedTextColor.YELLOW))
+                .append(Component.text(" at any time to cancel.", NamedTextColor.GRAY))
+        );
+        admin.sendMessage(Component.text("========================================", NamedTextColor.RED)
+                .decorate(TextDecoration.BOLD));
     }
 
     /**
@@ -105,7 +111,7 @@ public class InitGameManager {
         UUID adminId = admin.getUniqueId();
 
         if (this.adminStates.get(adminId) != InitGameManager.InitState.AWAITING_FIRST_CONFIRM) {
-            admin.sendMessage("§cError: Invalid initialization state.");
+            admin.sendMessage(Component.text("Error: Invalid initialization state.", NamedTextColor.RED));
 
         } else {
             this.adminStates.put(adminId, InitGameManager.InitState.AWAITING_MODE_SELECTION);
@@ -118,18 +124,16 @@ public class InitGameManager {
             admin.sendMessage("§7Type §e/pow admin init cancel §7to cancel.");
             admin.sendMessage("");
 
-            Component buttonMessage = Component.text("[RANDOM] ", NamedTextColor.GREEN)
+            admin.sendMessage(Component.text("[RANDOM] ", NamedTextColor.GREEN)
                     .decorate(TextDecoration.BOLD)
                     .clickEvent(ClickEvent.runCommand(COMMAND_PREFIX + "mode_random"))
                     .hoverEvent(HoverEvent.showText(Component.text("Randomly select vampires from online players", NamedTextColor.GRAY)))
-
                     .append(Component.text("[SELECTED]", NamedTextColor.AQUA)
                             .decorate(TextDecoration.BOLD)
                             .clickEvent(ClickEvent.runCommand(COMMAND_PREFIX + "mode_selected"))
                             .hoverEvent(HoverEvent.showText(Component.text("Manually choose which players become vampires", NamedTextColor.GRAY)))
-                    );
-
-            admin.sendMessage(buttonMessage);
+                    )
+            );
 
             admin.sendMessage("");
         }
@@ -144,7 +148,7 @@ public class InitGameManager {
         UUID adminId = admin.getUniqueId();
 
         if (this.adminStates.get(adminId) != InitGameManager.InitState.AWAITING_MODE_SELECTION) {
-            admin.sendMessage("§cError: Invalid initialization state.");
+            admin.sendMessage(Component.text("Error: Invalid initialization state.", NamedTextColor.RED));
 
         } else {
             InitData data = this.adminData.get(adminId);
@@ -170,7 +174,7 @@ public class InitGameManager {
         UUID adminId = admin.getUniqueId();
 
         if (this.adminStates.get(adminId) != InitGameManager.InitState.AWAITING_MODE_SELECTION) {
-            admin.sendMessage("§cError: Invalid initialization state.");
+            admin.sendMessage(Component.text("Error: Invalid initialization state.", NamedTextColor.RED));
 
         } else {
             InitData data = this.adminData.get(adminId);
@@ -189,7 +193,7 @@ public class InitGameManager {
         int playerCount = onlinePlayers.size();
 
         if (playerCount == 0) {
-            admin.sendMessage("§cNo players are online to select.");
+            admin.sendMessage(Component.text("No players are online to select.", NamedTextColor.RED));
             this.cancelInitialization(admin);
 
         } else {
@@ -361,7 +365,7 @@ public class InitGameManager {
                 int min = Integer.parseInt(input.trim());
 
                 if (min < 0) {
-                    admin.sendMessage("§cThe minimum must be 0 or more. Please try again:");
+                    admin.sendMessage(Component.text("The minimum must be 0 or more. Please try again:", NamedTextColor.RED));
 
                 } else {
                     InitData data = this.adminData.get(adminId);
@@ -381,7 +385,7 @@ public class InitGameManager {
                 return true;
 
             } catch (NumberFormatException e) {
-                admin.sendMessage("§c'" + input + "' is not a valid number. Please try again:");
+                admin.sendMessage(Component.text("'" + input + "' is not a valid number. Please try again:", NamedTextColor.RED));
                 return true;
             }
         }
@@ -407,7 +411,7 @@ public class InitGameManager {
                 int max = Integer.parseInt(input.trim());
 
                 if (max < data.minVampires) {
-                    admin.sendMessage("§cThe maximum must be " + data.minVampires + " or more. Please try again:");
+                    admin.sendMessage(Component.text("§cThe maximum must be " + data.minVampires + " or more. Please try again:", NamedTextColor.RED));
 
                 } else {
                     data.maxVampires = max;
@@ -419,7 +423,7 @@ public class InitGameManager {
 
                 return true;
             } catch (NumberFormatException e) {
-                admin.sendMessage("§c'" + input + "' is not a valid number. Please try again:");
+                admin.sendMessage(Component.text("§c'" + input + "' is not a valid number. Please try again:", NamedTextColor.RED));
                 return true;
             }
         }
@@ -776,7 +780,8 @@ public class InitGameManager {
         UUID adminId = admin.getUniqueId();
         this.adminStates.remove(adminId);
         this.adminData.remove(adminId);
-        admin.sendMessage("§cGame initialization cancelled.");
+
+        admin.sendMessage(Component.text("Game initialization cancelled.", NamedTextColor.RED));
     }
 
     /**
