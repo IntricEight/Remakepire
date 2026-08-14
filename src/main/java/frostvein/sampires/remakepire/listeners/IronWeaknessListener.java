@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import javax.annotation.Nullable;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
@@ -403,7 +402,7 @@ public class IronWeaknessListener implements Listener {
      * @param radius the range around the player to search.
      * @return The {@code Location} of the silver block, or {@code null} if none is found.
      */
-    private @Nullable Location getNearestIronBlock(Location location, double radius) {
+    private Location getNearestIronBlock(Location location, double radius) {
         final int x = location.getBlockX(), y = location.getBlockY(), z = location.getBlockZ();
         double nearestDistanceSquared = Double.MAX_VALUE;
         Location nearestIron = null;
