@@ -10,7 +10,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import javax.annotation.Nullable;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -228,7 +227,7 @@ public class BatTransformationManager {
      * @param bat a bat entity.
      * @return The player who is controlling the bat.
      */
-    public @Nullable Player getPlayerFromBat(Bat bat) {
+    public Player getPlayerFromBat(Bat bat) {
         if (bat.getCustomName() != null && bat.getCustomName().startsWith("Â§8")) {
             String playerName = bat.getCustomName().substring(2);
             return Bukkit.getPlayer(playerName);
