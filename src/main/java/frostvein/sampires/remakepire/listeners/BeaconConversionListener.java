@@ -113,7 +113,7 @@ public class BeaconConversionListener implements Listener {
             if (player.getGameMode() != GameMode.SPECTATOR) {
                 for (BeaconSite beacon : this.beaconManager.getBeaconsInRange(player.getLocation(), BEACON_CONVERSION_RANGE)) {
                     if (!this.sessionManager.isSessionActive()) {
-                        player.sendMessage("§c⚠ Cannot convert beacons - no session is currently active.");
+                        player.sendMessage(Component.text("⚠ Cannot convert beacons - no session is currently active.", NamedTextColor.RED));
                         return;
                     }
 
@@ -226,7 +226,7 @@ public class BeaconConversionListener implements Listener {
      */
     private boolean canPlayerConvertBeacon(Player player, BeaconSite beacon) {
         if (beacon.getState() == BeaconState.PERMANENTLY_DESECRATED) {
-            player.sendMessage("§cThis beacon has been permanently corrupted and cannot be converted.");
+            player.sendMessage(Component.text("This beacon has been permanently corrupted and cannot be converted.", NamedTextColor.RED));
             return false;
 
         } else {
@@ -255,9 +255,9 @@ public class BeaconConversionListener implements Listener {
 
                                 if ((!nearbyIsVampire || !nearbyPlayer.hasPotionEffect(PotionEffectType.INVISIBILITY)) && (playerIsVampire && nearbyIsHuman || !playerIsVampire && nearbyIsVampire)) {
                                     if (playerIsVampire) {
-                                        player.sendMessage("§cA pure being is nearby... They are stopping you from converting this beacon...");
+                                        player.sendMessage(Component.text("A pure being is nearby... They are stopping you from converting this beacon...", NamedTextColor.RED));
                                     } else {
-                                        player.sendMessage("§cYou feel unable to convert this beacon... As if a dark presence is choking the very light from it...");
+                                        player.sendMessage(Component.text("You feel unable to convert this beacon... As if a dark presence is choking the very light from it...", NamedTextColor.RED));
                                     }
 
                                     return false;
@@ -269,7 +269,8 @@ public class BeaconConversionListener implements Listener {
                     }
                 }
             } else {
-                player.sendMessage("§c⏰ Beacon " + beacon.getName() + " cannot be converted yet. Cooldown remaining: §e" + beacon.getRemainingCooldownString(this.sessionManager) + " (session time)");
+                player.sendMessage(Component.text("⏰ Beacon " + beacon.getName() + " cannot be converted yet. Cooldown remaining: ", NamedTextColor.RED)
+                        .append(Component.text(beacon.getRemainingCooldownString(this.sessionManager) + " (session time)", NamedTextColor.YELLOW)));
                 return false;
             }
         }
@@ -293,7 +294,10 @@ public class BeaconConversionListener implements Listener {
 
         data.addConverter(player.getUniqueId());
         data.recalculateConversionTime();
-        player.sendMessage("§eConverting beacon §f" + beacon.getName() + "§e... Stay crouched.");
+        player.sendMessage(Component.text("Converting beacon ", NamedTextColor.YELLOW)
+                .append(Component.text(beacon.getName(), NamedTextColor.WHITE))
+                .append(Component.text("... Stay crouched.", NamedTextColor.YELLOW))
+        );
     }
 
     /**
@@ -378,9 +382,15 @@ public class BeaconConversionListener implements Listener {
     private void broadcastBeaconGainToTeam(BeaconSite beacon, BeaconSite.BeaconState newState) {
         for (Player player : this.plugin.getServer().getOnlinePlayers()) {
             if (newState == BeaconState.HOLY) {
-                player.sendMessage("§aBeacon §e" + beacon.getName() + " §ahas been blessed with divine energy.");
+                player.sendMessage(Component.text("Beacon ", NamedTextColor.GREEN)
+                        .append(Component.text(beacon.getName(), NamedTextColor.YELLOW))
+                        .append(Component.text(" has been blessed with divine energy.", NamedTextColor.GREEN))
+                );
             } else if (newState == BeaconState.DESECRATED) {
-                player.sendMessage("§4Beacon §e" + beacon.getName() + " §4has been consumed by dark forces.");
+                player.sendMessage(Component.text("Beacon ", NamedTextColor.DARK_RED)
+                        .append(Component.text(beacon.getName(), NamedTextColor.YELLOW))
+                        .append(Component.text(" has been consumed by dark forces.", NamedTextColor.DARK_RED))
+                );
             }
         }
     }
@@ -468,12 +478,14 @@ public class BeaconConversionListener implements Listener {
                         Duration.ofSeconds(5),
                         Duration.ofSeconds(2)
                 ));
+        final Component beaconsShine = Component.text(" All beacons now shine with divine energy.", NamedTextColor.YELLOW);
+        final Component evilWeakened = Component.text(" Evil has been weakened by the overwhelming holy presence.", NamedTextColor.YELLOW);
 
         // Alert all online players of the holy beacon total control
         for (Player player : this.plugin.getServer().getOnlinePlayers()) {
             player.showTitle(title);
-            player.sendMessage("§e All beacons now shine with divine energy.");
-            player.sendMessage("§e Evil has been weakened by the overwhelming holy presence.");
+            player.sendMessage(beaconsShine);
+            player.sendMessage(evilWeakened);
             player.playSound(player.getLocation(), Sound.BLOCK_BEACON_ACTIVATE, SoundCategory.MASTER, 1.0F, 0.7F);
         }
 
@@ -501,11 +513,12 @@ public class BeaconConversionListener implements Listener {
                         Duration.ofSeconds(4),
                         Duration.ofSeconds(1)
                 ));
+        final Component standBroken = Component.text("A vampire has broken through the holy defenses.", NamedTextColor.RED);
 
         // Inform all online players that the holy control of the beacons has been broken
         for (Player player : this.plugin.getServer().getOnlinePlayers()) {
             player.showTitle(title);
-            player.sendMessage("§cA vampire has broken through the holy defenses.");
+            player.sendMessage(standBroken);
             player.playSound(player.getLocation(), Sound.ENTITY_WITHER_SPAWN, SoundCategory.MASTER, 1.0F, 0.5F);
         }
 
@@ -538,11 +551,12 @@ public class BeaconConversionListener implements Listener {
                         Duration.ofSeconds(5),
                         Duration.ofSeconds(2)
                 ));
+        final Component beaconsUnholy = Component.text(" All beacons now pulse with unholy energy.", NamedTextColor.RED);
 
         // Alert all online players of the desecrated beacon total control
         for (Player player : this.plugin.getServer().getOnlinePlayers()) {
             player.showTitle(title);
-            player.sendMessage("§c All beacons now pulse with unholy energy.");
+            player.sendMessage(beaconsUnholy);
             player.playSound(player.getLocation(), Sound.ENTITY_WITHER_SPAWN, SoundCategory.MASTER, 1.0F, 0.5F);
         }
 
@@ -570,11 +584,12 @@ public class BeaconConversionListener implements Listener {
                         Duration.ofSeconds(4),
                         Duration.ofSeconds(1)
                 ));
+        final Component standBroken = Component.text("A human has broken through the darkness.", NamedTextColor.GREEN);
 
         // Inform all online players that the darkness control of the beacons has been broken
         for (Player player : this.plugin.getServer().getOnlinePlayers()) {
             player.showTitle(title);
-            player.sendMessage("§aA human has broken through the darkness.");
+            player.sendMessage(standBroken);
             player.playSound(player.getLocation(), Sound.BLOCK_BEACON_ACTIVATE, SoundCategory.MASTER, 1.0F, 1.2F);
         }
 

@@ -5,6 +5,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -123,8 +125,11 @@ public class PowCommand implements CommandExecutor, TabCompleter {
                     return true;
 
                 default:
-                    sender.sendMessage("§cUnknown subcommand: " + subCommand);
-                    sender.sendMessage("§7Use §e/pow help §7for a list of commands");
+                    sender.sendMessage(Component.text("Unknown subcommand: " + subCommand, NamedTextColor.RED));
+                    sender.sendMessage(Component.text("Use ", NamedTextColor.GRAY)
+                            .append(Component.text("/pow help", NamedTextColor.YELLOW))
+                            .append(Component.text(" for a list of commands", NamedTextColor.GRAY))
+                    );
                     return true;
             }
         }
@@ -139,7 +144,7 @@ public class PowCommand implements CommandExecutor, TabCompleter {
      */
     private boolean handleAdminCommand(CommandSender sender, String[] args) {
         if (!sender.hasPermission("vampiresmp.admin")) {
-            sender.sendMessage("§cYou don't have permission to use admin commands.");
+            sender.sendMessage(Component.text("You don't have permission to use admin commands.", NamedTextColor.RED));
             return true;
 
         } else if (args.length == 0) {
@@ -170,7 +175,8 @@ public class PowCommand implements CommandExecutor, TabCompleter {
 
         // Only let the sender know about the admin option if they have access to it
         if (sender.hasPermission("vampiresmp.admin")) {
-            sender.sendMessage("§e/pow admin §7- Admin commands (requires permission)");
+            sender.sendMessage(Component.text("/pow admin", NamedTextColor.YELLOW)
+                    .append(Component.text(" - Admin commands (requires permission)", NamedTextColor.GRAY)));
         }
 
         sender.sendMessage("§e/pow vability <name> §7- Use vampire abilities");
@@ -231,8 +237,13 @@ public class PowCommand implements CommandExecutor, TabCompleter {
 
         if (args.length == 1) {
             List<String> subCommands = new ArrayList<>(Arrays.asList("vability", "tome", "checklives", "beaconstatus", "permadeath", "toggle-turning", "help"));
+
+            if (sender instanceof Player player && this.plugin.getVampireManager().isVampire(player)) {
+                subCommands.add("stake-myself");
+            }
+
             if (sender.hasPermission("vampiresmp.admin")) {
-                subCommands.add(0, "admin");
+                subCommands.addFirst("admin");
             }
 
             return subCommands.stream().filter((s) -> s.startsWith(args[0].toLowerCase())).collect(Collectors.toList());
@@ -405,5 +416,18 @@ public class PowCommand implements CommandExecutor, TabCompleter {
                 return completions;
             }
         }
+    }
+
+    /**
+     * Create a message about the command in a help list for players to learn about.
+     *
+     * @param command the exact command that readers are learning about
+     * @param info the details of the command
+     * @return A {@code Component} in the format of "[YELLOW]<command>[GRAY] - <info>".
+     */
+    public static Component formatCommandInstruction(String command, String info) {
+        // TODO: Fill this out to match the expected format. Test that the commands come out looking correct
+        return Component.text(command, NamedTextColor.YELLOW)
+                .append(Component.text(" - " + info, NamedTextColor.GRAY));
     }
 }

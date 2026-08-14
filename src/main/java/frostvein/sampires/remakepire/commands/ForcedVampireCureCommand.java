@@ -1,5 +1,7 @@
 package frostvein.sampires.remakepire.commands;
 
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Particle;
@@ -42,22 +44,22 @@ public class ForcedVampireCureCommand implements CommandExecutor {
      */
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (!(sender instanceof Player caster)) {
-            sender.sendMessage("§cThis command can only be used by players.");
+            sender.sendMessage(Component.text("This command can only be used by players.", NamedTextColor.RED));
             return true;
 
         } else if (!CureBookReadingListener.hasReadAllCureBooks(caster)) {
-            caster.sendMessage("§cYou do not know these holy words...");
-            caster.sendMessage("§7You must first read all three cure books to understand this power.");
+            caster.sendMessage(Component.text("You do not know these holy words...", NamedTextColor.RED));
+            caster.sendMessage(Component.text("You must first read all three cure books to understand this power.", NamedTextColor.GRAY));
             return true;
 
         } else if (!CureBookReadingListener.hasReadFourthBook(caster)) {
-            caster.sendMessage("§cYou do not know the words of retribution...");
-            caster.sendMessage("§7You must read the fourth book to learn how to force cure others.");
+            caster.sendMessage(Component.text("You do not know the words of retribution...", NamedTextColor.RED));
+            caster.sendMessage(Component.text("You must read the fourth book to learn how to force cure others.", NamedTextColor.GRAY));
             return true;
 
         } else if (args.length < 1) {
-            caster.sendMessage("§cYou must specify the name of the vampire to sanctify.");
-            caster.sendMessage("§7Usage: /hoc-vinculum-tibi-dirumpo-mala-creatura <player-name>");
+            caster.sendMessage(Component.text("You must specify the name of the vampire to sanctify.", NamedTextColor.RED));
+            caster.sendMessage(Component.text("Usage: /hoc-vinculum-tibi-dirumpo-mala-creatura <player-name>", NamedTextColor.GRAY));
             return true;
 
         } else {
@@ -65,28 +67,28 @@ public class ForcedVampireCureCommand implements CommandExecutor {
             Player target = Bukkit.getPlayer(targetName);
 
             if (target == null) {
-                caster.sendMessage("§cPlayer '" + targetName + "' is not online or does not exist.");
+                caster.sendMessage(Component.text("Player '" + targetName + "' is not online or does not exist.", NamedTextColor.RED));
                 return true;
 
             } else if (target.equals(caster)) {
-                caster.sendMessage("§cYou cannot use these holy words upon yourself. The ritual must be performed by another.");
+                caster.sendMessage(Component.text("You cannot use these holy words upon yourself. The ritual must be performed by another.", NamedTextColor.RED));
                 return true;
 
             } else if (!this.vampireManager.isVampire(target)) {
-                caster.sendMessage("§c" + target.getName() + " is not a vampire. The holy words have no power over them.");
+                caster.sendMessage(Component.text(target.getName() + " is not a vampire. The holy words have no power over them.", NamedTextColor.RED));
                 return true;
 
             } else {
                 // Only allow a cure during the day (if this setting is enabled)
                 if (this.plugin.getConfigManager().doCuresRequireDaytime() && !this.plugin.getEffectManager().isDaytime(caster.getWorld())) {
-                    caster.sendMessage("§cThe holy words can only be spoken during the day, when the sun's light empowers them.");
+                    caster.sendMessage(Component.text("The holy words can only be spoken during the day, when the sun's light empowers them.", NamedTextColor.RED));
 
                 } else {
                     ItemStack holyWater = this.plugin.getHolyWaterEffectManager().findHolyWater(caster);
 
                     // Ensure the caster has holy water in their inventory
                     if (holyWater == null) {
-                        caster.sendMessage("§cYou need holy water to sanctify the creature with these words.");
+                        caster.sendMessage(Component.text("You need holy water to sanctify the creature with these words.", NamedTextColor.RED));
 
                     } else {
                         // Ensure both caster and target are within cure range of a holy beacon
@@ -95,7 +97,7 @@ public class ForcedVampireCureCommand implements CommandExecutor {
 
                         // Ensure the caster is within cure range of a holy beacon
                         if (nearestHolyBeacon == null) {
-                            caster.sendMessage("§cYou must be close to a holy beacon to channel the divine power of these words.");
+                            caster.sendMessage(Component.text("You must be close to a holy beacon to channel the divine power of these words.", NamedTextColor.RED));
 
                         } else {
                             BeaconSite targetNearestBeacon = this.beaconManager.getNearestHolyBeacon(target.getLocation(), cureDistance);
@@ -103,15 +105,15 @@ public class ForcedVampireCureCommand implements CommandExecutor {
                             // Ensure the caster and target are within cure range of the same holy beacon
                             if (targetNearestBeacon != null && targetNearestBeacon.equals(nearestHolyBeacon)) {
                                 if (!this.sireManager.canBeCured(target)) {
-                                    caster.sendMessage("§4The curse cannot be broken while " + target.getName() + "'s sire still walks the world in mortal form...");
-                                    caster.sendMessage("§4The blood bond must be severed through the maker's true death.");
+                                    caster.sendMessage(Component.text("The curse cannot be broken while " + target.getName() + "'s sire still walks the world in mortal form...", NamedTextColor.DARK_RED));
+                                    caster.sendMessage(Component.text("The blood bond must be severed through the maker's true death.", NamedTextColor.DARK_RED));
 
                                 } else {
                                     holyWater.setAmount(holyWater.getAmount() - 1);
 
-                                    caster.sendMessage("§6You speak the holy words of retribution...");
-                                    caster.sendMessage("§7Divine light tears through the creature's cursed form...");
-                                    caster.sendMessage("§e" + target.getName() + " must now choose their fate...");
+                                    caster.sendMessage(Component.text("You speak the holy words of retribution...", NamedTextColor.GOLD));
+                                    caster.sendMessage(Component.text("Divine light tears through the creature's cursed form...", NamedTextColor.GRAY));
+                                    caster.sendMessage(Component.text(target.getName() + " must now choose their fate...", NamedTextColor.YELLOW));
 
                                     Location targetLoc = target.getLocation();
 
@@ -127,8 +129,8 @@ public class ForcedVampireCureCommand implements CommandExecutor {
                                     this.plugin.getForcedCureChoiceManager().openChoiceGUI(caster, target, nearestHolyBeacon);
                                 }
                             } else {
-                                caster.sendMessage("§cThe creature must also be within the holy beacon's divine light for the ritual to work.");
-                                caster.sendMessage("§7Both you and " + target.getName() + " must be near the same holy beacon.");
+                                caster.sendMessage(Component.text("The creature must also be within the holy beacon's divine light for the ritual to work.", NamedTextColor.RED));
+                                caster.sendMessage(Component.text("Both you and " + target.getName() + " must be near the same holy beacon.", NamedTextColor.GRAY));
                             }
                         }
                     }

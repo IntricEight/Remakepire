@@ -1,5 +1,7 @@
 package frostvein.sampires.remakepire.commands;
 
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -26,17 +28,17 @@ public class ToggleTurningCommand implements CommandExecutor {
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (sender instanceof Player player) {
             if (!this.plugin.getVampireManager().isVampire(player)) {
-                player.sendMessage("§cOnly vampires can use this command.");
+                player.sendMessage(Component.text("Only vampires can use this command.", NamedTextColor.RED));
 
             } else {
                 if (this.plugin.getVampireTurningManager().toggleTurning(player)) {
-                    player.sendMessage("§aVampire turning enabled. You will now turn humans into vampires when you kill them.");
+                    player.sendMessage(Component.text("Vampire turning enabled. You will now turn humans into vampires when you kill them.", NamedTextColor.GREEN));
                 } else {
-                    player.sendMessage("§cVampire turning disabled. Humans will die normally when you kill them.");
+                    player.sendMessage(Component.text("Vampire turning disabled. Humans will die normally when you kill them.", NamedTextColor.RED));
                 }
             }
         } else {
-            sender.sendMessage("§cThis command can only be used by players.");
+            sender.sendMessage(Component.text("This command can only be used by players.", NamedTextColor.RED));
         }
 
         return true;
