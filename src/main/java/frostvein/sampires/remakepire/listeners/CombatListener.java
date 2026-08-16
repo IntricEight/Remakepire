@@ -1,6 +1,9 @@
 package frostvein.sampires.remakepire.listeners;
 
 import java.util.Random;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.Location;
@@ -90,19 +93,19 @@ public class CombatListener implements Listener {
             // Prevent vampires from attacking in bat form
             } else if (this.plugin.getBatTransformationManager().isInBatForm(attacker)) {
                 event.setCancelled(true);
-                attacker.sendMessage("§cYou cannot damage entities while in bat form");
+                attacker.sendMessage(Component.text("You cannot damage entities while in bat form", NamedTextColor.RED));
 
             } else {
                 // Remove vampire invisibility after too many attacks are made
                 if (this.vampireManager.isVampire(attacker) && event.getEntity() instanceof Player && attacker.hasPotionEffect(PotionEffectType.INVISIBILITY)) {
                     if (this.vampireAbilityManager.trackInvisibilityAttack(attacker)) {
                         attacker.removePotionEffect(PotionEffectType.INVISIBILITY);
-                        attacker.sendMessage("§cYour invisibility fades after making too many attacks.");
+                        attacker.sendMessage(Component.text("Your invisibility fades after making too many attacks.", NamedTextColor.RED));
 
                     } else {
-                        int attackCount = this.vampireAbilityManager.getInvisibilityAttackCount(attacker);
-                        int remaining = 3 - attackCount;
-                        attacker.sendMessage("§6Warning: " + remaining + " attack(s) remaining before invisibility ends.");
+                        final int attackCount = this.vampireAbilityManager.getInvisibilityAttackCount(attacker);
+                        final int remaining = 3 - attackCount;
+                        attacker.sendMessage(Component.text("Warning: " + remaining + " attack(s) remaining before invisibility ends.", NamedTextColor.GOLD));
                     }
                 }
 
@@ -112,17 +115,17 @@ public class CombatListener implements Listener {
                     if (this.vampireManager.isVampire(victim)) {
                         if (this.plugin.getBatTransformationManager().isInBatForm(victim)) {
                             this.plugin.getBatTransformationManager().transformToHuman(victim);
-                            victim.sendMessage("§cYou were hit and forced out of bat form.");
+                            victim.sendMessage(Component.text("You were hit and forced out of bat form.", NamedTextColor.RED));
 
                         } else if (victim.hasPotionEffect(PotionEffectType.INVISIBILITY)) {
                             if (this.vampireAbilityManager.trackInvisibilityAttack(victim)) {
                                 victim.removePotionEffect(PotionEffectType.INVISIBILITY);
-                                victim.sendMessage("§cYour invisibility fades after being hit too many times.");
+                                victim.sendMessage(Component.text("Your invisibility fades after being hit too many times.", NamedTextColor.RED));
 
                             } else {
-                                int attackCount = this.vampireAbilityManager.getInvisibilityAttackCount(victim);
-                                int remaining = 3 - attackCount;
-                                victim.sendMessage("§6Warning: " + remaining + " hit(s) remaining before invisibility ends.");
+                                final int attackCount = this.vampireAbilityManager.getInvisibilityAttackCount(victim);
+                                final int remaining = 3 - attackCount;
+                                victim.sendMessage(Component.text("Warning: " + remaining + " hit(s) remaining before invisibility ends.", NamedTextColor.GOLD));
                             }
                         }
                     }
@@ -164,7 +167,7 @@ public class CombatListener implements Listener {
 
                             if (!attacker.getScoreboardTags().contains(SessionManager.INFORMED_WEAPON_WEAKNESS)) {
                                 attacker.addScoreboardTag(SessionManager.INFORMED_WEAPON_WEAKNESS);
-                                attacker.sendMessage("§cYour elongated claws make it difficult to use this tool effectively... As a creature of the night, you would be better tearing at your enemies with your hands than a weapon.");
+                                attacker.sendMessage(Component.text("Your elongated claws make it difficult to use this tool effectively... As a creature of the night, you would be better tearing at your enemies with your hands than a weapon.", NamedTextColor.RED));
                             }
                         }
 
@@ -182,7 +185,7 @@ public class CombatListener implements Listener {
                         // Create the effect of the one-time use stake
                         if (ItemTypeChecking.isStake(weapon.getType())) {
                             attacker.getInventory().setItemInMainHand(new ItemStack(Material.AIR));
-                            attacker.sendMessage("§cYour wooden stake breaks apart on impact.");
+                            attacker.sendMessage(Component.text("Your wooden stake breaks apart on impact.", NamedTextColor.RED));
                             attacker.getWorld().playSound(attacker.getLocation(), Sound.ENTITY_ITEM_BREAK, SoundCategory.PLAYERS, 1.0F, 1.0F);
                             attacker.setCooldown(Material.WOODEN_SWORD, this.plugin.getConfigManager().getWoodenStakeCooldownTicks());
                         }
@@ -200,7 +203,7 @@ public class CombatListener implements Listener {
                             victim.getWorld().playSound(victim.getLocation(), Sound.ENTITY_PLAYER_HURT, 1.0F, 1.0F);
 
                             attacker.getInventory().setItemInMainHand(new ItemStack(Material.AIR));
-                            attacker.sendMessage("§cYour wooden stake breaks apart on impact.");
+                            attacker.sendMessage(Component.text("Your wooden stake breaks apart on impact.", NamedTextColor.RED));
                             attacker.getWorld().playSound(attacker.getLocation(), Sound.ENTITY_ITEM_BREAK, SoundCategory.PLAYERS, 1.0F, 1.0F);
                             attacker.setCooldown(Material.WOODEN_SWORD, this.plugin.getConfigManager().getWoodenStakeCooldownTicks());
 
@@ -208,7 +211,7 @@ public class CombatListener implements Listener {
                             // Create the stake breaking effect when used on a human
                             if (ItemTypeChecking.isStake(weaponCheck.getType()) && this.vampireManager.isHuman(victim)) {
                                 attacker.getInventory().setItemInMainHand(new ItemStack(Material.AIR));
-                                attacker.sendMessage("§cYour wooden stake breaks apart on impact.");
+                                attacker.sendMessage(Component.text("Your wooden stake breaks apart on impact.", NamedTextColor.RED));
                                 attacker.getWorld().playSound(attacker.getLocation(), Sound.ENTITY_ITEM_BREAK, SoundCategory.PLAYERS, 1.0F, 1.0F);
                                 attacker.setCooldown(Material.WOODEN_SWORD, this.plugin.getConfigManager().getWoodenStakeCooldownTicks());
                             }
@@ -226,8 +229,8 @@ public class CombatListener implements Listener {
                                         if (deaths >= this.plugin.getConfigManager().getHumanLifeCount() || this.plugin.getPermadeathManager().hasAbsolutePermadeathEnabled(victim)) {
                                             event.setCancelled(true);
 
-                                            attacker.sendMessage("§4You watch the light of " + victim.getName() + "'s eyes fade, and extinguish. Lost forever.");
-                                            victim.sendMessage("§7The world grows dim, blurry... the light which drew you back so many times beckons once more, but it seems fainter now, out of reach... You lose your grip, and slip under the veil of the afterlife.");
+                                            attacker.sendMessage(Component.text("You watch the light of " + victim.getName() + "'s eyes fade, and extinguish. Lost forever.", NamedTextColor.DARK_RED));
+                                            victim.sendMessage(Component.text("The world grows dim, blurry... the light which drew you back so many times beckons once more, but it seems fainter now, out of reach... You lose your grip, and slip under the veil of the afterlife.", NamedTextColor.GRAY));
 
                                             victim.addScoreboardTag(DeathHandler.PERMADEATH_CHOSEN_TAG);
 
@@ -254,8 +257,8 @@ public class CombatListener implements Listener {
                                     // Apply the effect of a chosen absolute permadeath on death
                                     if (this.plugin.getPermadeathManager().hasAbsolutePermadeathEnabled(victim)) {
                                         event.setCancelled(true);
-                                        attacker.sendMessage("§4You watch the light of " + victim.getName() + "'s eyes fade, and extinguish. Lost forever.");
-                                        victim.sendMessage("§7The world grows dim, blurry, you feel a darkness reach out, offering you one last chance to live, as a creature of the night... But you refuse... And slip under the veil of the afterlife.");
+                                        attacker.sendMessage(Component.text("You watch the light of " + victim.getName() + "'s eyes fade, and extinguish. Lost forever.", NamedTextColor.DARK_RED));
+                                        victim.sendMessage(Component.text("The world grows dim, blurry, you feel a darkness reach out, offering you one last chance to live, as a creature of the night... But you refuse... And slip under the veil of the afterlife.", NamedTextColor.GRAY));
                                         victim.addScoreboardTag(DeathHandler.PERMADEATH_CHOSEN_TAG);
 
                                         int killThirst = this.plugin.getThirstManager().getKillThirstReward(attacker, victim);
@@ -267,19 +270,20 @@ public class CombatListener implements Listener {
                                     // Apply the effect of active garlic on death
                                     if (this.plugin.getBeetrootManager().hasBeetrootImmunity(victim)) {
                                         event.setCancelled(true);
-                                        attacker.sendMessage("§cThe sting of garlic sears at your gums, protecting your meal from your bite.");
+                                        attacker.sendMessage(Component.text("The sting of garlic sears at your gums, protecting your meal from your bite.", NamedTextColor.RED));
 
                                         if (this.plugin.getVampireTurningManager().isTurningEnabled(attacker)) {
-                                            attacker.sendMessage("§cYou have failed to turn " + victim.getName() + " - they will respawn as a human, wounded.");
+                                            attacker.sendMessage(Component.text("You have failed to turn " + victim.getName() + " - they will respawn as a human, wounded.", NamedTextColor.RED));
                                         } else {
-                                            attacker.sendMessage("§cYou have killed " + victim.getName() + " - they will respawn as a human, wounded.");
+                                            attacker.sendMessage(Component.text("You have killed " + victim.getName() + " - they will respawn as a human, wounded.", NamedTextColor.RED));
                                         }
 
                                         attacker.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, this.plugin.getConfigManager().getGarlicWeaknessDuration() * 20, 9, false, false));
 
                                         if (this.vampireManager.isHuman(victim)) {
-                                            victim.sendMessage("§a§lYour garlic immunity protects you from turning.");
-                                            victim.sendMessage("§aYou will respawn as a human, not as a cursed creature.");
+                                            victim.sendMessage(Component.text("Your garlic immunity protects you from turning.", NamedTextColor.GREEN)
+                                                    .decorate(TextDecoration.BOLD));
+                                            victim.sendMessage(Component.text("You will respawn as a human, not as a cursed creature.", NamedTextColor.GREEN));
                                         }
 
                                         this.plugin.getServer().getScheduler().runTask(this.plugin, () -> victim.setHealth(0.0));
@@ -296,8 +300,8 @@ public class CombatListener implements Listener {
                                             // Apply the effect of a chosen permadeath on death
                                             if (deathObjective != null) {
                                                 if (deathObjective.getScore(victim.getName()).getScore() >= this.plugin.getConfigManager().getHumanLifeCount()) {
-                                                    attacker.sendMessage("§4You watch the light of " + victim.getName() + "'s eyes fade, and extinguish. Lost forever.");
-                                                    victim.sendMessage("§7The world grows dim, blurry, you feel a darkness reach out, offering you one last chance to live, as a creature of the night... But you refuse... And slip under the veil of the afterlife.");
+                                                    attacker.sendMessage(Component.text("You watch the light of " + victim.getName() + "'s eyes fade, and extinguish. Lost forever.", NamedTextColor.DARK_RED));
+                                                    victim.sendMessage(Component.text("The world grows dim, blurry, you feel a darkness reach out, offering you one last chance to live, as a creature of the night... But you refuse... And slip under the veil of the afterlife.", NamedTextColor.GRAY));
                                                     victim.addScoreboardTag(DeathHandler.PERMADEATH_CHOSEN_TAG);
 
                                                     int killThirst = this.plugin.getThirstManager().getKillThirstReward(attacker, victim);
@@ -313,8 +317,8 @@ public class CombatListener implements Listener {
                                         // Apply the effects of killing a human without turning them
                                         final int killThirst = this.plugin.getThirstManager().getKillThirstReward(attacker, victim);
                                         this.plugin.getThirstManager().modifyQuench(attacker, killThirst, true);
-                                        attacker.sendMessage("§cYou have killed " + victim.getName() + ". They will respawn as a human, wounded.");
-                                        victim.sendMessage("§7You have been slain by a vampire, but they do not turn you...");
+                                        attacker.sendMessage(Component.text("You have killed " + victim.getName() + ". They will respawn as a human, wounded.", NamedTextColor.RED));
+                                        victim.sendMessage(Component.text("You have been slain by a vampire, but they do not turn you...", NamedTextColor.GRAY));
 
                                         this.plugin.getServer().getScheduler().runTask(this.plugin, () -> victim.setHealth(0.0));
                                         return;
@@ -323,10 +327,13 @@ public class CombatListener implements Listener {
                                     // Apply the effects of turning a cured vampire
                                     if (victim.getScoreboardTags().contains(VampireManager.CURED_VAMPIRE_TAG)) {
                                         event.setCancelled(true);
-                                        attacker.sendMessage("§4You taste the blood of " + victim.getName() + ", but it rejects your curse...");
-                                        attacker.sendMessage("§4They have been cleansed by holy power - their soul slips beyond your grasp, lost forever.");
-                                        victim.sendMessage("§7The darkness reaches for you again, but the holy blessing protects your soul...");
-                                        victim.sendMessage("§7Your past as a creature of the night cannot reclaim you. You slip into eternal peace...");
+
+                                        attacker.sendMessage(Component.text("You taste the blood of " + victim.getName() + ", but it rejects your curse...", NamedTextColor.DARK_RED));
+                                        attacker.sendMessage(Component.text("They have been cleansed by holy power - their soul slips beyond your grasp, lost forever.", NamedTextColor.DARK_RED));
+
+                                        victim.sendMessage(Component.text("The darkness reaches for you again, but the holy blessing protects your soul...", NamedTextColor.GRAY));
+                                        victim.sendMessage(Component.text("Your past as a creature of the night cannot reclaim you. You slip into eternal peace...", NamedTextColor.GRAY));
+
                                         victim.addScoreboardTag(DeathHandler.PERMADEATH_CHOSEN_TAG);
 
                                         final int killThirst = this.plugin.getThirstManager().getKillThirstReward(attacker, victim);
@@ -338,11 +345,11 @@ public class CombatListener implements Listener {
                                     // Apply the effects of a chosen permadeath on death
                                     if (this.plugin.getPermadeathManager().hasPermadeathEnabled(victim)) {
                                         event.setCancelled(true);
-                                        attacker.sendMessage("§4You watch the light of " + victim.getName() + "'s eyes fade, and extinguish. Lost forever.");
-                                        victim.sendMessage("§7The world grows dim, blurry, you feel a darkness reach out, offering you one last chance to live, as a creature of the night... But you refuse... And slip under the veil of the afterlife.");
+                                        attacker.sendMessage(Component.text("You watch the light of " + victim.getName() + "'s eyes fade, and extinguish. Lost forever.", NamedTextColor.DARK_RED));
+                                        victim.sendMessage(Component.text("The world grows dim, blurry, you feel a darkness reach out, offering you one last chance to live, as a creature of the night... But you refuse... And slip under the veil of the afterlife.", NamedTextColor.GRAY));
                                         victim.addScoreboardTag(DeathHandler.PERMADEATH_CHOSEN_TAG);
 
-                                        int killThirst = this.plugin.getThirstManager().getKillThirstReward(attacker, victim);
+                                        final int killThirst = this.plugin.getThirstManager().getKillThirstReward(attacker, victim);
                                         this.plugin.getThirstManager().modifyQuench(attacker, killThirst, true);
                                         this.plugin.getServer().getScheduler().runTask(this.plugin, () -> victim.setHealth(0.0));
                                         return;
@@ -369,12 +376,13 @@ public class CombatListener implements Listener {
                                     }, 5L);
 
                                     victim.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 200, 1, false, false));
-                                    attacker.sendMessage("§5You have turned " + victim.getName() + " into a vampire.");
+                                    attacker.sendMessage(Component.text("You have turned " + victim.getName() + " into a vampire.", NamedTextColor.DARK_PURPLE));
                                     final int killThirst = this.plugin.getThirstManager().getKillThirstReward(attacker, victim);
                                     this.plugin.getThirstManager().modifyQuench(attacker, killThirst, true);
 
-                                    attacker.sendMessage("§cThe taste of fresh blood coats your throat as you feed, you have successfully turned " + victim.getName() + " into a creature of the night");
+                                    attacker.sendMessage(Component.text("The taste of fresh blood coats your throat as you feed, you have successfully turned " + victim.getName() + " into a creature of the night", NamedTextColor.RED));
                                     attacker.playSound(attacker, Sound.ENTITY_ZOMBIE_VILLAGER_CURE, SoundCategory.MASTER, 1.0F, 0.7F);
+
                                     if (this.plugin.getVampireTrackingManager() != null) {
                                         this.plugin.getVampireTrackingManager().startTrackingNewVampire(victim);
                                     }
@@ -473,11 +481,8 @@ public class CombatListener implements Listener {
                                     // Only force the perma death if the human has run out of lives OR permadeath is set to ABSOLUTE
                                     if (deaths >= this.plugin.getConfigManager().getHumanLifeCount() || this.plugin.getPermadeathManager().hasAbsolutePermadeathEnabled(player)) {
                                         event.setCancelled(true);
-
-                                        player.sendMessage("§7The world grows dim, blurry... the light which drew you back so many times beckons once more, but it seems fainter now, out of reach... You lose your grip, and slip under the veil of the afterlife.");
-
+                                        player.sendMessage(Component.text("The world grows dim, blurry... the light which drew you back so many times beckons once more, but it seems fainter now, out of reach... You lose your grip, and slip under the veil of the afterlife.", NamedTextColor.GRAY));
                                         player.addScoreboardTag(DeathHandler.PERMADEATH_CHOSEN_TAG);
-
                                         this.plugin.getServer().getScheduler().runTask(this.plugin, () -> player.setHealth(0.0));
                                     }
                                 }
@@ -583,7 +588,7 @@ public class CombatListener implements Listener {
 
             if (newDamage >= maxDurability) {
                 attacker.getInventory().setItemInMainHand(new ItemStack(Material.AIR));
-                attacker.sendMessage("§cYour wooden stake breaks apart on impact.");
+                attacker.sendMessage(Component.text("Your wooden stake breaks apart on impact.", NamedTextColor.RED));
                 attacker.getWorld().playSound(attacker.getLocation(), Sound.ENTITY_ITEM_BREAK, SoundCategory.PLAYERS, 1.0F, 1.0F);
                 attacker.setCooldown(Material.WOODEN_SWORD, this.plugin.getConfigManager().getWoodenStakeCooldownTicks());
 
@@ -633,7 +638,7 @@ public class CombatListener implements Listener {
         if (victim instanceof Player humanVictim && this.vampireManager.isHuman(humanVictim)) {
             if (!humanVictim.getScoreboardTags().contains(SessionManager.INFORMED_VAMPIRE_CLAWS)) {
                 humanVictim.addScoreboardTag(SessionManager.INFORMED_VAMPIRE_CLAWS);
-                humanVictim.sendMessage("§cThe creatures claws rip your skin open, you are bleeding!");
+                humanVictim.sendMessage(Component.text("The creatures claws rip your skin open, you are bleeding!", NamedTextColor.RED));
             }
         }
     }

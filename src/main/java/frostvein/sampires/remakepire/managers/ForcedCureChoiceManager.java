@@ -88,7 +88,15 @@ public class ForcedCureChoiceManager {
                             .decorate(TextDecoration.BOLD)
                             .decoration(TextDecoration.ITALIC, false)
             );
-            humanityMeta.setLore(Arrays.asList("§7The holy words have broken your curse.", "§7You can feel your humanity returning...", "", "§eClick to accept your return to mortality."));
+            humanityMeta.lore(Arrays.asList(
+                    Component.text("The holy words have broken your curse.", NamedTextColor.GRAY)
+                            .decoration(TextDecoration.ITALIC, false),
+                    Component.text("You can feel your humanity returning...", NamedTextColor.GRAY)
+                            .decoration(TextDecoration.ITALIC, false),
+                    Component.empty(),
+                    Component.text("Click to accept your return to mortality.", NamedTextColor.YELLOW)
+                            .decoration(TextDecoration.ITALIC, false)
+            ));
             humanityButton.setItemMeta(humanityMeta);
         }
 
@@ -101,7 +109,18 @@ public class ForcedCureChoiceManager {
                             .decorate(TextDecoration.BOLD)
                             .decoration(TextDecoration.ITALIC, false)
             );
-            deathMeta.setLore(Arrays.asList("§7You have lived too long as a creature", "§7of darkness. Perhaps it is time to rest...", "", "§c§lWARNING: This will result in permadeath!", "§eClick to embrace the eternal sleep."));
+            deathMeta.lore(Arrays.asList(
+                    Component.text("You have lived too long as a creature", NamedTextColor.GRAY)
+                            .decoration(TextDecoration.ITALIC, false),
+                    Component.text("of darkness. Perhaps it is time to rest...", NamedTextColor.GRAY)
+                            .decoration(TextDecoration.ITALIC, false),
+                    Component.empty(),
+                    Component.text("WARNING: This will result in permadeath!", NamedTextColor.RED)
+                            .decorate(TextDecoration.BOLD)
+                            .decoration(TextDecoration.ITALIC, false),
+                    Component.text("Click to embrace the eternal sleep.", NamedTextColor.YELLOW)
+                            .decoration(TextDecoration.ITALIC, false)
+            ));
             deathButton.setItemMeta(deathMeta);
         }
 
@@ -110,11 +129,18 @@ public class ForcedCureChoiceManager {
         target.openInventory(gui);
 
         target.sendMessage("");
-        target.sendMessage("§4§l§m                                                    ");
-        target.sendMessage("§4§lHOLY WORDS PIERCE YOUR SOUL");
-        target.sendMessage("§7You feel the curse tearing away from your being...");
-        target.sendMessage("§7But you have a choice to make...");
-        target.sendMessage("§4§l§m                                                    ");
+        target.sendMessage(Component.text("                                                    ", NamedTextColor.DARK_RED)
+                .decorate(TextDecoration.BOLD)
+                .decorate(TextDecoration.STRIKETHROUGH)
+        );
+        target.sendMessage(Component.text("HOLY WORDS PIERCE YOUR SOUL", NamedTextColor.DARK_RED)
+                .decorate(TextDecoration.BOLD));
+        target.sendMessage(Component.text("You feel the curse tearing away from your being...", NamedTextColor.GRAY));
+        target.sendMessage(Component.text("But you have a choice to make...", NamedTextColor.GRAY));
+        target.sendMessage(Component.text("                                                    ", NamedTextColor.DARK_RED)
+                .decorate(TextDecoration.BOLD)
+                .decorate(TextDecoration.STRIKETHROUGH)
+        );
         target.sendMessage("");
     }
 
@@ -204,9 +230,9 @@ public class ForcedCureChoiceManager {
      */
     private void performCure(Player caster, Player target, BeaconSite holyBeacon) {
         // Inform the cure caster that the forced cure was successful
-        caster.sendMessage("§6" + target.getName() + " has chosen to return to humanity...");
-        caster.sendMessage("§7The creature of darkness accepts their redemption...");
-        caster.sendMessage("§aYou have sanctified " + target.getName() + ", and they have accepted.");
+        caster.sendMessage(Component.text(target.getName() + " has chosen to return to humanity...", NamedTextColor.GOLD));
+        caster.sendMessage(Component.text("The creature of darkness accepts their redemption...", NamedTextColor.GRAY));
+        caster.sendMessage(Component.text("You have sanctified " + target.getName() + ", and they have accepted.", NamedTextColor.GREEN));
 
         // Inform the former vampire that they are human once more
         target.showTitle(Title.title(
@@ -220,12 +246,12 @@ public class ForcedCureChoiceManager {
                 )
         ));
 
-        target.sendMessage("§aYou accept the holy words and choose to return...");
-        target.sendMessage("§7The holy water burns through your veins...");
-        target.sendMessage("§7Your corrupted blood boils away in divine light...");
-        target.sendMessage("§aYou feel your humanity returning...");
-        target.sendMessage("§aYou are human once more.");
-        target.sendMessage("§8But the holy site has been permanently corrupted by your dark presence...");
+        target.sendMessage(Component.text("You accept the holy words and choose to return...", NamedTextColor.GREEN));
+        target.sendMessage(Component.text("The holy water burns through your veins...", NamedTextColor.GRAY));
+        target.sendMessage(Component.text("Your corrupted blood boils away in divine light...", NamedTextColor.GRAY));
+        target.sendMessage(Component.text("You feel your humanity returning...", NamedTextColor.GREEN));
+        target.sendMessage(Component.text("You are human once more.", NamedTextColor.GREEN));
+        target.sendMessage(Component.text("But the holy site has been permanently corrupted by your dark presence...", NamedTextColor.DARK_GRAY));
 
         // Retrieve the messages to announce to the server population
         final String messageToHumans = this.plugin.getCureBookManager().getForceCureAnnouncementMessage(true, true);
@@ -284,9 +310,9 @@ public class ForcedCureChoiceManager {
      */
     private void performPermadeath(Player caster, Player target, BeaconSite holyBeacon) {
         // Inform the cure caster that the forced cure was rejected
-        caster.sendMessage("§4" + target.getName() + " has refused redemption...");
-        caster.sendMessage("§7The creature chooses death over humanity...");
-        caster.sendMessage("§8Their wish is granted...");
+        caster.sendMessage(Component.text(target.getName() + " has refused redemption...", NamedTextColor.DARK_RED));
+        caster.sendMessage(Component.text("The creature chooses death over humanity...", NamedTextColor.GRAY));
+        caster.sendMessage(Component.text("Their wish is granted...", NamedTextColor.DARK_GRAY));
 
         // Inform the vampire that they are now dead
         target.showTitle(Title.title(
@@ -300,9 +326,9 @@ public class ForcedCureChoiceManager {
                 )
         ));
 
-        target.sendMessage("§4You refuse the holy words and choose oblivion...");
-        target.sendMessage("§8The darkness claims you one final time...");
-        target.sendMessage("§8Your journey ends here...");
+        target.sendMessage(Component.text("You refuse the holy words and choose oblivion...", NamedTextColor.DARK_RED));
+        target.sendMessage(Component.text("The darkness claims you one final time...", NamedTextColor.DARK_GRAY));
+        target.sendMessage(Component.text("Your journey ends here...", NamedTextColor.DARK_GRAY));
 
         // Retrieve the messages to announce to the server population
         final String messageToHumans = this.plugin.getCureBookManager().getForceCureAnnouncementMessage(true, false);
@@ -324,10 +350,17 @@ public class ForcedCureChoiceManager {
         target.addScoreboardTag(DeathHandler.PERMAKILLED_TAG);
 
         target.sendMessage("");
-        target.sendMessage("§4§l§m                                                    ");
-        target.sendMessage("§4§lYOU HAVE CHOSEN PERMADEATH");
-        target.sendMessage("§7Your journey has ended.");
-        target.sendMessage("§4§l§m                                                    ");
+        target.sendMessage(Component.text("                                                    ", NamedTextColor.DARK_RED)
+                .decorate(TextDecoration.BOLD)
+                .decorate(TextDecoration.STRIKETHROUGH)
+        );
+        target.sendMessage(Component.text("YOU HAVE CHOSEN PERMADEATH", NamedTextColor.DARK_RED)
+                .decorate(TextDecoration.BOLD));
+        target.sendMessage(Component.text("Your journey has ended.", NamedTextColor.GRAY));
+        target.sendMessage(Component.text("                                                    ", NamedTextColor.DARK_RED)
+                .decorate(TextDecoration.BOLD)
+                .decorate(TextDecoration.STRIKETHROUGH)
+        );
         target.sendMessage("");
 
         DeathHandler.checkAndAnnounceTeamElimination(this.plugin, false, true);

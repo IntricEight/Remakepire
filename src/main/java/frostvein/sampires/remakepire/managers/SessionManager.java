@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.GameRule;
@@ -137,10 +139,10 @@ public class SessionManager {
      * Display the current session status when the session is not in an active game.
      */
     private void updateActionBarForAllPlayers() {
-        final String message = this.getSessionStatusMessage();
+        final Component message = this.getSessionStatusMessage();
 
         for (Player player : Bukkit.getOnlinePlayers()) {
-            player.sendActionBar(Component.text(message));
+            player.sendActionBar(message);
         }
     }
 
@@ -149,14 +151,25 @@ public class SessionManager {
      *
      * @return A description of the session state.
      */
-    private String getSessionStatusMessage() {
+    private Component getSessionStatusMessage() {
         return switch (this.getSessionState()) {
-            case BEFORE_SESSION -> "§e§lSession is primed and ready to start";
-            case IN_SESSION -> "§7§lSession is currently active";
-            case PAUSED -> "§6§lSession is currently paused";
-            case AFTER_SESSION -> "§c§lSession has ended";
-            case PRE_SESSION -> "§b§lBuilding Mode - interactions enabled";
-            default -> "§7§lSession status unknown";
+            case BEFORE_SESSION -> Component.text("Session is primed and ready to start", NamedTextColor.YELLOW)
+                    .decorate(TextDecoration.BOLD);
+
+            case IN_SESSION -> Component.text("Session is currently active", NamedTextColor.GRAY)
+                    .decorate(TextDecoration.BOLD);
+
+            case PAUSED -> Component.text("Session is currently paused", NamedTextColor.GOLD)
+                    .decorate(TextDecoration.BOLD);
+
+            case AFTER_SESSION -> Component.text("Session has ended", NamedTextColor.RED)
+                    .decorate(TextDecoration.BOLD);
+
+            case PRE_SESSION -> Component.text("Building Mode - interactions enabled", NamedTextColor.AQUA)
+                    .decorate(TextDecoration.BOLD);
+
+            default -> Component.text("Session status unknown", NamedTextColor.GRAY)
+                    .decorate(TextDecoration.BOLD);
         };
     }
 
@@ -519,7 +532,11 @@ public class SessionManager {
         this.plugin.getBeaconMajorityManager().updateBeaconMajorityBonuses();
         this.plugin.getTomeDistributionManager().startDistributionTask();
 
-        this.broadcastMessage("§a§lSESSION STARTED! §aThe SMP session has begun. Good luck!");
+        this.broadcastMessage(Component.text("SESSION STARTED!", NamedTextColor.GREEN)
+                .decorate(TextDecoration.BOLD)
+                .append(Component.text(" The SMP session has begun. Good luck!", NamedTextColor.GREEN)
+                        .decoration(TextDecoration.BOLD, false))
+        );
     }
 
     /**
@@ -535,7 +552,11 @@ public class SessionManager {
         this.plugin.getBeaconMajorityManager().updateBeaconMajorityBonuses();
         this.plugin.getTomeDistributionManager().startDistributionTask();
 
-        this.broadcastMessage("§a§lSESSION RESUMED! §aThe SMP session has been resumed.");
+        this.broadcastMessage(Component.text("SESSION RESUMED!", NamedTextColor.GREEN)
+                .decorate(TextDecoration.BOLD)
+                .append(Component.text(" The SMP session has been resumed.", NamedTextColor.GREEN)
+                        .decoration(TextDecoration.BOLD, false))
+        );
     }
 
     /**
@@ -551,7 +572,11 @@ public class SessionManager {
         this.freezeTick();
         this.plugin.getTomeDistributionManager().stopDistributionTask();
 
-        this.broadcastMessage("§e§lSESSION PAUSED! §eThe session has been temporarily paused.");
+        this.broadcastMessage(Component.text("SESSION PAUSED! ", NamedTextColor.YELLOW)
+                .decorate(TextDecoration.BOLD)
+                .append(Component.text("The session has been temporarily paused.", NamedTextColor.YELLOW)
+                        .decoration(TextDecoration.BOLD, false))
+        );
     }
 
     /**
@@ -568,7 +593,11 @@ public class SessionManager {
         this.freezeTick();
         this.plugin.getTomeDistributionManager().stopDistributionTask();
 
-        this.broadcastMessage("§c§lSESSION ENDED! §cThe SMP session has concluded. See you next time!");
+        this.broadcastMessage(Component.text("SESSION ENDED! ", NamedTextColor.RED)
+                .decorate(TextDecoration.BOLD)
+                .append(Component.text("The SMP session has concluded. See you next time!", NamedTextColor.RED)
+                        .decoration(TextDecoration.BOLD, false))
+        );
     }
 
     /**
@@ -592,7 +621,11 @@ public class SessionManager {
         this.freezeTick();
         this.plugin.getTomeDistributionManager().stopDistributionTask();
 
-        this.broadcastMessage("§c§lSESSION PRIMED! §cThe SMP session state has been primed for the next session!");
+        this.broadcastMessage(Component.text("SESSION PRIMED! ", NamedTextColor.RED)
+                .decorate(TextDecoration.BOLD)
+                .append(Component.text("The SMP session state has been primed for the next session!", NamedTextColor.RED)
+                                .decoration(TextDecoration.BOLD, false))
+        );
     }
 
     /**
@@ -603,7 +636,12 @@ public class SessionManager {
         sessionScore.setScore(PRE_SESSION);
         this.setOutOfSessionRules();
         this.unfreezeTick();
-        this.broadcastMessage("§b§lBUILDING MODE ENABLED! §bInteractions are now enabled. Use '/pow admin session start' to begin the full session.");
+
+        this.broadcastMessage(Component.text("BUILDING MODE ENABLED! ", NamedTextColor.AQUA)
+                .decorate(TextDecoration.BOLD)
+                .append(Component.text("Interactions are now enabled. Use '/pow admin session start' to begin the full session.", NamedTextColor.AQUA)
+                                .decoration(TextDecoration.BOLD, false))
+        );
     }
 
     /**
@@ -760,7 +798,7 @@ public class SessionManager {
      *
      * @param message the message to broadcast.
      */
-    private void broadcastMessage(String message) {
-        Bukkit.broadcast(Component.text(message));
+    private void broadcastMessage(Component message) {
+        Bukkit.broadcast(message);
     }
 }

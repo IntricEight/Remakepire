@@ -13,6 +13,9 @@ import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.Sound;
@@ -236,18 +239,19 @@ public class BeetrootManager {
      */
     public void handleBeetrootConsumption(Player player) {
         if (!this.plugin.getVampireManager().isHuman(player)) {
-            player.sendMessage("§c§lThe garlic burns your throat and causes you to retch...");
+            player.sendMessage(Component.text("The garlic burns your throat and causes you to retch...", NamedTextColor.RED)
+                    .decorate(TextDecoration.BOLD));
             player.addPotionEffect(new PotionEffect(PotionEffectType.NAUSEA, NAUSEA_DURATION, NAUSEA_AMPLIFIER, false, false));
 
         } else if (this.hasUsedBeetrootThisSession(player)) {
-            player.sendMessage("§eYou have already consumed garlic this session.");
-            player.sendMessage("§eYour body cannot process another dose so soon.");
+            player.sendMessage(Component.text("You have already consumed garlic this session.", NamedTextColor.YELLOW));
+            player.sendMessage(Component.text("Your body cannot process another dose so soon.", NamedTextColor.YELLOW));
 
         } else if (this.isProcessingBeetroot(player)) {
-            player.sendMessage("§eYou are already processing garlic substance...");
+            player.sendMessage(Component.text("You are already processing garlic substance...", NamedTextColor.YELLOW));
 
         } else if (this.hasBeetrootImmunity(player)) {
-            player.sendMessage("§a§You already have garlic immunity.");
+            player.sendMessage(Component.text("You already have garlic immunity.", NamedTextColor.GREEN));
 
         } else {
             player.addScoreboardTag(BEETROOT_USED_TAG);
@@ -261,8 +265,12 @@ public class BeetrootManager {
             this.processingTimers.put(playerId, processingSeconds);
             this.saveTimerData();
 
-            player.sendMessage("§e§lYou consume the garlic...");
-            player.sendMessage("§eThe earthy taste lingers in your mouth. You feel it will take §6" + minProcessing / 60 + "-" + maxProcessing / 60 + " minutes §eto take effect.");
+            player.sendMessage(Component.text("You consume the garlic...", NamedTextColor.YELLOW)
+                    .decorate(TextDecoration.BOLD));
+            player.sendMessage(Component.text("The earthy taste lingers in your mouth. You feel it will take ", NamedTextColor.YELLOW)
+                    .append(Component.text(minProcessing / 60 + "-" + maxProcessing / 60 + " minutes", NamedTextColor.GOLD))
+                    .append(Component.text(" to take effect.", NamedTextColor.YELLOW))
+            );
             player.playSound(player, Sound.ENTITY_PLAYER_BURP, SoundCategory.PLAYERS, 1.0F, 1.0F);
         }
     }
@@ -276,17 +284,20 @@ public class BeetrootManager {
         player.removeScoreboardTag(BEETROOT_PROCESSING_TAG);
         player.addScoreboardTag(BEETROOT_IMMUNITY_TAG);
 
-        int minImmunity = this.configManager.getGarlicImmunityDurationMin(), maxImmunity = this.configManager.getGarlicImmunityDurationMax();
-        int immunityRange = maxImmunity - minImmunity;
-        int immunitySeconds = minImmunity + (new Random()).nextInt(immunityRange + 1);
+        final int minImmunity = this.configManager.getGarlicImmunityDurationMin(), maxImmunity = this.configManager.getGarlicImmunityDurationMax();
+        final int immunityRange = maxImmunity - minImmunity;
+        final int immunitySeconds = minImmunity + (new Random()).nextInt(immunityRange + 1);
 
-        UUID playerId = player.getUniqueId();
+        final UUID playerId = player.getUniqueId();
         this.immunityTimers.put(playerId, immunitySeconds);
         this.saveTimerData();
 
         if (this.plugin.getVampireManager().isHuman(player)) {
-            player.sendMessage("§aThe garlic should have made its way into your system by now... You feel protected from the creatures of the night, should such things even exist.");
-            player.sendMessage("§aImmunity will last for §2" + minImmunity / 60 + "-" + maxImmunity / 60 + " minutes§a.");
+            player.sendMessage(Component.text("The garlic should have made its way into your system by now... You feel protected from the creatures of the night, should such things even exist.", NamedTextColor.GREEN));
+            player.sendMessage(Component.text("Immunity will last for ", NamedTextColor.GREEN)
+                    .append(Component.text(minImmunity / 60 + "-" + maxImmunity / 60 + " minutes", NamedTextColor.DARK_GREEN))
+                    .append(Component.text(".", NamedTextColor.GREEN))
+            );
         }
 
         player.playSound(player, Sound.BLOCK_BELL_USE, SoundCategory.PLAYERS, 1.0F, 1.5F);
@@ -300,17 +311,20 @@ public class BeetrootManager {
     private void endImmunityPeriod(Player player) {
         player.removeScoreboardTag(BEETROOT_IMMUNITY_TAG);
 
-        int minRecovery = this.configManager.getGarlicRecoveryDurationMin(), maxRecovery = this.configManager.getGarlicRecoveryDurationMax();
-        int recoveryRange = maxRecovery - minRecovery;
-        int recoverySeconds = minRecovery + (new Random()).nextInt(recoveryRange + 1);
+        final int minRecovery = this.configManager.getGarlicRecoveryDurationMin(), maxRecovery = this.configManager.getGarlicRecoveryDurationMax();
+        final int recoveryRange = maxRecovery - minRecovery;
+        final int recoverySeconds = minRecovery + (new Random()).nextInt(recoveryRange + 1);
 
-        UUID playerId = player.getUniqueId();
+        final UUID playerId = player.getUniqueId();
         this.recoveryTimers.put(playerId, recoverySeconds);
         this.saveTimerData();
 
         if (this.plugin.getVampireManager().isHuman(player)) {
-            player.sendMessage("§cYou imagine by now that the effects of the garlic have worn off...");
-            player.sendMessage("§cThe strain on your body is severe. You cannot handle more garlic for §4" + minRecovery / 60 + "-" + maxRecovery / 60 + " minutes§a.");
+            player.sendMessage(Component.text("You imagine by now that the effects of the garlic have worn off...", NamedTextColor.RED));
+            player.sendMessage(Component.text("The strain on your body is severe. You cannot handle more garlic for ", NamedTextColor.RED)
+                    .append(Component.text(minRecovery / 60 + "-" + maxRecovery / 60 + " minutes", NamedTextColor.DARK_RED))
+                    .append(Component.text(".", NamedTextColor.RED))
+            );
         }
 
         player.playSound(player, "iwie:creaking_deactivate", SoundCategory.PLAYERS, 1.0F, 1.0F);
@@ -325,7 +339,7 @@ public class BeetrootManager {
         player.removeScoreboardTag(BEETROOT_USED_TAG);
 
         if (this.plugin.getVampireManager().isHuman(player)) {
-            player.sendMessage("§aYour body seems to have recovered from the lingering effects of the garlic.");
+            player.sendMessage(Component.text("Your body seems to have recovered from the lingering effects of the garlic.", NamedTextColor.GREEN));
         }
 
         player.playSound(player, Sound.BLOCK_BELL_USE, SoundCategory.PLAYERS, 0.8F, 0.6F);
@@ -404,20 +418,21 @@ public class BeetrootManager {
      * @param player a player to restore.
      */
     public void restorePlayerState(Player player) {
-        UUID playerId = player.getUniqueId();
+        final UUID playerId = player.getUniqueId();
         int timeLeft = 0;
 
         if (this.processingTimers.containsKey(playerId)) {
             player.addScoreboardTag(BEETROOT_USED_TAG);
             player.addScoreboardTag(BEETROOT_PROCESSING_TAG);
             timeLeft = this.processingTimers.get(playerId);
-            player.sendMessage("The garlic you previously ingested is still processing...");
+            player.sendMessage(Component.text("The garlic you previously ingested is still processing...", NamedTextColor.YELLOW));
         }
 
         if (this.immunityTimers.containsKey(playerId)) {
             player.addScoreboardTag(BEETROOT_USED_TAG);
             player.addScoreboardTag(BEETROOT_IMMUNITY_TAG);
             timeLeft = this.immunityTimers.get(playerId);
+            player.sendMessage(Component.text("The garlic you previously ingested still grants you protection...", NamedTextColor.GREEN));
         }
     }
 

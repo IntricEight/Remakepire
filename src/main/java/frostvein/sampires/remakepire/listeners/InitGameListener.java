@@ -1,5 +1,7 @@
 package frostvein.sampires.remakepire.listeners;
 
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -119,7 +121,7 @@ public class InitGameListener implements Listener {
                 }
 
                 if (!handled) {
-                    player.sendMessage("§cError processing input. Please try again.");
+                    player.sendMessage(Component.text("Error processing input. Please try again.", NamedTextColor.RED));
                 }
             });
         }
@@ -141,7 +143,7 @@ public class InitGameListener implements Listener {
             event.setCancelled(true);
 
             if (!this.plugin.getInitGameManager().handleInternalCommand(player, command)) {
-                player.sendMessage("§cError: Invalid initialization command.");
+                player.sendMessage(Component.text("Error: Invalid initialization command.", NamedTextColor.RED));
             }
         }
     }
