@@ -1,9 +1,7 @@
 package frostvein.sampires.remakepire.listeners;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -220,7 +218,7 @@ public class IronWeaknessListener implements Listener {
     )
     public void onItemPickup(EntityPickupItemEvent event) {
         if (event.getEntity() instanceof Player player) {
-            if (this.vampireManager.isVampireStage2OrHigher(player)) {
+            if (this.vampireManager.isIronAffected(player)) {
                 Material itemType = event.getItem().getItemStack().getType();
 
                 if (this.ironMaterials.contains(itemType)) {
@@ -248,7 +246,7 @@ public class IronWeaknessListener implements Listener {
         Player player = event.getPlayer();
         Material armorStandItemType = event.getArmorStandItem().getType();
 
-        if (this.vampireManager.isVampireStage2OrHigher(player)) {
+        if (this.vampireManager.isIronAffected(player)) {
             if (this.ironMaterials.contains(armorStandItemType)) {
                 event.setCancelled(true);
 
@@ -274,7 +272,7 @@ public class IronWeaknessListener implements Listener {
 
         try {
             if (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK) {
-                if (this.vampireManager.isVampireStage2OrHigher(player)) {
+                if (this.vampireManager.isIronAffected(player)) {
                     // Check if the player is taking an item from a shelf
                     if (event.getClickedBlock() != null && event.getClickedBlock().getState() instanceof Shelf) {
                         // Check if any iron items have entered the player's inventory after they have taken from the shelf
@@ -299,24 +297,22 @@ public class IronWeaknessListener implements Listener {
 
         Player player = event.getPlayer();
 
-        if (this.vampireManager.isVampire(player)) {
-            if (!this.vampireManager.isVampireStage1(player)) {
-                Location to = event.getTo();
+        if (this.vampireManager.isIronAffected(player)) {
+            Location to = event.getTo();
 
-                final UUID playerId = player.getUniqueId();
-                final long currentTime = System.currentTimeMillis();
+            final UUID playerId = player.getUniqueId();
+            final long currentTime = System.currentTimeMillis();
 
-                if (this.knockbackCooldowns.containsKey(playerId)) {
-                    if (currentTime - this.knockbackCooldowns.get(playerId) < 1000L) {
-                        return;
-                    }
+            if (this.knockbackCooldowns.containsKey(playerId)) {
+                if (currentTime - this.knockbackCooldowns.get(playerId) < 1000L) {
+                    return;
                 }
+            }
 
-                Location nearestIronBlock = this.getNearestIronBlock(to, this.REPEL_DISTANCE);
-                if (nearestIronBlock != null) {
-                    event.setCancelled(true);
-                    this.applyIronRepulsion(player, to, nearestIronBlock);
-                }
+            Location nearestIronBlock = this.getNearestIronBlock(to, this.REPEL_DISTANCE);
+            if (nearestIronBlock != null) {
+                event.setCancelled(true);
+                this.applyIronRepulsion(player, to, nearestIronBlock);
             }
         }
     }
@@ -330,12 +326,7 @@ public class IronWeaknessListener implements Listener {
     private Vector getDirectionAwayFromNearestIron(Location location) {
         // Retrieve the nearest iron block to the player
         Location nearestIron = this.getNearestIronBlock(location, this.REPEL_DISTANCE);
-
-        if (nearestIron != null) {
-            return location.toVector().subtract(nearestIron.toVector()).normalize();
-        } else {
-            return new Vector(0, 0, 1);
-        }
+        return this.getDirectionAwayFromNearestIron(location, nearestIron);
     }
 
     /**
