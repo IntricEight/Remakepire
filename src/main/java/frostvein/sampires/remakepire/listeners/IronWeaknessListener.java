@@ -291,6 +291,11 @@ public class IronWeaknessListener implements Listener {
      */
     @EventHandler
     public void onPlayerMove(PlayerMoveEvent event) {
+        // Don't check for repulsion when the session is not active
+        if (!this.plugin.getSessionManager().isSessionActive()) {
+            return;
+        }
+
         Player player = event.getPlayer();
 
         if (this.vampireManager.isVampire(player)) {
@@ -348,19 +353,23 @@ public class IronWeaknessListener implements Listener {
     }
 
     /**
-     * Determine if the vampire should be repelled or weakened by nearby silver.
+     * Determine if the vampire should be repelled or weakened by nearby silver during active sessions.
      */
     public void checkIronProximity() {
-        for (Player player : Bukkit.getOnlinePlayers()) {
-            if (this.vampireManager.isVampire(player)) {
-                // Repel the player from the silver block
-                if (this.isNearIronBlock(player.getLocation(), REPEL_DISTANCE)) {
-                    this.applyIronRepulsion(player);
-                }
+        // Don't check for silver proximity when the session is not active
+        if (this.plugin.getSessionManager().isSessionActive()) {
+            for (Player player : Bukkit.getOnlinePlayers()) {
+                // Only apply the silver effects to higher vampires
+                if (this.vampireManager.isIronAffected(player)) {
+                    // Repel the player from the silver block
+                    if (this.isNearIronBlock(player.getLocation(), REPEL_DISTANCE)) {
+                        this.applyIronRepulsion(player);
+                    }
 
-                // Weaken the player from the silver block's proximity
-                if (this.isNearIronBlock(player.getLocation(), WEAKNESS_DISTANCE)) {
-                    this.applyIronWeakness(player);
+                    // Weaken the player from the silver block's proximity
+                    if (this.isNearIronBlock(player.getLocation(), WEAKNESS_DISTANCE)) {
+                        this.applyIronWeakness(player);
+                    }
                 }
             }
         }
