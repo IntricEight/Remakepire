@@ -1,5 +1,7 @@
 package frostvein.sampires.remakepire.listeners;
 
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -7,7 +9,7 @@ import org.bukkit.event.player.PlayerBedEnterEvent;
 import frostvein.sampires.remakepire.RemakepirePlugin;
 
 public class NoSleepListener implements Listener {
-    private RemakepirePlugin plugin;
+    private final RemakepirePlugin plugin;
 
     /**
      * Create an instance of the No Sleep (sleep prevention) listener.
@@ -28,10 +30,10 @@ public class NoSleepListener implements Listener {
         Player player = event.getPlayer();
 
         if (this.plugin.getVampireManager().isVampire(player)) {
-            player.sendMessage("§cYou close your eyes... And are left disappointed. Once again, you find it impossible to fall asleep.");
+            player.sendMessage(Component.text("You close your eyes... And are left disappointed. Once again, you find it impossible to fall asleep.", NamedTextColor.RED));
 
         } else if (this.plugin.getVampireManager().isHuman(player)) {
-            player.sendMessage("§cYou close your eyes... And are left disappointed. You feel too uneasy to sleep.");
+            player.sendMessage(Component.text("You close your eyes... And are left disappointed. You feel too uneasy to sleep.", NamedTextColor.RED));
         }
 
         event.setCancelled(true);

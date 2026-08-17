@@ -4,6 +4,7 @@ import java.util.List;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.HumanEntity;
@@ -73,7 +74,8 @@ public class TomeVampireRestrictionListener implements Listener {
 
                 if (this.isTome(currentItem) || this.isTome(cursorItem)) {
                     event.setCancelled(true);
-                    player.sendMessage("§4§lThe tome sears your flesh! You cannot touch such holy artifacts!");
+                    player.sendMessage(Component.text("The tome sears your flesh! You cannot touch such holy artifacts!", NamedTextColor.DARK_RED)
+                            .decorate(TextDecoration.BOLD));
                     Bukkit.getScheduler().runTask(this.plugin, () -> player.updateInventory());
                 }
             }
@@ -122,7 +124,7 @@ public class TomeVampireRestrictionListener implements Listener {
         }
 
         if (foundTome) {
-            player.sendMessage("§cYour dark nature cannot bear to hold such holy knowledge...");
+            player.sendMessage(Component.text("Your dark nature cannot bear to hold such holy knowledge...", NamedTextColor.RED));
         }
     }
 

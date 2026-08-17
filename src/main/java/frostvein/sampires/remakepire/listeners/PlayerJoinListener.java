@@ -1,6 +1,9 @@
 package frostvein.sampires.remakepire.listeners;
 
 import java.util.List;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -51,10 +54,10 @@ public class PlayerJoinListener implements Listener {
             this.plugin.getBloodMoonAttributeListener().forceCleanupOnJoin(player);
         }
 
-        player.sendMessage("§7" + this.getSessionStatusMessage());
+        player.sendMessage(Component.text(this.getSessionStatusMessage(), NamedTextColor.GRAY));
 
         if (!this.plugin.getSessionManager().playerReturningToGame(player)) {
-            player.sendMessage("§cA new game has been initialized since you last played. Resetting your stats accordingly.");
+            player.sendMessage(Component.text("A new game has been initialized since you last played. Resetting your stats accordingly.", NamedTextColor.RED));
 
             player.removeScoreboardTag(DeathHandler.PERMAKILLED_TAG);
             this.plugin.getSessionManager().resetPlayer(player);
@@ -79,14 +82,21 @@ public class PlayerJoinListener implements Listener {
 
             if (!warnings.isEmpty()) {
                 player.sendMessage("");
-                player.sendMessage("§c§l[CONFIG WARNING] §eThe following locations are outside the border:");
+                player.sendMessage(Component.text("[CONFIG WARNING] ", NamedTextColor.RED)
+                        .decorate(TextDecoration.BOLD)
+                        .append(Component.text("The following locations are outside the border:", NamedTextColor.YELLOW))
+                );
 
                 for (String warning : warnings) {
-                    player.sendMessage("§c  - " + warning);
+                    player.sendMessage(Component.text("  - " + warning, NamedTextColor.RED));
                 }
 
-                player.sendMessage("§7Border: X[" + (int)this.plugin.getConfigManager().getBorderMinX() + " to " + (int)this.plugin.getConfigManager().getBorderMaxX() + "] Z[" + (int)this.plugin.getConfigManager().getBorderMinZ() + " to " + (int)this.plugin.getConfigManager().getBorderMaxZ() + "]");
-                player.sendMessage("§7Check config.yml oakhurst.border settings.");
+                player.sendMessage(Component.text("Border: X["
+                        + (int)this.plugin.getConfigManager().getBorderMinX() + " to "
+                        + (int)this.plugin.getConfigManager().getBorderMaxX() + "] Z["
+                        + (int)this.plugin.getConfigManager().getBorderMinZ() + " to "
+                        + (int)this.plugin.getConfigManager().getBorderMaxZ() + "]", NamedTextColor.GRAY));
+                player.sendMessage(Component.text("Check config.yml oakhurst.border settings.", NamedTextColor.GRAY));
                 player.sendMessage("");
             }
         }

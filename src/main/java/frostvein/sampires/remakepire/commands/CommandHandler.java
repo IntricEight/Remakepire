@@ -980,6 +980,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                         target.setHealth(target.getAttribute(Attribute.MAX_HEALTH).getValue());
                         sender.sendMessage(Component.text(target.getName() + " is now human.", NamedTextColor.GREEN));
                         target.sendMessage(Component.text("You have been set as human.", NamedTextColor.GREEN));
+                        this.sendHumanTexturePackPrompt(target);
                         break;
 
                     case "1":
@@ -1856,7 +1857,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                         .append(Component.text(location.getBlockX() + ", " + location.getBlockY() + ", " + location.getBlockZ(), NamedTextColor.YELLOW)));
                 sender.sendMessage(Component.text("A chest has been placed at this location.", NamedTextColor.GRAY));
                 sender.sendMessage(Component.text("Total tome chest locations: ", NamedTextColor.GRAY)
-                        .append(Component.text(this.plugin.getTomeDistributionManager().getTomeLocations().size(),NamedTextColor.YELLOW)));
+                        .append(Component.text(this.plugin.getTomeDistributionManager().getTomeLocations().size(), NamedTextColor.YELLOW)));
 
             } else {
                 sender.sendMessage(Component.text("✖ This location already exists in the tome chest list.", NamedTextColor.RED));
@@ -2449,6 +2450,20 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                         .decorate(TextDecoration.UNDERLINED)
                         .clickEvent(ClickEvent.runCommand("/pow texture vampire"))
                         .hoverEvent(HoverEvent.showText(Component.text("Click to apply the vampire texture pack", NamedTextColor.GRAY)))
+                ));
+    }
+
+    /**
+     * Give the player a link to apply the human texture pack to their game.
+     *
+     * @param player the player changing to the human texture pack.
+     */
+    private void sendHumanTexturePackPrompt(Player player) {
+        player.sendMessage(Component.text("Apply the human texture pack: ", NamedTextColor.GRAY)
+                .append(Component.text("[CLICK HERE]", NamedTextColor.GREEN)
+                        .decorate(TextDecoration.UNDERLINED)
+                        .clickEvent(ClickEvent.runCommand("/pow texture human"))
+                        .hoverEvent(HoverEvent.showText(Component.text("Click to apply the human texture pack", NamedTextColor.GRAY)))
                 ));
     }
 }

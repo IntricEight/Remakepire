@@ -68,16 +68,15 @@ public class ForcedCureChoiceListener implements Listener {
             if (event.getPlayer() instanceof Player player) {
                 if (this.plugin.getForcedCureChoiceManager().hasPendingCure(player)) {
                     player.sendMessage("");
-                    player.sendMessage("§4This is a decision you cannot run from, monster.");
-                    player.sendMessage("§7The spirits have come knocking, and they are joined by death.");
-                    player.sendMessage("§7Say your piece, and when you ready to make your decision,");
+                    player.sendMessage(Component.text("This is a decision you cannot run from, monster.", NamedTextColor.DARK_RED));
+                    player.sendMessage(Component.text("The spirits have come knocking, and they are joined by death.", NamedTextColor.GRAY));
+                    player.sendMessage(Component.text("Say your piece, and when you ready to make your decision,", NamedTextColor.GRAY));
 
-                    Component message = Component.text("[CLICK HERE]", NamedTextColor.YELLOW)
+                    player.sendMessage(Component.text("[CLICK HERE]", NamedTextColor.YELLOW)
                             .decorate(TextDecoration.BOLD)
                             .clickEvent(ClickEvent.runCommand("/pow reopen"))
-                            .hoverEvent(HoverEvent.showText(Component.text("Click to reopen the choice menu", NamedTextColor.GOLD)));
-
-                    player.sendMessage(message);
+                            .hoverEvent(HoverEvent.showText(Component.text("Click to reopen the choice menu", NamedTextColor.GOLD)))
+                    );
                     player.sendMessage("");
                 }
             }
@@ -97,16 +96,15 @@ public class ForcedCureChoiceListener implements Listener {
             this.plugin.getServer().getScheduler().runTaskLater(this.plugin, () -> {
                 if (player.isOnline() && this.plugin.getForcedCureChoiceManager().hasPendingCure(player)) {
                     player.sendMessage("");
-                    player.sendMessage("§4This is a decision you cannot run from, monster.");
-                    player.sendMessage("§7The spirits have come knocking, and they are joined by death.");
-                    player.sendMessage("§7Say your piece, and when you ready to make your decision,");
+                    player.sendMessage(Component.text("This is a decision you cannot run from, monster.", NamedTextColor.DARK_RED));
+                    player.sendMessage(Component.text("The spirits have come knocking, and they are joined by death.", NamedTextColor.GRAY));
+                    player.sendMessage(Component.text("Say your piece, and when you ready to make your decision,", NamedTextColor.GRAY));
 
-                    Component message = Component.text("[CLICK HERE]", NamedTextColor.YELLOW)
+                    player.sendMessage(Component.text("[CLICK HERE]", NamedTextColor.YELLOW)
                             .decorate(TextDecoration.BOLD)
                             .clickEvent(ClickEvent.runCommand("/pow reopen"))
-                            .hoverEvent(HoverEvent.showText(Component.text("Click to reopen the choice menu", NamedTextColor.GOLD)));
-
-                    player.sendMessage(message);
+                            .hoverEvent(HoverEvent.showText(Component.text("Click to reopen the choice menu", NamedTextColor.GOLD)))
+                    );
                     player.sendMessage("");
                 }
             }, 20L);

@@ -1,5 +1,8 @@
 package frostvein.sampires.remakepire.managers;
 
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
 import org.bukkit.Sound;
 import org.bukkit.World;
@@ -79,7 +82,9 @@ public class BloodMoonManager {
                 this.vampireBuffTask = null;
             }
 
-            this.plugin.getWorld().getPlayers().forEach((player) -> player.sendMessage("§7The blood moon fades away..."));
+            this.plugin.getWorld().getPlayers().forEach(
+                    (player) -> player.sendMessage(Component.text("The blood moon fades away...", NamedTextColor.GRAY))
+            );
         }
     }
 
@@ -90,7 +95,8 @@ public class BloodMoonManager {
      */
     private void announceBloodMoon(World world) {
         world.getPlayers().forEach((player) -> {
-            player.sendMessage("§c§lA blood moon rises...");
+            player.sendMessage(Component.text("A blood moon rises...", NamedTextColor.RED)
+                    .decorate(TextDecoration.BOLD));
             player.playSound(player, Sound.AMBIENT_CRIMSON_FOREST_MOOD, 1.0F, 1.0F);
         });
     }
@@ -112,7 +118,7 @@ public class BloodMoonManager {
                         if (!player.getScoreboardTags().contains(SessionManager.INFORMED_BLOOD_MOON)) {
                             player.addScoreboardTag(SessionManager.INFORMED_BLOOD_MOON);
                             player.playSound(player, Sound.AMBIENT_NETHER_WASTES_MOOD, 1.0F, 1.0F);
-                            player.sendMessage("§4You feel the Blood Moon's power coursing through your veins...");
+                            player.sendMessage(Component.text("You feel the Blood Moon's power coursing through your veins...", NamedTextColor.DARK_RED));
                         }
                     } else {
                         player.removePotionEffect(PotionEffectType.UNLUCK);

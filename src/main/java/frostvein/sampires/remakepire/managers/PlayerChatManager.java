@@ -89,8 +89,7 @@ public class PlayerChatManager implements Listener {
                     .append(Component.text("[Click Here]", NamedTextColor.AQUA)
                             .clickEvent(ClickEvent.runCommand("/pow sendmessage"))
                             .hoverEvent(HoverEvent.showText(Component.text("Click to send your message: ", NamedTextColor.GREEN)
-                                    .append(Component.text(originalMessage, NamedTextColor.WHITE))
-                            )
+                                    .append(Component.text(originalMessage, NamedTextColor.WHITE)))
                     )
             );
 

@@ -236,7 +236,7 @@ public class BeaconManager {
                     player.addPotionEffect(regenEffect);
 
                     if (!player.hasPotionEffect(PotionEffectType.REGENERATION)) {
-                        player.sendMessage("§a§You feel the holy energy rejuvenating you...");
+                        player.sendMessage(Component.text("You feel the holy energy rejuvenating you...", NamedTextColor.GREEN));
                     }
                 }
             }
@@ -749,7 +749,7 @@ public class BeaconManager {
                         this.plugin.getEffectManager().removeEternalNightDarkness(player);
                     }
 
-                    player.sendMessage("§6A beacon has been reclaimed by the light... The eternal darkness recedes.");
+                    player.sendMessage(Component.text("A beacon has been reclaimed by the light... The eternal darkness recedes.", NamedTextColor.GOLD));
                 }
 
                 for (Player player : Bukkit.getOnlinePlayers()) {
@@ -769,15 +769,33 @@ public class BeaconManager {
         if (!this.plugin.getSessionManager().isFirstBeaconConvertedTriggered()) {
             this.plugin.getSessionManager().setFirstBeaconConvertedTriggered(true);
             Location beaconLocation = beacon.getLocation();
-            String nearMessage, farMessage;
+            Component nearMessage, farMessage;
 
             if (isDesecration) {
-                nearMessage = "\n§4A cold dread washes over you as the beacon's light twists into something sinister. The air grows heavy with malice... \n§7But just as suddenly, you feel a faint warmth stirring within, as if a force of light is rising to oppose the darkness. Perhaps there is still hope...\n";
-                farMessage = "§4A dark beacon has been desecrated somewhere amongst the land, you feel its corrupted presence seep through the earth. \n§7But just as soon after, a faint warmth touches your heart, like a force of good is awakening to fight back. Probably just your imagination...\n";
+                nearMessage = Component.newline()
+                        .append(Component.text("A cold dread washes over you as the beacon's light twists into something sinister. The air grows heavy with malice...", NamedTextColor.DARK_RED))
+                        .append(Component.newline())
+                        .append(Component.text("But just as suddenly, you feel a faint warmth stirring within, as if a force of light is rising to oppose the darkness. Perhaps there is still hope...", NamedTextColor.GRAY))
+                        .append(Component.newline());
+
+                farMessage = Component.newline()
+                        .append(Component.text("A dark beacon has been desecrated somewhere amongst the land, you feel its corrupted presence seep through the earth.", NamedTextColor.DARK_RED))
+                        .append(Component.newline())
+                        .append(Component.text("But just as soon after, a faint warmth touches your heart, like a force of good is awakening to fight back. Probably just your imagination...", NamedTextColor.GRAY))
+                        .append(Component.newline());
 
             } else {
-                nearMessage = "\n§6The beacons soft light warms your heart, filling you with peace. \n§7But just as soon as it activates, the air around you seems to thicken, like a dark presence is moving to snuff out the light... Have you awoken an evil force? Perhaps it is just superstition...\n";
-                farMessage = "§6A holy beacon has been activated somewhere amongst the land, you feel its divine presence radiate through the earth. \n§7But just as soon after, a chill runs through your spine, like a strange dark force is moving in to snuff the light. Probably just your nerves...\n";
+                nearMessage = Component.newline()
+                        .append(Component.text("The beacons soft light warms your heart, filling you with peace.", NamedTextColor.GOLD))
+                        .append(Component.newline())
+                        .append(Component.text("But just as soon as it activates, the air around you seems to thicken, like a dark presence is moving to snuff out the light... Have you awoken an evil force? Perhaps it is just superstition...", NamedTextColor.GRAY))
+                        .append(Component.newline());
+
+                farMessage = Component.newline()
+                        .append(Component.text("A holy beacon has been activated somewhere amongst the land, you feel its divine presence radiate through the earth.", NamedTextColor.GOLD))
+                        .append(Component.newline())
+                        .append(Component.text("But just as soon after, a chill runs through your spine, like a strange dark force is moving in to snuff the light. Probably just your nerves...", NamedTextColor.GRAY))
+                        .append(Component.newline());
             }
 
             for (Player player : Bukkit.getOnlinePlayers()) {
@@ -912,7 +930,7 @@ public class BeaconManager {
                         this.plugin.getEffectManager().removeHumansFinalStandHealthReduction(player);
                     }
 
-                    player.sendMessage("§4A beacon has fallen to darkness... The humans' final stand wavers.");
+                    player.sendMessage(Component.text("A beacon has fallen to darkness... The humans' final stand wavers.", NamedTextColor.DARK_RED));
                 }
 
                 for (Player player : Bukkit.getOnlinePlayers()) {
@@ -1671,13 +1689,16 @@ public class BeaconManager {
 
         BukkitTask task = this.plugin.getServer().getScheduler().runTaskLater(this.plugin, () -> {
             if (beacon.getState() == BeaconState.NEUTRAL) {
-                String message;
+                Component message = Component.text("Beacon", NamedTextColor.GRAY)
+                        .append(Component.text(beacon.getName(), NamedTextColor.YELLOW));
+
+                // Add on a description based on the beacon's previous state
                 if (previousState == BeaconState.HOLY) {
-                    message = "§7Beacon §e" + beacon.getName() + " §7has lost its divine protection...";
+                    message = message.append(Component.text("has lost its divine protection...", NamedTextColor.GRAY));
                 } else if (previousState == BeaconState.DESECRATED) {
-                    message = "§7Beacon §e" + beacon.getName() + " §7has been cleansed of dark influence...";
+                    message = message.append(Component.text("has been cleansed of dark influence...", NamedTextColor.GRAY));
                 } else {
-                    message = "§7Beacon §e" + beacon.getName() + " §7is now neutral.";
+                    message = message.append(Component.text("is now neutral.", NamedTextColor.GRAY));
                 }
 
                 for (Player player : this.plugin.getServer().getOnlinePlayers()) {
@@ -1712,12 +1733,16 @@ public class BeaconManager {
      * @param newState the beacon's new alignment.
      */
     private void broadcastBeaconGainToTeam(BeaconSite beacon, BeaconSite.BeaconState newState) {
-        String message;
+        Component message;
 
         if (newState == BeaconState.HOLY) {
-            message = "§aBeacon §e" + beacon.getName() + " §ahas been blessed with divine energy!";
+            message = Component.text("Beacon ", NamedTextColor.GREEN)
+                    .append(Component.text( beacon.getName(), NamedTextColor.YELLOW))
+                    .append(Component.text(" has been blessed with divine energy!", NamedTextColor.GREEN));
         } else if (newState == BeaconState.DESECRATED) {
-            message = "§4Beacon §e" + beacon.getName() + " §4has been consumed by dark forces!";
+            message = Component.text("Beacon ", NamedTextColor.DARK_RED)
+                    .append(Component.text( beacon.getName(), NamedTextColor.YELLOW))
+                    .append(Component.text(" has been consumed by dark forces!", NamedTextColor.DARK_RED));
         } else {
             return;
         }
@@ -1754,11 +1779,12 @@ public class BeaconManager {
                     }
                 }
 
-                String message;
+                Component message;
+
                 if (humansRemain) {
-                    message = "§cBut while humans remain... Hope still stands...";
+                    message = Component.text("But while humans remain... Hope still stands...", NamedTextColor.RED);
                 } else {
-                    message = "§cYou are free of your chains, creatures of the night...";
+                    message = Component.text("You are free of your chains, creatures of the night...", NamedTextColor.RED);
                 }
 
                 for (Player player : this.plugin.getServer().getOnlinePlayers()) {
@@ -1777,15 +1803,17 @@ public class BeaconManager {
                 }
 
                 if (vampiresRemain) {
+                    Component message = Component.text("But while vampires remain... Now only the vampires lie between you and freedom...", NamedTextColor.GREEN);
+
                     for (Player player : this.plugin.getServer().getOnlinePlayers()) {
                         if (this.plugin.getVampireManager().isHuman(player)) {
-                            player.sendMessage("§aBut while vampires remain... Now only the vampires lie between you and freedom...");
+                            player.sendMessage(message);
                         }
                     }
                 } else {
                     final String townName = plugin.getConfigManager().getTownName();
 
-                    Title defeatTitle = Title.title(
+                    final Title defeatTitle = Title.title(
                             Component.text("DEFEAT", NamedTextColor.RED)
                                     .decorate(TextDecoration.BOLD),
                             Component.text("The light has prevailed", NamedTextColor.GRAY),
@@ -1794,7 +1822,7 @@ public class BeaconManager {
                                     Duration.ofSeconds(5),
                                     Duration.ofSeconds(2)
                             ));
-                    Title victoryTitle = Title.title(
+                    final Title victoryTitle = Title.title(
                             Component.text("VICTORY", NamedTextColor.GREEN)
                                     .decorate(TextDecoration.BOLD),
                             Component.text("The darkness has been vanquished", NamedTextColor.YELLOW),
@@ -1809,14 +1837,14 @@ public class BeaconManager {
                         if (this.plugin.getVampireManager().isVampire(player)) {
                             player.showTitle(defeatTitle);
                             player.sendMessage("");
-                            player.sendMessage("§cAll beacons shine with divine light...");
-                            player.sendMessage("§cLight reigns supreme over " + townName + ". You have lost.");
+                            player.sendMessage(Component.text("All beacons shine with divine light...", NamedTextColor.RED));
+                            player.sendMessage(Component.text("Light reigns supreme over " + townName + ". You have lost.", NamedTextColor.RED));
 
                         } else {
                             player.showTitle(victoryTitle);
                             player.sendMessage("");
-                            player.sendMessage("§aAll beacons shine with divine light...");
-                            player.sendMessage("§aLight reigns supreme over " + townName + ". You are free.");
+                            player.sendMessage(Component.text("All beacons shine with divine light...", NamedTextColor.GREEN));
+                            player.sendMessage(Component.text("Light reigns supreme over " + townName + ". You are free.", NamedTextColor.GREEN));
                         }
 
                         player.sendMessage("");
