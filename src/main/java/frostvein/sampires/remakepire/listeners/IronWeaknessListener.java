@@ -60,13 +60,13 @@ public class IronWeaknessListener implements Listener {
             public void run() {
                 IronWeaknessListener.this.checkIronProximity();
             }
-        }).runTaskTimer(plugin, 0L, 20L);
+        }).runTaskTimer(plugin, 0L, 10L);
 
         (new BukkitRunnable() {
             public void run() {
                 IronWeaknessListener.this.scanAndRemoveIronFromInventories();
             }
-        }).runTaskTimer(plugin, 0L, 600L);
+        }).runTaskTimer(plugin, 0L, 200L);
     }
 
     /**
@@ -122,7 +122,8 @@ public class IronWeaknessListener implements Listener {
         if (this.vampireManager.isIronAffected(player)) {
             PlayerInventory inventory = player.getInventory();
             boolean foundIronItems = false;
-            List<String> droppedItems = new ArrayList<>();
+
+            // Clear silver items from the player's main inventory
             ItemStack[] contents = inventory.getContents();
 
             for (int i = 0; i < contents.length; ++i) {
@@ -130,11 +131,11 @@ public class IronWeaknessListener implements Listener {
                 if (item != null && !item.getType().isAir() && this.ironMaterials.contains(item.getType())) {
                     player.getWorld().dropItemNaturally(player.getLocation(), item);
                     inventory.setItem(i, null);
-                    droppedItems.add(item.getAmount() + "x " + item.getType().name().replace("_", " ").toLowerCase());
                     foundIronItems = true;
                 }
             }
 
+            // Clear silver items from the player's equipped armor
             ItemStack[] armor = inventory.getArmorContents();
 
             for (int i = 0; i < armor.length; ++i) {
@@ -143,18 +144,18 @@ public class IronWeaknessListener implements Listener {
                 if (item != null && !item.getType().isAir() && this.ironMaterials.contains(item.getType())) {
                     player.getWorld().dropItemNaturally(player.getLocation(), item);
                     armor[i] = null;
-                    droppedItems.add(item.getAmount() + "x " + item.getType().name().replace("_", " ").toLowerCase());
                     foundIronItems = true;
                 }
             }
 
             inventory.setArmorContents(armor);
+
+            // Clear silver items from the player's offhand
             ItemStack offhand = inventory.getItemInOffHand();
 
             if (!offhand.getType().isAir() && this.ironMaterials.contains(offhand.getType())) {
                 player.getWorld().dropItemNaturally(player.getLocation(), offhand);
                 inventory.setItemInOffHand(null);
-                droppedItems.add(offhand.getAmount() + "x " + offhand.getType().name().replace("_", " ").toLowerCase());
                 foundIronItems = true;
             }
 
@@ -169,7 +170,7 @@ public class IronWeaknessListener implements Listener {
      */
     private void scanAndRemoveIronFromInventories() {
         for (Player player : Bukkit.getOnlinePlayers()) {
-            scanAndRemoveIronFromSingleInventory(player);
+            this.scanAndRemoveIronFromSingleInventory(player);
         }
     }
 
