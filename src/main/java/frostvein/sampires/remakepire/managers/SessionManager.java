@@ -212,7 +212,7 @@ public class SessionManager {
      */
     private void restorePausedFoodLevels() {
         for (Player player : Bukkit.getOnlinePlayers()) {
-            UUID playerId = player.getUniqueId();
+            final UUID playerId = player.getUniqueId();
 
             if (this.pausedFoodLevels.containsKey(playerId)) {
                 int pausedFood = this.pausedFoodLevels.get(playerId);
@@ -482,7 +482,7 @@ public class SessionManager {
      */
     private void stopTrackingSessionTime() {
         if (this.trackingSessionTime) {
-            long phaseTime = System.currentTimeMillis() - this.currentPhaseStartTime;
+            final long phaseTime = System.currentTimeMillis() - this.currentPhaseStartTime;
             this.totalSessionTime += phaseTime;
             this.trackingSessionTime = false;
             this.plugin.logInfo("Stopped tracking session time. Added " + phaseTime / 1000L + " seconds. Total session time: " + this.totalSessionTime / 1000L + " seconds");
@@ -490,7 +490,7 @@ public class SessionManager {
     }
 
     public void updateAllPlayersSessionIDs() {
-        int session_id = this.sessionIDObjective.getScore(SESSION_ID_HOLDER).getScore();
+        final int session_id = this.sessionIDObjective.getScore(SESSION_ID_HOLDER).getScore();
 
         for (Player player : this.plugin.getWorld().getPlayers()) {
             this.sessionIDObjective.getScore(player.getName()).setScore(session_id);
@@ -498,7 +498,7 @@ public class SessionManager {
     }
 
     public void updateAllPlayersGameIDs() {
-        int game_id = this.gameIDObjective.getScore(GAME_ID_HOLDER).getScore();
+        final int game_id = this.gameIDObjective.getScore(GAME_ID_HOLDER).getScore();
 
         for (Player player : this.plugin.getWorld().getPlayers()) {
             this.gameIDObjective.getScore(player.getName()).setScore(game_id);
@@ -649,16 +649,15 @@ public class SessionManager {
      */
     private void setTimeToNextMorning() {
         World world = this.plugin.getWorld();
-        long currentTime = world.getTime();
-        long currentDayTime = currentTime % 24000L;
+        final long currentTime = world.getTime();
+        final long currentDayTime = currentTime % 24000L;
 
         if (currentDayTime <= 1000L) {
             world.setTime(currentTime);
 
         } else {
-            long timeUntilMorning = 24000L - currentDayTime;
-            long nextMorningTime = currentTime + timeUntilMorning;
-            world.setTime(nextMorningTime);
+            final long timeUntilMorning = 24000L - currentDayTime;
+            world.setTime(currentTime + timeUntilMorning);
         }
     }
 
@@ -728,7 +727,7 @@ public class SessionManager {
         }
 
         player.getAttribute(Attribute.MAX_HEALTH).setBaseValue(20.0);
-        double actualMaxHealth = player.getAttribute(Attribute.MAX_HEALTH).getValue();
+        final double actualMaxHealth = player.getAttribute(Attribute.MAX_HEALTH).getValue();
         player.setHealth(actualMaxHealth);
 
         for (String string : INFORMED_CONSTANTS) {
@@ -768,7 +767,7 @@ public class SessionManager {
      * @return {@code true} if the game state is BEFORE_SESSION, PAUSED, or AFTER_SESSION.
      */
     public boolean isOutOfSession() {
-        int state = this.getSessionState();
+        final int state = this.getSessionState();
         return state == BEFORE_SESSION || state == PAUSED || state == AFTER_SESSION;
     }
 
