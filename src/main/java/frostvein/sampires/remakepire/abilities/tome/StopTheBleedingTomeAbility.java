@@ -46,7 +46,7 @@ public class StopTheBleedingTomeAbility extends TomeAbility {
             this.sendCannotUseMessage(player, "Only humans can use tome abilities!");
 
         } else {
-            UUID playerId = player.getUniqueId();
+            final UUID playerId = player.getUniqueId();
 
             if (this.activeHealingSessions.containsKey(playerId)) {
                 this.cancelHealing(player, "You stop focusing on healing.");
@@ -93,7 +93,7 @@ public class StopTheBleedingTomeAbility extends TomeAbility {
      * @param target the player being healed.
      */
     private void startHealing(Player healer, Player target) {
-        UUID healerId = healer.getUniqueId();
+        final UUID healerId = healer.getUniqueId();
         healer.addScoreboardTag(ACTIVE_TAG);
 
         HealingSession session = new HealingSession(healer, target);
@@ -114,17 +114,17 @@ public class StopTheBleedingTomeAbility extends TomeAbility {
      * @param reason why the healing was stopped.
      */
     private void cancelHealing(Player healer, String reason) {
-        UUID healerId = healer.getUniqueId();
+        final UUID healerId = healer.getUniqueId();
         HealingSession session = this.activeHealingSessions.remove(healerId);
 
         if (session != null) {
             session.cancel();
             healer.removeScoreboardTag(ACTIVE_TAG);
-            healer.sendMessage("§c" + reason);
+            healer.sendMessage(Component.text(reason, NamedTextColor.RED));
             Player target = session.getTarget();
 
             if (target != null && !target.equals(healer) && target.isOnline()) {
-                target.sendMessage("§c" + healer.getName() + " stopped healing you.");
+                target.sendMessage(Component.text(healer.getName() + " stopped healing you.", NamedTextColor.RED));
             }
         }
 
@@ -137,7 +137,7 @@ public class StopTheBleedingTomeAbility extends TomeAbility {
      * @param target the player being healed.
      */
     private void completeHealing(Player healer, Player target) {
-        UUID healerId = healer.getUniqueId();
+        final UUID healerId = healer.getUniqueId();
         HealingSession session = this.activeHealingSessions.remove(healerId);
 
         if (session != null) {
@@ -152,10 +152,10 @@ public class StopTheBleedingTomeAbility extends TomeAbility {
 
         // Notify the players of the healing success
         if (!healer.equals(target)) {
-            target.sendMessage("§a" + healer.getName() + " has healed one of your wounds.");
-            healer.sendMessage("§aYou have successfully healed one of " + target.getName() + "'s wounds.");
+            target.sendMessage(Component.text(healer.getName() + " has healed one of your wounds.", NamedTextColor.GREEN));
+            healer.sendMessage(Component.text("You have successfully healed one of " + target.getName() + "'s wounds.", NamedTextColor.GREEN));
         } else {
-            healer.sendMessage("§aYou have healed one of your own wounds.");
+            healer.sendMessage(Component.text("You have healed one of your own wounds.", NamedTextColor.GREEN));
         }
 
         healer.playSound(healer.getLocation(), Sound.BLOCK_BEACON_ACTIVATE, SoundCategory.PLAYERS, 1.0F, 1.5F);
@@ -363,7 +363,11 @@ public class StopTheBleedingTomeAbility extends TomeAbility {
                                 }
 
                                 if (HealingSession.this.ticksRemaining % 200 == 0 && HealingSession.this.ticksRemaining > 0 && HealingSession.this.ticksRemaining < HEALING_DURATION_TICKS) {
-                                    currentHealer.sendMessage("§7[§aStop the Bleeding§7] §e" + secondsRemaining + " seconds remaining...");
+                                    currentHealer.sendMessage(Component.text("[", NamedTextColor.GRAY)
+                                            .append(Component.text("Stop the Bleeding", NamedTextColor.GREEN))
+                                            .append(Component.text("] ", NamedTextColor.GRAY))
+                                            .append(Component.text(secondsRemaining + " seconds remaining...", NamedTextColor.YELLOW))
+                                    );
                                 }
 
                                 --HealingSession.this.ticksRemaining;

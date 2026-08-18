@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
@@ -52,10 +54,10 @@ public class HolyWordTomeAbility extends TomeAbility implements Listener {
             for (Player target : nearbyPlayers) {
                 if (!target.equals(player) && !(target.getLocation().distance(player.getLocation()) > RADIUS) && target.getGameMode() != GameMode.SPECTATOR) {
                     if (vampireManager.isVampireStage1(target)) {
-                        target.sendMessage("§cA holy word sends your mind reeling, but you hold fast against it's paralysing effects.");
+                        target.sendMessage(Component.text("A holy word sends your mind reeling, but you hold fast against it's paralysing effects.", NamedTextColor.RED));
 
                     } else if (vampireManager.isVampireStage2(target) || vampireManager.isVampireStage3(target)) {
-                        target.sendMessage("§cYou are frozen by divine power!");
+                        target.sendMessage(Component.text("You are frozen by divine power!", NamedTextColor.RED));
                         target.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, PARALYSIS_DURATION, 255, false, false));
                         target.leaveVehicle();
                         BukkitTask paralysisTask = Bukkit.getScheduler().runTaskLater(this.plugin, () -> this.paralyzedPlayers.remove(target.getUniqueId()), PARALYSIS_DURATION);
@@ -65,7 +67,7 @@ public class HolyWordTomeAbility extends TomeAbility implements Listener {
 
                         Bukkit.getScheduler().runTaskLater(this.plugin, () -> {
                             if (target.isOnline()) {
-                                target.sendMessage("§7The divine paralysis fades... You can move again.");
+                                target.sendMessage(Component.text("The divine paralysis fades... You can move again.", NamedTextColor.GRAY));
                             }
                         }, PARALYSIS_DURATION);
 
@@ -116,7 +118,7 @@ public class HolyWordTomeAbility extends TomeAbility implements Listener {
             event.setCancelled(true);
 
             if (System.currentTimeMillis() % 3000L < 50L) {
-                player.sendMessage("§4You are frozen by divine power and cannot move!");
+                player.sendMessage(Component.text("You are frozen by divine power and cannot move!", NamedTextColor.DARK_RED));
             }
         }
     }
@@ -131,7 +133,7 @@ public class HolyWordTomeAbility extends TomeAbility implements Listener {
         if (event.getEntity() instanceof Player player) {
             if (this.isParalyzed(player)) {
                 event.setCancelled(true);
-                player.sendMessage("§4You are frozen by divine power and cannot mount!");
+                player.sendMessage(Component.text("You are frozen by divine power and cannot mount!", NamedTextColor.DARK_RED));
             }
         }
     }
@@ -166,7 +168,7 @@ public class HolyWordTomeAbility extends TomeAbility implements Listener {
      */
     private void createHolyLightRings(Player player) {
         final Location center = player.getLocation().add(0.0, 0.5, 0.0);
-        long delayBetweenRings = 8L;
+        final long delayBetweenRings = 8L;
 
         (new BukkitRunnable() {
             int ringCount = 0;

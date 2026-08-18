@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.Tag;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -41,8 +42,8 @@ public class LanternThrashTomeAbility extends TomeAbility {
             return false;
 
         } else {
-            Location playerLoc = player.getLocation();
-            double playerYaw = Math.toRadians((playerLoc.getYaw() + 90.0F));
+            final Location playerLoc = player.getLocation();
+            final double playerYaw = Math.toRadians((playerLoc.getYaw() + 90.0F));
 
             List<Location> fireLocations = this.calculateFireLocations(playerLoc);
             this.sortLocationsByAngle(fireLocations, playerLoc, playerYaw);
@@ -69,14 +70,14 @@ public class LanternThrashTomeAbility extends TomeAbility {
         // Use the FIRE_INNER_RADIUS and FIRE_OUTER_RADIUS values to create a hollow ring of fire around the caster
         for (int x = playerX - FIRE_OUTER_RADIUS; x <= playerX + FIRE_OUTER_RADIUS; ++x) {
             for (int z = playerZ - FIRE_OUTER_RADIUS; z <= playerZ + FIRE_OUTER_RADIUS; ++z) {
-                double distance = Math.sqrt(Math.pow((x - playerX), FIRE_INNER_RADIUS) + Math.pow((z - playerZ), FIRE_INNER_RADIUS));
+                final double distance = Math.sqrt(Math.pow((x - playerX), FIRE_INNER_RADIUS) + Math.pow((z - playerZ), FIRE_INNER_RADIUS));
 
                 // Prevent the creation of fire outside the ability ring
                 if (distance <= FIRE_OUTER_RADIUS && distance >= FIRE_INNER_RADIUS) {
                     for (int yOffset = -1; yOffset <= 0; ++yOffset) {
-                        Location blockLocation = new Location(playerLoc.getWorld(), x, playerY + yOffset, z);
-                        Block block = blockLocation.getBlock();
-                        Block blockAbove = blockLocation.clone().add(0.0, 1.0, 0.0).getBlock();
+                        final Location blockLocation = new Location(playerLoc.getWorld(), x, playerY + yOffset, z);
+                        final Block block = blockLocation.getBlock();
+                        final Block blockAbove = blockLocation.clone().add(0.0, 1.0, 0.0).getBlock();
 
                         if (blockAbove.getType() == Material.AIR && block.getType() != Material.AIR) {
                             locations.add(blockAbove.getLocation());
@@ -103,7 +104,7 @@ public class LanternThrashTomeAbility extends TomeAbility {
             angle1 = this.normalizeAngleRelativeToStart(angle1, startAngle);
             angle2 = this.normalizeAngleRelativeToStart(angle2, startAngle);
 
-            int angleComparison = Double.compare(angle1, angle2);
+            final int angleComparison = Double.compare(angle1, angle2);
             if (angleComparison != 0) {
                 return angleComparison;
             } else {
@@ -149,7 +150,7 @@ public class LanternThrashTomeAbility extends TomeAbility {
                     final int locationsThisTick = Math.max(1, (int)Math.ceil(totalRemaining / ticksRemaining));
 
                     for (int locationsSet = 0; this.currentIndex < fireLocations.size() && locationsSet < locationsThisTick; ++locationsSet) {
-                        Location fireLoc = fireLocations.get(this.currentIndex);
+                        final Location fireLoc = fireLocations.get(this.currentIndex);
                         Block fireBlock = fireLoc.getBlock();
 
                         if (fireBlock.getType() == Material.AIR) {
@@ -180,21 +181,11 @@ public class LanternThrashTomeAbility extends TomeAbility {
      */
     private boolean hasLanternInInventory(Player player) {
         for (ItemStack item : player.getInventory().getContents()) {
-            if (item != null && this.isLantern(item.getType())) {
+            if (item != null && Tag.LANTERNS.isTagged(item.getType())) {
                 return true;
             }
         }
 
         return false;
-    }
-
-    /**
-     * Determine if the item is a lantern.
-     *
-     * @param material the item being checked.
-     * @return {@code text} if this item is a lantern.
-     */
-    private boolean isLantern(Material material) {
-        return material == Material.LANTERN;
     }
 }
