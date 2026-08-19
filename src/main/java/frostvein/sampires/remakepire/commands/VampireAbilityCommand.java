@@ -100,9 +100,11 @@ public class VampireAbilityCommand implements CommandExecutor, TabCompleter {
     private void sendHelpMessage(Player player) {
         player.sendMessage(Component.text("=== VAMPIRE ABILITIES ===", NamedTextColor.GOLD)
                 .decorate(TextDecoration.BOLD));
-        player.sendMessage("§e/pow vability list §7- Show your available abilities");
-        player.sendMessage("§e/pow vability all §7- Show all abilities (including locked ones)");
-        player.sendMessage("§e/pow vability <ability> §7- Use an ability");
+
+        CommandHandler.sendCommandInstruction(player, "/pow vability list", "Show your available abilities");
+        CommandHandler.sendCommandInstruction(player, "/pow vability all", "Show all abilities (including locked ones)");
+        CommandHandler.sendCommandInstruction(player, "/pow vability <ability>", "Use an ability");
+
         player.sendMessage(Component.text("Example: ", NamedTextColor.GRAY)
                 .append(Component.text("/pow vability lunge", NamedTextColor.YELLOW)));
 
@@ -245,22 +247,30 @@ public class VampireAbilityCommand implements CommandExecutor, TabCompleter {
         }
 
         player.sendMessage(nameColor + ability.getDisplayName() + status);
-        player.sendMessage("  §7" + ability.getDescription());
-        String cooldownInfo = "  §7Required Stage: §e" + ability.getMinimumStage() + " §7| Cooldown: §e" + VampireAbilityManager.formatTime(ability.getCooldownSeconds(this.plugin));
+        player.sendMessage(Component.text("  " + ability.getDescription(), NamedTextColor.GRAY));
+        Component cooldownInfo = Component.text("  Required Stage: ", NamedTextColor.GRAY)
+                .append(Component.text(ability.getMinimumStage(), NamedTextColor.YELLOW))
+                .append(Component.text("| Cooldown: ", NamedTextColor.GRAY))
+                .append(Component.text(VampireAbilityManager.formatTime(ability.getCooldownSeconds(this.plugin)), NamedTextColor.YELLOW)
+        );
 
         // If more global abilities are introduced, this will have to change from being hard coded
         if (ability instanceof StormCallAbility) {
-            cooldownInfo = cooldownInfo + " §c(Global)";
+            cooldownInfo = cooldownInfo.append(Component.text(" (Global)", NamedTextColor.RED));
         }
 
         player.sendMessage(cooldownInfo);
 
         if (canUse && !suppressed) {
             if (ability.getName().equals("bat") && this.plugin.getBatTransformationManager().isInBatForm(player)) {
-                player.sendMessage("  §7Usage: §e/pow vability " + ability.getName() + " §7(to transform back)");
+                player.sendMessage(Component.text("  Usage: ", NamedTextColor.GRAY)
+                        .append(Component.text("/pow vability " + ability.getName(), NamedTextColor.YELLOW))
+                        .append(Component.text(" (to transform back)", NamedTextColor.GRAY))
+                );
 
             } else {
-                player.sendMessage("  §7Usage: §e/pow vability " + ability.getName());
+                player.sendMessage(Component.text("  Usage: ", NamedTextColor.GRAY)
+                        .append(Component.text("/pow vability " + ability.getName(), NamedTextColor.YELLOW)));
             }
         } else if (suppressed) {
             player.sendMessage(Component.text("  ✦ Blocked by holy beacon within " + (this.plugin.getConfigManager().getCureBeaconDistance()) + " blocks", NamedTextColor.RED));
