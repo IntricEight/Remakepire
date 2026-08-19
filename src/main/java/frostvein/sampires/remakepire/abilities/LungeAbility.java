@@ -1,5 +1,8 @@
 package frostvein.sampires.remakepire.abilities;
 
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Sound;
 import org.bukkit.SoundCategory;
 import org.bukkit.entity.Player;
@@ -62,7 +65,8 @@ public class LungeAbility extends VampireAbility {
      * @param stage the vampire stage of the ability user.
      */
     private void sendLungeMessage(Player player, int stage) {
-        player.sendMessage("§c§lYou leap forward with vampiric strength.");
+        player.sendMessage(Component.text("You leap forward with vampiric strength.", NamedTextColor.RED)
+                .decorate(TextDecoration.BOLD));
     }
 
     /**
