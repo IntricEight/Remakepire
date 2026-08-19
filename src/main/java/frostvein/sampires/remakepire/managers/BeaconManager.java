@@ -773,29 +773,21 @@ public class BeaconManager {
 
             if (isDesecration) {
                 nearMessage = Component.newline()
-                        .append(Component.text("A cold dread washes over you as the beacon's light twists into something sinister. The air grows heavy with malice...", NamedTextColor.DARK_RED))
-                        .append(Component.newline())
-                        .append(Component.text("But just as suddenly, you feel a faint warmth stirring within, as if a force of light is rising to oppose the darkness. Perhaps there is still hope...", NamedTextColor.GRAY))
-                        .append(Component.newline());
+                        .append(Component.text("A cold dread washes over you as the beacon's light twists into something sinister. The air grows heavy with malice...", NamedTextColor.DARK_RED)).append(Component.newline())
+                        .append(Component.text("But just as suddenly, you feel a faint warmth stirring within, as if a force of light is rising to oppose the darkness. Perhaps there is still hope...", NamedTextColor.GRAY)).append(Component.newline());
 
                 farMessage = Component.newline()
-                        .append(Component.text("A dark beacon has been desecrated somewhere amongst the land, you feel its corrupted presence seep through the earth.", NamedTextColor.DARK_RED))
-                        .append(Component.newline())
-                        .append(Component.text("But just as soon after, a faint warmth touches your heart, like a force of good is awakening to fight back. Probably just your imagination...", NamedTextColor.GRAY))
-                        .append(Component.newline());
+                        .append(Component.text("A dark beacon has been desecrated somewhere amongst the land, you feel its corrupted presence seep through the earth.", NamedTextColor.DARK_RED)).append(Component.newline())
+                        .append(Component.text("But just as soon after, a faint warmth touches your heart, like a force of good is awakening to fight back. Probably just your imagination...", NamedTextColor.GRAY)).append(Component.newline());
 
             } else {
                 nearMessage = Component.newline()
-                        .append(Component.text("The beacons soft light warms your heart, filling you with peace.", NamedTextColor.GOLD))
-                        .append(Component.newline())
-                        .append(Component.text("But just as soon as it activates, the air around you seems to thicken, like a dark presence is moving to snuff out the light... Have you awoken an evil force? Perhaps it is just superstition...", NamedTextColor.GRAY))
-                        .append(Component.newline());
+                        .append(Component.text("The beacons soft light warms your heart, filling you with peace.", NamedTextColor.GOLD)).append(Component.newline())
+                        .append(Component.text("But just as soon as it activates, the air around you seems to thicken, like a dark presence is moving to snuff out the light... Have you awoken an evil force? Perhaps it is just superstition...", NamedTextColor.GRAY)).append(Component.newline());
 
                 farMessage = Component.newline()
-                        .append(Component.text("A holy beacon has been activated somewhere amongst the land, you feel its divine presence radiate through the earth.", NamedTextColor.GOLD))
-                        .append(Component.newline())
-                        .append(Component.text("But just as soon after, a chill runs through your spine, like a strange dark force is moving in to snuff the light. Probably just your nerves...", NamedTextColor.GRAY))
-                        .append(Component.newline());
+                        .append(Component.text("A holy beacon has been activated somewhere amongst the land, you feel its divine presence radiate through the earth.", NamedTextColor.GOLD)).append(Component.newline())
+                        .append(Component.text("But just as soon after, a chill runs through your spine, like a strange dark force is moving in to snuff the light. Probably just your nerves...", NamedTextColor.GRAY)).append(Component.newline());
             }
 
             for (Player player : Bukkit.getOnlinePlayers()) {

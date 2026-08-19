@@ -1665,7 +1665,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                     if (bookMeta != null) {
                         String canonicalName = ability != null ? ability.getName() : abilityName;
                         bookMeta.setTitle(canonicalName);
-                        bookMeta.setAuthor("§6A source unknown...");
+                        bookMeta.author(Component.text("A source unknown...", NamedTextColor.GOLD));
 
                         if (ability != null) {
                             List<String> lore = new ArrayList<>();
@@ -1683,7 +1683,9 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                         List<String> pages = new ArrayList<>();
                         StringBuilder pageContent = new StringBuilder();
                         pageContent.append("§5§lANCIENT KNOWLEDGE§r\n\n");
-                        pageContent.append("§8The secrets of ").append(abilityName).append(" are contained within these pages.\n\n");
+                        pageContent.append("§8The secrets of ")
+                                .append(abilityName)
+                                .append(" are contained within these pages.\n\n");
 
                         if (ability != null) {
                             String[] descriptionLines = ability.getDescriptionLines();

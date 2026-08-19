@@ -3,6 +3,7 @@ package frostvein.sampires.remakepire.commands;
 import java.util.Map;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -44,11 +45,16 @@ public class HolySitesCommand implements CommandExecutor {
 
             // Modify the messages based on the player's alignment
             if (this.plugin.getVampireManager().isHuman(player)) {
-                player.sendMessage("§6§l=== BEACON STATUS ===");
-                player.sendMessage("§aHoly Beacons: §e" + holyCount);
-                player.sendMessage("§4Desecrated Beacons: §c" + desecratedCount);
-                player.sendMessage("§7Neutral Beacons: §f" + neutral);
-                player.sendMessage("§7Total Beacons: §e" + totalCount);
+                player.sendMessage(Component.text("=== BEACON STATUS ===", NamedTextColor.GOLD)
+                        .decorate(TextDecoration.BOLD));
+                player.sendMessage(Component.text("Holy Beacons: ", NamedTextColor.GREEN)
+                        .append(Component.text(holyCount, NamedTextColor.YELLOW)));
+                player.sendMessage(Component.text("Desecrated Beacons: ", NamedTextColor.DARK_RED)
+                        .append(Component.text(desecratedCount, NamedTextColor.RED)));
+                player.sendMessage(Component.text("Neutral Beacons: ", NamedTextColor.GRAY)
+                        .append(Component.text(neutral, NamedTextColor.WHITE)));
+                player.sendMessage(Component.text("Total Beacons: ", NamedTextColor.GRAY)
+                        .append(Component.text(totalCount, NamedTextColor.YELLOW)));
 
                 if (holyCount == 0 && desecratedCount == 0) {
                     player.sendMessage(Component.text("Neither light nor shadow has claimed any sites...", NamedTextColor.GRAY));
@@ -64,11 +70,16 @@ public class HolySitesCommand implements CommandExecutor {
                     player.sendMessage(Component.text("The realm has fallen into shadow... no sanctuaries remain.", NamedTextColor.DARK_RED));
                 }
             } else {
-                player.sendMessage("§4§l=== BEACON STATUS ===");
-                player.sendMessage("§4Desecrated Beacons: §c" + desecratedCount);
-                player.sendMessage("§aHoly Beacons: §e" + holyCount);
-                player.sendMessage("§7Neutral Beacons: §f" + neutral);
-                player.sendMessage("§7Total Beacons: §e" + totalCount);
+                player.sendMessage(Component.text("=== BEACON STATUS ===", NamedTextColor.DARK_RED)
+                        .decorate(TextDecoration.BOLD));
+                player.sendMessage(Component.text("Desecrated Beacons: ", NamedTextColor.DARK_RED)
+                        .append(Component.text(desecratedCount, NamedTextColor.RED)));
+                player.sendMessage(Component.text("Holy Beacons: ", NamedTextColor.GREEN)
+                        .append(Component.text(holyCount, NamedTextColor.YELLOW)));
+                player.sendMessage(Component.text("Neutral Beacons: ", NamedTextColor.GRAY)
+                        .append(Component.text(neutral, NamedTextColor.WHITE)));
+                player.sendMessage(Component.text("Total Beacons: ", NamedTextColor.GRAY)
+                        .append(Component.text(totalCount, NamedTextColor.YELLOW)));
 
                 if (desecratedCount == 0 && holyCount == 0) {
                     player.sendMessage(Component.text("No sites of power have been claimed by either side...", NamedTextColor.GRAY));
