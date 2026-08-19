@@ -662,8 +662,6 @@ public class InitGameManager {
 
                 world.setFullTime(1L);
                 world.getWorldBorder().setSize(900000.0);
-                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "gamerule playersNetherPortalDefaultDelay 80");
-                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "gamerule locatorBar false");
                 admin.sendMessage(Component.text("[6/9] Applying saturation effect...", NamedTextColor.GRAY));
 
                 for (Player player : onlinePlayers) {
