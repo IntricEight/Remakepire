@@ -60,6 +60,7 @@ public class ThirstManager {
     private Set<EntityType> initializeThirstQuenchers() {
         Set<EntityType> quenchers = new HashSet<>();
 
+        quenchers.add(EntityType.ARMADILLO);
         quenchers.add(EntityType.CAMEL);
         quenchers.add(EntityType.CHICKEN);
         quenchers.add(EntityType.CAT);
