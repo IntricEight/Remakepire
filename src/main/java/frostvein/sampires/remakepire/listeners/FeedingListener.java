@@ -42,6 +42,7 @@ public class FeedingListener implements Listener {
 
             if (!(deadEntity instanceof Player)) {
                 Player killer = deadEntity.getKiller();
+                ItemStack offhandItem = killer.getInventory().getItemInOffHand();
 
                 if (killer != null && this.plugin.getVampireManager().isVampire(killer)) {
                     int experienceDropped = event.getDroppedExp();
@@ -58,6 +59,10 @@ public class FeedingListener implements Listener {
                                 killer.sendMessage(Component.text("You taste the metallic essence of life...", NamedTextColor.RED));
                             }
                         }
+                    }
+                } else if (killer != null && this.vampireManager.isHuman(killer) && offhandItem != null && offhandItem.getType() == Material.GLASS_BOTTLE) {
+                    if (this.tryFillBottleWithBlood(killer)) {
+                        event.setDroppedExp(0);
                     }
                 }
             }

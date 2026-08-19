@@ -338,6 +338,11 @@ cure:
   # Default: true (It must be day time)
   daylight-requirement: true
 
+  # Control if curing vampires has a lasting effect on the players and world
+  # This controls whether players get the CuredVampire tag, and whether beacons are destroyed by cures
+  # Default: true
+  cure-aftermath: true
+
 # Fourth Cure Book Configuration
 # Controls whether "The Retribution 4/3" book should spawn in tome chests
 # Default: false
