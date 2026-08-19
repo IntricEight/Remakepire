@@ -15,15 +15,9 @@ import org.bukkit.inventory.ItemStack;
 import frostvein.sampires.remakepire.RemakepirePlugin;
 import frostvein.sampires.remakepire.beacons.BeaconSite;
 import frostvein.sampires.remakepire.listeners.CureBookReadingListener;
-import frostvein.sampires.remakepire.managers.BeaconManager;
-import frostvein.sampires.remakepire.managers.VampireManager;
-import frostvein.sampires.remakepire.managers.VampireSireManager;
 
 public class ForcedVampireCureCommand implements CommandExecutor {
     private final RemakepirePlugin plugin;
-    private final VampireManager vampireManager;
-    private final BeaconManager beaconManager;
-    private final VampireSireManager sireManager;
 
     /**
      * Create an instance of the plugin's forced cure command handler.
@@ -32,9 +26,6 @@ public class ForcedVampireCureCommand implements CommandExecutor {
      */
     public ForcedVampireCureCommand(RemakepirePlugin plugin) {
         this.plugin = plugin;
-        this.vampireManager = plugin.getVampireManager();
-        this.beaconManager = plugin.getBeaconManager();
-        this.sireManager = plugin.getSireManager();
     }
 
     /**
@@ -74,7 +65,7 @@ public class ForcedVampireCureCommand implements CommandExecutor {
                 caster.sendMessage(Component.text("You cannot use these holy words upon yourself. The ritual must be performed by another.", NamedTextColor.RED));
                 return true;
 
-            } else if (!this.vampireManager.isVampire(target)) {
+            } else if (!this.plugin.getVampireManager().isVampire(target)) {
                 caster.sendMessage(Component.text(target.getName() + " is not a vampire. The holy words have no power over them.", NamedTextColor.RED));
                 return true;
 
@@ -86,30 +77,33 @@ public class ForcedVampireCureCommand implements CommandExecutor {
                 } else {
                     ItemStack holyWater = this.plugin.getHolyWaterEffectManager().findHolyWater(caster);
 
-                    // Ensure the caster has holy water in their inventory
-                    if (holyWater == null) {
+                    // Ensure the caster has holy water in their inventory and check if the target is affected by holy water
+                    if (holyWater == null && !this.plugin.getHolyWaterEffectManager().isAbilitiesDisabled(caster)) {
                         caster.sendMessage(Component.text("You need holy water to sanctify the creature with these words.", NamedTextColor.RED));
 
                     } else {
                         // Ensure both caster and target are within cure range of a holy beacon
                         double cureDistance = this.plugin.getConfigManager().getCureBeaconDistance();
-                        BeaconSite nearestHolyBeacon = this.beaconManager.getNearestHolyBeacon(caster.getLocation(), cureDistance);
+                        BeaconSite nearestHolyBeacon = this.plugin.getBeaconManager().getNearestHolyBeacon(caster.getLocation(), cureDistance);
 
                         // Ensure the caster is within cure range of a holy beacon
                         if (nearestHolyBeacon == null) {
                             caster.sendMessage(Component.text("You must be close to a holy beacon to channel the divine power of these words.", NamedTextColor.RED));
 
                         } else {
-                            BeaconSite targetNearestBeacon = this.beaconManager.getNearestHolyBeacon(target.getLocation(), cureDistance);
+                            BeaconSite targetNearestBeacon = this.plugin.getBeaconManager().getNearestHolyBeacon(target.getLocation(), cureDistance);
 
                             // Ensure the caster and target are within cure range of the same holy beacon
                             if (targetNearestBeacon != null && targetNearestBeacon.equals(nearestHolyBeacon)) {
-                                if (!this.sireManager.canBeCured(target)) {
+                                if (!this.plugin.getSireManager().canBeCured(target)) {
                                     caster.sendMessage(Component.text("The curse cannot be broken while " + target.getName() + "'s sire still walks the world in mortal form...", NamedTextColor.DARK_RED));
                                     caster.sendMessage(Component.text("The blood bond must be severed through the maker's true death.", NamedTextColor.DARK_RED));
 
                                 } else {
-                                    holyWater.setAmount(holyWater.getAmount() - 1);
+                                    // If holyWater is null, then the target must be affected by an active holy water effect
+                                    if (holyWater != null) {
+                                        holyWater.setAmount(holyWater.getAmount() - 1);
+                                    }
 
                                     caster.sendMessage(Component.text("You speak the holy words of retribution...", NamedTextColor.GOLD));
                                     caster.sendMessage(Component.text("Divine light tears through the creature's cursed form...", NamedTextColor.GRAY));

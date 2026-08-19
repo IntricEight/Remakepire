@@ -1,9 +1,7 @@
 package frostvein.sampires.remakepire.listeners;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -60,13 +58,13 @@ public class IronWeaknessListener implements Listener {
             public void run() {
                 IronWeaknessListener.this.checkIronProximity();
             }
-        }).runTaskTimer(plugin, 0L, 20L);
+        }).runTaskTimer(plugin, 0L, 10L);
 
         (new BukkitRunnable() {
             public void run() {
                 IronWeaknessListener.this.scanAndRemoveIronFromInventories();
             }
-        }).runTaskTimer(plugin, 0L, 1200L);
+        }).runTaskTimer(plugin, 0L, 200L);
     }
 
     /**
@@ -122,7 +120,8 @@ public class IronWeaknessListener implements Listener {
         if (this.vampireManager.isIronAffected(player)) {
             PlayerInventory inventory = player.getInventory();
             boolean foundIronItems = false;
-            List<String> droppedItems = new ArrayList<>();
+
+            // Clear silver items from the player's main inventory
             ItemStack[] contents = inventory.getContents();
 
             for (int i = 0; i < contents.length; ++i) {
@@ -130,11 +129,11 @@ public class IronWeaknessListener implements Listener {
                 if (item != null && !item.getType().isAir() && this.ironMaterials.contains(item.getType())) {
                     player.getWorld().dropItemNaturally(player.getLocation(), item);
                     inventory.setItem(i, null);
-                    droppedItems.add(item.getAmount() + "x " + item.getType().name().replace("_", " ").toLowerCase());
                     foundIronItems = true;
                 }
             }
 
+            // Clear silver items from the player's equipped armor
             ItemStack[] armor = inventory.getArmorContents();
 
             for (int i = 0; i < armor.length; ++i) {
@@ -143,18 +142,18 @@ public class IronWeaknessListener implements Listener {
                 if (item != null && !item.getType().isAir() && this.ironMaterials.contains(item.getType())) {
                     player.getWorld().dropItemNaturally(player.getLocation(), item);
                     armor[i] = null;
-                    droppedItems.add(item.getAmount() + "x " + item.getType().name().replace("_", " ").toLowerCase());
                     foundIronItems = true;
                 }
             }
 
             inventory.setArmorContents(armor);
+
+            // Clear silver items from the player's offhand
             ItemStack offhand = inventory.getItemInOffHand();
 
             if (!offhand.getType().isAir() && this.ironMaterials.contains(offhand.getType())) {
                 player.getWorld().dropItemNaturally(player.getLocation(), offhand);
                 inventory.setItemInOffHand(null);
-                droppedItems.add(offhand.getAmount() + "x " + offhand.getType().name().replace("_", " ").toLowerCase());
                 foundIronItems = true;
             }
 
@@ -169,7 +168,7 @@ public class IronWeaknessListener implements Listener {
      */
     private void scanAndRemoveIronFromInventories() {
         for (Player player : Bukkit.getOnlinePlayers()) {
-            scanAndRemoveIronFromSingleInventory(player);
+            this.scanAndRemoveIronFromSingleInventory(player);
         }
     }
 
@@ -219,7 +218,7 @@ public class IronWeaknessListener implements Listener {
     )
     public void onItemPickup(EntityPickupItemEvent event) {
         if (event.getEntity() instanceof Player player) {
-            if (this.vampireManager.isVampireStage2OrHigher(player)) {
+            if (this.vampireManager.isIronAffected(player)) {
                 Material itemType = event.getItem().getItemStack().getType();
 
                 if (this.ironMaterials.contains(itemType)) {
@@ -247,7 +246,7 @@ public class IronWeaknessListener implements Listener {
         Player player = event.getPlayer();
         Material armorStandItemType = event.getArmorStandItem().getType();
 
-        if (this.vampireManager.isVampireStage2OrHigher(player)) {
+        if (this.vampireManager.isIronAffected(player)) {
             if (this.ironMaterials.contains(armorStandItemType)) {
                 event.setCancelled(true);
 
@@ -273,7 +272,7 @@ public class IronWeaknessListener implements Listener {
 
         try {
             if (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK) {
-                if (this.vampireManager.isVampireStage2OrHigher(player)) {
+                if (this.vampireManager.isIronAffected(player)) {
                     // Check if the player is taking an item from a shelf
                     if (event.getClickedBlock() != null && event.getClickedBlock().getState() instanceof Shelf) {
                         // Check if any iron items have entered the player's inventory after they have taken from the shelf
@@ -291,35 +290,29 @@ public class IronWeaknessListener implements Listener {
      */
     @EventHandler
     public void onPlayerMove(PlayerMoveEvent event) {
+        // Don't check for repulsion when the session is not active
+        if (!this.plugin.getSessionManager().isSessionActive()) {
+            return;
+        }
+
         Player player = event.getPlayer();
 
-        if (this.vampireManager.isVampire(player)) {
-            if (!this.vampireManager.isVampireStage1(player)) {
-                Location to = event.getTo();
+        if (this.vampireManager.isIronAffected(player)) {
+            Location to = event.getTo();
 
-                final UUID playerId = player.getUniqueId();
-                final long currentTime = System.currentTimeMillis();
+            final UUID playerId = player.getUniqueId();
+            final long currentTime = System.currentTimeMillis();
 
-                if (this.knockbackCooldowns.containsKey(playerId)) {
-                    if (currentTime - this.knockbackCooldowns.get(playerId) < 1000L) {
-                        return;
-                    }
+            if (this.knockbackCooldowns.containsKey(playerId)) {
+                if (currentTime - this.knockbackCooldowns.get(playerId) < 1000L) {
+                    return;
                 }
+            }
 
-                if (this.isNearIronBlock(to, this.REPEL_DISTANCE)) {
-                    event.setCancelled(true);
-
-                    if (!player.getScoreboardTags().contains(SessionManager.INFORMED_IRON_BLOCK_REPEL)) {
-                        player.addScoreboardTag(SessionManager.INFORMED_IRON_BLOCK_REPEL);
-                        player.sendMessage(Component.text("A block of silver is repelling you from this area...", NamedTextColor.RED));
-                    }
-
-                    Vector knockbackDirection = this.getDirectionAwayFromNearestIron(to);
-                    knockbackDirection.multiply(this.REPEL_STRENGTH);
-                    knockbackDirection.setY(Math.max(0.3, knockbackDirection.getY()));
-                    this.plugin.getServer().getScheduler().runTask(this.plugin, () -> player.setVelocity(knockbackDirection));
-                    this.knockbackCooldowns.put(playerId, currentTime);
-                }
+            Location nearestIronBlock = this.getNearestIronBlock(to, this.REPEL_DISTANCE);
+            if (nearestIronBlock != null) {
+                event.setCancelled(true);
+                this.applyIronRepulsion(player, to, nearestIronBlock);
             }
         }
     }
@@ -331,46 +324,44 @@ public class IronWeaknessListener implements Listener {
      * @return A {@code Vector} away from the nearest silver block.
      */
     private Vector getDirectionAwayFromNearestIron(Location location) {
-        final int x = location.getBlockX(), y = location.getBlockY(), z = location.getBlockZ();
-        Location nearestIron = null;
-        double nearestDistance = Double.MAX_VALUE;
+        // Retrieve the nearest iron block to the player
+        Location nearestIron = this.getNearestIronBlock(location, this.REPEL_DISTANCE);
+        return this.getDirectionAwayFromNearestIron(location, nearestIron);
+    }
 
-        // Search for the silver block within a cube around the player
-        for (int dx = (int)(-1 * REPEL_DISTANCE); dx <= (int)(REPEL_DISTANCE); ++dx) {
-            for (int dy = (int)(-1 * REPEL_DISTANCE); dy <= (int)(REPEL_DISTANCE); ++dy) {
-                for (int dz = (int)(-1 * REPEL_DISTANCE); dz <= (int)(REPEL_DISTANCE); ++dz) {
-                    Block block = location.getWorld().getBlockAt(x + dx, y + dy, z + dz);
-
-                    if (this.ironMaterials.contains(block.getType())) {
-                        Location ironLoc = block.getLocation().add(0.5, 0.5, 0.5);
-                        double distance = location.distance(ironLoc);
-
-                        if (distance < nearestDistance) {
-                            nearestDistance = distance;
-                            nearestIron = ironLoc;
-                        }
-                    }
-                }
-            }
-        }
-
-        if (nearestIron != null) {
-            return location.toVector().subtract(nearestIron.toVector()).normalize();
+    /**
+     * Determine the direction the player should be knocked back toward.
+     *
+     * @param playerLocation the player's location.
+     * @param ironLocation the closest silver's location.
+     * @return A {@code Vector} away from the provided silver block.
+     */
+    private Vector getDirectionAwayFromNearestIron(Location playerLocation, Location ironLocation) {
+        if (ironLocation != null) {
+            return playerLocation.toVector().subtract(ironLocation.toVector()).normalize();
         } else {
             return new Vector(0, 0, 1);
         }
     }
 
     /**
-     * Determine if the vampire should be weakened by nearby silver.
+     * Determine if the vampire should be repelled or weakened by nearby silver during active sessions.
      */
     public void checkIronProximity() {
-        for (Player player : Bukkit.getOnlinePlayers()) {
-            if (this.vampireManager.isVampire(player)) {
-                Location playerLoc = player.getLocation();
+        // Don't check for silver proximity when the session is not active
+        if (this.plugin.getSessionManager().isSessionActive()) {
+            for (Player player : Bukkit.getOnlinePlayers()) {
+                // Only apply the silver effects to higher vampires
+                if (this.vampireManager.isIronAffected(player)) {
+                    // Repel the player from the silver block
+                    if (this.isNearIronBlock(player.getLocation(), REPEL_DISTANCE)) {
+                        this.applyIronRepulsion(player);
+                    }
 
-                if (this.isNearIronBlock(playerLoc, WEAKNESS_DISTANCE)) {
-                    this.applyIronWeakness(player);
+                    // Weaken the player from the silver block's proximity
+                    if (this.isNearIronBlock(player.getLocation(), WEAKNESS_DISTANCE)) {
+                        this.applyIronWeakness(player);
+                    }
                 }
             }
         }
@@ -384,21 +375,74 @@ public class IronWeaknessListener implements Listener {
      * @return {@code true} if the player is nearby a silver block.
      */
     private boolean isNearIronBlock(Location location, double radius) {
-        int x = location.getBlockX(), y = location.getBlockY(), z = location.getBlockZ();
+        return this.getNearestIronBlock(location, radius) != null;
+    }
+
+    /**
+     * Retrieve the location of the nearest silver-typed block to the player within the radius.
+     *
+     * @param location the player's location.
+     * @param radius the range around the player to search.
+     * @return The {@code Location} of the silver block, or {@code null} if none is found.
+     */
+    private Location getNearestIronBlock(Location location, double radius) {
+        final int x = location.getBlockX(), y = location.getBlockY(), z = location.getBlockZ();
+        double nearestDistanceSquared = Double.MAX_VALUE;
+        Location nearestIron = null;
 
         for (double dx = -radius; dx <= radius; ++dx) {
             for (double dy = -radius; dy <= radius; ++dy) {
                 for (double dz = -radius; dz <= radius; ++dz) {
+                    // Check each block within the cube radius to see if it is a silver-type block
                     Block block = location.getWorld().getBlockAt((int)(x + dx), (int)(y + dy), (int)(z + dz));
 
                     if (this.ironMaterials.contains(block.getType())) {
-                        return true;
+                        // Make sure we are returning the closest silver block to the search location
+                        final double distanceSquared = Math.pow(dx ,2) + Math.pow(dy ,2) + Math.pow(dz ,2);
+
+                        if (distanceSquared < nearestDistanceSquared) {
+                            nearestDistanceSquared = distanceSquared;
+                            nearestIron = block.getLocation();
+                        }
                     }
                 }
             }
         }
 
-        return false;
+        return nearestIron;
+    }
+
+    /**
+     * Repel the player away from the silver block effecting them.
+     *
+     * @param player the vampire being repelled.
+     */
+    private void applyIronRepulsion(Player player) {
+        this.applyIronRepulsion(player, player.getLocation(), this.getNearestIronBlock(player.getLocation(), REPEL_DISTANCE));
+    }
+
+    /**
+     * Repel the player away from the silver block effecting them.
+     *
+     * @param player the vampire being repelled.
+     * @param newLocation the location a player attempted to move to.
+     * @param ironLocation the repulsing silver block's location.
+     */
+    private void applyIronRepulsion(Player player, Location newLocation, Location ironLocation) {
+        final UUID playerId = player.getUniqueId();
+        final long currentTime = System.currentTimeMillis();
+
+        // Only inform the player of the silver's repulsion effects once each session
+        if (!player.getScoreboardTags().contains(SessionManager.INFORMED_IRON_BLOCK_REPEL)) {
+            player.addScoreboardTag(SessionManager.INFORMED_IRON_BLOCK_REPEL);
+            player.sendMessage(Component.text("A block of silver is repelling you from this area...", NamedTextColor.RED));
+        }
+
+        Vector knockbackDirection = this.getDirectionAwayFromNearestIron(newLocation, ironLocation);
+        knockbackDirection.multiply(this.REPEL_STRENGTH);
+        knockbackDirection.setY(Math.max(0.3, knockbackDirection.getY()));
+        this.plugin.getServer().getScheduler().runTask(this.plugin, () -> player.setVelocity(knockbackDirection));
+        this.knockbackCooldowns.put(playerId, currentTime);
     }
 
     /**

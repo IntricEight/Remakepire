@@ -3,6 +3,8 @@ package frostvein.sampires.remakepire.listeners;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
 import org.bukkit.attribute.Attribute;
@@ -191,7 +193,8 @@ public class BloodMoonAttributeListener implements Listener {
 
             if (removedCount > 0) {
                 this.plugin.logInfo("AGGRESSIVE cleanup removed " + removedCount + " suspicious attribute modifiers from: " + player.getName());
-                player.sendMessage("§aRemoved " + removedCount + " attribute modifiers that were causing speed/jump issues.");
+                player.sendMessage(Component.text("Removed " + removedCount + " attribute modifiers that were causing speed/jump issues.", NamedTextColor.GREEN));
+
             } else {
                 this.plugin.logInfo("No suspicious attribute modifiers found for: " + player.getName());
             }

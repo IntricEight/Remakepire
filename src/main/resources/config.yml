@@ -156,8 +156,8 @@ abilities:
     banish-undead-cooldown: 900
     # Holy Word cooldown (default: 600 seconds = 10 minutes)
     holy-word-cooldown: 600
-    # Enlightened Eye cooldown (default: 900 seconds = 15 minutes)
-    enlightened-eye-cooldown: 900
+    # Enlightened Eye cooldown (default: 300 seconds = 5 minutes)
+    enlightened-eye-cooldown: 300
     # Lantern Thrash cooldown (default: 300 seconds = 5 minutes)
     lantern-thrash-cooldown: 300
     # Prayer of Faith cooldown (default: 900 seconds = 15 minutes)
@@ -178,9 +178,9 @@ abilities:
     way-of-the-lumberjack-cooldown: 600
     # Way of the Prospector cooldown (default: 600 seconds = 10 minutes)
     way-of-the-prospector-cooldown: 600
-    # Stop the Bleeding cooldown (default: 7200 seconds = 2 hours)
+    # Stop the Bleeding cooldown (default: 85400 seconds = 24 hours)
     # Applies to how frequently a player can be healed, not how often a player can heal others
-    stop-the-bleeding-cooldown: 7200
+    stop-the-bleeding-cooldown: 85400
 
 
 # ============================================================================
@@ -192,8 +192,8 @@ thirst:
   depletion-minutes: 120
 
   # Maximum thirst points a vampire can gain from feeding per session
-  # Default: 60
-  max-feeding-per-session: 60
+  # Default: 999 (Unlimited)
+  max-feeding-per-session: 999
 
 
 # ============================================================================
@@ -202,7 +202,7 @@ thirst:
 vampire:
   # Respawn location for vampire players (x,y,z coordinates)
   # Default: 40,101,-113 (the Oakhurst vampire crypt)
-  respawn-location: 40,101,-113
+  respawn-location: -1102, -2, -987
 
   # Control if vampires are stuck when they drop a level during the session
   # Choose if vampires are prevented to regaining a blood level for the rest of the active session, or if they can raise and lower their level at will

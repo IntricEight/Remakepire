@@ -125,6 +125,8 @@ public class BrigadierCommands {
                 .then(Commands.literal("stake-myself").executes((ctx) -> this.executePowCommand(ctx, "stake-myself")))
 
                 .then(Commands.literal("admin").requires((source) -> source.getSender().hasPermission("vampiresmp.admin"))
+                        .then(Commands.literal("help").executes((ctx) -> this.executePowCommand(ctx, "admin", "help")))
+
                         .then(Commands.literal("init").executes((ctx) -> this.executePowCommand(ctx, "admin", "init"))
                                 .then(Commands.literal("cancel").executes((ctx) -> this.executePowCommand(ctx, "admin", "init", "cancel"))))
                         .then(this.buildSessionSubcommand())

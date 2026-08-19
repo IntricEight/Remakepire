@@ -95,7 +95,7 @@ public class BanishUndeadTomeAbility extends TomeAbility {
      */
     private void createHolyLightRings(Player player) {
         final Location center = player.getLocation().add(0.0, 0.5, 0.0);
-        long delayBetweenRings = 8L;
+        final long delayBetweenRings = 8L;
 
         (new BukkitRunnable() {
             int ringCount = 0;

@@ -10,7 +10,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import javax.annotation.Nullable;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -113,8 +112,8 @@ public class BatTransformationManager {
 
                 if (player != null && player.isOnline()) {
                     this.forceTransformToHuman(player, batData);
-                    player.sendMessage("§6Your bat transformation has expired.");
-                    player.sendMessage("§7You transform back into your vampiric form.");
+                    player.sendMessage(Component.text("Your bat transformation has expired.", NamedTextColor.GOLD));
+                    player.sendMessage(Component.text("You transform back into your vampiric form.", NamedTextColor.GRAY));
                     player.playSound(player, Sound.ENTITY_BAT_TAKEOFF, SoundCategory.MASTER, 0.8F, 0.8F);
                 }
 
@@ -228,7 +227,7 @@ public class BatTransformationManager {
      * @param bat a bat entity.
      * @return The player who is controlling the bat.
      */
-    public @Nullable Player getPlayerFromBat(Bat bat) {
+    public Player getPlayerFromBat(Bat bat) {
         if (bat.getCustomName() != null && bat.getCustomName().startsWith("Â§8")) {
             String playerName = bat.getCustomName().substring(2);
             return Bukkit.getPlayer(playerName);

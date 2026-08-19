@@ -1,5 +1,8 @@
 package frostvein.sampires.remakepire.abilities;
 
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.SoundCategory;
@@ -36,7 +39,7 @@ public class StormCallAbility extends VampireAbility {
         World world = player.getWorld();
 
         if (world.hasStorm()) {
-            player.sendMessage("§8The skies are already under your influence...");
+            player.sendMessage(Component.text("The skies are already under your influence...", NamedTextColor.DARK_GRAY));
             return false;
 
         } else {
@@ -60,22 +63,20 @@ public class StormCallAbility extends VampireAbility {
      * @param player the player using the ability.
      */
     private void createStormSummonEffects(Player player) {
-        if (player.getWorld() != null) {
-            double angle, radius, x, y, z;
+        double angle, radius, x, y, z;
 
-            for (int i = 0; i < 50; ++i) {
-                angle = i * 0.3;
-                radius = 2.0;
-                x = Math.cos(angle) * radius;
-                y = Math.sin(angle) * radius;
-                z = i * 0.1;
+        for (int i = 0; i < 50; ++i) {
+            angle = i * 0.3;
+            radius = 2.0;
+            x = Math.cos(angle) * radius;
+            y = Math.sin(angle) * radius;
+            z = i * 0.1;
 
-                player.getWorld().spawnParticle(Particle.SMOKE, player.getLocation().add(x, z + 1.0, y), 1, 0.0, 0.0, 0.0, 0.05);
-            }
-
-            player.getWorld().spawnParticle(Particle.CLOUD, player.getLocation().add(0.0, 3.0, 0.0), 30, 3.0, 1.0, 3.0, 0.1);
-            player.getWorld().spawnParticle(Particle.ENCHANT, player.getLocation().add(0.0, 2.0, 0.0), 40, 2.0, 2.0, 2.0, 0.5);
+            player.getWorld().spawnParticle(Particle.SMOKE, player.getLocation().add(x, z + 1.0, y), 1, 0.0, 0.0, 0.0, 0.05);
         }
+
+        player.getWorld().spawnParticle(Particle.CLOUD, player.getLocation().add(0.0, 3.0, 0.0), 30, 3.0, 1.0, 3.0, 0.1);
+        player.getWorld().spawnParticle(Particle.ENCHANT, player.getLocation().add(0.0, 2.0, 0.0), 40, 2.0, 2.0, 2.0, 0.5);
     }
 
     /**
@@ -84,7 +85,7 @@ public class StormCallAbility extends VampireAbility {
      * @param player the player using the ability.
      */
     private void sendStormCallMessage(Player player) {
-        player.sendMessage("§7Rain will fall for the next 10 minutes.");
+        player.sendMessage(Component.text("Rain will fall for the next 10 minutes.", NamedTextColor.GRAY));
     }
 
     /**
@@ -106,8 +107,10 @@ public class StormCallAbility extends VampireAbility {
      * @param caster the player using the ability.
      */
     private void broadcastStormArrival(World world, Player caster) {
-        String message = "§8§lDark clouds gather across the sky...";
-        String casterMessage = "§7§o A vampire has called upon an ancient storm...";
+        final Component message = Component.text("Dark clouds gather across the sky...", NamedTextColor.DARK_GRAY)
+                .decorate(TextDecoration.BOLD);
+        final Component casterMessage = Component.text("A vampire has called upon an ancient storm...", NamedTextColor.GRAY)
+                .decorate(TextDecoration.ITALIC);
 
         for (Player player : world.getPlayers()) {
             player.sendMessage(message);
@@ -129,7 +132,8 @@ public class StormCallAbility extends VampireAbility {
     private void scheduleStormClearing(World world, Player caster, RemakepirePlugin plugin) {
         plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
             if (world.hasStorm()) {
-                String warningMessage = "§7§oThe clouds are beginning to thin... The storm will pass soon.";
+                final Component warningMessage = Component.text("The clouds are beginning to thin... The storm will pass soon.", NamedTextColor.GRAY)
+                        .decorate(TextDecoration.ITALIC);
 
                 for (Player worldPlayer : world.getPlayers()) {
                     worldPlayer.sendMessage(warningMessage);
@@ -159,10 +163,8 @@ public class StormCallAbility extends VampireAbility {
      * @param caster the player who used the ability.
      */
     private void createStormClearingEffects(Player caster) {
-        if (caster.getWorld() != null) {
-            caster.getWorld().spawnParticle(Particle.END_ROD, caster.getLocation().add(0.0, 1.0, 0.0), 20, 2.0, 3.0, 2.0, 0.1);
-            caster.getWorld().spawnParticle(Particle.HAPPY_VILLAGER, caster.getLocation().add(0.0, 1.0, 0.0), 15, 1.5, 1.0, 1.5, 0.1);
-        }
+        caster.getWorld().spawnParticle(Particle.END_ROD, caster.getLocation().add(0.0, 1.0, 0.0), 20, 2.0, 3.0, 2.0, 0.1);
+        caster.getWorld().spawnParticle(Particle.HAPPY_VILLAGER, caster.getLocation().add(0.0, 1.0, 0.0), 15, 1.5, 1.0, 1.5, 0.1);
     }
 
     /**
@@ -172,8 +174,10 @@ public class StormCallAbility extends VampireAbility {
      * @param player the player who used the ability.
      */
     private void broadcastStormClearing(World world, Player player) {
-        String message = "§f§lThe storm clouds part, revealing clear skies once more...";
-        String casterMessage = "§7§oYour dominion over the weather comes to an end.";
+        final Component message = Component.text("The storm clouds part, revealing clear skies once more...")
+                .decorate(TextDecoration.BOLD);
+        final Component casterMessage = Component.text("Your dominion over the weather comes to an end.", NamedTextColor.GRAY)
+                .decorate(TextDecoration.ITALIC);
 
         for (Player worldPlayer : world.getPlayers()) {
             worldPlayer.sendMessage(message);

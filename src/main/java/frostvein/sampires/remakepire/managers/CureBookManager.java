@@ -2,6 +2,8 @@ package frostvein.sampires.remakepire.managers;
 
 import java.util.ArrayList;
 import java.util.List;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -354,7 +356,7 @@ public class CureBookManager {
         World world = Bukkit.getWorld(RemakepirePlugin.WORLD_NAME);
 
         if (world == null) {
-            admin.sendMessage("§cWorld '" + RemakepirePlugin.WORLD_NAME + "' not found.");
+            admin.sendMessage(Component.text("World '" + RemakepirePlugin.WORLD_NAME + "' not found.", NamedTextColor.RED));
             return false;
         }
 
@@ -362,7 +364,7 @@ public class CureBookManager {
         Block block = world.getBlockAt(new Location(world, x, y, z));
 
         if (!(block.getState() instanceof Chest chest)) {
-            admin.sendMessage("§cNo chest found at coordinates " + x + ", " + y + ", " + z + ".");
+            admin.sendMessage(Component.text("No chest found at coordinates " + x + ", " + y + ", " + z + ".", NamedTextColor.RED));
             return false;
         }
 
@@ -371,7 +373,7 @@ public class CureBookManager {
         chestInventory.clear();
         ItemStack book = this.plugin.getCureBookManager().getCureBook(bookNumber);
         chestInventory.addItem(book);
-        admin.sendMessage("§aSuccessfully stashed '" + this.plugin.getCureBookManager().getCureBookName(bookNumber, true) + "' in the chest at " + x + ", " + y + ", " + z + ".");
+        admin.sendMessage(Component.text("Successfully stashed '" + this.plugin.getCureBookManager().getCureBookName(bookNumber, true) + "' in the chest at " + x + ", " + y + ", " + z + ".", NamedTextColor.GREEN));
 
         return true;
     }
@@ -389,7 +391,7 @@ public class CureBookManager {
         World world = Bukkit.getWorld(RemakepirePlugin.WORLD_NAME);
 
         if (world == null) {
-            this.plugin.logInfo("§cWorld '" + RemakepirePlugin.WORLD_NAME + "' not found.");
+            this.plugin.logInfo("World '" + RemakepirePlugin.WORLD_NAME + "' not found.");
             return false;
         }
 
@@ -397,7 +399,7 @@ public class CureBookManager {
         Block block = world.getBlockAt(new Location(world, x, y, z));
 
         if (!(block.getState() instanceof Chest chest)) {
-            this.plugin.logInfo("§cNo chest found at coordinates " + x + ", " + y + ", " + z + ".");
+            this.plugin.logInfo("No chest found at coordinates " + x + ", " + y + ", " + z + ".");
             return false;
         }
 
