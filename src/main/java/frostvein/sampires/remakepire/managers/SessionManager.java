@@ -683,7 +683,7 @@ public class SessionManager {
     }
 
     /**
-     * Turn off the Minecraft gamerules of the session.
+     * Turn off the Minecraft game rules of the session.
      */
     private void setOutOfSessionRules() {
         World world = this.plugin.getWorld();
