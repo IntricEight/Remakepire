@@ -26,9 +26,9 @@ public class BeaconMajorityManager {
     private int currentVampireBonus = 0, currentHumanBonus = 0;
 
     // Relic from before updating to newer content, left in case the UUID is needed to collaborate with
-//    private static final UUID VAMPIRE_MAJORITY_HEALTH_UUID = UUID.fromString("a1b2c3d4-5e6f-7890-1234-567890abcdef");
-//    private static final UUID HUMAN_MAJORITY_HEALTH_UUID = UUID.fromString("f1e2d3c4-b5a6-9870-4321-fedcba098765");
-//    private static final UUID DEATH_PENALTY_HEALTH_UUID = UUID.fromString("d1e2a3d4-b5e6-7890-abcd-1234567890ef");
+    //    VAMPIRE_MAJORITY_HEALTH_UUID was "a1b2c3d4-5e6f-7890-1234-567890abcdef"
+    //    HUMAN_MAJORITY_HEALTH_UUID was "f1e2d3c4-b5a6-9870-4321-fedcba098765"
+    //    DEATH_PENALTY_HEALTH_UUID was "d1e2a3d4-b5e6-7890-abcd-1234567890ef"
 
     /**
      * Create an instance of the Beacon Majority manager.
