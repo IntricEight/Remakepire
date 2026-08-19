@@ -3,7 +3,11 @@ package frostvein.sampires.remakepire.abilities.tome;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
 import org.bukkit.Sound;
 import org.bukkit.SoundCategory;
 import org.bukkit.entity.Player;
@@ -69,7 +73,7 @@ public abstract class TomeAbility {
      */
     public final boolean use(Player player) {
         if (this.isOnCooldown(player)) {
-            long remainingTime = this.getRemainingCooldown(player);
+            final long remainingTime = this.getRemainingCooldown(player);
             this.sendCannotUseMessage(player, "ability is on cooldown! " + VampireAbilityManager.formatTime(remainingTime) + " remaining.");
             return false;
 
@@ -99,7 +103,7 @@ public abstract class TomeAbility {
      * @return {@code true} if the {@code player} is human.
      */
     protected boolean canUse(Player player) {
-        return this.plugin.getVampireManager().isHuman(player);
+        return this.plugin.getVampireManager().isHuman(player) && player.getGameMode() != GameMode.SPECTATOR;
     }
 
     /**
@@ -109,7 +113,7 @@ public abstract class TomeAbility {
      * @param reason the reason that the player cannot use this ability.
      */
     protected void sendCannotUseMessage(Player player, String reason) {
-        player.sendMessage("§cCannot use " + this.name + ": " + reason);
+        player.sendMessage(Component.text("Cannot use " + this.name + ": " + reason, NamedTextColor.RED));
     }
 
     /**
@@ -119,7 +123,7 @@ public abstract class TomeAbility {
      * @param message the ability's successful use message.
      */
     protected void sendSuccessMessage(Player player, String message) {
-        player.sendMessage("§a" + message);
+        player.sendMessage(Component.text(message, NamedTextColor.GREEN));
     }
 
     /**
@@ -129,12 +133,11 @@ public abstract class TomeAbility {
      * @return {@code true} if the ability's cooldown has not yet elapsed.
      */
     protected boolean isOnCooldown(Player player) {
-        UUID playerId = player.getUniqueId();
+        final UUID playerId = player.getUniqueId();
         Map<String, Long> cooldowns = playerCooldowns.get(playerId);
 
         if (cooldowns != null && cooldowns.containsKey(this.name)) {
-            long cooldownEnd = cooldowns.get(this.name);
-            return System.currentTimeMillis() < cooldownEnd;
+            return System.currentTimeMillis() < cooldowns.get(this.name);
 
         } else {
             return false;
@@ -148,12 +151,11 @@ public abstract class TomeAbility {
      * @return the seconds remaining until the cooldown has elapsed.
      */
     protected long getRemainingCooldown(Player player) {
-        UUID playerId = player.getUniqueId();
+        final UUID playerId = player.getUniqueId();
         Map<String, Long> cooldowns = playerCooldowns.get(playerId);
 
         if (cooldowns != null && cooldowns.containsKey(this.name)) {
-            long cooldownEnd = cooldowns.get(this.name);
-            long remaining = cooldownEnd - System.currentTimeMillis();
+            final long remaining = cooldowns.get(this.name) - System.currentTimeMillis();
             return Math.max(0L, remaining / 1000L);
 
         } else {
@@ -167,10 +169,10 @@ public abstract class TomeAbility {
      * @param player the player attempting to use the ability.
      */
     protected void setCooldown(Player player) {
-        UUID playerId = player.getUniqueId();
+        final UUID playerId = player.getUniqueId();
         Map<String, Long> cooldowns = playerCooldowns.computeIfAbsent(playerId, (k) -> new HashMap<>());
 
-        long cooldownEnd = System.currentTimeMillis() + (long)this.cooldownSeconds * 1000L;
+        final long cooldownEnd = System.currentTimeMillis() + (long)this.cooldownSeconds * 1000L;
         cooldowns.put(this.name, cooldownEnd);
         this.scheduleCooldownNotification(player, this.cooldownSeconds);
     }
@@ -182,7 +184,7 @@ public abstract class TomeAbility {
      * @param cooldownSeconds the ability cooldown.
      */
     private void scheduleCooldownNotification(Player player, int cooldownSeconds) {
-        String taskKey = player.getUniqueId() + ":" + this.name;
+        final String taskKey = player.getUniqueId() + ":" + this.name;
         BukkitTask existingTask = cooldownNotificationTasks.get(taskKey);
 
         if (existingTask != null && !existingTask.isCancelled()) {
@@ -206,8 +208,9 @@ public abstract class TomeAbility {
      * @param player the player that used the ability.
      */
     private void notifyAbilityReady(Player player) {
-        player.sendMessage("§a§l⚡ TOME ABILITY READY ⚡");
-        player.sendMessage("§a" + this.name + " is now available.");
+        player.sendMessage(Component.text("⚡ TOME ABILITY READY ⚡", NamedTextColor.GREEN)
+                .decorate(TextDecoration.BOLD));
+        player.sendMessage(Component.text(this.name + " is now available.", NamedTextColor.GREEN));
         player.playSound(player, Sound.BLOCK_NOTE_BLOCK_CHIME, SoundCategory.MASTER, 0.5F, 1.5F);
     }
 
@@ -218,14 +221,14 @@ public abstract class TomeAbility {
      * @param abilityName the ability that will have its cooldown cleared.
      */
     public static void clearCooldown(Player player, String abilityName) {
-        UUID playerId = player.getUniqueId();
+        final UUID playerId = player.getUniqueId();
         Map<String, Long> cooldowns = playerCooldowns.get(playerId);
 
         if (cooldowns != null) {
             cooldowns.remove(abilityName);
         }
 
-        String taskKey = playerId + ":" + abilityName;
+        final String taskKey = playerId + ":" + abilityName;
         BukkitTask task = cooldownNotificationTasks.get(taskKey);
 
         if (task != null && !task.isCancelled()) {
@@ -240,9 +243,9 @@ public abstract class TomeAbility {
      * @param player the player that used the abilities.
      */
     public static void clearAllCooldowns(Player player) {
-        UUID playerId = player.getUniqueId();
+        final UUID playerId = player.getUniqueId();
+        final String playerPrefix = playerId + ":";
         playerCooldowns.remove(playerId);
-        String playerPrefix = playerId + ":";
 
         cooldownNotificationTasks.entrySet().removeIf((entry) -> {
             if ((entry.getKey()).startsWith(playerPrefix)) {
@@ -263,7 +266,7 @@ public abstract class TomeAbility {
      * Cancel the scheduled notifications regarding tome abilities.
      */
     public static void cancelAllNotificationTasks() {
-        for(BukkitTask task : cooldownNotificationTasks.values()) {
+        for (BukkitTask task : cooldownNotificationTasks.values()) {
             if (task != null && !task.isCancelled()) {
                 task.cancel();
             }

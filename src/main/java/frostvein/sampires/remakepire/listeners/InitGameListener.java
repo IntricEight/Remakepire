@@ -1,5 +1,8 @@
 package frostvein.sampires.remakepire.listeners;
 
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -34,7 +37,7 @@ public class InitGameListener implements Listener {
      */
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
-        if (this.plugin.getInitGameManager().isPlayerSelectionGUI(event.getView().getTitle())) {
+        if (this.plugin.getInitGameManager().isPlayerSelectionGUI(event.getView().title())) {
             event.setCancelled(true);
 
             if (event.getWhoClicked() instanceof Player admin) {
@@ -43,8 +46,8 @@ public class InitGameListener implements Listener {
                 if (clickedItem != null && clickedItem.getType() != Material.AIR) {
                     ItemMeta meta = clickedItem.getItemMeta();
 
-                    if (meta != null && meta.hasDisplayName()) {
-                        String displayName = meta.getDisplayName();
+                    if (meta != null && meta.customName() != null) {
+                        String displayName = PlainTextComponentSerializer.plainText().serialize(meta.customName());
 
                         if (clickedItem.getType() == Material.LIME_CONCRETE) {
                             this.plugin.getInitGameManager().handleGUIConfirmation(admin);
@@ -81,7 +84,7 @@ public class InitGameListener implements Listener {
      */
     @EventHandler
     public void onInventoryClose(InventoryCloseEvent event) {
-        if (this.plugin.getInitGameManager().isPlayerSelectionGUI(event.getView().getTitle())) {
+        if (this.plugin.getInitGameManager().isPlayerSelectionGUI(event.getView().title())) {
             if (event.getPlayer() instanceof Player admin) {
                 if (!this.plugin.getInitGameManager().isGUIRefreshInProgress(admin.getUniqueId())) {
                     if (this.plugin.getInitGameManager().getState(admin.getUniqueId()) == InitState.AWAITING_MODE_SELECTION) {
@@ -118,7 +121,7 @@ public class InitGameListener implements Listener {
                 }
 
                 if (!handled) {
-                    player.sendMessage("§cError processing input. Please try again.");
+                    player.sendMessage(Component.text("Error processing input. Please try again.", NamedTextColor.RED));
                 }
             });
         }
@@ -140,7 +143,7 @@ public class InitGameListener implements Listener {
             event.setCancelled(true);
 
             if (!this.plugin.getInitGameManager().handleInternalCommand(player, command)) {
-                player.sendMessage("§cError: Invalid initialization command.");
+                player.sendMessage(Component.text("Error: Invalid initialization command.", NamedTextColor.RED));
             }
         }
     }

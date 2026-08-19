@@ -1,10 +1,10 @@
 package frostvein.sampires.remakepire.listeners;
 
-import net.md_5.bungee.api.chat.ClickEvent;
-import net.md_5.bungee.api.chat.ComponentBuilder;
-import net.md_5.bungee.api.chat.HoverEvent;
-import net.md_5.bungee.api.chat.TextComponent;
-import net.md_5.bungee.api.chat.ClickEvent.Action;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.event.HoverEvent;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -36,7 +36,7 @@ public class ForcedCureChoiceListener implements Listener {
      */
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
-        if (event.getView().getTitle().equals(ForcedCureChoiceManager.CURE_CHOICE_TITLE)) {
+        if (event.getView().title().equals(ForcedCureChoiceManager.CURE_CHOICE_GUI_TITLE)) {
             event.setCancelled(true);
 
             if (event.getWhoClicked() instanceof Player player) {
@@ -64,19 +64,19 @@ public class ForcedCureChoiceListener implements Listener {
      */
     @EventHandler
     public void onInventoryClose(InventoryCloseEvent event) {
-        if (event.getView().getTitle().equals(ForcedCureChoiceManager.CURE_CHOICE_TITLE)) {
+        if (event.getView().title().equals(ForcedCureChoiceManager.CURE_CHOICE_GUI_TITLE)) {
             if (event.getPlayer() instanceof Player player) {
                 if (this.plugin.getForcedCureChoiceManager().hasPendingCure(player)) {
                     player.sendMessage("");
-                    player.sendMessage("§4This is a decision you cannot run from, monster.");
-                    player.sendMessage("§7The spirits have come knocking, and they are joined by death.");
-                    player.sendMessage("§7Say your piece, and when you ready to make your decision,");
+                    player.sendMessage(Component.text("This is a decision you cannot run from, monster.", NamedTextColor.DARK_RED));
+                    player.sendMessage(Component.text("The spirits have come knocking, and they are joined by death.", NamedTextColor.GRAY));
+                    player.sendMessage(Component.text("Say your piece, and when you ready to make your decision,", NamedTextColor.GRAY));
 
-                    TextComponent message = new TextComponent("§e§l[CLICK HERE]");
-                    message.setClickEvent(new ClickEvent(Action.RUN_COMMAND, "/pow reopen"));
-                    message.setHoverEvent(new HoverEvent(net.md_5.bungee.api.chat.HoverEvent.Action.SHOW_TEXT, (new ComponentBuilder("§6Click to reopen the choice menu")).create()));
-
-                    player.spigot().sendMessage(message);
+                    player.sendMessage(Component.text("[CLICK HERE]", NamedTextColor.YELLOW)
+                            .decorate(TextDecoration.BOLD)
+                            .clickEvent(ClickEvent.runCommand("/pow reopen"))
+                            .hoverEvent(HoverEvent.showText(Component.text("Click to reopen the choice menu", NamedTextColor.GOLD)))
+                    );
                     player.sendMessage("");
                 }
             }
@@ -96,14 +96,15 @@ public class ForcedCureChoiceListener implements Listener {
             this.plugin.getServer().getScheduler().runTaskLater(this.plugin, () -> {
                 if (player.isOnline() && this.plugin.getForcedCureChoiceManager().hasPendingCure(player)) {
                     player.sendMessage("");
-                    player.sendMessage("§4This is a decision you cannot run from, monster.");
-                    player.sendMessage("§7The spirits have come knocking, and they are joined by death.");
-                    player.sendMessage("§7Say your piece, and when you ready to make your decision,");
+                    player.sendMessage(Component.text("This is a decision you cannot run from, monster.", NamedTextColor.DARK_RED));
+                    player.sendMessage(Component.text("The spirits have come knocking, and they are joined by death.", NamedTextColor.GRAY));
+                    player.sendMessage(Component.text("Say your piece, and when you ready to make your decision,", NamedTextColor.GRAY));
 
-                    TextComponent message = new TextComponent("§e§l[CLICK HERE]");
-                    message.setClickEvent(new ClickEvent(Action.RUN_COMMAND, "/pow reopen"));
-                    message.setHoverEvent(new HoverEvent(net.md_5.bungee.api.chat.HoverEvent.Action.SHOW_TEXT, (new ComponentBuilder("§6Click to reopen the choice menu")).create()));
-                    player.spigot().sendMessage(message);
+                    player.sendMessage(Component.text("[CLICK HERE]", NamedTextColor.YELLOW)
+                            .decorate(TextDecoration.BOLD)
+                            .clickEvent(ClickEvent.runCommand("/pow reopen"))
+                            .hoverEvent(HoverEvent.showText(Component.text("Click to reopen the choice menu", NamedTextColor.GOLD)))
+                    );
                     player.sendMessage("");
                 }
             }, 20L);
@@ -111,7 +112,7 @@ public class ForcedCureChoiceListener implements Listener {
     }
 
     /**
-     * Prevent the player from moving once a force cure has been used on them until a choice is maded.
+     * Prevent the player from moving once a force cure has been used on them until a choice is made.
      *
      * @param event a player moving.
      */

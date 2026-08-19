@@ -1,6 +1,10 @@
 package frostvein.sampires.remakepire.listeners;
 
 import java.util.List;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.HumanEntity;
@@ -16,13 +20,9 @@ import org.bukkit.inventory.meta.BookMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.scheduler.BukkitRunnable;
 import frostvein.sampires.remakepire.RemakepirePlugin;
-import frostvein.sampires.remakepire.managers.TomeManager;
-import frostvein.sampires.remakepire.managers.VampireManager;
 
 public class TomeVampireRestrictionListener implements Listener {
     private final RemakepirePlugin plugin;
-    private final VampireManager vampireManager;
-    private final TomeManager tomeManager;
 
     /**
      * Create an instance of the Tome Vampire Restriction listener.
@@ -31,8 +31,6 @@ public class TomeVampireRestrictionListener implements Listener {
      */
     public TomeVampireRestrictionListener(RemakepirePlugin plugin) {
         this.plugin = plugin;
-        this.vampireManager = plugin.getVampireManager();
-        this.tomeManager = plugin.getTomeManager();
         this.startTomeCheckTask();
     }
 
@@ -76,7 +74,8 @@ public class TomeVampireRestrictionListener implements Listener {
 
                 if (this.isTome(currentItem) || this.isTome(cursorItem)) {
                     event.setCancelled(true);
-                    player.sendMessage("§4§lThe tome sears your flesh! You cannot touch such holy artifacts!");
+                    player.sendMessage(Component.text("The tome sears your flesh! You cannot touch such holy artifacts!", NamedTextColor.DARK_RED)
+                            .decorate(TextDecoration.BOLD));
                     Bukkit.getScheduler().runTask(this.plugin, () -> player.updateInventory());
                 }
             }
@@ -89,7 +88,7 @@ public class TomeVampireRestrictionListener implements Listener {
     private void startTomeCheckTask() {
         (new BukkitRunnable() {
             public void run() {
-                for(Player player : Bukkit.getOnlinePlayers()) {
+                for (Player player : Bukkit.getOnlinePlayers()) {
                     if (TomeVampireRestrictionListener.this.isRestrictedVampire(player)) {
                         TomeVampireRestrictionListener.this.checkAndDropTomes(player);
                     }
@@ -106,7 +105,7 @@ public class TomeVampireRestrictionListener implements Listener {
     private void checkAndDropTomes(Player player) {
         boolean foundTome = false;
 
-        for(int i = 0; i < player.getInventory().getSize(); ++i) {
+        for (int i = 0; i < player.getInventory().getSize(); ++i) {
             ItemStack item = player.getInventory().getItem(i);
 
             if (this.isTome(item)) {
@@ -125,7 +124,7 @@ public class TomeVampireRestrictionListener implements Listener {
         }
 
         if (foundTome) {
-            player.sendMessage("§cYour dark nature cannot bear to hold such holy knowledge...");
+            player.sendMessage(Component.text("Your dark nature cannot bear to hold such holy knowledge...", NamedTextColor.RED));
         }
     }
 
@@ -136,7 +135,7 @@ public class TomeVampireRestrictionListener implements Listener {
      * @return {@code true} if the player is a higher vampire.
      */
     private boolean isRestrictedVampire(Player player) {
-        return this.vampireManager.isVampireStage2OrHigher(player);
+        return this.plugin.getVampireManager().isVampireStage2OrHigher(player);
     }
 
     /**
@@ -168,9 +167,11 @@ public class TomeVampireRestrictionListener implements Listener {
 
             if (meta != null) {
                 if (meta.hasDisplayName()) {
-                    String displayName = meta.getDisplayName();
+                    Component displayName = meta.customName();
 
-                    if (displayName.startsWith("§6Tome of ")) {
+                    if (displayName instanceof TextComponent textComponent
+                            && NamedTextColor.GOLD.equals(textComponent.color())
+                            && textComponent.content().startsWith("Tome of ")) {
                         return true;
                     }
                 }
@@ -189,8 +190,7 @@ public class TomeVampireRestrictionListener implements Listener {
 
                 if (item.getType() == Material.WRITTEN_BOOK && meta instanceof BookMeta bookMeta) {
                     if (bookMeta.hasTitle()) {
-                        String title = bookMeta.getTitle();
-                        return this.tomeManager.isValidAbility(title);
+                        return this.plugin.getTomeManager().isValidAbility(bookMeta.getTitle());
                     }
                 }
             }

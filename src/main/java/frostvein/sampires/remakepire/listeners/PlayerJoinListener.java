@@ -1,8 +1,9 @@
 package frostvein.sampires.remakepire.listeners;
 
 import java.util.List;
-
-import frostvein.sampires.remakepire.managers.*;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -11,12 +12,12 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.scoreboard.Team;
 import frostvein.sampires.remakepire.RemakepirePlugin;
 import frostvein.sampires.remakepire.abilities.tome.TurnUndeadTomeAbility;
+import frostvein.sampires.remakepire.managers.SessionManager;
+import frostvein.sampires.remakepire.managers.VampireManager;
 
 public class PlayerJoinListener implements Listener {
     private final RemakepirePlugin plugin;
     private final VampireManager vampireManager;
-    private final EffectManager effectManager;
-    private final BeetrootManager beetrootManager;
 
     /**
      * Create an instance of the Player Join listener.
@@ -26,8 +27,6 @@ public class PlayerJoinListener implements Listener {
     public PlayerJoinListener(RemakepirePlugin plugin) {
         this.plugin = plugin;
         this.vampireManager = plugin.getVampireManager();
-        this.effectManager = plugin.getEffectManager();
-        this.beetrootManager = plugin.getBeetrootManager();
     }
 
     /**
@@ -43,8 +42,8 @@ public class PlayerJoinListener implements Listener {
 
         this.vampireManager.initializeNewPlayer(player);
         this.vampireManager.ensureVampireTagConsistency(player);
-        this.effectManager.applyJoinEffects(player);
-        this.beetrootManager.restorePlayerState(player);
+        this.plugin.getEffectManager().applyJoinEffects(player);
+        this.plugin.getBeetrootManager().restorePlayerState(player);
 
         this.plugin.getBeaconMajorityManager().applyBonusesToPlayer(player);
         if (this.plugin.getVampireTexturePackManager() != null && (this.vampireManager.isVampire(player) || player.getScoreboardTags().contains(VampireManager.CURED_VAMPIRE_TAG))) {
@@ -55,11 +54,10 @@ public class PlayerJoinListener implements Listener {
             this.plugin.getBloodMoonAttributeListener().forceCleanupOnJoin(player);
         }
 
-        String sessionStatus = this.getSessionStatusMessage();
+        player.sendMessage(Component.text(this.getSessionStatusMessage(), NamedTextColor.GRAY));
 
-        player.sendMessage("§7" + sessionStatus);
         if (!this.plugin.getSessionManager().playerReturningToGame(player)) {
-            player.sendMessage("§cA new game has been initialized since you last played. Resetting your stats accordingly.");
+            player.sendMessage(Component.text("A new game has been initialized since you last played. Resetting your stats accordingly.", NamedTextColor.RED));
 
             player.removeScoreboardTag(DeathHandler.PERMAKILLED_TAG);
             this.plugin.getSessionManager().resetPlayer(player);
@@ -84,19 +82,26 @@ public class PlayerJoinListener implements Listener {
 
             if (!warnings.isEmpty()) {
                 player.sendMessage("");
-                player.sendMessage("§c§l[CONFIG WARNING] §eThe following locations are outside the border:");
+                player.sendMessage(Component.text("[CONFIG WARNING] ", NamedTextColor.RED)
+                        .decorate(TextDecoration.BOLD)
+                        .append(Component.text("The following locations are outside the border:", NamedTextColor.YELLOW))
+                );
 
-                for(String warning : warnings) {
-                    player.sendMessage("§c  - " + warning);
+                for (String warning : warnings) {
+                    player.sendMessage(Component.text("  - " + warning, NamedTextColor.RED));
                 }
 
-                player.sendMessage("§7Border: X[" + (int)this.plugin.getConfigManager().getBorderMinX() + " to " + (int)this.plugin.getConfigManager().getBorderMaxX() + "] Z[" + (int)this.plugin.getConfigManager().getBorderMinZ() + " to " + (int)this.plugin.getConfigManager().getBorderMaxZ() + "]");
-                player.sendMessage("§7Check config.yml oakhurst.border settings.");
+                player.sendMessage(Component.text("Border: X["
+                        + (int)this.plugin.getConfigManager().getBorderMinX() + " to "
+                        + (int)this.plugin.getConfigManager().getBorderMaxX() + "] Z["
+                        + (int)this.plugin.getConfigManager().getBorderMinZ() + " to "
+                        + (int)this.plugin.getConfigManager().getBorderMaxZ() + "]", NamedTextColor.GRAY));
+                player.sendMessage(Component.text("Check config.yml oakhurst.border settings.", NamedTextColor.GRAY));
                 player.sendMessage("");
             }
         }
 
-        event.setJoinMessage(null);
+        event.joinMessage(null);
     }
 
     /**
@@ -128,7 +133,7 @@ public class PlayerJoinListener implements Listener {
             this.plugin.getVampireTexturePackManager().onPlayerQuit(player);
         }
 
-        event.setQuitMessage(null);
+        event.quitMessage(null);
     }
 
     /**
@@ -158,7 +163,6 @@ public class PlayerJoinListener implements Listener {
             }
         } catch (Exception e) {
             this.plugin.getLogger().severe("Failed to add player " + player.getName() + " to CastTeam: " + e.getMessage());
-            e.printStackTrace();
         }
     }
 

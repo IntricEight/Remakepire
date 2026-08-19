@@ -5,7 +5,9 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
@@ -38,11 +40,29 @@ public class VampireSireManager {
     /**
      * Retrieve the sire of the vampire.
      *
-     * @param vampire the vampire whose sire is being retrieved.
+     * @param fledgling the vampire whose sire is being retrieved.
      * @return The name of the vampire's sire.
      */
-    public String getSire(Player vampire) {
-        return this.sireMap.get(vampire.getName().toLowerCase());
+    public String getSire(Player fledgling) {
+        return this.sireMap.get(fledgling.getName().toLowerCase());
+    }
+
+    /**
+     * Retrieve the fledglings of the vampire.
+     *
+     * @param sire the vampire whose fledglings is being retrieved.
+     * @return A {@code List} of player names.
+     */
+    public List<String> getFledglings(Player sire) {
+        List<String> fledglings = new ArrayList<>();
+
+        for (Map.Entry<String, String> entry : this.sireMap.entrySet()) {
+            if (entry.getValue().equalsIgnoreCase(sire.getName())) {
+                fledglings.add(entry.getKey());
+            }
+        }
+
+        return fledglings;
     }
 
     /**
@@ -99,9 +119,11 @@ public class VampireSireManager {
 
         if (sireName == null) {
             return "No sire assigned (can cure freely)";
+
         } else if (vampire.getScoreboardTags().contains("CannotCure")) {
             // If the player is impossible to cure, act as though their sire is alive
             return "No sire assigned, but the player is prevented from being cured.";
+
         } else {
             Player sire = Bukkit.getPlayer(sireName);
 
@@ -191,7 +213,7 @@ public class VampireSireManager {
                 Map<String, String> rawData = this.gson.fromJson(reader, type);
 
                 if (rawData != null) {
-                    for(Map.Entry<String, String> entry : rawData.entrySet()) {
+                    for (Map.Entry<String, String> entry : rawData.entrySet()) {
                         this.sireMap.put((entry.getKey()).toLowerCase(), entry.getValue());
                     }
 

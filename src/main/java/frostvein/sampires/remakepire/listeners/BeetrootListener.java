@@ -8,13 +8,9 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerItemConsumeEvent;
 import org.bukkit.inventory.ItemStack;
 import frostvein.sampires.remakepire.RemakepirePlugin;
-import frostvein.sampires.remakepire.managers.BeetrootManager;
-import frostvein.sampires.remakepire.managers.SessionManager;
 
 public class BeetrootListener implements Listener {
     private final RemakepirePlugin plugin;
-    private final BeetrootManager beetrootManager;
-    private final SessionManager sessionManager;
 
     /**
      * Create an instance of the Beetroot "garlic" listener.
@@ -23,8 +19,6 @@ public class BeetrootListener implements Listener {
      */
     public BeetrootListener(RemakepirePlugin plugin) {
         this.plugin = plugin;
-        this.beetrootManager = plugin.getBeetrootManager();
-        this.sessionManager = plugin.getSessionManager();
     }
 
     /**
@@ -39,9 +33,9 @@ public class BeetrootListener implements Listener {
         Player player = event.getPlayer();
         ItemStack item = event.getItem();
 
-        if (this.sessionManager.isSessionActive()) {
+        if (this.plugin.getSessionManager().isSessionActive()) {
             if (item.getType() == Material.BEETROOT) {
-                this.beetrootManager.handleBeetrootConsumption(player);
+                this.plugin.getBeetrootManager().handleBeetrootConsumption(player);
             }
         }
     }

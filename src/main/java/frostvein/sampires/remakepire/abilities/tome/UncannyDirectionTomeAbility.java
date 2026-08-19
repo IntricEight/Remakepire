@@ -1,5 +1,7 @@
 package frostvein.sampires.remakepire.abilities.tome;
 
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -22,22 +24,26 @@ public class UncannyDirectionTomeAbility extends TomeAbility {
             return false;
 
         } else {
-            final double townCenterX = this.plugin.getConfigManager().getTownCenterX();
-            final double townCenterZ = this.plugin.getConfigManager().getTownCenterZ();
+            final double townCenterX = this.plugin.getConfigManager().getTownCenterX(), townCenterZ = this.plugin.getConfigManager().getTownCenterZ();
 
             (new BukkitRunnable() {
-                final ConversionAssistant conversionAssistant =  new ConversionAssistant();
                 int ticksRemaining = 140;
 
                 public void run() {
                     if (this.ticksRemaining > 0 && player.isOnline()) {
                         Location currentLocation = player.getLocation();
-                        double deltaX = townCenterX - currentLocation.getX(), deltaZ = townCenterZ - currentLocation.getZ();
-                        double distance = Math.sqrt(deltaX * deltaX + deltaZ * deltaZ);
+                        final double deltaX = townCenterX - currentLocation.getX(), deltaZ = townCenterZ - currentLocation.getZ();
+                        final double distance = Math.sqrt(deltaX * deltaX + deltaZ * deltaZ);
 
-                        String direction = conversionAssistant.getRelativeDirection(deltaX, deltaZ, currentLocation.getYaw());
-                        String actionBarMessage = String.format("§6Town Center: §f %s §7(§f%.0f blocks§7)", direction, distance);
-                        UncannyDirectionTomeAbility.this.plugin.getSessionManager().sendActionBar(player, actionBarMessage);
+                        final String direction = ConversionAssistant.getRelativeDirection(deltaX, deltaZ, currentLocation.getYaw());
+                        final Component actionBarMessage = Component.text("Town Center: ", NamedTextColor.GOLD)
+                                .append(Component.text(direction, NamedTextColor.WHITE))
+                                .append(Component.text(" (", NamedTextColor.GRAY))
+                                .append(Component.text(String.format("%.0f", distance), NamedTextColor.WHITE))
+                                .append(Component.text(" blocks)", NamedTextColor.GRAY));
+
+                        player.sendActionBar(actionBarMessage);
+
                         this.ticksRemaining -= 4;
 
                     } else {

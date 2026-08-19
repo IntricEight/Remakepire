@@ -1,13 +1,15 @@
 package frostvein.sampires.remakepire.managers;
 
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import net.md_5.bungee.api.chat.ClickEvent;
-import net.md_5.bungee.api.chat.ComponentBuilder;
-import net.md_5.bungee.api.chat.HoverEvent;
-import net.md_5.bungee.api.chat.TextComponent;
-import net.md_5.bungee.api.chat.ClickEvent.Action;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.event.HoverEvent;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.title.Title;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
@@ -34,6 +36,7 @@ public class VampireManager {
     private final Map<UUID, Double> lungingPlayers = new HashMap<>();
     private final Map<UUID, Integer> stageCaps = new HashMap<>();
     private static final long LEVEL_CHANGE_COOLDOWN = 5000L, LEVEL_CHANGE_TIMEOUT = 10000L, PROTECTION_DURATION = 10000L;
+    // Vampire state tags
     public static final String HUMAN_TAG = "human", VAMPIRE_TAG = "vampire";
     public static final String VAMPIRE_STAGE1_TAG = "vampire_stage1", VAMPIRE_STAGE2_TAG = "vampire_stage2", VAMPIRE_STAGE3_TAG = "vampire_stage3";
     public static final String PROMOTION_BAN_TAG = "promotion_ban";
@@ -256,14 +259,17 @@ public class VampireManager {
                     player.addScoreboardTag(VAMPIRE_STAGE1_TAG);
                     player.setLevel(1);
                     break;
+
                 case 2:
                     player.addScoreboardTag(VAMPIRE_STAGE2_TAG);
                     player.setLevel(2);
                     break;
+
                 case 3:
                     player.addScoreboardTag(VAMPIRE_STAGE3_TAG);
                     player.setLevel(3);
                     break;
+
                 default:
                     player.addScoreboardTag(VAMPIRE_STAGE1_TAG);
                     player.setLevel(1);
@@ -347,10 +353,30 @@ public class VampireManager {
         target.addScoreboardTag("ImmuneToThirst");
         target.setRespawnLocation(this.plugin.getVampireRespawnLocation());
         this.applyTurningEffects(target);
-        target.sendTitle("§4§lTURNED", "", 10, 60, 20);
+        target.showTitle(Title.title(
+                Component.text("TURNED", NamedTextColor.DARK_RED)
+                        .decorate(TextDecoration.BOLD),
+                Component.empty(),
+                Title.Times.times(
+                        Duration.ofMillis(500),
+                        Duration.ofSeconds(3),
+                        Duration.ofSeconds(1)
+                )
+        ));
 
+        // Inform the new sire of their fledgling's creation
         if (turner != null) {
-            turner.sendTitle("§4§lNEW BLOOD", "", 10, 60, 20);
+            turner.showTitle(Title.title(
+                    Component.text("NEW BLOOD", NamedTextColor.DARK_RED)
+                            .decorate(TextDecoration.BOLD),
+                    Component.empty(),
+                    Title.Times.times(
+                            Duration.ofMillis(500),
+                            Duration.ofSeconds(3),
+                            Duration.ofSeconds(1)
+                    )
+            ));
+
             turner.playSound(turner.getLocation(), Sound.ENTITY_ZOMBIE_VILLAGER_CURE, 0.5F, 1.2F);
         }
 
@@ -367,8 +393,9 @@ public class VampireManager {
         Bukkit.getScheduler().runTaskLater(this.plugin, () -> {
             if (target.isOnline() && this.isVampire(target)) {
                 target.removeScoreboardTag("ImmuneToThirst");
-                target.sendMessage("§4§lThe Thirst Awakens");
-                target.sendMessage("§cYour first feeling as a vampire, is the need to feed... Your thirst will now start depleting over time.");
+                target.sendMessage(Component.text("The Thirst Awakens", NamedTextColor.DARK_RED)
+                        .decorate(TextDecoration.BOLD));
+                target.sendMessage(Component.text("Your first feeling as a vampire, is the need to feed... Your thirst will now start depleting over time.", NamedTextColor.RED));
                 target.playSound(target, Sound.AMBIENT_SOUL_SAND_VALLEY_MOOD, SoundCategory.MASTER, 1.0F, 1.2F);
             }
 
@@ -391,34 +418,30 @@ public class VampireManager {
      * @param turner the player who turned the target.
      */
     private void sendTurningMessages(Player target, Player turner) {
-        target.sendMessage("§4THE TURNING");
+        target.sendMessage(Component.text("THE TURNING", NamedTextColor.DARK_RED));
         target.sendMessage("");
 
         if (turner != null) {
-            target.sendMessage("§cThe bite of " + turner.getName() + " courses through your veins...");
+            target.sendMessage(Component.text("The bite of " + turner.getName() + " courses through your veins...", NamedTextColor.RED));
         } else {
-            target.sendMessage("§cDark forces flow through your veins...");
+            target.sendMessage(Component.text("Dark forces flow through your veins...", NamedTextColor.RED));
         }
 
-        target.sendMessage("§cYour heart slows... then stops...");
-        target.sendMessage("§cDarkness consumes your vision...");
+        target.sendMessage(Component.text("Your heart slows... then stops...", NamedTextColor.RED));
+        target.sendMessage(Component.text("Darkness consumes your vision...", NamedTextColor.RED));
         target.sendMessage("");
-        target.sendMessage("§cYou awaken... different. Changed. Cursed.");
-        target.sendMessage("§cYou are now a Stage 1 vampire.");
+        target.sendMessage(Component.text("You awaken... different. Changed. Cursed.", NamedTextColor.RED));
+        target.sendMessage(Component.text("You are now a Stage 1 vampire.", NamedTextColor.RED));
         target.sendMessage("");
 
-        TextComponent prefixText = new TextComponent("§7When you are ready to accept your new self, ");
-        TextComponent clickableText = new TextComponent("§e§n[CLICK HERE]");
-        clickableText.setClickEvent(new ClickEvent(Action.RUN_COMMAND, "/pow texture"));
-        clickableText.setHoverEvent(new HoverEvent(net.md_5.bungee.api.chat.HoverEvent.Action.SHOW_TEXT, (new ComponentBuilder("§7Click to apply the Creature Of The Night texture pack")).create()));
-        TextComponent suffixText = new TextComponent("§7 to have the Creature Of The Night texture pack applied.");
-        TextComponent fullMessage = new TextComponent("");
-
-        fullMessage.addExtra(prefixText);
-        fullMessage.addExtra(clickableText);
-        fullMessage.addExtra(suffixText);
-
-        target.spigot().sendMessage(fullMessage);
+        target.sendMessage(Component.text("When you are ready to accept your new self, ", NamedTextColor.GRAY)
+                .append(Component.text("[CLICK HERE]", NamedTextColor.YELLOW)
+                        .decorate(TextDecoration.UNDERLINED)
+                        .clickEvent(ClickEvent.runCommand("/pow texture"))
+                        .hoverEvent(HoverEvent.showText(Component.text("Click to apply the Creature Of The Night texture pack", NamedTextColor.GRAY)))
+                )
+                .append(Component.text(" to have the Creature Of The Night texture pack applied.", NamedTextColor.GRAY))
+        );
         target.sendMessage("");
     }
 
@@ -430,26 +453,26 @@ public class VampireManager {
     public void reduceVampireStage(Player player) {
         if (player.getScoreboardTags().contains(VAMPIRE_STAGE3_TAG)) {
             this.setPlayerAsVampire(player, 2);
-            player.sendMessage("§6Your vampire power has diminished. You are now Stage 2.");
+            player.sendMessage(Component.text("Your vampire power has diminished. You are now Stage 2.", NamedTextColor.GOLD));
             this.plugin.getVampireAbilityManager().clearAllCooldowns(player);
-            player.sendMessage("§dThough your essence grows weaker, your abilities cooldowns are renewed once more");
+            player.sendMessage(Component.text("Though your essence grows weaker, your abilities cooldowns are renewed once more", NamedTextColor.LIGHT_PURPLE));
 
             if (this.plugin.getHolyWaterEffectManager() != null && this.plugin.getHolyWaterEffectManager().isAbilitiesDisabled(player)) {
                 this.plugin.getHolyWaterEffectManager().removeHolyWaterEffect(player, true);
-                player.sendMessage("§aThe holy water's grip on you has been shattered by your demotion.");
+                player.sendMessage(Component.text("The holy water's grip on you has been shattered by your demotion.", NamedTextColor.GREEN));
             }
 
             this.applyDemotionEffectsToNearbyHumans(player);
 
         } else if (player.getScoreboardTags().contains(VAMPIRE_STAGE2_TAG)) {
             this.setPlayerAsVampire(player, 1);
-            player.sendMessage("§6Your vampire power has diminished. You are now Stage 1.");
+            player.sendMessage(Component.text("Your vampire power has diminished. You are now Stage 1.", NamedTextColor.GOLD));
             this.plugin.getVampireAbilityManager().clearAllCooldowns(player);
-            player.sendMessage("§dThough your essence grows weaker, your abilities cooldowns are renewed once more");
+            player.sendMessage(Component.text("Though your essence grows weaker, your abilities cooldowns are renewed once more", NamedTextColor.LIGHT_PURPLE));
 
             if (this.plugin.getHolyWaterEffectManager() != null && this.plugin.getHolyWaterEffectManager().isAbilitiesDisabled(player)) {
                 this.plugin.getHolyWaterEffectManager().removeHolyWaterEffect(player, true);
-                player.sendMessage("§aThe holy water's grip on you has been shattered by your demotion.");
+                player.sendMessage(Component.text("The holy water's grip on you has been shattered by your demotion.", NamedTextColor.GREEN));
             }
 
             this.applyDemotionEffectsToNearbyHumans(player);
@@ -464,11 +487,12 @@ public class VampireManager {
     private void applyDemotionEffectsToNearbyHumans(Player vampire) {
         Location vampireLocation = vampire.getLocation();
 
-        for(Player nearbyPlayer : Bukkit.getOnlinePlayers()) {
+        for (Player nearbyPlayer : Bukkit.getOnlinePlayers()) {
             if (this.isHuman(nearbyPlayer) && nearbyPlayer.getWorld().equals(vampire.getWorld())) {
                 if (nearbyPlayer.getLocation().distance(vampireLocation) <= 10) {
-                    nearbyPlayer.sendMessage("§8You feel a darkness lunge out at you, a vampire near you has lost a piece of their essence and grown weaker...");
+                    nearbyPlayer.sendMessage(Component.text("You feel a darkness lunge out at you, a vampire near you has lost a piece of their essence and grown weaker...", NamedTextColor.DARK_GRAY));
                     nearbyPlayer.playSound(nearbyPlayer.getLocation(), Sound.ENTITY_WARDEN_HEARTBEAT, SoundCategory.MASTER, 1.0F, 0.8F);
+
                     Vector direction = nearbyPlayer.getLocation().toVector().subtract(vampireLocation.toVector()).normalize();
                     nearbyPlayer.setVelocity(direction.multiply(2.4));
                 }
@@ -479,7 +503,7 @@ public class VampireManager {
     /**
      * Permakill a player and inform them of their final death.
      *
-     * @param player the vampire who has been permakilled.
+     * @param player the player who has been permakilled.
      */
     public void killPlayerPermanently(Player player) {
         this.plugin.getServer().getScheduler().runTaskLater(this.plugin, () -> {
@@ -496,14 +520,25 @@ public class VampireManager {
             player.setGameMode(GameMode.SPECTATOR);
             player.addScoreboardTag(DeathHandler.PERMAKILLED_TAG);
 
-            player.sendTitle("§4§lFINAL DEATH", "§7Your journey has ended", 10, 100, 30);
+            player.showTitle(Title.title(
+                    Component.text("FINAL DEATH", NamedTextColor.DARK_RED)
+                            .decorate(TextDecoration.BOLD),
+                    Component.text("Your journey has ended", NamedTextColor.GRAY),
+                    Title.Times.times(
+                            Duration.ofMillis(500),
+                            Duration.ofSeconds(5),
+                            Duration.ofMillis(1500)
+                    )
+            ));
+
             player.sendMessage("");
-            player.sendMessage("§4§lPERMANENTLY KILLED");
+            player.sendMessage(Component.text("PERMANENTLY KILLED", NamedTextColor.DARK_RED)
+                    .decorate(TextDecoration.BOLD));
             player.sendMessage("");
-            player.sendMessage("§7Your soul has been released from this mortal realm.");
-            player.sendMessage("§7You are now in spectator mode.");
+            player.sendMessage(Component.text("Your soul has been released from this mortal realm.", NamedTextColor.GRAY));
+            player.sendMessage(Component.text("You are now in spectator mode.", NamedTextColor.GRAY));
             player.sendMessage("");
-            player.sendMessage("§8Watch over the remaining survivors...");
+            player.sendMessage(Component.text("Watch over the remaining survivors...", NamedTextColor.DARK_GRAY));
             player.sendMessage("");
 
             player.playSound(player.getLocation(), Sound.ENTITY_WITHER_DEATH, SoundCategory.MASTER, 0.5F, 0.5F);
@@ -619,17 +654,18 @@ public class VampireManager {
             // Force the player to return to the lowest level
             this.setPlayerAsVampire(player, 1);
 
+            player.sendMessage(Component.text("DEATH PENALTY", NamedTextColor.DARK_RED)
+                    .decorate(TextDecoration.BOLD));
+
             // If vampire leveling is capped, inform the player of their new weakness
             if (plugin.getConfigManager().isVampireLevelingCapped()) {
                 player.addScoreboardTag(PROMOTION_BAN_TAG);
 
-                player.sendMessage("§4§lDEATH PENALTY");
-                player.sendMessage("§c§lYour death has cursed you with weakness.");
-                player.sendMessage("§c§lYou cannot grow stronger until the next session begins...");
+                player.sendMessage(Component.text("Your death has cursed you with weakness.", NamedTextColor.RED));
+                player.sendMessage(Component.text("You cannot grow stronger until the next session begins...", NamedTextColor.RED));
             } else {
-                player.sendMessage("§4§lDEATH PENALTY");
-                player.sendMessage("§4§lYour death has sapped your blood, weakened you...");
-                player.sendMessage("§4§lAnd yet, your potential remains. Grow strong, creature of the night.");
+                player.sendMessage(Component.text("Your death has sapped your blood, weakened you...", NamedTextColor.RED));
+                player.sendMessage(Component.text("And yet, your potential remains. Grow strong, creature of the night.", NamedTextColor.RED));
             }
         }
     }
@@ -647,7 +683,7 @@ public class VampireManager {
      * Remove the vampire stage promotion bans from all online players.
      */
     public void clearAllPromotionBans() {
-        for(Player player : Bukkit.getOnlinePlayers()) {
+        for (Player player : Bukkit.getOnlinePlayers()) {
             this.clearPromotionBan(player);
         }
     }
@@ -798,7 +834,7 @@ public class VampireManager {
         int corrections = 0, skipped = 0;
         final int maxCorrectionsPerRun = 3;
 
-        for(Player player : Bukkit.getOnlinePlayers()) {
+        for (Player player : Bukkit.getOnlinePlayers()) {
             if (corrections >= maxCorrectionsPerRun) {
                 break;
             }

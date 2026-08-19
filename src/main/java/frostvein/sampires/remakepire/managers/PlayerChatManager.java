@@ -2,17 +2,16 @@ package frostvein.sampires.remakepire.managers;
 
 import java.util.HashMap;
 import java.util.Map;
-import net.md_5.bungee.api.chat.ClickEvent;
-import net.md_5.bungee.api.chat.ComponentBuilder;
-import net.md_5.bungee.api.chat.HoverEvent;
-import net.md_5.bungee.api.chat.TextComponent;
-import net.md_5.bungee.api.chat.ClickEvent.Action;
+import io.papermc.paper.event.player.AsyncChatEvent;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.event.HoverEvent;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.ChatColor;
-import org.bukkit.Server;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.AsyncPlayerChatEvent;
 import frostvein.sampires.remakepire.RemakepirePlugin;
 
 public class PlayerChatManager implements Listener {
@@ -54,17 +53,20 @@ public class PlayerChatManager implements Listener {
     @EventHandler(
             ignoreCancelled = true
     )
-    public void onAsyncPlayerChat(AsyncPlayerChatEvent event) {
+    public void onAsyncPlayerChat(AsyncChatEvent event) {
         Player player = event.getPlayer();
 
         if (this.plugin.getConfigManager().isFirstMessageBlockingEnabled()) {
             if (event.getPlayer().getScoreboardTags().contains("ChatPrevented")) {
                 event.setCancelled(true);
-                player.getServer().broadcastMessage("<" + player.getName() + "> " + event.getMessage());
+                String message = PlainTextComponentSerializer.plainText().serialize(event.message());
+
+                player.getServer().broadcast(Component.text("<" + player.getName() + "> " + message));
 
             } else {
                 event.setCancelled(true);
-                String originalMessage = event.getMessage();
+                String originalMessage = PlainTextComponentSerializer.plainText().serialize(event.message());
+
                 this.pendingMessages.put(player, originalMessage);
                 this.sendPreventionMessage(player, originalMessage);
             }
@@ -83,17 +85,20 @@ public class PlayerChatManager implements Listener {
 
         if (translatedMessage.contains("[Click Here]")) {
             String[] parts = translatedMessage.split("\\[Click Here\\]", 2);
-            TextComponent message = new TextComponent("\n" + parts[0]);
-            TextComponent clickHere = new TextComponent(ChatColor.AQUA + "[Click Here]");
-            clickHere.setClickEvent(new ClickEvent(Action.RUN_COMMAND, "/pow sendmessage"));
-            clickHere.setHoverEvent(new HoverEvent(net.md_5.bungee.api.chat.HoverEvent.Action.SHOW_TEXT, (new ComponentBuilder(ChatColor.GREEN + "Click to send your message: " + ChatColor.WHITE + originalMessage)).create()));
-            message.addExtra(clickHere);
+            Component message = Component.text("\n" + parts[0])
+                    .append(Component.text("[Click Here]", NamedTextColor.AQUA)
+                            .clickEvent(ClickEvent.runCommand("/pow sendmessage"))
+                            .hoverEvent(HoverEvent.showText(Component.text("Click to send your message: ", NamedTextColor.GREEN)
+                                    .append(Component.text(originalMessage, NamedTextColor.WHITE)))
+                    )
+            );
 
             if (parts.length > 1) {
-                message.addExtra(new TextComponent(parts[1]));
+                message = message.append(Component.text(parts[1]));
             }
 
-            player.spigot().sendMessage(message);
+            player.sendMessage(message);
+
         } else {
             player.sendMessage("\n" + translatedMessage);
         }
@@ -108,7 +113,7 @@ public class PlayerChatManager implements Listener {
         String pendingMessage = this.pendingMessages.get(player);
 
         if (pendingMessage != null) {
-            player.getServer().broadcastMessage("<" + player.getName() + "> " + pendingMessage);
+            player.getServer().broadcast(Component.text("<" + player.getName() + "> " + pendingMessage));
             this.pendingMessages.remove(player);
         }
     }

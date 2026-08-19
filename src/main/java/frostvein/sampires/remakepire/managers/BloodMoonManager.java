@@ -1,9 +1,11 @@
 package frostvein.sampires.remakepire.managers;
 
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
 import org.bukkit.Sound;
 import org.bukkit.World;
-import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -12,9 +14,9 @@ import org.bukkit.scheduler.BukkitTask;
 import frostvein.sampires.remakepire.RemakepirePlugin;
 
 public class BloodMoonManager {
-    private boolean isBloodMoonActive = false;
     private RemakepirePlugin plugin;
     private BukkitTask vampireBuffTask;
+    private boolean isBloodMoonActive = false;
 
     /**
      * Create an instance of the Blood Moon manager.
@@ -35,9 +37,9 @@ public class BloodMoonManager {
      * Begin or end the blood moon depending on the time of day and moon phase
      */
     private void checkTimeAndMoon() {
-        long fullTime = this.plugin.getWorld().getFullTime();
-        boolean isNight = !this.plugin.getEffectManager().isDaytime(this.plugin.getWorld());
-        boolean isFullMoon = fullTime % 192000L < 24000L;
+        final long fullTime = this.plugin.getWorld().getFullTime();
+        final boolean isNight = !this.plugin.getEffectManager().isDaytime(this.plugin.getWorld());
+        final boolean isFullMoon = fullTime % 192000L < 24000L;
 
         if (isNight && isFullMoon && !this.isBloodMoonActive) {
             this.startBloodMoon(this.plugin.getWorld());
@@ -80,7 +82,9 @@ public class BloodMoonManager {
                 this.vampireBuffTask = null;
             }
 
-            this.plugin.getWorld().getPlayers().forEach((player) -> player.sendMessage("§7The blood moon fades away..."));
+            this.plugin.getWorld().getPlayers().forEach(
+                    (player) -> player.sendMessage(Component.text("The blood moon fades away...", NamedTextColor.GRAY))
+            );
         }
     }
 
@@ -91,7 +95,8 @@ public class BloodMoonManager {
      */
     private void announceBloodMoon(World world) {
         world.getPlayers().forEach((player) -> {
-            player.sendMessage("§c§lA blood moon rises...");
+            player.sendMessage(Component.text("A blood moon rises...", NamedTextColor.RED)
+                    .decorate(TextDecoration.BOLD));
             player.playSound(player, Sound.AMBIENT_CRIMSON_FOREST_MOOD, 1.0F, 1.0F);
         });
     }
@@ -101,15 +106,19 @@ public class BloodMoonManager {
      */
     private void applyVampireBuffs() {
         if (this.isBloodMoonActive) {
-            for(Player player : Bukkit.getOnlinePlayers()) {
+            for (Player player : Bukkit.getOnlinePlayers()) {
                 if (this.plugin.getVampireManager().isVampireStage2(player) || this.plugin.getVampireManager().isVampireStage3(player)) {
                     if (this.plugin.getEffectManager().canPlayerSeeSky(player)) {
-                        player.addPotionEffect(new PotionEffect(PotionEffectType.UNLUCK, 240, 0, false, false), false);
+                        // Dev note: Newer standards are to remove and replace the potion effect if I need to guarantee it is applied,
+                        // instead of using the addPotionEffect variant that forces this behavior (Which has since been deprecated)
+                        player.removePotionEffect(PotionEffectType.UNLUCK);
+                        player.addPotionEffect(new PotionEffect(PotionEffectType.UNLUCK, 240, 0, false,false));
 
+                        // Inform the vampire of the Blood Moon's influence
                         if (!player.getScoreboardTags().contains(SessionManager.INFORMED_BLOOD_MOON)) {
                             player.addScoreboardTag(SessionManager.INFORMED_BLOOD_MOON);
                             player.playSound(player, Sound.AMBIENT_NETHER_WASTES_MOOD, 1.0F, 1.0F);
-                            player.sendMessage("§4You feel the Blood Moon's power coursing through your veins...");
+                            player.sendMessage(Component.text("You feel the Blood Moon's power coursing through your veins...", NamedTextColor.DARK_RED));
                         }
                     } else {
                         player.removePotionEffect(PotionEffectType.UNLUCK);

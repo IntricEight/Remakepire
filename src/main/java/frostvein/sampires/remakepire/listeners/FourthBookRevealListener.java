@@ -1,8 +1,10 @@
 package frostvein.sampires.remakepire.listeners;
 
 import java.util.List;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.block.Chest;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -10,13 +12,10 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.BookMeta;
 import frostvein.sampires.remakepire.RemakepirePlugin;
-import frostvein.sampires.remakepire.managers.ConfigManager;
 
 public class FourthBookRevealListener implements Listener {
     private final RemakepirePlugin plugin;
-    private final ConfigManager configManager;
     private final List<Location> tomeChestLocations;
     private final Location townChestLocation;
 
@@ -27,8 +26,7 @@ public class FourthBookRevealListener implements Listener {
      */
     public FourthBookRevealListener(RemakepirePlugin plugin) {
         this.plugin = plugin;
-        this.configManager = plugin.getConfigManager();
-        this.tomeChestLocations = configManager.getTomeChestLocations();
+        this.tomeChestLocations = plugin.getConfigManager().getTomeChestLocations();
 
         if (plugin.getWorld() != null) {
             this.townChestLocation = new Location(plugin.getWorld(), 76.0, 80.0, 407.0);
@@ -91,7 +89,7 @@ public class FourthBookRevealListener implements Listener {
      * @return {@code true} if the location matches that of a tome chest.
      */
     private boolean isTomeChest(Location location) {
-        for(Location tomeLocation : this.tomeChestLocations) {
+        for (Location tomeLocation : this.tomeChestLocations) {
             if (location.getBlockX() == tomeLocation.getBlockX() && location.getBlockY() == tomeLocation.getBlockY() && location.getBlockZ() == tomeLocation.getBlockZ() && location.getWorld().equals(tomeLocation.getWorld())) {
                 return true;
             }
@@ -130,8 +128,10 @@ public class FourthBookRevealListener implements Listener {
         chestInventory.addItem(fourthBook);
         this.markAsRevealed();
 
-        player.sendMessage("§8§o[As you open the chest, an unfamiliar book suddenly materializes within...]");
-        player.sendMessage("§4§o[The smell of old blood emanates from its pages...]");
+        player.sendMessage(Component.text("[As you open the chest, an unfamiliar book suddenly materializes within...]", NamedTextColor.DARK_GRAY)
+                .decorate(TextDecoration.ITALIC));
+        player.sendMessage(Component.text("[The smell of old blood emanates from its pages...]", NamedTextColor.DARK_RED)
+                .decorate(TextDecoration.ITALIC));
 
         this.plugin.logInfo("FOURTH BOOK REVEALED: " + player.getName() + " opened tome chest at " + chest.getLocation().getBlockX() + ", " + chest.getLocation().getBlockY() + ", " + chest.getLocation().getBlockZ());
     }

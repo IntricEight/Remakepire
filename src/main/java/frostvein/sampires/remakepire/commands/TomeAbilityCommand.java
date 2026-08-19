@@ -3,6 +3,9 @@ package frostvein.sampires.remakepire.commands;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -11,12 +14,10 @@ import org.bukkit.entity.Player;
 import frostvein.sampires.remakepire.RemakepirePlugin;
 import frostvein.sampires.remakepire.abilities.tome.TomeAbility;
 import frostvein.sampires.remakepire.managers.TomeManager;
-import frostvein.sampires.remakepire.managers.VampireManager;
 
 public class TomeAbilityCommand implements CommandExecutor, TabCompleter {
     private final RemakepirePlugin plugin;
     private final TomeManager tomeManager;
-    private final VampireManager vampireManager;
 
     /**
      * Create an instance of the plugin's tome ability command handler.
@@ -26,7 +27,6 @@ public class TomeAbilityCommand implements CommandExecutor, TabCompleter {
     public TomeAbilityCommand(RemakepirePlugin plugin) {
         this.plugin = plugin;
         this.tomeManager = plugin.getTomeManager();
-        this.vampireManager = plugin.getVampireManager();
     }
 
     /**
@@ -36,11 +36,11 @@ public class TomeAbilityCommand implements CommandExecutor, TabCompleter {
      */
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage("§cOnly players can use tome abilities.");
+            sender.sendMessage(Component.text("Only players can use tome abilities.", NamedTextColor.RED));
             return true;
 
-        } else if (!this.vampireManager.isHuman(player)) {
-            player.sendMessage("§cOnly humans can use tome abilities.");
+        } else if (!this.plugin.getVampireManager().isHuman(player)) {
+            player.sendMessage(Component.text("Only humans can use tome abilities.", NamedTextColor.RED));
             return true;
 
         } else if (args.length == 0) {
@@ -64,31 +64,33 @@ public class TomeAbilityCommand implements CommandExecutor, TabCompleter {
         Set<String> playerAbilities = this.tomeManager.getPlayerAbilities(player);
 
         if (playerAbilities.isEmpty()) {
-            player.sendMessage("§7You have not learned any tome abilities yet.");
-            player.sendMessage("§7Find ancient tomes scattered throughout the world to learn new abilities.");
+            player.sendMessage(Component.text("You have not learned any tome abilities yet.", NamedTextColor.GRAY));
+            player.sendMessage(Component.text("Find ancient tomes scattered throughout the world to learn new abilities.", NamedTextColor.GRAY));
 
         } else {
-            player.sendMessage("§6§l=== YOUR TOME ABILITIES ===");
+            player.sendMessage(Component.text("=== YOUR TOME ABILITIES ===", NamedTextColor.GOLD)
+                    .decorate(TextDecoration.BOLD));
 
-            for(String abilityName : playerAbilities) {
+            for (String abilityName : playerAbilities) {
                 TomeAbility ability = this.tomeManager.getAbility(abilityName);
-                player.sendMessage("§e" + abilityName);
+                player.sendMessage(Component.text(abilityName, NamedTextColor.YELLOW));
 
                 if (ability != null) {
                     String[] descriptionLines = ability.getDescriptionLines();
 
-                    for(String line : descriptionLines) {
-                        player.sendMessage("§7  " + line);
+                    for (String line : descriptionLines) {
+                        player.sendMessage(Component.text("  " + line, NamedTextColor.GRAY));
                     }
                 } else {
-                    player.sendMessage("§7  No description available");
+                    player.sendMessage(Component.text("  No description available", NamedTextColor.GRAY));
                 }
 
-                player.sendMessage("§8  Use: /pow tome " + abilityName.toLowerCase());
+                player.sendMessage(Component.text("  Use: /pow tome " + abilityName.toLowerCase(), NamedTextColor.DARK_GRAY));
                 player.sendMessage("");
             }
 
-            player.sendMessage("§7Total abilities: §e" + playerAbilities.size());
+            player.sendMessage(Component.text("Total abilities: ", NamedTextColor.GRAY)
+                    .append(Component.text(playerAbilities.size(), NamedTextColor.YELLOW)));
         }
 
         return true;
@@ -112,11 +114,12 @@ public class TomeAbilityCommand implements CommandExecutor, TabCompleter {
      * @param player The human checking their options.
      */
     private void sendUsage(Player player) {
-        player.sendMessage("§6§l=== TOME ABILITIES ===");
-        player.sendMessage("§e/pow tome list §7- Show your available abilities");
-        player.sendMessage("§e/pow tome <ability> §7- Use a specific ability");
+        player.sendMessage(Component.text("=== TOME ABILITIES ===", NamedTextColor.GOLD)
+                .decorate(TextDecoration.BOLD));
+        CommandHandler.sendCommandInstruction(player, "/pow tome list", "Show your available abilities");
+        CommandHandler.sendCommandInstruction(player, "/pow tome <ability>", "Use a specific ability");
         player.sendMessage("");
-        player.sendMessage("§7Find ancient tomes in the world to learn new abilities.");
+        player.sendMessage(Component.text("Find ancient tomes in the world to learn new abilities.", NamedTextColor.RED));
     }
 
     /**

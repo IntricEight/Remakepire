@@ -12,6 +12,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.Sound;
@@ -25,9 +28,8 @@ import frostvein.sampires.remakepire.RemakepirePlugin;
 public class ThirstManager {
     private final RemakepirePlugin plugin;
     private final VampireManager vampireManager;
-    private final SessionManager sessionManager;
-    private final ConfigManager configManager;
     private final float THIRST_PER_SECOND;
+    // The number of minutes that vampires will not lose blood naturally during after a stage change
     private final int IMMUNITY_DURATION_MINUTES = 15;
     private File immunityFile;
     private Map<UUID, Integer> immunityTimers = new HashMap<>();
@@ -43,11 +45,9 @@ public class ThirstManager {
      */
     public ThirstManager(RemakepirePlugin plugin) {
         this.plugin = plugin;
-        this.configManager = plugin.getConfigManager();
         this.vampireManager = plugin.getVampireManager();
-        this.sessionManager = plugin.getSessionManager();
         this.thirstQuenchers = this.initializeThirstQuenchers();
-        this.THIRST_PER_SECOND = 1.0F / (float)configManager.getThirstDepletionMinutes() / 60.0F;
+        this.THIRST_PER_SECOND = 1.0F / (float)plugin.getConfigManager().getThirstDepletionMinutes() / 60.0F;
         this.setupImmunitySystem();
         this.startThirstTask();
     }
@@ -145,7 +145,7 @@ public class ThirstManager {
      */
     private void saveImmunityData() {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(this.immunityFile))) {
-            for(Map.Entry<UUID, Integer> entry : this.immunityTimers.entrySet()) {
+            for (Map.Entry<UUID, Integer> entry : this.immunityTimers.entrySet()) {
                 writer.write((entry.getKey()).toString() + ":" + entry.getValue());
                 writer.newLine();
             }
@@ -160,8 +160,8 @@ public class ThirstManager {
     private void startThirstTask() {
         this.thirstTask = (new BukkitRunnable() {
             public void run() {
-                if (ThirstManager.this.sessionManager.isSessionActive()) {
-                    for(Player player : Bukkit.getOnlinePlayers()) {
+                if (ThirstManager.this.plugin.getSessionManager().isSessionActive()) {
+                    for (Player player : Bukkit.getOnlinePlayers()) {
                         if (ThirstManager.this.vampireManager.isVampire(player)) {
                             ThirstManager.this.processVampireThirst(player);
                         }
@@ -184,7 +184,7 @@ public class ThirstManager {
      * @param vampire the vampire losing blood.
      */
     private void processVampireThirst(Player vampire) {
-        if (!vampire.getScoreboardTags().contains(THIRST_IMMUNITY_TAG)) {
+        if (!this.hasThirstImmunity(vampire)) {
             float currentThirst = vampire.getExp();
             float newThirst = currentThirst - this.THIRST_PER_SECOND;
 
@@ -313,9 +313,10 @@ public class ThirstManager {
      */
     public void promoteVampire(Player vampire) {
         if (this.vampireManager.hasPromotionBan(vampire)) {
-            vampire.sendMessage("§4§lPROMOTION DENIED");
-            vampire.sendMessage("§c§lThe curse of death still lingers upon you...");
-            vampire.sendMessage("§c§lYou cannot grow stronger until the next session begins.");
+            vampire.sendMessage(Component.text("PROMOTION DENIED", NamedTextColor.DARK_RED)
+                    .decorate(TextDecoration.BOLD));
+            vampire.sendMessage(Component.text("The curse of death still lingers upon you...", NamedTextColor.RED));
+            vampire.sendMessage(Component.text("You cannot grow stronger until the next session begins.", NamedTextColor.RED));
             vampire.setExp(0.99F);
 
         } else {
@@ -326,9 +327,10 @@ public class ThirstManager {
                 int stageCap = this.vampireManager.getStageCap(vampire);
 
                 if (newStage > stageCap) {
-                    vampire.sendMessage("§4§lPROMOTION DENIED");
-                    vampire.sendMessage("§c§lThe weakness of your starvation still haunts you...");
-                    vampire.sendMessage("§c§lYou cannot reach Stage " + newStage + " until the next session begins.");
+                    vampire.sendMessage(Component.text("PROMOTION DENIED", NamedTextColor.DARK_RED)
+                            .decorate(TextDecoration.BOLD));
+                    vampire.sendMessage(Component.text("The weakness of your starvation still haunts you...", NamedTextColor.RED));
+                    vampire.sendMessage(Component.text("You cannot reach Stage " + newStage + " until the next session begins.", NamedTextColor.RED));
                     vampire.setExp(0.99F);
                     return;
                 }
@@ -338,10 +340,11 @@ public class ThirstManager {
             this.giveThirstImmunity(vampire);
             vampire.setExp(0.25F);
 
-            vampire.sendMessage("§4§lASCENSION");
-            vampire.sendMessage("§cThe crimson blood coats the inside of your throat, your pupils dilate as your tension eases.");
-            vampire.sendMessage("§cYour thirst is quenched, you are stronger, for now...");
-            vampire.sendMessage("§5You are now a Stage " + newStage + " vampire.");
+            vampire.sendMessage(Component.text("ASCENSION", NamedTextColor.DARK_RED)
+                    .decorate(TextDecoration.BOLD));
+            vampire.sendMessage(Component.text("The crimson blood coats the inside of your throat, your pupils dilate as your tension eases.", NamedTextColor.RED));
+            vampire.sendMessage(Component.text("Your thirst is quenched, you are stronger, for now...", NamedTextColor.RED));
+            vampire.sendMessage(Component.text("You are now a Stage " + newStage + " vampire.", NamedTextColor.DARK_PURPLE));
             vampire.playSound(vampire, Sound.ENTITY_ZOMBIE_VILLAGER_CURE, SoundCategory.MASTER, 1.0F, 0.5F);
         }
     }
@@ -353,13 +356,14 @@ public class ThirstManager {
      * @param fromStarvation {@code false} if the vampire has dropped their stage because of dying.
      */
     private void demoteVampire(Player vampire, boolean fromStarvation) {
-        int currentStage = this.vampireManager.getVampireStage(vampire);
+        final int currentStage = this.vampireManager.getVampireStage(vampire);
 
         if (currentStage > 1) {
             if (fromStarvation) {
-                int newStage = currentStage - 1;
+                final int newStage = currentStage - 1;
                 this.vampireManager.setStageCap(vampire, newStage);
-                vampire.sendMessage("§4§lYou cannot return to Stage " + currentStage + " until the next session begins.");
+                vampire.sendMessage(Component.text("You cannot return to Stage " + currentStage + " until the next session begins.", NamedTextColor.DARK_RED)
+                        .decorate(TextDecoration.BOLD));
             }
 
             this.vampireManager.reduceVampireStage(vampire);
@@ -367,13 +371,15 @@ public class ThirstManager {
             vampire.setExp(0.5F);
 
             if (fromStarvation) {
-                vampire.sendMessage("§4§lWEAKENING");
-                vampire.sendMessage("§c§lThe pain of hunger stabs through your stomach like a knife.");
-                vampire.sendMessage("§c§lYou feel weaker. Closer to death than ever before... Be careful, spawn.");
+                vampire.sendMessage(Component.text("WEAKENING", NamedTextColor.DARK_RED)
+                        .decorate(TextDecoration.BOLD));
+                vampire.sendMessage(Component.text("The pain of hunger stabs through your stomach like a knife.", NamedTextColor.RED));
+                vampire.sendMessage(Component.text("You feel weaker. Closer to death than ever before... Be careful, spawn.", NamedTextColor.RED));
 
             } else {
-                vampire.sendMessage("§4§lDEATH'S EMBRACE");
-                vampire.sendMessage("§c§lThe world fades to grey, and you awake within your coffin.");
+                vampire.sendMessage(Component.text("DEATH'S EMBRACE", NamedTextColor.DARK_RED)
+                        .decorate(TextDecoration.BOLD));
+                vampire.sendMessage(Component.text("The world fades to grey, and you awake within your resting grounds.", NamedTextColor.RED));
             }
 
             vampire.playSound(vampire, Sound.AMBIENT_SOUL_SAND_VALLEY_MOOD, SoundCategory.MASTER, 1.0F, 1.0F);
@@ -386,7 +392,7 @@ public class ThirstManager {
      * @param vampire the player gaining thirst immunity.
      */
     private void giveThirstImmunity(Player vampire) {
-        UUID playerUUID = vampire.getUniqueId();
+        final UUID playerUUID = vampire.getUniqueId();
         this.immunityTimers.put(playerUUID, IMMUNITY_DURATION_MINUTES);
         vampire.addScoreboardTag(THIRST_IMMUNITY_TAG);
         this.saveImmunityData();
@@ -399,7 +405,7 @@ public class ThirstManager {
         Set<UUID> onlinePlayers = Bukkit.getOnlinePlayers().stream().map(OfflinePlayer::getUniqueId).collect(Collectors.toSet());
         Set<UUID> toRemove = new HashSet<>();
 
-        for(Map.Entry<UUID, Integer> entry : this.immunityTimers.entrySet()) {
+        for (Map.Entry<UUID, Integer> entry : this.immunityTimers.entrySet()) {
             UUID playerUUID = entry.getKey();
 
             if (onlinePlayers.contains(playerUUID)) {
@@ -413,9 +419,10 @@ public class ThirstManager {
                         player.removeScoreboardTag(THIRST_IMMUNITY_TAG);
 
                         if (this.vampireManager.isVampire(player)) {
-                            player.sendMessage("§4§lIMMUNITY EXPIRED");
-                            player.sendMessage("§cThe stabbing pain in your gut tells you everything you need to know...");
-                            player.sendMessage("§cThe time to feed is approaching...");
+                            player.sendMessage(Component.text("IMMUNITY EXPIRED", NamedTextColor.DARK_RED)
+                                    .decorate(TextDecoration.BOLD));
+                            player.sendMessage(Component.text("The stabbing pain in your gut tells you everything you need to know...", NamedTextColor.RED));
+                            player.sendMessage(Component.text("The time to feed is approaching...", NamedTextColor.RED));
                             player.playSound(player, Sound.AMBIENT_SOUL_SAND_VALLEY_MOOD, SoundCategory.MASTER, 1.0F, 1.0F);
                         }
                     }
@@ -425,7 +432,8 @@ public class ThirstManager {
             }
         }
 
-        for(UUID uuid : toRemove) {
+        // Remove the expired immunity timers from the map
+        for (UUID uuid : toRemove) {
             this.immunityTimers.remove(uuid);
         }
 
@@ -439,12 +447,11 @@ public class ThirstManager {
      */
     public void regenerateFood(Player vampire) {
         if (!this.plugin.getHolyWaterEffectManager().isAbilitiesDisabled(vampire)) {
-            int currentFoodLevel = vampire.getFoodLevel();
+            final int currentFoodLevel = vampire.getFoodLevel();
 
             if (currentFoodLevel < 20) {
-                int foodToRegen = Math.min(1, 20 - currentFoodLevel);
-                float thirstCost = (float)foodToRegen * 0.0105F;
-                float currentThirst = vampire.getExp();
+                final int foodToRegen = Math.min(1, 20 - currentFoodLevel);
+                final float thirstCost = foodToRegen * 0.0105F, currentThirst = vampire.getExp();
 
                 if (currentThirst < thirstCost) {
                     if (this.vampireManager.getVampireStage(vampire) > 1) {
