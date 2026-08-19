@@ -59,8 +59,8 @@ public class VampireCureCommand implements CommandExecutor {
             } else {
                 ItemStack holyWater = this.plugin.getHolyWaterEffectManager().findHolyWater(player);
 
-                // Ensure the caster has holy water in their inventory
-                if (holyWater == null) {
+                // Ensure the caster has holy water in their inventory and check if the player is affected by holy water
+                if (holyWater == null && !this.plugin.getHolyWaterEffectManager().isAbilitiesDisabled(player)) {
                     player.sendMessage(Component.text("You need holy water to perform this ritual.", NamedTextColor.RED));
 
                 } else {
@@ -94,9 +94,12 @@ public class VampireCureCommand implements CommandExecutor {
      * @param holyBeacon the beacon being used for the cure.
      */
     private void performCure(Player player, ItemStack holyWater, BeaconSite holyBeacon) {
-        holyWater.setAmount(holyWater.getAmount() - 1);
+        // If holyWater is null, then this player must be affected by an active holy water effect
+        if (holyWater != null) {
+            holyWater.setAmount(holyWater.getAmount() - 1);
+        }
 
-        final Title title = Title.title(
+        player.showTitle(Title.title(
                 Component.text("CURED", NamedTextColor.GOLD, TextDecoration.BOLD),
                 Component.text("The curse is lifted", NamedTextColor.YELLOW),
                 Title.Times.times(
@@ -105,9 +108,7 @@ public class VampireCureCommand implements CommandExecutor {
                         Duration.ofSeconds(3),
                         Duration.ofSeconds(1)
                 )
-        );
-
-        player.showTitle(title);
+        ));
 
         player.sendMessage(Component.text("The holy water burns through your veins...", NamedTextColor.GRAY));
         player.sendMessage(Component.text("The corrupted blood boils away in divine light...", NamedTextColor.GRAY));

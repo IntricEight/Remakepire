@@ -138,7 +138,7 @@ public class ThirstEffectsListener implements Listener {
      * @param stage the vampire's stage.
      */
     private void sendFoodConsumptionMessage(Player vampire, int stage) {
-        vampire.sendMessage("§cThe food tastes like ash in your mouth, and you struggle not to retch...");
+        vampire.sendMessage(Component.text("The food tastes like ash in your mouth, and you struggle not to retch...", NamedTextColor.RED));
     }
 
     /**

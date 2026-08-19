@@ -4,7 +4,6 @@ import io.papermc.paper.event.entity.WaterBottleSplashEvent;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import javax.annotation.Nullable;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
@@ -142,7 +141,7 @@ public class HolyWaterEffectManager implements Listener {
      * @param player the player being searched.
      * @return The bottle of holy water, or {@code null} if none is found.
      */
-    public @Nullable ItemStack findHolyWater(Player player) {
+    public ItemStack findHolyWater(Player player) {
         for (ItemStack item : player.getInventory()) {
             if (ItemTypeChecking.isHolyWater(item)) {
                 return item;

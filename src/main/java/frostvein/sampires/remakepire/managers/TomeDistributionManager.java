@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -243,7 +245,7 @@ public class TomeDistributionManager {
 
         if (bookMeta != null) {
             bookMeta.setTitle(tomeType);
-            bookMeta.setAuthor("§6A source unknown...");
+            bookMeta.author(Component.text("A source unknown...", NamedTextColor.GOLD));
             TomeAbility ability = this.plugin.getTomeManager().getAbility(tomeType);
 
             if (ability != null) {
@@ -294,7 +296,7 @@ public class TomeDistributionManager {
 
         if (meta != null) {
             Enchantment randomEnchantment = this.enchantmentTypes[this.random.nextInt(this.enchantmentTypes.length)];
-            int level = 1;
+            final int level = 1;
             meta.addStoredEnchant(randomEnchantment, level, true);
             enchantedBook.setItemMeta(meta);
         }

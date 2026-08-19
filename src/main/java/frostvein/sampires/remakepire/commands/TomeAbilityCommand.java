@@ -116,8 +116,8 @@ public class TomeAbilityCommand implements CommandExecutor, TabCompleter {
     private void sendUsage(Player player) {
         player.sendMessage(Component.text("=== TOME ABILITIES ===", NamedTextColor.GOLD)
                 .decorate(TextDecoration.BOLD));
-        player.sendMessage("§e/pow tome list §7- Show your available abilities");
-        player.sendMessage("§e/pow tome <ability> §7- Use a specific ability");
+        CommandHandler.sendCommandInstruction(player, "/pow tome list", "Show your available abilities");
+        CommandHandler.sendCommandInstruction(player, "/pow tome <ability>", "Use a specific ability");
         player.sendMessage("");
         player.sendMessage(Component.text("Find ancient tomes in the world to learn new abilities.", NamedTextColor.RED));
     }

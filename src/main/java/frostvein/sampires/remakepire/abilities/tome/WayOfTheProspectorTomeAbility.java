@@ -2,6 +2,8 @@ package frostvein.sampires.remakepire.abilities.tome;
 
 import java.util.Random;
 import java.util.Set;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -34,8 +36,8 @@ public class WayOfTheProspectorTomeAbility extends TomeAbility implements Listen
 
         } else {
             this.sendSuccessMessage(player, "You have absorbed the knowledge of the prospector!");
-            player.sendMessage("§7You now have a permanent 50% chance to receive double drops when mining ores.");
-            player.sendMessage("§7This knowledge flows through your very being - you need not activate it again.");
+            player.sendMessage(Component.text("You now have a permanent 50% chance to receive double drops when mining ores.", NamedTextColor.GRAY));
+            player.sendMessage(Component.text("This knowledge flows through your very being - you need not activate it again.", NamedTextColor.GRAY));
 
             this.plugin.getWorld().playSound(player.getLocation(), "minecraft:block.stone.break", 1.0F, 1.2F);
             this.plugin.getWorld().playSound(player.getLocation(), "minecraft:entity.experience_orb.pickup", 0.5F, 0.8F);

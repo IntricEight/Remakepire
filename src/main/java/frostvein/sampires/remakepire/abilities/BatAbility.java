@@ -1,5 +1,7 @@
 package frostvein.sampires.remakepire.abilities;
 
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Sound;
 import org.bukkit.SoundCategory;
 import org.bukkit.entity.Player;
@@ -30,25 +32,28 @@ public class BatAbility extends VampireAbility {
     public boolean execute(Player player, VampireManager vampireManager, RemakepirePlugin plugin) {
         if (plugin.getBatTransformationManager().isInBatForm(player)) {
             if (plugin.getBatTransformationManager().transformToHuman(player)) {
-                player.sendMessage("§6You transform back into your vampiric form.");
+                player.sendMessage(Component.text("You transform back into your vampiric form.", NamedTextColor.GOLD));
                 player.playSound(player, Sound.ENTITY_BAT_TAKEOFF, SoundCategory.MASTER, 0.8F, 0.8F);
                 return true;
 
             } else {
-                player.sendMessage("§cFailed to transform back to human form.");
+                player.sendMessage(Component.text("Failed to transform back to human form.", NamedTextColor.RED));
                 return false;
             }
         } else {
             if (plugin.getBatTransformationManager().transformToBat(player)) {
-                player.sendMessage("§cIn a flurry of wings, you transform into a bat");
-                player.sendMessage("§cBe warned, if you die in bat form, your human form dies too");
-                player.sendMessage("§7Use §e/pow vability bat §7again to transform back early.");
+                player.sendMessage(Component.text("In a flurry of wings, you transform into a bat.", NamedTextColor.RED));
+                player.sendMessage(Component.text("Be warned, if you die in bat form, your human form dies too.", NamedTextColor.RED));
+                player.sendMessage(Component.text("Use ", NamedTextColor.GRAY)
+                        .append(Component.text("/pow vability bat", NamedTextColor.YELLOW))
+                        .append(Component.text(" again to transform back early.", NamedTextColor.GRAY))
+                );
 
                 player.playSound(player, Sound.ENTITY_BAT_AMBIENT, SoundCategory.MASTER, 1.0F, 1.2F);
                 return true;
 
             } else {
-                player.sendMessage("§cFailed to transform into bat form.");
+                player.sendMessage(Component.text("Failed to transform into bat form.", NamedTextColor.RED));
                 return false;
             }
         }

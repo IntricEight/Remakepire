@@ -1,6 +1,8 @@
 package frostvein.sampires.remakepire.abilities.tome;
 
 import java.util.List;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -42,13 +44,13 @@ public class RallyingCryTomeAbility extends TomeAbility {
             // Give nearby humans the strength effect
             for (Player nearbyHuman : nearbyHumans) {
                 nearbyHuman.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH, STRENGTH_DURATION, STRENGTH_AMPLIFIER, false, false));
-                nearbyHuman.sendMessage("§6" + player.getName() + "'s rallying cry fills you with strength.");
+                nearbyHuman.sendMessage(Component.text(player.getName() + "'s rallying cry fills you with strength.", NamedTextColor.GOLD));
                 othersAffected = true;
             }
 
             // Inform nearby vampires of their inhumanity
             for (Player nearbyVampire : nearbyVampires) {
-                nearbyVampire.sendMessage("§7A human nearby rallies strength to their comrades. The words find no purchase in your cold dead heart.");
+                nearbyVampire.sendMessage(Component.text("A human nearby rallies strength to their comrades. The words find no purchase in your cold dead heart.", NamedTextColor.GRAY));
             }
 
             // Play a sound to show the ability's activation

@@ -1,6 +1,8 @@
 package frostvein.sampires.remakepire.listeners;
 
 import java.util.Set;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.entity.Camel;
 import org.bukkit.entity.CamelHusk;
 import org.bukkit.entity.Donkey;
@@ -58,11 +60,11 @@ public class MountTeamsListener implements Listener {
         // Prevent humans from riding undead mounts and higher vampires from riding living mounts
         if (this.plugin.getVampireManager().isHuman(player) && this.isUndeadMount(mount)) {
             event.setCancelled(true);
-            player.sendMessage("§cThe animal recoils from your warm touch...");
+            player.sendMessage(Component.text("The animal recoils from your warm touch...", NamedTextColor.RED));
 
         } else if (this.plugin.getVampireManager().isVampireStage2OrHigher(player) && this.isLivingMount(mount)) {
             event.setCancelled(true);
-            player.sendMessage("§cThe animal recoils from you as you extend a hand to it...");
+            player.sendMessage(Component.text("The animal recoils from you as you extend a hand to it...", NamedTextColor.RED));
         }
     }
 

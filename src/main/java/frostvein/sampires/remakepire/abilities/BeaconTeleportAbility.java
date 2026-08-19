@@ -47,23 +47,23 @@ public class BeaconTeleportAbility extends VampireAbility {
     public boolean execute(Player player, VampireManager vampireManager, RemakepirePlugin plugin) {
         if (plugin.getBatTransformationManager().isInBatForm(player)) {
             // Stop the player from using the ability while in bat form
-            player.sendMessage("§cYour fragile form cannot handle the strain of using the beacon network.");
+            player.sendMessage(Component.text("Your fragile form cannot handle the strain of using the beacon network.", NamedTextColor.RED));
             return false;
 
         } else if (player.getHealth() < player.getAttribute(Attribute.MAX_HEALTH).getValue()) {
-            player.sendMessage("§cYou find yourself too weak to use that ability... Rest up and heal first.");
+            player.sendMessage(Component.text("You find yourself too weak to use that ability... Rest up and heal first.", NamedTextColor.RED));
             return false;
 
         } else {
             List<BeaconSite> desecratedBeacons = plugin.getBeaconManager().getDesecratedBeacons();
 
             if (desecratedBeacons.isEmpty()) {
-                player.sendMessage("§cNo desecrated beacons are available for beacon travel.");
-                player.sendMessage("§7Beacons must be desecrated to connect to the beacon network.");
+                player.sendMessage(Component.text("No desecrated beacons are available for beacon travel.", NamedTextColor.RED));
+                player.sendMessage(Component.text("Beacons must be desecrated to connect to the beacon network.", NamedTextColor.GRAY));
 
             } else {
                 this.openBeaconTeleportGUI(player, desecratedBeacons);
-                player.sendMessage("§5The shadows whisper of distant beacons...");
+                player.sendMessage(Component.text("The shadows whisper of distant beacons...", NamedTextColor.DARK_PURPLE));
             }
 
             return false;
