@@ -12,7 +12,6 @@
  *  - Add this file (RaiseUndeadAbility.java) to the abilities folder
  *  - Add "raiseundead" to the VAMPIRE_ABILITIES list inside commands/BrigadierCommands.java
  *  - Register RaiseUndeadAbility() in registerAbilities inside managers/VampireAbilityManager.java
- *
  */
 
 package frostvein.sampires.remakepire.abilities;
