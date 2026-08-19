@@ -14,7 +14,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import javax.annotation.Nullable;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Sound;
@@ -188,8 +190,9 @@ public class VampireAbilityManager {
         VampireAbility ability = this.abilities.get(abilityName.toLowerCase());
 
         if (ability != null) {
-            player.sendMessage("§a§l⚡ ABILITY READY ⚡");
-            player.sendMessage("§a" + ability.getDisplayName() + " is now available.");
+            player.sendMessage(Component.text("⚡ ABILITY READY ⚡", NamedTextColor.GREEN)
+                    .decorate(TextDecoration.BOLD));
+            player.sendMessage(Component.text(ability.getDisplayName() + " is now available.", NamedTextColor.GREEN));
             player.playSound(player, Sound.BLOCK_NOTE_BLOCK_CHIME, SoundCategory.MASTER, 0.5F, 2.0F);
         }
     }
@@ -205,8 +208,9 @@ public class VampireAbilityManager {
         if (ability != null) {
             for (Player player : Bukkit.getOnlinePlayers()) {
                 if (this.vampireManager.isVampire(player) && ability.canUse(player, this.vampireManager)) {
-                    player.sendMessage("§6§l⚡ GLOBAL ABILITY READY ⚡");
-                    player.sendMessage("§6" + ability.getDisplayName() + " is now available to all vampires.");
+                    player.sendMessage(Component.text("⚡ GLOBAL ABILITY READY ⚡", NamedTextColor.GOLD)
+                            .decorate(TextDecoration.BOLD));
+                    player.sendMessage(Component.text(ability.getDisplayName() + " is now available to all vampires.", NamedTextColor.GOLD));
                     player.playSound(player, Sound.BLOCK_NOTE_BLOCK_BELL, SoundCategory.MASTER, 0.7F, 1.5F);
                 }
             }
@@ -222,52 +226,54 @@ public class VampireAbilityManager {
      */
     public boolean useAbility(Player player, String abilityName) {
         if (!this.vampireManager.isVampire(player)) {
-            player.sendMessage("§cOnly vampires can use abilities.");
+            player.sendMessage(Component.text("Only vampires can use abilities.", NamedTextColor.RED));
             return false;
 
         } else if (player.getGameMode() == GameMode.SPECTATOR) {
-            player.sendMessage("§cYou cannot use vampire abilities while in spectator mode.");
+            player.sendMessage(Component.text("You cannot use vampire abilities while in spectator mode.", NamedTextColor.RED));
             return false;
 
         } else if (this.plugin.getHolyWaterEffectManager().isAbilitiesDisabled(player)) {
-            long remainingTime = this.plugin.getHolyWaterEffectManager().getRemainingDisableTime(player);
-            player.sendMessage("§4§lHOLY WATER EFFECT ACTIVE");
-            player.sendMessage("§cYour abilities are disabled by holy water!");
-            player.sendMessage("§cAbilities will return in approximately " + (remainingTime / 60L + 1L) + " minute(s).");
+            final long remainingTime = this.plugin.getHolyWaterEffectManager().getRemainingDisableTime(player) / 60L + 1L;
+            player.sendMessage(Component.text("HOLY WATER EFFECT ACTIVE", NamedTextColor.DARK_RED)
+                    .decorate(TextDecoration.BOLD));
+            player.sendMessage(Component.text("Your abilities are disabled by holy water!", NamedTextColor.RED));
+            player.sendMessage(Component.text("Abilities will return in approximately " + remainingTime + " minute" + (remainingTime != 1L ? "s." : "."), NamedTextColor.RED));
             return false;
 
         } else {
             TomeAbility holyWordAbility = this.plugin.getTomeManager().getAbility("holyword");
 
             if (holyWordAbility instanceof HolyWordTomeAbility && ((HolyWordTomeAbility)holyWordAbility).isParalyzed(player)) {
-                player.sendMessage("§cYou cannot use abilities while being cured.");
+                player.sendMessage(Component.text("You cannot use abilities while being cured.", NamedTextColor.RED));
                 return false;
 
             } else if (this.plugin.getForcedCureChoiceManager().hasPendingCure(player)) {
-                player.sendMessage("§cYou cannot use abilities while being cured.");
+                player.sendMessage(Component.text("You cannot use abilities while being cured.", NamedTextColor.RED));
                 return false;
 
             } else {
                 VampireAbility ability = this.abilities.get(abilityName.toLowerCase());
 
                 if (ability == null) {
-                    player.sendMessage("§cUnknown ability: " + abilityName);
+                    player.sendMessage(Component.text("Unknown ability: " + abilityName, NamedTextColor.RED));
                     return false;
 
                 } else if (!ability.canUse(player, this.vampireManager)) {
                     String requirement = ability.getRequirementMessage(player, this.vampireManager);
-                    player.sendMessage("§c" + requirement);
+                    player.sendMessage(Component.text(requirement, NamedTextColor.RED));
                     return false;
 
                 } else {
                     if (ability instanceof StormCallAbility) {
                         if (this.isOnGlobalCooldown(abilityName)) {
-                            long remainingSeconds = this.getRemainingGlobalCooldown(abilityName);
+                            final long remainingSeconds = this.getRemainingGlobalCooldown(abilityName);
                             GlobalCooldownData data = this.globalCooldowns.get(abilityName.toLowerCase());
 
-                            player.sendMessage("§c§l GLOBAL ABILITY COOLDOWN");
-                            player.sendMessage("§c" + ability.getDisplayName() + " was recently used by " + data.lastUserName + ".");
-                            player.sendMessage("§cIt will be available to all vampires in " + formatTime(remainingSeconds) + ".");
+                            player.sendMessage(Component.text(" GLOBAL ABILITY COOLDOWN", NamedTextColor.RED)
+                                    .decorate(TextDecoration.BOLD));
+                            player.sendMessage(Component.text(ability.getDisplayName() + " was recently used by " + data.lastUserName + ".", NamedTextColor.RED));
+                            player.sendMessage(Component.text("It will be available to all vampires in " + formatTime(remainingSeconds) + ".", NamedTextColor.RED));
 
                             return false;
                         }
@@ -282,8 +288,9 @@ public class VampireAbilityManager {
 
                         if (this.isOnCooldown(player, abilityName)) {
                             long remainingSeconds = this.getRemainingCooldown(player, abilityName);
-                            player.sendMessage("§c§l ABILITY ON COOLDOWN");
-                            player.sendMessage("§c" + ability.getDisplayName() + " will be ready in " + formatTime(remainingSeconds) + ".");
+                            player.sendMessage(Component.text(" ABILITY ON COOLDOWN", NamedTextColor.RED)
+                                    .decorate(TextDecoration.BOLD));
+                            player.sendMessage(Component.text(ability.getDisplayName() + " will be ready in " + formatTime(remainingSeconds) + ".", NamedTextColor.RED));
                             return false;
                         }
                     }
@@ -557,7 +564,7 @@ public class VampireAbilityManager {
      * @param abilityName the name of the ability.
      * @return A string description of the ability's condition.
      */
-    public @Nullable String getGlobalCooldownInfo(String abilityName) {
+    public String getGlobalCooldownInfo(String abilityName) {
         GlobalCooldownData data = this.globalCooldowns.get(abilityName.toLowerCase());
 
         if (data != null && this.isOnGlobalCooldown(abilityName)) {

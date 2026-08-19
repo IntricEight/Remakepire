@@ -55,7 +55,7 @@ public class FeedingListener implements Listener {
 
                             if (experienceDropped > 0 && !killer.getScoreboardTags().contains(SessionManager.INFORMED_SUCCESSFUL_FEEDING)) {
                                 killer.addScoreboardTag(SessionManager.INFORMED_SUCCESSFUL_FEEDING);
-                                killer.sendMessage("§cYou taste the metallic essence of life...");
+                                killer.sendMessage(Component.text("You taste the metallic essence of life...", NamedTextColor.RED));
                             }
                         }
                     }
@@ -116,7 +116,7 @@ public class FeedingListener implements Listener {
             event.setAmount(0);
 
             if (event.getAmount() > 0 && Math.random() < 0.1) {
-                player.sendMessage("§8Such mundane activities no longer sustain your cursed existence...");
+                player.sendMessage(Component.text("Such mundane activities no longer sustain your cursed existence...", NamedTextColor.DARK_GRAY));
             }
         }
     }

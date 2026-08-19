@@ -5,6 +5,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Entity;
@@ -106,12 +108,12 @@ public class ShoulderBargeTomeAbility extends TomeAbility {
      * @param player the player who cast the ability.
      */
     private void checkForCollisions(Player player) {
-        UUID playerId = player.getUniqueId();
+        final UUID playerId = player.getUniqueId();
         Set<UUID> hitEntities = this.chargeHitEntities.get(playerId);
 
         if (hitEntities != null) {
             for (Entity entity : player.getNearbyEntities(1.5, 2.0, 1.5)) {
-                UUID entityId = entity.getUniqueId();
+                final UUID entityId = entity.getUniqueId();
 
                 // Prevent item entities from being hit by the charge
                 if (!(entity instanceof LivingEntity)) {
@@ -135,7 +137,7 @@ public class ShoulderBargeTomeAbility extends TomeAbility {
                     continue;
                 }
 
-                Long lastBargeTime = this.recentlyBargedEntities.get(entityId);
+                final Long lastBargeTime = this.recentlyBargedEntities.get(entityId);
 
                 if (lastBargeTime != null && System.currentTimeMillis() - lastBargeTime < TARGET_COOLDOWN_MS) {
                     continue;
@@ -168,7 +170,7 @@ public class ShoulderBargeTomeAbility extends TomeAbility {
         target.setVelocity(knockback);
 
         if (target instanceof LivingEntity livingTarget) {
-            double damageAmount;
+            final double damageAmount;
 
             if (target instanceof Player) {
                 damageAmount = DAMAGE_TO_PLAYERS;
@@ -182,10 +184,10 @@ public class ShoulderBargeTomeAbility extends TomeAbility {
 
         player.getWorld().playSound(player.getLocation(), "minecraft:entity.player.attack.knockback", 1.0F, 0.8F);
         player.getWorld().playSound(target.getLocation(), "minecraft:entity.generic.hurt", 0.8F, 1.1F);
-        player.sendMessage("§aYou barrel into " + this.getEntityName(target) + ".");
+        player.sendMessage(Component.text("You barrel into " + this.getEntityName(target) + ".", NamedTextColor.GREEN));
 
         if (target instanceof Player) {
-            target.sendMessage("§c" + player.getName() + " charges into you with a shoulder barge.");
+            target.sendMessage(Component.text(player.getName() + " charges into you with a shoulder barge.", NamedTextColor.RED));
         }
     }
 

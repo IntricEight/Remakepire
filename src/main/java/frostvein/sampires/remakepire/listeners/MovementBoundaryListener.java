@@ -399,11 +399,13 @@ public class MovementBoundaryListener implements Listener {
      */
     private boolean anySurvivingHumansExist() {
         for (Player onlinePlayer : this.plugin.getServer().getOnlinePlayers()) {
-            if (onlinePlayer.getGameMode() != GameMode.SURVIVAL || onlinePlayer.getGameMode() != GameMode.ADVENTURE || !this.plugin.getVampireManager().isHuman(onlinePlayer)) continue;
-            return true;
+            if (this.plugin.getVampireManager().isHuman(onlinePlayer) &&
+                    (onlinePlayer.getGameMode() == GameMode.SURVIVAL || onlinePlayer.getGameMode() == GameMode.ADVENTURE)) {
+                return false;
+            }
         }
 
-        return false;
+        return true;
     }
 
     /**
@@ -414,11 +416,13 @@ public class MovementBoundaryListener implements Listener {
      */
     private boolean anySurvivingVampiresExist() {
         for (Player onlinePlayer : this.plugin.getServer().getOnlinePlayers()) {
-            if (onlinePlayer.getGameMode() != GameMode.SURVIVAL || onlinePlayer.getGameMode() != GameMode.ADVENTURE || this.plugin.getVampireManager().isHuman(onlinePlayer)) continue;
-            return true;
+            if (this.plugin.getVampireManager().isVampire(onlinePlayer) &&
+                    (onlinePlayer.getGameMode() == GameMode.SURVIVAL || onlinePlayer.getGameMode() == GameMode.ADVENTURE)) {
+                return false;
+            }
         }
 
-        return false;
+        return true;
     }
 
     /**
@@ -429,11 +433,11 @@ public class MovementBoundaryListener implements Listener {
      */
     private boolean isInsideBoundary(Location location) {
         // Retrieve the border values from the config
-        double minX = this.plugin.getConfigManager().getBorderMinX(), minZ = this.plugin.getConfigManager().getBorderMinZ();
-        double maxX = this.plugin.getConfigManager().getBorderMaxX(), maxZ = this.plugin.getConfigManager().getBorderMaxZ();
+        final double minX = this.plugin.getConfigManager().getBorderMinX(), minZ = this.plugin.getConfigManager().getBorderMinZ();
+        final double maxX = this.plugin.getConfigManager().getBorderMaxX(), maxZ = this.plugin.getConfigManager().getBorderMaxZ();
 
         // Retrieve the current horizontal coordinates of the location
-        double locX = location.getX(), locZ = location.getZ();
+        final double locX = location.getX(), locZ = location.getZ();
 
         // Determine whether any of the coordinate points lie outside the border.
         return locX >= minX && locX <= maxX && locZ >= minZ && locZ <= maxZ;

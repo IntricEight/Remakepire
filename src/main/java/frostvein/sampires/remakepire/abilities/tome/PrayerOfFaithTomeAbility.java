@@ -42,12 +42,14 @@ public class PrayerOfFaithTomeAbility extends TomeAbility {
             return false;
 
         } else {
-            Location prayerLocation = player.getLocation().clone();
+            final Location prayerLocation = player.getLocation().clone();
             PrayerSession session = new PrayerSession(player, prayerLocation);
             activePrayers.put(player.getUniqueId(), session);
+
             player.playSound(player.getLocation(), "minecraft:block.bell.use", 1.0F, 0.8F);
             this.sendSuccessMessage(player, "You begin your prayer... Remain motionless for " + PRAYER_DURATION + " seconds.");
-            player.sendMessage("§7You can look around, but do not move from this spot.");
+            player.sendMessage(Component.text("You can look around, but do not move from this spot.", NamedTextColor.GRAY));
+
             session.startMonitoring();
             return true;
         }
@@ -112,7 +114,7 @@ public class PrayerOfFaithTomeAbility extends TomeAbility {
                         Location currentLocation = PrayerSession.this.player.getLocation();
 
                         if (PrayerSession.this.hasPlayerMoved(PrayerSession.this.originalLocation, currentLocation)) {
-                            PrayerSession.this.player.sendMessage("§cYour prayer is interrupted. You moved from your position.");
+                            PrayerSession.this.player.sendMessage(Component.text("Your prayer is interrupted. You moved from your position.", NamedTextColor.RED));
                             PrayerSession.this.player.playSound(PrayerSession.this.player.getLocation(), "minecraft:block.glass.break", 1.0F, 0.5F);
 
                             TomeAbility.clearCooldown(PrayerSession.this.player, PrayerOfFaithTomeAbility.this.getName());
@@ -163,7 +165,7 @@ public class PrayerOfFaithTomeAbility extends TomeAbility {
         private void completePrayer() {
             this.player.addPotionEffect(new PotionEffect(PotionEffectType.ABSORPTION, ABSORPTION_DURATION, ABSORPTION_AMPLIFIER, false, false));
             this.player.playSound(this.player.getLocation(), "minecraft:block.beacon.activate", 1.0F, 1.5F);
-            this.player.sendMessage("§7You feel divinely protected with absorption for " + (ABSORPTION_DURATION / 20 / 60) + " minutes.");
+            this.player.sendMessage(Component.text("You feel divinely protected with absorption for " + (ABSORPTION_DURATION / 20 / 60) + " minutes.", NamedTextColor.GRAY));
             this.player.sendActionBar(Component.text("✦ Prayer Complete ✦", NamedTextColor.GREEN));
         }
 

@@ -60,7 +60,7 @@ public class ConfigGuiManager {
      */
     public void openConfigGUI(Player admin) {
         admin.openInventory(configGui);
-        admin.sendMessage("§6Select configuration value to change");
+        admin.sendMessage(Component.text("Select configuration value to change", NamedTextColor.GOLD));
     }
 
     /**

@@ -1,5 +1,7 @@
 package frostvein.sampires.remakepire.abilities.tome;
 
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -29,7 +31,7 @@ public class EnlightenedEyeTomeAbility extends TomeAbility {
             player.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION, NIGHT_VISION_DURATION, NIGHT_VISION_AMPLIFIER, false, false));
             player.playSound(player.getLocation(), "minecraft:block.beacon.power_select", 1.0F, 1.5F);
             this.sendSuccessMessage(player, "Your eyes adjust to pierce the darkness...");
-            player.sendMessage("§7You can now see clearly in the shadows for " + (NIGHT_VISION_DURATION / 20 / 60) + " minutes.");
+            player.sendMessage(Component.text("You can now see clearly in the shadows for " + (NIGHT_VISION_DURATION / 20 / 60) + " minutes.", NamedTextColor.GRAY));
 
             return true;
         }

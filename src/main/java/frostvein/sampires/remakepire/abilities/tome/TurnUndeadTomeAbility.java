@@ -1,5 +1,7 @@
 package frostvein.sampires.remakepire.abilities.tome;
 
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
@@ -40,15 +42,15 @@ public class TurnUndeadTomeAbility extends TomeAbility {
 
                 this.plugin.getWorld().playSound(player.getLocation(), "minecraft:ambient.warped_forest.mood", 1.0F, 1.0F);
                 this.sendSuccessMessage(player, "You feel the cold embrace of death wash over you...");
-                player.sendMessage("§7Undead creatures now see you as one of their own.");
-                player.sendMessage("§8This effect will last for 5 minutes.");
+                player.sendMessage(Component.text("Undead creatures now see you as one of their own.", NamedTextColor.GRAY));
+                player.sendMessage(Component.text("This effect will last for 5 minutes.", NamedTextColor.DARK_GRAY));
 
                 Bukkit.getScheduler().runTaskLater(this.plugin, () -> {
                     if (player.isOnline()) {
                         this.removeFromVampireCastTeam(player);
 
-                        player.sendMessage("§aThe deathly aura fades... You feel alive once more.");
-                        player.sendMessage("§7Undead creatures will now see you as a threat again.");
+                        player.sendMessage(Component.text("The deathly aura fades... You feel alive once more.", NamedTextColor.GREEN));
+                        player.sendMessage(Component.text("Undead creatures will now see you as a threat again.", NamedTextColor.GRAY));
                         this.plugin.getWorld().playSound(player.getLocation(), "minecraft:block.beacon.activate", 1.0F, 1.2F);
 
                     } else {
@@ -95,7 +97,7 @@ public class TurnUndeadTomeAbility extends TomeAbility {
                     regularCastTeam.addEntry(player.getName());
                 }
 
-                player.sendMessage("§7Your undead disguise has faded during your absence.");
+                player.sendMessage(Component.text("Your undead disguise has faded during your absence.", NamedTextColor.GRAY));
                 plugin.logInfo("Moved human player " + player.getName() + " from VampireCastTeam to CastTeam (login cleanup)");
             }
         }

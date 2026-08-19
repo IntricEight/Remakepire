@@ -26,7 +26,7 @@ public class BlessingTomeAbility extends TomeAbility {
     }
 
     protected boolean useAbility(Player player) {
-        boolean isSessionCapped = this.plugin.getConfigManager().isHolyWaterSessionCapped();
+        final boolean isSessionCapped = this.plugin.getConfigManager().isHolyWaterSessionCapped();
 
         if (!this.canUse(player)) {
             this.sendCannotUseMessage(player, "Only humans can use tome abilities!");
@@ -52,7 +52,7 @@ public class BlessingTomeAbility extends TomeAbility {
                         inventory.addItem(splashWater);
                     } else {
                         player.getWorld().dropItemNaturally(player.getLocation(), splashWater);
-                        player.sendMessage("§7Your inventory is full. The holy water was dropped at your feet.");
+                        player.sendMessage(Component.text("Your inventory is full. The holy water was dropped at your feet.", NamedTextColor.GRAY));
                     }
                 } else {
                     ItemStack splashWater = new ItemStack(Material.SPLASH_POTION, 1);
@@ -63,7 +63,7 @@ public class BlessingTomeAbility extends TomeAbility {
                 player.playSound(player.getLocation(), "minecraft:block.beacon.activate", 0.8F, 1.4F);
                 player.playSound(player.getLocation(), "minecraft:entity.player.levelup", 0.5F, 1.2F);
                 this.sendSuccessMessage(player, "Divine light flows through the water, blessing it into holy water!");
-                player.sendMessage("§7The blessed water can now be thrown as a splash potion.");
+                player.sendMessage(Component.text("The blessed water can now be thrown as a splash potion.", NamedTextColor.GRAY));
 
                 player.addScoreboardTag(SessionManager.BLESSING_USED_SESSION);
 
@@ -85,7 +85,7 @@ public class BlessingTomeAbility extends TomeAbility {
         ItemMeta meta = item.getItemMeta();
 
         if (meta instanceof PotionMeta potionMeta) {
-            int durationSeconds = this.plugin.getConfigManager().getHolyWaterDisableDurationSeconds();
+            final int durationSeconds = this.plugin.getConfigManager().getHolyWaterDisableDurationSeconds();
             String durationText = durationSeconds >= 60
                     ? durationSeconds / 60 + " minute" + ((durationSeconds / 60) != 1 ? "s" : "")
                     : durationSeconds + " second" + (durationSeconds != 1 ? "s" : "");

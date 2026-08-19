@@ -1,5 +1,7 @@
 package frostvein.sampires.remakepire.abilities;
 
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
@@ -32,12 +34,12 @@ public class VampireVisionAbility extends VampireAbility {
         // Deactivate the ability if it is in use
         if (player.hasPotionEffect(PotionEffectType.NIGHT_VISION)) {
             player.removePotionEffect(PotionEffectType.NIGHT_VISION);
-            player.sendMessage("§8Your supernatural vision fades... The world returns to natural darkness.");
+            player.sendMessage(Component.text("Your supernatural vision fades... The world returns to natural darkness.", NamedTextColor.DARK_GRAY));
 
         } else {
             PotionEffect nightVision = new PotionEffect(PotionEffectType.NIGHT_VISION, -1, 0, false, false, false);
             player.addPotionEffect(nightVision);
-            player.sendMessage("§5Your vampiric eyes pierce through the darkness...");
+            player.sendMessage(Component.text("Your vampiric eyes pierce through the darkness...", NamedTextColor.DARK_PURPLE));
         }
 
         player.playSound(player.getLocation(), Sound.BLOCK_LODESTONE_PLACE, 0.5F, 1.0F);

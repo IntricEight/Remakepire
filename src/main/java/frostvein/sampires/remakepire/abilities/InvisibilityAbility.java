@@ -1,5 +1,8 @@
 package frostvein.sampires.remakepire.abilities;
 
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.SoundCategory;
@@ -82,14 +85,12 @@ public class InvisibilityAbility extends VampireAbility {
      * @param isVanishing {@code true} if the player is activating the ability, {@code false} if they are deactivating it.
      */
     private void createVanishEffects(Player player, boolean isVanishing) {
-        if (player.getWorld() != null) {
-            if (isVanishing) {
-                player.getWorld().spawnParticle(Particle.SMOKE, player.getLocation().add(0.0, 1.0, 0.0), 30, 0.5, 1.0, 0.5, 0.1);
-                player.getWorld().spawnParticle(Particle.ENCHANT, player.getLocation().add(0.0, 1.0, 0.0), 15, 1.0, 1.5, 1.0, 0.3);
+        if (isVanishing) {
+            player.getWorld().spawnParticle(Particle.SMOKE, player.getLocation().add(0.0, 1.0, 0.0), 30, 0.5, 1.0, 0.5, 0.1);
+            player.getWorld().spawnParticle(Particle.ENCHANT, player.getLocation().add(0.0, 1.0, 0.0), 15, 1.0, 1.5, 1.0, 0.3);
 
-            } else {
-                player.getWorld().spawnParticle(Particle.CLOUD, player.getLocation().add(0.0, 1.0, 0.0), 20, 0.3, 0.8, 0.3, 0.05);
-            }
+        } else {
+            player.getWorld().spawnParticle(Particle.CLOUD, player.getLocation().add(0.0, 1.0, 0.0), 20, 0.3, 0.8, 0.3, 0.05);
         }
     }
 
@@ -101,7 +102,8 @@ public class InvisibilityAbility extends VampireAbility {
      * @param durationSeconds how long the ability will last (in seconds).
      */
     private void sendVanishMessage(Player player, int stage, int durationSeconds) {
-        player.sendMessage("§8§lYou fade into the shadows... (" + VampireAbilityManager.formatTime(durationSeconds) + ")");
+        player.sendMessage(Component.text("You fade into the shadows... (" + VampireAbilityManager.formatTime(durationSeconds) + ")", NamedTextColor.DARK_GRAY)
+                .decorate(TextDecoration.BOLD));
     }
 
     /**
@@ -124,7 +126,8 @@ public class InvisibilityAbility extends VampireAbility {
     private void scheduleInvisibilityWarning(Player player, int totalDurationTicks, RemakepirePlugin plugin) {
         plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
             if (player.isOnline() && player.hasPotionEffect(PotionEffectType.INVISIBILITY)) {
-                player.sendMessage("§7§oYour invisibility is fading...");
+                player.sendMessage(Component.text("Your invisibility is fading...", NamedTextColor.GRAY)
+                        .decorate(TextDecoration.ITALIC));
                 player.playSound(player, Sound.BLOCK_NOTE_BLOCK_CHIME, SoundCategory.MASTER, 0.3F, 0.8F);
             }
         }, Math.max(totalDurationTicks - 40, 20));
@@ -145,7 +148,7 @@ public class InvisibilityAbility extends VampireAbility {
      * @param player the player using the ability.
      */
     private void sendReappearMessage(Player player) {
-        player.sendMessage("§7You emerge from the shadows...");
+        player.sendMessage(Component.text("You emerge from the shadows...", NamedTextColor.GRAY));
     }
 
     /**

@@ -115,9 +115,9 @@ public class TomeManager {
 
         } else if (player.getGameMode() != GameMode.CREATIVE && this.hasUsedTomeThisSession(player)) {
             if (plugin.getConfigManager().isTomeAbsorptionCapped()) {
-                player.sendMessage("§cYou have already absorbed one tome this session. Your mind cannot handle more ancient knowledge.");
+                player.sendMessage(Component.text("You have already absorbed one tome this session. Your mind cannot handle more ancient knowledge.", NamedTextColor.RED));
             } else {
-                player.sendMessage("§cYour mind requires more time to recover from the ancient knowledge you absorbed.");
+                player.sendMessage(Component.text("Your mind requires more time to recover from the ancient knowledge you absorbed.", NamedTextColor.RED));
             }
 
             return false;
@@ -137,7 +137,7 @@ public class TomeManager {
                         this.playerTomeUsageSession.remove(player.getUniqueId());
 
                         if (player.isOnline()) {
-                            player.sendMessage("§aYour mind eases, recovered from the strain of ancient knowledge.");
+                            player.sendMessage(Component.text("Your mind eases, recovered from the strain of ancient knowledge.", NamedTextColor.GREEN));
                         }
                     }
                 }, (long)plugin.getConfigManager().getTomeAbsorptionIntervalMinutes() * 60 * 20);
@@ -209,18 +209,18 @@ public class TomeManager {
      */
     public boolean useAbility(Player player, String abilityName) {
         if (!this.plugin.getVampireManager().isHuman(player)) {
-            player.sendMessage("§cOnly humans can use tome abilities.");
+            player.sendMessage(Component.text("Only humans can use tome abilities.", NamedTextColor.RED));
             return false;
 
         } else if (!this.hasAbility(player, abilityName)) {
-            player.sendMessage("§cYou don't have access to the '" + abilityName + "' ability.");
+            player.sendMessage(Component.text("You don't have access to the '" + abilityName + "' ability.", NamedTextColor.RED));
             return false;
 
         } else {
             TomeAbility ability = this.getAbility(abilityName);
 
             if (ability == null) {
-                player.sendMessage("§cAbility '" + abilityName + "' is not implemented.");
+                player.sendMessage(Component.text("Ability '" + abilityName + "' is not implemented.", NamedTextColor.RED));
                 return false;
             } else {
                 return ability.use(player);
@@ -292,7 +292,8 @@ public class TomeManager {
         this.addCureBookToGUI(gui, target, 48, CureBookReadingListener.TAG_CURE_BOOK_4, "§5Cure Book 4", this.plugin.getCureBookManager().getCureBookName(4, true));
 
         admin.openInventory(gui);
-        admin.sendMessage("§6Select tome abilities to grant to §e" + target.getName());
+        admin.sendMessage(Component.text("Select tome abilities to grant to ", NamedTextColor.GOLD)
+                .append(Component.text(target.getName(), NamedTextColor.YELLOW)));
     }
 
     /**

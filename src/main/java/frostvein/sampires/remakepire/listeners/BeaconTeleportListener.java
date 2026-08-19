@@ -3,6 +3,9 @@ package frostvein.sampires.remakepire.listeners;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -60,22 +63,22 @@ public class BeaconTeleportListener implements Listener {
                         BeaconSite beacon = this.plugin.getBeaconManager().getBeacon(beaconName);
 
                         if (beacon == null) {
-                            player.sendMessage("§cBeacon not found: " + beaconName);
+                            player.sendMessage(Component.text("Beacon not found: " + beaconName, NamedTextColor.RED));
                             player.closeInventory();
 
                         } else if (beacon.getState() != BeaconState.DESECRATED) {
-                            player.sendMessage("§cThat beacon is no longer desecrated and cannot be used for beacon travel.");
+                            player.sendMessage(Component.text("That beacon is no longer desecrated and cannot be used for beacon travel.", NamedTextColor.RED));
                             player.closeInventory();
 
                         } else if (!this.plugin.getVampireManager().isVampire(player)) {
-                            player.sendMessage("§cOnly vampires can use beacon travel.");
+                            player.sendMessage(Component.text("Only vampires can use beacon travel.", NamedTextColor.RED));
                             player.closeInventory();
 
                         } else {
                             BeaconSite suppressingBeacon = this.plugin.getBeaconManager().checkHolySuppression(player.getLocation());
 
                             if (suppressingBeacon != null) {
-                                player.sendMessage("§cThe holy power from '" + suppressingBeacon.getName() + "' prevents beacon travel.");
+                                player.sendMessage(Component.text("The holy power from '" + suppressingBeacon.getName() + "' prevents beacon travel.", NamedTextColor.RED));
                                 player.closeInventory();
 
                             } else {
@@ -103,9 +106,12 @@ public class BeaconTeleportListener implements Listener {
         startLocation.setPitch(0.0F);
         startLocation.setYaw(0.0F);
 
-        player.sendMessage("§5§lShadow Travel initiated...");
-        player.sendMessage("§7Destination: §f" + beacon.getName());
-        player.sendMessage("§c§lDo not move for 5 seconds.");
+        player.sendMessage(Component.text("Shadow Travel initiated...", NamedTextColor.DARK_PURPLE)
+                .decorate(TextDecoration.BOLD));
+        player.sendMessage(Component.text("Destination: ", NamedTextColor.GRAY)
+                .append(Component.text(beacon.getName(), NamedTextColor.WHITE)));
+        player.sendMessage(Component.text("Do not move for 5 seconds.", NamedTextColor.RED)
+                .decorate(TextDecoration.BOLD));
         player.playSound(player.getLocation(), Sound.BLOCK_PORTAL_AMBIENT, 0.5F, 1.5F);
 
         BukkitTask channelingTask = (new BukkitRunnable() {
@@ -131,7 +137,8 @@ public class BeaconTeleportListener implements Listener {
                             int secondsRemaining = (totalTicks - this.ticksElapsed) / 20;
 
                             if (secondsRemaining > 0) {
-                                player.sendMessage("§7Channeling... §e" + VampireAbilityManager.formatTime(secondsRemaining) + " remaining");
+                                player.sendMessage(Component.text("Channeling... ", NamedTextColor.GRAY)
+                                        .append(Component.text(VampireAbilityManager.formatTime(secondsRemaining) + " remaining", NamedTextColor.YELLOW)));
                                 player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 0.3F, 1.0F + (float)secondsRemaining * 0.1F);
                             }
                         }
@@ -170,8 +177,9 @@ public class BeaconTeleportListener implements Listener {
                 Player player = this.plugin.getServer().getPlayer(playerId);
 
                 if (player != null) {
-                    player.sendMessage("§c§lShadow Travel cancelled.");
-                    player.sendMessage("§7You moved during channeling. Your cooldown has been reset.");
+                    player.sendMessage(Component.text("Shadow Travel cancelled.", NamedTextColor.RED)
+                            .decorate(TextDecoration.BOLD));
+                    player.sendMessage(Component.text("You moved during channeling. Your cooldown has been reset.", NamedTextColor.GRAY));
                     player.playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_HURT, 0.8F, 1.2F);
 
                     Location particleLoc = player.getLocation().add(0.0, 1.0, 0.0);
@@ -211,7 +219,7 @@ public class BeaconTeleportListener implements Listener {
         if (this.channelingPlayers.containsKey(playerId)) {
             Location from = event.getFrom(), to = event.getTo();
 
-            if (to != null && (from.getX() != to.getX() || from.getY() != to.getY() || from.getZ() != to.getZ())) {
+            if (from.getX() != to.getX() || from.getY() != to.getY() || from.getZ() != to.getZ()) {
                 this.cancelChanneling(playerId, true);
             }
         }
@@ -238,8 +246,10 @@ public class BeaconTeleportListener implements Listener {
         destination.add(0.5, 1.0, 0.5);
         destination = this.findSafeTeleportLocation(destination);
 
-        player.sendMessage("§5§lShadow Travel initiated...");
-        player.sendMessage("§7Destination: §f" + beacon.getName());
+        player.sendMessage(Component.text("Shadow Travel initiated...", NamedTextColor.DARK_PURPLE)
+                .decorate(TextDecoration.BOLD));
+        player.sendMessage(Component.text("Destination: ", NamedTextColor.GRAY)
+                .append(Component.text(beacon.getName(), NamedTextColor.WHITE)));
         player.playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1.0F, 0.5F);
 
         Location playerLoc = player.getLocation().add(0.0, 1.0, 0.0);
@@ -256,7 +266,10 @@ public class BeaconTeleportListener implements Listener {
                         BeaconTeleportListener.this.plugin.getLogger().warning("Failed to apply beacon travel cooldown for player: " + player.getName());
                     }
 
-                    player.sendMessage("§5You emerge from the shadows at §f" + beacon.getName() + "§5.");
+                    player.sendMessage(Component.text("You emerge from the shadows at ", NamedTextColor.DARK_PURPLE)
+                            .append(Component.text(beacon.getName(), NamedTextColor.WHITE))
+                            .append(Component.text(".", NamedTextColor.DARK_PURPLE))
+                    );
                     player.playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1.0F, 0.8F);
 
                     Location arrivalLoc = player.getLocation().add(0.0, 1.0, 0.0);
@@ -266,7 +279,7 @@ public class BeaconTeleportListener implements Listener {
                     plugin.logInfo("Player " + player.getName() + " used beacon travel to beacon: " + beacon.getName());
 
                 } else {
-                    player.sendMessage("§cBeacon travel failed. The destination may be unsafe or blocked.");
+                    player.sendMessage(Component.text("Beacon travel failed. The destination may be unsafe or blocked.", NamedTextColor.RED));
                     plugin.getLogger().warning("Beacon travel failed for " + player.getName() + " to beacon: " + beacon.getName());
                 }
             }

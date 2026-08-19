@@ -10,6 +10,8 @@ import java.lang.reflect.Type;
 import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -48,8 +50,8 @@ public class WayOfTheLumberjackTomeAbility extends TomeAbility implements Listen
 
         } else {
             this.sendSuccessMessage(player, "You have absorbed the knowledge of the lumberjack!");
-            player.sendMessage("§7You now have a permanent 30% chance to receive double drops when harvesting natural logs.");
-            player.sendMessage("§7This knowledge flows through your very being - you need not activate it again.");
+            player.sendMessage(Component.text("You now have a permanent 30% chance to receive double drops when harvesting natural logs.", NamedTextColor.GRAY));
+            player.sendMessage(Component.text("This knowledge flows through your very being - you need not activate it again.", NamedTextColor.GRAY));
 
             this.plugin.getWorld().playSound(player.getLocation(), "minecraft:block.wood.break", 1.0F, 1.2F);
             this.plugin.getWorld().playSound(player.getLocation(), "minecraft:entity.experience_orb.pickup", 0.5F, 0.8F);
@@ -65,7 +67,7 @@ public class WayOfTheLumberjackTomeAbility extends TomeAbility implements Listen
      */
     @EventHandler
     public void onBlockPlace(BlockPlaceEvent event) {
-        Block block = event.getBlock();
+        final Block block = event.getBlock();
 
         // Record placed logs to prevent them from triggering the ability
         if (LOG_MATERIALS.contains(block.getType())) {

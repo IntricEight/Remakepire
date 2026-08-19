@@ -1,6 +1,9 @@
 package frostvein.sampires.remakepire.listeners;
 
 import java.util.List;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Location;
 import org.bukkit.block.Chest;
 import org.bukkit.entity.Player;
@@ -125,8 +128,10 @@ public class FourthBookRevealListener implements Listener {
         chestInventory.addItem(fourthBook);
         this.markAsRevealed();
 
-        player.sendMessage("§8§o[As you open the chest, an unfamiliar book suddenly materializes within...]");
-        player.sendMessage("§4§o[The smell of old blood emanates from its pages...]");
+        player.sendMessage(Component.text("[As you open the chest, an unfamiliar book suddenly materializes within...]", NamedTextColor.DARK_GRAY)
+                .decorate(TextDecoration.ITALIC));
+        player.sendMessage(Component.text("[The smell of old blood emanates from its pages...]", NamedTextColor.DARK_RED)
+                .decorate(TextDecoration.ITALIC));
 
         this.plugin.logInfo("FOURTH BOOK REVEALED: " + player.getName() + " opened tome chest at " + chest.getLocation().getBlockX() + ", " + chest.getLocation().getBlockY() + ", " + chest.getLocation().getBlockZ());
     }

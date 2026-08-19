@@ -45,7 +45,7 @@ public class ExperienceBottleListener implements Listener {
                 if (action == Action.RIGHT_CLICK_AIR || action == Action.RIGHT_CLICK_BLOCK) {
                     if (this.vampireManager.isHuman(player)) {
                         event.setCancelled(true);
-                        player.sendMessage("§cYou recoil at the sight of thick crimson blood rolling across the inside of the bottle... Who would collect something like this?");
+                        player.sendMessage(Component.text("You recoil at the sight of thick crimson blood rolling across the inside of the bottle... Who would collect something like this?", NamedTextColor.RED));
 
                     } else {
                         event.setCancelled(true);

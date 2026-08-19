@@ -74,6 +74,11 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
             sender.sendMessage(Component.text("You don't have permission to use this command.", NamedTextColor.RED));
             return true;
 
+        } else if (command.getName().equalsIgnoreCase("help")) {
+            // Send a help message for the admin
+            this.sendAdminHelp(sender);
+            return true;
+
         } else if (command.getName().equalsIgnoreCase("init")) {
             // Begin the process of initializing a new game of Vampires
             return this.handleInitCommand(sender, args);
@@ -184,6 +189,42 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
     }
 
     /**
+     * Print to the sender a list of available admin commands they can run using the pow admin command.
+     *
+     * @param sender the admin sending the command.
+     */
+    private void sendAdminHelp(CommandSender sender) {
+        sender.sendMessage(Component.text("=== VampireSMP Admin Commands ===", NamedTextColor.GOLD)
+                .decorate(TextDecoration.BOLD));
+
+        sendCommandInstruction(sender, "/pow admin init", "Initialize a new game (full reset)");
+        sendCommandInstruction(sender, "/pow admin session <start | pause | end | prime | resume | building>", "Manage session state");
+        sendCommandInstruction(sender, "/pow admin vampire <player> <human | 1 | 2 | 3 | turn>", "Manage vampire status");
+        sendCommandInstruction(sender, "/pow admin beacon <subcommand>", "Manage beacon sites (use tab for options)");
+        sendCommandInstruction(sender, "/pow admin config <configuration>", "Configure values in the configuration file live and in-game");
+        sendCommandInstruction(sender, "/pow admin vampirecooldowns <reset | clear> [player]", "Reset vampire ability cooldowns");
+        sendCommandInstruction(sender, "/pow admin resettomecooldowns [player]", "Reset tome ability cooldowns");
+        sendCommandInstruction(sender, "/pow admin break_warning", "Play break warning sounds");
+        sendCommandInstruction(sender, "/pow admin givetome <player> <ability> [amount]", "Give tome to player");
+        sendCommandInstruction(sender, "/pow admin select_tomes <player>", "Open GUI to grant tome abilities");
+        sendCommandInstruction(sender, "/pow admin give_cure_book <player> <1 | 2 | 3 | 4>", "Give cure book item to player");
+        sendCommandInstruction(sender, "/pow admin stash_cure_book <1 | 2 | 3 | 4> [x y z]", "Spawn a cure book inside a tome chest. Don't provide coordinates to randomize book spawn location.");
+        sendCommandInstruction(sender, "/pow admin distributetomes", "Manually trigger tome distribution");
+        sendCommandInstruction(sender, "/pow admin clearbloodmoonbuffs <all | player>", "Clear blood moon buffs");
+        sendCommandInstruction(sender, "/pow admin fixattributes <all | player>", "Fix stuck attribute modifiers (health/speed)");
+        sendCommandInstruction(sender, "/pow admin make_incurable [player]", "Makes the player incapable of being cured.");
+        sendCommandInstruction(sender, "/pow admin removeendermen <all | toggle | status>", "Manage enderman removal");
+        sendCommandInstruction(sender, "/pow admin removecreepers <all | toggle | status>", "Manage creeper removal");
+        sendCommandInstruction(sender, "/pow admin setupplayer <player>", "Give starter items to player");
+        sendCommandInstruction(sender, "/pow admin spawnanimals", "Manually trigger passive mob spawning");
+        sendCommandInstruction(sender, "/pow admin addtomechest", "Add current location as tome chest spawn");
+        sendCommandInstruction(sender, "/pow admin removetomechest", "Remove nearest tome chest within 10 blocks");
+        sendCommandInstruction(sender, "/pow admin listtomechests", "List all tome chest locations");
+        sendCommandInstruction(sender, "/pow admin resetplayer <player>", "Fully reset player to fresh state");
+        sendCommandInstruction(sender, "/pow admin set_vampire_spawn [x y z]", "Set vampire respawn location");
+    }
+
+    /**
      * Reset a player's stats and tags to a default human state.<br/>
      * Optionally, clear the player's inventory during the reset.
      *
@@ -191,8 +232,8 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
      */
     private boolean handleResetPlayerCommand(CommandSender sender, String[] args) {
         if (args.length < 1) {
-            sender.sendMessage("§cUsage: /pow admin resetplayer <player> [true | false]");
-            sender.sendMessage("§7  true/false = clear inventory");
+            sender.sendMessage(Component.text("Usage: /pow admin resetplayer <player> [true | false]", NamedTextColor.RED));
+            sender.sendMessage(Component.text("  true/false = clear inventory", NamedTextColor.GRAY));
 
         } else {
             Player target = Bukkit.getPlayer(args[0]);
@@ -288,10 +329,11 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
      */
     private boolean handlePlayerCountCommand(CommandSender sender, String[] args) {
         if (args.length == 0) {
-            sender.sendMessage("§cUsage: /playercount <all | human | vampire>");
-            sender.sendMessage("§7- /playercount all §8- See the number of alive players");
-            sender.sendMessage("§7- /playercount human §8- See the number of alive human players");
-            sender.sendMessage("§7- /playercount vampire §8- See the number of \"alive\" vampire players");
+            sender.sendMessage(Component.text("Usage: /pow admin playercount <all | human | vampire>", NamedTextColor.RED));
+
+            CommandHandler.sendCommandCorrection(sender, "  all", "See the number of alive players");
+            CommandHandler.sendCommandCorrection(sender, "  human", "See the number of alive human players");
+            CommandHandler.sendCommandCorrection(sender, "  vampire", "See the number of \"alive\" vampire players");
 
         } else {
             int playerCount = 0;
@@ -639,25 +681,29 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
      * @param sender the player sending the command.
      */
     private void sendConfigHelp(CommandSender sender) {
-        sender.sendMessage("§aUsage: /pow admin config <configuration> <new setting>");
-        sender.sendMessage("§oUse §e/pow admin config§r to use the Configuration GUI");
-        sender.sendMessage("§e  alert_on_quit [true | false] §7- Alert admins when a player leaves");
-        sender.sendMessage("§e  holy_water_cap [true | false] §7- Limit holy water creation");
-        sender.sendMessage("§e  tome_cap [true | false] §7- Limit new tome abilities absorbed");
-        sender.sendMessage("§e  vampire_level_cap [true | false] §7- Prevent vampires from returning to lost levels");
-        sender.sendMessage("§e  new_vampire_tracking [true | false] §7- Allow vampires to track down newly created vampires");
-        sender.sendMessage("§e  allow_vampire_mounts [true | false] §7- Allow vampires to ride living mounts");
-        sender.sendMessage("§e  vampire_health_check [ticks] §7- Configure vampire health check interval");
-        sender.sendMessage("§e  damage_suppression [percentage] §7- Configure damage suppression");
-        sender.sendMessage("§e  cure_requires_dead_sire [true | false] §7- Require a sire's permadeath before their spawn can be cured");
-        sender.sendMessage("§e  cure_requires_daylight [true | false] §7- Require it to be day time for vampires to be cured");
-        sender.sendMessage("§e  cure_book_spawning [true | false] §7- Allow cure books to spawn within tome chests");
-        sender.sendMessage("§e  enable_npc_mobs [true | false] §7- Allow NPC mobs to naturally spawn");
-        sender.sendMessage("§e  breeding_out_of_session [true | false] §7- Allow animals to be bred and hatched outside of active session");
-        sender.sendMessage("§e  stake_permadeath_stage [1 | 2 | 3] §7- Set stage that vampires can permadie on");
-        sender.sendMessage("§e  human_life_limit [true | false] §7- Humans always die on their sixth death");
-        sender.sendMessage("§e  one_human_left [true | false] §7- Activate One Human Left mode (no beacon cooldowns)");
-        sender.sendMessage("§e  border_active [true | false] §7- Activate or deactivate the game boundary for trapped players");
+        sender.sendMessage(Component.text("Usage: /pow admin config <configuration> <new setting>", NamedTextColor.GREEN));
+        sender.sendMessage(Component.text("Use ", NamedTextColor.WHITE)
+                .append(Component.text("/pow admin config", NamedTextColor.YELLOW))
+                .append(Component.text(" to use the Configuration GUI", NamedTextColor.WHITE))
+        );
+
+        sendCommandInstruction(sender, "  alert_on_quit [true | false]", "Alert admins when a player leaves");
+        sendCommandInstruction(sender, "  holy_water_cap [true | false]", "Limit holy water creation");
+        sendCommandInstruction(sender, "  tome_cap [true | false]", "Limit new tome abilities absorbed");
+        sendCommandInstruction(sender, "  vampire_level_cap [true | false]", "Prevent vampires from returning to lost levels");
+        sendCommandInstruction(sender, "  new_vampire_tracking [true | false]", "Allow vampires to track down newly created vampires");
+        sendCommandInstruction(sender, "  allow_vampire_mounts [true | false]", "Allow vampires to ride living mounts");
+        sendCommandInstruction(sender, "  vampire_health_check [ticks]", "Configure vampire health check interval");
+        sendCommandInstruction(sender, "  damage_suppression [percentage]", "Configure damage suppression");
+        sendCommandInstruction(sender, "  cure_requires_dead_sire [true | false]", "Require a sire's permadeath before their spawn can be cured");
+        sendCommandInstruction(sender, "  cure_requires_daylight [true | false]", "Require it to be day time for vampires to be cured");
+        sendCommandInstruction(sender, "  cure_book_spawning [true | false]", "Allow cure books to spawn within tome chests");
+        sendCommandInstruction(sender, "  enable_npc_mobs [true | false]", "Allow NPC mobs to naturally spawn");
+        sendCommandInstruction(sender, "  breeding_out_of_session [true | false]", "Allow animals to be bred and hatched outside of active session");
+        sendCommandInstruction(sender, "  stake_permadeath_stage [1 | 2 | 3]", "Set stage that vampires can permadie on");
+        sendCommandInstruction(sender, "  human_life_limit [true | false]", "Humans always die on their sixth death");
+        sendCommandInstruction(sender, "  one_human_left [true | false]", "Activate One Human Left mode (no beacon cooldowns)");
+        sendCommandInstruction(sender, "  border_active [true | false]", "Activate or deactivate the game boundary for trapped players");
     }
 
     /**
@@ -728,10 +774,10 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
      */
     private boolean handleVampireCooldownCommand(CommandSender sender, String[] args) {
         if (args.length == 0) {
-            sender.sendMessage("§cUsage: /pow admin vampirecooldowns <reset | clear> [player]");
-            sender.sendMessage("§7- /pow admin vampirecooldowns reset §8- Reset all cooldowns for all online players");
-            sender.sendMessage("§7- /pow admin vampirecooldowns reset <player> §8- Reset cooldowns for a specific player");
-            sender.sendMessage("§7- /pow admin vampirecooldowns clear §8- Same as reset");
+            sender.sendMessage(Component.text("Usage: /pow admin vampirecooldowns <reset | clear> [player]", NamedTextColor.RED));
+            CommandHandler.sendCommandCorrection(sender, "  reset", "Reset all cooldowns for all online players");
+            CommandHandler.sendCommandCorrection(sender, "  reset <player>", "Reset cooldowns for a specific player");
+            CommandHandler.sendCommandCorrection(sender, "  clear", "Same as reset");
 
         } else {
             String action = args[0].toLowerCase();
@@ -864,7 +910,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
      */
     private boolean handleSessionCommand(CommandSender sender, String[] args) {
         if (args.length != 1) {
-            sender.sendMessage("§cUsage: /pow admin session <start | pause | end | prime | resume | building>");
+            sender.sendMessage(Component.text("Usage: /pow admin session <start | pause | end | prime | resume | building>", NamedTextColor.RED));
 
         } else {
             switch (args[0].toLowerCase()) {
@@ -957,9 +1003,9 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
      */
     private boolean handleVampireCommand(CommandSender sender, String[] args) {
         if (args.length < 2) {
-            sender.sendMessage("§cUsage: /pow admin vampire <player> <human | 1 | 2 | 3 | turn | clearcap | clearban>");
-            sender.sendMessage("§7  clearcap - Remove stage cap (allows vampire to level up after thirst demotion)");
-            sender.sendMessage("§7  clearban - Remove promotion ban (allows vampire to level up again)");
+            sender.sendMessage(Component.text("Usage: /pow admin vampire <player> <human | 1 | 2 | 3 | turn | clearcap | clearban>", NamedTextColor.RED));
+            sendCommandCorrection(sender, "  clearcap", "Remove stage cap (allows vampire to level up after thirst demotion)");
+            sendCommandCorrection(sender, "  clearban", "Remove promotion ban (allows vampire to level up again)");
 
         } else {
             Player target = Bukkit.getPlayer(args[0]);
@@ -980,6 +1026,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                         target.setHealth(target.getAttribute(Attribute.MAX_HEALTH).getValue());
                         sender.sendMessage(Component.text(target.getName() + " is now human.", NamedTextColor.GREEN));
                         target.sendMessage(Component.text("You have been set as human.", NamedTextColor.GREEN));
+                        this.sendHumanTexturePackPrompt(target);
                         break;
 
                     case "1":
@@ -1161,7 +1208,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                 }
 
             } else {
-                sender.sendMessage(Component.text("Usage: /beacon debug [beacon_name]", NamedTextColor.RED));
+                sender.sendMessage(Component.text("Usage: /pow admin beacon debug [beacon_name]", NamedTextColor.RED));
             }
         } else {
             sender.sendMessage(Component.text("=== BEACON DISPLAY DEBUG INFO ===", NamedTextColor.GOLD));
@@ -1222,7 +1269,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
      */
     private boolean handleBeaconAdd(CommandSender sender, String[] args) {
         if (args.length < 2) {
-            sender.sendMessage("§cUsage: /pow admin beacon add <name> [radius]");
+            sender.sendMessage(Component.text("Usage: /pow admin beacon add <name> [radius]", NamedTextColor.RED));
 
         } else if (!(sender instanceof Player player)) {
             sender.sendMessage(Component.text("Only players can add beacons.", NamedTextColor.RED));
@@ -1280,7 +1327,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
      */
     private boolean handleBeaconRemove(CommandSender sender, String[] args) {
         if (args.length < 2) {
-            sender.sendMessage("§cUsage: /pow admin beacon remove <name>");
+            sender.sendMessage(Component.text("Usage: /pow admin beacon remove <name>", NamedTextColor.RED));
 
         } else {
             String name = args[1];
@@ -1393,7 +1440,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
      */
     private boolean handleBeaconInfo(CommandSender sender, String[] args) {
         if (args.length < 2) {
-            sender.sendMessage("§cUsage: /pow admin beacon info <name>");
+            sender.sendMessage(Component.text("Usage: /pow admin beacon info <name>", NamedTextColor.RED));
 
         } else {
             String name = args[1];
@@ -1430,7 +1477,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
      */
     private boolean handleBeaconHoly(CommandSender sender, String[] args) {
         if (args.length < 2) {
-            sender.sendMessage("§cUsage: /pow admin beacon holy <name>");
+            sender.sendMessage(Component.text("Usage: /pow admin beacon holy <name>", NamedTextColor.RED));
         } else {
             String name = args[1];
 
@@ -1452,7 +1499,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
      */
     private boolean handleBeaconDesecrated(CommandSender sender, String[] args) {
         if (args.length < 2) {
-            sender.sendMessage("§cUsage: /pow admin beacon desecrated <name>");
+            sender.sendMessage(Component.text("Usage: /pow admin beacon desecrated <name>", NamedTextColor.RED));
         } else {
             String name = args[1];
 
@@ -1474,7 +1521,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
      */
     private boolean handleBeaconCorrupted(CommandSender sender, String[] args) {
         if (args.length < 2) {
-            sender.sendMessage("§cUsage: /pow admin beacon corrupted <name>");
+            sender.sendMessage(Component.text("Usage: /pow admin beacon corrupted <name>", NamedTextColor.RED));
         } else {
             String name = args[1];
 
@@ -1496,7 +1543,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
      */
     private boolean handleBeaconNeutral(CommandSender sender, String[] args) {
         if (args.length < 2) {
-            sender.sendMessage("§cUsage: /pow admin beacon neutral <name>");
+            sender.sendMessage(Component.text("Usage: /pow admin beacon neutral <name>", NamedTextColor.RED));
         } else {
             String name = args[1];
 
@@ -1517,24 +1564,24 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
     private void sendBeaconHelp(CommandSender sender) {
         sender.sendMessage(Component.text("=== BEACON COMMANDS ===", NamedTextColor.GOLD)
                 .decorate(TextDecoration.BOLD));
-        sender.sendMessage("§e/pow admin beacon add <name> [radius] §7- Add beacon at your location");
-        sender.sendMessage("§e/pow admin beacon remove <name> §7- Remove a beacon");
-        sender.sendMessage("§e/pow admin beacon list §7- List all beacons");
-        sender.sendMessage("§e/pow admin beacon list §7- List all beacons");
-        sender.sendMessage("§e/pow admin beacon stats §7- Show spiritual influence statistics");
-        sender.sendMessage("§e/pow admin beacon reload §7- Reload beacons from file");
-        sender.sendMessage("§e/pow admin beacon validate §7- Check for invalid beacons");
 
-        sender.sendMessage("§e/pow admin beacon holy <name> §7- Instantly convert the beacon to holy");
-        sender.sendMessage("§e/pow admin beacon desecrated <name> §7- Instantly convert the beacon to desecrated");
-        sender.sendMessage("§e/pow admin beacon corrupted <name> §7- Instantly corrupt and break the beacon");
-        sender.sendMessage("§e/pow admin beacon neutral <name> §7- Instantly convert the beacon to neutral");
+        sendCommandInstruction(sender, "  add <name> [radius]", "Add beacon at your location");
+        sendCommandInstruction(sender, "  remove <name>", "Remove a beacon");
+        sendCommandInstruction(sender, "  list", "List all beacons");
+        sendCommandInstruction(sender, "  stats", "Show spiritual influence statistics");
+        sendCommandInstruction(sender, "  reload", "Reload beacons from file");
+        sendCommandInstruction(sender, "  reload", "Check for invalid beacons");
 
-        sender.sendMessage("§e/pow admin beacon fix §7- Repair missing item displays");
-        sender.sendMessage("§e/pow admin beacon refresh §7- Force refresh all beacon displays");
-        sender.sendMessage("§e/pow admin beacon cleanup §7- AGGRESSIVE cleanup of all item displays at beacons");
-        sender.sendMessage("§e/pow admin beacon clearcooldowns §7- Clear all beacon conversion cooldowns");
-        sender.sendMessage("§e/pow admin beacon debug [name] §7- Debug beacon display info");
+        sendCommandInstruction(sender, "  holy <name>", "Instantly convert the beacon to holy");
+        sendCommandInstruction(sender, "  desecrated <name>", "Instantly convert the beacon to desecrated");
+        sendCommandInstruction(sender, "  corrupted <name>", "Instantly corrupt and break the beacon");
+        sendCommandInstruction(sender, "  neutral <name>", "Instantly convert the beacon to neutral");
+
+        sendCommandInstruction(sender, "  fix", "Repair missing item displays");
+        sendCommandInstruction(sender, "  refresh", "Force refresh all beacon displays");
+        sendCommandInstruction(sender, "  cleanup", "AGGRESSIVE cleanup of all item displays at beacons");
+        sendCommandInstruction(sender, "  clearcooldowns", "Clear all beacon conversion cooldowns");
+        sendCommandInstruction(sender, "  debug [name]", "Debug beacon display info");
     }
 
     /**
@@ -1579,7 +1626,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
      */
     private boolean handleGiveTomeCommand(CommandSender sender, String[] args) {
         if (args.length < 2) {
-            sender.sendMessage("§cUsage: /givetome <player> <ability> [amount]");
+            sender.sendMessage(Component.text("Usage: /pow admin givetome <player> <ability> [amount]", NamedTextColor.RED));
 
         } else {
             Player target = Bukkit.getPlayer(args[0]);
@@ -1618,7 +1665,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                     if (bookMeta != null) {
                         String canonicalName = ability != null ? ability.getName() : abilityName;
                         bookMeta.setTitle(canonicalName);
-                        bookMeta.setAuthor("§6A source unknown...");
+                        bookMeta.author(Component.text("A source unknown...", NamedTextColor.GOLD));
 
                         if (ability != null) {
                             List<String> lore = new ArrayList<>();
@@ -1636,7 +1683,9 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                         List<String> pages = new ArrayList<>();
                         StringBuilder pageContent = new StringBuilder();
                         pageContent.append("§5§lANCIENT KNOWLEDGE§r\n\n");
-                        pageContent.append("§8The secrets of ").append(abilityName).append(" are contained within these pages.\n\n");
+                        pageContent.append("§8The secrets of ")
+                                .append(abilityName)
+                                .append(" are contained within these pages.\n\n");
 
                         if (ability != null) {
                             String[] descriptionLines = ability.getDescriptionLines();
@@ -1681,7 +1730,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
             sender.sendMessage(Component.text("This command can only be used by players.", NamedTextColor.RED));
 
         } else if (args.length < 1) {
-            sender.sendMessage("§cUsage: /pow admin select_tomes <player>");
+            sender.sendMessage(Component.text("Usage: /pow admin select_tomes <player>", NamedTextColor.RED));
 
         } else {
             Player target = Bukkit.getPlayer(args[0]);
@@ -1753,7 +1802,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
     private boolean handleStashCureBookCommand(CommandSender sender, String[] args) {
         // Catch if an improper number of parameters was provided
         if (args.length != 1 && args.length != 4) {
-            sender.sendMessage("§cUsage: /stash_cure_book <1 | 2 | 3 | 4> <x> <y> <z>");
+            sender.sendMessage("§cUsage: /pow admin stash_cure_book <1 | 2 | 3 | 4> <x> <y> <z>");
             return true;
         }
 
@@ -1856,7 +1905,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                         .append(Component.text(location.getBlockX() + ", " + location.getBlockY() + ", " + location.getBlockZ(), NamedTextColor.YELLOW)));
                 sender.sendMessage(Component.text("A chest has been placed at this location.", NamedTextColor.GRAY));
                 sender.sendMessage(Component.text("Total tome chest locations: ", NamedTextColor.GRAY)
-                        .append(Component.text(this.plugin.getTomeDistributionManager().getTomeLocations().size(),NamedTextColor.YELLOW)));
+                        .append(Component.text(this.plugin.getTomeDistributionManager().getTomeLocations().size(), NamedTextColor.YELLOW)));
 
             } else {
                 sender.sendMessage(Component.text("✖ This location already exists in the tome chest list.", NamedTextColor.RED));
@@ -1982,7 +2031,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
      */
     private boolean handleClearBloodMoonBuffsCommand(CommandSender sender, String[] args) {
         if (args.length == 0) {
-            sender.sendMessage("§cUsage: /clearbloodmoonbuffs <player | all>");
+            sender.sendMessage("§cUsage: /pow admin clearbloodmoonbuffs <player | all>");
             sender.sendMessage("§7This command removes stacked blood moon attribute modifiers");
 
         } else {
@@ -2030,7 +2079,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
      */
     private boolean makePlayerIncurable(CommandSender sender, String[] args) {
         if (args.length == 0) {
-            sender.sendMessage("§cUsage: /make_incurable <player>");
+            sender.sendMessage("§cUsage: /pow admin make_incurable <player>");
             sender.sendMessage("§7This command makes a vampire impossible to cure, and immune to the force cure movement trap.");
             sender.sendMessage("§7The plugin will treat the player as though their sire was still alive.");
             sender.sendMessage("§7However, it will still prevent curing even if the config is toggled to ignore whether the vampire's sire is alive.");
@@ -2070,7 +2119,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                 sender.sendMessage(Component.text("Aggressively cleaned your attribute modifiers.", NamedTextColor.GREEN));
 
             } else {
-                sender.sendMessage("§cUsage: /fixattributes <player | all>");
+                sender.sendMessage("§cUsage: /pow admin fixattributes <player | all>");
             }
 
         } else {
@@ -2117,10 +2166,10 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
      */
     private boolean handleRemoveEndermenCommand(CommandSender sender, String[] args) {
         if (args.length == 0) {
-            sender.sendMessage("§cUsage: /removeendermen <all | toggle | status>");
-            sender.sendMessage("§7- /removeendermen all §8- Remove all existing endermen from loaded chunks");
-            sender.sendMessage("§7- /removeendermen toggle §8- Toggle enderman spawn prevention on/off");
-            sender.sendMessage("§7- /removeendermen status §8- Check if enderman removal is enabled");
+            sender.sendMessage("§cUsage: /pow admin removeendermen <all | toggle | status>");
+            CommandHandler.sendCommandCorrection(sender, "  all", "Remove all existing endermen from loaded chunks");
+            CommandHandler.sendCommandCorrection(sender, "  toggle", "Toggle enderman spawn prevention on/off");
+            CommandHandler.sendCommandCorrection(sender, "  status", "Check if enderman removal is enabled");
 
         } else {
             switch (args[0].toLowerCase()) {
@@ -2167,10 +2216,10 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
      */
     private boolean handleRemoveCreeperCommand(CommandSender sender, String[] args) {
         if (args.length == 0) {
-            sender.sendMessage("§cUsage: /removecreepers <all | toggle | status>");
-            sender.sendMessage("§7- /removecreepers all §8- Remove all existing creepers from loaded chunks");
-            sender.sendMessage("§7- /removecreepers toggle §8- Toggle creeper spawn prevention on/off");
-            sender.sendMessage("§7- /removecreepers status §8- Check if creeper removal is enabled");
+            sender.sendMessage("§cUsage: /pow admin removecreepers <all | toggle | status>");
+            CommandHandler.sendCommandCorrection(sender, "  all", "Remove all existing creepers from loaded chunks");
+            CommandHandler.sendCommandCorrection(sender, "  toggle", "Toggle creeper spawn prevention on/off");
+            CommandHandler.sendCommandCorrection(sender, "  status", "Check if creeper removal is enabled");
 
         } else {
             switch (args[0].toLowerCase()) {
@@ -2220,7 +2269,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
      */
     private boolean handleSetupPlayerCommand(CommandSender sender, String[] args) {
         if (args.length != 1) {
-            sender.sendMessage("§cUsage: /setupplayer <playername>");
+            sender.sendMessage("§cUsage: /pow admin setupplayer <playername>");
 
         } else {
             Player target = Bukkit.getPlayer(args[0]);
@@ -2450,5 +2499,65 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                         .clickEvent(ClickEvent.runCommand("/pow texture vampire"))
                         .hoverEvent(HoverEvent.showText(Component.text("Click to apply the vampire texture pack", NamedTextColor.GRAY)))
                 ));
+    }
+
+    /**
+     * Give the player a link to apply the human texture pack to their game.
+     *
+     * @param player the player changing to the human texture pack.
+     */
+    private void sendHumanTexturePackPrompt(Player player) {
+        player.sendMessage(Component.text("Apply the human texture pack: ", NamedTextColor.GRAY)
+                .append(Component.text("[CLICK HERE]", NamedTextColor.GREEN)
+                        .decorate(TextDecoration.UNDERLINED)
+                        .clickEvent(ClickEvent.runCommand("/pow texture human"))
+                        .hoverEvent(HoverEvent.showText(Component.text("Click to apply the human texture pack", NamedTextColor.GRAY)))
+                ));
+    }
+
+    /**
+     * Create a message about the command in a help list for players to learn about.
+     *
+     * @param command the exact command that readers are learning about.
+     * @param info the details of the command.
+     * @return A {@code Component} in the format of "[YELLOW]<command>[GRAY] - <info>".
+     */
+    public static Component formatCommandInstruction(String command, String info) {
+        return Component.text(command, NamedTextColor.YELLOW)
+                .append(Component.text(" - " + info, NamedTextColor.GRAY));
+    }
+
+    /**
+     * Create a message about the proper usage of a command when players trigger one wrong.
+     *
+     * @param command the exact command that readers are being corrected on.
+     * @param info the details of the command.
+     * @return A {@code Component} in the format of "[GRAY]<command>[DARK GRAY] - <info>".
+     */
+    public static Component formatCommandCorrection(String command, String info) {
+        return Component.text(command, NamedTextColor.GRAY)
+                .append(Component.text(" - " + info, NamedTextColor.DARK_GRAY));
+    }
+
+    /**
+     * Send a message about the command in a help list for players to learn about.
+     *
+     * @param sender the player to send the help message to.
+     * @param command the exact command that readers are learning about.
+     * @param info the details of the command.
+     */
+    public static void sendCommandInstruction(CommandSender sender, String command, String info) {
+        sender.sendMessage(formatCommandInstruction(command, info));
+    }
+
+    /**
+     * Send a message about the proper usage of a command when players trigger one wrong.
+     *
+     * @param sender the player to send the informative message to.
+     * @param command the exact command that readers inputted incorrectly.
+     * @param info the details of the command.
+     */
+    public static void sendCommandCorrection(CommandSender sender, String command, String info) {
+        sender.sendMessage(formatCommandCorrection(command, info));
     }
 }
