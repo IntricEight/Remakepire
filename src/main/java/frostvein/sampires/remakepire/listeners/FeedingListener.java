@@ -60,7 +60,7 @@ public class FeedingListener implements Listener {
                             }
                         }
                     }
-                } else if (killer != null && this.vampireManager.isHuman(killer) && offhandItem != null && offhandItem.getType() == Material.GLASS_BOTTLE) {
+                } else if (killer != null && this.plugin.getVampireManager().isHuman(killer) && offhandItem != null && offhandItem.getType() == Material.GLASS_BOTTLE) {
                     if (this.tryFillBottleWithBlood(killer)) {
                         event.setDroppedExp(0);
                     }
