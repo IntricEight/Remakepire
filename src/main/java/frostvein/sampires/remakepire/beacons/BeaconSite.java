@@ -59,7 +59,7 @@ public class BeaconSite {
      * Determine if a location is within the beacon's capture range.
      *
      * @param location A location within the world.
-     * @return {@code true}
+     * @return {@code true} if the location is within the capture range of the beacon.
      */
     public boolean isWithinCaptureRadius(Location location) {
         Location beaconLoc = this.getLocation();
@@ -77,17 +77,9 @@ public class BeaconSite {
      *
      * @param newState the new alignment of the beacon.
      * @param changedBy the method that changed the beacon.
-     * @param sessionManager the manager for the session states.
-     * @param cooldownMs how long the beacon will remain inconvertible.
      */
-    public void changeState(BeaconState newState, String changedBy, SessionManager sessionManager, long cooldownMs) {
-        this.state = newState;
-        this.lastChangedBy = changedBy;
-        this.lastStateChangeTime = System.currentTimeMillis();
-
-        if (newState == BeaconSite.BeaconState.HOLY || newState == BeaconSite.BeaconState.DESECRATED) {
-            this.conversionCooldownUntil = sessionManager.getSessionTime() + cooldownMs;
-        }
+    public void changeState(BeaconState newState, String changedBy) {
+        this.changeState(newState, changedBy, 3600000L);
     }
 
     /**
@@ -123,9 +115,17 @@ public class BeaconSite {
      *
      * @param newState the new alignment of the beacon.
      * @param changedBy the method that changed the beacon.
+     * @param sessionManager the manager for the session states.
+     * @param cooldownMs how long the beacon will remain inconvertible.
      */
-    public void changeState(BeaconState newState, String changedBy) {
-        this.changeState(newState, changedBy, 3600000L);
+    public void changeState(BeaconState newState, String changedBy, SessionManager sessionManager, long cooldownMs) {
+        this.state = newState;
+        this.lastChangedBy = changedBy;
+        this.lastStateChangeTime = System.currentTimeMillis();
+
+        if (newState == BeaconSite.BeaconState.HOLY || newState == BeaconSite.BeaconState.DESECRATED) {
+            this.conversionCooldownUntil = sessionManager.getSessionTime() + cooldownMs;
+        }
     }
 
     /**
@@ -138,8 +138,11 @@ public class BeaconSite {
         return sessionManager.getSessionTime() < this.conversionCooldownUntil;
     }
 
-    /** @deprecated */
-    @Deprecated
+    /**
+     * Determine if the beacon's conversion cooldown has elapsed.
+     *
+     * @return {@code true} if the beacon's conversation cooldown is active.
+     */
     public boolean isOnConversionCooldown() {
         return System.currentTimeMillis() < this.conversionCooldownUntil;
     }
@@ -185,8 +188,10 @@ public class BeaconSite {
     @Deprecated
     public String getRemainingCooldownString() {
         long remaining = this.getRemainingCooldownMs();
+
         if (remaining <= 0L) {
             return "Ready";
+
         } else {
             long minutes = remaining / 60000L;
             long seconds = remaining % 60000L / 1000L;
@@ -212,8 +217,7 @@ public class BeaconSite {
      * @return A {@code String} of the beacon's current details.
      */
     public String getStatusString(SessionManager sessionManager) {
-        String stateColor = this.state.getColorCode();
-        String timeAgo = this.getTimeSinceStateChange();
+        final String stateColor = this.state.getColorCode(), timeAgo = this.getTimeSinceStateChange();
         String status = String.format("§e%s §7at §f(%.0f, %.0f, %.0f) §7in §f%s", this.name, this.x, this.y, this.z, this.worldName);
         status = status + String.format("\n  §7State: %s%s §7| Radius: §e%d blocks", stateColor, this.state.getDisplayName(), this.captureRadius);
 
@@ -234,14 +238,15 @@ public class BeaconSite {
     /** @deprecated */
     @Deprecated
     public String getStatusString() {
-        String stateColor = this.state.getColorCode();
-        String timeAgo = this.getTimeSinceStateChange();
+        final String stateColor = this.state.getColorCode(), timeAgo = this.getTimeSinceStateChange();
         String status = String.format("§e%s §7at §f(%.0f, %.0f, %.0f) §7in §f%s", this.name, this.x, this.y, this.z, this.worldName);
         status = status + String.format("\n  §7State: %s%s §7| Radius: §e%d blocks", stateColor, this.state.getDisplayName(), this.captureRadius);
+
         if (this.lastChangedBy != null) {
             status = status + String.format("\n  §7Last changed by: §f%s §7(%s ago)", this.lastChangedBy, timeAgo);
         }
 
+        // Display the cooldown status
         if (this.isOnConversionCooldown()) {
             status = status + String.format("\n  §c⏰ Conversion cooldown: %s remaining", this.getRemainingCooldownString());
         } else if (this.state != BeaconSite.BeaconState.NEUTRAL) {

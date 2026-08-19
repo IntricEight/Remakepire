@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.Tag;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -41,8 +42,8 @@ public class LanternThrashTomeAbility extends TomeAbility {
             return false;
 
         } else {
-            Location playerLoc = player.getLocation();
-            double playerYaw = Math.toRadians((playerLoc.getYaw() + 90.0F));
+            final Location playerLoc = player.getLocation();
+            final double playerYaw = Math.toRadians((playerLoc.getYaw() + 90.0F));
 
             List<Location> fireLocations = this.calculateFireLocations(playerLoc);
             this.sortLocationsByAngle(fireLocations, playerLoc, playerYaw);
@@ -64,21 +65,19 @@ public class LanternThrashTomeAbility extends TomeAbility {
      */
     private List<Location> calculateFireLocations(Location playerLoc) {
         List<Location> locations = new ArrayList<>();
-        int playerX = playerLoc.getBlockX();
-        int playerY = playerLoc.getBlockY();
-        int playerZ = playerLoc.getBlockZ();
+        final int playerX = playerLoc.getBlockX(), playerY = playerLoc.getBlockY(), playerZ = playerLoc.getBlockZ();
 
         // Use the FIRE_INNER_RADIUS and FIRE_OUTER_RADIUS values to create a hollow ring of fire around the caster
-        for(int x = playerX - FIRE_OUTER_RADIUS; x <= playerX + FIRE_OUTER_RADIUS; ++x) {
-            for(int z = playerZ - FIRE_OUTER_RADIUS; z <= playerZ + FIRE_OUTER_RADIUS; ++z) {
-                double distance = Math.sqrt(Math.pow((x - playerX), FIRE_INNER_RADIUS) + Math.pow((z - playerZ), FIRE_INNER_RADIUS));
+        for (int x = playerX - FIRE_OUTER_RADIUS; x <= playerX + FIRE_OUTER_RADIUS; ++x) {
+            for (int z = playerZ - FIRE_OUTER_RADIUS; z <= playerZ + FIRE_OUTER_RADIUS; ++z) {
+                final double distance = Math.sqrt(Math.pow((x - playerX), FIRE_INNER_RADIUS) + Math.pow((z - playerZ), FIRE_INNER_RADIUS));
 
                 // Prevent the creation of fire outside the ability ring
                 if (distance <= FIRE_OUTER_RADIUS && distance >= FIRE_INNER_RADIUS) {
-                    for(int yOffset = -1; yOffset <= 0; ++yOffset) {
-                        Location blockLocation = new Location(playerLoc.getWorld(), x, playerY + yOffset, z);
-                        Block block = blockLocation.getBlock();
-                        Block blockAbove = blockLocation.clone().add(0.0, 1.0, 0.0).getBlock();
+                    for (int yOffset = -1; yOffset <= 0; ++yOffset) {
+                        final Location blockLocation = new Location(playerLoc.getWorld(), x, playerY + yOffset, z);
+                        final Block block = blockLocation.getBlock();
+                        final Block blockAbove = blockLocation.clone().add(0.0, 1.0, 0.0).getBlock();
 
                         if (blockAbove.getType() == Material.AIR && block.getType() != Material.AIR) {
                             locations.add(blockAbove.getLocation());
@@ -105,13 +104,11 @@ public class LanternThrashTomeAbility extends TomeAbility {
             angle1 = this.normalizeAngleRelativeToStart(angle1, startAngle);
             angle2 = this.normalizeAngleRelativeToStart(angle2, startAngle);
 
-            int angleComparison = Double.compare(angle1, angle2);
+            final int angleComparison = Double.compare(angle1, angle2);
             if (angleComparison != 0) {
                 return angleComparison;
             } else {
-                double dist1 = playerLoc.distance(loc1);
-                double dist2 = playerLoc.distance(loc2);
-                return Double.compare(dist1, dist2);
+                return Double.compare(playerLoc.distance(loc1), playerLoc.distance(loc2));
             }
         });
     }
@@ -124,12 +121,10 @@ public class LanternThrashTomeAbility extends TomeAbility {
      * @return A normalized {@code Double} angle.
      */
     private double normalizeAngleRelativeToStart(double angle, double startAngle) {
-        double normalizedAngle;
+        double normalizedAngle = (angle - startAngle) % (Math.PI * 2.0);
 
-        for(normalizedAngle = angle - startAngle; normalizedAngle < 0; normalizedAngle += (Math.PI * 2D)) {}
-
-        while(normalizedAngle >= (Math.PI * 2D)) {
-            normalizedAngle -= (Math.PI * 2D);
+        if (normalizedAngle < 0) {
+            normalizedAngle += (Math.PI * 2.0);
         }
 
         return normalizedAngle;
@@ -151,12 +146,11 @@ public class LanternThrashTomeAbility extends TomeAbility {
 
                 public void run() {
                     ++this.tickCounter;
-                    int totalRemaining = fireLocations.size() - this.currentIndex;
-                    int ticksRemaining = totalTicks - this.tickCounter + 1;
-                    int locationsThisTick = Math.max(1, (int)Math.ceil((double)totalRemaining / (double)ticksRemaining));
+                    final double totalRemaining = fireLocations.size() - this.currentIndex, ticksRemaining = totalTicks - this.tickCounter + 1;
+                    final int locationsThisTick = Math.max(1, (int)Math.ceil(totalRemaining / ticksRemaining));
 
-                    for(int locationsSet = 0; this.currentIndex < fireLocations.size() && locationsSet < locationsThisTick; ++locationsSet) {
-                        Location fireLoc = (Location)fireLocations.get(this.currentIndex);
+                    for (int locationsSet = 0; this.currentIndex < fireLocations.size() && locationsSet < locationsThisTick; ++locationsSet) {
+                        final Location fireLoc = fireLocations.get(this.currentIndex);
                         Block fireBlock = fireLoc.getBlock();
 
                         if (fireBlock.getType() == Material.AIR) {
@@ -186,22 +180,12 @@ public class LanternThrashTomeAbility extends TomeAbility {
      * @return {@code true} if the {@code player} has a lantern in their inventory.
      */
     private boolean hasLanternInInventory(Player player) {
-        for(ItemStack item : player.getInventory().getContents()) {
-            if (item != null && this.isLantern(item.getType())) {
+        for (ItemStack item : player.getInventory().getContents()) {
+            if (item != null && Tag.LANTERNS.isTagged(item.getType())) {
                 return true;
             }
         }
 
         return false;
-    }
-
-    /**
-     * Determine if the item is a lantern.
-     *
-     * @param material the item being checked.
-     * @return {@code text} if this item is a lantern.
-     */
-    private boolean isLantern(Material material) {
-        return material == Material.LANTERN;
     }
 }

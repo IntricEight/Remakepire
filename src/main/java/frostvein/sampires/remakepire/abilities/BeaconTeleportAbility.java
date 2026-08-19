@@ -2,11 +2,14 @@ package frostvein.sampires.remakepire.abilities;
 
 import java.util.ArrayList;
 import java.util.List;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import frostvein.sampires.remakepire.RemakepirePlugin;
@@ -14,7 +17,8 @@ import frostvein.sampires.remakepire.beacons.BeaconSite;
 import frostvein.sampires.remakepire.managers.VampireManager;
 
 public class BeaconTeleportAbility extends VampireAbility {
-    public static final String INVENTORY_TITLE = "§4Desecrated Beacon Network";
+    public static final Component INVENTORY_GUI_TITLE = Component.text("Desecrated Beacon Network", NamedTextColor.DARK_RED)
+            .decoration(TextDecoration.ITALIC, false);
 
     public String getName() {
         return "beacontravel";
@@ -36,10 +40,6 @@ public class BeaconTeleportAbility extends VampireAbility {
         return 2;
     }
 
-    protected boolean canUseAdditionalRequirements(Player player, VampireManager vampireManager) {
-        return true;
-    }
-
     protected String getAdditionalRequirementMessage(Player player, VampireManager vampireManager) {
         return "The shadow network is unavailable right now.";
     }
@@ -47,25 +47,26 @@ public class BeaconTeleportAbility extends VampireAbility {
     public boolean execute(Player player, VampireManager vampireManager, RemakepirePlugin plugin) {
         if (plugin.getBatTransformationManager().isInBatForm(player)) {
             // Stop the player from using the ability while in bat form
-            player.sendMessage("§cYour fragile form cannot handle the strain of using the beacon network.");
+            player.sendMessage(Component.text("Your fragile form cannot handle the strain of using the beacon network.", NamedTextColor.RED));
             return false;
 
-        } else if (player.getHealth() < player.getMaxHealth()) {
-            player.sendMessage("§cYou find yourself too weak to use that ability... Rest up and heal first.");
+        } else if (player.getHealth() < player.getAttribute(Attribute.MAX_HEALTH).getValue()) {
+            player.sendMessage(Component.text("You find yourself too weak to use that ability... Rest up and heal first.", NamedTextColor.RED));
             return false;
+
         } else {
             List<BeaconSite> desecratedBeacons = plugin.getBeaconManager().getDesecratedBeacons();
 
             if (desecratedBeacons.isEmpty()) {
-                player.sendMessage("§cNo desecrated beacons are available for beacon travel.");
-                player.sendMessage("§7Beacons must be desecrated to connect to the beacon network.");
-                return false;
+                player.sendMessage(Component.text("No desecrated beacons are available for beacon travel.", NamedTextColor.RED));
+                player.sendMessage(Component.text("Beacons must be desecrated to connect to the beacon network.", NamedTextColor.GRAY));
 
             } else {
-                this.openBeaconTeleportGUI(player, desecratedBeacons, plugin);
-                player.sendMessage("§5The shadows whisper of distant beacons...");
-                return false;
+                this.openBeaconTeleportGUI(player, desecratedBeacons);
+                player.sendMessage(Component.text("The shadows whisper of distant beacons...", NamedTextColor.DARK_PURPLE));
             }
+
+            return false;
         }
     }
 
@@ -74,14 +75,13 @@ public class BeaconTeleportAbility extends VampireAbility {
      *
      * @param player the player using the ability.
      * @param desecratedBeacons a list of corrupted beacons for teleportation.
-     * @param plugin the host plugin object.
      */
-    private void openBeaconTeleportGUI(Player player, List<BeaconSite> desecratedBeacons, RemakepirePlugin plugin) {
+    private void openBeaconTeleportGUI(Player player, List<BeaconSite> desecratedBeacons) {
         int slots = Math.max(9, (desecratedBeacons.size() + 8) / 9 * 9);
         slots = Math.min(54, slots);
-        Inventory inventory = Bukkit.createInventory(null, slots, INVENTORY_TITLE);
+        Inventory inventory = Bukkit.createInventory(null, slots, INVENTORY_GUI_TITLE);
 
-        for(int i = 0; i < desecratedBeacons.size() && i < slots; ++i) {
+        for (int i = 0; i < desecratedBeacons.size() && i < slots; ++i) {
             BeaconSite beacon = desecratedBeacons.get(i);
             ItemStack item = this.createBeaconItem(beacon, player);
             inventory.setItem(i, item);
@@ -102,15 +102,18 @@ public class BeaconTeleportAbility extends VampireAbility {
         ItemMeta meta = item.getItemMeta();
 
         if (meta != null) {
-            meta.setDisplayName("§4§l" + beacon.getName());
+            meta.customName(
+                    Component.text(beacon.getName(), NamedTextColor.DARK_RED)
+                            .decorate(TextDecoration.BOLD)
+                            .decoration(TextDecoration.ITALIC, false)
+            );
+
             List<String> lore = new ArrayList<>();
 
             lore.add("§7Location: §f" + beacon.getLocation().getWorld().getName());
             lore.add("§7Coordinates: §f" + beacon.getLocation().getBlockX() + ", " + beacon.getLocation().getBlockY() + ", " + beacon.getLocation().getBlockZ());
             lore.add("§7State: " + beacon.getState().getColorCode() + beacon.getState().getDisplayName());
-
-            double distance = beacon.getLocation().distance(player.getLocation());
-            lore.add("§7Distance: §e" + Math.round(distance) + " blocks");
+            lore.add("§7Distance: §e" + Math.round(beacon.getLocation().distance(player.getLocation())) + " blocks");
             lore.add("");
             lore.add("§5⚡ Desecrated Energy");
             lore.add("§8The beacon pulses with dark power,");

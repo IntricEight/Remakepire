@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -28,7 +30,6 @@ public class TomeDistributionManager {
     private final ConfigManager configManager;
     private final Random random;
     private BukkitTask distributionTask;
-    private final ConversionAssistant conversionAssistant;
     private int distributionCount;
     private List<Location> tomeLocations = new ArrayList<>();
     private final String[] tomeTypes;
@@ -58,7 +59,6 @@ public class TomeDistributionManager {
         this.plugin = plugin;
         this.configManager = plugin.getConfigManager();
         this.random = new Random();
-        this.conversionAssistant = new ConversionAssistant();
         this.initializeTomeLocations();
 
         // Set what books can be found within the tome chests
@@ -182,7 +182,7 @@ public class TomeDistributionManager {
      * Clear the contents of all tome chests.
      */
     private void clearAllTomeChests() {
-        for(Location location : this.tomeLocations) {
+        for (Location location : this.tomeLocations) {
             Block block = location.getBlock();
 
             if (block.getType() == Material.CHEST) {
@@ -224,13 +224,13 @@ public class TomeDistributionManager {
 
         if (block.getType() != Material.CHEST) {
             block.setType(Material.CHEST);
-            this.plugin.logInfo("TomeDistributionManager: Created chest at " + this.conversionAssistant.locationToString(location));
+            this.plugin.logInfo("TomeDistributionManager: Created chest at " + ConversionAssistant.locationToString(location));
         }
 
         Chest chest = (Chest)block.getState();
         chest.getInventory().addItem(this.createTomeItem(tomeType));
 
-        this.plugin.logInfo("TomeDistributionManager: Added " + tomeType + " tome to chest at " + this.conversionAssistant.locationToString(location));
+        this.plugin.logInfo("TomeDistributionManager: Added " + tomeType + " tome to chest at " + ConversionAssistant.locationToString(location));
     }
 
     /**
@@ -245,14 +245,14 @@ public class TomeDistributionManager {
 
         if (bookMeta != null) {
             bookMeta.setTitle(tomeType);
-            bookMeta.setAuthor("§6A source unknown...");
+            bookMeta.author(Component.text("A source unknown...", NamedTextColor.GOLD));
             TomeAbility ability = this.plugin.getTomeManager().getAbility(tomeType);
 
             if (ability != null) {
                 List<String> lore = new ArrayList<>();
                 String[] descriptionLines = ability.getDescriptionLines();
 
-                for(String line : descriptionLines) {
+                for (String line : descriptionLines) {
                     lore.add("§7" + line);
                 }
 
@@ -269,7 +269,7 @@ public class TomeDistributionManager {
             if (ability != null) {
                 String[] descriptionLines = ability.getDescriptionLines();
 
-                for(String line : descriptionLines) {
+                for (String line : descriptionLines) {
                     pageContent.append("§7").append(line).append("\n");
                 }
             } else {
@@ -296,7 +296,7 @@ public class TomeDistributionManager {
 
         if (meta != null) {
             Enchantment randomEnchantment = this.enchantmentTypes[this.random.nextInt(this.enchantmentTypes.length)];
-            int level = 1;
+            final int level = 1;
             meta.addStoredEnchant(randomEnchantment, level, true);
             enchantedBook.setItemMeta(meta);
         }
@@ -314,13 +314,13 @@ public class TomeDistributionManager {
 
         if (block.getType() != Material.CHEST) {
             block.setType(Material.CHEST);
-            this.plugin.logInfo("TomeDistributionManager: Created chest at " + this.conversionAssistant.locationToString(location));
+            this.plugin.logInfo("TomeDistributionManager: Created chest at " + ConversionAssistant.locationToString(location));
         }
 
         Chest chest = (Chest)block.getState();
         chest.getInventory().addItem(this.createRandomEnchantmentBook());
 
-        this.plugin.logInfo("TomeDistributionManager: Added enchantment book to chest at " + this.conversionAssistant.locationToString(location));
+        this.plugin.logInfo("TomeDistributionManager: Added enchantment book to chest at " + ConversionAssistant.locationToString(location));
     }
 
     /**
@@ -333,7 +333,7 @@ public class TomeDistributionManager {
 
         if (block.getType() != Material.CHEST) {
             block.setType(Material.CHEST);
-            this.plugin.logInfo("TomeDistributionManager: Created chest at " + this.conversionAssistant.locationToString(location));
+            this.plugin.logInfo("TomeDistributionManager: Created chest at " + ConversionAssistant.locationToString(location));
         }
 
         Chest chest = (Chest)block.getState();
@@ -342,7 +342,8 @@ public class TomeDistributionManager {
         ItemStack cureBook = this.createRandomCureBook();
         chestInventory.addItem(cureBook);
 
-        this.plugin.logInfo("TomeDistributionManager: Replaced chest contents with cure book (" + cureBook.getItemMeta().getDisplayName() + ") at " + this.conversionAssistant.locationToString(location));
+        this.plugin.logInfo("TomeDistributionManager: Replaced chest contents with cure book (" +
+                cureBook.getItemMeta().getDisplayName() + ") at " + ConversionAssistant.locationToString(location));
     }
 
     /**
@@ -382,11 +383,11 @@ public class TomeDistributionManager {
     public boolean addTomeLocation(Location location) {
         if (this.configManager.addTomeChestLocation(location)) {
             this.tomeLocations = this.configManager.getTomeChestLocations();
-            this.plugin.logInfo("TomeDistributionManager: Added tome location at " + this.conversionAssistant.locationToString(location));
+            this.plugin.logInfo("TomeDistributionManager: Added tome location at " + ConversionAssistant.locationToString(location));
             return true;
 
         } else {
-            this.plugin.getLogger().warning("TomeDistributionManager: Location " + this.conversionAssistant.locationToString(location) + " already exists in config");
+            this.plugin.getLogger().warning("TomeDistributionManager: Location " + ConversionAssistant.locationToString(location) + " already exists in config");
             return false;
         }
     }
@@ -400,11 +401,11 @@ public class TomeDistributionManager {
     public boolean removeTomeLocation(Location location) {
         if (this.configManager.removeTomeChestLocation(location)) {
             this.tomeLocations = this.configManager.getTomeChestLocations();
-            this.plugin.logInfo("TomeDistributionManager: Removed tome location at " + this.conversionAssistant.locationToString(location));
+            this.plugin.logInfo("TomeDistributionManager: Removed tome location at " + ConversionAssistant.locationToString(location));
             return true;
 
         } else {
-            this.plugin.getLogger().warning("TomeDistributionManager: Location " + this.conversionAssistant.locationToString(location) + " not found in config");
+            this.plugin.getLogger().warning("TomeDistributionManager: Location " + ConversionAssistant.locationToString(location) + " not found in config");
             return false;
         }
     }

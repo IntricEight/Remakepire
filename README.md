@@ -20,8 +20,8 @@ to follow the steps in order to avoid losing important game data.
 
 The process of getting the plugin running on your server is identical to running the _VampireSMP_ plugin.
 This process may vary platform by platform, so check out a platform-specific tutorial if you are getting
-confuse. Here is what works at the most basic level:
-- After dragging _Remakepire-1.1.0.jar_ into your plugins folder, run the server and it will create a folder
+confused. Here is what works at the most basic level:
+- After dragging Remakepire .jar into your plugins folder, run the server, and it will create a folder
   containing core files like the sire map, config, and beacons.
 - Once the server has booted up and its folder has been created, turn off the server.
 - Open the _config.yml_ file and begin changing the plugin values. This is the time you would bring in any existing files
@@ -76,6 +76,6 @@ More notably, though, its source code is also thoroughly documented and freely a
 to turn POW's plugin into an open-source project for the community to mod. Although the scope of this plugin has grown since
 its original release. it remains designed around assisting game runners and other players in customizing the plugin.
 
-At the time of writing, the .zip file containing _Remakepire_'s source code has been posted inside the #coders-and-modders
-in the Fanpires server, public for everyone's use. If you are having trouble finding it, you can reach out to me (Intric) directly,
-or search for my posts within the channel.
+There are several modifications to Remakepire within this repository, accessible through different branches. Please peruse
+and combine them at your leisure if they contain features you would like to use, or use them as a starting point instead
+of the main branch as you desire.

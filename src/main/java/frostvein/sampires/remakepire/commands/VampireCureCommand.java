@@ -1,5 +1,10 @@
 package frostvein.sampires.remakepire.commands;
 
+import java.time.Duration;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.title.Title;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -13,13 +18,11 @@ import frostvein.sampires.remakepire.listeners.CureBookReadingListener;
 import frostvein.sampires.remakepire.listeners.DeathHandler;
 import frostvein.sampires.remakepire.managers.BeaconManager;
 import frostvein.sampires.remakepire.managers.VampireManager;
-import frostvein.sampires.remakepire.managers.VampireSireManager;
 
 public class VampireCureCommand implements CommandExecutor {
     private final RemakepirePlugin plugin;
     private final VampireManager vampireManager;
     private final BeaconManager beaconManager;
-    private final VampireSireManager sireManager;
 
     /**
      * Create an instance of the plugin's self cure command handler.
@@ -30,7 +33,6 @@ public class VampireCureCommand implements CommandExecutor {
         this.plugin = plugin;
         this.vampireManager = plugin.getVampireManager();
         this.beaconManager = plugin.getBeaconManager();
-        this.sireManager = plugin.getSireManager();
     }
 
     /**
@@ -40,39 +42,39 @@ public class VampireCureCommand implements CommandExecutor {
      */
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage("§cThis command can only be used by players.");
+            sender.sendMessage(Component.text("This command can only be used by players.", NamedTextColor.RED));
 
         } else if (!CureBookReadingListener.hasReadAllCureBooks(player)) {
-            player.sendMessage("§cYou do not know these ancient words...");
-            player.sendMessage("§7You must first read all three cure books to learn the ritual.");
+            player.sendMessage(Component.text("You do not know these ancient words...", NamedTextColor.RED));
+            player.sendMessage(Component.text("You must first read all three cure books to learn the ritual.", NamedTextColor.GRAY));
 
         } else if (!this.vampireManager.isVampire(player)) {
-            player.sendMessage("§cOnly vampires can use this cure ritual.");
+            player.sendMessage(Component.text("Only vampires can use this cure ritual.", NamedTextColor.RED));
 
         } else {
             // Only allow a cure during the day (if this setting is enabled)
             if (this.plugin.getConfigManager().doCuresRequireDaytime() && !this.plugin.getEffectManager().isDaytime(player.getWorld())) {
-                player.sendMessage("§cThis ritual can only be performed during the day.");
+                player.sendMessage(Component.text("This ritual can only be performed during the day.", NamedTextColor.RED));
 
             } else {
                 ItemStack holyWater = this.plugin.getHolyWaterEffectManager().findHolyWater(player);
 
-                // Ensure the caster has holy water in their inventory
-                if (holyWater == null) {
-                    player.sendMessage("§cYou need holy water to perform this ritual.");
+                // Ensure the caster has holy water in their inventory and check if the player is affected by holy water
+                if (holyWater == null && !this.plugin.getHolyWaterEffectManager().isAbilitiesDisabled(player)) {
+                    player.sendMessage(Component.text("You need holy water to perform this ritual.", NamedTextColor.RED));
 
                 } else {
                     // Ensure the caster is within cure range of a holy beacon
-                    double cureDistance = this.plugin.getConfigManager().getCureBeaconDistance();
+                    final double cureDistance = this.plugin.getConfigManager().getCureBeaconDistance();
                     BeaconSite nearestHolyBeacon = this.beaconManager.getNearestHolyBeacon(player.getLocation(), cureDistance);
 
                     if (nearestHolyBeacon == null) {
-                        player.sendMessage("§cYou must be close to a holy beacon to perform this ritual.");
+                        player.sendMessage(Component.text("You must be close to a holy beacon to perform this ritual.", NamedTextColor.RED));
 
                     } else {
-                        if (!this.sireManager.canBeCured(player)) {
-                            player.sendMessage("§4The curse cannot be broken while your sire still walks the world in mortal form...");
-                            player.sendMessage("§4Only through your maker's true death can you find release.");
+                        if (!this.plugin.getSireManager().canBeCured(player)) {
+                            player.sendMessage(Component.text("The curse cannot be broken while your sire still walks the world in mortal form...", NamedTextColor.DARK_RED));
+                            player.sendMessage(Component.text("Only through your maker's true death can you find release.", NamedTextColor.DARK_RED));
                         } else {
                             this.performCure(player, holyWater, nearestHolyBeacon);
                         }
@@ -92,21 +94,34 @@ public class VampireCureCommand implements CommandExecutor {
      * @param holyBeacon the beacon being used for the cure.
      */
     private void performCure(Player player, ItemStack holyWater, BeaconSite holyBeacon) {
-        holyWater.setAmount(holyWater.getAmount() - 1);
+        // If holyWater is null, then this player must be affected by an active holy water effect
+        if (holyWater != null) {
+            holyWater.setAmount(holyWater.getAmount() - 1);
+        }
 
-        player.sendTitle("§6§lCURED", "§eThe curse is lifted", 10, 60, 20);
-        player.sendMessage("§7The holy water burns through your veins...");
-        player.sendMessage("§7The corrupted blood boils away in divine light...");
-        player.sendMessage("§aYou feel your humanity returning...");
-        player.sendMessage("§aYou are cured. You are human once more.");
-        player.sendMessage("§8But the holy site has been permanently corrupted by your dark presence...");
+        player.showTitle(Title.title(
+                Component.text("CURED", NamedTextColor.GOLD, TextDecoration.BOLD),
+                Component.text("The curse is lifted", NamedTextColor.YELLOW),
+                Title.Times.times(
+                        // 50 milliseconds in a tick, 20 ticks in a second
+                        Duration.ofMillis(10 * 50),     // 1/2 of a second
+                        Duration.ofSeconds(3),
+                        Duration.ofSeconds(1)
+                )
+        ));
+
+        player.sendMessage(Component.text("The holy water burns through your veins...", NamedTextColor.GRAY));
+        player.sendMessage(Component.text("The corrupted blood boils away in divine light...", NamedTextColor.GRAY));
+        player.sendMessage(Component.text("You feel your humanity returning...", NamedTextColor.GREEN));
+        player.sendMessage(Component.text("You are cured. You are human once more.", NamedTextColor.GREEN));
+        player.sendMessage(Component.text("But the holy site has been permanently corrupted by your dark presence...", NamedTextColor.DARK_GRAY));
 
         // Retrieve the messages to announce to the server population
         final String messageToHumans = this.plugin.getCureBookManager().getSelfCureAnnouncementMessage(true);
         final String messageToVampires = this.plugin.getCureBookManager().getSelfCureAnnouncementMessage(false);
 
         // Alert all players that a vampire has been cured
-        for(Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+        for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
             if (!onlinePlayer.equals(player)) {
                 if (this.vampireManager.isVampire(onlinePlayer)) {
                     onlinePlayer.sendMessage(messageToVampires);

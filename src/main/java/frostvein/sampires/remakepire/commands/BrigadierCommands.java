@@ -7,7 +7,6 @@ import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
@@ -105,12 +104,12 @@ public class BrigadierCommands {
                 .then(Commands.literal("texturepack").executes((ctx) -> this.executePowCommand(ctx, "texture")))
                 .then(Commands.literal("resourcepack").executes((ctx) -> this.executePowCommand(ctx, "texture")))
 
-                .then(((LiteralArgumentBuilder) Commands.literal("permadeath")
-                        .then(Commands.literal("on").executes((ctx) -> this.executePowCommand(ctx, "permadeath", "on"))))
+                .then(Commands.literal("permadeath")
+                        .then(Commands.literal("on").executes((ctx) -> this.executePowCommand(ctx, "permadeath", "on")))
                         .then(Commands.literal("off").executes((ctx) -> this.executePowCommand(ctx, "permadeath", "off")))
                         .then(Commands.literal("absolute").executes((ctx) -> this.executePowCommand(ctx, "permadeath", "absolute"))))
-                .then(((LiteralArgumentBuilder) Commands.literal("toggle-permadeath")
-                        .then(Commands.literal("on").executes((ctx) -> this.executePowCommand(ctx, "permadeath", "on"))))
+                .then(Commands.literal("toggle-permadeath")
+                        .then(Commands.literal("on").executes((ctx) -> this.executePowCommand(ctx, "permadeath", "on")))
                         .then(Commands.literal("off").executes((ctx) -> this.executePowCommand(ctx, "permadeath", "off")))
                         .then(Commands.literal("absolute").executes((ctx) -> this.executePowCommand(ctx, "permadeath", "absolute"))))
 
@@ -123,8 +122,12 @@ public class BrigadierCommands {
                 .then(Commands.literal("reopen").executes((ctx) -> this.executePowCommand(ctx, "reopen")))
                 .then(Commands.literal("forcedcure-reopen").executes((ctx) -> this.executePowCommand(ctx, "reopen")))
 
-                .then(((LiteralArgumentBuilder) Commands.literal("admin").requires((source) -> source.getSender().hasPermission("vampiresmp.admin")))
-                        .then(((LiteralArgumentBuilder) Commands.literal("init").executes((ctx) -> this.executePowCommand(ctx, "admin", "init")))
+                .then(Commands.literal("stake-myself").executes((ctx) -> this.executePowCommand(ctx, "stake-myself")))
+
+                .then(Commands.literal("admin").requires((source) -> source.getSender().hasPermission("vampiresmp.admin"))
+                        .then(Commands.literal("help").executes((ctx) -> this.executePowCommand(ctx, "admin", "help")))
+
+                        .then(Commands.literal("init").executes((ctx) -> this.executePowCommand(ctx, "admin", "init"))
                                 .then(Commands.literal("cancel").executes((ctx) -> this.executePowCommand(ctx, "admin", "init", "cancel"))))
                         .then(this.buildSessionSubcommand())
                         .then(this.buildVampireSubcommand())
@@ -139,15 +142,20 @@ public class BrigadierCommands {
                                     return this.executePowCommand(ctx, "admin", "make_incurable", player);
                                 })))
 
+                        .then((Commands.literal("playercount")
+                                .then(Commands.literal("all").executes((ctx) -> this.executePowCommand(ctx, "admin", "playercount", "all"))))
+                                .then(Commands.literal("human").executes((ctx) -> this.executePowCommand(ctx, "admin", "playercount", "human")))
+                                .then(Commands.literal("vampire").executes((ctx) -> this.executePowCommand(ctx, "admin", "playercount", "vampire"))))
+
                         .then(Commands.literal("break_warning").executes((ctx) -> this.executePowCommand(ctx, "admin", "break_warning")))
 
                         .then(Commands.literal("givetome")
                                 .then(Commands.argument("player", StringArgumentType.word()).suggests((ctx, builder) -> this.suggestOnlinePlayers(builder))
-                                        .then(((RequiredArgumentBuilder) Commands.argument("ability", StringArgumentType.word()).suggests((ctx, builder) -> this.suggestAllTomeAbilities(builder)).executes((ctx) -> {
+                                        .then(Commands.argument("ability", StringArgumentType.word()).suggests((ctx, builder) -> this.suggestAllTomeAbilities(builder)).executes((ctx) -> {
                                             String player = StringArgumentType.getString(ctx, "player");
                                             String ability = StringArgumentType.getString(ctx, "ability");
                                             return this.executePowCommand(ctx, "admin", "givetome", player, ability);
-                                        }))
+                                        })
                                                 .then(Commands.argument("amount", IntegerArgumentType.integer(1, 64)).executes((ctx) -> {
                                                     String player = StringArgumentType.getString(ctx, "player");
                                                     String ability = StringArgumentType.getString(ctx, "ability");
@@ -219,7 +227,10 @@ public class BrigadierCommands {
                                 .then(Commands.literal("all").executes((ctx) -> this.executePowCommand(ctx, "admin", "removeendermen", "all"))))
                                 .then(Commands.literal("toggle").executes((ctx) -> this.executePowCommand(ctx, "admin", "removeendermen", "toggle")))
                                 .then(Commands.literal("status").executes((ctx) -> this.executePowCommand(ctx, "admin", "removeendermen", "status"))))
-
+                        .then((Commands.literal("removecreepers")
+                                .then(Commands.literal("all").executes((ctx) -> this.executePowCommand(ctx, "admin", "removecreepers", "all"))))
+                                .then(Commands.literal("toggle").executes((ctx) -> this.executePowCommand(ctx, "admin", "removecreepers", "toggle")))
+                                .then(Commands.literal("status").executes((ctx) -> this.executePowCommand(ctx, "admin", "removecreepers", "status"))))
 
                         .then(Commands.literal("spawnanimals").executes((ctx) -> this.executePowCommand(ctx, "admin", "spawnanimals")))
 
@@ -234,6 +245,7 @@ public class BrigadierCommands {
                                                     int x = IntegerArgumentType.getInteger(ctx, "x");
                                                     int y = IntegerArgumentType.getInteger(ctx, "y");
                                                     int z = IntegerArgumentType.getInteger(ctx, "z");
+
                                                     return this.executePowCommand(ctx, "admin", "set_vampire_spawn", String.valueOf(x), String.valueOf(y), String.valueOf(z));
                                                 }))))
                         )
@@ -245,12 +257,12 @@ public class BrigadierCommands {
      */
     private LiteralArgumentBuilder<CommandSourceStack> buildVampireAbilitySubcommand() {
         return Commands.literal("vability")
-                    .then(Commands.literal("list").executes((ctx) -> this.executePowCommand(ctx, "vability", "list")))
-                    .then(Commands.literal("all").executes((ctx) -> this.executePowCommand(ctx, "vability", "all")))
-                    .then(Commands.argument("ability", StringArgumentType.word()).suggests((ctx, builder) -> this.suggestVampireAbilities(builder)).executes((ctx) -> {
-                        String ability = StringArgumentType.getString(ctx, "ability");
-                        return this.executePowCommand(ctx, "vability", ability);
-                    }));
+                .then(Commands.literal("list").executes((ctx) -> this.executePowCommand(ctx, "vability", "list")))
+                .then(Commands.literal("all").executes((ctx) -> this.executePowCommand(ctx, "vability", "all")))
+                .then(Commands.argument("ability", StringArgumentType.word()).suggests((ctx, builder) -> this.suggestVampireAbilities(builder)).executes((ctx) -> {
+                    String ability = StringArgumentType.getString(ctx, "ability");
+                    return this.executePowCommand(ctx, "vability", ability);
+                }));
     }
 
     /**
@@ -258,11 +270,11 @@ public class BrigadierCommands {
      */
     private LiteralArgumentBuilder<CommandSourceStack> buildTomeAbilitySubcommand() {
         return Commands.literal("tome")
-                    .then(Commands.literal("list").executes((ctx) -> this.executePowCommand(ctx, "tome", "list")))
-                    .then(Commands.argument("ability", StringArgumentType.word()).suggests((ctx, builder) -> this.suggestTomeAbilities(ctx, builder)).executes((ctx) -> {
-                        String ability = StringArgumentType.getString(ctx, "ability");
-                        return this.executePowCommand(ctx, "tome", ability);
-                    }));
+                .then(Commands.literal("list").executes((ctx) -> this.executePowCommand(ctx, "tome", "list")))
+                .then(Commands.argument("ability", StringArgumentType.word()).suggests((ctx, builder) -> this.suggestTomeAbilities(ctx, builder)).executes((ctx) -> {
+                    String ability = StringArgumentType.getString(ctx, "ability");
+                    return this.executePowCommand(ctx, "tome", ability);
+                }));
     }
 
     /**

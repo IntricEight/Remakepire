@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import org.bukkit.Location;
 import org.bukkit.World;
-import org.bukkit.configuration.file.FileConfiguration;
 import frostvein.sampires.remakepire.RemakepirePlugin;
 import frostvein.sampires.remakepire.beacons.BeaconSite;
 
@@ -41,7 +40,7 @@ public class ConfigManager {
             this.plugin.getLogger().severe("World '" + RemakepirePlugin.WORLD_NAME + "' not found! Cannot load tome chest locations.");
 
         } else {
-            for(String locString : locationStrings) {
+            for (String locString : locationStrings) {
                 try {
                     String[] parts = locString.split(",");
 
@@ -1054,7 +1053,7 @@ public class ConfigManager {
                 warnings.add("Vampire respawn (" + vampireSpawn.getBlockX() + ", " + vampireSpawn.getBlockZ() + ")");
             }
 
-            for(Location loc : this.getTomeChestLocations()) {
+            for (Location loc : this.getTomeChestLocations()) {
                 if (!this.isLocationWithinBorder(loc.getX(), loc.getZ())) {
                     warnings.add("Tome chest at (" + loc.getBlockX() + ", " + loc.getBlockZ() + ")");
                 }
@@ -1062,7 +1061,7 @@ public class ConfigManager {
         }
 
         if (beaconManager != null) {
-            for(BeaconSite beacon : beaconManager.getAllBeacons()) {
+            for (BeaconSite beacon : beaconManager.getAllBeacons()) {
                 Location loc = beacon.getLocation();
                 if (!this.isLocationWithinBorder(loc.getX(), loc.getZ())) {
                     warnings.add("Beacon '" + beacon.getName() + "' (" + loc.getBlockX() + ", " + loc.getBlockZ() + ")");

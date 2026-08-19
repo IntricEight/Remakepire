@@ -22,12 +22,11 @@ import frostvein.sampires.remakepire.beacons.BeaconSite;
 import frostvein.sampires.remakepire.managers.SessionManager;
 import frostvein.sampires.remakepire.managers.VampireManager;
 
-public class MovementBoundaryListener
-implements Listener {
+public class MovementBoundaryListener implements Listener {
     private final RemakepirePlugin plugin;
     private final FileConfiguration textConfig;
     private final String TOWN_NAME;
-    public static final String LEFT_OAKHURST_TAG = "LeftOakhurst";
+    public static final String LEFT_OAKHURST_TAG = "LeftOakhurst", OVERRIDE_TAG = "BorderOverride";
     private final boolean CUSTOM_BORDER_MESSAGES;
 
     /**
@@ -75,7 +74,7 @@ implements Listener {
         }
 
         // Determine the condition of the player's movement attempt regarding the border
-        boolean wasInsideBoundary = this.isInsideBoundary(from), isOutsideBoundary = !this.isInsideBoundary(to);
+        final boolean wasInsideBoundary = this.isInsideBoundary(from), isOutsideBoundary = !this.isInsideBoundary(to);
 
         // End the event check early if the player is still inside the border
         if (!isOutsideBoundary) {
@@ -83,7 +82,7 @@ implements Listener {
         }
 
         // Tune the freedom message based on the game's condition and player's alignment
-        boolean canLeave = this.meetsLeaveCondition(player);
+        final boolean canLeave = this.meetsLeaveCondition(player);
 
         // Send the leave message to the player if they have legally escaped beyond the border
         if (canLeave && wasInsideBoundary && isOutsideBoundary) {
@@ -400,11 +399,13 @@ implements Listener {
      */
     private boolean anySurvivingHumansExist() {
         for (Player onlinePlayer : this.plugin.getServer().getOnlinePlayers()) {
-            if (onlinePlayer.getGameMode() != GameMode.SURVIVAL || onlinePlayer.getGameMode() != GameMode.ADVENTURE || !this.plugin.getVampireManager().isHuman(onlinePlayer)) continue;
-            return true;
+            if (this.plugin.getVampireManager().isHuman(onlinePlayer) &&
+                    (onlinePlayer.getGameMode() == GameMode.SURVIVAL || onlinePlayer.getGameMode() == GameMode.ADVENTURE)) {
+                return false;
+            }
         }
 
-        return false;
+        return true;
     }
 
     /**
@@ -415,11 +416,13 @@ implements Listener {
      */
     private boolean anySurvivingVampiresExist() {
         for (Player onlinePlayer : this.plugin.getServer().getOnlinePlayers()) {
-            if (onlinePlayer.getGameMode() != GameMode.SURVIVAL || onlinePlayer.getGameMode() != GameMode.ADVENTURE || this.plugin.getVampireManager().isHuman(onlinePlayer)) continue;
-            return true;
+            if (this.plugin.getVampireManager().isVampire(onlinePlayer) &&
+                    (onlinePlayer.getGameMode() == GameMode.SURVIVAL || onlinePlayer.getGameMode() == GameMode.ADVENTURE)) {
+                return false;
+            }
         }
 
-        return false;
+        return true;
     }
 
     /**
@@ -430,11 +433,11 @@ implements Listener {
      */
     private boolean isInsideBoundary(Location location) {
         // Retrieve the border values from the config
-        double minX = this.plugin.getConfigManager().getBorderMinX(), minZ = this.plugin.getConfigManager().getBorderMinZ();
-        double maxX = this.plugin.getConfigManager().getBorderMaxX(), maxZ = this.plugin.getConfigManager().getBorderMaxZ();
+        final double minX = this.plugin.getConfigManager().getBorderMinX(), minZ = this.plugin.getConfigManager().getBorderMinZ();
+        final double maxX = this.plugin.getConfigManager().getBorderMaxX(), maxZ = this.plugin.getConfigManager().getBorderMaxZ();
 
         // Retrieve the current horizontal coordinates of the location
-        double locX = location.getX(), locZ = location.getZ();
+        final double locX = location.getX(), locZ = location.getZ();
 
         // Determine whether any of the coordinate points lie outside the border.
         return locX >= minX && locX <= maxX && locZ >= minZ && locZ <= maxZ;
@@ -484,7 +487,7 @@ implements Listener {
         // Check if the border is currently enabled
         if (this.plugin.getSessionManager().isBorderActive()) {
             // Each of the following is a leave condition
-            if (player.getScoreboardTags().contains(VampireManager.CURED_VAMPIRE_TAG)) {
+            if (player.getScoreboardTags().contains(OVERRIDE_TAG) || player.getScoreboardTags().contains(VampireManager.CURED_VAMPIRE_TAG)) {
                 return true;
 
             } else if (!this.plugin.getVampireManager().isHuman(player)) {

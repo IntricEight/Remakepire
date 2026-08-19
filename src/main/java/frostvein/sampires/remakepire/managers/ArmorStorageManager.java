@@ -149,7 +149,7 @@ public class ArmorStorageManager {
             Map<String, StoredArmor> loadedData = this.gson.fromJson(reader, mapType);
 
             if (loadedData != null) {
-                for(Map.Entry<String, StoredArmor> entry : loadedData.entrySet()) {
+                for (Map.Entry<String, StoredArmor> entry : loadedData.entrySet()) {
                     try {
                         UUID playerId = UUID.fromString(entry.getKey());
                         this.armorCache.put(playerId, entry.getValue());
@@ -184,7 +184,7 @@ public class ArmorStorageManager {
 
             Map<String, StoredArmor> dataToSave = new HashMap<>();
 
-            for(Map.Entry<UUID, StoredArmor> entry : this.armorCache.entrySet()) {
+            for (Map.Entry<UUID, StoredArmor> entry : this.armorCache.entrySet()) {
                 dataToSave.put((entry.getKey()).toString(), entry.getValue());
             }
 

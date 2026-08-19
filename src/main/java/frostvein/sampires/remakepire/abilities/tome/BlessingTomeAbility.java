@@ -1,6 +1,9 @@
 package frostvein.sampires.remakepire.abilities.tome;
 
-import java.util.Arrays;
+import java.util.List;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -10,6 +13,7 @@ import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.potion.PotionType;
 import frostvein.sampires.remakepire.RemakepirePlugin;
 import frostvein.sampires.remakepire.managers.SessionManager;
+import frostvein.sampires.remakepire.utils.ItemTypeChecking;
 
 public class BlessingTomeAbility extends TomeAbility {
     /**
@@ -22,7 +26,7 @@ public class BlessingTomeAbility extends TomeAbility {
     }
 
     protected boolean useAbility(Player player) {
-        boolean isSessionCapped = this.plugin.getConfigManager().isHolyWaterSessionCapped();
+        final boolean isSessionCapped = this.plugin.getConfigManager().isHolyWaterSessionCapped();
 
         if (!this.canUse(player)) {
             this.sendCannotUseMessage(player, "Only humans can use tome abilities!");
@@ -37,7 +41,7 @@ public class BlessingTomeAbility extends TomeAbility {
             ItemStack mainHandItem = inventory.getItemInMainHand();
 
             // Check if the player is holding a water bottle, and convert it into a splash potion of holy water
-            if (mainHandItem.getType() == Material.POTION && this.isWaterBottle(mainHandItem)) {
+            if (mainHandItem.getType() == Material.POTION && ItemTypeChecking.isWaterBottle(mainHandItem)) {
                 if (mainHandItem.getAmount() > 1) {
                     mainHandItem.setAmount(mainHandItem.getAmount() - 1);
                     ItemStack splashWater = new ItemStack(Material.SPLASH_POTION, 1);
@@ -48,7 +52,7 @@ public class BlessingTomeAbility extends TomeAbility {
                         inventory.addItem(splashWater);
                     } else {
                         player.getWorld().dropItemNaturally(player.getLocation(), splashWater);
-                        player.sendMessage("§7Your inventory is full. The holy water was dropped at your feet.");
+                        player.sendMessage(Component.text("Your inventory is full. The holy water was dropped at your feet.", NamedTextColor.GRAY));
                     }
                 } else {
                     ItemStack splashWater = new ItemStack(Material.SPLASH_POTION, 1);
@@ -59,7 +63,7 @@ public class BlessingTomeAbility extends TomeAbility {
                 player.playSound(player.getLocation(), "minecraft:block.beacon.activate", 0.8F, 1.4F);
                 player.playSound(player.getLocation(), "minecraft:entity.player.levelup", 0.5F, 1.2F);
                 this.sendSuccessMessage(player, "Divine light flows through the water, blessing it into holy water!");
-                player.sendMessage("§7The blessed water can now be thrown as a splash potion.");
+                player.sendMessage(Component.text("The blessed water can now be thrown as a splash potion.", NamedTextColor.GRAY));
 
                 player.addScoreboardTag(SessionManager.BLESSING_USED_SESSION);
 
@@ -81,29 +85,16 @@ public class BlessingTomeAbility extends TomeAbility {
         ItemMeta meta = item.getItemMeta();
 
         if (meta instanceof PotionMeta potionMeta) {
-            int durationSeconds = this.plugin.getConfigManager().getHolyWaterDisableDurationSeconds();
+            final int durationSeconds = this.plugin.getConfigManager().getHolyWaterDisableDurationSeconds();
             String durationText = durationSeconds >= 60
                     ? durationSeconds / 60 + " minute" + ((durationSeconds / 60) != 1 ? "s" : "")
                     : durationSeconds + " second" + (durationSeconds != 1 ? "s" : "");
 
             potionMeta.setBasePotionType(PotionType.WATER);
-            potionMeta.setDisplayName("§aHoly Water");
-            potionMeta.setLore(Arrays.asList("§7Throw this on an evil creature to disable their powers for " + durationText + "!"));
-            item.setItemMeta(potionMeta);
-        }
-    }
+            potionMeta.customName(Component.text("Holy Water", NamedTextColor.GREEN).decoration(TextDecoration.ITALIC, false));
+            potionMeta.lore(List.of(Component.text("Throw this on an evil creature to disable their powers for " + durationText + "!").decoration(TextDecoration.ITALIC, false)));
 
-    /**
-     * Determine if the item is a water bottle.
-     *
-     * @param item the item being checked.
-     * @return {@code true} if this item is a water bottle.
-     */
-    private boolean isWaterBottle(ItemStack item) {
-        if (item.getType() != Material.POTION) {
-            return false;
-        } else {
-            return !item.hasItemMeta() || item.getItemMeta().getPersistentDataContainer().isEmpty();
+            item.setItemMeta(potionMeta);
         }
     }
 }

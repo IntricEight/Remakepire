@@ -12,12 +12,16 @@
  *  - Add this file (RaiseUndeadAbility.java) to the abilities folder
  *  - Add "raiseundead" to the VAMPIRE_ABILITIES list inside commands/BrigadierCommands.java
  *  - Register RaiseUndeadAbility() in registerAbilities inside managers/VampireAbilityManager.java
+ *
  */
 
 package frostvein.sampires.remakepire.abilities;
 
 import java.util.ArrayList;
 import java.util.List;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import org.bukkit.Difficulty;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
@@ -51,10 +55,14 @@ public class RaiseUndeadAbility extends VampireAbility {
     }
 
     public boolean execute(Player player, VampireManager vampireManager, RemakepirePlugin plugin) {
-        int summonCount = this.getSummonCount(vampireManager.getVampireStage(player));
+        // Prevent the ability from being used on Peaceful mode
+        if (plugin.getWorld().getDifficulty() == Difficulty.PEACEFUL) {
+            player.sendMessage(Component.text("This land is too peaceful for the dead to wake.", NamedTextColor.RED));
+            return false;
+        }
 
         // Spawn the zombies around the caster
-        this.spawnZombies(player, summonCount);
+        this.spawnZombies(player, this.getSummonCount(vampireManager.getVampireStage(player)));
 
         // Assign the mobs to the vampire team after spawning
         plugin.getMobTeamManager().assignMobsNow();
@@ -146,15 +154,11 @@ public class RaiseUndeadAbility extends VampireAbility {
      * @param player the player using the ability.
      */
     private void createRaiseUndeadEffects(Player player) {
-        if (player.getWorld() != null) {
-            for(int i = 0; i < 50; ++i) {
-                double angle = i * 0.3, radius = 2.0;
-                double x = Math.cos(angle) * radius;
-                double y = Math.sin(angle) * radius;
-                double z = i * 0.1;
+        for (int i = 0; i < 50; ++i) {
+            final double angle = i * 0.3, radius = 2.0;
+            final double x = Math.cos(angle) * radius, y = Math.sin(angle) * radius, z = i * 0.1;
 
-                player.getWorld().spawnParticle(Particle.COPPER_FIRE_FLAME, player.getLocation().add(x, z + 1.0, y), 1, 0.0, 0.0, 0.0, 0.05);
-            }
+            player.getWorld().spawnParticle(Particle.COPPER_FIRE_FLAME, player.getLocation().add(x, z + 1.0, y), 1, 0.0, 0.0, 0.0, 0.05);
         }
     }
 
@@ -165,7 +169,7 @@ public class RaiseUndeadAbility extends VampireAbility {
      * @param player the player using the ability.
      */
     private void sendRaiseUndeadMessage(Player player) {
-        player.sendMessage("§cThe ground around you crumbles as the dead emerge.");
+        player.sendMessage(Component.text("The ground around you crumbles as the dead emerge.", NamedTextColor.RED));
     }
 
     /**

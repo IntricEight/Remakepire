@@ -10,6 +10,7 @@ import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.attribute.AttributeModifier.Operation;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.EquipmentSlotGroup;
 import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Scoreboard;
 import frostvein.sampires.remakepire.RemakepirePlugin;
@@ -19,13 +20,15 @@ public class BeaconMajorityManager {
     private final VampireManager vampireManager;
     private final BeaconManager beaconManager;
     private final Map<UUID, AttributeModifier> healthModifiers = new HashMap<>();
-    private static final UUID VAMPIRE_MAJORITY_HEALTH_UUID = UUID.fromString("a1b2c3d4-5e6f-7890-1234-567890abcdef");
-    private static final UUID HUMAN_MAJORITY_HEALTH_UUID = UUID.fromString("f1e2d3c4-b5a6-9870-4321-fedcba098765");
-    private static final UUID DEATH_PENALTY_HEALTH_UUID = UUID.fromString("d1e2a3d4-b5e6-7890-abcd-1234567890ef");
-//    private final NamespacedKey VAMPIRE_MAJORITY_HEALTH_KEY;
-//    private final NamespacedKey HUMAN_MAJORITY_HEALTH_KEY;
-//    private final NamespacedKey DEATH_PENALTY_HEALTH_KEY;
+    private final NamespacedKey HUMAN_MAJORITY_HEALTH_KEY;
+    private final NamespacedKey VAMPIRE_MAJORITY_HEALTH_KEY;
+    private final NamespacedKey DEATH_PENALTY_HEALTH_KEY;
     private int currentVampireBonus = 0, currentHumanBonus = 0;
+
+    // Relic from before updating to newer content, left in case the UUID is needed to collaborate with
+    //    VAMPIRE_MAJORITY_HEALTH_UUID was "a1b2c3d4-5e6f-7890-1234-567890abcdef"
+    //    HUMAN_MAJORITY_HEALTH_UUID was "f1e2d3c4-b5a6-9870-4321-fedcba098765"
+    //    DEATH_PENALTY_HEALTH_UUID was "d1e2a3d4-b5e6-7890-abcd-1234567890ef"
 
     /**
      * Create an instance of the Beacon Majority manager.
@@ -37,9 +40,9 @@ public class BeaconMajorityManager {
         this.vampireManager = plugin.getVampireManager();
         this.beaconManager = plugin.getBeaconManager();
 
-//        this.VAMPIRE_MAJORITY_HEALTH_KEY = new NamespacedKey(plugin, "vampire_majority_health");
-//        this.HUMAN_MAJORITY_HEALTH_KEY = new NamespacedKey(plugin, "human_majority_health");
-//        this.DEATH_PENALTY_HEALTH_KEY = new NamespacedKey(plugin, "death_penalty_health");
+        this.VAMPIRE_MAJORITY_HEALTH_KEY = new NamespacedKey(plugin, "vampire_majority_health");
+        this.HUMAN_MAJORITY_HEALTH_KEY = new NamespacedKey(plugin, "human_majority_health");
+        this.DEATH_PENALTY_HEALTH_KEY = new NamespacedKey(plugin, "death_penalty_health");
     }
 
     /**
@@ -82,9 +85,9 @@ public class BeaconMajorityManager {
         this.currentVampireBonus = 0;
         double healthBonus = bonusHearts * 2.0;
 
-        for(Player player : Bukkit.getOnlinePlayers()) {
+        for (Player player : Bukkit.getOnlinePlayers()) {
             if (this.vampireManager.isHuman(player)) {
-                this.applyHealthModifier(player, healthBonus, HUMAN_MAJORITY_HEALTH_UUID, "Beacon Majority (Human)");
+                this.applyHealthModifier(player, healthBonus, HUMAN_MAJORITY_HEALTH_KEY);
                 this.applyDeathPenalty(player);
             }
         }
@@ -100,9 +103,9 @@ public class BeaconMajorityManager {
         this.currentHumanBonus = 0;
         double healthBonus = bonusHearts * 2.0;
 
-        for(Player player : Bukkit.getOnlinePlayers()) {
+        for (Player player : Bukkit.getOnlinePlayers()) {
             if (this.vampireManager.isVampire(player)) {
-                this.applyHealthModifier(player, healthBonus, VAMPIRE_MAJORITY_HEALTH_UUID, "Beacon Majority (Vampire)");
+                this.applyHealthModifier(player, healthBonus, VAMPIRE_MAJORITY_HEALTH_KEY);
             }
         }
     }
@@ -113,9 +116,9 @@ public class BeaconMajorityManager {
     private void removeBonusFromHumans() {
         this.currentHumanBonus = 0;
 
-        for(Player player : Bukkit.getOnlinePlayers()) {
+        for (Player player : Bukkit.getOnlinePlayers()) {
             if (this.vampireManager.isHuman(player)) {
-                this.removeHealthModifier(player, HUMAN_MAJORITY_HEALTH_UUID);
+                this.removeHealthModifier(player, HUMAN_MAJORITY_HEALTH_KEY);
                 this.applyDeathPenalty(player);
             }
         }
@@ -127,9 +130,9 @@ public class BeaconMajorityManager {
     private void removeBonusFromVampires() {
         this.currentVampireBonus = 0;
 
-        for(Player player : Bukkit.getOnlinePlayers()) {
+        for (Player player : Bukkit.getOnlinePlayers()) {
             if (this.vampireManager.isVampire(player)) {
-                this.removeHealthModifier(player, VAMPIRE_MAJORITY_HEALTH_UUID);
+                this.removeHealthModifier(player, VAMPIRE_MAJORITY_HEALTH_KEY);
             }
         }
     }
@@ -141,9 +144,9 @@ public class BeaconMajorityManager {
         this.currentVampireBonus = 0;
         this.currentHumanBonus = 0;
 
-        for(Player player : Bukkit.getOnlinePlayers()) {
-            this.removeHealthModifier(player, HUMAN_MAJORITY_HEALTH_UUID);
-            this.removeHealthModifier(player, VAMPIRE_MAJORITY_HEALTH_UUID);
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            this.removeHealthModifier(player, HUMAN_MAJORITY_HEALTH_KEY);
+            this.removeHealthModifier(player, VAMPIRE_MAJORITY_HEALTH_KEY);
 
             if (this.vampireManager.isHuman(player)) {
                 this.applyDeathPenalty(player);
@@ -156,22 +159,23 @@ public class BeaconMajorityManager {
      *
      * @param player the player getting extra hearts.
      * @param healthBonus the health points to add.
-     * @param modifierUUID the UUID of the team's health modifier.
-     * @param name the reason for the health modifier change.
+     * @param modifierKey the {@code NamespacedKey} key of the team's health modifier.
      */
-    private void applyHealthModifier(Player player, double healthBonus, UUID modifierUUID, String name) {
+    private void applyHealthModifier(Player player, double healthBonus, NamespacedKey modifierKey) {
         AttributeInstance healthAttribute = player.getAttribute(Attribute.MAX_HEALTH);
+
         if (healthAttribute != null) {
-            this.removeHealthModifier(player, modifierUUID);
-            AttributeModifier healthModifier = new AttributeModifier(modifierUUID, name, healthBonus, Operation.ADD_NUMBER);
+            this.removeHealthModifier(player, modifierKey);
+            AttributeModifier healthModifier = new AttributeModifier(modifierKey, healthBonus, Operation.ADD_NUMBER, EquipmentSlotGroup.ANY);
 
             healthAttribute.addModifier(healthModifier);
             this.healthModifiers.put(player.getUniqueId(), healthModifier);
-            double currentHealth = player.getHealth();
-            double maxHealth = player.getMaxHealth();
+
+            final double currentHealth = player.getHealth();
+            final double maxHealth = player.getAttribute(Attribute.MAX_HEALTH).getValue();
 
             if (currentHealth > 0 && currentHealth >= maxHealth - healthBonus) {
-                player.setHealth(player.getMaxHealth());
+                player.setHealth(player.getAttribute(Attribute.MAX_HEALTH).getValue());
             }
 
             this.plugin.getLogger().fine("Applied +" + healthBonus / 2 + " hearts bonus to " + player.getName());
@@ -182,20 +186,22 @@ public class BeaconMajorityManager {
      * Remove the extra hearts from the player.
      *
      * @param player the player losing the extra hearts.
-     * @param modifierUUID the UUID of the team's health modifier
+     * @param modifierKey the {@code NamespacedKey} key of the team's health modifier.
      */
-    private void removeHealthModifier(Player player, UUID modifierUUID) {
+    private void removeHealthModifier(Player player, NamespacedKey modifierKey) {
         AttributeInstance healthAttribute = player.getAttribute(Attribute.MAX_HEALTH);
 
         if (healthAttribute != null) {
-            AttributeModifier toRemove = (AttributeModifier)healthAttribute.getModifiers().stream().filter((modifier) -> modifier.getUniqueId().equals(modifierUUID)).findFirst().orElse(null);
+            AttributeModifier toRemove = healthAttribute.getModifiers().stream()
+                    .filter(modifier -> modifier.getKey().equals(modifierKey))
+                    .findFirst().orElse(null);
 
             if (toRemove != null) {
                 healthAttribute.removeModifier(toRemove);
                 this.healthModifiers.remove(player.getUniqueId());
 
-                if (player.getHealth() > player.getMaxHealth()) {
-                    player.setHealth(player.getMaxHealth());
+                if (player.getHealth() > player.getAttribute(Attribute.MAX_HEALTH).getValue()) {
+                    player.setHealth(player.getAttribute(Attribute.MAX_HEALTH).getValue());
                 }
 
                 this.plugin.getLogger().fine("Removed health modifier from " + player.getName());
@@ -211,13 +217,11 @@ public class BeaconMajorityManager {
     public void applyBonusesToPlayer(Player player) {
         if (this.plugin.getSessionManager().isSessionActive()) {
             if (this.vampireManager.isVampire(player) && this.currentVampireBonus > 0) {
-                double healthBonus = this.currentVampireBonus * 2.0;
-                this.applyHealthModifier(player, healthBonus, VAMPIRE_MAJORITY_HEALTH_UUID, "Beacon Majority (Vampire)");
+                this.applyHealthModifier(player, this.currentVampireBonus * 2.0, VAMPIRE_MAJORITY_HEALTH_KEY);
 
             } else if (this.vampireManager.isHuman(player)) {
                 if (this.currentHumanBonus > 0) {
-                    double healthBonus = this.currentHumanBonus * 2.0;
-                    this.applyHealthModifier(player, healthBonus, HUMAN_MAJORITY_HEALTH_UUID, "Beacon Majority (Human)");
+                    this.applyHealthModifier(player, this.currentHumanBonus * 2.0, HUMAN_MAJORITY_HEALTH_KEY);
                 }
 
                 this.applyDeathPenalty(player);
@@ -231,9 +235,9 @@ public class BeaconMajorityManager {
      * @param player the player losing their bonus hearts.
      */
     public void removeBonusesFromPlayer(Player player) {
-        this.removeHealthModifier(player, VAMPIRE_MAJORITY_HEALTH_UUID);
-        this.removeHealthModifier(player, HUMAN_MAJORITY_HEALTH_UUID);
-        this.removeHealthModifier(player, DEATH_PENALTY_HEALTH_UUID);
+        this.removeHealthModifier(player, VAMPIRE_MAJORITY_HEALTH_KEY);
+        this.removeHealthModifier(player, HUMAN_MAJORITY_HEALTH_KEY);
+        this.removeHealthModifier(player, DEATH_PENALTY_HEALTH_KEY);
     }
 
     /**
@@ -246,12 +250,11 @@ public class BeaconMajorityManager {
             int deathCount = this.getPlayerDeathCount(player);
 
             if (deathCount > 0) {
-                double healthPenalty = -(deathCount * 2.0);
-                this.applyHealthModifier(player, healthPenalty, DEATH_PENALTY_HEALTH_UUID, "Death Penalty");
+                this.applyHealthModifier(player, -1 * deathCount * 2.0, DEATH_PENALTY_HEALTH_KEY);
                 this.plugin.getLogger().fine("Applied -" + deathCount + " hearts death penalty to " + player.getName());
 
             } else {
-                this.removeHealthModifier(player, DEATH_PENALTY_HEALTH_UUID);
+                this.removeHealthModifier(player, DEATH_PENALTY_HEALTH_KEY);
             }
         }
     }
@@ -307,7 +310,7 @@ public class BeaconMajorityManager {
      * Remove the health modifiers before shutting down the manager.
      */
     public void shutdown() {
-        for(Player player : Bukkit.getOnlinePlayers()) {
+        for (Player player : Bukkit.getOnlinePlayers()) {
             this.removeBonusesFromPlayer(player);
         }
 

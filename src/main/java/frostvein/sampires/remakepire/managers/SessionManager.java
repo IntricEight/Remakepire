@@ -5,18 +5,20 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import net.md_5.bungee.api.ChatMessageType;
-import net.md_5.bungee.api.chat.TextComponent;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.GameRule;
 import org.bukkit.World;
 import org.bukkit.attribute.Attribute;
-import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scoreboard.Criteria;
 import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Score;
 import org.bukkit.scoreboard.Scoreboard;
@@ -27,6 +29,7 @@ public class SessionManager {
     private final Map<UUID, Integer> pausedFoodLevels = new HashMap<>();
     private final Map<UUID, Float> pausedSaturationLevels = new HashMap<>();
     private Objective sessionObjective, sessionIDObjective, gameIDObjective;
+    CommandSender silentSender = Bukkit.getServer().createCommandSender(component -> {});
     public static final String SESSION_ID_HOLDER = "session_id_holder", GAME_ID_HOLDER = "game_id_holder";
     public static final int BEFORE_SESSION = 0, IN_SESSION = 1, PAUSED = 2, AFTER_SESSION = 3, PRE_SESSION = 4;
     private long totalSessionTime = 0L, currentPhaseStartTime = 0L;
@@ -74,7 +77,7 @@ public class SessionManager {
     public void executeServerCommand(String command) {
         try {
             Bukkit.getScheduler().runTask(this.plugin, () -> {
-                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command);
+                Bukkit.dispatchCommand(silentSender, command);
                 this.plugin.logInfo("Executed command: /" + command);
             });
         } catch (Exception e) {
@@ -102,7 +105,7 @@ public class SessionManager {
     private void startSaturationTask() {
         (new BukkitRunnable() {
             public void run() {
-                int sessionState = SessionManager.this.getSessionState();
+                final int sessionState = SessionManager.this.getSessionState();
 
                 if (sessionState == PAUSED) {
                     SessionManager.this.restorePausedFoodLevels();
@@ -136,28 +139,10 @@ public class SessionManager {
      * Display the current session status when the session is not in an active game.
      */
     private void updateActionBarForAllPlayers() {
-        String message = this.getSessionStatusMessage();
+        final Component message = this.getSessionStatusMessage();
 
-        for(Player player : Bukkit.getOnlinePlayers()) {
-            this.sendActionBar(player, message);
-        }
-    }
-
-    /**
-     * Update the words above the player's hotbar.
-     *
-     * @param player the player who is receiving the message.
-     * @param message the message to be placed above the hotbar.
-     */
-    public void sendActionBar(Player player, String message) {
-        try {
-            player.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(message));
-        } catch (Exception e) {
-            try {
-                player.sendTitle("", message, 0, 25, 5);
-            } catch (Exception e1) {
-                player.sendMessage("§8[§6Session§8] " + message);
-            }
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            player.sendActionBar(message);
         }
     }
 
@@ -166,14 +151,25 @@ public class SessionManager {
      *
      * @return A description of the session state.
      */
-    private String getSessionStatusMessage() {
+    private Component getSessionStatusMessage() {
         return switch (this.getSessionState()) {
-            case BEFORE_SESSION -> "§e§lSession is primed and ready to start";
-            case IN_SESSION -> "§7§lSession is currently active";
-            case PAUSED -> "§6§lSession is currently paused";
-            case AFTER_SESSION -> "§c§lSession has ended";
-            case PRE_SESSION -> "§b§lBuilding Mode - interactions enabled";
-            default -> "§7§lSession status unknown";
+            case BEFORE_SESSION -> Component.text("Session is primed and ready to start", NamedTextColor.YELLOW)
+                    .decorate(TextDecoration.BOLD);
+
+            case IN_SESSION -> Component.text("Session is currently active", NamedTextColor.GRAY)
+                    .decorate(TextDecoration.BOLD);
+
+            case PAUSED -> Component.text("Session is currently paused", NamedTextColor.GOLD)
+                    .decorate(TextDecoration.BOLD);
+
+            case AFTER_SESSION -> Component.text("Session has ended", NamedTextColor.RED)
+                    .decorate(TextDecoration.BOLD);
+
+            case PRE_SESSION -> Component.text("Building Mode - interactions enabled", NamedTextColor.AQUA)
+                    .decorate(TextDecoration.BOLD);
+
+            default -> Component.text("Session status unknown", NamedTextColor.GRAY)
+                    .decorate(TextDecoration.BOLD);
         };
     }
 
@@ -181,7 +177,7 @@ public class SessionManager {
      * Apply an extreme saturation effect to all players.
      */
     private void applySaturationToAllPlayers() {
-        for(Player player : Bukkit.getOnlinePlayers()) {
+        for (Player player : Bukkit.getOnlinePlayers()) {
             player.addPotionEffect(new PotionEffect(PotionEffectType.SATURATION, 100, 100, false, false));
         }
     }
@@ -190,7 +186,7 @@ public class SessionManager {
      * Fill the food and saturation bars of all players.
      */
     private void setAllPlayersMaxFood() {
-        for(Player player : Bukkit.getOnlinePlayers()) {
+        for (Player player : Bukkit.getOnlinePlayers()) {
             player.setFoodLevel(20);
             player.setSaturation(20.0F);
         }
@@ -203,7 +199,7 @@ public class SessionManager {
         this.pausedFoodLevels.clear();
         this.pausedSaturationLevels.clear();
 
-        for(Player player : Bukkit.getOnlinePlayers()) {
+        for (Player player : Bukkit.getOnlinePlayers()) {
             this.pausedFoodLevels.put(player.getUniqueId(), player.getFoodLevel());
             this.pausedSaturationLevels.put(player.getUniqueId(), player.getSaturation());
         }
@@ -215,8 +211,8 @@ public class SessionManager {
      * Restore the food and saturation levels of all players to their last recorded values.
      */
     private void restorePausedFoodLevels() {
-        for(Player player : Bukkit.getOnlinePlayers()) {
-            UUID playerId = player.getUniqueId();
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            final UUID playerId = player.getUniqueId();
 
             if (this.pausedFoodLevels.containsKey(playerId)) {
                 int pausedFood = this.pausedFoodLevels.get(playerId);
@@ -423,20 +419,23 @@ public class SessionManager {
         this.sessionObjective = mainScoreboard.getObjective("smp_session");
 
         if (this.sessionObjective == null) {
-            this.sessionObjective = mainScoreboard.registerNewObjective("smp_session", "dummy", "SMP Session State");
+            this.sessionObjective = mainScoreboard.registerNewObjective("smp_session", Criteria.DUMMY, Component.text("SMP Session State"));
+
             Score sessionScore = this.sessionObjective.getScore("state");
             sessionScore.setScore(BEFORE_SESSION);
         }
 
         this.sessionIDObjective = mainScoreboard.getObjective("vsmp_session_id");
         if (this.sessionIDObjective == null) {
-            this.sessionIDObjective = mainScoreboard.registerNewObjective("vsmp_session_id", "dummy");
+            this.sessionIDObjective = mainScoreboard.registerNewObjective("vsmp_session_id", Criteria.DUMMY, Component.empty());
+
             this.sessionIDObjective.getScore(SESSION_ID_HOLDER).setScore(1);
         }
 
         this.gameIDObjective = mainScoreboard.getObjective("vsmp_game_id");
         if (this.gameIDObjective == null) {
-            this.gameIDObjective = mainScoreboard.registerNewObjective("vsmp_game_id", "dummy");
+            this.gameIDObjective = mainScoreboard.registerNewObjective("vsmp_game_id", Criteria.DUMMY, Component.empty());
+
             this.gameIDObjective.getScore(GAME_ID_HOLDER).setScore(1);
         }
 
@@ -483,7 +482,7 @@ public class SessionManager {
      */
     private void stopTrackingSessionTime() {
         if (this.trackingSessionTime) {
-            long phaseTime = System.currentTimeMillis() - this.currentPhaseStartTime;
+            final long phaseTime = System.currentTimeMillis() - this.currentPhaseStartTime;
             this.totalSessionTime += phaseTime;
             this.trackingSessionTime = false;
             this.plugin.logInfo("Stopped tracking session time. Added " + phaseTime / 1000L + " seconds. Total session time: " + this.totalSessionTime / 1000L + " seconds");
@@ -491,17 +490,17 @@ public class SessionManager {
     }
 
     public void updateAllPlayersSessionIDs() {
-        int session_id = this.sessionIDObjective.getScore(SESSION_ID_HOLDER).getScore();
+        final int session_id = this.sessionIDObjective.getScore(SESSION_ID_HOLDER).getScore();
 
-        for(Player player : this.plugin.getWorld().getPlayers()) {
+        for (Player player : this.plugin.getWorld().getPlayers()) {
             this.sessionIDObjective.getScore(player.getName()).setScore(session_id);
         }
     }
 
     public void updateAllPlayersGameIDs() {
-        int game_id = this.gameIDObjective.getScore(GAME_ID_HOLDER).getScore();
+        final int game_id = this.gameIDObjective.getScore(GAME_ID_HOLDER).getScore();
 
-        for(Player player : this.plugin.getWorld().getPlayers()) {
+        for (Player player : this.plugin.getWorld().getPlayers()) {
             this.gameIDObjective.getScore(player.getName()).setScore(game_id);
         }
 
@@ -533,7 +532,11 @@ public class SessionManager {
         this.plugin.getBeaconMajorityManager().updateBeaconMajorityBonuses();
         this.plugin.getTomeDistributionManager().startDistributionTask();
 
-        this.broadcastMessage("§a§lSESSION STARTED! §aThe SMP session has begun. Good luck!");
+        this.broadcastMessage(Component.text("SESSION STARTED!", NamedTextColor.GREEN)
+                .decorate(TextDecoration.BOLD)
+                .append(Component.text(" The SMP session has begun. Good luck!", NamedTextColor.GREEN)
+                        .decoration(TextDecoration.BOLD, false))
+        );
     }
 
     /**
@@ -549,7 +552,11 @@ public class SessionManager {
         this.plugin.getBeaconMajorityManager().updateBeaconMajorityBonuses();
         this.plugin.getTomeDistributionManager().startDistributionTask();
 
-        this.broadcastMessage("§a§lSESSION RESUMED! §aThe SMP session has been resumed.");
+        this.broadcastMessage(Component.text("SESSION RESUMED!", NamedTextColor.GREEN)
+                .decorate(TextDecoration.BOLD)
+                .append(Component.text(" The SMP session has been resumed.", NamedTextColor.GREEN)
+                        .decoration(TextDecoration.BOLD, false))
+        );
     }
 
     /**
@@ -565,7 +572,11 @@ public class SessionManager {
         this.freezeTick();
         this.plugin.getTomeDistributionManager().stopDistributionTask();
 
-        this.broadcastMessage("§e§lSESSION PAUSED! §eThe session has been temporarily paused.");
+        this.broadcastMessage(Component.text("SESSION PAUSED! ", NamedTextColor.YELLOW)
+                .decorate(TextDecoration.BOLD)
+                .append(Component.text("The session has been temporarily paused.", NamedTextColor.YELLOW)
+                        .decoration(TextDecoration.BOLD, false))
+        );
     }
 
     /**
@@ -582,7 +593,11 @@ public class SessionManager {
         this.freezeTick();
         this.plugin.getTomeDistributionManager().stopDistributionTask();
 
-        this.broadcastMessage("§c§lSESSION ENDED! §cThe SMP session has concluded. See you next time!");
+        this.broadcastMessage(Component.text("SESSION ENDED! ", NamedTextColor.RED)
+                .decorate(TextDecoration.BOLD)
+                .append(Component.text("The SMP session has concluded. See you next time!", NamedTextColor.RED)
+                        .decoration(TextDecoration.BOLD, false))
+        );
     }
 
     /**
@@ -606,7 +621,11 @@ public class SessionManager {
         this.freezeTick();
         this.plugin.getTomeDistributionManager().stopDistributionTask();
 
-        this.broadcastMessage("§c§lSESSION PRIMED! §cThe SMP session state has been primed for the next session!");
+        this.broadcastMessage(Component.text("SESSION PRIMED! ", NamedTextColor.RED)
+                .decorate(TextDecoration.BOLD)
+                .append(Component.text("The SMP session state has been primed for the next session!", NamedTextColor.RED)
+                                .decoration(TextDecoration.BOLD, false))
+        );
     }
 
     /**
@@ -617,7 +636,12 @@ public class SessionManager {
         sessionScore.setScore(PRE_SESSION);
         this.setOutOfSessionRules();
         this.unfreezeTick();
-        this.broadcastMessage("§b§lBUILDING MODE ENABLED! §bInteractions are now enabled. Use '/pow admin session start' to begin the full session.");
+
+        this.broadcastMessage(Component.text("BUILDING MODE ENABLED! ", NamedTextColor.AQUA)
+                .decorate(TextDecoration.BOLD)
+                .append(Component.text("Interactions are now enabled. Use '/pow admin session start' to begin the full session.", NamedTextColor.AQUA)
+                                .decoration(TextDecoration.BOLD, false))
+        );
     }
 
     /**
@@ -625,16 +649,15 @@ public class SessionManager {
      */
     private void setTimeToNextMorning() {
         World world = this.plugin.getWorld();
-        long currentTime = world.getTime();
-        long currentDayTime = currentTime % 24000L;
+        final long currentTime = world.getTime();
+        final long currentDayTime = currentTime % 24000L;
 
         if (currentDayTime <= 1000L) {
             world.setTime(currentTime);
 
         } else {
-            long timeUntilMorning = 24000L - currentDayTime;
-            long nextMorningTime = currentTime + timeUntilMorning;
-            world.setTime(nextMorningTime);
+            final long timeUntilMorning = 24000L - currentDayTime;
+            world.setTime(currentTime + timeUntilMorning);
         }
     }
 
@@ -650,11 +673,11 @@ public class SessionManager {
         world.setGameRule(GameRule.KEEP_INVENTORY, true);
         world.setGameRule(GameRule.ANNOUNCE_ADVANCEMENTS, false);
         world.setGameRule(GameRule.DO_MOB_LOOT, true);
-        world.setGameRule(GameRule.MOB_GRIEFING, false);
         world.setGameRule(GameRule.REDUCED_DEBUG_INFO, true);
         world.setGameRule(GameRule.SHOW_DEATH_MESSAGES, false);
         world.setGameRule(GameRule.DO_INSOMNIA, false);
         world.setGameRule(GameRule.DO_IMMEDIATE_RESPAWN, true);
+        world.setGameRule(GameRule.LOCATOR_BAR, false);
 
         this.setNpcSpawningGamerules(world, plugin.getConfigManager().areNpcMobsEnabled());
     }
@@ -671,11 +694,11 @@ public class SessionManager {
         world.setGameRule(GameRule.KEEP_INVENTORY, true);
         world.setGameRule(GameRule.ANNOUNCE_ADVANCEMENTS, false);
         world.setGameRule(GameRule.DO_MOB_LOOT, false);
-        world.setGameRule(GameRule.MOB_GRIEFING, false);
         world.setGameRule(GameRule.REDUCED_DEBUG_INFO, false);
         world.setGameRule(GameRule.SHOW_DEATH_MESSAGES, false);
         world.setGameRule(GameRule.DO_INSOMNIA, false);
         world.setGameRule(GameRule.DO_IMMEDIATE_RESPAWN, false);
+        world.setGameRule(GameRule.LOCATOR_BAR, false);
 
         this.setNpcSpawningGamerules(world, false);
     }
@@ -684,7 +707,7 @@ public class SessionManager {
      * Reset the tags of all online players.
      */
     private void resetPlayers() {
-        for(Player player : Bukkit.getOnlinePlayers()) {
+        for (Player player : Bukkit.getOnlinePlayers()) {
             this.resetPlayer(player);
         }
     }
@@ -706,10 +729,10 @@ public class SessionManager {
         }
 
         player.getAttribute(Attribute.MAX_HEALTH).setBaseValue(20.0);
-        double actualMaxHealth = player.getAttribute(Attribute.MAX_HEALTH).getValue();
+        final double actualMaxHealth = player.getAttribute(Attribute.MAX_HEALTH).getValue();
         player.setHealth(actualMaxHealth);
 
-        for(String string : INFORMED_CONSTANTS) {
+        for (String string : INFORMED_CONSTANTS) {
             player.removeScoreboardTag(string);
         }
 
@@ -746,7 +769,7 @@ public class SessionManager {
      * @return {@code true} if the game state is BEFORE_SESSION, PAUSED, or AFTER_SESSION.
      */
     public boolean isOutOfSession() {
-        int state = this.getSessionState();
+        final int state = this.getSessionState();
         return state == BEFORE_SESSION || state == PAUSED || state == AFTER_SESSION;
     }
 
@@ -767,7 +790,8 @@ public class SessionManager {
     private void setNpcSpawningGamerules(World world, boolean enabled) {
         world.setGameRule(GameRule.DO_TRADER_SPAWNING, enabled);
         world.setGameRule(GameRule.DO_PATROL_SPAWNING, enabled);
-        world.setGameRule(GameRule.DISABLE_RAIDS, enabled);
+        world.setGameRule(GameRule.DISABLE_RAIDS, !enabled);
+        this.plugin.getSpawnRemovalListener().setWitchRemovalEnabled(!enabled);
     }
 
     /**
@@ -775,7 +799,7 @@ public class SessionManager {
      *
      * @param message the message to broadcast.
      */
-    private void broadcastMessage(String message) {
-        Bukkit.broadcastMessage(message);
+    private void broadcastMessage(Component message) {
+        Bukkit.broadcast(message);
     }
 }

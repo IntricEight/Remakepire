@@ -7,6 +7,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
 import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.GameMode;
@@ -21,12 +24,13 @@ import frostvein.sampires.remakepire.listeners.CureBookReadingListener;
 
 public class TomeManager {
     private final RemakepirePlugin plugin;
-    private final VampireManager vampireManager;
     private final Map<String, TomeAbility> abilities;
     private final Map<UUID, Integer> playerTomeUsageSession = new HashMap<>();
     private final Map<UUID, UUID> tomeSelectionTargets = new HashMap<>();
     public static final String TOME_TAG_PREFIX = "tome_ability_";
-    public static final String TOME_SELECTION_GUI_TITLE = "§6§lSelect Tome Abilities";
+    public static final Component TOME_SELECTION_GUI_TITLE = Component.text("Select Tome Abilities", NamedTextColor.GOLD)
+            .decorate(TextDecoration.BOLD)
+            .decoration(TextDecoration.ITALIC, false);
 
     /**
      * Create an instance of the Tome manager.
@@ -35,7 +39,6 @@ public class TomeManager {
      */
     public TomeManager(RemakepirePlugin plugin) {
         this.plugin = plugin;
-        this.vampireManager = plugin.getVampireManager();
         this.abilities = new HashMap<>();
         this.registerTomeAbilities();
     }
@@ -101,7 +104,7 @@ public class TomeManager {
      * @return {@code true} if the player gains the ability.
      */
     public boolean grantAbility(Player player, String abilityName) {
-        if (!this.vampireManager.isHuman(player)) {
+        if (!this.plugin.getVampireManager().isHuman(player)) {
             return false;
 
         } else if (!this.isValidAbility(abilityName)) {
@@ -112,9 +115,9 @@ public class TomeManager {
 
         } else if (player.getGameMode() != GameMode.CREATIVE && this.hasUsedTomeThisSession(player)) {
             if (plugin.getConfigManager().isTomeAbsorptionCapped()) {
-                player.sendMessage("§cYou have already absorbed one tome this session. Your mind cannot handle more ancient knowledge.");
+                player.sendMessage(Component.text("You have already absorbed one tome this session. Your mind cannot handle more ancient knowledge.", NamedTextColor.RED));
             } else {
-                player.sendMessage("§cYour mind requires more time to recover from the ancient knowledge you absorbed.");
+                player.sendMessage(Component.text("Your mind requires more time to recover from the ancient knowledge you absorbed.", NamedTextColor.RED));
             }
 
             return false;
@@ -128,13 +131,13 @@ public class TomeManager {
                 this.playerTomeUsageSession.put(player.getUniqueId(), currentSessionId);
 
                 // Set a timer to remove the player from the tome prevention list after the timer elapses
-                BukkitTask absorptionCooldonTask = Bukkit.getScheduler().runTaskLater(this.plugin, () -> {
+                BukkitTask absorptionCooldownTask = Bukkit.getScheduler().runTaskLater(this.plugin, () -> {
                     // Only remove the player if tome capping is not enabled. After the timer elapses
                     if (!plugin.getConfigManager().isTomeAbsorptionCapped()) {
                         this.playerTomeUsageSession.remove(player.getUniqueId());
 
                         if (player.isOnline()) {
-                            player.sendMessage("§aYour mind eases, recovered from the strain of ancient knowledge.");
+                            player.sendMessage(Component.text("Your mind eases, recovered from the strain of ancient knowledge.", NamedTextColor.GREEN));
                         }
                     }
                 }, (long)plugin.getConfigManager().getTomeAbsorptionIntervalMinutes() * 60 * 20);
@@ -166,7 +169,7 @@ public class TomeManager {
     public Set<String> getPlayerAbilities(Player player) {
         Set<String> abilities = new HashSet<>();
 
-        for(String tag : player.getScoreboardTags()) {
+        for (String tag : player.getScoreboardTags()) {
             if (tag.startsWith(TOME_TAG_PREFIX)) {
                 String abilityName = tag.substring(TOME_TAG_PREFIX.length());
                 abilities.add(abilityName);
@@ -182,20 +185,18 @@ public class TomeManager {
      * @param player the player losing their abilities.
      */
     public void removeAllAbilities(Player player) {
-        Set<String> tagsToRemove = new HashSet<>();
+        int tagsRemoved = 0;
 
-        for(String tag : player.getScoreboardTags()) {
+        // Remove the tome ability tags from the player
+        for (String tag : player.getScoreboardTags()) {
             if (tag.startsWith(TOME_TAG_PREFIX)) {
-                tagsToRemove.add(tag);
+                player.removeScoreboardTag(tag);
+                ++tagsRemoved;
             }
         }
 
-        for(String tag : tagsToRemove) {
-            player.removeScoreboardTag(tag);
-        }
-
-        if (!tagsToRemove.isEmpty()) {
-            this.plugin.logInfo("Removed " + tagsToRemove.size() + " tome abilities from " + player.getName() + " (converted to vampire)");
+        if (tagsRemoved > 0) {
+            this.plugin.logInfo("Removed " + tagsRemoved + " tome abilities from " + player.getName() + " (converted to vampire)");
         }
     }
 
@@ -207,19 +208,19 @@ public class TomeManager {
      * @return {@code true} if the ability was successfully used.
      */
     public boolean useAbility(Player player, String abilityName) {
-        if (!this.vampireManager.isHuman(player)) {
-            player.sendMessage("§cOnly humans can use tome abilities.");
+        if (!this.plugin.getVampireManager().isHuman(player)) {
+            player.sendMessage(Component.text("Only humans can use tome abilities.", NamedTextColor.RED));
             return false;
 
         } else if (!this.hasAbility(player, abilityName)) {
-            player.sendMessage("§cYou don't have access to the '" + abilityName + "' ability.");
+            player.sendMessage(Component.text("You don't have access to the '" + abilityName + "' ability.", NamedTextColor.RED));
             return false;
 
         } else {
             TomeAbility ability = this.getAbility(abilityName);
 
             if (ability == null) {
-                player.sendMessage("§cAbility '" + abilityName + "' is not implemented.");
+                player.sendMessage(Component.text("Ability '" + abilityName + "' is not implemented.", NamedTextColor.RED));
                 return false;
             } else {
                 return ability.use(player);
@@ -240,7 +241,7 @@ public class TomeManager {
         abilityNames.sort(String::compareToIgnoreCase);
         int slot = 0;
 
-        for(String abilityName : abilityNames) {
+        for (String abilityName : abilityNames) {
             if (slot >= 54) {
                 break;
             }
@@ -250,18 +251,22 @@ public class TomeManager {
             ItemMeta meta = book.getItemMeta();
 
             if (meta != null) {
-                String displayName = this.formatAbilityName(abilityName);
-                boolean hasAbility = this.hasAbility(target, abilityName);
+                final String displayName = this.formatAbilityName(abilityName);
+                final boolean hasAbility = this.hasAbility(target, abilityName);
 
                 if (hasAbility) {
-                    meta.setDisplayName("§a✓ " + displayName + " §7(Already has)");
+                    meta.customName(Component.text("✓ " + displayName, NamedTextColor.GREEN)
+                            .append(Component.text(" (Already has)", NamedTextColor.GRAY))
+                            .decoration(TextDecoration.ITALIC, false)
+                    );
                 } else {
-                    meta.setDisplayName("§e" + displayName);
+                    meta.customName(Component.text(displayName, NamedTextColor.YELLOW)
+                            .decoration(TextDecoration.ITALIC, false));
                 }
 
                 List<String> lore = new ArrayList<>();
                 if (ability != null) {
-                    for(String line : ability.getDescriptionLines()) {
+                    for (String line : ability.getDescriptionLines()) {
                         lore.add("§7" + line);
                     }
                 }
@@ -287,7 +292,8 @@ public class TomeManager {
         this.addCureBookToGUI(gui, target, 48, CureBookReadingListener.TAG_CURE_BOOK_4, "§5Cure Book 4", this.plugin.getCureBookManager().getCureBookName(4, true));
 
         admin.openInventory(gui);
-        admin.sendMessage("§6Select tome abilities to grant to §e" + target.getName());
+        admin.sendMessage(Component.text("Select tome abilities to grant to ", NamedTextColor.GOLD)
+                .append(Component.text(target.getName(), NamedTextColor.YELLOW)));
     }
 
     /**
@@ -305,12 +311,16 @@ public class TomeManager {
         ItemMeta meta = book.getItemMeta();
 
         if (meta != null) {
-            boolean hasTag = target.getScoreboardTags().contains(tag);
+            final boolean hasTag = target.getScoreboardTags().contains(tag);
 
             if (hasTag) {
-                meta.setDisplayName("§a✓ " + displayName + " §7(Read)");
+                meta.customName(Component.text("✓ " + displayName, NamedTextColor.GREEN)
+                        .append(Component.text(" (Read)", NamedTextColor.GRAY))
+                        .decoration(TextDecoration.ITALIC, false)
+                );
             } else {
-                meta.setDisplayName(displayName);
+                meta.customName(Component.text(displayName)
+                        .decoration(TextDecoration.ITALIC, false));
             }
 
             List<String> lore = new ArrayList<>();
@@ -341,7 +351,7 @@ public class TomeManager {
         StringBuilder result = new StringBuilder();
         boolean capitalizeNext = true;
 
-        for(int i = 0; i < abilityName.length(); ++i) {
+        for (int i = 0; i < abilityName.length(); ++i) {
             char c = abilityName.charAt(i);
             if (i > 0) {
                 String remaining = abilityName.substring(i).toLowerCase();

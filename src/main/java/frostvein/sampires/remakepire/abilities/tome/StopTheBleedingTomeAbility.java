@@ -5,8 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import net.md_5.bungee.api.ChatMessageType;
-import net.md_5.bungee.api.chat.TextComponent;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
@@ -25,7 +25,7 @@ public class StopTheBleedingTomeAbility extends TomeAbility {
     // Controls how long the ability takes to conclude (in ticks)
     private static final int HEALING_DURATION_TICKS = 1200;
     // Controls how far the players can be while healing
-    private static final double PROXIMITY_DISTANCE = 2.0;
+    private static final int PROXIMITY_DISTANCE = 2;
     // Controls how frequently particle effects appear (in ticks)
     private static final int PARTICLE_INTERVAL_TICKS = 20;
     private static final String ACTIVE_TAG = "stopthebleeding_active";
@@ -38,7 +38,7 @@ public class StopTheBleedingTomeAbility extends TomeAbility {
      * @param plugin the host plugin object.
      */
     public StopTheBleedingTomeAbility(RemakepirePlugin plugin) {
-        super(plugin, "StopTheBleeding", new String[]{"You learn how to mend the wounds of death itself.", "Crouch within " + (int)PROXIMITY_DISTANCE + " blocks of another player for " + (HEALING_DURATION_TICKS / 20 / 60) + " minute", "to heal one heart for them, restoring their vitality."}, plugin.getConfigManager().getTomeStopTheBleedingCooldown());
+        super(plugin, "StopTheBleeding", new String[]{"You learn how to mend the wounds of death itself.", "Crouch within " + PROXIMITY_DISTANCE + " blocks of another player for " + (HEALING_DURATION_TICKS / 20 / 60) + " minute", "to heal one heart for them, restoring their vitality."}, plugin.getConfigManager().getTomeStopTheBleedingCooldown());
     }
 
     protected boolean useAbility(Player player) {
@@ -46,7 +46,7 @@ public class StopTheBleedingTomeAbility extends TomeAbility {
             this.sendCannotUseMessage(player, "Only humans can use tome abilities!");
 
         } else {
-            UUID playerId = player.getUniqueId();
+            final UUID playerId = player.getUniqueId();
 
             if (this.activeHealingSessions.containsKey(playerId)) {
                 this.cancelHealing(player, "You stop focusing on healing.");
@@ -93,18 +93,18 @@ public class StopTheBleedingTomeAbility extends TomeAbility {
      * @param target the player being healed.
      */
     private void startHealing(Player healer, Player target) {
-        UUID healerId = healer.getUniqueId();
+        final UUID healerId = healer.getUniqueId();
         healer.addScoreboardTag(ACTIVE_TAG);
 
         HealingSession session = new HealingSession(healer, target);
         this.activeHealingSessions.put(healerId, session);
         session.start();
-        this.sendSuccessMessage(healer, "You begin focusing your healing energy on " + target.getName() + "...");
 
         if (!healer.equals(target)) {
-            target.sendMessage("§a" + healer.getName() + " is focusing healing energy on you. Stay close.");
+            this.sendSuccessMessage(healer, "You begin focusing your healing energy on " + target.getName() + "...");
+            this.sendSuccessMessage(target, healer.getName() + " is focusing healing energy on you. Stay close.");
         } else {
-            healer.sendMessage("§aYou focus healing energy on yourself...");
+            this.sendSuccessMessage(healer, "You focus healing energy on yourself...");
         }
     }
 
@@ -114,17 +114,17 @@ public class StopTheBleedingTomeAbility extends TomeAbility {
      * @param reason why the healing was stopped.
      */
     private void cancelHealing(Player healer, String reason) {
-        UUID healerId = healer.getUniqueId();
+        final UUID healerId = healer.getUniqueId();
         HealingSession session = this.activeHealingSessions.remove(healerId);
 
         if (session != null) {
             session.cancel();
             healer.removeScoreboardTag(ACTIVE_TAG);
-            healer.sendMessage("§c" + reason);
+            healer.sendMessage(Component.text(reason, NamedTextColor.RED));
             Player target = session.getTarget();
 
             if (target != null && !target.equals(healer) && target.isOnline()) {
-                target.sendMessage("§c" + healer.getName() + " stopped healing you.");
+                target.sendMessage(Component.text(healer.getName() + " stopped healing you.", NamedTextColor.RED));
             }
         }
 
@@ -137,7 +137,7 @@ public class StopTheBleedingTomeAbility extends TomeAbility {
      * @param target the player being healed.
      */
     private void completeHealing(Player healer, Player target) {
-        UUID healerId = healer.getUniqueId();
+        final UUID healerId = healer.getUniqueId();
         HealingSession session = this.activeHealingSessions.remove(healerId);
 
         if (session != null) {
@@ -145,17 +145,17 @@ public class StopTheBleedingTomeAbility extends TomeAbility {
         }
 
         healer.removeScoreboardTag(ACTIVE_TAG);
-        int currentDeaths = this.getDeathScore(target);
-        int newDeaths = Math.max(0, currentDeaths - 1);
-        this.setDeathScore(target, newDeaths);
+
+        // Update the health and death counts of the player healed
+        this.setDeathScore(target, Math.max(0, this.getDeathScore(target) - 1));
         this.updateMaxHealth(target);
 
         // Notify the players of the healing success
         if (!healer.equals(target)) {
-            target.sendMessage("§a" + healer.getName() + " has healed one of your wounds.");
-            healer.sendMessage("§aYou have successfully healed one of " + target.getName() + "'s wounds.");
+            target.sendMessage(Component.text(healer.getName() + " has healed one of your wounds.", NamedTextColor.GREEN));
+            healer.sendMessage(Component.text("You have successfully healed one of " + target.getName() + "'s wounds.", NamedTextColor.GREEN));
         } else {
-            healer.sendMessage("§aYou have healed one of your own wounds.");
+            healer.sendMessage(Component.text("You have healed one of your own wounds.", NamedTextColor.GREEN));
         }
 
         healer.playSound(healer.getLocation(), Sound.BLOCK_BEACON_ACTIVATE, SoundCategory.PLAYERS, 1.0F, 1.5F);
@@ -183,11 +183,11 @@ public class StopTheBleedingTomeAbility extends TomeAbility {
      */
     private Player findNearestPlayer(Player player, double maxDistance) {
         Player nearest = null;
-        double nearestDistance = maxDistance;
+        double nearestDistance = maxDistance, distance;
 
-        for(Player other : Bukkit.getOnlinePlayers()) {
+        for (Player other : Bukkit.getOnlinePlayers()) {
             if (!other.equals(player) && other.getWorld().equals(player.getWorld())) {
-                double distance = player.getLocation().distance(other.getLocation());
+                distance = player.getLocation().distance(other.getLocation());
 
                 if (distance <= maxDistance && distance < nearestDistance) {
                     nearest = other;
@@ -253,8 +253,7 @@ public class StopTheBleedingTomeAbility extends TomeAbility {
                     this.plugin.getBeaconMajorityManager().updateBeaconMajorityBonuses();
                 }
 
-                double maxHealth = player.getAttribute(Attribute.MAX_HEALTH).getValue();
-                this.plugin.logInfo("Updated max health for " + player.getName() + " to " + maxHealth);
+                this.plugin.logInfo("Updated max health for " + player.getName() + " to " + player.getAttribute(Attribute.MAX_HEALTH).getValue());
             } catch (Exception e) {
                 this.plugin.getLogger().warning("Failed to update max health for " + player.getName() + ": " + e.getMessage());
             }
@@ -337,19 +336,38 @@ public class StopTheBleedingTomeAbility extends TomeAbility {
 
                                 ++HealingSession.this.particleCounter;
                                 int secondsRemaining = HealingSession.this.ticksRemaining / 20;
-                                String timeDisplay = VampireAbilityManager.formatTime((long)secondsRemaining);
+                                String timeDisplay = VampireAbilityManager.formatTime(secondsRemaining);
 
+                                // Let the player(s) involved know what's going on
                                 if (HealingSession.this.isSelfHeal) {
-                                    currentHealer.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent("§aHealing yourself... §e" + timeDisplay + " §aremaining"));
+                                    // Let the player know they are healing themselves successfully
+                                    currentHealer.sendActionBar(
+                                            Component.text("Healing yourself... ", NamedTextColor.GREEN)
+                                                    .append(Component.text(timeDisplay, NamedTextColor.YELLOW))
+                                                    .append(Component.text(" remaining", NamedTextColor.GREEN))
+                                    );
                                 } else {
                                     // Let the healer know how much time remains
-                                    currentHealer.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent("§aHealing " + currentTarget.getName() + "... §e" + timeDisplay + " §aremaining"));
+                                    currentHealer.sendActionBar(
+                                            Component.text("Healing " + currentTarget.getName() + "... ", NamedTextColor.GREEN)
+                                                    .append(Component.text(timeDisplay, NamedTextColor.YELLOW))
+                                                    .append(Component.text(" remaining", NamedTextColor.GREEN))
+                                    );
+
                                     // Let the receiving player know how much time remains
-                                    currentTarget.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent("§aBeing healed by " + currentHealer.getName() + "... §e" + timeDisplay + " §aremaining"));
+                                    currentTarget.sendActionBar(
+                                            Component.text("Being healed by " + currentHealer.getName() + "... ", NamedTextColor.GREEN)
+                                                    .append(Component.text(timeDisplay, NamedTextColor.YELLOW))
+                                                    .append(Component.text(" remaining", NamedTextColor.GREEN))
+                                    );
                                 }
 
                                 if (HealingSession.this.ticksRemaining % 200 == 0 && HealingSession.this.ticksRemaining > 0 && HealingSession.this.ticksRemaining < HEALING_DURATION_TICKS) {
-                                    currentHealer.sendMessage("§7[§aStop the Bleeding§7] §e" + secondsRemaining + " seconds remaining...");
+                                    currentHealer.sendMessage(Component.text("[", NamedTextColor.GRAY)
+                                            .append(Component.text("Stop the Bleeding", NamedTextColor.GREEN))
+                                            .append(Component.text("] ", NamedTextColor.GRAY))
+                                            .append(Component.text(secondsRemaining + " seconds remaining...", NamedTextColor.YELLOW))
+                                    );
                                 }
 
                                 --HealingSession.this.ticksRemaining;

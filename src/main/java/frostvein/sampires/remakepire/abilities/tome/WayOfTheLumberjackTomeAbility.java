@@ -1,5 +1,7 @@
 package frostvein.sampires.remakepire.abilities.tome;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -8,10 +10,9 @@ import java.lang.reflect.Type;
 import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
-
-import frostvein.sampires.remakepire.utils.ConversionAssistant;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
-import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
@@ -21,16 +22,14 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.inventory.ItemStack;
 import frostvein.sampires.remakepire.RemakepirePlugin;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
+import frostvein.sampires.remakepire.utils.ConversionAssistant;
 
 public class WayOfTheLumberjackTomeAbility extends TomeAbility implements Listener {
     private final Random random = new Random();
     private final Gson gson = new Gson();
     private final File placedLogsFile;
-    private final ConversionAssistant conversionAssistant;
     private Set<String> placedLogs = new HashSet<>();
-    private static final Set<Material> LOG_MATERIALS = Set.of(Material.OAK_LOG, Material.SPRUCE_LOG, Material.BIRCH_LOG, Material.JUNGLE_LOG, Material.ACACIA_LOG, Material.DARK_OAK_LOG, Material.MANGROVE_LOG, Material.CHERRY_LOG, Material.CRIMSON_STEM, Material.WARPED_STEM);;
+    private static final Set<Material> LOG_MATERIALS = Set.of(Material.OAK_LOG, Material.SPRUCE_LOG, Material.BIRCH_LOG, Material.JUNGLE_LOG, Material.ACACIA_LOG, Material.DARK_OAK_LOG, Material.MANGROVE_LOG, Material.CHERRY_LOG, Material.CRIMSON_STEM, Material.WARPED_STEM);
 
     /**
      * Create an instance of the Way of the Land tome ability.
@@ -41,7 +40,6 @@ public class WayOfTheLumberjackTomeAbility extends TomeAbility implements Listen
         super(plugin, "WayOfTheLumberjack", new String[]{"You gain knowledge on how to fell the forest.", "You permanently gain a 30% chance to harvest", "twice the yield from each harvest."}, 0);
         this.placedLogsFile = new File(plugin.getDataFolder(), "placed_logs.json");
         this.loadPlacedLogs();
-        this.conversionAssistant =  new ConversionAssistant();
         Bukkit.getPluginManager().registerEvents(this, plugin);
     }
 
@@ -52,8 +50,8 @@ public class WayOfTheLumberjackTomeAbility extends TomeAbility implements Listen
 
         } else {
             this.sendSuccessMessage(player, "You have absorbed the knowledge of the lumberjack!");
-            player.sendMessage("§7You now have a permanent 30% chance to receive double drops when harvesting natural logs.");
-            player.sendMessage("§7This knowledge flows through your very being - you need not activate it again.");
+            player.sendMessage(Component.text("You now have a permanent 30% chance to receive double drops when harvesting natural logs.", NamedTextColor.GRAY));
+            player.sendMessage(Component.text("This knowledge flows through your very being - you need not activate it again.", NamedTextColor.GRAY));
 
             this.plugin.getWorld().playSound(player.getLocation(), "minecraft:block.wood.break", 1.0F, 1.2F);
             this.plugin.getWorld().playSound(player.getLocation(), "minecraft:entity.experience_orb.pickup", 0.5F, 0.8F);
@@ -69,10 +67,11 @@ public class WayOfTheLumberjackTomeAbility extends TomeAbility implements Listen
      */
     @EventHandler
     public void onBlockPlace(BlockPlaceEvent event) {
-        Block block = event.getBlock();
+        final Block block = event.getBlock();
 
+        // Record placed logs to prevent them from triggering the ability
         if (LOG_MATERIALS.contains(block.getType())) {
-            String locationKey = this.conversionAssistant.locationToString(block.getLocation());
+            String locationKey = ConversionAssistant.locationToString(block.getLocation());
             this.placedLogs.add(locationKey);
             this.savePlacedLogs();
         }
@@ -89,7 +88,7 @@ public class WayOfTheLumberjackTomeAbility extends TomeAbility implements Listen
         Block block = event.getBlock();
 
         if (LOG_MATERIALS.contains(block.getType())) {
-            String locationKey = this.conversionAssistant.locationToString(block.getLocation());
+            String locationKey = ConversionAssistant.locationToString(block.getLocation());
 
             // Prevent placed logs from triggering the ability
             if (this.placedLogs.contains(locationKey)) {
