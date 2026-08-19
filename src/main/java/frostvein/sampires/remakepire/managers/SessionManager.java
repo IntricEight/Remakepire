@@ -697,6 +697,17 @@ public class SessionManager {
     private void setInSessionRules() {
         World world = this.plugin.getWorld();
 
+        world.setGameRule(GameRule.DO_DAYLIGHT_CYCLE, true);
+        world.setGameRule(GameRule.DO_WEATHER_CYCLE, false);
+        world.setGameRule(GameRule.DO_MOB_SPAWNING, true);
+        world.setGameRule(GameRule.KEEP_INVENTORY, true);
+        world.setGameRule(GameRule.ANNOUNCE_ADVANCEMENTS, false);
+        world.setGameRule(GameRule.DO_MOB_LOOT, true);
+        world.setGameRule(GameRule.REDUCED_DEBUG_INFO, true);
+        world.setGameRule(GameRule.SHOW_DEATH_MESSAGES, false);
+        world.setGameRule(GameRule.DO_INSOMNIA, false);
+        world.setGameRule(GameRule.DO_IMMEDIATE_RESPAWN, true);
+        world.setGameRule(GameRule.LOCATOR_BAR, false);
         world.setGameRule(GameRules.ADVANCE_TIME, true);
         world.setGameRule(GameRules.ADVANCE_WEATHER, false);
         world.setGameRule(GameRules.SPAWN_MOBS, true);
@@ -717,11 +728,22 @@ public class SessionManager {
     }
 
     /**
-     * Turn off the Minecraft gamerules of the session.
+     * Turn off the Minecraft game rules of the session.
      */
     private void setOutOfSessionRules() {
         World world = this.plugin.getWorld();
 
+        world.setGameRule(GameRule.DO_DAYLIGHT_CYCLE, false);
+        world.setGameRule(GameRule.DO_WEATHER_CYCLE, false);
+        world.setGameRule(GameRule.DO_MOB_SPAWNING, false);
+        world.setGameRule(GameRule.KEEP_INVENTORY, true);
+        world.setGameRule(GameRule.ANNOUNCE_ADVANCEMENTS, false);
+        world.setGameRule(GameRule.DO_MOB_LOOT, false);
+        world.setGameRule(GameRule.REDUCED_DEBUG_INFO, false);
+        world.setGameRule(GameRule.SHOW_DEATH_MESSAGES, false);
+        world.setGameRule(GameRule.DO_INSOMNIA, false);
+        world.setGameRule(GameRule.DO_IMMEDIATE_RESPAWN, false);
+        world.setGameRule(GameRule.LOCATOR_BAR, false);
         world.setGameRule(GameRules.ADVANCE_TIME, false);
         world.setGameRule(GameRules.ADVANCE_WEATHER, false);
         world.setGameRule(GameRules.SPAWN_MOBS, false);
