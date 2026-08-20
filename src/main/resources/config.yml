@@ -131,6 +131,8 @@ abilities:
   vampire:
     # Bat transformation cooldown (default: 900 seconds = 15 minutes)
     bat-cooldown: 900
+    # Blood ties cooldown (default: 300 seconds = 5 minutes)
+    blood-ties-cooldown: 300
     # Lunge attack cooldown (default: 45 seconds)
     lunge-cooldown: 45
     # Vanish/Invisibility cooldown (default: 420 seconds = 7 minutes)

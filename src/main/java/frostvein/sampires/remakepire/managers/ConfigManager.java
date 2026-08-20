@@ -113,6 +113,15 @@ public class ConfigManager {
     }
 
     /**
+     * Retrieve the cooldown on the vampire ability Blood Ties.
+     *
+     * @return the seconds between ability uses.
+     */
+    public int getBloodTiesCooldown() {
+        return this.plugin.getConfig().getInt("abilities.vampire.blood-ties-cooldown", 300);
+    }
+
+    /**
      * Retrieve the cooldown on the vampire ability Vampiric Lunge.
      *
      * @return the seconds between ability uses.
