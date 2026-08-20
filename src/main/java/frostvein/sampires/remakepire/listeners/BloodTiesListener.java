@@ -4,10 +4,7 @@
  *
  * Implementation Requirements:
  * Implement the BloodTiesAbility.java file and follow its instructions
- * Add an instance of BloodTiesListener to RemakepirePlugin.java and register it, and call the shutdown function inside onDisable()
- *
- *
- *
+ * Add an instance of BloodTiesListener to RemakepirePlugin.java, register it inside onEnable(), and call the shutdown function inside onDisable()
  */
 
 package frostvein.sampires.remakepire.listeners;
