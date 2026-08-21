@@ -236,13 +236,13 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
             sender.sendMessage(Component.text("  true/false = clear inventory", NamedTextColor.GRAY));
 
         } else {
-            Player target = Bukkit.getPlayer(args[0]);
+            Player target = Bukkit.getPlayerExact(args[0]);
 
             if (target == null) {
                 sender.sendMessage(Component.text("Player not found: " + args[0], NamedTextColor.RED));
 
             } else {
-                boolean clearInventory = args.length >= 2 && args[1].equalsIgnoreCase("true");
+                final boolean clearInventory = args.length >= 2 && args[1].equalsIgnoreCase("true");
 
                 if (target.getGameMode() == GameMode.SPECTATOR) {
                     target.setGameMode(GameMode.SURVIVAL);
@@ -785,7 +785,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                 sender.sendMessage(Component.text("Invalid action. Use 'reset' or 'clear'.", NamedTextColor.RED));
 
             } else if (args.length >= 2) {
-                Player target = Bukkit.getPlayer(args[1]);
+                Player target = Bukkit.getPlayerExact(args[1]);
 
                 if (target == null) {
                     sender.sendMessage(Component.text("Player '" + args[1] + "' not found.", NamedTextColor.RED));
@@ -850,7 +850,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
             }
         } else {
             // Handle the cooldown command for a single player
-            Player target = Bukkit.getPlayer(args[0]);
+            Player target = Bukkit.getPlayerExact(args[0]);
 
             if (target != null && this.plugin.getVampireManager().isHuman(target)) {
                 TomeAbility.clearAllCooldowns(target);
@@ -1008,7 +1008,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
             sendCommandCorrection(sender, "  clearban", "Remove promotion ban (allows vampire to level up again)");
 
         } else {
-            Player target = Bukkit.getPlayer(args[0]);
+            Player target = Bukkit.getPlayerExact(args[0]);
 
             if (target == null) {
                 sender.sendMessage(Component.text("Player not found.", NamedTextColor.RED));
@@ -1598,7 +1598,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
             Player turner = null;
 
             if (args.length >= 3) {
-                turner = Bukkit.getPlayer(args[2]);
+                turner = Bukkit.getPlayerExact(args[2]);
 
                 if (turner == null) {
                     sender.sendMessage(Component.text("Turner player '" + args[2] + "' not found.", NamedTextColor.RED));
@@ -1629,7 +1629,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
             sender.sendMessage(Component.text("Usage: /pow admin givetome <player> <ability> [amount]", NamedTextColor.RED));
 
         } else {
-            Player target = Bukkit.getPlayer(args[0]);
+            Player target = Bukkit.getPlayerExact(args[0]);
 
             if (target == null) {
                 sender.sendMessage(Component.text("Player '" + args[0] + "' not found.", NamedTextColor.RED));
@@ -1733,7 +1733,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
             sender.sendMessage(Component.text("Usage: /pow admin select_tomes <player>", NamedTextColor.RED));
 
         } else {
-            Player target = Bukkit.getPlayer(args[0]);
+            Player target = Bukkit.getPlayerExact(args[0]);
 
             if (target == null) {
                 sender.sendMessage(Component.text("Player '" + args[0] + "' not found.", NamedTextColor.RED));
@@ -1752,10 +1752,10 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
      */
     private boolean handleGiveCureBookCommand(CommandSender sender, String[] args) {
         if (args.length < 2) {
-            sender.sendMessage("§cUsage: /pow admin give_cure_book <player> <1 | 2 | 3 | 4>");
+            sender.sendMessage(Component.text("Usage: /pow admin give_cure_book <player> <1 | 2 | 3 | 4>", NamedTextColor.RED));
 
         } else {
-            Player target = Bukkit.getPlayer(args[0]);
+            Player target = Bukkit.getPlayerExact(args[0]);
 
             if (target == null) {
                 sender.sendMessage(Component.text("Player '" + args[0] + "' not found.", NamedTextColor.RED));
@@ -1802,7 +1802,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
     private boolean handleStashCureBookCommand(CommandSender sender, String[] args) {
         // Catch if an improper number of parameters was provided
         if (args.length != 1 && args.length != 4) {
-            sender.sendMessage("§cUsage: /pow admin stash_cure_book <1 | 2 | 3 | 4> <x> <y> <z>");
+            sender.sendMessage(Component.text("Usage: /pow admin stash_cure_book <1 | 2 | 3 | 4> <x> <y> <z>", NamedTextColor.RED));
             return true;
         }
 
@@ -2031,11 +2031,11 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
      */
     private boolean handleClearBloodMoonBuffsCommand(CommandSender sender, String[] args) {
         if (args.length == 0) {
-            sender.sendMessage("§cUsage: /pow admin clearbloodmoonbuffs <player | all>");
-            sender.sendMessage("§7This command removes stacked blood moon attribute modifiers");
+            sender.sendMessage(Component.text("Usage: /pow admin clearbloodmoonbuffs <player | all>", NamedTextColor.RED));
+            sender.sendMessage(Component.text("This command removes stacked blood moon attribute modifiers", NamedTextColor.GRAY));
 
         } else {
-            String target = args[0].toLowerCase();
+            final String target = args[0].toLowerCase();
 
             if (target.equals("all")) {
                 int playersAffected = 0;
@@ -2052,7 +2052,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                 this.plugin.logInfo("Admin " + sender.getName() + " cleared blood moon buffs for all players");
 
             } else {
-                Player targetPlayer = Bukkit.getPlayer(target);
+                Player targetPlayer = Bukkit.getPlayerExact(target);
 
                 if (targetPlayer == null) {
                     sender.sendMessage(Component.text("Player '" + target + "' not found or not online.", NamedTextColor.RED));
@@ -2079,15 +2079,15 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
      */
     private boolean makePlayerIncurable(CommandSender sender, String[] args) {
         if (args.length == 0) {
-            sender.sendMessage("§cUsage: /pow admin make_incurable <player>");
-            sender.sendMessage("§7This command makes a vampire impossible to cure, and immune to the force cure movement trap.");
-            sender.sendMessage("§7The plugin will treat the player as though their sire was still alive.");
-            sender.sendMessage("§7However, it will still prevent curing even if the config is toggled to ignore whether the vampire's sire is alive.");
-            sender.sendMessage("§7To revert, use '/tag <name> remove CannotCure' to manually remove the CannotCure tag from the player.");
+            sender.sendMessage(Component.text("Usage: /pow admin make_incurable <player>", NamedTextColor.RED));
+            sender.sendMessage(Component.text("This command makes a vampire impossible to cure, and immune to the force cure movement trap.", NamedTextColor.GRAY));
+            sender.sendMessage(Component.text("The plugin will treat the player as though their sire was still alive.", NamedTextColor.GRAY));
+            sender.sendMessage(Component.text("However, it will still prevent curing even if the config is toggled to ignore whether the vampire's sire is alive.", NamedTextColor.GRAY));
+            sender.sendMessage(Component.text("To revert, use '/tag <name> remove CannotCure' to manually remove the CannotCure tag from the player.", NamedTextColor.GRAY));
 
         } else {
             String target = args[0].toLowerCase();
-            Player targetPlayer = Bukkit.getPlayer(args[0].toLowerCase());
+            Player targetPlayer = Bukkit.getPlayerExact(args[0].toLowerCase());
 
             if (targetPlayer == null) {
                 sender.sendMessage(Component.text("Player '" + target + "' not found or not online.", NamedTextColor.RED));
@@ -2119,11 +2119,11 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                 sender.sendMessage(Component.text("Aggressively cleaned your attribute modifiers.", NamedTextColor.GREEN));
 
             } else {
-                sender.sendMessage("§cUsage: /pow admin fixattributes <player | all>");
+                sender.sendMessage(Component.text("Usage: /pow admin fixattributes <player | all>", NamedTextColor.RED));
             }
 
         } else {
-            String target = args[0].toLowerCase();
+            final String target = args[0].toLowerCase();
 
             if (target.equals("all")) {
                 int playersAffected = 0;
@@ -2140,7 +2140,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                 this.plugin.logInfo("Admin " + sender.getName() + " fixed attributes for all players");
 
             } else {
-                Player targetPlayer = Bukkit.getPlayer(target);
+                Player targetPlayer = Bukkit.getPlayerExact(target);
 
                 if (targetPlayer == null) {
                     sender.sendMessage(Component.text("Player '" + target + "' not found or not online.", NamedTextColor.RED));
@@ -2166,7 +2166,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
      */
     private boolean handleRemoveEndermenCommand(CommandSender sender, String[] args) {
         if (args.length == 0) {
-            sender.sendMessage("§cUsage: /pow admin removeendermen <all | toggle | status>");
+            sender.sendMessage(Component.text("Usage: /pow admin removeendermen <all | toggle | status>", NamedTextColor.RED));
             CommandHandler.sendCommandCorrection(sender, "  all", "Remove all existing endermen from loaded chunks");
             CommandHandler.sendCommandCorrection(sender, "  toggle", "Toggle enderman spawn prevention on/off");
             CommandHandler.sendCommandCorrection(sender, "  status", "Check if enderman removal is enabled");
@@ -2216,7 +2216,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
      */
     private boolean handleRemoveCreeperCommand(CommandSender sender, String[] args) {
         if (args.length == 0) {
-            sender.sendMessage("§cUsage: /pow admin removecreepers <all | toggle | status>");
+            sender.sendMessage(Component.text("Usage: /pow admin removecreepers <all | toggle | status>", NamedTextColor.RED));
             CommandHandler.sendCommandCorrection(sender, "  all", "Remove all existing creepers from loaded chunks");
             CommandHandler.sendCommandCorrection(sender, "  toggle", "Toggle creeper spawn prevention on/off");
             CommandHandler.sendCommandCorrection(sender, "  status", "Check if creeper removal is enabled");
@@ -2269,10 +2269,10 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
      */
     private boolean handleSetupPlayerCommand(CommandSender sender, String[] args) {
         if (args.length != 1) {
-            sender.sendMessage("§cUsage: /pow admin setupplayer <playername>");
+            sender.sendMessage(Component.text("Usage: /pow admin setupplayer <playername>", NamedTextColor.RED));
 
         } else {
-            Player target = Bukkit.getPlayer(args[0]);
+            Player target = Bukkit.getPlayerExact(args[0]);
 
             if (target == null) {
                 sender.sendMessage(Component.text("Player '" + args[0] + "' not found.", NamedTextColor.RED));

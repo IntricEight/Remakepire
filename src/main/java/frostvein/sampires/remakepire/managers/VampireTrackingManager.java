@@ -43,10 +43,6 @@ public class VampireTrackingManager {
             this.stopTracking(newVampireId);
             this.mostRecentVampireId = newVampireId;
 
-            // Check if the new vampire should be tracked
-            // Done out here instead of inside the task to reduce the config checks
-            boolean shouldTrack = this.plugin.getConfigManager().canTrackNewVampires();
-
             BukkitTask trackingTask = (new BukkitRunnable() {
                 int ticksRemaining = TRACKING_DURATION_SECONDS * 20;
 
@@ -54,17 +50,15 @@ public class VampireTrackingManager {
                     if (this.ticksRemaining <= 0) {
                         VampireTrackingManager.this.stopTracking(newVampireId);
                     } else {
-                        Player trackedPlayer = Bukkit.getPlayer(newVampireId);
-
-                        if (trackedPlayer != null && trackedPlayer.isOnline()) {
-                            VampireTrackingManager.this.updateTrackingForAllVampires(trackedPlayer, shouldTrack);
+                        if (newVampire.isOnline()) {
+                            VampireTrackingManager.this.updateTrackingForAllVampires(newVampire);
                             this.ticksRemaining -= UPDATE_INTERVAL_TICKS;
                         } else {
                             VampireTrackingManager.this.stopTracking(newVampireId);
                         }
                     }
                 }
-            }).runTaskTimer(this.plugin, 0L, 4L);
+            }).runTaskTimer(this.plugin, 0L, UPDATE_INTERVAL_TICKS);
 
             this.activeTrackingSessions.put(newVampireId, trackingTask);
             this.plugin.logInfo("Started vampire tracking for " + newVampire.getName() + " (120s)");
@@ -76,16 +70,20 @@ public class VampireTrackingManager {
      *
      * @param trackedVampire the newly turned player.
      */
-    private void updateTrackingForAllVampires(Player trackedVampire, boolean trackLocation) {
+    private void updateTrackingForAllVampires(Player trackedVampire) {
         if (this.mostRecentVampireId == null || trackedVampire.getUniqueId().equals(this.mostRecentVampireId)) {
             Location trackedLocation = trackedVampire.getLocation();
 
+            // Check if the new vampire should be tracked
+            // Done out here instead of inside the task to reduce the config checks
+            final boolean shouldTrack = this.plugin.getConfigManager().canTrackNewVampires();
+
             for (Player vampire : Bukkit.getOnlinePlayers()) {
                 if (this.vampireManager.isVampire(vampire) && !vampire.getUniqueId().equals(trackedVampire.getUniqueId()) && vampire.getWorld().equals(trackedVampire.getWorld()) && (this.plugin.getVampireFeedingManager() == null || !this.plugin.getVampireFeedingManager().isFeeding(vampire))) {
-                    Component messageComponent;
+                    Component messageComponent = Component.text("New Vampire", NamedTextColor.DARK_RED);
 
                     // Only give directions if that feature is enabled
-                    if (trackLocation) {
+                    if (shouldTrack) {
                         Location vampireLocation = vampire.getLocation();
 
                         double deltaX = trackedLocation.getX() - vampireLocation.getX();
@@ -93,13 +91,11 @@ public class VampireTrackingManager {
                         double distance = Math.sqrt(deltaX * deltaX + deltaZ * deltaZ);
 
                         String direction = ConversionAssistant.getRelativeDirection(deltaX, deltaZ, vampireLocation.getYaw());
-                        messageComponent = Component.text("New Vampire: ", NamedTextColor.DARK_RED)
-                                .append(Component.text(direction, NamedTextColor.WHITE))
+                        messageComponent = messageComponent.append(Component.text(direction, NamedTextColor.WHITE))
                                 .append(Component.text(String.format(" (%.0f blocks)", distance), NamedTextColor.GRAY));
 
                     } else {
-                        messageComponent = Component.text("New Vampire", NamedTextColor.DARK_RED)
-                                .decorate(TextDecoration.BOLD);
+                        messageComponent = messageComponent.decorate(TextDecoration.BOLD);
                     }
 
                     vampire.sendActionBar(messageComponent);

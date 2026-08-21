@@ -272,7 +272,7 @@ public class HolyWaterEffectManager implements Listener {
      */
     public void clearAllEffects() {
         for (Map.Entry<UUID, BukkitTask> entry : this.disabledVampires.entrySet()) {
-            UUID vampireId = entry.getKey();
+            final UUID vampireId = entry.getKey();
             BukkitTask task = entry.getValue();
 
             if (task != null && !task.isCancelled()) {
@@ -286,7 +286,7 @@ public class HolyWaterEffectManager implements Listener {
             }
         }
 
-        int cleared = this.getDisabledVampireCount();
+        final int cleared = this.getDisabledVampireCount();
         this.disabledVampires.clear();
         this.plugin.logInfo("Cleared holy water effects from " + cleared + " vampires");
     }

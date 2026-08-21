@@ -151,7 +151,7 @@ public class BeetrootManager {
 
         // Handle the manual timers for activating the garlic immunity
         for (Map.Entry<UUID, Integer> entry : this.processingTimers.entrySet()) {
-            UUID playerId = entry.getKey();
+            final UUID playerId = entry.getKey();
 
             if (onlinePlayers.contains(playerId)) {
                 int timeLeft = entry.getValue() - 1;
@@ -176,7 +176,7 @@ public class BeetrootManager {
 
         // Handle the manual timers for the garlic immunity duration
         for (Map.Entry<UUID, Integer> entry : this.immunityTimers.entrySet()) {
-            UUID playerId = entry.getKey();
+            final UUID playerId = entry.getKey();
 
             if (onlinePlayers.contains(playerId)) {
                 int timeLeft = entry.getValue() - 1;
@@ -201,7 +201,7 @@ public class BeetrootManager {
 
         // Handle the manual timers for the garlic recovery duration
         for (Map.Entry<UUID, Integer> entry : this.recoveryTimers.entrySet()) {
-            UUID playerId = entry.getKey();
+            final UUID playerId = entry.getKey();
 
             if (onlinePlayers.contains(playerId)) {
                 int timeLeft = entry.getValue() - 1;
