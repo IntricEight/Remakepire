@@ -57,7 +57,11 @@ public class BloodTiesAbility extends VampireAbility {
     }
 
     public boolean execute(Player player, VampireManager vampireManager, RemakepirePlugin plugin) {
-
+        // Make sure there isn't another tracking process happening at this time
+        if (plugin.getVampireTrackingManager().getActiveTrackingCount() != 0) {
+            player.sendMessage(Component.text("Your senses are flooded by your new kin... You cannot shift your focus until you grow accustomed to their presence.", NamedTextColor.RED));
+            return false;
+        }
 
         // Get a list of the vampire's fledglings
         List<String> fledglingNames = plugin.getSireManager().getFledglings(player);

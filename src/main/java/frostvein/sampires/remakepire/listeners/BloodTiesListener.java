@@ -35,7 +35,7 @@ import frostvein.sampires.remakepire.utils.ConversionAssistant;
 public class BloodTiesListener implements Listener {
     private final RemakepirePlugin plugin;
     private final Map<UUID, BukkitTask> activeTrackingSessions = new ConcurrentHashMap<>();
-    private static final int TRACKING_DURATION_SECONDS = 45;
+    private static final int TRACKING_DURATION_SECONDS = 30;
     private static final int UPDATE_INTERVAL_TICKS = 4;
 
     /**
@@ -119,7 +119,7 @@ public class BloodTiesListener implements Listener {
 
                     } else {
                         BloodTiesListener.this.stopTracking(fledglingId);
-                        plugin.getLogger().info("A player is found to be offline during the tracking");
+                        plugin.getLogger().info("A player is found to be offline during the Blood Ties tracking process");
                     }
                 }
             }
