@@ -16,6 +16,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -113,7 +114,7 @@ public class BloodTiesListener implements Listener {
                     BloodTiesListener.this.stopTracking(fledglingId);
 
                 } else {
-                    if (fledgling.isOnline() && sire.isOnline()) {
+                    if (BloodTiesListener.this.eligibleToTrack(sire, fledgling)) {
                         BloodTiesListener.this.updateTracking(sire, fledgling);
                         this.ticksRemaining -= UPDATE_INTERVAL_TICKS;
 
@@ -136,25 +137,27 @@ public class BloodTiesListener implements Listener {
 
         // Alert the players of the ability use
         sire.sendMessage(Component.text(" Red mist gathers at the edge of your vision, pointing the way to ." + fledgling.getName(), NamedTextColor.RED));
-        fledgling.sendMessage(Component.text("A shiver runs down your spine.", NamedTextColor.DARK_RED));
+        fledgling.sendMessage(Component.text("A shiver runs down your spine.", NamedTextColor.GRAY));
 
         // Play the ability sound effects
         sire.playSound(sire, Sound.ENTITY_ALLAY_AMBIENT_WITHOUT_ITEM, SoundCategory.MASTER, 0.5F, 0.3F);
-        fledgling.playSound(fledgling, Sound.ENTITY_BREEZE_WHIRL, SoundCategory.MASTER, 1.2F, 0.6F);
+        fledgling.playSound(fledgling, Sound.ENTITY_WARDEN_AGITATED, SoundCategory.MASTER, 0.8F, 0.6F);
     }
 
     /**
      * Direct the other vampires in the direction of the new fledgling.
      *
-     * @param trackedVampire the newly turned player.
+     * @param trackedVampire the fledgling being tracked.
      */
     private void updateTracking(Player sire, Player trackedVampire) {
         Location trackedLocation = trackedVampire.getLocation();
 
+        // Make sure nothing is distracting the player or overriding the action bar
         if (this.plugin.getVampireManager().isVampire(sire) && !sire.getUniqueId().equals(trackedVampire.getUniqueId())
                 && this.plugin.getVampireManager().isVampire(trackedVampire)
                 && sire.getWorld().equals(trackedVampire.getWorld())
                 && (this.plugin.getVampireFeedingManager() == null || !this.plugin.getVampireFeedingManager().isFeeding(sire))
+                && this.plugin.getVampireTrackingManager().getActiveTrackingCount() == 0
         ) {
             Location vampireLocation = sire.getLocation();
 
@@ -166,6 +169,22 @@ public class BloodTiesListener implements Listener {
             sire.sendActionBar(Component.text(trackedVampire.getName() + " ", NamedTextColor.DARK_RED)
                     .append(Component.text(direction, NamedTextColor.WHITE)));
         }
+    }
+
+    /**
+     * Check that the two vampires are eligible to track each other each time the directional indicator updates.
+     *
+     * @param sire the player using the ability.
+     * @param trackedVampire the fledgling being tracked.
+     * @return {@code true} if the sire can track the vampire.
+     */
+    private boolean eligibleToTrack(Player sire, Player trackedVampire) {
+        return sire != null && trackedVampire != null
+                && trackedVampire.isOnline() && sire.isOnline()
+                && !this.plugin.getHolyWaterEffectManager().isAbilitiesDisabled(sire)
+                && !this.plugin.getHolyWaterEffectManager().isAbilitiesDisabled(trackedVampire)
+                && sire.getGameMode() == GameMode.SPECTATOR || sire.isDead() || this.plugin.getVampireManager().isVampire(sire)
+                && trackedVampire.getGameMode() == GameMode.SPECTATOR || trackedVampire.isDead() || this.plugin.getVampireManager().isVampire(trackedVampire);
     }
 
     /**
