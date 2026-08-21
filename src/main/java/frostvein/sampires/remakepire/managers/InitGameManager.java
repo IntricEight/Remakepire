@@ -353,7 +353,7 @@ public class InitGameManager {
         InitData data = this.adminData.get(adminId);
 
         if (data != null && data.mode == InitGameManager.InitData.VampireMode.SELECTED) {
-            Player targetPlayer = Bukkit.getPlayer(playerName);
+            Player targetPlayer = Bukkit.getPlayerExact(playerName);
 
             if (targetPlayer != null) {
                 final UUID targetId = targetPlayer.getUniqueId();

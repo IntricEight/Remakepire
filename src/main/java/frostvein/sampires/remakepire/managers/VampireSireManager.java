@@ -72,7 +72,7 @@ public class VampireSireManager {
      * @return {@code true} if the vampire's sire is dead.
      */
     public boolean isSireDead(Player vampire) {
-        String sireName = this.getSire(vampire);
+        final String sireName = this.getSire(vampire);
 
         if (sireName == null) {
             // If the sire cannot be found, act as though they are dead
@@ -82,7 +82,7 @@ public class VampireSireManager {
             return false;
         } else {
             // Only act like the sire is alive if they are online and in an activate game mode
-            Player sire = Bukkit.getPlayer(sireName);
+            Player sire = Bukkit.getPlayerExact(sireName);
 
             if (sire == null) {
                 return true;
@@ -115,7 +115,7 @@ public class VampireSireManager {
      * @return The gamemode or offline status of the sire.
      */
     public String getSireStatus(Player vampire) {
-        String sireName = this.getSire(vampire);
+        final String sireName = this.getSire(vampire);
 
         if (sireName == null) {
             return "No sire assigned (can cure freely)";
@@ -125,12 +125,12 @@ public class VampireSireManager {
             return "No sire assigned, but the player is prevented from being cured.";
 
         } else {
-            Player sire = Bukkit.getPlayer(sireName);
+            Player sire = Bukkit.getPlayerExact(sireName);
 
             if (sire == null) {
                 return "Sire '" + sireName + "' is OFFLINE (can cure)";
             } else {
-                GameMode sireGameMode = sire.getGameMode();
+                final GameMode sireGameMode = sire.getGameMode();
                 return sireGameMode == GameMode.SPECTATOR ? "Sire '" + sireName + "' is in SPECTATOR mode (can cure)" : "Sire '" + sireName + "' is ALIVE in " + sireGameMode + " mode (CANNOT cure)";
             }
         }

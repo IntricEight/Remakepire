@@ -132,7 +132,7 @@ public class VampireAbilityManager {
      * Notify vampires when their ability's cooldown has elapsed.
      */
     private void checkCooldownExpirations() {
-        long currentTime = this.sessionManager.getSessionTimeSeconds();
+        final long currentTime = this.sessionManager.getSessionTimeSeconds();
 
         for (UUID playerId : this.abilityCooldowns.keySet()) {
             Player player = Bukkit.getPlayer(playerId);
@@ -143,8 +143,8 @@ public class VampireAbilityManager {
 
                 while(iterator.hasNext()) {
                     Map.Entry<String, Long> entry = iterator.next();
-                    String abilityName = entry.getKey();
-                    long cooldownEnd = entry.getValue();
+                    final String abilityName = entry.getKey();
+                    final long cooldownEnd = entry.getValue();
 
                     if (currentTime >= cooldownEnd) {
                         iterator.remove();

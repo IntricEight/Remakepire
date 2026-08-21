@@ -407,7 +407,7 @@ public class ThirstManager {
         Set<UUID> toRemove = new HashSet<>();
 
         for (Map.Entry<UUID, Integer> entry : this.immunityTimers.entrySet()) {
-            UUID playerUUID = entry.getKey();
+            final UUID playerUUID = entry.getKey();
 
             if (onlinePlayers.contains(playerUUID)) {
                 int timeLeft = entry.getValue() - 1;
