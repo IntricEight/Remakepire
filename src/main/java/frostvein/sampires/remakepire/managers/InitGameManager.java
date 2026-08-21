@@ -353,7 +353,7 @@ public class InitGameManager {
         InitData data = this.adminData.get(adminId);
 
         if (data != null && data.mode == InitGameManager.InitData.VampireMode.SELECTED) {
-            Player targetPlayer = Bukkit.getPlayer(playerName);
+            Player targetPlayer = Bukkit.getPlayerExact(playerName);
 
             if (targetPlayer != null) {
                 final UUID targetId = targetPlayer.getUniqueId();
@@ -835,16 +835,17 @@ public class InitGameManager {
         final double minX = configManager.getBorderMinX(), maxX = configManager.getBorderMaxX();
         final double minZ = configManager.getBorderMinZ(), maxZ = configManager.getBorderMaxZ();
 
-        double angle, distance, x, z;
+        double angle, distance;
+        int x, z;
 
         for (int attempt = 0; attempt < maxAttempts; ++attempt) {
             angle = ThreadLocalRandom.current().nextDouble() * 2.0 * Math.PI;
             distance = Math.sqrt(ThreadLocalRandom.current().nextDouble()) * teleportRadius;
-            x = townCenterX + distance * Math.cos(angle);
-            z = townCenterZ + distance * Math.sin(angle);
+            x = (int)Math.floor(townCenterX + distance * Math.cos(angle));
+            z = (int)Math.floor(townCenterZ + distance * Math.sin(angle));
 
             if (!(x < minX + BORDER_BUFFER) && !(x > maxX - BORDER_BUFFER) && !(z < minZ + BORDER_BUFFER) && !(z > maxZ - BORDER_BUFFER)) {
-                Location loc = new Location(world, x, world.getHighestBlockYAt((int)x, (int)z) + 1, z);
+                Location loc = new Location(world, x + 0.5, world.getHighestBlockYAt(x, z) + 1, z + 0.5);
 
                 if (loc.getY() > 0 && loc.getY() < world.getMaxHeight()) {
                     return loc;
@@ -852,7 +853,7 @@ public class InitGameManager {
             }
         }
 
-        return new Location(world, townCenterX, world.getHighestBlockYAt((int)townCenterX, (int)townCenterZ) + 1, townCenterZ);
+        return new Location(world, townCenterX + 0.5, world.getHighestBlockYAt((int)townCenterX, (int)townCenterZ) + 1, townCenterZ + 0.5);
     }
 
     /**
@@ -861,7 +862,7 @@ public class InitGameManager {
      * @param admin the player running the initialization command.
      */
     public void cancelInitialization(Player admin) {
-        UUID adminId = admin.getUniqueId();
+        final UUID adminId = admin.getUniqueId();
         this.adminStates.remove(adminId);
         this.adminData.remove(adminId);
 

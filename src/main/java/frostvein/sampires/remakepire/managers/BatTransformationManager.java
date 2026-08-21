@@ -104,7 +104,7 @@ public class BatTransformationManager {
 
         while(iterator.hasNext()) {
             Map.Entry<UUID, BatData> entry = iterator.next();
-            UUID playerId = entry.getKey();
+            final UUID playerId = entry.getKey();
             BatData batData = entry.getValue();
 
             if (batData.isExpired()) {
@@ -129,7 +129,7 @@ public class BatTransformationManager {
      */
     private void updateBatActionBars() {
         for (Map.Entry<UUID, BatData> entry : this.activeBats.entrySet()) {
-            UUID playerId = entry.getKey();
+            final UUID playerId = entry.getKey();
             BatData batData = entry.getValue();
             Player player = Bukkit.getPlayer(playerId);
 
@@ -151,7 +151,7 @@ public class BatTransformationManager {
 
         while(iterator.hasNext()) {
             Map.Entry<UUID, BatData> entry = iterator.next();
-            UUID playerId = entry.getKey();
+            final UUID playerId = entry.getKey();
             BatData batData = entry.getValue();
 
             if (batData.batEntity != null && !batData.batEntity.isValid()) {
@@ -229,8 +229,8 @@ public class BatTransformationManager {
      */
     public Player getPlayerFromBat(Bat bat) {
         if (bat.getCustomName() != null && bat.getCustomName().startsWith("Â§8")) {
-            String playerName = bat.getCustomName().substring(2);
-            return Bukkit.getPlayer(playerName);
+            final String playerName = bat.getCustomName().substring(2);
+            return Bukkit.getPlayerExact(playerName);
 
         } else {
             return null;
