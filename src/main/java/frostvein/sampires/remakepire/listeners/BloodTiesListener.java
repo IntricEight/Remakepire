@@ -183,8 +183,8 @@ public class BloodTiesListener implements Listener {
                 && trackedVampire.isOnline() && sire.isOnline()
                 && !this.plugin.getHolyWaterEffectManager().isAbilitiesDisabled(sire)
                 && !this.plugin.getHolyWaterEffectManager().isAbilitiesDisabled(trackedVampire)
-                && sire.getGameMode() == GameMode.SPECTATOR || sire.isDead() || this.plugin.getVampireManager().isVampire(sire)
-                && trackedVampire.getGameMode() == GameMode.SPECTATOR || trackedVampire.isDead() || this.plugin.getVampireManager().isVampire(trackedVampire);
+                && sire.getGameMode() != GameMode.SPECTATOR || !sire.isDead() || this.plugin.getVampireManager().isVampire(sire)
+                && trackedVampire.getGameMode() != GameMode.SPECTATOR || !trackedVampire.isDead() || this.plugin.getVampireManager().isVampire(trackedVampire);
     }
 
     /**
