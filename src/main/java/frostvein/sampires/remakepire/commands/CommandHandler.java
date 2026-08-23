@@ -342,8 +342,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                 case "all":
                     for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
                         // Make sure the player is active in the game
-                        if ((onlinePlayer.getGameMode() == GameMode.SURVIVAL || onlinePlayer.getGameMode() == GameMode.ADVENTURE)
-                                && (!onlinePlayer.getScoreboardTags().contains(DeathHandler.PERMAKILLED_TAG) || onlinePlayer.isDead())
+                        if (onlinePlayer.getGameMode() != GameMode.SPECTATOR && (!onlinePlayer.getScoreboardTags().contains(DeathHandler.PERMAKILLED_TAG) || onlinePlayer.isDead())
                         ) {
                             playerCount++;
                         }
