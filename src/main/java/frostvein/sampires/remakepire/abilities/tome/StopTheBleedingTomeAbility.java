@@ -38,7 +38,7 @@ public class StopTheBleedingTomeAbility extends TomeAbility {
      * @param plugin the host plugin object.
      */
     public StopTheBleedingTomeAbility(RemakepirePlugin plugin) {
-        super(plugin, "StopTheBleeding", new String[]{"You learn how to mend the wounds of death itself.", "Crouch within " + PROXIMITY_DISTANCE + " blocks of another player for " + (HEALING_DURATION_TICKS / 20 / 60) + " minute", "to heal one heart for them, restoring their vitality."}, plugin.getConfigManager().getTomeStopTheBleedingCooldown());
+        super(plugin, "StopTheBleeding", "Stop the Bleeding", new String[]{"You learn how to mend the wounds of death itself.", "Crouch within " + PROXIMITY_DISTANCE + " blocks of another player for " + (HEALING_DURATION_TICKS / 20 / 60) + " minute", "to heal one heart for them, restoring their vitality."}, plugin.getConfigManager().getTomeStopTheBleedingCooldown());
     }
 
     protected boolean useAbility(Player player) {

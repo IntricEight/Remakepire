@@ -19,7 +19,7 @@ public class EnlightenedEyeTomeAbility extends TomeAbility {
      * @param plugin the host plugin object.
      */
     public EnlightenedEyeTomeAbility(RemakepirePlugin plugin) {
-        super(plugin, "EnlightenedEye", new String[]{"You learn the secret to discern shapes from shadow,", "and gain night vision for 5 minutes."}, plugin.getConfigManager().getTomeEnlightenedEyeCooldown());
+        super(plugin, "EnlightenedEye", "Enlightened Eye", new String[]{"You learn the secret to discern shapes from shadow,", "and gain night vision for 5 minutes."}, plugin.getConfigManager().getTomeEnlightenedEyeCooldown());
     }
 
     protected boolean useAbility(Player player) {
