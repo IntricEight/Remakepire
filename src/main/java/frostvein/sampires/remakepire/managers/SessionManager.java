@@ -700,6 +700,7 @@ public class SessionManager {
         world.setGameRule(GameRules.ADVANCE_TIME, true);
         world.setGameRule(GameRules.ADVANCE_WEATHER, false);
         world.setGameRule(GameRules.SPAWN_MOBS, true);
+        world.setGameRule(GameRules.MOB_GRIEFING, true);
         world.setGameRule(GameRules.KEEP_INVENTORY, true);
         world.setGameRule(GameRules.SHOW_ADVANCEMENT_MESSAGES, false);
         world.setGameRule(GameRules.MOB_DROPS, true);
@@ -726,6 +727,7 @@ public class SessionManager {
         world.setGameRule(GameRules.ADVANCE_TIME, false);
         world.setGameRule(GameRules.ADVANCE_WEATHER, false);
         world.setGameRule(GameRules.SPAWN_MOBS, false);
+        world.setGameRule(GameRules.MOB_GRIEFING, false);
         world.setGameRule(GameRules.KEEP_INVENTORY, true);
         world.setGameRule(GameRules.SHOW_ADVANCEMENT_MESSAGES, false);
         world.setGameRule(GameRules.MOB_DROPS, false);
