@@ -271,13 +271,12 @@ public class VampireAbilityManager {
                 } else {
                     if (ability instanceof StormCallAbility) {
                         if (this.isOnGlobalCooldown(abilityName)) {
-                            final long remainingSeconds = this.getRemainingGlobalCooldown(abilityName);
                             GlobalCooldownData data = this.globalCooldowns.get(abilityName.toLowerCase());
 
                             player.sendMessage(Component.text(" GLOBAL ABILITY COOLDOWN", NamedTextColor.RED)
                                     .decorate(TextDecoration.BOLD));
                             player.sendMessage(Component.text(ability.getDisplayName() + " was recently used by " + data.lastUserName + ".", NamedTextColor.RED));
-                            player.sendMessage(Component.text("It will be available to all vampires in " + formatTime(remainingSeconds) + ".", NamedTextColor.RED));
+                            player.sendMessage(Component.text("It will be available to all vampires in " + formatTime(this.getRemainingGlobalCooldown(abilityName)) + ".", NamedTextColor.RED));
 
                             return false;
                         }
@@ -291,10 +290,9 @@ public class VampireAbilityManager {
                         }
 
                         if (this.isOnCooldown(player, abilityName)) {
-                            long remainingSeconds = this.getRemainingCooldown(player, abilityName);
                             player.sendMessage(Component.text(" ABILITY ON COOLDOWN", NamedTextColor.RED)
                                     .decorate(TextDecoration.BOLD));
-                            player.sendMessage(Component.text(ability.getDisplayName() + " will be ready in " + formatTime(remainingSeconds) + ".", NamedTextColor.RED));
+                            player.sendMessage(Component.text(ability.getDisplayName() + " will be ready in " + formatTime(this.getRemainingCooldown(player, abilityName)) + ".", NamedTextColor.RED));
                             return false;
                         }
                     }

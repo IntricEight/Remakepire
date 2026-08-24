@@ -73,7 +73,7 @@ public class TomeAbilityCommand implements CommandExecutor, TabCompleter {
 
             for (String abilityName : playerAbilities) {
                 TomeAbility ability = this.tomeManager.getAbility(abilityName);
-                player.sendMessage(Component.text(abilityName, NamedTextColor.YELLOW));
+                player.sendMessage(Component.text(ability.getDisplayName(), NamedTextColor.YELLOW));
 
                 if (ability != null) {
                     String[] descriptionLines = ability.getDescriptionLines();

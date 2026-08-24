@@ -342,8 +342,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                 case "all":
                     for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
                         // Make sure the player is active in the game
-                        if ((onlinePlayer.getGameMode() == GameMode.SURVIVAL || onlinePlayer.getGameMode() == GameMode.ADVENTURE)
-                                && (!onlinePlayer.getScoreboardTags().contains(DeathHandler.PERMAKILLED_TAG) || onlinePlayer.isDead())
+                        if (onlinePlayer.getGameMode() != GameMode.SPECTATOR && (!onlinePlayer.getScoreboardTags().contains(DeathHandler.PERMAKILLED_TAG) || onlinePlayer.isDead())
                         ) {
                             playerCount++;
                         }
@@ -1684,7 +1683,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                         StringBuilder pageContent = new StringBuilder();
                         pageContent.append("§5§lANCIENT KNOWLEDGE§r\n\n");
                         pageContent.append("§8The secrets of ")
-                                .append(abilityName)
+                                .append(this.plugin.getTomeManager().getAbility(abilityName).getDisplayName())
                                 .append(" are contained within these pages.\n\n");
 
                         if (ability != null) {

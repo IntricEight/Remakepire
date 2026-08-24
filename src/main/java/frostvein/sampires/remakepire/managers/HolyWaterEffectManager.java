@@ -58,19 +58,14 @@ public class HolyWaterEffectManager implements Listener {
 
             for (Entity nearby : splashLocation.getWorld().getNearbyEntities(splashLocation, splashRadius, splashRadius, splashRadius)) {
                 if (nearby instanceof Player player) {
-                    final double distance = nearby.getLocation().distance(splashLocation);
-
-                    if (distance <= splashRadius) {
+                    if (nearby.getLocation().distance(splashLocation) <= splashRadius) {
                         this.processHolyWaterHit(player);
                     }
                 }
             }
 
         } else {
-            ThrownPotion potion = event.getPotion();
-            ItemStack potionItem = potion.getItem();
-
-            if (ItemTypeChecking.isHolyWater(potionItem)) {
+            if (ItemTypeChecking.isHolyWater(event.getPotion().getItem())) {
                 for (LivingEntity entity : event.getAffectedEntities()) {
                     this.processHolyWaterHit(entity);
                 }
@@ -90,9 +85,7 @@ public class HolyWaterEffectManager implements Listener {
         if (event.getEntity() instanceof ThrownPotion potion) {
             if (potion.getShooter() instanceof Player player) {
                 if (this.plugin.getVampireManager().isVampireStage2OrHigher(player)) {
-                    ItemStack potionItem = potion.getItem();
-
-                    if (ItemTypeChecking.isHolyWater(potionItem)) {
+                    if (ItemTypeChecking.isHolyWater(potion.getItem())) {
                         event.setCancelled(true);
                     }
                 }
@@ -157,7 +150,7 @@ public class HolyWaterEffectManager implements Listener {
      * @param vampire the player whose powers will be suppressed.
      */
     public void applyHolyWaterEffect(Player vampire) {
-        UUID vampireId = vampire.getUniqueId();
+        final UUID vampireId = vampire.getUniqueId();
         BukkitTask existingTask = this.disabledVampires.get(vampireId);
 
         if (existingTask != null && !existingTask.isCancelled()) {
@@ -190,7 +183,7 @@ public class HolyWaterEffectManager implements Listener {
      * @param notify {@code true} if the vampire should be notified that the effect has worn off.
      */
     public void removeHolyWaterEffect(Player vampire, boolean notify) {
-        UUID vampireId = vampire.getUniqueId();
+        final UUID vampireId = vampire.getUniqueId();
         BukkitTask task = this.disabledVampires.remove(vampireId);
 
         if (task != null && !task.isCancelled()) {
@@ -233,7 +226,7 @@ public class HolyWaterEffectManager implements Listener {
      * @param vampire the player whose abilities are disabled.
      */
     private void notifyVampireDisabled(Player vampire) {
-        int duration = this.configManager.getHolyWaterDisableDurationSeconds();
+        final int duration = this.configManager.getHolyWaterDisableDurationSeconds();
 
         vampire.sendMessage(Component.text("The holy water sears your vampiric essence!", NamedTextColor.RED));
 

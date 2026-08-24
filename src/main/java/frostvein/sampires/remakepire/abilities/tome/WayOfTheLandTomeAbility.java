@@ -24,7 +24,7 @@ public class WayOfTheLandTomeAbility extends TomeAbility implements Listener {
      * @param plugin the host plugin object.
      */
     public WayOfTheLandTomeAbility(RemakepirePlugin plugin) {
-        super(plugin, "WayOfTheLand", new String[]{"You gain knowledge on how to live off the land.", "You permanently have a 75% chance when harvesting a crop", "to receive double drops."}, 0);
+        super(plugin, "WayOfTheLand", "Way of the Land", new String[]{"You gain knowledge on how to live off the land.", "You permanently have a 75% chance when harvesting a crop", "to receive double drops."}, 0);
         Bukkit.getPluginManager().registerEvents(this, plugin);
     }
 

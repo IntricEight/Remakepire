@@ -485,10 +485,10 @@ public class VampireManager {
      * @param vampire the vampire who has been demoted.
      */
     private void applyDemotionEffectsToNearbyHumans(Player vampire) {
-        Location vampireLocation = vampire.getLocation();
+        final Location vampireLocation = vampire.getLocation();
 
         for (Player nearbyPlayer : Bukkit.getOnlinePlayers()) {
-            if (this.isHuman(nearbyPlayer) && nearbyPlayer.getWorld().equals(vampire.getWorld())) {
+            if (nearbyPlayer.getGameMode() != GameMode.SPECTATOR && this.isHuman(nearbyPlayer) && nearbyPlayer.getWorld().equals(vampire.getWorld())) {
                 if (nearbyPlayer.getLocation().distance(vampireLocation) <= 10) {
                     nearbyPlayer.sendMessage(Component.text("You feel a darkness lunge out at you, a vampire near you has lost a piece of their essence and grown weaker...", NamedTextColor.DARK_GRAY));
                     nearbyPlayer.playSound(nearbyPlayer.getLocation(), Sound.ENTITY_WARDEN_HEARTBEAT, SoundCategory.MASTER, 1.0F, 0.8F);
