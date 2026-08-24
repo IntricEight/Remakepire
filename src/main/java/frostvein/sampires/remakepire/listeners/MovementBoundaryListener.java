@@ -26,7 +26,7 @@ public class MovementBoundaryListener implements Listener {
     private final RemakepirePlugin plugin;
     private final FileConfiguration textConfig;
     private final String TOWN_NAME;
-    public static final String LEFT_OAKHURST_TAG = "LeftOakhurst", OVERRIDE_TAG = "BorderOverride";
+    public static final String LEFT_OAKHURST_TAG = "LeftOakhurst", OVERRIDE_TAG = "BorderOverride", FORCE_TAG = "BorderForced";
     private final boolean CUSTOM_BORDER_MESSAGES;
 
     /**
@@ -395,34 +395,34 @@ public class MovementBoundaryListener implements Listener {
      * Determine if all humans have been defeated.
      * Checks if any human players are in survival or adventure mode.
      *
-     * @return {@code true} if there are no survival-mode humans online.
+     * @return {@code true} if there are no surviving humans online.
      */
     private boolean anySurvivingHumansExist() {
         for (Player onlinePlayer : this.plugin.getServer().getOnlinePlayers()) {
             if (this.plugin.getVampireManager().isHuman(onlinePlayer) &&
                     (onlinePlayer.getGameMode() == GameMode.SURVIVAL || onlinePlayer.getGameMode() == GameMode.ADVENTURE)) {
-                return false;
+                return true;
             }
         }
 
-        return true;
+        return false;
     }
 
     /**
      * Determine if all vampires have been defeated.
      * Checks if any vampire players are in survival or adventure mode.
      *
-     * @return {@code true} if there are no survival-mode vampires online.
+     * @return {@code true} if there are no surviving vampires online.
      */
     private boolean anySurvivingVampiresExist() {
         for (Player onlinePlayer : this.plugin.getServer().getOnlinePlayers()) {
             if (this.plugin.getVampireManager().isVampire(onlinePlayer) &&
                     (onlinePlayer.getGameMode() == GameMode.SURVIVAL || onlinePlayer.getGameMode() == GameMode.ADVENTURE)) {
-                return false;
+                return true;
             }
         }
 
-        return true;
+        return false;
     }
 
     /**
@@ -484,17 +484,22 @@ public class MovementBoundaryListener implements Listener {
     private boolean meetsLeaveCondition(Player player) {
         // Determine if the player is allowed to leave the game boundaries
 
+        // Prevent the player from leaving if they have the forced border tag active
+        if (player.getScoreboardTags().contains(FORCE_TAG)) {
+            return false;
+        }
+
         // Check if the border is currently enabled
         if (this.plugin.getSessionManager().isBorderActive()) {
             // Each of the following is a leave condition
-            if (player.getScoreboardTags().contains(OVERRIDE_TAG) || player.getScoreboardTags().contains(VampireManager.CURED_VAMPIRE_TAG)) {
+            if (player.getScoreboardTags().contains(VampireManager.CURED_VAMPIRE_TAG) || player.getScoreboardTags().contains(OVERRIDE_TAG)) {
                 return true;
 
-            } else if (!this.plugin.getVampireManager().isHuman(player)) {
+            } else if (this.plugin.getVampireManager().isVampire(player)) {
                 return this.areAllBeaconsDesecrated() && !this.anySurvivingHumansExist();
 
-            } else if (this.areAllBeaconsHoly() && !this.anySurvivingVampiresExist()) {
-                return true;
+            } else if (this.plugin.getVampireManager().isHuman(player)) {
+                return this.areAllBeaconsHoly() && !this.anySurvivingVampiresExist();
             }
 
             // If none of the above have been met, then the player should not be allowed to leave the game boundaries
@@ -516,7 +521,7 @@ public class MovementBoundaryListener implements Listener {
         List<String> messages = new ArrayList<>();
 
         // Tune the freedom message based on the game's condition and player's alignment
-        if (player.getScoreboardTags().contains(VampireManager.CURED_VAMPIRE_TAG)) {
+        if (player.getScoreboardTags().contains(VampireManager.CURED_VAMPIRE_TAG) || player.getScoreboardTags().contains(OVERRIDE_TAG)) {
             if (CUSTOM_BORDER_MESSAGES) {
                 messages = this.textConfig.getStringList("border-freedom-messages.cured-vampire-freedom");
             } else {

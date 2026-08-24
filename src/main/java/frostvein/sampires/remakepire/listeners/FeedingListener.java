@@ -29,7 +29,8 @@ public class FeedingListener implements Listener {
     }
 
     /**
-     * Provide vampires with blood when they kill a valid entity, and prevent xp from spawning.
+     * Provide vampires with blood when they kill a valid entity, and prevent exp from spawning.<br/>
+     * Let players fill a bottle with blood at the cost of the kill's exp.
      *
      * @param event an entity dying.
      */
@@ -43,14 +44,19 @@ public class FeedingListener implements Listener {
             if (!(deadEntity instanceof Player)) {
                 Player killer = deadEntity.getKiller();
 
-                if (killer != null && this.plugin.getVampireManager().isVampire(killer)) {
+                if (killer != null) {
+                    final boolean bottleFilled = this.tryFillBottleWithBlood(killer);
                     int experienceDropped = event.getDroppedExp();
-                    event.setDroppedExp(0);
 
-                    if (this.plugin.getThirstManager().isThirstQuencher(deadEntity.getType())) {
-                        boolean bottleFilled = this.tryFillBottleWithBlood(killer);
+                    if (bottleFilled) {
+                        // Prevent players from getting XP when they fill a bottle with blood
+                        event.setDroppedExp(0);
 
-                        if (!bottleFilled) {
+                    } else {
+                        if (this.plugin.getVampireManager().isVampire(killer)) {
+                            // Prevent vampires from getting XP directly thr drop
+                            event.setDroppedExp(0);
+
                             this.plugin.getThirstManager().handleEntityKill(killer, deadEntity.getType(), experienceDropped);
 
                             if (experienceDropped > 0 && !killer.getScoreboardTags().contains(SessionManager.INFORMED_SUCCESSFUL_FEEDING)) {
