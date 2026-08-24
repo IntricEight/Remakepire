@@ -251,7 +251,7 @@ public class TomeManager {
             ItemMeta meta = book.getItemMeta();
 
             if (meta != null) {
-                final String displayName = this.formatAbilityName(abilityName);
+                final String displayName = ability.getDisplayName();
                 final boolean hasAbility = this.hasAbility(target, abilityName);
 
                 if (hasAbility) {

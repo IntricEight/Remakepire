@@ -1683,7 +1683,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                         StringBuilder pageContent = new StringBuilder();
                         pageContent.append("§5§lANCIENT KNOWLEDGE§r\n\n");
                         pageContent.append("§8The secrets of ")
-                                .append(abilityName)
+                                .append(this.plugin.getTomeManager().getAbility(abilityName).getDisplayName())
                                 .append(" are contained within these pages.\n\n");
 
                         if (ability != null) {

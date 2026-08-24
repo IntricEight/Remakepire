@@ -238,7 +238,7 @@ public abstract class TomeAbility {
     private void notifyAbilityReady(Player player) {
         player.sendMessage(Component.text("⚡ TOME ABILITY READY ⚡", NamedTextColor.GREEN)
                 .decorate(TextDecoration.BOLD));
-        player.sendMessage(Component.text(this.name + " is now available.", NamedTextColor.GREEN));
+        player.sendMessage(Component.text(this.displayName + " is now available.", NamedTextColor.GREEN));
         player.playSound(player, Sound.BLOCK_NOTE_BLOCK_CHIME, SoundCategory.MASTER, 0.5F, 1.5F);
     }
 

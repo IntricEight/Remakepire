@@ -264,7 +264,9 @@ public class TomeDistributionManager {
             List<String> pages = new ArrayList<>();
             StringBuilder pageContent = new StringBuilder();
             pageContent.append("§5§lANCIENT KNOWLEDGE§r\n\n");
-            pageContent.append("§8The secrets of ").append(tomeType).append(" are contained within these pages.\n\n");
+            pageContent.append("§8The secrets of ")
+                    .append(this.plugin.getTomeManager().getAbility(tomeType).getDisplayName())
+                    .append(" are contained within these pages.\n\n");
 
             if (ability != null) {
                 String[] descriptionLines = ability.getDescriptionLines();
