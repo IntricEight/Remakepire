@@ -95,8 +95,8 @@ public class DeathHandler implements Listener {
 
                     // Make sure the player doesn't respawn with an illegal number of lives
                     if (deathObjective != null) {
-                        int currentDeaths = deathObjective.getScore(player.getName()).getScore();
-                        int maxDeaths = this.plugin.getConfigManager().getHumanLifeCount();
+                        final int currentDeaths = deathObjective.getScore(player.getName()).getScore();
+                        final int maxDeaths = this.plugin.getConfigManager().getHumanLifeCount();
 
                         if (currentDeaths > maxDeaths) {
                             deathObjective.getScore(player.getName()).setScore(maxDeaths);
@@ -114,7 +114,7 @@ public class DeathHandler implements Listener {
                 this.plugin.getBeaconMajorityManager().updateBeaconMajorityBonuses();
             }
 
-            double maxHealth = player.getAttribute(Attribute.MAX_HEALTH).getValue();
+            final double maxHealth = player.getAttribute(Attribute.MAX_HEALTH).getValue();
             player.setHealth(maxHealth);
             this.plugin.getLogger().fine(player.getName() + " respawned with " + maxHealth + " HP (full health)");
         }, 5L);
@@ -138,14 +138,13 @@ public class DeathHandler implements Listener {
      */
     public static void checkAndAnnounceTeamElimination(RemakepirePlugin plugin, boolean affectedWasHuman, boolean affectedWasVampire) {
         if (plugin.getSessionManager().isSessionActive()) {
-            VampireManager vampireManager = plugin.getVampireManager();
             int aliveHumans = 0, aliveVampires = 0;
 
             for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-                if (onlinePlayer.getGameMode() == GameMode.SURVIVAL) {
-                    if (vampireManager.isHuman(onlinePlayer)) {
+                if (onlinePlayer.getGameMode() == GameMode.SURVIVAL || onlinePlayer.getGameMode() == GameMode.ADVENTURE) {
+                    if (plugin.getVampireManager().isHuman(onlinePlayer)) {
                         ++aliveHumans;
-                    } else if (vampireManager.isVampire(onlinePlayer)) {
+                    } else if (plugin.getVampireManager().isVampire(onlinePlayer)) {
                         ++aliveVampires;
                     }
                 }
