@@ -354,8 +354,9 @@ public class IronWeaknessListener implements Listener {
                 // Only apply the silver effects to higher vampires
                 if (this.vampireManager.isIronAffected(player)) {
                     // Repel the player from the silver block
-                    if (this.isNearIronBlock(player.getLocation(), REPEL_DISTANCE)) {
-                        this.applyIronRepulsion(player);
+                    Location nearestIronBlock = this.getNearestIronBlock(player.getLocation(), REPEL_DISTANCE);
+                    if (nearestIronBlock != null) {
+                        this.applyIronRepulsion(player, player.getLocation(), nearestIronBlock);
                     }
 
                     // Weaken the player from the silver block's proximity
