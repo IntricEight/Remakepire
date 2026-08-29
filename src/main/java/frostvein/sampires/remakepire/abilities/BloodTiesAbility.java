@@ -3,6 +3,7 @@
  * This ability gives vampires a directional indicator of one of their fledgling's locations.
  *
  * Use Conditions:
+ *  - User is a vampire.
  *  - The vampire has turned another player into a vampire.
  *
  * Implementation Requirements:
@@ -21,7 +22,9 @@ import java.util.List;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
-import org.bukkit.*;
+import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
