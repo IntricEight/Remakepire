@@ -74,7 +74,7 @@ public class BloodMoonAttributeListener implements Listener {
      * @param player the player being given bonuses from the blood moon.
      */
     private void applyBloodMoonAttributes(Player player) {
-        UUID playerId = player.getUniqueId();
+        final UUID playerId = player.getUniqueId();
 
         if (!this.playersWithBloodMoonAttributes.getOrDefault(playerId, false)) {
             AttributeInstance speedAttribute = player.getAttribute(Attribute.MOVEMENT_SPEED);
@@ -112,7 +112,7 @@ public class BloodMoonAttributeListener implements Listener {
      * @param player the player who had bonuses from the blood moon.
      */
     private void removeBloodMoonAttributes(Player player) {
-        UUID playerId = player.getUniqueId();
+        final UUID playerId = player.getUniqueId();
 
         if (this.playersWithBloodMoonAttributes.getOrDefault(playerId, false)) {
             AttributeInstance speedAttribute = player.getAttribute(Attribute.MOVEMENT_SPEED);
@@ -142,7 +142,7 @@ public class BloodMoonAttributeListener implements Listener {
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
         Player player = event.getPlayer();
-        UUID playerId = player.getUniqueId();
+        final UUID playerId = player.getUniqueId();
 
         if (this.playersWithBloodMoonAttributes.getOrDefault(playerId, false)) {
             this.removeBloodMoonAttributes(player);
@@ -166,7 +166,7 @@ public class BloodMoonAttributeListener implements Listener {
      */
     public void forceCleanupOnJoin(Player player) {
         try {
-            UUID playerId = player.getUniqueId();
+            final UUID playerId = player.getUniqueId();
             AttributeInstance speedAttribute = player.getAttribute(Attribute.MOVEMENT_SPEED);
             AttributeInstance strengthAttribute = player.getAttribute(Attribute.ATTACK_DAMAGE);
             int removedCount = 0;

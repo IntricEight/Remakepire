@@ -39,8 +39,8 @@ public class CheckLivesCommand implements CommandExecutor {
 
             // Make sure the player doesn't respawn with an illegal number of lives
             if (deathObjective != null) {
-                int currentDeaths = deathObjective.getScore(player.getName()).getScore();
-                int maxDeaths = this.plugin.getConfigManager().getHumanLifeCount();
+                final int currentDeaths = deathObjective.getScore(player.getName()).getScore();
+                final int maxDeaths = this.plugin.getConfigManager().getHumanLifeCount();
 
                 // Send a message to the player depending on their life counter
                 if (currentDeaths < maxDeaths) {

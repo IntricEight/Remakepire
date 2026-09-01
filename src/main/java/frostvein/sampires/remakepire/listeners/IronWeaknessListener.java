@@ -298,7 +298,7 @@ public class IronWeaknessListener implements Listener {
         Player player = event.getPlayer();
 
         if (this.vampireManager.isIronAffected(player)) {
-            Location to = event.getTo();
+            final Location to = event.getTo();
 
             final UUID playerId = player.getUniqueId();
             final long currentTime = System.currentTimeMillis();

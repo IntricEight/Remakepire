@@ -65,7 +65,7 @@ public class InitGameManager {
      * @param admin the player running the initialization command.
      */
     public void startInitialization(Player admin) {
-        UUID adminId = admin.getUniqueId();
+        final UUID adminId = admin.getUniqueId();
         this.adminStates.put(adminId, InitGameManager.InitState.AWAITING_FIRST_CONFIRM);
         this.adminData.put(adminId, new InitData());
 
@@ -112,7 +112,7 @@ public class InitGameManager {
      * @param admin the player running the initialization command.
      */
     public void handleFirstConfirmation(Player admin) {
-        UUID adminId = admin.getUniqueId();
+        final UUID adminId = admin.getUniqueId();
 
         if (this.adminStates.get(adminId) != InitGameManager.InitState.AWAITING_FIRST_CONFIRM) {
             admin.sendMessage(Component.text("Error: Invalid initialization state.", NamedTextColor.RED));
