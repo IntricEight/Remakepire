@@ -132,8 +132,12 @@ public class BrigadierCommands {
                         .then(this.buildVampireSubcommand())
                         .then(this.buildConfigSubcommand())
                         .then(this.buildBeaconSubcommand())
-                        .then(this.buildVampireCooldownSubcommand())
-                        .then(this.buildTomeCooldownSubcommand())
+
+                        // Give two versions of each command to keep the original wording intact while providing a more consistent head command for them both
+                        .then(this.buildVampireCooldownSubcommand("vampirecooldowns"))
+                        .then(this.buildVampireCooldownSubcommand("cooldownvampires"))
+                        .then(this.buildTomeCooldownSubcommand("resettomecooldowns"))
+                        .then(this.buildTomeCooldownSubcommand("cooldownresettomes"))
 
                         .then(Commands.literal("make_incurable")
                                 .then(Commands.argument("player", StringArgumentType.word()).suggests((ctx, builder) -> this.suggestOnlinePlayers(builder)).executes((ctx) -> {
@@ -508,8 +512,8 @@ public class BrigadierCommands {
     /**
      * Build out the vampire ability cooldowns command subtree.
      */
-    private LiteralArgumentBuilder<CommandSourceStack> buildVampireCooldownSubcommand() {
-        return Commands.literal("vampirecooldowns")
+    private LiteralArgumentBuilder<CommandSourceStack> buildVampireCooldownSubcommand(String commandName) {
+        return Commands.literal(commandName)
                 .then((Commands.literal("reset").executes((ctx) -> this.executePowCommand(ctx, "admin", "vampirecooldowns", "reset")))
                         .then(Commands.argument("player", StringArgumentType.word()).suggests((ctx, builder) -> this.suggestOnlinePlayers(builder)).executes((ctx) -> {
                             String player = StringArgumentType.getString(ctx, "player");
@@ -525,8 +529,8 @@ public class BrigadierCommands {
     /**
      * Build out the tome ability cooldowns command subtree.
      */
-    private LiteralArgumentBuilder<CommandSourceStack> buildTomeCooldownSubcommand() {
-        return Commands.literal("resettomecooldowns").executes((ctx) -> this.executePowCommand(ctx, "admin", "resettomecooldowns"))
+    private LiteralArgumentBuilder<CommandSourceStack> buildTomeCooldownSubcommand(String commandName) {
+        return Commands.literal(commandName).executes((ctx) -> this.executePowCommand(ctx, "admin", "resettomecooldowns"))
                 .then(Commands.argument("player", StringArgumentType.word()).suggests((ctx, builder) -> this.suggestOnlinePlayers(builder)).executes((ctx) -> {
                     String player = StringArgumentType.getString(ctx, "player");
                     return this.executePowCommand(ctx, "admin", "resettomecooldowns", player);

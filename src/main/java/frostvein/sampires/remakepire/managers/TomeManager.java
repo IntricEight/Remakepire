@@ -156,7 +156,7 @@ public class TomeManager {
      * @return {@code true} if the player has access to the ability.
      */
     public boolean hasAbility(Player player, String abilityName) {
-        String tag = TOME_TAG_PREFIX + abilityName.toLowerCase();
+        final String tag = TOME_TAG_PREFIX + abilityName.toLowerCase();
         return player.getScoreboardTags().contains(tag);
     }
 
@@ -171,7 +171,7 @@ public class TomeManager {
 
         for (String tag : player.getScoreboardTags()) {
             if (tag.startsWith(TOME_TAG_PREFIX)) {
-                String abilityName = tag.substring(TOME_TAG_PREFIX.length());
+                final String abilityName = tag.substring(TOME_TAG_PREFIX.length());
                 abilities.add(abilityName);
             }
         }
