@@ -87,6 +87,16 @@ public class TomeManager {
     }
 
     /**
+     * Retrieve the display name of an ability using its usage name.
+     *
+     * @param abilityName the name of the ability.
+     * @return The display name of the tome ability.
+     */
+    public String getAbilityDisplayName(String abilityName) {
+        return this.abilities.get(abilityName.toLowerCase()).getDisplayName();
+    }
+
+    /**
      * Check if an ability has been registered.
      *
      * @param abilityName the name of the ability.
