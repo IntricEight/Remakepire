@@ -394,7 +394,7 @@ public class IronWeaknessListener implements Listener {
                     } else if (nearestIronEntity == null) {
                         nearest = nearestIronBlock;
                     } else {
-                        final double blockDistance = nearestIronBlock.distanceSquared(to), entityDistance = nearestIronEntity.distanceSquared(to);
+                        final double blockDistance = nearestIronBlock.distanceSquared(player.getLocation()), entityDistance = nearestIronEntity.distanceSquared(player.getLocation());
                         nearest = (blockDistance <= entityDistance ? nearestIronBlock : nearestIronEntity);
                     }
                     if (nearest != null) {
