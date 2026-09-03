@@ -25,7 +25,6 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.BookMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scoreboard.Objective;
@@ -1584,7 +1583,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
     }
 
     /**
-     * Turn a human player into a new vampire and set their sire as another existing vampire.
+     * Handle the command to turn a human player into a new vampire.
      *
      * @param target the player being turned into a fledgling vampire.
      * @return {@code true}
@@ -1619,7 +1618,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
     }
 
     /**
-     * Give physical tome ability book(s) to a player.
+     * Handle the command to give out physical tome ability book(s) directly to players.
      *
      * @return {@code true}
      */
@@ -1627,96 +1626,82 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         if (args.length < 2) {
             sender.sendMessage(Component.text("Usage: /pow admin givetome <player> <ability> [amount]", NamedTextColor.RED));
 
-        } else {
-            Player target = Bukkit.getPlayerExact(args[0]);
+        } else if (args.length == 2) {
+            sender.sendMessage(Component.text("Cannot find a tome ability to give in the command", NamedTextColor.RED));
 
-            if (target == null) {
-                sender.sendMessage(Component.text("Player '" + args[0] + "' not found.", NamedTextColor.RED));
+        } else {
+            // Make sure the inputs are valid before flooding the admin with failure messages
+            int amount = 1;
+            String abilityName = args[1];
+
+            if (!this.tomeManager.isValidAbility(abilityName)) {
+                sender.sendMessage(Component.text("Unknown tome ability: '" + abilityName + "'", NamedTextColor.RED)
+                        .append(Component.newline())
+                        .append(Component.text("Available abilities: " + String.join(", ", this.tomeManager.getAllAbilityNames()), NamedTextColor.GRAY))
+                );
+
+                return true;
+            }
+
+            if (args.length > 3) {
+                try {
+                    amount = Integer.parseInt(args[2]);
+
+                    if (amount < 1 || amount > 64) {
+                        sender.sendMessage(Component.text("Amount must be between 1 and 64.", NamedTextColor.RED));
+                        return true;
+                    }
+                } catch (NumberFormatException e) {
+                    sender.sendMessage(Component.text("Invalid amount: '" + args[2] + "'. Must be a number between 1 and 64.", NamedTextColor.RED));
+                    return true;
+                }
+            }
+
+            if (args[0].equalsIgnoreCase("@a")) {
+                int playercount = 0;
+
+                for (Player player : Bukkit.getOnlinePlayers()) {
+                    this.giveTome(player, abilityName, amount);
+                    playercount++;
+                }
+
+                sender.sendMessage(Component.text("Gave " + amount + "x Tome of " + abilityName + " to " + playercount + " players.", NamedTextColor.GREEN));
 
             } else {
-                String abilityName = args[1];
+                Player target = Bukkit.getPlayerExact(args[0]);
 
-                if (!this.tomeManager.isValidAbility(abilityName)) {
-                    sender.sendMessage(Component.text("Unknown tome ability: '" + abilityName + "'", NamedTextColor.RED));
-                    sender.sendMessage(Component.text("Available abilities: " + String.join(", ", this.tomeManager.getAllAbilityNames()), NamedTextColor.GRAY));
-
-                } else {
-                    int amount = 1;
-
-                    if (args.length >= 3) {
-                        try {
-                            amount = Integer.parseInt(args[2]);
-
-                            if (amount < 1 || amount > 64) {
-                                sender.sendMessage(Component.text("Amount must be between 1 and 64.", NamedTextColor.RED));
-                                return true;
-                            }
-                        } catch (NumberFormatException e) {
-                            sender.sendMessage(Component.text("Invalid amount: '" + args[2] + "'. Must be a number between 1 and 64.", NamedTextColor.RED));
-                            return true;
-                        }
-                    }
-
-                    TomeAbility ability = this.tomeManager.getAbility(abilityName);
-                    ItemStack tome = new ItemStack(Material.WRITTEN_BOOK, amount);
-                    BookMeta bookMeta = (BookMeta)tome.getItemMeta();
-
-                    if (bookMeta != null) {
-                        String canonicalName = ability != null ? ability.getName() : abilityName;
-                        bookMeta.setTitle(canonicalName);
-                        bookMeta.author(Component.text("A source unknown...", NamedTextColor.GOLD));
-
-                        if (ability != null) {
-                            List<String> lore = new ArrayList<>();
-                            String[] descriptionLines = ability.getDescriptionLines();
-
-                            for (String line : descriptionLines) {
-                                lore.add("§7" + line);
-                            }
-
-                            lore.add("");
-                            lore.add("§eRight-click with this tome in hand to learn its secrets");
-                            bookMeta.setLore(lore);
-                        }
-
-                        List<String> pages = new ArrayList<>();
-                        StringBuilder pageContent = new StringBuilder();
-                        pageContent.append("§5§lANCIENT KNOWLEDGE§r\n\n");
-                        pageContent.append("§8The secrets of ")
-                                .append(this.plugin.getTomeManager().getAbility(abilityName).getDisplayName())
-                                .append(" are contained within these pages.\n\n");
-
-                        if (ability != null) {
-                            String[] descriptionLines = ability.getDescriptionLines();
-
-                            for (String line : descriptionLines) {
-                                pageContent.append("§7").append(line).append("\n");
-                            }
-                        } else {
-                            pageContent.append("§7No description available\n");
-                        }
-
-                        pageContent.append("\n§6Use this knowledge wisely, for it comes with great responsibility.");
-                        pages.add(pageContent.toString());
-                        bookMeta.setPages(pages);
-                        tome.setItemMeta(bookMeta);
-                    }
-
-                    if (target.getInventory().firstEmpty() == -1) {
-                        target.getWorld().dropItemNaturally(target.getLocation(), tome);
-                        target.sendMessage(Component.text("A mysterious tome appears at your feet...", NamedTextColor.YELLOW));
-
-                    } else {
-                        target.getInventory().addItem(tome);
-                        target.sendMessage(Component.text("A mysterious tome has appeared in your inventory...", NamedTextColor.YELLOW));
-                    }
-
-                    sender.sendMessage(Component.text("Gave " + amount + "x Tome of " + abilityName + " to " + target.getName() + ".", NamedTextColor.GREEN));
+                if (target == null) {
+                    sender.sendMessage(Component.text("Player '" + args[0] + "' not found.", NamedTextColor.RED));
+                    return true;
                 }
+
+                this.giveTome(target, abilityName, amount);
+                sender.sendMessage(Component.text("Gave " + amount + "x Tome of " + abilityName + " to " + target.getName() + ".", NamedTextColor.GREEN));
             }
         }
 
         return true;
+    }
+
+    /**
+     * Give physical tome ability book(s) to a player.
+     *
+     * @param target the player receiving a tome book.
+     * @param abilityName the tome ability provided by the book.
+     * @param amount the number of tome books to give the player.
+     */
+    private void giveTome(Player target, String abilityName, int amount) {
+        TomeAbility ability = this.tomeManager.getAbility(abilityName);
+        ItemStack tome = this.plugin.getTomeDistributionManager().createTomeItem(ability != null ? ability.getName() : abilityName, amount);
+
+        if (target.getInventory().firstEmpty() == -1) {
+            target.getWorld().dropItemNaturally(target.getLocation(), tome);
+            target.sendMessage(Component.text("A mysterious tome appears at your feet...", NamedTextColor.YELLOW));
+
+        } else {
+            target.getInventory().addItem(tome);
+            target.sendMessage(Component.text("A mysterious tome has appeared in your inventory...", NamedTextColor.YELLOW));
+        }
     }
 
     /**
