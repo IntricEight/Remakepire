@@ -294,7 +294,7 @@ public class PowCommand implements CommandExecutor, TabCompleter {
                 }
 
                 if (args.length == 3 && args[1].equalsIgnoreCase("givetome")) {
-                    return Bukkit.getOnlinePlayers().stream().map(Player::getName).filter((s) -> s.toLowerCase().startsWith(args[2].toLowerCase())).collect(Collectors.toList());
+                    return Stream.concat(Stream.of("@a"), Bukkit.getOnlinePlayers().stream().map(Player::getName)).filter((s) -> s.toLowerCase().startsWith(args[2].toLowerCase())).collect(Collectors.toList());
                 }
 
                 if (args.length == 4 && args[1].equalsIgnoreCase("givetome")) {
@@ -311,7 +311,7 @@ public class PowCommand implements CommandExecutor, TabCompleter {
                 }
 
                 if (args.length == 3 && args[1].equalsIgnoreCase("give_cure_book")) {
-                    return Bukkit.getOnlinePlayers().stream().map(Player::getName).filter((s) -> s.toLowerCase().startsWith(args[2].toLowerCase())).collect(Collectors.toList());
+                    return Stream.concat(Stream.of("@a"), Bukkit.getOnlinePlayers().stream().map(Player::getName)).filter((s) -> s.toLowerCase().startsWith(args[2].toLowerCase())).collect(Collectors.toList());
                 }
 
                 if (args.length == 4 && args[1].equalsIgnoreCase("give_cure_book")) {
@@ -331,11 +331,11 @@ public class PowCommand implements CommandExecutor, TabCompleter {
                 }
 
                 if (args.length == 3 && args[1].equalsIgnoreCase("make_incurable")) {
-                    return Bukkit.getOnlinePlayers().stream().map(Player::getName).filter((s) -> s.toLowerCase().startsWith(args[2].toLowerCase())).collect(Collectors.toList());
+                    return Stream.concat(Stream.of("@a"), Bukkit.getOnlinePlayers().stream().map(Player::getName)).filter((s) -> s.toLowerCase().startsWith(args[2].toLowerCase())).collect(Collectors.toList());
                 }
 
                 if (args.length == 3 && args[1].equalsIgnoreCase("resetplayer")) {
-                    return Bukkit.getOnlinePlayers().stream().map(Player::getName).filter((s) -> s.toLowerCase().startsWith(args[2].toLowerCase())).collect(Collectors.toList());
+                    return Stream.concat(Stream.of("@a"), Bukkit.getOnlinePlayers().stream().map(Player::getName)).filter((s) -> s.toLowerCase().startsWith(args[2].toLowerCase())).collect(Collectors.toList());
                 }
 
                 if (args.length == 4 && args[1].equalsIgnoreCase("resetplayer")) {
@@ -354,7 +354,7 @@ public class PowCommand implements CommandExecutor, TabCompleter {
                 }
 
                 if (args.length == 3 && args[1].equalsIgnoreCase("setupplayer")) {
-                    return Bukkit.getOnlinePlayers().stream().map(Player::getName).filter((s) -> s.toLowerCase().startsWith(args[2].toLowerCase())).collect(Collectors.toList());
+                    return Stream.concat(Stream.of("@a"), Bukkit.getOnlinePlayers().stream().map(Player::getName)).filter((s) -> s.toLowerCase().startsWith(args[2].toLowerCase())).collect(Collectors.toList());
                 }
 
                 if (args.length == 3 && args[1].equalsIgnoreCase("init")) {

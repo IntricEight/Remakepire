@@ -12,6 +12,7 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
+import io.papermc.paper.command.brigadier.argument.ArgumentTypes;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
@@ -153,7 +154,10 @@ public class BrigadierCommands {
                         .then(Commands.literal("break_warning").executes((ctx) -> this.executePowCommand(ctx, "admin", "break_warning")))
 
                         .then(Commands.literal("givetome")
-                                .then(Commands.argument("player", StringArgumentType.word()).suggests((ctx, builder) -> this.suggestOnlinePlayers(builder))
+                                .then(Commands.argument("player", ArgumentTypes.players()).suggests((ctx, builder) -> {
+                                    builder.suggest("@a");
+                                    return this.suggestOnlinePlayers(builder);
+                                })
                                         .then(Commands.argument("ability", StringArgumentType.word()).suggests((ctx, builder) -> this.suggestAllTomeAbilities(builder)).executes((ctx) -> {
                                             String player = StringArgumentType.getString(ctx, "player");
                                             String ability = StringArgumentType.getString(ctx, "ability");
