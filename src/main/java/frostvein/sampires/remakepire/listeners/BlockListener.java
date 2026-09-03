@@ -4,7 +4,10 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Creeper;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Wither;
+import org.bukkit.entity.WitherSkull;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
@@ -109,14 +112,16 @@ public class BlockListener implements Listener {
     }
 
     /**
-     * Stop creeper explosions from destroying blocks.
+     * Stop creeper and wither explosions from destroying blocks.
      *
-     * @param event a creeper explodes.
+     * @param event an entity explodes.
      */
     @EventHandler
-    public void onCreeperExplode(EntityExplodeEvent event) {
-        // Only stop the block destruction if it is from a Creeper
-        if (!(event.getEntity() instanceof Creeper)) {
+    public void onEntityExplode(EntityExplodeEvent event) {
+        Entity entity = event.getEntity();
+
+        // Only stop the block destruction if it is from a Creeper or a Wither
+        if (!(entity instanceof Creeper || entity instanceof Wither || entity instanceof WitherSkull)) {
             return;
         }
 

@@ -54,8 +54,8 @@ public class ForcedVampireCureCommand implements CommandExecutor {
             return true;
 
         } else {
-            String targetName = args[0];
-            Player target = Bukkit.getPlayer(targetName);
+            final String targetName = args[0];
+            Player target = Bukkit.getPlayerExact(targetName);
 
             if (target == null) {
                 caster.sendMessage(Component.text("Player '" + targetName + "' is not online or does not exist.", NamedTextColor.RED));
@@ -83,7 +83,7 @@ public class ForcedVampireCureCommand implements CommandExecutor {
 
                     } else {
                         // Ensure both caster and target are within cure range of a holy beacon
-                        double cureDistance = this.plugin.getConfigManager().getCureBeaconDistance();
+                        final double cureDistance = this.plugin.getConfigManager().getCureBeaconDistance();
                         BeaconSite nearestHolyBeacon = this.plugin.getBeaconManager().getNearestHolyBeacon(caster.getLocation(), cureDistance);
 
                         // Ensure the caster is within cure range of a holy beacon

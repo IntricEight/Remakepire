@@ -22,7 +22,7 @@ public class RallyingCryTomeAbility extends TomeAbility {
      * @param plugin the host plugin object.
      */
     public RallyingCryTomeAbility(RemakepirePlugin plugin) {
-        super(plugin, "RallyingCry", new String[]{"You learn the secrets needed to inspire man.", "At your word, you and humans around you", "gain strength for " + (STRENGTH_DURATION / 20) + " seconds."}, plugin.getConfigManager().getTomeRallyingCryCooldown());
+        super(plugin, "RallyingCry", "Rallying Cry", new String[]{"You learn the secrets needed to inspire man.", "At your word, you and humans around you", "gain strength for " + (STRENGTH_DURATION / 20) + " seconds."}, plugin.getConfigManager().getTomeRallyingCryCooldown());
     }
 
     protected boolean useAbility(Player player) {

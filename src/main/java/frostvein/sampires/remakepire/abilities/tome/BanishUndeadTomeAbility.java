@@ -38,7 +38,7 @@ public class BanishUndeadTomeAbility extends TomeAbility {
      * @param plugin the host plugin object.
      */
     public BanishUndeadTomeAbility(RemakepirePlugin plugin) {
-        super(plugin, "BanishUndead", new String[]{"All undead mobs within a " + RADIUS + " block radius of you die instantly."}, plugin.getConfigManager().getTomeBanishUndeadCooldown());
+        super(plugin, "BanishUndead", "Banish Undead", new String[]{"All undead mobs within a " + RADIUS + " block radius of you die instantly."}, plugin.getConfigManager().getTomeBanishUndeadCooldown());
     }
 
     protected boolean useAbility(Player player) {

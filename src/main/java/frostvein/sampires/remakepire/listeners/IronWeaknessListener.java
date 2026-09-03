@@ -5,6 +5,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import io.papermc.paper.datacomponent.DataComponentTypes;
+import io.papermc.paper.datacomponent.item.SulfurCubeContent;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
@@ -12,7 +14,9 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.Shelf;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.SulfurCube;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -312,10 +316,33 @@ public class IronWeaknessListener implements Listener {
             }
 
             Location nearestIronBlock = this.getNearestIronBlock(to, this.REPEL_DISTANCE);
-            if (nearestIronBlock != null) {
-                event.setCancelled(true);
-                this.applyIronRepulsion(player, to, nearestIronBlock);
+
+
+
+
+            // TODO: After I have my fun, remove the silver repulsion from sulfur cubes
+            Location nearestIronEntity = this.getNearestIronEntity(to, this.REPEL_DISTANCE), nearest;
+            if (nearestIronBlock == null) {
+                nearest = nearestIronEntity;
+            } else if (nearestIronEntity == null) {
+                nearest = nearestIronBlock;
+            } else {
+                final double blockDistance = nearestIronBlock.distanceSquared(to), entityDistance = nearestIronEntity.distanceSquared(to);
+                nearest = (blockDistance <= entityDistance ? nearestIronBlock : nearestIronEntity);
             }
+            if (nearest != null) {
+                event.setCancelled(true);
+                this.applyIronRepulsion(player, to, nearest);
+            }
+
+
+
+
+            // TODO: Bring this back when the entity repulsion is removed
+//            if (nearestIronBlock != null) {
+//                event.setCancelled(true);
+//                this.applyIronRepulsion(player, to, nearestIronBlock);
+//            }
         }
     }
 
@@ -356,9 +383,30 @@ public class IronWeaknessListener implements Listener {
                 // Only apply the silver effects to higher vampires
                 if (this.vampireManager.isIronAffected(player)) {
                     // Repel the player from the silver block
-                    if (this.isNearIronBlock(player.getLocation(), REPEL_DISTANCE)) {
-                        this.applyIronRepulsion(player);
+                    Location nearestIronBlock = this.getNearestIronBlock(player.getLocation(), REPEL_DISTANCE);
+
+
+
+                    // TODO: After I have my fun, remove the silver repulsion from sulfur cubes
+                    Location nearestIronEntity = this.getNearestIronEntity(player.getLocation(), this.REPEL_DISTANCE), nearest;
+                    if (nearestIronBlock == null) {
+                        nearest = nearestIronEntity;
+                    } else if (nearestIronEntity == null) {
+                        nearest = nearestIronBlock;
+                    } else {
+                        final double blockDistance = nearestIronBlock.distanceSquared(to), entityDistance = nearestIronEntity.distanceSquared(to);
+                        nearest = (blockDistance <= entityDistance ? nearestIronBlock : nearestIronEntity);
                     }
+                    if (nearest != null) {
+                        this.applyIronRepulsion(player, player.getLocation(), nearestIronBlock);
+                    }
+
+
+
+                    // TODO: Bring this back when the entity repulsion is removed
+//                    if (nearestIronBlock != null) {
+//                        this.applyIronRepulsion(player, player.getLocation(), nearestIronBlock);
+//                    }
 
                     // Weaken the player from the silver block's proximity
                     if (this.isNearIronBlock(player.getLocation(), WEAKNESS_DISTANCE)) {
@@ -370,14 +418,14 @@ public class IronWeaknessListener implements Listener {
     }
 
     /**
-     * Determine if the player is within a distance of a silver-typed block.
+     * Determine if the player is within a distance of a silver-typed block or entity.
      *
      * @param location the player's location.
      * @param radius the range around the player to search.
      * @return {@code true} if the player is nearby a silver block.
      */
     private boolean isNearIronBlock(Location location, double radius) {
-        return this.getNearestIronBlock(location, radius) != null;
+        return this.getNearestIronBlock(location, radius) != null || this.getNearestIronEntity(location, radius) != null;
     }
 
     /**
@@ -392,6 +440,7 @@ public class IronWeaknessListener implements Listener {
         double nearestDistanceSquared = Double.MAX_VALUE;
         Location nearestIron = null;
 
+        // Check for the nearest iron block within the square radius
         for (double dx = -radius; dx <= radius; ++dx) {
             for (double dy = -radius; dy <= radius; ++dy) {
                 for (double dz = -radius; dz <= radius; ++dz) {
@@ -407,6 +456,37 @@ public class IronWeaknessListener implements Listener {
                             nearestIron = block.getLocation();
                         }
                     }
+                }
+            }
+        }
+
+        return nearestIron;
+    }
+
+    /**
+     * Retrieve the location of the nearest silver-typed entity to the player within the radius.
+     *
+     * @param location the player's location.
+     * @param radius the range around the player to search.
+     * @return The {@code Location} of the silver entity, or {@code null} if none is found.
+     */
+    private Location getNearestIronEntity(Location location, double radius) {
+        double nearestDistanceSquared = Double.MAX_VALUE;
+        Location nearestIron = null;
+
+        // Check for any iron blocks inside sulfur cubes within the square radius
+        for (Entity entity : location.getWorld().getNearbyEntities(location, radius, radius, radius, entity -> entity instanceof SulfurCube)) {
+            SulfurCube sulfurCube = (SulfurCube)entity;
+            SulfurCubeContent content = sulfurCube.getData(DataComponentTypes.SULFUR_CUBE_CONTENT);
+
+            // Ignore Sulfur Cubes whose absorbed block is not an iron material
+            if (content != null && this.ironMaterials.contains(content.absorbedItem().getType())) {
+                final double distanceSquared = sulfurCube.getLocation().distanceSquared(location);
+
+                // Replace the current nearest iron source if this Sulfur Cube is closer
+                if (distanceSquared < nearestDistanceSquared) {
+                    nearestDistanceSquared = distanceSquared;
+                    nearestIron = sulfurCube.getLocation();
                 }
             }
         }

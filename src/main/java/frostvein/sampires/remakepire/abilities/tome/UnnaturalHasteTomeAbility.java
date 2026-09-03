@@ -19,7 +19,7 @@ public class UnnaturalHasteTomeAbility extends TomeAbility {
      * @param plugin the host plugin object.
      */
     public UnnaturalHasteTomeAbility(RemakepirePlugin plugin) {
-        super(plugin, "UnnaturalHaste", new String[]{"You learn how to dip into a pool of strength unknown to this world,", "and gain haste for " + (HASTE_DURATION / 20 / 60) + " minutes."}, plugin.getConfigManager().getTomeUnnaturalHasteCooldown());
+        super(plugin, "UnnaturalHaste", "Unnatural Haste", new String[]{"You learn how to dip into a pool of strength unknown to this world,", "and gain haste for " + (HASTE_DURATION / 20 / 60) + " minutes."}, plugin.getConfigManager().getTomeUnnaturalHasteCooldown());
     }
 
     protected boolean useAbility(Player player) {

@@ -1681,16 +1681,16 @@ public class BeaconManager {
 
         BukkitTask task = this.plugin.getServer().getScheduler().runTaskLater(this.plugin, () -> {
             if (beacon.getState() == BeaconState.NEUTRAL) {
-                Component message = Component.text("Beacon", NamedTextColor.GRAY)
+                Component message = Component.text("Beacon ", NamedTextColor.GRAY)
                         .append(Component.text(beacon.getName(), NamedTextColor.YELLOW));
 
                 // Add on a description based on the beacon's previous state
                 if (previousState == BeaconState.HOLY) {
-                    message = message.append(Component.text("has lost its divine protection...", NamedTextColor.GRAY));
+                    message = message.append(Component.text(" has lost its divine protection...", NamedTextColor.GRAY));
                 } else if (previousState == BeaconState.DESECRATED) {
-                    message = message.append(Component.text("has been cleansed of dark influence...", NamedTextColor.GRAY));
+                    message = message.append(Component.text(" has been cleansed of dark influence...", NamedTextColor.GRAY));
                 } else {
-                    message = message.append(Component.text("is now neutral.", NamedTextColor.GRAY));
+                    message = message.append(Component.text(" is now neutral.", NamedTextColor.GRAY));
                 }
 
                 for (Player player : this.plugin.getServer().getOnlinePlayers()) {

@@ -29,7 +29,7 @@ public class PrayerOfFaithTomeAbility extends TomeAbility {
      * @param plugin the host plugin object.
      */
     public PrayerOfFaithTomeAbility(RemakepirePlugin plugin) {
-        super(plugin, "PrayerOfFaith", new String[]{"You pray to whatever God you think might be listening,", "you must remain motionless for " + PRAYER_DURATION + " seconds after using this ability,", "after which you will receive absorption for " + (ABSORPTION_DURATION / 20 / 60) + " minutes."}, plugin.getConfigManager().getTomePrayerOfFaithCooldown());
+        super(plugin, "PrayerOfFaith", "Prayer of Faith", new String[]{"You pray to whatever God you think might be listening,", "you must remain motionless for " + PRAYER_DURATION + " seconds after using this ability,", "after which you will receive absorption for " + (ABSORPTION_DURATION / 20 / 60) + " minutes."}, plugin.getConfigManager().getTomePrayerOfFaithCooldown());
     }
 
     protected boolean useAbility(Player player) {
