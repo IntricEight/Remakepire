@@ -14,6 +14,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
@@ -136,8 +137,9 @@ public class BloodTiesListener implements Listener {
         }
 
         // Alert the players of the ability use
-        sire.sendMessage(Component.text(" Red mist gathers at the edge of your vision, pointing the way to ." + fledgling.getName(), NamedTextColor.RED));
-        fledgling.sendMessage(Component.text("A shiver runs down your spine.", NamedTextColor.GRAY));
+        sire.sendMessage(Component.text("Red mist gathers at the edge of your vision, pointing the way to ." + fledgling.getName(), NamedTextColor.RED));
+        fledgling.sendMessage(Component.text("A shiver runs down your spine.", NamedTextColor.GRAY)
+                .decorate(TextDecoration.ITALIC));
 
         // Play the ability sound effects
         sire.playSound(sire, Sound.ENTITY_ALLAY_AMBIENT_WITHOUT_ITEM, SoundCategory.MASTER, 0.5F, 0.3F);
