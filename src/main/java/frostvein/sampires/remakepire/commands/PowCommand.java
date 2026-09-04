@@ -152,8 +152,8 @@ public class PowCommand implements CommandExecutor, TabCompleter {
             return true;
 
         } else {
-            String adminSubCommand = args[0].toLowerCase();
-            String[] adminArgs = Arrays.copyOfRange(args, 1, args.length);
+            final String adminSubCommand = args[0].toLowerCase();
+            final String[] adminArgs = Arrays.copyOfRange(args, 1, args.length);
 
             Command dummyCommand = new BukkitCommand(adminSubCommand) {
                 public boolean execute(CommandSender sender, String commandLabel, String[] args) {
@@ -219,6 +219,9 @@ public class PowCommand implements CommandExecutor, TabCompleter {
             List<String> permadeathOptions = Arrays.asList("on", "off", "absolute");
             return permadeathOptions.stream().filter((s) -> s.startsWith(args[1].toLowerCase())).collect(Collectors.toList());
 
+        } else if (args.length == 2 && args[0].equalsIgnoreCase("checklives") && sender.hasPermission("vampiresmp.admin")) {
+            return Bukkit.getOnlinePlayers().stream().map(Player::getName).filter((s) -> s.toLowerCase().startsWith(args[1].toLowerCase())).collect(Collectors.toList());
+
         } else {
             if (args.length >= 2 && args[0].equalsIgnoreCase("admin")) {
                 if (!sender.hasPermission("vampiresmp.admin")) {
@@ -226,7 +229,7 @@ public class PowCommand implements CommandExecutor, TabCompleter {
                 }
 
                 if (args.length == 2) {
-                    List<String> adminCommands = Arrays.asList("help", "init", "session", "vampire", "beacon", "vampirecooldowns", "resettomecooldowns", "break_warning", "givetome", "select_tomes", "give_cure_book", "stash_cure_book", "distributetomes", "clearbloodmoonbuffs", "make_incurable", "fixattributes", "removeendermen", "removecreepers", "setupplayer", "spawnanimals", "addtomechest", "removetomechest", "listtomechests", "resetplayer", "set_vampire_spawn", "config");
+                    List<String> adminCommands = Arrays.asList("help", "init", "session", "vampire", "beacon", "vampirecooldowns", "cooldownvampires", "resettomecooldowns", "cooldownresettomes", "break_warning", "givetome", "select_tomes", "give_cure_book", "stash_cure_book", "distributetomes", "clearbloodmoonbuffs", "make_incurable", "fixattributes", "removeendermen", "removecreepers", "setupplayer", "spawnanimals", "addtomechest", "removetomechest", "listtomechests", "resetplayer", "set_vampire_spawn", "config");
                     return adminCommands.stream().filter((s) -> s.startsWith(args[1].toLowerCase())).collect(Collectors.toList());
                 }
 
@@ -246,12 +249,12 @@ public class PowCommand implements CommandExecutor, TabCompleter {
                 }
 
                 // Set the player autofill for 'resettomecooldowns'
-                if (args.length == 3 && args[1].equalsIgnoreCase("resettomecooldowns")) {
+                if (args.length == 3 && (args[1].equalsIgnoreCase("resettomecooldowns") || args[1].equalsIgnoreCase("cooldownresettomes"))) {
                     return Bukkit.getOnlinePlayers().stream().map(Player::getName).filter((s) -> s.toLowerCase().startsWith(args[2].toLowerCase())).collect(Collectors.toList());
                 }
 
                 if (args.length == 4 && args[1].equalsIgnoreCase("config")) {
-                    String configName = args[2].toLowerCase();
+                    final String configName = args[2].toLowerCase();
 
                     if (configName.equals("stake_permadeath_stage")) {
                         // Handle vampire permadeath setting with the valid numbers 1, 2 and 3
@@ -271,7 +274,7 @@ public class PowCommand implements CommandExecutor, TabCompleter {
                 }
 
                 if (args.length == 4 && args[1].equalsIgnoreCase("beacon")) {
-                    String subCommand = args[2].toLowerCase();
+                    final String subCommand = args[2].toLowerCase();
                     if (subCommand.equals("remove") || subCommand.equals("delete") || subCommand.equals("info") || subCommand.equals("holy") || subCommand.equals("desecrated") || subCommand.equals("corrupted") || subCommand.equals("neutral")) {
                         return this.plugin.getBeaconManager().getAllBeacons().stream().map((beacon) -> beacon.getName()).filter((s) -> s.toLowerCase().startsWith(args[3].toLowerCase())).collect(Collectors.toList());
                     }
@@ -285,16 +288,16 @@ public class PowCommand implements CommandExecutor, TabCompleter {
                     return Arrays.asList("5", "10", "15", "20", "25", "50", "100");
                 }
 
-                if (args.length == 3 && args[1].equalsIgnoreCase("vampirecooldowns")) {
+                if (args.length == 3 && (args[1].equalsIgnoreCase("vampirecooldowns") || args[1].equalsIgnoreCase("cooldownvampires"))) {
                     return Stream.of("reset", "clear").filter((s) -> s.startsWith(args[2].toLowerCase())).collect(Collectors.toList());
                 }
 
-                if (args.length == 4 && args[1].equalsIgnoreCase("vampirecooldowns") && (args[2].equalsIgnoreCase("reset") || args[2].equalsIgnoreCase("clear"))) {
+                if (args.length == 4 && (args[1].equalsIgnoreCase("vampirecooldowns") || args[1].equalsIgnoreCase("cooldownvampires")) && (args[2].equalsIgnoreCase("reset") || args[2].equalsIgnoreCase("clear"))) {
                     return Bukkit.getOnlinePlayers().stream().map(Player::getName).filter((s) -> s.toLowerCase().startsWith(args[3].toLowerCase())).collect(Collectors.toList());
                 }
 
                 if (args.length == 3 && args[1].equalsIgnoreCase("givetome")) {
-                    return Bukkit.getOnlinePlayers().stream().map(Player::getName).filter((s) -> s.toLowerCase().startsWith(args[2].toLowerCase())).collect(Collectors.toList());
+                    return Stream.concat(Stream.of("@a"), Bukkit.getOnlinePlayers().stream().map(Player::getName)).filter((s) -> s.toLowerCase().startsWith(args[2].toLowerCase())).collect(Collectors.toList());
                 }
 
                 if (args.length == 4 && args[1].equalsIgnoreCase("givetome")) {
@@ -311,7 +314,7 @@ public class PowCommand implements CommandExecutor, TabCompleter {
                 }
 
                 if (args.length == 3 && args[1].equalsIgnoreCase("give_cure_book")) {
-                    return Bukkit.getOnlinePlayers().stream().map(Player::getName).filter((s) -> s.toLowerCase().startsWith(args[2].toLowerCase())).collect(Collectors.toList());
+                    return Stream.concat(Stream.of("@a"), Bukkit.getOnlinePlayers().stream().map(Player::getName)).filter((s) -> s.toLowerCase().startsWith(args[2].toLowerCase())).collect(Collectors.toList());
                 }
 
                 if (args.length == 4 && args[1].equalsIgnoreCase("give_cure_book")) {
@@ -331,11 +334,11 @@ public class PowCommand implements CommandExecutor, TabCompleter {
                 }
 
                 if (args.length == 3 && args[1].equalsIgnoreCase("make_incurable")) {
-                    return Bukkit.getOnlinePlayers().stream().map(Player::getName).filter((s) -> s.toLowerCase().startsWith(args[2].toLowerCase())).collect(Collectors.toList());
+                    return Stream.concat(Stream.of("@a"), Bukkit.getOnlinePlayers().stream().map(Player::getName)).filter((s) -> s.toLowerCase().startsWith(args[2].toLowerCase())).collect(Collectors.toList());
                 }
 
                 if (args.length == 3 && args[1].equalsIgnoreCase("resetplayer")) {
-                    return Bukkit.getOnlinePlayers().stream().map(Player::getName).filter((s) -> s.toLowerCase().startsWith(args[2].toLowerCase())).collect(Collectors.toList());
+                    return Stream.concat(Stream.of("@a"), Bukkit.getOnlinePlayers().stream().map(Player::getName)).filter((s) -> s.toLowerCase().startsWith(args[2].toLowerCase())).collect(Collectors.toList());
                 }
 
                 if (args.length == 4 && args[1].equalsIgnoreCase("resetplayer")) {
@@ -354,7 +357,7 @@ public class PowCommand implements CommandExecutor, TabCompleter {
                 }
 
                 if (args.length == 3 && args[1].equalsIgnoreCase("setupplayer")) {
-                    return Bukkit.getOnlinePlayers().stream().map(Player::getName).filter((s) -> s.toLowerCase().startsWith(args[2].toLowerCase())).collect(Collectors.toList());
+                    return Stream.concat(Stream.of("@a"), Bukkit.getOnlinePlayers().stream().map(Player::getName)).filter((s) -> s.toLowerCase().startsWith(args[2].toLowerCase())).collect(Collectors.toList());
                 }
 
                 if (args.length == 3 && args[1].equalsIgnoreCase("init")) {

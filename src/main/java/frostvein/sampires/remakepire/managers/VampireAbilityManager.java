@@ -356,20 +356,20 @@ public class VampireAbilityManager {
      * @return {@code true} if the ability is on cooldown.
      */
     public boolean isOnCooldown(Player player, String abilityName) {
-        UUID playerId = player.getUniqueId();
+        final UUID playerId = player.getUniqueId();
         Map<String, Long> playerCooldowns = this.abilityCooldowns.get(playerId);
 
         if (playerCooldowns == null) {
             return false;
 
         } else {
-            Long cooldownEnd = playerCooldowns.get(abilityName.toLowerCase());
+            final Long cooldownEnd = playerCooldowns.get(abilityName.toLowerCase());
 
             if (cooldownEnd == null) {
                 return false;
 
             } else {
-                long currentTime = this.sessionManager.getSessionTimeSeconds();
+                final long currentTime = this.sessionManager.getSessionTimeSeconds();
                 return currentTime < cooldownEnd;
             }
         }
@@ -400,20 +400,20 @@ public class VampireAbilityManager {
      * @return The remaining seconds until the cooldown has elapsed.
      */
     public long getRemainingCooldown(Player player, String abilityName) {
-        UUID playerId = player.getUniqueId();
+        final UUID playerId = player.getUniqueId();
         Map<String, Long> playerCooldowns = this.abilityCooldowns.get(playerId);
 
         if (playerCooldowns == null) {
             return 0L;
 
         } else {
-            Long cooldownEnd = playerCooldowns.get(abilityName.toLowerCase());
+            final Long cooldownEnd = playerCooldowns.get(abilityName.toLowerCase());
 
             if (cooldownEnd == null) {
                 return 0L;
 
             } else {
-                long currentTime = this.sessionManager.getSessionTimeSeconds();
+                final long currentTime = this.sessionManager.getSessionTimeSeconds();
                 return Math.max(0L, cooldownEnd - currentTime);
             }
         }
@@ -445,8 +445,8 @@ public class VampireAbilityManager {
      * @param cooldownSeconds the time until the player can use the ability again.
      */
     private void setCooldown(Player player, String abilityName, int cooldownSeconds) {
-        UUID playerId = player.getUniqueId();
-        long cooldownEnd = this.sessionManager.getSessionTimeSeconds() + (long)cooldownSeconds;
+        final UUID playerId = player.getUniqueId();
+        final long cooldownEnd = this.sessionManager.getSessionTimeSeconds() + (long)cooldownSeconds;
         (this.abilityCooldowns.computeIfAbsent(playerId, k -> new HashMap<>())).put(abilityName.toLowerCase(), cooldownEnd);
     }
 
@@ -469,11 +469,11 @@ public class VampireAbilityManager {
      * @param player the player with active cooldowns.
      */
     public void clearAllCooldowns(Player player) {
-        UUID playerId = player.getUniqueId();
+        final UUID playerId = player.getUniqueId();
         Map<String, Long> playerCooldowns = this.abilityCooldowns.get(playerId);
 
         if (playerCooldowns != null) {
-            int clearedCount = playerCooldowns.size();
+            final int clearedCount = playerCooldowns.size();
             playerCooldowns.clear();
             this.abilityCooldowns.remove(playerId);
             this.plugin.logInfo("Cleared " + clearedCount + " personal cooldowns for player: " + player.getName());
@@ -487,7 +487,7 @@ public class VampireAbilityManager {
      */
     public void clearGlobalCooldowns() {
         if (!this.globalCooldowns.isEmpty()) {
-            int clearedCount = this.globalCooldowns.size();
+            final int clearedCount = this.globalCooldowns.size();
             List<String> clearedAbilities = new ArrayList<>(this.globalCooldowns.keySet());
             this.globalCooldowns.clear();
             this.plugin.logInfo("Cleared " + clearedCount + " global cooldowns for abilities: " + String.join(", ", clearedAbilities));

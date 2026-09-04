@@ -268,9 +268,8 @@ public class DeathHandler implements Listener {
      */
     @EventHandler
     public void onPlayerDeath(PlayerDeathEvent event) {
-        Player victim = event.getEntity();
-        Player killer = victim.getKiller();
-        UUID trackedKillerUUID = this.woodenStakeKills.remove(victim.getUniqueId());
+        Player victim = event.getEntity(), killer = victim.getKiller();
+        final UUID trackedKillerUUID = this.woodenStakeKills.remove(victim.getUniqueId());
 
         if (trackedKillerUUID != null && killer == null) {
             Player trackedKiller = this.plugin.getServer().getPlayer(trackedKillerUUID);
@@ -287,7 +286,7 @@ public class DeathHandler implements Listener {
                 Objective deathObjective = mainScoreboard.getObjective("vsmp_death");
 
                 if (deathObjective != null) {
-                    int currentDeaths = deathObjective.getScore(victim.getName()).getScore();
+                    final int currentDeaths = deathObjective.getScore(victim.getName()).getScore();
                     deathObjective.getScore(victim.getName()).setScore(currentDeaths + 1);
                     this.plugin.logInfo("Incremented death count for " + victim.getName() + " to " + (currentDeaths + 1));
                 }

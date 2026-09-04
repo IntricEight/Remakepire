@@ -304,7 +304,7 @@ public class IronWeaknessListener implements Listener {
         Player player = event.getPlayer();
 
         if (this.vampireManager.isIronAffected(player)) {
-            Location to = event.getTo();
+            final Location to = event.getTo();
 
             final UUID playerId = player.getUniqueId();
             final long currentTime = System.currentTimeMillis();
@@ -394,7 +394,7 @@ public class IronWeaknessListener implements Listener {
                     } else if (nearestIronEntity == null) {
                         nearest = nearestIronBlock;
                     } else {
-                        final double blockDistance = nearestIronBlock.distanceSquared(to), entityDistance = nearestIronEntity.distanceSquared(to);
+                        final double blockDistance = nearestIronBlock.distanceSquared(player.getLocation()), entityDistance = nearestIronEntity.distanceSquared(player.getLocation());
                         nearest = (blockDistance <= entityDistance ? nearestIronBlock : nearestIronEntity);
                     }
                     if (nearest != null) {

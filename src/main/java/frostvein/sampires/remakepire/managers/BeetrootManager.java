@@ -85,9 +85,9 @@ public class BeetrootManager {
                 String[] parts = line.split(":");
 
                 if (parts.length == 3) {
-                    UUID uuid = UUID.fromString(parts[0]);
-                    String type = parts[1];
-                    int seconds = Integer.parseInt(parts[2]);
+                    final UUID uuid = UUID.fromString(parts[0]);
+                    final String type = parts[1];
+                    final int seconds = Integer.parseInt(parts[2]);
 
                     if ("processing".equals(type)) {
                         this.processingTimers.put(uuid, seconds);
@@ -154,7 +154,7 @@ public class BeetrootManager {
             final UUID playerId = entry.getKey();
 
             if (onlinePlayers.contains(playerId)) {
-                int timeLeft = entry.getValue() - 1;
+                final int timeLeft = entry.getValue() - 1;
 
                 if (timeLeft <= 0) {
                     processingToRemove.add(playerId);
@@ -179,7 +179,7 @@ public class BeetrootManager {
             final UUID playerId = entry.getKey();
 
             if (onlinePlayers.contains(playerId)) {
-                int timeLeft = entry.getValue() - 1;
+                final int timeLeft = entry.getValue() - 1;
 
                 if (timeLeft <= 0) {
                     immunityToRemove.add(playerId);
@@ -204,7 +204,7 @@ public class BeetrootManager {
             final UUID playerId = entry.getKey();
 
             if (onlinePlayers.contains(playerId)) {
-                int timeLeft = entry.getValue() - 1;
+                final int timeLeft = entry.getValue() - 1;
 
                 if (timeLeft <= 0) {
                     recoveryToRemove.add(playerId);
