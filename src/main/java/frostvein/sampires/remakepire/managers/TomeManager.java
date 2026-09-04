@@ -275,10 +275,8 @@ public class TomeManager {
                 }
 
                 List<String> lore = new ArrayList<>();
-                if (ability != null) {
-                    for (String line : ability.getDescriptionLines()) {
-                        lore.add("§7" + line);
-                    }
+                for (String line : ability.getDescriptionLines()) {
+                    lore.add("§7" + line);
                 }
 
                 lore.add("");
@@ -410,7 +408,7 @@ public class TomeManager {
      * @param abilityName the name of the ability.
      */
     public void forceGrantAbility(Player player, String abilityName) {
-        String normalizedName = abilityName.toLowerCase();
+        final String normalizedName = abilityName.toLowerCase();
 
         if (this.isValidAbility(normalizedName)) {
             String tag = TOME_TAG_PREFIX + normalizedName;
@@ -426,8 +424,8 @@ public class TomeManager {
      * @param abilityName the name of the ability.
      */
     public void removeAbility(Player player, String abilityName) {
-        String normalizedName = abilityName.toLowerCase();
-        String tag = TOME_TAG_PREFIX + normalizedName;
+        final String normalizedName = abilityName.toLowerCase();
+        final String tag = TOME_TAG_PREFIX + normalizedName;
         player.removeScoreboardTag(tag);
         this.plugin.logInfo("Admin removed tome ability '" + normalizedName + "' from player " + player.getName());
     }
@@ -477,14 +475,14 @@ public class TomeManager {
      * @return {@code true} if the player has absorbed an ability this session.
      */
     private boolean hasUsedTomeThisSession(Player player) {
-        UUID playerUUID = player.getUniqueId();
+        final UUID playerUUID = player.getUniqueId();
 
         if (!this.playerTomeUsageSession.containsKey(playerUUID)) {
             return false;
 
         } else {
-            int currentSessionId = this.plugin.getSessionManager().getSessionIDObjective().getScore("session_id_holder").getScore();
-            int tomeUsageSessionId = this.playerTomeUsageSession.get(playerUUID);
+            final int currentSessionId = this.plugin.getSessionManager().getSessionIDObjective().getScore("session_id_holder").getScore();
+            final int tomeUsageSessionId = this.playerTomeUsageSession.get(playerUUID);
             return tomeUsageSessionId == currentSessionId;
         }
     }

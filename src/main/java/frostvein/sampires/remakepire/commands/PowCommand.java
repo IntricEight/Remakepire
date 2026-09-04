@@ -152,8 +152,8 @@ public class PowCommand implements CommandExecutor, TabCompleter {
             return true;
 
         } else {
-            String adminSubCommand = args[0].toLowerCase();
-            String[] adminArgs = Arrays.copyOfRange(args, 1, args.length);
+            final String adminSubCommand = args[0].toLowerCase();
+            final String[] adminArgs = Arrays.copyOfRange(args, 1, args.length);
 
             Command dummyCommand = new BukkitCommand(adminSubCommand) {
                 public boolean execute(CommandSender sender, String commandLabel, String[] args) {
@@ -251,7 +251,7 @@ public class PowCommand implements CommandExecutor, TabCompleter {
                 }
 
                 if (args.length == 4 && args[1].equalsIgnoreCase("config")) {
-                    String configName = args[2].toLowerCase();
+                    final String configName = args[2].toLowerCase();
 
                     if (configName.equals("stake_permadeath_stage")) {
                         // Handle vampire permadeath setting with the valid numbers 1, 2 and 3
@@ -271,7 +271,7 @@ public class PowCommand implements CommandExecutor, TabCompleter {
                 }
 
                 if (args.length == 4 && args[1].equalsIgnoreCase("beacon")) {
-                    String subCommand = args[2].toLowerCase();
+                    final String subCommand = args[2].toLowerCase();
                     if (subCommand.equals("remove") || subCommand.equals("delete") || subCommand.equals("info") || subCommand.equals("holy") || subCommand.equals("desecrated") || subCommand.equals("corrupted") || subCommand.equals("neutral")) {
                         return this.plugin.getBeaconManager().getAllBeacons().stream().map((beacon) -> beacon.getName()).filter((s) -> s.toLowerCase().startsWith(args[3].toLowerCase())).collect(Collectors.toList());
                     }

@@ -249,9 +249,9 @@ public class TomeListener implements Listener {
      * @param tag the book's name.
      */
     private void handleCureBookClick(Player admin, Player target, String tag) {
-        boolean hasTag = target.getScoreboardTags().contains(tag);
+        final boolean hasTag = target.getScoreboardTags().contains(tag);
 
-        String friendlyName = switch (tag) {
+        final String friendlyName = switch (tag) {
             case CureBookReadingListener.TAG_CURE_BOOK_1 -> "Cure Book 1 (" + this.plugin.getCureBookManager().getCureBookName(1, false) + ")";
             case CureBookReadingListener.TAG_CURE_BOOK_2 -> "Cure Book 2 (" + this.plugin.getCureBookManager().getCureBookName(2, false) + ")";
             case CureBookReadingListener.TAG_CURE_BOOK_3 -> "Cure Book 3 (" + this.plugin.getCureBookManager().getCureBookName(3, false) + ")";
@@ -303,7 +303,7 @@ public class TomeListener implements Listener {
         if (event.getView().title().equals(TomeManager.TOME_SELECTION_GUI_TITLE)) {
             if (event.getPlayer() instanceof Player player) {
                 Bukkit.getScheduler().runTaskLater(this.plugin, () -> {
-                    if (player.getOpenInventory() == null || player.getOpenInventory().title() == null || !player.getOpenInventory().title().equals(TomeManager.TOME_SELECTION_GUI_TITLE)) {
+                    if (!player.getOpenInventory().title().equals(TomeManager.TOME_SELECTION_GUI_TITLE)) {
                         this.tomeManager.removeTomeSelectionTarget(player.getUniqueId());
                     }
                 }, 1L);
