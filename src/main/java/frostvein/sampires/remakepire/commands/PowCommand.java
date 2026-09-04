@@ -219,6 +219,9 @@ public class PowCommand implements CommandExecutor, TabCompleter {
             List<String> permadeathOptions = Arrays.asList("on", "off", "absolute");
             return permadeathOptions.stream().filter((s) -> s.startsWith(args[1].toLowerCase())).collect(Collectors.toList());
 
+        } else if (args.length == 2 && args[0].equalsIgnoreCase("checklives") && sender.hasPermission("vampiresmp.admin")) {
+            return Bukkit.getOnlinePlayers().stream().map(Player::getName).filter((s) -> s.toLowerCase().startsWith(args[1].toLowerCase())).collect(Collectors.toList());
+
         } else {
             if (args.length >= 2 && args[0].equalsIgnoreCase("admin")) {
                 if (!sender.hasPermission("vampiresmp.admin")) {
