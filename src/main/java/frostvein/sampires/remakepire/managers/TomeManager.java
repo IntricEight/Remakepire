@@ -87,6 +87,16 @@ public class TomeManager {
     }
 
     /**
+     * Retrieve the display name of an ability using its usage name.
+     *
+     * @param abilityName the name of the ability.
+     * @return The display name of the tome ability.
+     */
+    public String getAbilityDisplayName(String abilityName) {
+        return this.abilities.get(abilityName.toLowerCase()).getDisplayName();
+    }
+
+    /**
      * Check if an ability has been registered.
      *
      * @param abilityName the name of the ability.
@@ -156,7 +166,7 @@ public class TomeManager {
      * @return {@code true} if the player has access to the ability.
      */
     public boolean hasAbility(Player player, String abilityName) {
-        String tag = TOME_TAG_PREFIX + abilityName.toLowerCase();
+        final String tag = TOME_TAG_PREFIX + abilityName.toLowerCase();
         return player.getScoreboardTags().contains(tag);
     }
 
@@ -171,7 +181,7 @@ public class TomeManager {
 
         for (String tag : player.getScoreboardTags()) {
             if (tag.startsWith(TOME_TAG_PREFIX)) {
-                String abilityName = tag.substring(TOME_TAG_PREFIX.length());
+                final String abilityName = tag.substring(TOME_TAG_PREFIX.length());
                 abilities.add(abilityName);
             }
         }
@@ -265,10 +275,8 @@ public class TomeManager {
                 }
 
                 List<String> lore = new ArrayList<>();
-                if (ability != null) {
-                    for (String line : ability.getDescriptionLines()) {
-                        lore.add("§7" + line);
-                    }
+                for (String line : ability.getDescriptionLines()) {
+                    lore.add("§7" + line);
                 }
 
                 lore.add("");
@@ -400,7 +408,7 @@ public class TomeManager {
      * @param abilityName the name of the ability.
      */
     public void forceGrantAbility(Player player, String abilityName) {
-        String normalizedName = abilityName.toLowerCase();
+        final String normalizedName = abilityName.toLowerCase();
 
         if (this.isValidAbility(normalizedName)) {
             String tag = TOME_TAG_PREFIX + normalizedName;
@@ -416,8 +424,8 @@ public class TomeManager {
      * @param abilityName the name of the ability.
      */
     public void removeAbility(Player player, String abilityName) {
-        String normalizedName = abilityName.toLowerCase();
-        String tag = TOME_TAG_PREFIX + normalizedName;
+        final String normalizedName = abilityName.toLowerCase();
+        final String tag = TOME_TAG_PREFIX + normalizedName;
         player.removeScoreboardTag(tag);
         this.plugin.logInfo("Admin removed tome ability '" + normalizedName + "' from player " + player.getName());
     }
@@ -467,14 +475,14 @@ public class TomeManager {
      * @return {@code true} if the player has absorbed an ability this session.
      */
     private boolean hasUsedTomeThisSession(Player player) {
-        UUID playerUUID = player.getUniqueId();
+        final UUID playerUUID = player.getUniqueId();
 
         if (!this.playerTomeUsageSession.containsKey(playerUUID)) {
             return false;
 
         } else {
-            int currentSessionId = this.plugin.getSessionManager().getSessionIDObjective().getScore("session_id_holder").getScore();
-            int tomeUsageSessionId = this.playerTomeUsageSession.get(playerUUID);
+            final int currentSessionId = this.plugin.getSessionManager().getSessionIDObjective().getScore("session_id_holder").getScore();
+            final int tomeUsageSessionId = this.playerTomeUsageSession.get(playerUUID);
             return tomeUsageSessionId == currentSessionId;
         }
     }

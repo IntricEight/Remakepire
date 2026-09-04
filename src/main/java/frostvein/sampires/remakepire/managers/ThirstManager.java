@@ -132,8 +132,8 @@ public class ThirstManager {
                 String[] parts = line.split(":");
 
                 if (parts.length == 2) {
-                    UUID uuid = UUID.fromString(parts[0]);
-                    int minutes = Integer.parseInt(parts[1]);
+                    final UUID uuid = UUID.fromString(parts[0]);
+                    final int minutes = Integer.parseInt(parts[1]);
                     this.immunityTimers.put(uuid, minutes);
                 }
             }

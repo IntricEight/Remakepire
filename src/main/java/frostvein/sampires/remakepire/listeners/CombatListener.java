@@ -223,7 +223,7 @@ public class CombatListener implements Listener {
                                     Objective deathObjective = mainScoreboard.getObjective("vsmp_death");
 
                                     if (deathObjective != null) {
-                                        int deaths = deathObjective.getScore(victim.getName()).getScore();
+                                        final int deaths = deathObjective.getScore(victim.getName()).getScore();
 
                                         // Only force the perma death if the human has run out of lives OR permadeath is set to ABSOLUTE
                                         if (deaths >= this.plugin.getConfigManager().getHumanLifeCount() || this.plugin.getPermadeathManager().hasAbsolutePermadeathEnabled(victim)) {
@@ -299,12 +299,14 @@ public class CombatListener implements Listener {
 
                                             // Apply the effect of a chosen permadeath on death
                                             if (deathObjective != null) {
-                                                if (deathObjective.getScore(victim.getName()).getScore() >= this.plugin.getConfigManager().getHumanLifeCount()) {
+                                                final int deaths = deathObjective.getScore(victim.getName()).getScore();
+
+                                                if (deaths >= this.plugin.getConfigManager().getHumanLifeCount()) {
                                                     attacker.sendMessage(Component.text("You watch the light of " + victim.getName() + "'s eyes fade, and extinguish. Lost forever.", NamedTextColor.DARK_RED));
                                                     victim.sendMessage(Component.text("The world grows dim, blurry, you feel a darkness reach out, offering you one last chance to live, as a creature of the night... But you refuse... And slip under the veil of the afterlife.", NamedTextColor.GRAY));
                                                     victim.addScoreboardTag(DeathHandler.PERMADEATH_CHOSEN_TAG);
 
-                                                    int killThirst = this.plugin.getThirstManager().getKillThirstReward(attacker, victim);
+                                                    final int killThirst = this.plugin.getThirstManager().getKillThirstReward(attacker, victim);
                                                     this.plugin.getThirstManager().modifyQuench(attacker, killThirst, true);
                                                     this.plugin.getServer().getScheduler().runTask(this.plugin, () -> victim.setHealth(0.0));
                                                     return;
@@ -476,7 +478,7 @@ public class CombatListener implements Listener {
                                 Objective deathObjective = mainScoreboard.getObjective("vsmp_death");
 
                                 if (deathObjective != null) {
-                                    int deaths = deathObjective.getScore(player.getName()).getScore();
+                                    final int deaths = deathObjective.getScore(player.getName()).getScore();
 
                                     // Only force the perma death if the human has run out of lives OR permadeath is set to ABSOLUTE
                                     if (deaths >= this.plugin.getConfigManager().getHumanLifeCount() || this.plugin.getPermadeathManager().hasAbsolutePermadeathEnabled(player)) {
