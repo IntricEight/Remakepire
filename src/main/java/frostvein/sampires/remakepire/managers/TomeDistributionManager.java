@@ -9,6 +9,7 @@ import java.util.Random;
 import java.util.Set;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -228,7 +229,7 @@ public class TomeDistributionManager {
         }
 
         Chest chest = (Chest)block.getState();
-        chest.getInventory().addItem(this.createTomeItem(tomeType));
+        chest.getInventory().addItem(this.createTomeItem(tomeType, 1));
 
         this.plugin.logInfo("TomeDistributionManager: Added " + tomeType + " tome to chest at " + ConversionAssistant.locationToString(location));
     }
@@ -239,8 +240,19 @@ public class TomeDistributionManager {
      * @param tomeType the tome ability name.
      * @return A book that will grant a human player the tome ability when used.
      */
-    private ItemStack createTomeItem(String tomeType) {
-        ItemStack tome = new ItemStack(Material.WRITTEN_BOOK);
+    public ItemStack createTomeItem(String tomeType) {
+        return this.createTomeItem(tomeType, 1);
+    }
+
+    /**
+     * Create the tome ability book for the tome ability.
+     *
+     * @param tomeType the tome ability name.
+     * @param amount the number of tome books to create.
+     * @return A book that will grant a human player the tome ability when used.
+     */
+    public ItemStack createTomeItem(String tomeType, int amount) {
+        ItemStack tome = new ItemStack(Material.WRITTEN_BOOK, amount);
         BookMeta bookMeta = (BookMeta)tome.getItemMeta();
 
         if (bookMeta != null) {
@@ -249,38 +261,47 @@ public class TomeDistributionManager {
             TomeAbility ability = this.plugin.getTomeManager().getAbility(tomeType);
 
             if (ability != null) {
-                List<String> lore = new ArrayList<>();
+                List<Component> lore = new ArrayList<>();
                 String[] descriptionLines = ability.getDescriptionLines();
 
                 for (String line : descriptionLines) {
-                    lore.add("§7" + line);
+                    lore.add(Component.text(line, NamedTextColor.GRAY)
+                            .decoration(TextDecoration.ITALIC, false));
                 }
 
-                lore.add("");
-                lore.add("§eRight-click with this tome in hand to learn its secrets");
-                bookMeta.setLore(lore);
+                lore.add(Component.newline()
+                        .append(Component.text("Right-click with this tome in hand to learn its secrets", NamedTextColor.YELLOW)
+                                .decoration(TextDecoration.ITALIC, false))
+                );
+
+                bookMeta.lore(lore);
             }
 
-            List<String> pages = new ArrayList<>();
-            StringBuilder pageContent = new StringBuilder();
-            pageContent.append("§5§lANCIENT KNOWLEDGE§r\n\n");
-            pageContent.append("§8The secrets of ")
-                    .append(this.plugin.getTomeManager().getAbility(tomeType).getDisplayName())
-                    .append(" are contained within these pages.\n\n");
+            Component pages = Component.text("ANCIENT KNOWLEDGE", NamedTextColor.DARK_PURPLE)
+                    .decorate(TextDecoration.BOLD)
+                    .append(Component.newline())
+                    .append(Component.newline())
+                    .append(Component.text("The secrets of " + this.plugin.getTomeManager().getAbility(tomeType).getDisplayName() + " are contained within these pages.", NamedTextColor.DARK_GRAY)
+                            .decoration(TextDecoration.BOLD, false)
+                    )
+                    .append(Component.newline())
+                    .append(Component.newline());
 
             if (ability != null) {
                 String[] descriptionLines = ability.getDescriptionLines();
 
                 for (String line : descriptionLines) {
-                    pageContent.append("§7").append(line).append("\n");
+                    pages = pages.append(Component.text(line, NamedTextColor.GRAY))
+                            .append(Component.newline());
                 }
             } else {
-                pageContent.append("§7No description available\n");
+                pages = pages.append(Component.text("No description available", NamedTextColor.GRAY))
+                        .append(Component.newline());
             }
 
-            pageContent.append("\n§6Use this knowledge wisely, for it comes with great responsibility.");
-            pages.add(pageContent.toString());
-            bookMeta.setPages(pages);
+            pages = pages.append(Component.newline())
+                    .append(Component.text("Use this knowledge wisely, for it comes with great responsibility.", NamedTextColor.GOLD));
+            bookMeta.pages(pages);
             tome.setItemMeta(bookMeta);
         }
 
@@ -297,8 +318,10 @@ public class TomeDistributionManager {
         EnchantmentStorageMeta meta = (EnchantmentStorageMeta)enchantedBook.getItemMeta();
 
         if (meta != null) {
-            Enchantment randomEnchantment = this.enchantmentTypes[this.random.nextInt(this.enchantmentTypes.length)];
+            // Enchantment books are prevented from spawning above this level within VampireSMP
             final int level = 1;
+
+            Enchantment randomEnchantment = this.enchantmentTypes[this.random.nextInt(this.enchantmentTypes.length)];
             meta.addStoredEnchant(randomEnchantment, level, true);
             enchantedBook.setItemMeta(meta);
         }

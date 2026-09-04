@@ -73,16 +73,16 @@ public class VampireManager {
      * @return {@code true} if the player hits the ground high enough and soon enough.
      */
     public boolean shouldPreventFallDamage(Player player) {
-        UUID playerId = player.getUniqueId();
+        final UUID playerId = player.getUniqueId();
 
         if (!this.lungingPlayers.containsKey(playerId)) {
             return false;
 
         } else {
-            Long lungeTime = this.lungeTimestamps.get(playerId);
+            final Long lungeTime = this.lungeTimestamps.get(playerId);
 
             if (lungeTime != null && System.currentTimeMillis() - lungeTime <= PROTECTION_DURATION) {
-                Double startingY = this.lungingPlayers.get(playerId);
+                final Double startingY = this.lungingPlayers.get(playerId);
 
                 if (startingY != null && player.getLocation().getY() >= startingY) {
                     this.lungingPlayers.remove(playerId);
@@ -106,7 +106,7 @@ public class VampireManager {
      * @param player the player whose protections are being removed.
      */
     public void removeProtection(Player player) {
-        UUID playerId = player.getUniqueId();
+        final UUID playerId = player.getUniqueId();
         this.lungingPlayers.remove(playerId);
         this.lungeTimestamps.remove(playerId);
     }
@@ -235,14 +235,14 @@ public class VampireManager {
      * @param adminOverride {@code true} if an admin caused this change.
      */
     public void setPlayerAsVampire(Player player, int stage, boolean adminOverride) {
-        UUID playerId = player.getUniqueId();
+        final UUID playerId = player.getUniqueId();
 
         if (!adminOverride && this.hasPromotionBan(player) && stage > 1) {
             stage = 1;
         }
 
         this.startLevelChange(playerId);
-        boolean isInBatForm = this.plugin.getBatTransformationManager() != null && this.plugin.getBatTransformationManager().isInBatForm(player);
+        final boolean isInBatForm = this.plugin.getBatTransformationManager() != null && this.plugin.getBatTransformationManager().isInBatForm(player);
 
         try {
             this.removeAllVampireTags(player);
@@ -275,7 +275,7 @@ public class VampireManager {
                     player.setLevel(1);
             }
 
-            long baseDelay = isInBatForm ? 5L : 2L;
+            final long baseDelay = isInBatForm ? 5L : 2L;
             final int CURRENT_STAGE = stage;   // Copy the current stage for use within the lambda
 
             Bukkit.getScheduler().runTaskLater(this.plugin, () -> {
@@ -287,7 +287,7 @@ public class VampireManager {
                             this.plugin.getBeaconMajorityManager().applyBonusesToPlayer(player);
 
                             if (CURRENT_STAGE >= 2) {
-                                long tomeDelay = isInBatForm ? 3L : 1L;
+                                final long tomeDelay = isInBatForm ? 3L : 1L;
                                 Bukkit.getScheduler().runTaskLater(this.plugin, () -> {
                                     if (player.isOnline()) {
                                         this.plugin.getTomeVampireRestrictionListener().forceDropTomesForPlayer(player);
@@ -839,7 +839,7 @@ public class VampireManager {
                 break;
             }
 
-            UUID playerId = player.getUniqueId();
+            final UUID playerId = player.getUniqueId();
 
             if (!this.isLevelChangeInProgress(playerId) && !this.hadRecentLevelChange(playerId)) {
                 if (this.isVampire(player)) {
@@ -881,7 +881,7 @@ public class VampireManager {
      * @param playerId the UUID of the player changing their stage.
      */
     private void startLevelChange(UUID playerId) {
-        long currentTime = System.currentTimeMillis();
+        final long currentTime = System.currentTimeMillis();
         this.levelChangeInProgress.put(playerId, currentTime);
         this.lastLevelChange.put(playerId, currentTime);
     }
@@ -902,7 +902,7 @@ public class VampireManager {
      * @return {@code true} if the expected time has not yet passed.
      */
     private boolean isLevelChangeInProgress(UUID playerId) {
-        Long startTime = this.levelChangeInProgress.get(playerId);
+        final Long startTime = this.levelChangeInProgress.get(playerId);
 
         if (startTime == null) {
             return false;
@@ -924,7 +924,7 @@ public class VampireManager {
      * @return {@code true} if the player's vampire stage was changed recently enough.
      */
     private boolean hadRecentLevelChange(UUID playerId) {
-        Long lastChange = this.lastLevelChange.get(playerId);
+        final Long lastChange = this.lastLevelChange.get(playerId);
 
         if (lastChange == null) {
             return false;

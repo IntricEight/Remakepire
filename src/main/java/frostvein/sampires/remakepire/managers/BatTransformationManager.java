@@ -364,7 +364,7 @@ public class BatTransformationManager {
      * @param player the vampire using the bat ability.
      */
     private void restorePlayerArmor(Player player) {
-        UUID playerId = player.getUniqueId();
+        final UUID playerId = player.getUniqueId();
 
         try {
             if (!this.armorStorageManager.hasStoredArmor(playerId)) {
@@ -473,7 +473,7 @@ public class BatTransformationManager {
      * @param player the player joining the game.
      */
     public void handlePlayerJoin(Player player) {
-        UUID playerId = player.getUniqueId();
+        final UUID playerId = player.getUniqueId();
 
         if (this.armorStorageManager.hasStoredArmor(playerId)) {
             this.plugin.logInfo("Found stored armor for player " + player.getName() + " on join - attempting restoration");
@@ -513,8 +513,8 @@ public class BatTransformationManager {
 
                 String[] parts = line.split(":");
                 if (parts.length == 2) {
-                    UUID playerId = UUID.fromString(parts[0]);
-                    long startTime = Long.parseLong(parts[1]);
+                    final UUID playerId = UUID.fromString(parts[0]);
+                    final long startTime = Long.parseLong(parts[1]);
                     BatData batData = new BatData(startTime);
                     this.activeBats.put(playerId, batData);
                 }
@@ -530,7 +530,7 @@ public class BatTransformationManager {
     private void saveBatStates() {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(this.batStateFile))) {
             for (Map.Entry<UUID, BatData> entry : this.activeBats.entrySet()) {
-                UUID playerId = entry.getKey();
+                final UUID playerId = entry.getKey();
                 BatData batData = entry.getValue();
 
                 if (!batData.isExpired()) {
