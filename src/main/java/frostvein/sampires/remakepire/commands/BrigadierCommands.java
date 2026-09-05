@@ -147,11 +147,11 @@ public class BrigadierCommands {
                         .then(this.buildTomeCooldownSubcommand("cooldownresettomes"))
 
                         .then(Commands.literal("make_incurable")
-                                .then(Commands.literal("@a").executes(ctx -> this.executePowCommand(ctx, "admin", "make_incurable", "@a"))))
+                                .then(Commands.literal("@a").executes(ctx -> this.executePowCommand(ctx, "admin", "make_incurable", "@a")))
                                 .then(Commands.argument("player", StringArgumentType.word()).suggests((ctx, builder) -> this.suggestOnlinePlayers(builder)).executes((ctx) -> {
                                     final String player = StringArgumentType.getString(ctx, "player");
                                     return this.executePowCommand(ctx, "admin", "make_incurable", player);
-                                }))
+                                })))
 
                         .then((Commands.literal("playercount")
                                 .then(Commands.literal("all").executes(ctx -> this.executePowCommand(ctx, "admin", "playercount", "all"))))
