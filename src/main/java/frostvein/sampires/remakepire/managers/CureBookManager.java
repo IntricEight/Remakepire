@@ -53,6 +53,26 @@ public class CureBookManager {
     }
 
     /**
+     * Retrieve a replacement book that stops the reader from acquiring knowledge on the cure.
+     *
+     * @return A useless cure book.
+     */
+    public ItemStack getObscuredBook() {
+        ItemStack obscuredBook = new ItemStack(Material.WRITTEN_BOOK);
+        BookMeta obscuredMeta = (BookMeta)obscuredBook.getItemMeta();
+
+        // Fill the contents of the fourth book with replacement contents to stop players from gaining useful knowledge without
+        if (obscuredMeta != null) {
+            obscuredMeta.setTitle(this.plugin.getCureBookManager().getCureBookName(4, true));
+            obscuredMeta.setAuthor(this.plugin.getCureBookManager().getCureBookAuthor(4));
+            obscuredMeta.setPages(this.plugin.getCureBookManager().getCureBook4UnreadablePages());
+            obscuredBook.setItemMeta(obscuredMeta);
+        }
+
+        return obscuredBook;
+    }
+
+    /**
      * Retrieve the data of a cure book using its sequence number.
      *
      * @param bookNumber the cure book's order in the sequence.
@@ -194,7 +214,7 @@ public class CureBookManager {
      *
      * @return An {@code ArrayList} of pages to fill the book's placeholder pages.
      */
-    public List<String> getCureBook4UnreadablePages() {
+    private List<String> getCureBook4UnreadablePages() {
         List<String> pages = new ArrayList<>();
 
         if (CUSTOM_BOOKS) {
