@@ -359,15 +359,18 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
      */
     private boolean handlePlayerCountCommand(CommandSender sender, String[] args) {
         if (args.length == 0) {
-            sender.sendMessage(Component.text("Usage: /pow admin playercount <all | human | vampire>", NamedTextColor.RED));
-            CommandHandler.sendCommandCorrection(sender, "  all", "See the number of alive players");
-            CommandHandler.sendCommandCorrection(sender, "  human", "See the number of alive human players");
-            CommandHandler.sendCommandCorrection(sender, "  vampire", "See the number of \"alive\" vampire players");
+            sender.sendMessage(Component.text("Usage: /pow admin playercount <all | human | vampire> <spoiler>", NamedTextColor.RED));
+            CommandHandler.sendCommandCorrection(sender, "  all", "See the number of alive players.");
+            CommandHandler.sendCommandCorrection(sender, "  human", "See the number of alive human players.");
+            CommandHandler.sendCommandCorrection(sender, "  vampire", "See the number of \"alive\" vampire players.");
+            CommandHandler.sendCommandCorrection(sender, "    spoiler", "Retrieve the names of the players counted.");
 
             return true;
         }
 
-        int playerCount = 0;
+        String consoleReport;
+        List<Player> players = new ArrayList<>();
+        int playerCount;
 
         switch (args[0].toLowerCase()) {
             case "all":
@@ -375,16 +378,17 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                     // Make sure the player is active in the game
                     if (onlinePlayer.getGameMode() != GameMode.SPECTATOR && (!onlinePlayer.getScoreboardTags().contains(DeathHandler.PERMAKILLED_TAG) || onlinePlayer.isDead())
                     ) {
-                        playerCount++;
+                        players.add(onlinePlayer);
                     }
                 }
 
+                playerCount = players.size();
                 sender.sendMessage(Component.text("There " + (playerCount == 1 ? "is" : "are") + " currently ", NamedTextColor.WHITE)
                         .append(Component.text(playerCount, NamedTextColor.GRAY))
                         .append(Component.text(" player" + (playerCount == 1 ? "" : "s") + " in the session.", NamedTextColor.WHITE))
                 );
 
-                this.plugin.logInfo("Admin " + sender.getName() + " checked the game player count");
+                consoleReport = "Admin " + sender.getName() + " checked the game player count";
                 break;
 
             case "human":
@@ -394,16 +398,17 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                             && (!onlinePlayer.getScoreboardTags().contains(DeathHandler.PERMAKILLED_TAG) || onlinePlayer.isDead())
                             && this.plugin.getVampireManager().isHuman(onlinePlayer)
                     ) {
-                        playerCount++;
+                        players.add(onlinePlayer);
                     }
                 }
 
+                playerCount = players.size();
                 sender.sendMessage(Component.text("There " + (playerCount == 1 ? "is" : "are") + " currently ", NamedTextColor.WHITE)
                         .append(Component.text(playerCount, NamedTextColor.GOLD))
                         .append(Component.text(" human" + (playerCount == 1 ? "" : "s") + " in the session.", NamedTextColor.WHITE))
                 );
 
-                this.plugin.logInfo("Admin " + sender.getName() + " checked the human player count");
+                consoleReport = "Admin " + sender.getName() + " checked the human player count";
                 break;
 
             case "vampire":
@@ -413,22 +418,42 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                             && (!onlinePlayer.getScoreboardTags().contains(DeathHandler.PERMAKILLED_TAG) || onlinePlayer.isDead())
                             && this.plugin.getVampireManager().isVampire(onlinePlayer)
                     ) {
-                        playerCount++;
+                        players.add(onlinePlayer);
                     }
                 }
 
+                playerCount = players.size();
                 sender.sendMessage(Component.text("There " + (playerCount == 1 ? "is" : "are") + " currently ", NamedTextColor.WHITE)
                         .append(Component.text(playerCount, NamedTextColor.RED))
                         .append(Component.text(" vampire" + (playerCount == 1 ? "" : "s") + " in the session.", NamedTextColor.WHITE))
                 );
 
-                this.plugin.logInfo("Admin " + sender.getName() + " checked the vampire player count");
+                consoleReport = "Admin " + sender.getName() + " checked the vampire player count";
                 break;
 
             default:
                 sender.sendMessage(Component.text("Invalid action. Use 'all', 'human', or 'vampire'.", NamedTextColor.RED));
+                return true;
         }
 
+        // Display the names of the players who meet the conditions searched for
+        if (args.length >= 2 && !players.isEmpty()) {
+            final boolean spoiler = Boolean.parseBoolean(args[1]);
+
+            if (spoiler) {
+                StringBuilder playerNames = new StringBuilder();
+
+                for (Player onlinePlayer : players) {
+                    playerNames.append(onlinePlayer.getName()).append("  ");
+                }
+
+                sender.sendMessage(Component.text(playerNames.toString(), NamedTextColor.WHITE));
+
+                consoleReport += " using the SPOILER view.";
+            }
+        }
+
+        this.plugin.logInfo(consoleReport);
         return true;
     }
 

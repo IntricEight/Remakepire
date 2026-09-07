@@ -153,10 +153,7 @@ public class BrigadierCommands {
                                     return this.executePowCommand(ctx, "admin", "make_incurable", player);
                                 })))
 
-                        .then((Commands.literal("playercount")
-                                .then(Commands.literal("all").executes(ctx -> this.executePowCommand(ctx, "admin", "playercount", "all"))))
-                                .then(Commands.literal("human").executes(ctx -> this.executePowCommand(ctx, "admin", "playercount", "human")))
-                                .then(Commands.literal("vampire").executes(ctx -> this.executePowCommand(ctx, "admin", "playercount", "vampire"))))
+                        .then(this.buildPlayerCountSubcommand())
 
                         .then(Commands.literal("break_warning").executes(ctx -> this.executePowCommand(ctx, "admin", "break_warning")))
 
@@ -564,6 +561,25 @@ public class BrigadierCommands {
                             final int bookNum = IntegerArgumentType.getInteger(ctx, "book_number");
                             return this.executePowCommand(ctx, "admin", "give_cure_book", player, String.valueOf(bookNum));
                         })));
+    }
+
+    /**
+     * Build out the player count command subtree.
+     */
+    private LiteralArgumentBuilder<CommandSourceStack> buildPlayerCountSubcommand() {
+        return Commands.literal("playercount").executes(ctx -> this.executePowCommand(ctx, "admin", "playercount"))
+                .then(Commands.literal("all").executes(ctx -> this.executePowCommand(ctx, "admin", "playercount", "all"))
+                        .then(Commands.literal("true").executes(ctx -> this.executePowCommand(ctx, "admin", "playercount", "all", "true")))
+                        .then(Commands.literal("false").executes(ctx -> this.executePowCommand(ctx, "admin", "playercount", "all", "false")))
+                )
+                .then(Commands.literal("human").executes(ctx -> this.executePowCommand(ctx, "admin", "playercount", "human"))
+                        .then(Commands.literal("true").executes(ctx -> this.executePowCommand(ctx, "admin", "playercount", "human", "true")))
+                        .then(Commands.literal("false").executes(ctx -> this.executePowCommand(ctx, "admin", "playercount", "human", "false")))
+                )
+                .then(Commands.literal("vampire").executes(ctx -> this.executePowCommand(ctx, "admin", "playercount", "vampire"))
+                        .then(Commands.literal("true").executes(ctx -> this.executePowCommand(ctx, "admin", "playercount", "vampire", "true")))
+                        .then(Commands.literal("false").executes(ctx -> this.executePowCommand(ctx, "admin", "playercount", "vampire", "false")))
+                );
     }
 
     /**
