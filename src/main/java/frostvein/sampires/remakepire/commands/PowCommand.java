@@ -149,6 +149,7 @@ public class PowCommand implements CommandExecutor, TabCompleter {
             return true;
 
         } else if (args.length == 0) {
+            this.adminHandler.sendAdminHelp(sender);
             return true;
 
         } else {
@@ -171,6 +172,7 @@ public class PowCommand implements CommandExecutor, TabCompleter {
      * @param sender the player sending the command.
      */
     private void sendHelp(CommandSender sender) {
+        sender.sendMessage("");
         sender.sendMessage(Component.text("=== VampireSMP Commands ===", NamedTextColor.GOLD)
                 .decorate(TextDecoration.BOLD));
 

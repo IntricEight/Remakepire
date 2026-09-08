@@ -131,31 +131,30 @@ public class TomeManager {
             }
 
             return false;
-
-        } else {
-            String tag = TOME_TAG_PREFIX + abilityName.toLowerCase();
-            player.addScoreboardTag(tag);
-
-            if (player.getGameMode() != GameMode.CREATIVE) {
-                int currentSessionId = this.plugin.getSessionManager().getSessionIDObjective().getScore("session_id_holder").getScore();
-                this.playerTomeUsageSession.put(player.getUniqueId(), currentSessionId);
-
-                // Set a timer to remove the player from the tome prevention list after the timer elapses
-                BukkitTask absorptionCooldownTask = Bukkit.getScheduler().runTaskLater(this.plugin, () -> {
-                    // Only remove the player if tome capping is not enabled. After the timer elapses
-                    if (!plugin.getConfigManager().isTomeAbsorptionCapped()) {
-                        this.playerTomeUsageSession.remove(player.getUniqueId());
-
-                        if (player.isOnline()) {
-                            player.sendMessage(Component.text("Your mind eases, recovered from the strain of ancient knowledge.", NamedTextColor.GREEN));
-                        }
-                    }
-                }, (long)plugin.getConfigManager().getTomeAbsorptionIntervalMinutes() * 60 * 20);
-            }
-
-            this.plugin.logInfo("Granted tome ability '" + abilityName + "' to player " + player.getName());
-            return true;
         }
+
+        final String tag = TOME_TAG_PREFIX + abilityName.toLowerCase();
+        player.addScoreboardTag(tag);
+
+        if (player.getGameMode() != GameMode.CREATIVE) {
+            int currentSessionId = this.plugin.getSessionManager().getSessionIDObjective().getScore("session_id_holder").getScore();
+            this.playerTomeUsageSession.put(player.getUniqueId(), currentSessionId);
+
+            // Set a timer to remove the player from the tome prevention list after the timer elapses
+            BukkitTask absorptionCooldownTask = Bukkit.getScheduler().runTaskLater(this.plugin, () -> {
+                // Only remove the player if tome capping is not enabled. After the timer elapses
+                if (!plugin.getConfigManager().isTomeAbsorptionCapped()) {
+                    this.playerTomeUsageSession.remove(player.getUniqueId());
+
+                    if (player.isOnline()) {
+                        player.sendMessage(Component.text("Your mind eases, recovered from the strain of ancient knowledge.", NamedTextColor.GREEN));
+                    }
+                }
+            }, (long)plugin.getConfigManager().getTomeAbsorptionIntervalMinutes() * 60 * 20);
+        }
+
+        this.plugin.logInfo("Granted tome ability '" + abilityName + "' to player " + player.getName());
+        return true;
     }
 
     /**

@@ -192,7 +192,8 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
      *
      * @param sender the admin sending the command.
      */
-    private void sendAdminHelp(CommandSender sender) {
+    public void sendAdminHelp(CommandSender sender) {
+        sender.sendMessage("");
         sender.sendMessage(Component.text("=== VampireSMP Admin Commands ===", NamedTextColor.GOLD)
                 .decorate(TextDecoration.BOLD));
 
@@ -1266,6 +1267,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                 sender.sendMessage(Component.text("Usage: /pow admin beacon debug [beacon_name]", NamedTextColor.RED));
             }
         } else {
+            sender.sendMessage("");
             sender.sendMessage(Component.text("=== BEACON DISPLAY DEBUG INFO ===", NamedTextColor.GOLD));
 
             for (BeaconSite beacon : this.beaconManager.getAllBeacons()) {
@@ -1459,6 +1461,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         Map<BeaconSite.BeaconState, Integer> stateStats = this.beaconManager.getStateStats();
         final int total = stateStats.values().stream().mapToInt(Integer::intValue).sum();
 
+        sender.sendMessage("");
         sender.sendMessage(Component.text("=== BEACON STATISTICS ===", NamedTextColor.GOLD)
                 .decorate(TextDecoration.BOLD));
         sender.sendMessage(Component.text("Total Beacons: ", NamedTextColor.GRAY)
@@ -1625,6 +1628,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
      * Provide the sender with a helpful list of instructions on using POW's plugin commands
      */
     private void sendBeaconHelp(CommandSender sender) {
+        sender.sendMessage("");
         sender.sendMessage(Component.text("=== BEACON COMMANDS ===", NamedTextColor.GOLD)
                 .decorate(TextDecoration.BOLD));
 
@@ -2051,6 +2055,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
     private boolean handleListTomeChestsCommand(CommandSender sender, String[] args) {
         List<Location> tomeLocations = this.plugin.getTomeDistributionManager().getTomeLocations();
 
+        sender.sendMessage("");
         sender.sendMessage(Component.text("=== TOME CHEST LOCATIONS ===", NamedTextColor.GOLD)
                 .decorate(TextDecoration.BOLD));
         sender.sendMessage(Component.text("Total: ", NamedTextColor.GRAY)

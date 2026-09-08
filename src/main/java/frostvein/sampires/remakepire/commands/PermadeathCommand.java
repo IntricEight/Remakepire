@@ -91,6 +91,7 @@ public class PermadeathCommand implements CommandExecutor {
      */
     private void showCurrentStatus(Player player) {
         PermadeathManager.PermadeathMode currentMode = this.permadeathManager.getPermadeathMode(player);
+        player.sendMessage("");
         player.sendMessage(Component.text("=== PERMADEATH STATUS ===", NamedTextColor.GOLD)
                 .decorate(TextDecoration.BOLD));
 

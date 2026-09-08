@@ -98,6 +98,7 @@ public class VampireAbilityCommand implements CommandExecutor, TabCompleter {
     }
 
     private void sendHelpMessage(Player player) {
+        player.sendMessage("");
         player.sendMessage(Component.text("=== VAMPIRE ABILITIES ===", NamedTextColor.GOLD)
                 .decorate(TextDecoration.BOLD));
 
@@ -144,6 +145,7 @@ public class VampireAbilityCommand implements CommandExecutor, TabCompleter {
                 player.sendMessage(Component.text("Use '/pow vability all' to see what abilities you could unlock.", NamedTextColor.GRAY));
 
             } else {
+                player.sendMessage("");
                 player.sendMessage(Component.text("=== YOUR VAMPIRE ABILITIES ===", NamedTextColor.DARK_RED)
                         .decorate(TextDecoration.BOLD));
                 player.sendMessage(Component.text("Your Stage: ", NamedTextColor.GRAY)
@@ -176,6 +178,7 @@ public class VampireAbilityCommand implements CommandExecutor, TabCompleter {
             player.sendMessage(Component.text("You must be a vampire to see abilities.", NamedTextColor.RED));
 
         } else {
+            player.sendMessage("");
             player.sendMessage(Component.text("=== ALL VAMPIRE ABILITIES ===", NamedTextColor.DARK_RED)
                     .decorate(TextDecoration.BOLD));
             player.sendMessage(Component.text("Your Stage: ", NamedTextColor.GRAY)
@@ -250,7 +253,7 @@ public class VampireAbilityCommand implements CommandExecutor, TabCompleter {
         player.sendMessage(Component.text("  " + ability.getDescription(), NamedTextColor.GRAY));
         Component cooldownInfo = Component.text("  Required Stage: ", NamedTextColor.GRAY)
                 .append(Component.text(ability.getMinimumStage(), NamedTextColor.YELLOW))
-                .append(Component.text("| Cooldown: ", NamedTextColor.GRAY))
+                .append(Component.text(" | Cooldown: ", NamedTextColor.GRAY))
                 .append(Component.text(VampireAbilityManager.formatTime(ability.getCooldownSeconds(this.plugin)), NamedTextColor.YELLOW)
         );
 
