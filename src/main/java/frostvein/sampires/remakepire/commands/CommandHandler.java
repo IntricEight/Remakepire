@@ -449,7 +449,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
 
                 playerCount = players.size();
                 sender.sendMessage(Component.text("There " + (playerCount == 1 ? "is" : "are") + " currently ", NamedTextColor.WHITE)
-                        .append(Component.text(playerCount, NamedTextColor.GOLD))
+                        .append(Component.text(playerCount, NamedTextColor.AQUA))
                         .append(Component.text(" player" + (playerCount == 1 ? "" : "s") + " who can cure themselves in the session.", NamedTextColor.WHITE))
                 );
 
@@ -469,7 +469,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
 
                 playerCount = players.size();
                 sender.sendMessage(Component.text("There " + (playerCount == 1 ? "is" : "are") + " currently ", NamedTextColor.WHITE)
-                        .append(Component.text(playerCount, NamedTextColor.GOLD))
+                        .append(Component.text(playerCount, NamedTextColor.DARK_AQUA))
                         .append(Component.text(" player" + (playerCount == 1 ? "" : "s") + " who can cure others in the session.", NamedTextColor.WHITE))
                 );
 
