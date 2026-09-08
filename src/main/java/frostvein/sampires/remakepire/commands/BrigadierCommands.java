@@ -580,6 +580,14 @@ public class BrigadierCommands {
                 .then(Commands.literal("vampire").executes(ctx -> this.executePowCommand(ctx, "admin", "playercount", "vampire"))
                         .then(Commands.literal("true").executes(ctx -> this.executePowCommand(ctx, "admin", "playercount", "vampire", "true")))
                         .then(Commands.literal("false").executes(ctx -> this.executePowCommand(ctx, "admin", "playercount", "vampire", "false")))
+                )
+                .then(Commands.literal("canCure").executes(ctx -> this.executePowCommand(ctx, "admin", "playercount", "canCure"))
+                        .then(Commands.literal("true").executes(ctx -> this.executePowCommand(ctx, "admin", "playercount", "canCure", "true")))
+                        .then(Commands.literal("false").executes(ctx -> this.executePowCommand(ctx, "admin", "playercount", "canCure", "false")))
+                )
+                .then(Commands.literal("canForceCure").executes(ctx -> this.executePowCommand(ctx, "admin", "playercount", "canForceCure"))
+                        .then(Commands.literal("true").executes(ctx -> this.executePowCommand(ctx, "admin", "playercount", "canForceCure", "true")))
+                        .then(Commands.literal("false").executes(ctx -> this.executePowCommand(ctx, "admin", "playercount", "canForceCure", "false")))
                 );
     }
 

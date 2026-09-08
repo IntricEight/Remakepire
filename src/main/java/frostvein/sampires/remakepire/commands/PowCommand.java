@@ -340,7 +340,7 @@ public class PowCommand implements CommandExecutor, TabCompleter {
                 }
 
                 if (args.length == 3 && args[1].equalsIgnoreCase("playercount")) {
-                    return Stream.of("all", "human", "vampire").filter((s) -> s.startsWith(args[2].toLowerCase())).collect(Collectors.toList());
+                    return Stream.of("all", "human", "vampire", "canCure", "canForceCure").filter((s) -> s.startsWith(args[2].toLowerCase())).collect(Collectors.toList());
                 }
 
                 if (args.length == 4 && args[1].equalsIgnoreCase("playercount")) {

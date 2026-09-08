@@ -33,6 +33,7 @@ import frostvein.sampires.remakepire.RemakepirePlugin;
 import frostvein.sampires.remakepire.abilities.tome.TomeAbility;
 import frostvein.sampires.remakepire.beacons.BeaconSite;
 import frostvein.sampires.remakepire.beacons.BeaconSite.BeaconState;
+import frostvein.sampires.remakepire.listeners.CureBookReadingListener;
 import frostvein.sampires.remakepire.listeners.DeathHandler;
 import frostvein.sampires.remakepire.managers.BeaconManager;
 import frostvein.sampires.remakepire.managers.ConfigManager;
@@ -216,11 +217,12 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         sendCommandInstruction(sender, "/pow admin removeendermen <all | toggle | status>", "Manage enderman removal");
         sendCommandInstruction(sender, "/pow admin removecreepers <all | toggle | status>", "Manage creeper removal");
         sendCommandInstruction(sender, "/pow admin setupplayer <player>", "Give starter items to player");
+        sendCommandInstruction(sender, "/pow admin resetplayer <player>", "Fully reset player to fresh state");
+        sendCommandInstruction(sender, "/pow admin playercount <all | human | vampire | canCure | canForceCure> [spoiler]", "Retrieve the number of players who meet certain criteria. If [spoiler] is true, the player names will be listed as well.");
         sendCommandInstruction(sender, "/pow admin spawnanimals", "Manually trigger passive mob spawning");
         sendCommandInstruction(sender, "/pow admin addtomechest", "Add current location as tome chest spawn");
         sendCommandInstruction(sender, "/pow admin removetomechest", "Remove nearest tome chest within 10 blocks");
         sendCommandInstruction(sender, "/pow admin listtomechests", "List all tome chest locations");
-        sendCommandInstruction(sender, "/pow admin resetplayer <player>", "Fully reset player to fresh state");
         sendCommandInstruction(sender, "/pow admin set_vampire_spawn [x y z]", "Set vampire respawn location");
     }
 
@@ -360,11 +362,13 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
      */
     private boolean handlePlayerCountCommand(CommandSender sender, String[] args) {
         if (args.length == 0) {
-            sender.sendMessage(Component.text("Usage: /pow admin playercount <all | human | vampire> <spoiler>", NamedTextColor.RED));
+            sender.sendMessage(Component.text("Usage: /pow admin playercount <all | human | vampire | canCure | canForceCure> <spoiler>", NamedTextColor.RED));
             CommandHandler.sendCommandCorrection(sender, "  all", "See the number of alive players.");
             CommandHandler.sendCommandCorrection(sender, "  human", "See the number of alive human players.");
             CommandHandler.sendCommandCorrection(sender, "  vampire", "See the number of \"alive\" vampire players.");
-            CommandHandler.sendCommandCorrection(sender, "    spoiler", "Retrieve the names of the players counted.");
+            CommandHandler.sendCommandCorrection(sender, "  canCure", "See the number of alive players who can cure themselves.");
+            CommandHandler.sendCommandCorrection(sender, "  canForceCure", "See the number of alive players who can cure others.");
+            CommandHandler.sendCommandCorrection(sender, "  spoiler", "Learn the names of the players counted.");
 
             return true;
         }
@@ -430,6 +434,46 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                 );
 
                 consoleReport = "Admin " + sender.getName() + " checked the vampire player count";
+                break;
+
+            case "cancure":
+                for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+                    // Make sure the player is active in the game
+                    if ((onlinePlayer.getGameMode() == GameMode.SURVIVAL || onlinePlayer.getGameMode() == GameMode.ADVENTURE)
+                            && (!onlinePlayer.getScoreboardTags().contains(DeathHandler.PERMAKILLED_TAG) || onlinePlayer.isDead())
+                            && CureBookReadingListener.hasReadAllCureBooks(onlinePlayer)
+                    ) {
+                        players.add(onlinePlayer);
+                    }
+                }
+
+                playerCount = players.size();
+                sender.sendMessage(Component.text("There " + (playerCount == 1 ? "is" : "are") + " currently ", NamedTextColor.WHITE)
+                        .append(Component.text(playerCount, NamedTextColor.GOLD))
+                        .append(Component.text(" player" + (playerCount == 1 ? "" : "s") + " who can cure themselves in the session.", NamedTextColor.WHITE))
+                );
+
+                consoleReport = "Admin " + sender.getName() + " checked the count of players who can cure";
+                break;
+
+            case "canforcecure":
+                for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+                    // Make sure the player is active in the game
+                    if ((onlinePlayer.getGameMode() == GameMode.SURVIVAL || onlinePlayer.getGameMode() == GameMode.ADVENTURE)
+                            && (!onlinePlayer.getScoreboardTags().contains(DeathHandler.PERMAKILLED_TAG) || onlinePlayer.isDead())
+                            && CureBookReadingListener.hasReadAllCureBooks(onlinePlayer) && CureBookReadingListener.hasReadFourthBook(onlinePlayer)
+                    ) {
+                        players.add(onlinePlayer);
+                    }
+                }
+
+                playerCount = players.size();
+                sender.sendMessage(Component.text("There " + (playerCount == 1 ? "is" : "are") + " currently ", NamedTextColor.WHITE)
+                        .append(Component.text(playerCount, NamedTextColor.GOLD))
+                        .append(Component.text(" player" + (playerCount == 1 ? "" : "s") + " who can cure others in the session.", NamedTextColor.WHITE))
+                );
+
+                consoleReport = "Admin " + sender.getName() + " checked the count of players who can force cure";
                 break;
 
             default:
