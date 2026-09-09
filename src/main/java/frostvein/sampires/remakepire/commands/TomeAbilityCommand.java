@@ -68,6 +68,7 @@ public class TomeAbilityCommand implements CommandExecutor, TabCompleter {
             player.sendMessage(Component.text("Find ancient tomes scattered throughout the world to learn new abilities.", NamedTextColor.GRAY));
 
         } else {
+            player.sendMessage("");
             player.sendMessage(Component.text("=== YOUR TOME ABILITIES ===", NamedTextColor.GOLD)
                     .decorate(TextDecoration.BOLD));
 
@@ -114,10 +115,13 @@ public class TomeAbilityCommand implements CommandExecutor, TabCompleter {
      * @param player The human checking their options.
      */
     private void sendUsage(Player player) {
+        player.sendMessage("");
         player.sendMessage(Component.text("=== TOME ABILITIES ===", NamedTextColor.GOLD)
                 .decorate(TextDecoration.BOLD));
+
         CommandHandler.sendCommandInstruction(player, "/pow tome list", "Show your available abilities");
         CommandHandler.sendCommandInstruction(player, "/pow tome <ability>", "Use a specific ability");
+
         player.sendMessage("");
         player.sendMessage(Component.text("Find ancient tomes in the world to learn new abilities.", NamedTextColor.RED));
     }
