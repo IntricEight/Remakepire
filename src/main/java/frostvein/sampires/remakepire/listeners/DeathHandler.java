@@ -71,8 +71,8 @@ public class DeathHandler implements Listener {
     @EventHandler
     public void onPlayerPostRespawn(PlayerRespawnEvent event) {
         Player player = event.getPlayer();
-        boolean wasVampire = this.vampireManager.isVampire(player);
-        boolean wasHuman = this.vampireManager.isHuman(player);
+        final boolean wasVampire = this.vampireManager.isVampire(player);
+        final boolean wasHuman = this.vampireManager.isHuman(player);
 
         if (wasVampire && player.getScoreboardTags().contains(PERMAKILL_PROCESSING_TAG)) {
             this.vampireManager.killPlayerPermanently(player);
