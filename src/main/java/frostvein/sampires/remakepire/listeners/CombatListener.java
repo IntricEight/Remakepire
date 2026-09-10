@@ -51,6 +51,41 @@ public class CombatListener implements Listener {
         this.random = new Random();
     }
 
+
+
+
+
+
+
+    private void reduceDamageToPlayer(EntityDamageEvent event) {
+        if (event.getEntity() instanceof Player victim) {
+            // Handle any damage modifications caused by being attacked by a player
+            if (event instanceof EntityDamageByEntityEvent byPlayerEvent) {
+                // Modify the damage dealt to humans
+                if (this.vampireManager.isHuman(victim)) {
+                    // Reduce the damage done by mobs
+                    if (!(byPlayerEvent.getDamager() instanceof Player)) {
+                        event.setDamage(event.getDamage() * 0.5);
+                    }
+                }
+
+                // Modify the damage dealt to vampires
+                if (this.vampireManager.isVampire(victim)) {
+                    // Reduce the damage done by mobs
+                    if (!(byPlayerEvent.getDamager() instanceof Player)) {
+                        event.setDamage(event.getDamage() * 0.05);
+                    }
+
+                    // Modify the damage using the vampiric innate resistance
+                    if (victim.getScoreboardTags().contains("skin_strength")) {
+                        event.setDamage(event.getDamage() * 0.9);
+                    }
+                }
+            }
+        }
+    }
+
+
     /**
      * Manage the special interactions that occur during combat. This includes knocking vampires out of bat form, managing damage resistance, turnings and permadeaths, and more.
      *
@@ -60,32 +95,11 @@ public class CombatListener implements Listener {
             priority = EventPriority.HIGH
     )
     public void onEntityDamageByEntity(EntityDamageByEntityEvent event) {
-        Entity reducedDamage = event.getEntity();
-
-        if (reducedDamage instanceof Player victim) {
-            // Modify the damage dealt to humans
-            if (this.vampireManager.isHuman(victim)) {
-                // Reduce the damage done by mobs
-                if (!(event.getDamager() instanceof Player)) {
-                    event.setDamage(event.getDamage() * 0.5);
-                }
-            }
-
-            // Modify the damage dealt to vampires
-            if (this.vampireManager.isVampire(victim)) {
-                // Reduce the damage done by mobs
-                if (!(event.getDamager() instanceof Player)) {
-                    event.setDamage(event.getDamage() * 0.05);
-                }
-
-                // Modify the damage using the vampiric innate resistance
-                if (victim.getScoreboardTags().contains("skin_strength")) {
-                    event.setDamage(event.getDamage() * 0.9);
-                }
-            }
+        if (event.getEntity() instanceof Player victim) {
+            this.reduceDamageToPlayer(event);
         }
 
-        reducedDamage = event.getDamager();
+        Entity reducedDamage = event.getDamager();
         if (reducedDamage instanceof Player attacker) {
             if (!this.plugin.getSessionManager().isSessionActive()) {
                 event.setCancelled(true);
