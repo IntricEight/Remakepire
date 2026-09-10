@@ -118,7 +118,7 @@ public class ConfigManager {
      * @return the seconds between ability uses.
      */
     public int getBloodTiesCooldown() {
-        return this.plugin.getConfig().getInt("abilities.vampire.blood-ties-cooldown", 300);
+        return this.plugin.getConfig().getInt("abilities.vampire.blood-ties-cooldown", 480);
     }
 
     /**

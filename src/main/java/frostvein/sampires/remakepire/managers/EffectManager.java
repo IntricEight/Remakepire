@@ -99,11 +99,11 @@ public class EffectManager {
         } else {
             // Apply sun weakness to the player during active sessions
             if (this.canPlayerSeeSky(player) && this.isDaytime(player.getWorld()) && this.isClearWeather(player.getWorld()) && plugin.getSessionManager().isSessionActive()) {
-                int stage = this.vampireManager.getVampireStage(player);
-                long currentTime = System.currentTimeMillis();
-                UUID playerUUID = player.getUniqueId();
-                Long lastApplied = this.lastTrialOmenApplied.get(playerUUID);
-                boolean shouldApplyTrialOmen = lastApplied == null || currentTime - lastApplied >= 300000L;
+                final int stage = this.vampireManager.getVampireStage(player);
+                final long currentTime = System.currentTimeMillis();
+                final UUID playerUUID = player.getUniqueId();
+                final Long lastApplied = this.lastTrialOmenApplied.get(playerUUID);
+                final boolean shouldApplyTrialOmen = lastApplied == null || currentTime - lastApplied >= 300000L;
 
                 // Apply the visual indicator of sun weakness
                 if (shouldApplyTrialOmen && !player.hasPotionEffect(PotionEffectType.INVISIBILITY) && player.getGameMode() == GameMode.SURVIVAL) {
@@ -206,7 +206,7 @@ public class EffectManager {
      * @return {@code true} if there are no blocks above the player.
      */
     public boolean canPlayerSeeSky(Player player) {
-        Block highestBlock = player.getWorld().getHighestBlockAt(player.getLocation());
+        final Block highestBlock = player.getWorld().getHighestBlockAt(player.getLocation());
         return player.getLocation().getBlockY() >= highestBlock.getY();
     }
 
@@ -238,7 +238,7 @@ public class EffectManager {
      */
     public void applyEternalNightDarkness(Player player) {
         if (this.vampireManager.isHuman(player) && player.getGameMode() == GameMode.SURVIVAL && this.plugin.getSessionManager().isVampiresEternalNightActive()) {
-            PotionEffect darkness = new PotionEffect(PotionEffectType.DARKNESS, -1, 0, false, false, true);
+            final PotionEffect darkness = new PotionEffect(PotionEffectType.DARKNESS, -1, 0, false, false, true);
             player.addPotionEffect(darkness);
         }
     }

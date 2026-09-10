@@ -214,10 +214,10 @@ public class BeaconTeleportListener implements Listener {
     @EventHandler
     public void onPlayerMove(PlayerMoveEvent event) {
         Player player = event.getPlayer();
-        UUID playerId = player.getUniqueId();
+        final UUID playerId = player.getUniqueId();
 
         if (this.channelingPlayers.containsKey(playerId)) {
-            Location from = event.getFrom(), to = event.getTo();
+            final Location from = event.getFrom(), to = event.getTo();
 
             if (from.getX() != to.getX() || from.getY() != to.getY() || from.getZ() != to.getZ()) {
                 this.cancelChanneling(playerId, true);

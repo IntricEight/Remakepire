@@ -37,7 +37,7 @@ public class WayOfTheLumberjackTomeAbility extends TomeAbility implements Listen
      * @param plugin the host plugin object.
      */
     public WayOfTheLumberjackTomeAbility(RemakepirePlugin plugin) {
-        super(plugin, "WayOfTheLumberjack", new String[]{"You gain knowledge on how to fell the forest.", "You permanently gain a 30% chance to harvest", "twice the yield from each harvest."}, 0);
+        super(plugin, "WayOfTheLumberjack", "Way of the Lumberjack", new String[]{"You gain knowledge on how to fell the forest.", "You permanently gain a 30% chance to harvest", "twice the yield from each harvest."}, 0);
         this.placedLogsFile = new File(plugin.getDataFolder(), "placed_logs.json");
         this.loadPlacedLogs();
         Bukkit.getPluginManager().registerEvents(this, plugin);

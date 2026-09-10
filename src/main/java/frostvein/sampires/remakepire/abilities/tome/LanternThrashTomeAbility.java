@@ -29,7 +29,7 @@ public class LanternThrashTomeAbility extends TomeAbility {
      * @param plugin the host plugin object.
      */
     public LanternThrashTomeAbility(RemakepirePlugin plugin) {
-        super(plugin, "LanternThrash", new String[]{"You learn how to thrash your lantern around you in a wide circle,", "igniting the ground beneath you,", "while coating yourself in a flame resistant ichor."}, plugin.getConfigManager().getTomeLanternThrashCooldown());
+        super(plugin, "LanternThrash", "Lantern Thrash", new String[]{"You learn how to thrash your lantern around you in a wide circle,", "igniting the ground beneath you,", "while coating yourself in a flame resistant ichor."}, plugin.getConfigManager().getTomeLanternThrashCooldown());
     }
 
     protected boolean useAbility(Player player) {

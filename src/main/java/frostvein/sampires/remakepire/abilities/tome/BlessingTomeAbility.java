@@ -22,7 +22,7 @@ public class BlessingTomeAbility extends TomeAbility {
      * @param plugin the host plugin object.
      */
     public BlessingTomeAbility(RemakepirePlugin plugin) {
-        super(plugin, "Blessing", new String[]{"Once per day, you are able to turn a bottle of water", "into a splash bottle of holy water."}, plugin.getConfigManager().getTomeBlessingCooldown());
+        super(plugin, "Blessing", "Blessing", new String[]{"Once per day, you are able to turn a bottle of water", "into a splash bottle of holy water."}, plugin.getConfigManager().getTomeBlessingCooldown());
     }
 
     protected boolean useAbility(Player player) {

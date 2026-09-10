@@ -19,7 +19,7 @@ public class TurnUndeadTomeAbility extends TomeAbility {
      * @param plugin the host plugin object.
      */
     public TurnUndeadTomeAbility(RemakepirePlugin plugin) {
-        super(plugin, "TurnUndead", new String[]{"You die. Temporarily.", "For the duration of this ability, undead mobs see you as one of their own,", "and do not attack you."}, plugin.getConfigManager().getTomeTurnUndeadCooldown());
+        super(plugin, "TurnUndead", "Turn Undead", new String[]{"You die. Temporarily.", "For the duration of this ability, undead mobs see you as one of their own,", "and do not attack you."}, plugin.getConfigManager().getTomeTurnUndeadCooldown());
     }
 
     protected boolean useAbility(Player player) {

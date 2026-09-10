@@ -163,9 +163,9 @@ public class VampireFeedingManager implements Listener {
         }
 
         if (this.vampireManager.isHuman(target)) {
-            UUID vampireId = vampire.getUniqueId();
-            int currentSessionThirst = this.getSessionFeedingThirst(vampire);
-            int maxFeedingThirst = this.plugin.getConfigManager().getMaxFeedingThirstPerSession();
+            final UUID vampireId = vampire.getUniqueId();
+            final int currentSessionThirst = this.getSessionFeedingThirst(vampire);
+            final int maxFeedingThirst = this.plugin.getConfigManager().getMaxFeedingThirstPerSession();
 
             // Prevent the vampire from draining more blood than the config setting allows
             if (currentSessionThirst >= maxFeedingThirst) {
@@ -182,11 +182,11 @@ public class VampireFeedingManager implements Listener {
                 return;
             }
 
-            double newHealth = currentHealth - HEALTH_DRAIN_PER_SECOND;
+            final double newHealth = currentHealth - HEALTH_DRAIN_PER_SECOND;
             target.setHealth(newHealth);
-            int currentFoodLevel = target.getFoodLevel(), newFoodLevel = Math.max(0, currentFoodLevel - 1);
+            final int currentFoodLevel = target.getFoodLevel(), newFoodLevel = Math.max(0, currentFoodLevel - 1);
             target.setFoodLevel(newFoodLevel);
-            int thirstToGive = Math.min(2, maxFeedingThirst - currentSessionThirst);
+            final int thirstToGive = Math.min(2, maxFeedingThirst - currentSessionThirst);
 
             this.thirstManager.modifyQuench(vampire, thirstToGive);
             this.sessionFeedingThirst.put(vampireId, currentSessionThirst + thirstToGive);
@@ -210,7 +210,7 @@ public class VampireFeedingManager implements Listener {
         }
 
         // Create the custom drinking sound effect
-        float pitch = session.highPitch ? 0.8F : 0.6F;
+        final float pitch = session.highPitch ? 0.8F : 0.6F;
         vampire.getWorld().playSound(vampire.getLocation(), Sound.ENTITY_WITCH_DRINK, SoundCategory.PLAYERS, 1.0F, pitch);
         session.highPitch = !session.highPitch;
     }
@@ -259,9 +259,9 @@ public class VampireFeedingManager implements Listener {
                 Objective deathObjective = mainScoreboard.getObjective("vsmp_death");
 
                 if (deathObjective != null) {
-                    int currentDeaths = deathObjective.getScore(target.getName()).getScore();
+                    final int currentDeaths = deathObjective.getScore(target.getName()).getScore();
 
-                    if (currentDeaths >= 5) {
+                    if (currentDeaths >= this.plugin.getConfigManager().getHumanLifeCount()) {
                         vampire.sendMessage(Component.text("You watch the light of " + target.getName() + "'s eyes fade, and extinguish. Lost forever.", NamedTextColor.DARK_RED));
                         target.sendMessage(Component.text("The world grows dim, blurry, you feel a darkness reach out, offering you one last chance to live, as a creature of the night... But you refuse... And slip under the veil of the afterlife.", NamedTextColor.GRAY));
                         target.addScoreboardTag(DeathHandler.PERMADEATH_CHOSEN_TAG);
@@ -348,10 +348,11 @@ public class VampireFeedingManager implements Listener {
         if (!this.isFeeding(vampire)) {
             if (vampire.isSneaking()) {
                 if (this.vampireManager.isVampire(vampire)) {
-                    int currentSessionThirst = this.getSessionFeedingThirst(vampire);
+                    final int currentSessionThirst = this.getSessionFeedingThirst(vampire);
 
                     if (currentSessionThirst >= this.plugin.getConfigManager().getMaxFeedingThirstPerSession()) {
                         vampire.sendMessage(Component.text("Your thirst is quenched, for now. You are unable to drink any more blood from feeding until the next session.", NamedTextColor.RED));
+
                     } else {
                         double distance;
                         boolean isHuman, isVampire, inRange;
@@ -412,7 +413,7 @@ public class VampireFeedingManager implements Listener {
      * @param target the player being fed on.
      */
     public void cancelFeedingSessionByTarget(Player target) {
-        UUID targetId = target.getUniqueId();
+        final UUID targetId = target.getUniqueId();
 
         for (FeedingSession session : this.activeSessions.values().toArray(new FeedingSession[0])) {
             if (session.targetId.equals(targetId)) {
@@ -459,7 +460,7 @@ public class VampireFeedingManager implements Listener {
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
         Player player = event.getPlayer();
-        UUID playerId = player.getUniqueId();
+        final UUID playerId = player.getUniqueId();
         FeedingSession session = this.activeSessions.get(playerId);
 
         if (session != null) {

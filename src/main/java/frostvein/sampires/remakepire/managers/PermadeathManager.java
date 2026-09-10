@@ -50,7 +50,7 @@ public class PermadeathManager {
      * @param mode the new permadeath setting.
      */
     public void setPermadeathMode(Player player, PermadeathMode mode) {
-        UUID playerId = player.getUniqueId();
+        final UUID playerId = player.getUniqueId();
         this.permadeathModes.put(playerId, mode);
         this.savePermadeathData();
         this.plugin.logInfo("Player " + player.getName() + " permadeath mode set to: " + mode);
@@ -83,7 +83,7 @@ public class PermadeathManager {
      * @param player the player being removed.
      */
     public void removePlayer(Player player) {
-        UUID playerId = player.getUniqueId();
+        final UUID playerId = player.getUniqueId();
         this.permadeathModes.remove(playerId);
         this.savePermadeathData();
     }
@@ -112,6 +112,7 @@ public class PermadeathManager {
     private void loadPermadeathData() {
         if (!this.dataFile.exists()) {
             this.plugin.logInfo("PermadeathManager: No existing permadeath data file found, starting fresh.");
+
         } else {
             try (FileReader reader = new FileReader(this.dataFile)) {
                 Type type = (new TypeToken<Map<String, String>>() {}).getType();
@@ -120,7 +121,7 @@ public class PermadeathManager {
                 if (rawData != null) {
                     for (Map.Entry<String, String> entry : rawData.entrySet()) {
                         try {
-                            UUID playerId = UUID.fromString(entry.getKey());
+                            final UUID playerId = UUID.fromString(entry.getKey());
                             PermadeathMode mode = PermadeathManager.PermadeathMode.valueOf(entry.getValue());
                             this.permadeathModes.put(playerId, mode);
 
@@ -154,7 +155,7 @@ public class PermadeathManager {
                 if (oldData != null) {
                     for (Map.Entry<String, Boolean> entry : oldData.entrySet()) {
                         try {
-                            UUID playerId = UUID.fromString(entry.getKey());
+                            final UUID playerId = UUID.fromString(entry.getKey());
 
                             if (entry.getValue() && !this.permadeathModes.containsKey(playerId)) {
                                 this.permadeathModes.put(playerId, PermadeathManager.PermadeathMode.ON);
@@ -177,7 +178,7 @@ public class PermadeathManager {
                 if (oldData != null) {
                     for (Map.Entry<String, Boolean> entry : oldData.entrySet()) {
                         try {
-                            UUID playerId = UUID.fromString(entry.getKey());
+                            final UUID playerId = UUID.fromString(entry.getKey());
                             if (entry.getValue()) {
                                 this.permadeathModes.put(playerId, PermadeathManager.PermadeathMode.ABSOLUTE);
                             }

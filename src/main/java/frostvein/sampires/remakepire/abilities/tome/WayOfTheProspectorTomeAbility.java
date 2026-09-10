@@ -25,7 +25,7 @@ public class WayOfTheProspectorTomeAbility extends TomeAbility implements Listen
      * @param plugin the host plugin object.
      */
     public WayOfTheProspectorTomeAbility(RemakepirePlugin plugin) {
-        super(plugin, "WayOfTheProspector", new String[]{"You gain knowledge on how to extract value from the very earth beneath you.", "You permanently gain a 50% chance for an ore", "to drop twice its drops."}, 0);
+        super(plugin, "WayOfTheProspector", "Way of the Prospector", new String[]{"You gain knowledge on how to extract value from the very earth beneath you.", "You permanently gain a 50% chance for an ore", "to drop twice its drops."}, 0);
         Bukkit.getPluginManager().registerEvents(this, plugin);
     }
 

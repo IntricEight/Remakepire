@@ -48,7 +48,7 @@ public class ShoulderBargeTomeAbility extends TomeAbility {
      * @param plugin the host plugin object.
      */
     public ShoulderBargeTomeAbility(RemakepirePlugin plugin) {
-        super(plugin, "ShoulderBarge", new String[]{"You learn to use your very body as a weapon.", "You charge forwards, and any entity that collides with you during this charge", "is knocked back and given slowness for " + (SLOWNESS_DURATION / 20) + " seconds."}, plugin.getConfigManager().getTomeShoulderBargeCooldown());
+        super(plugin, "ShoulderBarge", "Shoulder Barge", new String[]{"You learn to use your very body as a weapon.", "You charge forwards, and any entity that collides with you during this charge", "is knocked back and given slowness for " + (SLOWNESS_DURATION / 20) + " seconds."}, plugin.getConfigManager().getTomeShoulderBargeCooldown());
         Bukkit.getScheduler().runTaskTimer(plugin, this::cleanupOldEntries, 600L, 600L);
     }
 

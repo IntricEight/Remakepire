@@ -17,7 +17,7 @@ import frostvein.sampires.remakepire.managers.VampireAbilityManager;
 
 public abstract class TomeAbility {
     protected final RemakepirePlugin plugin;
-    protected final String name;
+    protected final String name, displayName;
     protected final String[] descriptionLines;
     protected final int cooldownSeconds;
     private static final Map<UUID, Map<String, Long>> playerCooldowns = new HashMap<>();
@@ -34,6 +34,24 @@ public abstract class TomeAbility {
     public TomeAbility(RemakepirePlugin plugin, String name, String[] descriptionLines, int cooldownSeconds) {
         this.plugin = plugin;
         this.name = name;
+        this.displayName = name;
+        this.descriptionLines = descriptionLines;
+        this.cooldownSeconds = cooldownSeconds;
+    }
+
+    /**
+     * Create an instance of a Tome Ability.
+     *
+     * @param plugin the host plugin object.
+     * @param name the name of the ability.
+     * @param displayName the cosmetic name of the ability.
+     * @param descriptionLines the description of the ability.
+     * @param cooldownSeconds the seconds between repeated ability uses (per player).
+     */
+    public TomeAbility(RemakepirePlugin plugin, String name, String displayName, String[] descriptionLines, int cooldownSeconds) {
+        this.plugin = plugin;
+        this.name = name;
+        this.displayName = displayName;
         this.descriptionLines = descriptionLines;
         this.cooldownSeconds = cooldownSeconds;
     }
@@ -45,6 +63,15 @@ public abstract class TomeAbility {
      */
     public String getName() {
         return this.name;
+    }
+
+    /**
+     * Retrieve the tome ability's display name.
+     *
+     * @return A {@code String} of the ability's presentation name.
+     */
+    public String getDisplayName() {
+        return this.displayName;
     }
 
     /**
@@ -73,8 +100,9 @@ public abstract class TomeAbility {
      */
     public final boolean use(Player player) {
         if (this.isOnCooldown(player)) {
-            final long remainingTime = this.getRemainingCooldown(player);
-            this.sendCannotUseMessage(player, "ability is on cooldown! " + VampireAbilityManager.formatTime(remainingTime) + " remaining.");
+            player.sendMessage(Component.text(" ABILITY ON COOLDOWN", NamedTextColor.RED)
+                    .decorate(TextDecoration.BOLD));
+            player.sendMessage(Component.text( this.getDisplayName() + " will be ready in " + VampireAbilityManager.formatTime(this.getRemainingCooldown(player)) + ".", NamedTextColor.RED));
             return false;
 
         } else {
@@ -210,7 +238,7 @@ public abstract class TomeAbility {
     private void notifyAbilityReady(Player player) {
         player.sendMessage(Component.text("⚡ TOME ABILITY READY ⚡", NamedTextColor.GREEN)
                 .decorate(TextDecoration.BOLD));
-        player.sendMessage(Component.text(this.name + " is now available.", NamedTextColor.GREEN));
+        player.sendMessage(Component.text(this.displayName + " is now available.", NamedTextColor.GREEN));
         player.playSound(player, Sound.BLOCK_NOTE_BLOCK_CHIME, SoundCategory.MASTER, 0.5F, 1.5F);
     }
 

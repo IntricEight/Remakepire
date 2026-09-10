@@ -151,7 +151,7 @@ public class ArmorStorageManager {
             if (loadedData != null) {
                 for (Map.Entry<String, StoredArmor> entry : loadedData.entrySet()) {
                     try {
-                        UUID playerId = UUID.fromString(entry.getKey());
+                        final UUID playerId = UUID.fromString(entry.getKey());
                         this.armorCache.put(playerId, entry.getValue());
 
                     } catch (IllegalArgumentException e) {

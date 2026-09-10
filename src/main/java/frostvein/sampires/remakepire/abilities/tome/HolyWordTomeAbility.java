@@ -37,7 +37,7 @@ public class HolyWordTomeAbility extends TomeAbility implements Listener {
      * @param plugin the host plugin object.
      */
     public HolyWordTomeAbility(RemakepirePlugin plugin) {
-        super(plugin, "HolyWord", new String[]{"You speak a word of divine power,", "paralysing all vampires within a " + RADIUS + " block radius for " + (PARALYSIS_DURATION / 20) + " seconds", "(Vampires are impervious to all damage while frozen)."}, plugin.getConfigManager().getTomeHolyWordCooldown());
+        super(plugin, "HolyWord", "Holy Word", new String[]{"You speak a word of divine power,", "paralysing all vampires within a " + RADIUS + " block radius for " + (PARALYSIS_DURATION / 20) + " seconds", "(Vampires are impervious to all damage while frozen)."}, plugin.getConfigManager().getTomeHolyWordCooldown());
         Bukkit.getPluginManager().registerEvents(this, plugin);
     }
 

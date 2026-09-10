@@ -15,7 +15,7 @@ public class UncannyDirectionTomeAbility extends TomeAbility {
      * @param plugin the host plugin object.
      */
     public UncannyDirectionTomeAbility(RemakepirePlugin plugin) {
-        super(plugin, "UncannyDirection", new String[]{"You gain an understanding of navigation you thought not possible,", "and can navigate your way back to home far more easily than before."}, plugin.getConfigManager().getTomeUncannyDirectionCooldown());
+        super(plugin, "UncannyDirection", "Uncanny Direction", new String[]{"You gain an understanding of navigation you thought not possible,", "and can navigate your way back to home far more easily than before."}, plugin.getConfigManager().getTomeUncannyDirectionCooldown());
     }
 
     protected boolean useAbility(final Player player) {
