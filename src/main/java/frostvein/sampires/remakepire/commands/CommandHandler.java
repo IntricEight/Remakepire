@@ -33,6 +33,7 @@ import frostvein.sampires.remakepire.RemakepirePlugin;
 import frostvein.sampires.remakepire.abilities.tome.TomeAbility;
 import frostvein.sampires.remakepire.beacons.BeaconSite;
 import frostvein.sampires.remakepire.beacons.BeaconSite.BeaconState;
+import frostvein.sampires.remakepire.listeners.CureBookReadingListener;
 import frostvein.sampires.remakepire.listeners.DeathHandler;
 import frostvein.sampires.remakepire.managers.BeaconManager;
 import frostvein.sampires.remakepire.managers.ConfigManager;
@@ -192,7 +193,8 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
      *
      * @param sender the admin sending the command.
      */
-    private void sendAdminHelp(CommandSender sender) {
+    public void sendAdminHelp(CommandSender sender) {
+        sender.sendMessage("");
         sender.sendMessage(Component.text("=== VampireSMP Admin Commands ===", NamedTextColor.GOLD)
                 .decorate(TextDecoration.BOLD));
 
@@ -215,11 +217,12 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         sendCommandInstruction(sender, "/pow admin removeendermen <all | toggle | status>", "Manage enderman removal");
         sendCommandInstruction(sender, "/pow admin removecreepers <all | toggle | status>", "Manage creeper removal");
         sendCommandInstruction(sender, "/pow admin setupplayer <player>", "Give starter items to player");
+        sendCommandInstruction(sender, "/pow admin resetplayer <player>", "Fully reset player to fresh state");
+        sendCommandInstruction(sender, "/pow admin playercount <all | human | vampire | canCure | canForceCure> [spoiler]", "Retrieve the number of players who meet certain criteria. If [spoiler] is true, the player names will be listed as well.");
         sendCommandInstruction(sender, "/pow admin spawnanimals", "Manually trigger passive mob spawning");
         sendCommandInstruction(sender, "/pow admin addtomechest", "Add current location as tome chest spawn");
         sendCommandInstruction(sender, "/pow admin removetomechest", "Remove nearest tome chest within 10 blocks");
         sendCommandInstruction(sender, "/pow admin listtomechests", "List all tome chest locations");
-        sendCommandInstruction(sender, "/pow admin resetplayer <player>", "Fully reset player to fresh state");
         sendCommandInstruction(sender, "/pow admin set_vampire_spawn [x y z]", "Set vampire respawn location");
     }
 
@@ -359,15 +362,20 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
      */
     private boolean handlePlayerCountCommand(CommandSender sender, String[] args) {
         if (args.length == 0) {
-            sender.sendMessage(Component.text("Usage: /pow admin playercount <all | human | vampire>", NamedTextColor.RED));
-            CommandHandler.sendCommandCorrection(sender, "  all", "See the number of alive players");
-            CommandHandler.sendCommandCorrection(sender, "  human", "See the number of alive human players");
-            CommandHandler.sendCommandCorrection(sender, "  vampire", "See the number of \"alive\" vampire players");
+            sender.sendMessage(Component.text("Usage: /pow admin playercount <all | human | vampire | canCure | canForceCure> <spoiler>", NamedTextColor.RED));
+            CommandHandler.sendCommandCorrection(sender, "  all", "See the number of alive players.");
+            CommandHandler.sendCommandCorrection(sender, "  human", "See the number of alive human players.");
+            CommandHandler.sendCommandCorrection(sender, "  vampire", "See the number of \"alive\" vampire players.");
+            CommandHandler.sendCommandCorrection(sender, "  canCure", "See the number of alive players who can cure themselves.");
+            CommandHandler.sendCommandCorrection(sender, "  canForceCure", "See the number of alive players who can cure others.");
+            CommandHandler.sendCommandCorrection(sender, "  spoiler", "Learn the names of the players counted.");
 
             return true;
         }
 
-        int playerCount = 0;
+        String consoleReport;
+        List<Player> players = new ArrayList<>();
+        int playerCount;
 
         switch (args[0].toLowerCase()) {
             case "all":
@@ -375,16 +383,17 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                     // Make sure the player is active in the game
                     if (onlinePlayer.getGameMode() != GameMode.SPECTATOR && (!onlinePlayer.getScoreboardTags().contains(DeathHandler.PERMAKILLED_TAG) || onlinePlayer.isDead())
                     ) {
-                        playerCount++;
+                        players.add(onlinePlayer);
                     }
                 }
 
+                playerCount = players.size();
                 sender.sendMessage(Component.text("There " + (playerCount == 1 ? "is" : "are") + " currently ", NamedTextColor.WHITE)
                         .append(Component.text(playerCount, NamedTextColor.GRAY))
                         .append(Component.text(" player" + (playerCount == 1 ? "" : "s") + " in the session.", NamedTextColor.WHITE))
                 );
 
-                this.plugin.logInfo("Admin " + sender.getName() + " checked the game player count");
+                consoleReport = "Admin " + sender.getName() + " checked the game player count";
                 break;
 
             case "human":
@@ -394,16 +403,17 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                             && (!onlinePlayer.getScoreboardTags().contains(DeathHandler.PERMAKILLED_TAG) || onlinePlayer.isDead())
                             && this.plugin.getVampireManager().isHuman(onlinePlayer)
                     ) {
-                        playerCount++;
+                        players.add(onlinePlayer);
                     }
                 }
 
+                playerCount = players.size();
                 sender.sendMessage(Component.text("There " + (playerCount == 1 ? "is" : "are") + " currently ", NamedTextColor.WHITE)
                         .append(Component.text(playerCount, NamedTextColor.GOLD))
                         .append(Component.text(" human" + (playerCount == 1 ? "" : "s") + " in the session.", NamedTextColor.WHITE))
                 );
 
-                this.plugin.logInfo("Admin " + sender.getName() + " checked the human player count");
+                consoleReport = "Admin " + sender.getName() + " checked the human player count";
                 break;
 
             case "vampire":
@@ -413,22 +423,82 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                             && (!onlinePlayer.getScoreboardTags().contains(DeathHandler.PERMAKILLED_TAG) || onlinePlayer.isDead())
                             && this.plugin.getVampireManager().isVampire(onlinePlayer)
                     ) {
-                        playerCount++;
+                        players.add(onlinePlayer);
                     }
                 }
 
+                playerCount = players.size();
                 sender.sendMessage(Component.text("There " + (playerCount == 1 ? "is" : "are") + " currently ", NamedTextColor.WHITE)
                         .append(Component.text(playerCount, NamedTextColor.RED))
                         .append(Component.text(" vampire" + (playerCount == 1 ? "" : "s") + " in the session.", NamedTextColor.WHITE))
                 );
 
-                this.plugin.logInfo("Admin " + sender.getName() + " checked the vampire player count");
+                consoleReport = "Admin " + sender.getName() + " checked the vampire player count";
+                break;
+
+            case "cancure":
+                for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+                    // Make sure the player is active in the game
+                    if ((onlinePlayer.getGameMode() == GameMode.SURVIVAL || onlinePlayer.getGameMode() == GameMode.ADVENTURE)
+                            && (!onlinePlayer.getScoreboardTags().contains(DeathHandler.PERMAKILLED_TAG) || onlinePlayer.isDead())
+                            && CureBookReadingListener.hasReadAllCureBooks(onlinePlayer)
+                    ) {
+                        players.add(onlinePlayer);
+                    }
+                }
+
+                playerCount = players.size();
+                sender.sendMessage(Component.text("There " + (playerCount == 1 ? "is" : "are") + " currently ", NamedTextColor.WHITE)
+                        .append(Component.text(playerCount, NamedTextColor.AQUA))
+                        .append(Component.text(" player" + (playerCount == 1 ? "" : "s") + " who can cure themselves in the session.", NamedTextColor.WHITE))
+                );
+
+                consoleReport = "Admin " + sender.getName() + " checked the count of players who can cure";
+                break;
+
+            case "canforcecure":
+                for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+                    // Make sure the player is active in the game
+                    if ((onlinePlayer.getGameMode() == GameMode.SURVIVAL || onlinePlayer.getGameMode() == GameMode.ADVENTURE)
+                            && (!onlinePlayer.getScoreboardTags().contains(DeathHandler.PERMAKILLED_TAG) || onlinePlayer.isDead())
+                            && CureBookReadingListener.hasReadAllCureBooks(onlinePlayer) && CureBookReadingListener.hasReadFourthBook(onlinePlayer)
+                    ) {
+                        players.add(onlinePlayer);
+                    }
+                }
+
+                playerCount = players.size();
+                sender.sendMessage(Component.text("There " + (playerCount == 1 ? "is" : "are") + " currently ", NamedTextColor.WHITE)
+                        .append(Component.text(playerCount, NamedTextColor.DARK_AQUA))
+                        .append(Component.text(" player" + (playerCount == 1 ? "" : "s") + " who can cure others in the session.", NamedTextColor.WHITE))
+                );
+
+                consoleReport = "Admin " + sender.getName() + " checked the count of players who can force cure";
                 break;
 
             default:
                 sender.sendMessage(Component.text("Invalid action. Use 'all', 'human', or 'vampire'.", NamedTextColor.RED));
+                return true;
         }
 
+        // Display the names of the players who meet the conditions searched for
+        if (args.length >= 2 && !players.isEmpty()) {
+            final boolean spoiler = Boolean.parseBoolean(args[1]);
+
+            if (spoiler) {
+                StringBuilder playerNames = new StringBuilder();
+
+                for (Player onlinePlayer : players) {
+                    playerNames.append(onlinePlayer.getName()).append("  ");
+                }
+
+                sender.sendMessage(Component.text(playerNames.toString(), NamedTextColor.WHITE));
+
+                consoleReport += " using the SPOILER view.";
+            }
+        }
+
+        this.plugin.logInfo(consoleReport);
         return true;
     }
 
@@ -1241,6 +1311,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                 sender.sendMessage(Component.text("Usage: /pow admin beacon debug [beacon_name]", NamedTextColor.RED));
             }
         } else {
+            sender.sendMessage("");
             sender.sendMessage(Component.text("=== BEACON DISPLAY DEBUG INFO ===", NamedTextColor.GOLD));
 
             for (BeaconSite beacon : this.beaconManager.getAllBeacons()) {
@@ -1434,6 +1505,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         Map<BeaconSite.BeaconState, Integer> stateStats = this.beaconManager.getStateStats();
         final int total = stateStats.values().stream().mapToInt(Integer::intValue).sum();
 
+        sender.sendMessage("");
         sender.sendMessage(Component.text("=== BEACON STATISTICS ===", NamedTextColor.GOLD)
                 .decorate(TextDecoration.BOLD));
         sender.sendMessage(Component.text("Total Beacons: ", NamedTextColor.GRAY)
@@ -1600,6 +1672,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
      * Provide the sender with a helpful list of instructions on using POW's plugin commands
      */
     private void sendBeaconHelp(CommandSender sender) {
+        sender.sendMessage("");
         sender.sendMessage(Component.text("=== BEACON COMMANDS ===", NamedTextColor.GOLD)
                 .decorate(TextDecoration.BOLD));
 
@@ -2026,6 +2099,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
     private boolean handleListTomeChestsCommand(CommandSender sender, String[] args) {
         List<Location> tomeLocations = this.plugin.getTomeDistributionManager().getTomeLocations();
 
+        sender.sendMessage("");
         sender.sendMessage(Component.text("=== TOME CHEST LOCATIONS ===", NamedTextColor.GOLD)
                 .decorate(TextDecoration.BOLD));
         sender.sendMessage(Component.text("Total: ", NamedTextColor.GRAY)
