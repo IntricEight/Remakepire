@@ -397,12 +397,12 @@ public class DeathHandler implements Listener {
         if (type == null) {
             this.plugin.logInfo("DEBUG: Weapon is null");
             return false;
-
-        } else {
-            final boolean isWooden = ItemTypeChecking.isWoodenWeapon(type);
-            this.plugin.logInfo("DEBUG: Weapon type: " + type + ", Is wooden: " + isWooden);
-            return isWooden;
         }
+
+        final boolean isWooden = ItemTypeChecking.isWoodenWeapon(type);
+        this.plugin.logInfo("DEBUG: Weapon type: " + type + ", Is wooden: " + isWooden);
+
+        return isWooden;
     }
 
     /**
@@ -411,24 +411,27 @@ public class DeathHandler implements Listener {
      * @param deathLocation the location where the vampire was staked.
      */
     public void createVampireDeathEffects(Location deathLocation) {
-        if (deathLocation.getWorld() != null) {
-            Location centerLoc = deathLocation.clone().add(0.0, 1.0, 0.0);
-            deathLocation.getWorld().spawnParticle(Particle.SOUL_FIRE_FLAME, centerLoc, 60, 1.5, 1.0, 1.5, 0.1);
-            deathLocation.getWorld().spawnParticle(Particle.FLAME, centerLoc, 40, 1.2, 0.8, 1.2, 0.08);
-            deathLocation.getWorld().spawnParticle(Particle.WHITE_ASH, centerLoc, 50, 1.0, 1.5, 1.0, 0.05);
-            deathLocation.getWorld().spawnParticle(Particle.LARGE_SMOKE, centerLoc, 30, 1.8, 1.2, 1.8, 0.02);
-            deathLocation.getWorld().playSound(deathLocation, Sound.ITEM_FIRECHARGE_USE, SoundCategory.PLAYERS, 1.5F, 0.8F);
-
-            this.plugin.getServer().getScheduler().runTaskLater(this.plugin, () -> {
-                deathLocation.getWorld().spawnParticle(Particle.WHITE_ASH, centerLoc, 30, 1.5, 2.0, 1.5, 0.03);
-                deathLocation.getWorld().spawnParticle(Particle.SOUL_FIRE_FLAME, centerLoc, 20, 1.0, 0.5, 1.0, 0.02);
-                deathLocation.getWorld().playSound(deathLocation, Sound.BLOCK_FIRE_EXTINGUISH, SoundCategory.PLAYERS, 1.0F, 1.2F);
-            }, 20L);
-
-            this.plugin.getServer().getScheduler().runTaskLater(this.plugin, () -> {
-                deathLocation.getWorld().spawnParticle(Particle.LARGE_SMOKE, centerLoc, 15, 2.0, 1.8, 2.0, 0.01);
-                deathLocation.getWorld().spawnParticle(Particle.WHITE_ASH, centerLoc, 10, 1.8, 2.5, 1.8, 0.02);
-            }, 40L);
+        if (deathLocation.getWorld() == null) {
+            return;
         }
+
+        final Location centerLoc = deathLocation.clone().add(0.0, 1.0, 0.0);
+
+        deathLocation.getWorld().spawnParticle(Particle.SOUL_FIRE_FLAME, centerLoc, 60, 1.5, 1.0, 1.5, 0.1);
+        deathLocation.getWorld().spawnParticle(Particle.FLAME, centerLoc, 40, 1.2, 0.8, 1.2, 0.08);
+        deathLocation.getWorld().spawnParticle(Particle.WHITE_ASH, centerLoc, 50, 1.0, 1.5, 1.0, 0.05);
+        deathLocation.getWorld().spawnParticle(Particle.LARGE_SMOKE, centerLoc, 30, 1.8, 1.2, 1.8, 0.02);
+        deathLocation.getWorld().playSound(deathLocation, Sound.ITEM_FIRECHARGE_USE, SoundCategory.PLAYERS, 1.5F, 0.8F);
+
+        this.plugin.getServer().getScheduler().runTaskLater(this.plugin, () -> {
+            deathLocation.getWorld().spawnParticle(Particle.WHITE_ASH, centerLoc, 30, 1.5, 2.0, 1.5, 0.03);
+            deathLocation.getWorld().spawnParticle(Particle.SOUL_FIRE_FLAME, centerLoc, 20, 1.0, 0.5, 1.0, 0.02);
+            deathLocation.getWorld().playSound(deathLocation, Sound.BLOCK_FIRE_EXTINGUISH, SoundCategory.PLAYERS, 1.0F, 1.2F);
+        }, 20L);
+
+        this.plugin.getServer().getScheduler().runTaskLater(this.plugin, () -> {
+            deathLocation.getWorld().spawnParticle(Particle.LARGE_SMOKE, centerLoc, 15, 2.0, 1.8, 2.0, 0.01);
+            deathLocation.getWorld().spawnParticle(Particle.WHITE_ASH, centerLoc, 10, 1.8, 2.5, 1.8, 0.02);
+        }, 40L);
     }
 }
