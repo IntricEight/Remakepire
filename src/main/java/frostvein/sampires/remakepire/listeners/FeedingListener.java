@@ -41,7 +41,7 @@ public class FeedingListener implements Listener {
         if (this.plugin.getSessionManager().isSessionActive()) {
             LivingEntity deadEntity = event.getEntity();
 
-            if (!(deadEntity instanceof Player)) {
+            if (!(deadEntity instanceof Player) && this.plugin.getThirstManager().isThirstQuencher(deadEntity)) {
                 Player killer = deadEntity.getKiller();
 
                 if (killer != null) {
@@ -57,7 +57,7 @@ public class FeedingListener implements Listener {
                             // Prevent vampires from getting XP directly thr drop
                             event.setDroppedExp(0);
 
-                            this.plugin.getThirstManager().handleEntityKill(killer, deadEntity.getType(), experienceDropped);
+                            this.plugin.getThirstManager().handleEntityKill(killer, deadEntity, experienceDropped);
 
                             if (experienceDropped > 0 && !killer.getScoreboardTags().contains(SessionManager.INFORMED_SUCCESSFUL_FEEDING)) {
                                 killer.addScoreboardTag(SessionManager.INFORMED_SUCCESSFUL_FEEDING);
