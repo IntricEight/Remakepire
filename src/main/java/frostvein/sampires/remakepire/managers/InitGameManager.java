@@ -580,8 +580,8 @@ public class InitGameManager {
 
                 admin.sendMessage(Component.text("[2/9] Clearing beacon cooldowns...", NamedTextColor.GRAY));
                 this.plugin.getBeaconManager().clearAllBeaconCooldownsForNewSession();
-                admin.sendMessage(Component.text("[3/9] Resetting player data...", NamedTextColor.GRAY));
 
+                admin.sendMessage(Component.text("[3/9] Resetting player data...", NamedTextColor.GRAY));
                 Collection<? extends Player> onlinePlayers = Bukkit.getOnlinePlayers();
 
                 // Clear all tags from all online players
@@ -658,12 +658,11 @@ public class InitGameManager {
 
                 admin.sendMessage(Component.text("[4.8/9] Clearing permadeath preferences...", NamedTextColor.GRAY));
                 this.plugin.getPermadeathManager().clearAllPermadeathModes();
-                admin.sendMessage(Component.text("[5/9] Setting world time and border...", NamedTextColor.GRAY));
 
+                admin.sendMessage(Component.text("[5/9] Setting world time...", NamedTextColor.GRAY));
                 world.setFullTime(1L);
-                world.getWorldBorder().setSize(900000.0);
-                admin.sendMessage(Component.text("[6/9] Applying saturation effect...", NamedTextColor.GRAY));
 
+                admin.sendMessage(Component.text("[6/9] Applying saturation effect...", NamedTextColor.GRAY));
                 for (Player player : onlinePlayers) {
                     player.addPotionEffect(new PotionEffect(PotionEffectType.SATURATION, 200, 9));
                 }
@@ -777,7 +776,6 @@ public class InitGameManager {
                 }
 
                 admin.sendMessage(Component.text("[11/11] Clearing potion effects...", NamedTextColor.GRAY));
-
                 for (Player player : onlinePlayers) {
                     for (PotionEffect effect : player.getActivePotionEffects()) {
                         player.removePotionEffect(effect.getType());
