@@ -4,10 +4,12 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
-import org.bukkit.scheduler.BukkitTask;
 import frostvein.sampires.remakepire.RemakepirePlugin;
 
 public class VampireTexturePackManager {
@@ -67,7 +69,7 @@ public class VampireTexturePackManager {
      * @param reason the reason why the texture pack is being applied.
      */
     public void applyVampireTexturePackDelayed(Player player, long delayTicks, String reason) {
-        BukkitTask task = Bukkit.getScheduler().runTaskLater(this.plugin, () -> {
+        Bukkit.getScheduler().runTaskLater(this.plugin, () -> {
             if (player.isOnline() && this.vampireManager.isVampire(player)) {
                 try {
                     this.applyVampireTexturePack(player, reason + " (delayed)");
@@ -143,8 +145,14 @@ public class VampireTexturePackManager {
      */
     public void applyHumanTexturePackDelayed(Player player, long delayTicks, String reason) {
         Bukkit.getScheduler().runTaskLater(this.plugin, () -> {
-            if (player.isOnline()) {
-                this.applyHumanTexturePack(player, reason + " (delayed)");
+            if (player.isOnline() && this.vampireManager.isHuman(player)) {
+                try {
+                    this.applyHumanTexturePack(player, reason + " (delayed)");
+                } catch (Exception e) {
+                    this.plugin.getLogger().warning("Failed to apply delayed human texture pack to " + player.getName() + ": " + e.getMessage());
+                }
+            } else if (player.isOnline()) {
+                this.plugin.logInfo("Skipped human texture pack for " + player.getName() + " - no longer a human (" + reason + ")");
             }
         }, delayTicks);
     }
@@ -167,6 +175,34 @@ public class VampireTexturePackManager {
      */
     public boolean hasHumanTexturePack(Player player) {
         return this.playersWithHumanTexturePack.contains(player.getUniqueId());
+    }
+
+    /**
+     * Give the player a link to apply the vampire texture pack to their game.
+     *
+     * @param player the player changing to the vampire texture pack.
+     */
+    public void sendVampireTexturePackPrompt(Player player) {
+        player.sendMessage(Component.text("Apply the vampire texture pack: ", NamedTextColor.GRAY)
+                .append(Component.text("[CLICK HERE]", NamedTextColor.RED)
+                        .decorate(TextDecoration.UNDERLINED)
+                        .clickEvent(ClickEvent.runCommand("/pow texture vampire"))
+                        .hoverEvent(HoverEvent.showText(Component.text("Click to apply the vampire texture pack", NamedTextColor.GRAY)))
+                ));
+    }
+
+    /**
+     * Give the player a link to apply the human texture pack to their game.
+     *
+     * @param player the player changing to the human texture pack.
+     */
+    public void sendHumanTexturePackPrompt(Player player) {
+        player.sendMessage(Component.text("Apply the human texture pack: ", NamedTextColor.GRAY)
+                .append(Component.text("[CLICK HERE]", NamedTextColor.GREEN)
+                        .decorate(TextDecoration.UNDERLINED)
+                        .clickEvent(ClickEvent.runCommand("/pow texture human"))
+                        .hoverEvent(HoverEvent.showText(Component.text("Click to apply the human texture pack", NamedTextColor.GRAY)))
+                ));
     }
 
     /**

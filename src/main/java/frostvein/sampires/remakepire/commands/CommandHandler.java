@@ -1129,7 +1129,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                 target.setHealth(target.getAttribute(Attribute.MAX_HEALTH).getValue());
                 sender.sendMessage(Component.text(target.getName() + " is now human.", NamedTextColor.GREEN));
                 target.sendMessage(Component.text("You have been set as human.", NamedTextColor.GREEN));
-                this.sendHumanTexturePackPrompt(target);
+                this.plugin.getVampireTexturePackManager().sendHumanTexturePackPrompt(target);
                 break;
 
             case "1":
@@ -1146,7 +1146,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
 
                 sender.sendMessage(Component.text(target.getName() + " is now a Stage 1 vampire.", NamedTextColor.DARK_PURPLE));
                 target.sendMessage(Component.text("You have been set as a Stage 1 vampire.", NamedTextColor.DARK_PURPLE));
-                this.sendVampireTexturePackPrompt(target);
+                this.plugin.getVampireTexturePackManager().sendVampireTexturePackPrompt(target);
                 break;
 
             case "2":
@@ -1163,7 +1163,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
 
                 sender.sendMessage(Component.text(target.getName() + " is now a Stage 2 vampire.", NamedTextColor.DARK_PURPLE));
                 target.sendMessage(Component.text("You have been set as a Stage 2 vampire.", NamedTextColor.DARK_PURPLE));
-                this.sendVampireTexturePackPrompt(target);
+                this.plugin.getVampireTexturePackManager().sendVampireTexturePackPrompt(target);
                 break;
 
             case "3":
@@ -1180,7 +1180,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
 
                 sender.sendMessage(Component.text(target.getName() + " is now a Stage 3 vampire.", NamedTextColor.DARK_PURPLE));
                 target.sendMessage(Component.text("You have been set as a Stage 3 vampire.", NamedTextColor.DARK_PURPLE));
-                this.sendVampireTexturePackPrompt(target);
+                this.plugin.getVampireTexturePackManager().sendVampireTexturePackPrompt(target);
                 break;
 
             case "turn":
@@ -2656,34 +2656,6 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
     private void applyVampireNightVision(Player player) {
         final PotionEffect nightVision = new PotionEffect(PotionEffectType.NIGHT_VISION, -1, 0, false, false, false);
         player.addPotionEffect(nightVision);
-    }
-
-    /**
-     * Give the player a link to apply the vampire texture pack to their game.
-     *
-     * @param player the player changing to the vampire texture pack.
-     */
-    private void sendVampireTexturePackPrompt(Player player) {
-        player.sendMessage(Component.text("Apply the vampire texture pack: ", NamedTextColor.GRAY)
-                .append(Component.text("[CLICK HERE]", NamedTextColor.RED)
-                        .decorate(TextDecoration.UNDERLINED)
-                        .clickEvent(ClickEvent.runCommand("/pow texture vampire"))
-                        .hoverEvent(HoverEvent.showText(Component.text("Click to apply the vampire texture pack", NamedTextColor.GRAY)))
-                ));
-    }
-
-    /**
-     * Give the player a link to apply the human texture pack to their game.
-     *
-     * @param player the player changing to the human texture pack.
-     */
-    private void sendHumanTexturePackPrompt(Player player) {
-        player.sendMessage(Component.text("Apply the human texture pack: ", NamedTextColor.GRAY)
-                .append(Component.text("[CLICK HERE]", NamedTextColor.GREEN)
-                        .decorate(TextDecoration.UNDERLINED)
-                        .clickEvent(ClickEvent.runCommand("/pow texture human"))
-                        .hoverEvent(HoverEvent.showText(Component.text("Click to apply the human texture pack", NamedTextColor.GRAY)))
-                ));
     }
 
     /**

@@ -120,6 +120,9 @@ public class VampireCureCommand implements CommandExecutor {
         player.sendMessage(Component.text("You are cured. You are human once more.", NamedTextColor.GREEN));
         player.sendMessage(Component.text("But the holy site has been permanently corrupted by your dark presence...", NamedTextColor.DARK_GRAY));
 
+        player.sendMessage("");
+        this.plugin.getVampireTexturePackManager().sendHumanTexturePackPrompt(player);
+
         // Retrieve the messages to announce to the server population
         final String messageToHumans = this.plugin.getCureBookManager().getSelfCureAnnouncementMessage(true);
         final String messageToVampires = this.plugin.getCureBookManager().getSelfCureAnnouncementMessage(false);

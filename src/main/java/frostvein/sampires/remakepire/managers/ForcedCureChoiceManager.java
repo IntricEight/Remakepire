@@ -250,8 +250,11 @@ public class ForcedCureChoiceManager {
         target.sendMessage(Component.text("The holy water burns through your veins...", NamedTextColor.GRAY));
         target.sendMessage(Component.text("Your corrupted blood boils away in divine light...", NamedTextColor.GRAY));
         target.sendMessage(Component.text("You feel your humanity returning...", NamedTextColor.GREEN));
-        target.sendMessage(Component.text("You are human once more.", NamedTextColor.GREEN));
+        target.sendMessage(Component.text("You are cured. You are human once more.", NamedTextColor.GREEN));
         target.sendMessage(Component.text("But the holy site has been permanently corrupted by your dark presence...", NamedTextColor.DARK_GRAY));
+
+        target.sendMessage("");
+        this.plugin.getVampireTexturePackManager().sendHumanTexturePackPrompt(target);
 
         // Retrieve the messages to announce to the server population
         final String messageToHumans = this.plugin.getCureBookManager().getForceCureAnnouncementMessage(true, true);
