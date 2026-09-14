@@ -49,7 +49,7 @@ public class ConfigGuiManager {
         this.configGui = Bukkit.createInventory(null, 9 * ROWS, CONFIG_GUI_TITLE);
 
         for (String commandName : commandsInGui) {
-            this.configGui.setItem(getCommandPositionInGui(commandName), this.getGuiItem(commandName));
+            this.configGui.setItem(getConfigPositionInGui(commandName), this.getGuiItem(commandName));
         }
     }
 
@@ -82,7 +82,7 @@ public class ConfigGuiManager {
      * @param commandName the name of the command which modifies the config value.
      * @return The location of the command's item inside the config GUI.
      */
-    public static int getCommandPositionInGui(String commandName) {
+    public static int getConfigPositionInGui(String commandName) {
         // Retrieve the placement of each command within the GUI design (0-indexed).
         return switch (commandName) {
             // Row 1
@@ -136,7 +136,7 @@ public class ConfigGuiManager {
          * one_human_left           "Ochre froglight"
          * border_active            "barrier"
          *
-         * If changing any values from this, don't forget to change the associated values inside both getItemVisual() and getCommandNameFromItem()
+         * If changing any values from this, don't forget to change the associated values inside both getItemVisual() and getConfigNameFromItem()
          */
 
         return ItemStack.of( switch (commandName) {
@@ -168,7 +168,7 @@ public class ConfigGuiManager {
      * @param material the item being used for the command's slot.
      * @return The command's name.
      */
-    public static String getCommandNameFromItem(Material material) {
+    public static String getConfigNameFromItem(Material material) {
         return switch (material) {
             case Material.NOTE_BLOCK ->                     "alert_on_quit";
             case Material.POTION ->                         "holy_water_cap";
@@ -431,7 +431,7 @@ public class ConfigGuiManager {
      * @param commandName the name of the command that is being described.
      */
     public void refreshConfigGuiItem(String commandName) {
-        this.configGui.setItem(getCommandPositionInGui(commandName), this.getGuiItem(commandName));
+        this.configGui.setItem(getConfigPositionInGui(commandName), this.getGuiItem(commandName));
     }
 
     /**
