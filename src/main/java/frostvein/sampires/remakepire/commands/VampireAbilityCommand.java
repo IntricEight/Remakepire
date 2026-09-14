@@ -1,6 +1,5 @@
 package frostvein.sampires.remakepire.commands;
 
-import java.util.ArrayList;
 import java.util.List;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -10,7 +9,6 @@ import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffectType;
 import frostvein.sampires.remakepire.RemakepirePlugin;
@@ -20,7 +18,7 @@ import frostvein.sampires.remakepire.beacons.BeaconSite;
 import frostvein.sampires.remakepire.managers.BeaconManager;
 import frostvein.sampires.remakepire.managers.VampireAbilityManager;
 
-public class VampireAbilityCommand implements CommandExecutor, TabCompleter {
+public class VampireAbilityCommand implements CommandExecutor {
     private final RemakepirePlugin plugin;
     private final VampireAbilityManager abilityManager;
     private final BeaconManager beaconManager;
@@ -280,37 +278,5 @@ public class VampireAbilityCommand implements CommandExecutor, TabCompleter {
         }
 
         player.sendMessage("");
-    }
-
-    /**
-     * Create the list of autocorrecting options for vability commands as they are written out in the command line.
-     *
-     * @param command the previous word in the argument list.
-     * @return A {@code List} of options for the autocomplete to suggest.
-     */
-    public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
-        if (!(sender instanceof Player player)) {
-            return new ArrayList<>();
-
-        } else {
-            List<String> completions = new ArrayList<>();
-
-            if (args.length == 1) {
-                completions.add("list");
-                completions.add("all");
-
-                if (this.plugin.getVampireManager().isVampire(player)) {
-                    List<VampireAbility> availableAbilities = this.abilityManager.getAvailableAbilities(player);
-                    completions.addAll(availableAbilities.stream().map(VampireAbility::getName).toList());
-                }
-            }
-
-            if (args.length > 0) {
-                String input = args[args.length - 1].toLowerCase();
-                completions.removeIf((s) -> !s.toLowerCase().startsWith(input));
-            }
-
-            return completions;
-        }
     }
 }

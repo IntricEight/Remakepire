@@ -1,7 +1,6 @@
 package frostvein.sampires.remakepire.commands;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -22,7 +21,6 @@ import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
@@ -41,7 +39,7 @@ import frostvein.sampires.remakepire.managers.SessionManager;
 import frostvein.sampires.remakepire.managers.TomeManager;
 import frostvein.sampires.remakepire.managers.VampireManager;
 
-public class CommandHandler implements CommandExecutor, TabCompleter {
+public class CommandHandler implements CommandExecutor {
     private final RemakepirePlugin plugin;
     private final ConfigManager configManager;
     private final SessionManager sessionManager;
@@ -310,8 +308,8 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
             this.plugin.getLogger().warning("Failed to reset death count for " + player.getName() + ": " + e.getMessage());
         }
 
-        if (this.plugin.getTomeManager() != null) {
-            this.plugin.getTomeManager().removeAllAbilities(player);
+        if (tomeManager != null) {
+            tomeManager.removeAllAbilities(player);
         }
 
         if (this.plugin.getThirstManager() != null) {
@@ -401,7 +399,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                     // Make sure the player is active in the game
                     if ((onlinePlayer.getGameMode() == GameMode.SURVIVAL || onlinePlayer.getGameMode() == GameMode.ADVENTURE)
                             && (!onlinePlayer.getScoreboardTags().contains(DeathHandler.PERMAKILLED_TAG) || onlinePlayer.isDead())
-                            && this.plugin.getVampireManager().isHuman(onlinePlayer)
+                            && vampireManager.isHuman(onlinePlayer)
                     ) {
                         players.add(onlinePlayer);
                     }
@@ -421,7 +419,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                     // Make sure the player is active in the game
                     if ((onlinePlayer.getGameMode() == GameMode.SURVIVAL || onlinePlayer.getGameMode() == GameMode.ADVENTURE)
                             && (!onlinePlayer.getScoreboardTags().contains(DeathHandler.PERMAKILLED_TAG) || onlinePlayer.isDead())
-                            && this.plugin.getVampireManager().isVampire(onlinePlayer)
+                            && vampireManager.isVampire(onlinePlayer)
                     ) {
                         players.add(onlinePlayer);
                     }
@@ -623,7 +621,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
 
                     // Clear the list of tome absorption if the cap is being disabled
                     if (!Boolean.parseBoolean(args[1])) {
-                        this.plugin.getTomeManager().clearAllTomeUsage();
+                        tomeManager.clearAllTomeUsage();
                     }
 
                     break;
@@ -633,8 +631,8 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
 
                     // Clear existing promotion and stage bans if capping is being disabled
                     if (!Boolean.parseBoolean(args[1])) {
-                        plugin.getVampireManager().clearAllPromotionBans();
-                        plugin.getVampireManager().clearAllStageCaps();
+                        vampireManager.clearAllPromotionBans();
+                        vampireManager.clearAllStageCaps();
                     }
 
                     senderMessage = this.configUpdateMessage("vampire-level-capping", Boolean.parseBoolean(args[1]));
@@ -837,7 +835,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         }
 
         String locationStr = (int)x + "," + (int)y + "," + (int)z;
-        this.plugin.getConfigManager().setVampireRespawnLocation(locationStr);
+        configManager.setVampireRespawnLocation(locationStr);
         this.plugin.reloadVampireRespawnLocation();
 
         sender.sendMessage(Component.text("Vampire spawn location set to: ", NamedTextColor.GREEN)
@@ -938,7 +936,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         // Handle the cooldown command for individual players
         if (args.length == 0) {
             for (Player player : Bukkit.getOnlinePlayers()) {
-                if (this.plugin.getVampireManager().isHuman(player)) {
+                if (vampireManager.isHuman(player)) {
                     TomeAbility.clearAllCooldowns(player);
 
                     player.removeScoreboardTag(SessionManager.BLESSING_USED_SESSION);
@@ -952,7 +950,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
             // Handle the cooldown command for a single player
             Player target = Bukkit.getPlayerExact(args[0]);
 
-            if (target != null && this.plugin.getVampireManager().isHuman(target)) {
+            if (target != null && vampireManager.isHuman(target)) {
                 TomeAbility.clearAllCooldowns(target);
 
                 target.removeScoreboardTag(SessionManager.BLESSING_USED_SESSION);
@@ -1556,7 +1554,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
 
         sender.sendMessage(Component.text("=== BEACON INFO ===", NamedTextColor.GOLD)
                 .decorate(TextDecoration.BOLD));
-        sender.sendMessage(beacon.getStatusString(this.plugin.getSessionManager()));
+        sender.sendMessage(beacon.getStatusString(sessionManager));
 
         return true;
     }
@@ -1659,7 +1657,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
 
         if (this.beaconManager.setBeaconNeutral(name)) {
             sender.sendMessage(Component.text("Beacon '" + name + "' has been unaligned and set to neutral.", NamedTextColor.GRAY));
-            sender.sendMessage(Component.text("The beacon texture has changed. Players will receive a notification in " + this.plugin.getConfigManager().getBeaconNeutralAnnouncementDelaySeconds() + " seconds.", NamedTextColor.GRAY));
+            sender.sendMessage(Component.text("The beacon texture has changed. Players will receive a notification in " + configManager.getBeaconNeutralAnnouncementDelaySeconds() + " seconds.", NamedTextColor.GRAY));
 
         } else {
             sender.sendMessage(Component.text("Beacon '" + name + "' not found.", NamedTextColor.RED));
@@ -1725,7 +1723,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
             sender.sendMessage(Component.text("Missing crucial argument for the turner player.", NamedTextColor.RED));
         }
 
-        this.plugin.getVampireManager().performVampireTurning(target, turner);
+        vampireManager.performVampireTurning(target, turner);
 
         return true;
     }
@@ -1773,7 +1771,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
             int playercount = 0;
 
             for (Player player : Bukkit.getOnlinePlayers()) {
-                if (!this.plugin.getVampireManager().isVampireStage2OrHigher(player)) {
+                if (!vampireManager.isVampireStage2OrHigher(player)) {
                     this.giveTome(player, abilityName, amount);
                     playercount++;
                 }
@@ -2497,165 +2495,12 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
     }
 
     /**
-     * Create the list of autocorrecting options for admin commands as they are written out in the command line.
-     *
-     * @param command the previous word in the argument list.
-     * @return A {@code List} of options for the autocomplete to suggest.
-     */
-    public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
-        if (!sender.hasPermission("vampiresmp.admin")) {
-            return new ArrayList<>();
-        }
-
-        // Stores the autocomplete options that will be displayed
-        List<String> completions = new ArrayList<>();
-
-        if (command.getName().equalsIgnoreCase("session")) {
-            if (args.length == 1) {
-                completions.addAll(Arrays.asList("start", "pause", "end", "prime", "resume", "building"));
-            }
-
-        } else if (command.getName().equalsIgnoreCase("vampire")) {
-            if (args.length == 1) {
-                for (Player player : Bukkit.getOnlinePlayers()) {
-                    completions.add(player.getName());
-                }
-            } else if (args.length == 2) {
-                completions.addAll(Arrays.asList("human", "1", "2", "3", "turn", "clearcap", "clearban"));
-
-            } else if (args.length == 3 && args[1].equalsIgnoreCase("turn")) {
-                for (Player player : Bukkit.getOnlinePlayers()) {
-                    if (this.vampireManager.isVampire(player)) {
-                        completions.add(player.getName());
-                    }
-                }
-            }
-
-        } else if (command.getName().equalsIgnoreCase("config")) {
-            if (args.length == 1) {
-                completions.addAll(Arrays.asList("help", "alert_on_quit", "holy_water_cap", "tome_cap", "vampire_level_cap", "new_vampire_tracking", "allow_vampire_mounts", "vampire_health_check", "damage_suppression", "cure_requires_dead_sire", "cure_requires_daylight", "cure_book_spawning", "enable_npc_mobs", "breeding_out_of_session", "stake_permadeath_stage", "human_life_limit", "one_human_left", "border_active"));
-
-            } else if (args.length == 2) {
-                switch (args[0]) {
-                    case "stake_permadeath_stage":
-                        completions.addAll(Arrays.asList("1", "2", "3"));
-                        break;
-
-                    case "vampire_health_check":
-                        completions.addAll(Arrays.asList("20", "40", "60", "100", "200"));
-                        break;
-
-                    case "damage_suppression":
-                        completions.addAll(Arrays.asList("0", "10", "25", "50", "75", "100"));
-                        break;
-
-                    default:
-                        completions.addAll(Arrays.asList("true", "false"));
-                        break;
-                }
-            }
-
-        } else if (command.getName().equalsIgnoreCase("beacon")) {
-            if (args.length == 1) {
-                completions.addAll(Arrays.asList("add", "remove", "list", "info", "stats", "reload", "validate", "holy", "desecrated", "corrupted", "neutral", "fix", "refresh", "cleanup", "clearcooldowns", "debug"));
-
-            } else if (args.length == 2) {
-                final String subCommand = args[0].toLowerCase();
-
-                if (!subCommand.equals("remove") && !subCommand.equals("delete") && !subCommand.equals("info") && !subCommand.equals("holy") && !subCommand.equals("desecrated") && !subCommand.equals("desecrate") && !subCommand.equals("break") && !subCommand.equals("corrupt") && !subCommand.equals("corrupted") && !subCommand.equals("neutral")) {
-                    if (subCommand.equals("add")) {
-                        completions.add("<beacon_name>");
-                    }
-                } else {
-                    completions.addAll(this.beaconManager.getBeaconNames());
-                }
-            } else if (args.length == 3 && args[0].equalsIgnoreCase("add")) {
-                completions.addAll(Arrays.asList("5", "10", "15", "20", "25"));
-            }
-        } else if (command.getName().equalsIgnoreCase("cooldowns")) {
-            if (args.length == 1) {
-                completions.addAll(Arrays.asList("reset", "clear"));
-
-            } else if (args.length == 2 && (args[0].equalsIgnoreCase("reset") || args[0].equalsIgnoreCase("clear"))) {
-                for (Player player : Bukkit.getOnlinePlayers()) {
-                    completions.add(player.getName());
-                }
-            }
-        } else if (command.getName().equalsIgnoreCase("break_warning")) {
-            completions.clear();
-
-        } else if (command.getName().equalsIgnoreCase("givetome")) {
-            if (args.length == 1) {
-                completions.add("@a");
-
-                for (Player player : Bukkit.getOnlinePlayers()) {
-                    completions.add(player.getName());
-                }
-            } else if (args.length == 2) {
-                completions.addAll(this.tomeManager.getAllAbilityNames());
-
-            } else if (args.length == 3) {
-                completions.addAll(Arrays.asList("1", "5", "10", "16", "32", "64"));
-            }
-        } else if (command.getName().equalsIgnoreCase("distributetomes")) {
-            completions.clear();
-
-        } else if (command.getName().equalsIgnoreCase("clearbloodmoonbuffs")) {
-            if (args.length == 1) {
-                completions.add("all");
-
-                for (Player player : Bukkit.getOnlinePlayers()) {
-                    completions.add(player.getName());
-                }
-            }
-        } else if (command.getName().equalsIgnoreCase("make_incurable")) {
-            if (args.length == 1) {
-                completions.add("@a");
-
-                for (Player player : Bukkit.getOnlinePlayers()) {
-                    completions.add(player.getName());
-                }
-            }
-        } else if (command.getName().equalsIgnoreCase("fixattributes")) {
-            if (args.length == 1) {
-                completions.add("all");
-
-                for (Player player : Bukkit.getOnlinePlayers()) {
-                    completions.add(player.getName());
-                }
-            }
-        } else if (command.getName().equalsIgnoreCase("removeendermen")) {
-            if (args.length == 1) {
-                completions.addAll(Arrays.asList("all", "toggle", "status"));
-            }
-        } else if (command.getName().equalsIgnoreCase("setupplayer")) {
-            if (args.length == 1) {
-                completions.add("@a");
-
-                for (Player player : Bukkit.getOnlinePlayers()) {
-                    completions.add(player.getName());
-                }
-            }
-        } else if (command.getName().equalsIgnoreCase("spawnanimals")) {
-            completions.clear();
-        }
-
-        if (args.length > 0) {
-            String input = args[args.length - 1].toLowerCase();
-            completions.removeIf((s) -> !s.toLowerCase().startsWith(input));
-        }
-
-        return completions;
-    }
-
-    /**
      * Give an infinite night vision effect to the player.
      *
      * @param player the vampire gaining night vision.
      */
     private void applyVampireNightVision(Player player) {
-        final PotionEffect nightVision = new PotionEffect(PotionEffectType.NIGHT_VISION, -1, 0, false, false, false);
-        player.addPotionEffect(nightVision);
+        player.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION, -1, 0, false, false, false));
     }
 
     /**
