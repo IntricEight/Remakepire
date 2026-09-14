@@ -12,6 +12,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import frostvein.sampires.remakepire.RemakepirePlugin;
 import frostvein.sampires.remakepire.managers.SessionManager;
@@ -112,13 +113,28 @@ public class BlockListener implements Listener {
     }
 
     /**
+     * Prevent players from breaking crops by jumping on them during inactive game sessions.
+     *
+     * @param event a block state is changed.
+     */
+    @EventHandler
+    public void onFarmlandTrample(EntityChangeBlockEvent event) {
+        if (this.plugin.getSessionManager().isOutOfSession()) {
+            // Stop players from turning farm blocks into dirt blocks outside of interaction times (active session and build mode)
+            if (event.getBlock().getType() == Material.FARMLAND && event.getTo() == Material.DIRT) {
+                event.setCancelled(true);
+            }
+        }
+    }
+
+    /**
      * Stop creeper and wither explosions from destroying blocks.
      *
      * @param event an entity explodes.
      */
     @EventHandler
     public void onEntityExplode(EntityExplodeEvent event) {
-        Entity entity = event.getEntity();
+        final Entity entity = event.getEntity();
 
         // Only stop the block destruction if it is from a Creeper or a Wither
         if (!(entity instanceof Creeper || entity instanceof Wither || entity instanceof WitherSkull)) {

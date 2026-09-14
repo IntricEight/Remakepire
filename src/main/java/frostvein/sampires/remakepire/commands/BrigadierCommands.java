@@ -79,7 +79,7 @@ public class BrigadierCommands {
             this.registerLatinCureCommand(commands);
             this.registerLatinForcedCureCommand(commands);
 
-            this.plugin.logInfo("All Brigadier commands registered successfully!");
+            this.plugin.logInfo("Remakepire - All Brigadier commands registered successfully!");
         });
     }
 

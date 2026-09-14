@@ -19,6 +19,8 @@ import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.Sound;
 import org.bukkit.SoundCategory;
+import org.bukkit.entity.Ageable;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -46,7 +48,7 @@ public class ThirstManager {
     public ThirstManager(RemakepirePlugin plugin) {
         this.plugin = plugin;
         this.vampireManager = plugin.getVampireManager();
-        this.thirstQuenchers = this.initializeThirstQuenchers();
+        this.thirstQuenchers = initializeThirstQuenchers();
         this.THIRST_PER_SECOND = 1.0F / (float)plugin.getConfigManager().getThirstDepletionMinutes() / 60.0F;
         this.setupImmunitySystem();
         this.startThirstTask();
@@ -57,7 +59,7 @@ public class ThirstManager {
      *
      * @return A {@code Set} of entities for vampire to feed on.
      */
-    private Set<EntityType> initializeThirstQuenchers() {
+    public static Set<EntityType> initializeThirstQuenchers() {
         Set<EntityType> quenchers = new HashSet<>();
 
         quenchers.add(EntityType.ARMADILLO);
@@ -215,12 +217,14 @@ public class ThirstManager {
      * Grant the vampire blood from a kill.
      *
      * @param vampire the player gaining blood.
-     * @param entityType the type of entity the vampire killed.
+     * @param entity the entity that the vampire killed.
      * @param experienceDropped the experience points that the entity dropped when killed.
      */
-    public void handleEntityKill(Player vampire, EntityType entityType, int experienceDropped) {
-        if (this.thirstQuenchers.contains(entityType)) {
+    public void handleEntityKill(Player vampire, Entity entity, int experienceDropped) {
+        if (this.isThirstQuencher(entity)) {
             experienceDropped = Math.max(experienceDropped * 2 + 3, 1);
+
+            EntityType entityType = entity.getType();
 
             if (entityType == EntityType.WANDERING_TRADER || entityType == EntityType.PILLAGER || entityType == EntityType.VILLAGER) {
                 experienceDropped += 10;
@@ -470,11 +474,12 @@ public class ThirstManager {
     /**
      * Retrieve if an entity can give vampires blood.
      *
-     * @param entityType the type of entity being checked.
+     * @param entity the entity being checked.
      * @return {@code true} if the entity is listed as the vampire's prey.
      */
-    public boolean isThirstQuencher(EntityType entityType) {
-        return this.thirstQuenchers.contains(entityType);
+    public boolean isThirstQuencher(Entity entity) {
+        // Make sure the animal or entity being fed on is an adult
+        return thirstQuenchers.contains(entity.getType()) && (!(entity instanceof Ageable ageable) || ageable.isAdult());
     }
 
     /**
