@@ -269,10 +269,9 @@ public class TomeDistributionManager {
                             .decoration(TextDecoration.ITALIC, false));
                 }
 
-                lore.add(Component.newline()
-                        .append(Component.text("Right-click with this tome in hand to learn its secrets", NamedTextColor.YELLOW)
-                                .decoration(TextDecoration.ITALIC, false))
-                );
+                lore.add(Component.empty());
+                lore.add(Component.text("Right-click with this tome in hand to learn its secrets", NamedTextColor.YELLOW)
+                                .decoration(TextDecoration.ITALIC, false));
 
                 bookMeta.lore(lore);
             }

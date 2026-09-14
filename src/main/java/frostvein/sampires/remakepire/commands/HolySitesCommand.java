@@ -45,6 +45,7 @@ public class HolySitesCommand implements CommandExecutor {
 
             // Modify the messages based on the player's alignment
             if (this.plugin.getVampireManager().isHuman(player)) {
+                sender.sendMessage("");
                 player.sendMessage(Component.text("=== BEACON STATUS ===", NamedTextColor.GOLD)
                         .decorate(TextDecoration.BOLD));
                 player.sendMessage(Component.text("Holy Beacons: ", NamedTextColor.GREEN)
@@ -70,6 +71,7 @@ public class HolySitesCommand implements CommandExecutor {
                     player.sendMessage(Component.text("The realm has fallen into shadow... no sanctuaries remain.", NamedTextColor.DARK_RED));
                 }
             } else {
+                sender.sendMessage("");
                 player.sendMessage(Component.text("=== BEACON STATUS ===", NamedTextColor.DARK_RED)
                         .decorate(TextDecoration.BOLD));
                 player.sendMessage(Component.text("Desecrated Beacons: ", NamedTextColor.DARK_RED)
