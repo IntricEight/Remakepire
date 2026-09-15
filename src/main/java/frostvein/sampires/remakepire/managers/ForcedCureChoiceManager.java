@@ -46,12 +46,12 @@ public class ForcedCureChoiceManager {
      *
      * @param caster the player forcing the cure.
      * @param target the player who must make the decision.
-     * @param holyBeacon the beacon being used for the cure.
      */
-    public void openChoiceGUI(Player caster, Player target, BeaconSite holyBeacon) {
+    public void openChoiceGUI(Player caster, Player target) {
         boolean hadFlight = target.getAllowFlight();
         boolean wasInvulnerable = target.isInvulnerable();
-        this.pendingCures.put(target.getUniqueId(), new ForcedCureData(caster.getUniqueId(), target.getUniqueId(), holyBeacon, hadFlight, wasInvulnerable));
+
+        this.pendingCures.put(target.getUniqueId(), new ForcedCureData(caster.getUniqueId(), target.getUniqueId(), hadFlight, wasInvulnerable));
         this.applyEffectsAndOpenGUI(target);
     }
 
@@ -193,7 +193,7 @@ public class ForcedCureChoiceManager {
             this.removePendingCure(target);
             Player caster = data.getCaster();
             this.plugin.logInfo("FORCED CURE CHOICE: " + target.getName() + " chose to return to humanity");
-            this.performCure(caster, target, data.holyBeacon);
+            this.performCure(caster, target);
         }
     }
 
@@ -217,8 +217,102 @@ public class ForcedCureChoiceManager {
             this.removePendingCure(target);
             Player caster = data.getCaster();
             this.plugin.logInfo("FORCED CURE CHOICE: " + target.getName() + " chose permadeath over cure");
-            this.performPermadeath(caster, target, data.holyBeacon);
+            this.performPermadeath(caster, target);
         }
+    }
+
+    /**
+     * Create the visual and auditory effects of initiating the force cure, and open the force cure choice GUI.
+     *
+     * @param healer the player enacting the force cure.
+     * @param target the vampire being cured.
+     */
+    public void executeForceVampireCure(Player healer, Player target) {
+        healer.sendMessage("§6Your syringe empties into the vampire's veins");
+        healer.sendMessage("§7Divine light tears through the creature's cursed form...");
+        healer.sendMessage("§e" + target.getName() + " must now choose their fate...");
+
+        Location targetLoc = target.getLocation();
+
+        targetLoc.getWorld().spawnParticle(Particle.END_ROD, targetLoc.clone().add(0.0, 1.0, 0.0), 50, 0.3, 1.0, 0.3, 0.1);
+        targetLoc.getWorld().spawnParticle(Particle.ENCHANT, targetLoc.clone().add(0.0, 1.0, 0.0), 60, 0.5, 1.5, 0.5, 0.5);
+        targetLoc.getWorld().spawnParticle(Particle.WHITE_ASH, targetLoc.clone().add(0.0, 1.0, 0.0), 40, 0.4, 1.2, 0.4, 0.05);
+        targetLoc.getWorld().spawnParticle(Particle.EXPLOSION_EMITTER, targetLoc, 1, 0.0, 0.0, 0.0, 0.0);
+
+        targetLoc.getWorld().playSound(targetLoc, Sound.BLOCK_BELL_USE, SoundCategory.PLAYERS, 1.5F, 1.0F);
+        targetLoc.getWorld().playSound(targetLoc, Sound.BLOCK_BEACON_ACTIVATE, SoundCategory.PLAYERS, 1.0F, 1.2F);
+        targetLoc.getWorld().playSound(targetLoc, Sound.ENTITY_LIGHTNING_BOLT_THUNDER, SoundCategory.PLAYERS, 0.5F, 1.5F);
+
+        this.openChoiceGUI(healer, target);
+    }
+
+    /**
+     * Cure the player of vampirism.
+     *
+     * @param player the vampire being cured.
+     */
+    public void performCure(Player player) {
+        player.showTitle(Title.title(
+                Component.text("CURED", NamedTextColor.GOLD, TextDecoration.BOLD),
+                Component.text("The curse is lifted", NamedTextColor.YELLOW),
+                Title.Times.times(
+                        // 50 milliseconds in a tick, 20 ticks in a second
+                        Duration.ofMillis(10 * 50),     // 1/2 of a second
+                        Duration.ofSeconds(3),
+                        Duration.ofSeconds(1)
+                )
+        ));
+
+        player.sendMessage(Component.text("The mixture burns through your veins...", NamedTextColor.GRAY));
+        player.sendMessage(Component.text("The corrupted blood boils away...", NamedTextColor.GRAY));
+        player.sendMessage(Component.text("You feel your humanity returning...", NamedTextColor.GREEN));
+        player.sendMessage(Component.text("You are cured. You are human once more.", NamedTextColor.GREEN));
+
+        player.sendMessage("");
+        this.plugin.getVampireTexturePackManager().sendHumanTexturePackPrompt(player);
+
+        // Retrieve the messages to announce to the server population
+        final String messageToHumans = this.plugin.getCureBookManager().getForceCureAnnouncementMessage(true, true);
+        final String messageToVampires = this.plugin.getCureBookManager().getForceCureAnnouncementMessage(false, true);
+
+        // Alert all players that a vampire has been cured
+        for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+            if (!onlinePlayer.equals(player)) {
+                if (this.plugin.getVampireManager().isVampire(onlinePlayer)) {
+                    onlinePlayer.sendMessage(messageToVampires);
+                } else {
+                    onlinePlayer.sendMessage(messageToHumans);
+                }
+            }
+        }
+
+        this.plugin.getVampireManager().setPlayerAsHuman(player);
+        player.getActivePotionEffects().forEach((effect) -> player.removePotionEffect(effect.getType()));
+
+        // Check if players are prevented from getting turned again
+        if (plugin.getConfigManager().doCuresHaveLastingEffects()) {
+            player.addScoreboardTag("CuredVampire");
+        }
+
+        // Check for and apply the effects of beacon control
+        if (this.plugin.getSessionManager().isHumansFinalStandActive()) {
+            // Restore the human's health when humans control all beacons
+            this.plugin.getEffectManager().removeHumansFinalStandHealthReduction(player);
+
+        } else if (this.plugin.getSessionManager().isVampiresEternalNightActive()) {
+            // Apply blindness to the human if vampires control all beacons
+            this.plugin.getEffectManager().applyEternalNightDarkness(player);
+        }
+
+        // Create the visual and audio effects of the cure working on the vampire
+        this.plugin.getForcedCureChoiceManager().createCureEffects(player);
+
+        if (this.plugin.getVampireTurningManager() != null) {
+            this.plugin.getVampireTurningManager().disableAllVampireTurning();
+        }
+
+        this.plugin.logInfo("VAMPIRE CURE: " + player.getName() + " has been cured");
+        DeathHandler.checkAndAnnounceTeamElimination(this.plugin, false, true);
     }
 
     /**
@@ -226,9 +320,8 @@ public class ForcedCureChoiceManager {
      *
      * @param caster the player forcing the cure.
      * @param target the player who must make the decision.
-     * @param holyBeacon the beacon being used for the cure.
      */
-    private void performCure(Player caster, Player target, BeaconSite holyBeacon) {
+    public void performCure(Player caster, Player target) {
         // Inform the cure caster that the forced cure was successful
         caster.sendMessage(Component.text(target.getName() + " has chosen to return to humanity...", NamedTextColor.GOLD));
         caster.sendMessage(Component.text("The creature of darkness accepts their redemption...", NamedTextColor.GRAY));
@@ -247,11 +340,10 @@ public class ForcedCureChoiceManager {
         ));
 
         target.sendMessage(Component.text("You accept the holy words and choose to return...", NamedTextColor.GREEN));
-        target.sendMessage(Component.text("The holy water burns through your veins...", NamedTextColor.GRAY));
+        target.sendMessage(Component.text("The mixture burns through your veins...", NamedTextColor.GRAY));
         target.sendMessage(Component.text("Your corrupted blood boils away in divine light...", NamedTextColor.GRAY));
         target.sendMessage(Component.text("You feel your humanity returning...", NamedTextColor.GREEN));
         target.sendMessage(Component.text("You are cured. You are human once more.", NamedTextColor.GREEN));
-        target.sendMessage(Component.text("But the holy site has been permanently corrupted by your dark presence...", NamedTextColor.DARK_GRAY));
 
         target.sendMessage("");
         this.plugin.getVampireTexturePackManager().sendHumanTexturePackPrompt(target);
@@ -292,13 +384,6 @@ public class ForcedCureChoiceManager {
         // Create the visual and audio effects of the cure working on the vampire
         this.createCureEffects(target);
 
-        // Check if beacons should be damaged by the cure process
-        if (plugin.getConfigManager().doCuresHaveLastingEffects()) {
-            this.createBeaconCorruptionEffects(target, holyBeacon);
-            holyBeacon.setState(BeaconState.PERMANENTLY_DESECRATED);
-        }
-
-        this.plugin.getBeaconManager().updateBeaconDisplay(holyBeacon);
         this.plugin.getBeaconManager().saveBeacons();
         this.plugin.getBeaconMajorityManager().updateBeaconMajorityBonuses();
         this.plugin.getBeaconManager().checkAndBroadcastCompleteControl();
@@ -317,9 +402,8 @@ public class ForcedCureChoiceManager {
      *
      * @param caster the player forcing the cure.
      * @param target the player who must make the decision.
-     * @param holyBeacon the beacon being used for the cure.
      */
-    private void performPermadeath(Player caster, Player target, BeaconSite holyBeacon) {
+    private void performPermadeath(Player caster, Player target) {
         // Inform the cure caster that the forced cure was rejected
         caster.sendMessage(Component.text(target.getName() + " has refused redemption...", NamedTextColor.DARK_RED));
         caster.sendMessage(Component.text("The creature chooses death over humanity...", NamedTextColor.GRAY));
@@ -396,22 +480,6 @@ public class ForcedCureChoiceManager {
     }
 
     /**
-     * Create the visual and audio effects of destroying a beacon.
-     *
-     * @param player the player being cured.
-     * @param beacon the beacon being corrupted.
-     */
-    public void createBeaconCorruptionEffects(Player player, BeaconSite beacon) {
-        Location beaconLocation = beacon.getLocation();
-
-        if (beaconLocation != null) {
-            player.getWorld().spawnParticle(Particle.LARGE_SMOKE, beaconLocation.clone().add(0.0, 1.5, 0.0), 50, 0.5, 1.0, 0.5, 0.05);
-            player.getWorld().spawnParticle(Particle.SMOKE, beaconLocation.clone().add(0.0, 1.5, 0.0), 30, 0.3, 0.8, 0.3, 0.02);
-            player.getWorld().playSound(beaconLocation, Sound.ENTITY_WITHER_HURT, SoundCategory.MASTER, 0.8F, 0.6F);
-        }
-    }
-
-    /**
      * Clear the list of pending cures before shutting down the manager.
      */
     public void shutdown() {
@@ -420,7 +488,6 @@ public class ForcedCureChoiceManager {
 
     public static class ForcedCureData {
         public final UUID casterUUID, targetUUID;
-        public final BeaconSite holyBeacon;
         public final boolean hadFlightBefore, wasInvulnerableBefore;
 
         /**
@@ -428,14 +495,12 @@ public class ForcedCureChoiceManager {
          *
          * @param casterUUID the UUID of the player forcing the cure.
          * @param targetUUID the UUID of the player who must make the decision.
-         * @param holyBeacon the beacon being used for the cure.
          * @param hadFlightBefore {@code true} if the player previously had an attribute which granted them flight.
          * @param wasInvulnerableBefore {@code true} if the player previously had an attribute which made them invincible.
          */
-        public ForcedCureData(UUID casterUUID, UUID targetUUID, BeaconSite holyBeacon, boolean hadFlightBefore, boolean wasInvulnerableBefore) {
+        public ForcedCureData(UUID casterUUID, UUID targetUUID, boolean hadFlightBefore, boolean wasInvulnerableBefore) {
             this.casterUUID = casterUUID;
             this.targetUUID = targetUUID;
-            this.holyBeacon = holyBeacon;
             this.hadFlightBefore = hadFlightBefore;
             this.wasInvulnerableBefore = wasInvulnerableBefore;
         }

@@ -104,6 +104,24 @@ public class ConfigManager {
     }
 
     /**
+     * Retrieve the time a player can cancel their self cure before the cure is enacted.
+     *
+     * @return the seconds it takes to apply the cure.
+     */
+    public int getSelfCureApplicationSeconds() {
+        return this.plugin.getConfig().getInt("cure.seconds-to-self-cure", 5);
+    }
+
+    /**
+     * Retrieve the time a player must apply for the force cure to a player before they are trapped into their choice.
+     *
+     * @return the seconds it takes to apply the cure.
+     */
+    public int getForceCureApplicationSeconds() {
+        return this.plugin.getConfig().getInt("cure.seconds-to-force-cure", 5);
+    }
+
+    /**
      * Retrieve the cooldown on the vampire ability Bat Transformation.
      *
      * @return the seconds between ability uses.

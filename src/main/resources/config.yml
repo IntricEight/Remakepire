@@ -359,6 +359,14 @@ cure:
   # Default: true
   cure-aftermath: true
 
+  # Controls how long a player must apply the self cure before it can take effect
+  # Default: 5 seconds
+  seconds-to-self-cure: 5
+
+  # Controls how long a player must apply the forced cure before it can take effect
+  # Default: 5 seconds
+  seconds-to-force-cure: 5
+
 # Fourth Cure Book Configuration
 # Controls whether "The Retribution 4/3" book should spawn in tome chests
 # Default: false

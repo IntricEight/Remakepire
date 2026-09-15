@@ -8,6 +8,7 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
+import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.SoundCategory;
 import org.bukkit.entity.Player;
@@ -114,6 +115,11 @@ public class VampireFeedingManager implements Listener {
 
         --session.preparationSecondsRemaining;
         String preparationMessage;
+
+        // Stop players attempting a cure from feeding by checking if they are holding prismarine
+        if (vampire.getInventory().getItemInMainHand().getType() == Material.PRISMARINE_SHARD || vampire.getInventory().getItemInOffHand().getType() == Material.PRISMARINE_SHARD) {
+            this.cancelFeedingSession(session);
+        }
 
         if (this.vampireManager.isHuman(target)) {
             preparationMessage = "Preparing to feed... " + VampireAbilityManager.formatTime(session.preparationSecondsRemaining) + " remaining";
