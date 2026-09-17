@@ -42,6 +42,23 @@ public class ForcedCureChoiceManager {
     }
 
     /**
+     * Determine if a beacon is currently being used for a force cure.
+     *
+     * @param beaconSite the beacon location to be used.
+     * @return {@code true} if the beacon is actively curing a player.
+     */
+    public boolean isBeaconBeingUsed(BeaconSite beaconSite) {
+        // Check the list of pending cures for one using this beacon
+        for (ForcedCureData data : pendingCures.values()) {
+            if (data.holyBeacon.equals(beaconSite)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
      * Freeze the target and begin the force cure process.
      *
      * @param caster the player forcing the cure.

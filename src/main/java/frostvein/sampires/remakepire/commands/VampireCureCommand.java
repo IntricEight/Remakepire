@@ -81,6 +81,10 @@ public class VampireCureCommand implements CommandExecutor {
         if (nearestHolyBeacon == null) {
             player.sendMessage(Component.text("You must be close to a holy beacon to perform this ritual.", NamedTextColor.RED));
             return true;
+
+        } else if (this.plugin.getForcedCureChoiceManager().isBeaconBeingUsed(nearestHolyBeacon)) {
+            player.sendMessage(Component.text("This holy beacon is actively being channeled toward another cursed creature.", NamedTextColor.RED));
+            return true;
         }
 
         // If the player is not being suppressed, then there must be holy water in their inventory
