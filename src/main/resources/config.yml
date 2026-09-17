@@ -466,7 +466,7 @@ border_active: true
 # ============================================================================
 
 # It is recommended to have the server's forced texture pack (Set inside server.properties) be the human texture pack,
-# in addition to the following settings .
+# in addition to the following configuration settings.
 
 # The URL and SHA1 of the texture pack that human players are provided with
 human-texture-pack:

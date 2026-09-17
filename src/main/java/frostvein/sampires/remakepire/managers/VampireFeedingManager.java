@@ -242,7 +242,7 @@ public class VampireFeedingManager implements Listener {
 
             vampire.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, this.plugin.getConfigManager().getGarlicWeaknessDuration() * 20, 9, false, false));
 
-            // Only trigger the target's death once
+            // Only trigger the target's death once, no matter how many vampires are feeding at the time
             if (!didVictimAlreadyDie(target)) {
                 target.sendMessage(Component.text("Your garlic immunity protects you from turning.", NamedTextColor.GREEN)
                         .decorate(TextDecoration.BOLD));
@@ -254,30 +254,20 @@ public class VampireFeedingManager implements Listener {
             this.cancelFeedingSession(session);
 
         } else if (!this.plugin.getVampireTurningManager().isTurningEnabled(vampire)) {
-            try {
-                Scoreboard mainScoreboard = Bukkit.getScoreboardManager().getMainScoreboard();
-                Objective deathObjective = mainScoreboard.getObjective("vsmp_death");
+            if (this.plugin.getDeathHandler().shouldHumanPermadie(target)) {
+                vampire.sendMessage(Component.text("You watch the light of " + target.getName() + "'s eyes fade, and extinguish. Lost forever.", NamedTextColor.DARK_RED));
+                target.sendMessage(Component.text("The world grows dim, blurry, you feel a darkness reach out, offering you one last chance to live, as a creature of the night... But you refuse... And slip under the veil of the afterlife.", NamedTextColor.GRAY));
+                target.addScoreboardTag(DeathHandler.PERMADEATH_CHOSEN_TAG);
+                target.setHealth(0.0);
 
-                if (deathObjective != null) {
-                    final int currentDeaths = deathObjective.getScore(target.getName()).getScore();
+                this.cancelFeedingSession(session);
+                return;
 
-                    if (currentDeaths >= this.plugin.getConfigManager().getHumanLifeCount()) {
-                        vampire.sendMessage(Component.text("You watch the light of " + target.getName() + "'s eyes fade, and extinguish. Lost forever.", NamedTextColor.DARK_RED));
-                        target.sendMessage(Component.text("The world grows dim, blurry, you feel a darkness reach out, offering you one last chance to live, as a creature of the night... But you refuse... And slip under the veil of the afterlife.", NamedTextColor.GRAY));
-                        target.addScoreboardTag(DeathHandler.PERMADEATH_CHOSEN_TAG);
-                        target.setHealth(0.0);
-
-                        this.cancelFeedingSession(session);
-                        return;
-                    }
-                }
-            } catch (Exception e) {
-                this.plugin.getLogger().warning("Failed to check death count for " + target.getName() + ": " + e.getMessage());
+            } else {
+                vampire.sendMessage(Component.text("You have killed " + target.getName() + ". They will respawn as a human, wounded.", NamedTextColor.RED));
             }
 
-            vampire.sendMessage(Component.text("You have killed " + target.getName() + ". They will respawn as a human, wounded.", NamedTextColor.RED));
-
-            // Only trigger the target's death once
+            // Only trigger the target's death once, no matter how many vampires are feeding at the time
             if (!didVictimAlreadyDie(target)) {
                 target.sendMessage(Component.text("You have been slain by a vampire, but they do not turn you...", NamedTextColor.GRAY));
 
@@ -398,7 +388,7 @@ public class VampireFeedingManager implements Listener {
      * @param session the blood feeding session.
      */
     private void cancelFeedingSession(FeedingSession session) {
-        Player vampire = Bukkit.getPlayer(session.vampireId), target = Bukkit.getPlayer(session.targetId);
+        Player target = Bukkit.getPlayer(session.targetId);
 
         if (target != null && target.isOnline() && session.phase == VampireFeedingManager.FeedingPhase.ACTIVE_FEEDING) {
             target.sendMessage(Component.text("You no longer feel a vampire draining your life force", NamedTextColor.GREEN));

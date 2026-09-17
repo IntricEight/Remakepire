@@ -218,28 +218,16 @@ public class CombatListener implements Listener {
 
                             // If the config is set to allow non-vampire kill sources on humans, check if the human has run out of lives
                             if (plugin.getConfigManager().isLifeLimitEnforced() && victim.getHealth() - event.getFinalDamage() <= 0) {
-                                try {
-                                    Scoreboard mainScoreboard = Bukkit.getScoreboardManager().getMainScoreboard();
-                                    Objective deathObjective = mainScoreboard.getObjective("vsmp_death");
+                                if (this.plugin.getDeathHandler().shouldHumanPermadie(victim)) {
+                                    event.setCancelled(true);
 
-                                    if (deathObjective != null) {
-                                        final int deaths = deathObjective.getScore(victim.getName()).getScore();
+                                    attacker.sendMessage(Component.text("You watch the light of " + victim.getName() + "'s eyes fade, and extinguish. Lost forever.", NamedTextColor.DARK_RED));
+                                    victim.sendMessage(Component.text("The world grows dim, blurry... the light which drew you back so many times beckons once more, but it seems fainter now, out of reach... You lose your grip, and slip under the veil of the afterlife.", NamedTextColor.GRAY));
 
-                                        // Only force the perma death if the human has run out of lives OR permadeath is set to ABSOLUTE
-                                        if (deaths >= this.plugin.getConfigManager().getHumanLifeCount() || this.plugin.getPermadeathManager().hasAbsolutePermadeathEnabled(victim)) {
-                                            event.setCancelled(true);
+                                    victim.addScoreboardTag(DeathHandler.PERMADEATH_CHOSEN_TAG);
 
-                                            attacker.sendMessage(Component.text("You watch the light of " + victim.getName() + "'s eyes fade, and extinguish. Lost forever.", NamedTextColor.DARK_RED));
-                                            victim.sendMessage(Component.text("The world grows dim, blurry... the light which drew you back so many times beckons once more, but it seems fainter now, out of reach... You lose your grip, and slip under the veil of the afterlife.", NamedTextColor.GRAY));
-
-                                            victim.addScoreboardTag(DeathHandler.PERMADEATH_CHOSEN_TAG);
-
-                                            this.plugin.getServer().getScheduler().runTask(this.plugin, () -> victim.setHealth(0.0));
-                                            return;
-                                        }
-                                    }
-                                } catch (Exception e) {
-                                    this.plugin.getLogger().warning("Failed to check death count for " + victim.getName() + ": " + e.getMessage());
+                                    this.plugin.getServer().getScheduler().runTask(this.plugin, () -> victim.setHealth(0.0));
+                                    return;
                                 }
                             }
 
@@ -293,27 +281,15 @@ public class CombatListener implements Listener {
                                     if (!this.plugin.getVampireTurningManager().isTurningEnabled(attacker)) {
                                         event.setCancelled(true);
 
-                                        try {
-                                            Scoreboard mainScoreboard = Bukkit.getScoreboardManager().getMainScoreboard();
-                                            Objective deathObjective = mainScoreboard.getObjective("vsmp_death");
+                                        if (this.plugin.getDeathHandler().shouldHumanPermadie(victim)) {
+                                            attacker.sendMessage(Component.text("You watch the light of " + victim.getName() + "'s eyes fade, and extinguish. Lost forever.", NamedTextColor.DARK_RED));
+                                            victim.sendMessage(Component.text("The world grows dim, blurry, you feel a darkness reach out, offering you one last chance to live, as a creature of the night... But you refuse... And slip under the veil of the afterlife.", NamedTextColor.GRAY));
+                                            victim.addScoreboardTag(DeathHandler.PERMADEATH_CHOSEN_TAG);
 
-                                            // Apply the effect of a chosen permadeath on death
-                                            if (deathObjective != null) {
-                                                final int deaths = deathObjective.getScore(victim.getName()).getScore();
-
-                                                if (deaths >= this.plugin.getConfigManager().getHumanLifeCount()) {
-                                                    attacker.sendMessage(Component.text("You watch the light of " + victim.getName() + "'s eyes fade, and extinguish. Lost forever.", NamedTextColor.DARK_RED));
-                                                    victim.sendMessage(Component.text("The world grows dim, blurry, you feel a darkness reach out, offering you one last chance to live, as a creature of the night... But you refuse... And slip under the veil of the afterlife.", NamedTextColor.GRAY));
-                                                    victim.addScoreboardTag(DeathHandler.PERMADEATH_CHOSEN_TAG);
-
-                                                    final int killThirst = this.plugin.getThirstManager().getKillThirstReward(attacker, victim);
-                                                    this.plugin.getThirstManager().modifyQuench(attacker, killThirst, true);
-                                                    this.plugin.getServer().getScheduler().runTask(this.plugin, () -> victim.setHealth(0.0));
-                                                    return;
-                                                }
-                                            }
-                                        } catch (Exception e) {
-                                            this.plugin.getLogger().warning("Failed to check death count for " + victim.getName() + ": " + e.getMessage());
+                                            final int killThirst = this.plugin.getThirstManager().getKillThirstReward(attacker, victim);
+                                            this.plugin.getThirstManager().modifyQuench(attacker, killThirst, true);
+                                            this.plugin.getServer().getScheduler().runTask(this.plugin, () -> victim.setHealth(0.0));
+                                            return;
                                         }
 
                                         // Apply the effects of killing a human without turning them
@@ -473,23 +449,11 @@ public class CombatListener implements Listener {
                     } else if (this.vampireManager.isHuman(player)) {
                         // If the config is set to allow non-vampire kill sources on humans, check if the human has run out of lives
                         if (plugin.getConfigManager().isLifeLimitEnforced() && player.getHealth() - event.getFinalDamage() <= 0) {
-                            try {
-                                Scoreboard mainScoreboard = Bukkit.getScoreboardManager().getMainScoreboard();
-                                Objective deathObjective = mainScoreboard.getObjective("vsmp_death");
-
-                                if (deathObjective != null) {
-                                    final int deaths = deathObjective.getScore(player.getName()).getScore();
-
-                                    // Only force the perma death if the human has run out of lives OR permadeath is set to ABSOLUTE
-                                    if (deaths >= this.plugin.getConfigManager().getHumanLifeCount() || this.plugin.getPermadeathManager().hasAbsolutePermadeathEnabled(player)) {
-                                        event.setCancelled(true);
-                                        player.sendMessage(Component.text("The world grows dim, blurry... the light which drew you back so many times beckons once more, but it seems fainter now, out of reach... You lose your grip, and slip under the veil of the afterlife.", NamedTextColor.GRAY));
-                                        player.addScoreboardTag(DeathHandler.PERMADEATH_CHOSEN_TAG);
-                                        this.plugin.getServer().getScheduler().runTask(this.plugin, () -> player.setHealth(0.0));
-                                    }
-                                }
-                            } catch (Exception e) {
-                                this.plugin.getLogger().warning("Failed to check death count for " + player.getName() + ": " + e.getMessage());
+                            if (this.plugin.getDeathHandler().shouldHumanPermadie(player)) {
+                                event.setCancelled(true);
+                                player.sendMessage(Component.text("The world grows dim, blurry... the light which drew you back so many times beckons once more, but it seems fainter now, out of reach... You lose your grip, and slip under the veil of the afterlife.", NamedTextColor.GRAY));
+                                player.addScoreboardTag(DeathHandler.PERMADEATH_CHOSEN_TAG);
+                                this.plugin.getServer().getScheduler().runTask(this.plugin, () -> player.setHealth(0.0));
                             }
                         }
                     }
