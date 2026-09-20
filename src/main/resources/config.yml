@@ -470,8 +470,8 @@ border_active: true
 
 # The URL and SHA1 of the texture pack that human players are provided with
 human-texture-pack:
-  url: "https://download.mc-packs.net/pack/b1fbd00667c6ad35c11967a385184aa336d605e1.zip"
-  sha1: "b1fbd00667c6ad35c11967a385184aa336d605e1"
+  url: "https://download.mc-packs.net/pack/4e42367081530cc073b612d9772a18daca7c0df9.zip"
+  sha1: "4e42367081530cc073b612d9772a18daca7c0df9"
 
 # The URL and SHA1 of the texture pack that vampire players are provided with
 vampire-texture-pack:
