@@ -45,42 +45,45 @@ public class StopTheBleedingTomeAbility extends TomeAbility {
         if (!this.canUse(player)) {
             this.sendCannotUseMessage(player, "Only humans can use tome abilities!");
 
-        } else {
-            final UUID playerId = player.getUniqueId();
+        } else if (plugin.getSessionManager().isOutOfSession()) {
+            this.sendCannotUseMessage(player, "This ability cannot be used outside of sessions.");
+            return false;
+        }
 
-            if (this.activeHealingSessions.containsKey(playerId)) {
-                this.cancelHealing(player, "You stop focusing on healing.");
+        final UUID playerId = player.getUniqueId();
 
-            } else {
-                Player target = this.findNearestPlayer(player, PROXIMITY_DISTANCE);
+        if (this.activeHealingSessions.containsKey(playerId)) {
+            this.cancelHealing(player, "You stop focusing on healing.");
+            return false;
+        }
 
-                // If the player is not healing someone, let them heal themselves
-                if (target == null) {
-                    target = player;
-                }
+        Player target = this.findNearestPlayer(player, PROXIMITY_DISTANCE);
 
-                // Prevent a player from being healed too frequently
-                if (target.getScoreboardTags().contains(SessionManager.STOPTHEBLEEDING_USED_SESSION)) {
-                    // Prevent the player from receiving both messages if they are healing themselves
-                    if (target != player) {
-                        this.sendCannotUseMessage(player, target.getName() + " has been healed too recently, it would be dangerous to try again so soon!");
-                    }
+        // If the player is not healing someone, let them heal themselves
+        if (target == null) {
+            target = player;
+        }
 
-                    this.sendCannotUseMessage(target, "Your body still aches from the previous healing session!");
-
-                    return false;
-                }
-
-                if (this.getDeathScore(target) <= 0) {
-                    if (target.equals(player)) {
-                        this.sendCannotUseMessage(player, "You have no deaths to heal!");
-                    } else {
-                        this.sendCannotUseMessage(player, target.getName() + " has no deaths to heal!");
-                    }
-                } else {
-                    this.startHealing(player, target);
-                }
+        // Prevent a player from being healed too frequently
+        if (target.getScoreboardTags().contains(SessionManager.STOPTHEBLEEDING_USED_SESSION)) {
+            // Prevent the player from receiving both messages if they are healing themselves
+            if (target != player) {
+                this.sendCannotUseMessage(player, target.getName() + " has been healed too recently, it would be dangerous to try again so soon!");
             }
+
+            this.sendCannotUseMessage(target, "Your body still aches from the previous healing session!");
+
+            return false;
+        }
+
+        if (this.getDeathScore(target) <= 0) {
+            if (target.equals(player)) {
+                this.sendCannotUseMessage(player, "You have no deaths to heal!");
+            } else {
+                this.sendCannotUseMessage(player, target.getName() + " has no deaths to heal!");
+            }
+        } else {
+            this.startHealing(player, target);
         }
 
         return false;
@@ -321,48 +324,44 @@ public class StopTheBleedingTomeAbility extends TomeAbility {
         public void start() {
             this.task = (new BukkitRunnable() {
                 public void run() {
-                    Player currentHealer = Bukkit.getPlayer(HealingSession.this.healerUUID);
-                    Player currentTarget = Bukkit.getPlayer(HealingSession.this.targetUUID);
+                    Player currentHealer = Bukkit.getPlayer(healerUUID), currentTarget = Bukkit.getPlayer(targetUUID);
 
                     if (currentHealer != null && currentHealer.isOnline() && currentHealer.getScoreboardTags().contains(ACTIVE_TAG)) {
                         if (currentTarget != null && currentTarget.isOnline()) {
                             if (!currentHealer.isSneaking()) {
-                                StopTheBleedingTomeAbility.this.cancelHealing(currentHealer, "You stopped crouching - Your healing procedure is cancelled.");
+                                cancelHealing(currentHealer, "You stopped crouching - Your healing procedure is cancelled.");
 
-                            } else if (HealingSession.this.isSelfHeal || currentHealer.getWorld().equals(currentTarget.getWorld()) && !(currentHealer.getLocation().distance(currentTarget.getLocation()) > PROXIMITY_DISTANCE)) {
-                                if (HealingSession.this.particleCounter % PARTICLE_INTERVAL_TICKS == 0) {
+                            } else if (isSelfHeal || currentHealer.getWorld().equals(currentTarget.getWorld()) && !(currentHealer.getLocation().distance(currentTarget.getLocation()) > PROXIMITY_DISTANCE)) {
+                                if (particleCounter % PARTICLE_INTERVAL_TICKS == 0) {
                                     currentTarget.getWorld().spawnParticle(Particle.SCRAPE, currentTarget.getLocation().add(0.0, 1.0, 0.0), 3, 0.3, 0.5, 0.3, 0.02);
                                 }
 
-                                ++HealingSession.this.particleCounter;
-                                int secondsRemaining = HealingSession.this.ticksRemaining / 20;
+                                ++particleCounter;
+                                int secondsRemaining = ticksRemaining / 20;
                                 String timeDisplay = VampireAbilityManager.formatTime(secondsRemaining);
 
                                 // Let the player(s) involved know what's going on
-                                if (HealingSession.this.isSelfHeal) {
+                                if (isSelfHeal) {
                                     // Let the player know they are healing themselves successfully
-                                    currentHealer.sendActionBar(
-                                            Component.text("Healing yourself... ", NamedTextColor.GREEN)
-                                                    .append(Component.text(timeDisplay, NamedTextColor.YELLOW))
-                                                    .append(Component.text(" remaining", NamedTextColor.GREEN))
+                                    currentHealer.sendActionBar(Component.text("Healing yourself... ", NamedTextColor.GREEN)
+                                            .append(Component.text(timeDisplay, NamedTextColor.YELLOW))
+                                            .append(Component.text(" remaining", NamedTextColor.GREEN))
                                     );
                                 } else {
                                     // Let the healer know how much time remains
-                                    currentHealer.sendActionBar(
-                                            Component.text("Healing " + currentTarget.getName() + "... ", NamedTextColor.GREEN)
-                                                    .append(Component.text(timeDisplay, NamedTextColor.YELLOW))
-                                                    .append(Component.text(" remaining", NamedTextColor.GREEN))
+                                    currentHealer.sendActionBar(Component.text("Healing " + currentTarget.getName() + "... ", NamedTextColor.GREEN)
+                                            .append(Component.text(timeDisplay, NamedTextColor.YELLOW))
+                                            .append(Component.text(" remaining", NamedTextColor.GREEN))
                                     );
 
                                     // Let the receiving player know how much time remains
-                                    currentTarget.sendActionBar(
-                                            Component.text("Being healed by " + currentHealer.getName() + "... ", NamedTextColor.GREEN)
-                                                    .append(Component.text(timeDisplay, NamedTextColor.YELLOW))
-                                                    .append(Component.text(" remaining", NamedTextColor.GREEN))
+                                    currentTarget.sendActionBar(Component.text("Being healed by " + currentHealer.getName() + "... ", NamedTextColor.GREEN)
+                                            .append(Component.text(timeDisplay, NamedTextColor.YELLOW))
+                                            .append(Component.text(" remaining", NamedTextColor.GREEN))
                                     );
                                 }
 
-                                if (HealingSession.this.ticksRemaining % 200 == 0 && HealingSession.this.ticksRemaining > 0 && HealingSession.this.ticksRemaining < HEALING_DURATION_TICKS) {
+                                if (ticksRemaining % 200 == 0 && ticksRemaining > 0 && ticksRemaining < HEALING_DURATION_TICKS) {
                                     currentHealer.sendMessage(Component.text("[", NamedTextColor.GRAY)
                                             .append(Component.text("Stop the Bleeding", NamedTextColor.GREEN))
                                             .append(Component.text("] ", NamedTextColor.GRAY))
@@ -370,27 +369,27 @@ public class StopTheBleedingTomeAbility extends TomeAbility {
                                     );
                                 }
 
-                                --HealingSession.this.ticksRemaining;
-                                if (HealingSession.this.ticksRemaining <= 0) {
-                                    StopTheBleedingTomeAbility.this.completeHealing(currentHealer, currentTarget);
+                                --ticksRemaining;
+                                if (ticksRemaining <= 0) {
+                                    completeHealing(currentHealer, currentTarget);
                                 }
 
                             } else {
-                                StopTheBleedingTomeAbility.this.cancelHealing(currentHealer, "You moved too far away from " + currentTarget.getName() + "!");
+                                cancelHealing(currentHealer, "You moved too far away from " + currentTarget.getName() + "!");
                             }
                         } else {
-                            StopTheBleedingTomeAbility.this.cancelHealing(currentHealer, "Target player logged off.");
+                            cancelHealing(currentHealer, "Target player logged off.");
                         }
                     } else {
                         if (currentHealer != null) {
-                            StopTheBleedingTomeAbility.this.cancelHealing(currentHealer, "Healing interrupted.");
+                            cancelHealing(currentHealer, "Healing interrupted.");
                         } else {
                             this.cancel();
-                            StopTheBleedingTomeAbility.this.activeHealingSessions.remove(HealingSession.this.healerUUID);
+                            activeHealingSessions.remove(healerUUID);
                         }
                     }
                 }
-            }).runTaskTimer(StopTheBleedingTomeAbility.this.plugin, 0L, 1L);
+            }).runTaskTimer(plugin, 0L, 1L);
         }
 
         /**

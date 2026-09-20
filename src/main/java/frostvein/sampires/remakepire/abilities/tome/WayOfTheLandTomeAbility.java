@@ -32,17 +32,16 @@ public class WayOfTheLandTomeAbility extends TomeAbility implements Listener {
         if (!this.canUse(player)) {
             this.sendCannotUseMessage(player, "Only humans can use tome abilities!");
             return false;
-
-        } else {
-            this.sendSuccessMessage(player, "You have absorbed the knowledge of living off the land!");
-            player.sendMessage(Component.text("You now have a permanent 75% chance to receive double drops when harvesting crops.", NamedTextColor.GRAY));
-            player.sendMessage(Component.text("This knowledge flows through your very being - you need not activate it again.", NamedTextColor.GRAY));
-
-            this.plugin.getWorld().playSound(player.getLocation(), "minecraft:block.grass.break", 1.0F, 1.2F);
-            this.plugin.getWorld().playSound(player.getLocation(), "minecraft:entity.experience_orb.pickup", 0.5F, 0.8F);
-
-            return true;
         }
+
+        this.sendSuccessMessage(player, "You have absorbed the knowledge of living off the land!");
+        player.sendMessage(Component.text("You now have a permanent 75% chance to receive double drops when harvesting crops.", NamedTextColor.GRAY));
+        player.sendMessage(Component.text("This knowledge flows through your very being - you need not activate it again.", NamedTextColor.GRAY));
+
+        this.plugin.getWorld().playSound(player.getLocation(), "minecraft:block.grass.break", 1.0F, 1.2F);
+        this.plugin.getWorld().playSound(player.getLocation(), "minecraft:entity.experience_orb.pickup", 0.5F, 0.8F);
+
+        return true;
     }
 
     /**

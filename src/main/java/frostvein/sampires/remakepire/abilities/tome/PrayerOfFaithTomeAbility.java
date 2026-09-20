@@ -37,22 +37,25 @@ public class PrayerOfFaithTomeAbility extends TomeAbility {
             this.sendCannotUseMessage(player, "Only humans can use tome abilities!");
             return false;
 
+        } else if (plugin.getSessionManager().isOutOfSession()) {
+            this.sendCannotUseMessage(player, "This ability cannot be used outside of sessions.");
+            return false;
+
         } else if (PrayerOfFaithTomeAbility.isPraying(player)) {
             this.sendCannotUseMessage(player, "you are already in prayer!");
             return false;
-
-        } else {
-            final Location prayerLocation = player.getLocation().clone();
-            PrayerSession session = new PrayerSession(player, prayerLocation);
-            activePrayers.put(player.getUniqueId(), session);
-
-            player.playSound(player.getLocation(), "minecraft:block.bell.use", 1.0F, 0.8F);
-            this.sendSuccessMessage(player, "You begin your prayer... Remain motionless for " + PRAYER_DURATION + " seconds.");
-            player.sendMessage(Component.text("You can look around, but do not move from this spot.", NamedTextColor.GRAY));
-
-            session.startMonitoring();
-            return true;
         }
+
+        final Location prayerLocation = player.getLocation().clone();
+        PrayerSession session = new PrayerSession(player, prayerLocation);
+        activePrayers.put(player.getUniqueId(), session);
+
+        player.playSound(player.getLocation(), "minecraft:block.bell.use", 1.0F, 0.8F);
+        this.sendSuccessMessage(player, "You begin your prayer... Remain motionless for " + PRAYER_DURATION + " seconds.");
+        player.sendMessage(Component.text("You can look around, but do not move from this spot.", NamedTextColor.GRAY));
+
+        session.startMonitoring();
+        return true;
     }
 
     /**
@@ -104,48 +107,46 @@ public class PrayerOfFaithTomeAbility extends TomeAbility {
         public void startMonitoring() {
             this.monitoringTask = (new BukkitRunnable() {
                 public void run() {
-                    if (!PrayerSession.this.player.isOnline()) {
-                        TomeAbility.clearCooldown(PrayerSession.this.player, PrayerOfFaithTomeAbility.this.getName());
+                    if (!player.isOnline()) {
+                        TomeAbility.clearCooldown(player, getName());
                         this.cancel();
 
-                        PrayerOfFaithTomeAbility.cancelPrayer(PrayerSession.this.player);
+                        PrayerOfFaithTomeAbility.cancelPrayer(player);
+                        return;
+                    }
 
-                    } else {
-                        Location currentLocation = PrayerSession.this.player.getLocation();
+                    if (hasPlayerMoved(originalLocation, player.getLocation())) {
+                        player.sendMessage(Component.text("Your prayer is interrupted. You moved from your position.", NamedTextColor.RED));
+                        player.playSound(player.getLocation(), "minecraft:block.glass.break", 1.0F, 0.5F);
 
-                        if (PrayerSession.this.hasPlayerMoved(PrayerSession.this.originalLocation, currentLocation)) {
-                            PrayerSession.this.player.sendMessage(Component.text("Your prayer is interrupted. You moved from your position.", NamedTextColor.RED));
-                            PrayerSession.this.player.playSound(PrayerSession.this.player.getLocation(), "minecraft:block.glass.break", 1.0F, 0.5F);
+                        TomeAbility.clearCooldown(player, getName());
+                        this.cancel();
 
-                            TomeAbility.clearCooldown(PrayerSession.this.player, PrayerOfFaithTomeAbility.this.getName());
-                            this.cancel();
+                        PrayerOfFaithTomeAbility.cancelPrayer(player);
+                        return;
+                    }
 
-                            PrayerOfFaithTomeAbility.cancelPrayer(PrayerSession.this.player);
+                    --secondsRemaining;
 
-                        } else {
-                            --PrayerSession.this.secondsRemaining;
-
-                            if (PrayerSession.this.secondsRemaining != 45 && PrayerSession.this.secondsRemaining != 30 && PrayerSession.this.secondsRemaining != 15) {
-                                if (PrayerSession.this.secondsRemaining <= 10 && PrayerSession.this.secondsRemaining > 0) {
-                                    PrayerSession.this.player.sendActionBar(Component.text("Prayer: ", NamedTextColor.GOLD)
-                                            .append(Component.text(VampireAbilityManager.formatTime(PrayerSession.this.secondsRemaining) + "...", NamedTextColor.YELLOW))
-                                    );
-                                }
-                            } else {
-                                PrayerSession.this.player.sendActionBar(Component.text("Prayer: ", NamedTextColor.GOLD)
-                                        .append(Component.text(VampireAbilityManager.formatTime(PrayerSession.this.secondsRemaining) + " remaining...", NamedTextColor.YELLOW))
-                                );
-                            }
-
-                            if (PrayerSession.this.secondsRemaining <= 0) {
-                                PrayerSession.this.completePrayer();
-                                this.cancel();
-                                PrayerOfFaithTomeAbility.cancelPrayer(PrayerSession.this.player);
-                            }
+                    if (secondsRemaining != 45 && secondsRemaining != 30 && secondsRemaining != 15) {
+                        if (secondsRemaining <= 10 && secondsRemaining > 0) {
+                            player.sendActionBar(Component.text("Prayer: ", NamedTextColor.GOLD)
+                                    .append(Component.text(VampireAbilityManager.formatTime(secondsRemaining) + "...", NamedTextColor.YELLOW))
+                            );
                         }
+                    } else {
+                        player.sendActionBar(Component.text("Prayer: ", NamedTextColor.GOLD)
+                                .append(Component.text(VampireAbilityManager.formatTime(secondsRemaining) + " remaining...", NamedTextColor.YELLOW))
+                        );
+                    }
+
+                    if (secondsRemaining <= 0) {
+                        completePrayer();
+                        this.cancel();
+                        PrayerOfFaithTomeAbility.cancelPrayer(player);
                     }
                 }
-            }).runTaskTimer(PrayerOfFaithTomeAbility.this.plugin, 0L, 20L);
+            }).runTaskTimer(plugin, 0L, 20L);
         }
 
         /**

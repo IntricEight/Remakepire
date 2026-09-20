@@ -22,39 +22,38 @@ public class UncannyDirectionTomeAbility extends TomeAbility {
         if (!this.canUse(player)) {
             this.sendCannotUseMessage(player, "Only humans can use tome abilities!");
             return false;
-
-        } else {
-            final double townCenterX = this.plugin.getConfigManager().getTownCenterX(), townCenterZ = this.plugin.getConfigManager().getTownCenterZ();
-
-            (new BukkitRunnable() {
-                int ticksRemaining = 140;
-
-                public void run() {
-                    if (this.ticksRemaining > 0 && player.isOnline()) {
-                        Location currentLocation = player.getLocation();
-                        final double deltaX = townCenterX - currentLocation.getX(), deltaZ = townCenterZ - currentLocation.getZ();
-                        final double distance = Math.sqrt(deltaX * deltaX + deltaZ * deltaZ);
-
-                        final String direction = ConversionAssistant.getRelativeDirection(deltaX, deltaZ, currentLocation.getYaw());
-                        final Component actionBarMessage = Component.text("Town Center: ", NamedTextColor.GOLD)
-                                .append(Component.text(direction, NamedTextColor.WHITE))
-                                .append(Component.text(" (", NamedTextColor.GRAY))
-                                .append(Component.text(String.format("%.0f", distance), NamedTextColor.WHITE))
-                                .append(Component.text(" blocks)", NamedTextColor.GRAY));
-
-                        player.sendActionBar(actionBarMessage);
-
-                        this.ticksRemaining -= 4;
-
-                    } else {
-                        this.cancel();
-                    }
-                }
-            }).runTaskTimer(this.plugin, 0L, 4L);
-
-            this.plugin.getWorld().playSound(player.getLocation(), "minecraft:item.lodestone_compass.lock", 1.0F, 1.2F);
-            this.sendSuccessMessage(player, "Your inner compass awakens, pointing you toward home...");
-            return true;
         }
+
+        final double townCenterX = this.plugin.getConfigManager().getTownCenterX(), townCenterZ = this.plugin.getConfigManager().getTownCenterZ();
+
+        (new BukkitRunnable() {
+            int ticksRemaining = 140;
+
+            public void run() {
+                if (this.ticksRemaining > 0 && player.isOnline()) {
+                    Location currentLocation = player.getLocation();
+                    final double deltaX = townCenterX - currentLocation.getX(), deltaZ = townCenterZ - currentLocation.getZ();
+                    final double distance = Math.sqrt(deltaX * deltaX + deltaZ * deltaZ);
+
+                    final String direction = ConversionAssistant.getRelativeDirection(deltaX, deltaZ, currentLocation.getYaw());
+                    final Component actionBarMessage = Component.text("Town Center: ", NamedTextColor.GOLD)
+                            .append(Component.text(direction, NamedTextColor.WHITE))
+                            .append(Component.text(" (", NamedTextColor.GRAY))
+                            .append(Component.text(String.format("%.0f", distance), NamedTextColor.WHITE))
+                            .append(Component.text(" blocks)", NamedTextColor.GRAY));
+
+                    player.sendActionBar(actionBarMessage);
+
+                    this.ticksRemaining -= 4;
+
+                } else {
+                    this.cancel();
+                }
+            }
+        }).runTaskTimer(this.plugin, 0L, 4L);
+
+        this.plugin.getWorld().playSound(player.getLocation(), "minecraft:item.lodestone_compass.lock", 1.0F, 1.2F);
+        this.sendSuccessMessage(player, "Your inner compass awakens, pointing you toward home...");
+        return true;
     }
 }
