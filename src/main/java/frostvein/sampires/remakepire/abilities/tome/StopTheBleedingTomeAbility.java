@@ -218,6 +218,7 @@ public class StopTheBleedingTomeAbility extends TomeAbility {
             }
         } catch (Exception e) {
             this.plugin.getLogger().warning("Failed to get death score for " + player.getName() + ": " + e.getMessage());
+            e.printStackTrace();
         }
 
         return 0;
@@ -240,6 +241,7 @@ public class StopTheBleedingTomeAbility extends TomeAbility {
             }
         } catch (Exception e) {
             this.plugin.getLogger().warning("Failed to set death score for " + player.getName() + ": " + e.getMessage());
+            e.printStackTrace();
         }
 
     }
@@ -257,8 +259,10 @@ public class StopTheBleedingTomeAbility extends TomeAbility {
                 }
 
                 this.plugin.logInfo("Updated max health for " + player.getName() + " to " + player.getAttribute(Attribute.MAX_HEALTH).getValue());
+
             } catch (Exception e) {
                 this.plugin.getLogger().warning("Failed to update max health for " + player.getName() + ": " + e.getMessage());
+                e.printStackTrace();
             }
         });
     }

@@ -65,27 +65,29 @@ public class BeaconTeleportListener implements Listener {
                         if (beacon == null) {
                             player.sendMessage(Component.text("Beacon not found: " + beaconName, NamedTextColor.RED));
                             player.closeInventory();
+                            return;
 
                         } else if (beacon.getState() != BeaconState.DESECRATED) {
                             player.sendMessage(Component.text("That beacon is no longer desecrated and cannot be used for beacon travel.", NamedTextColor.RED));
                             player.closeInventory();
+                            return;
 
                         } else if (!this.plugin.getVampireManager().isVampire(player)) {
                             player.sendMessage(Component.text("Only vampires can use beacon travel.", NamedTextColor.RED));
                             player.closeInventory();
-
-                        } else {
-                            BeaconSite suppressingBeacon = this.plugin.getBeaconManager().checkHolySuppression(player.getLocation());
-
-                            if (suppressingBeacon != null) {
-                                player.sendMessage(Component.text("The holy power from '" + suppressingBeacon.getName() + "' prevents beacon travel.", NamedTextColor.RED));
-                                player.closeInventory();
-
-                            } else {
-                                player.closeInventory();
-                                this.startChanneling(player, beacon);
-                            }
+                            return;
                         }
+
+                        BeaconSite suppressingBeacon = this.plugin.getBeaconManager().checkHolySuppression(player.getLocation());
+
+                        if (suppressingBeacon != null) {
+                            player.sendMessage(Component.text("The holy power from '" + suppressingBeacon.getName() + "' prevents beacon travel.", NamedTextColor.RED));
+                            player.closeInventory();
+                            return;
+                        }
+
+                        player.closeInventory();
+                        this.startChanneling(player, beacon);
                     }
                 }
             }
@@ -119,41 +121,43 @@ public class BeaconTeleportListener implements Listener {
             final int totalTicks = 100;
 
             public void run() {
-                ChannelingData data = BeaconTeleportListener.this.channelingPlayers.get(playerId);
+                ChannelingData data = channelingPlayers.get(playerId);
 
                 if (data == null) {
                     this.cancel();
-                } else {
-                    Location currentLoc = player.getLocation().clone();
-                    currentLoc.setPitch(0.0F);
-                    currentLoc.setYaw(0.0F);
+                    return;
+                }
 
-                    if (currentLoc.distanceSquared(data.startLocation) > 0.01) {
-                        BeaconTeleportListener.this.cancelChanneling(playerId, true);
-                    } else {
-                        ++this.ticksElapsed;
+                Location currentLoc = player.getLocation().clone();
+                currentLoc.setPitch(0.0F);
+                currentLoc.setYaw(0.0F);
 
-                        if (this.ticksElapsed % 20 == 0) {
-                            int secondsRemaining = (totalTicks - this.ticksElapsed) / 20;
+                if (currentLoc.distanceSquared(data.startLocation) > 0.01) {
+                    cancelChanneling(playerId, true);
+                    return;
+                }
 
-                            if (secondsRemaining > 0) {
-                                player.sendMessage(Component.text("Channeling... ", NamedTextColor.GRAY)
-                                        .append(Component.text(VampireAbilityManager.formatTime(secondsRemaining) + " remaining", NamedTextColor.YELLOW)));
-                                player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 0.3F, 1.0F + (float)secondsRemaining * 0.1F);
-                            }
-                        }
+                ++this.ticksElapsed;
 
-                        if (this.ticksElapsed % 4 == 0) {
-                            Location particleLoc = player.getLocation().add(0.0, 1.0, 0.0);
-                            player.getWorld().spawnParticle(Particle.PORTAL, particleLoc, 2, 0.2, 0.5, 0.2, 0.1);
-                            player.getWorld().spawnParticle(Particle.ENCHANT, particleLoc, 1, 0.3, 0.3, 0.3, 0.5);
-                        }
+                if (this.ticksElapsed % 20 == 0) {
+                    int secondsRemaining = (totalTicks - this.ticksElapsed) / 20;
 
-                        if (this.ticksElapsed >= totalTicks) {
-                            BeaconTeleportListener.this.completeChanneling(playerId);
-                            this.cancel();
-                        }
+                    if (secondsRemaining > 0) {
+                        player.sendMessage(Component.text("Channeling... ", NamedTextColor.GRAY)
+                                .append(Component.text(VampireAbilityManager.formatTime(secondsRemaining) + " remaining", NamedTextColor.YELLOW)));
+                        player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 0.3F, 1.0F + (float)secondsRemaining * 0.1F);
                     }
+                }
+
+                if (this.ticksElapsed % 4 == 0) {
+                    Location particleLoc = player.getLocation().add(0.0, 1.0, 0.0);
+                    player.getWorld().spawnParticle(Particle.PORTAL, particleLoc, 2, 0.2, 0.5, 0.2, 0.1);
+                    player.getWorld().spawnParticle(Particle.ENCHANT, particleLoc, 1, 0.3, 0.3, 0.3, 0.5);
+                }
+
+                if (this.ticksElapsed >= totalTicks) {
+                    completeChanneling(playerId);
+                    this.cancel();
                 }
             }
         }).runTaskTimer(this.plugin, 0L, 1L);
@@ -260,10 +264,10 @@ public class BeaconTeleportListener implements Listener {
         (new BukkitRunnable() {
             public void run() {
                 if (player.teleport(finalDestination)) {
-                    if (BeaconTeleportListener.this.plugin.getVampireAbilityManager().applyCooldownForAbility(player, "beacontravel")) {
-                        BeaconTeleportListener.this.plugin.logInfo("Applied beacon travel cooldown for player: " + player.getName());
+                    if (plugin.getVampireAbilityManager().applyCooldownForAbility(player, "beacontravel")) {
+                        plugin.logInfo("Applied beacon travel cooldown for player: " + player.getName());
                     } else {
-                        BeaconTeleportListener.this.plugin.getLogger().warning("Failed to apply beacon travel cooldown for player: " + player.getName());
+                        plugin.getLogger().warning("Failed to apply beacon travel cooldown for player: " + player.getName());
                     }
 
                     player.sendMessage(Component.text("You emerge from the shadows at ", NamedTextColor.DARK_PURPLE)
@@ -323,18 +327,17 @@ public class BeaconTeleportListener implements Listener {
     private boolean isSafeLocation(Location loc) {
         if (loc.getWorld() == null) {
             return false;
-
-        } else {
-            Material groundMaterial = loc.clone().subtract(0.0, 1.0, 0.0).getBlock().getType();
-            Material feetMaterial = loc.getBlock().getType();
-            Material headMaterial = loc.clone().add(0.0, 1.0, 0.0).getBlock().getType();
-
-            boolean hasGround = groundMaterial.isSolid() && !groundMaterial.equals(Material.LAVA) && !groundMaterial.equals(Material.WATER);
-            boolean feetClear = !feetMaterial.isSolid() || feetMaterial.equals(Material.WATER) || feetMaterial.equals(Material.LAVA);
-            boolean headClear = !headMaterial.isSolid() || headMaterial.equals(Material.WATER) || headMaterial.equals(Material.LAVA);
-
-            return hasGround && feetClear && headClear;
         }
+
+        final Material groundMaterial = loc.clone().subtract(0.0, 1.0, 0.0).getBlock().getType();
+        final Material feetMaterial = loc.getBlock().getType();
+        final Material headMaterial = loc.clone().add(0.0, 1.0, 0.0).getBlock().getType();
+
+        final boolean hasGround = groundMaterial.isSolid() && !groundMaterial.equals(Material.LAVA) && !groundMaterial.equals(Material.WATER);
+        final boolean feetClear = !feetMaterial.isSolid() || feetMaterial.equals(Material.WATER) || feetMaterial.equals(Material.LAVA);
+        final boolean headClear = !headMaterial.isSolid() || headMaterial.equals(Material.WATER) || headMaterial.equals(Material.LAVA);
+
+        return hasGround && feetClear && headClear;
     }
 
     private static class ChannelingData {

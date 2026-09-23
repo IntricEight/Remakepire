@@ -38,6 +38,7 @@ public class DamageSuppressionListener implements Listener {
                 }
             } catch (Exception e) {
                 this.plugin.getLogger().warning("Failed to read damage suppression from config: " + e.getMessage());
+                e.printStackTrace();
             }
         }
     }

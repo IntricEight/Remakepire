@@ -820,7 +820,7 @@ public class VampireManager {
     private void startLevelValidationTask() {
         this.levelValidationTask = (new BukkitRunnable() {
             public void run() {
-                VampireManager.this.validateVampireLevels();
+                validateVampireLevels();
             }
         }).runTaskTimer(this.plugin, 2400L, 2400L);
 

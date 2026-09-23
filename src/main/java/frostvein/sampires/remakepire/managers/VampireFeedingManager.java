@@ -61,7 +61,7 @@ public class VampireFeedingManager implements Listener {
     private void startFeedingDetectionTask() {
         (new BukkitRunnable() {
             public void run() {
-                VampireFeedingManager.this.checkFeedingSessions();
+                checkFeedingSessions();
             }
         }).runTaskTimer(this.plugin, 20L, 20L);
     }

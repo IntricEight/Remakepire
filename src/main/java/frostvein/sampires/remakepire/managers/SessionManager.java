@@ -105,18 +105,18 @@ public class SessionManager {
     private void startSaturationTask() {
         (new BukkitRunnable() {
             public void run() {
-                final int sessionState = SessionManager.this.getSessionState();
+                final int sessionState = getSessionState();
 
                 if (sessionState == PAUSED) {
-                    SessionManager.this.restorePausedFoodLevels();
+                    restorePausedFoodLevels();
 
-                } else if (SessionManager.this.isOutOfSession()) {
-                    SessionManager.this.applySaturationToAllPlayers();
-                    SessionManager.this.setAllPlayersMaxFood();
+                } else if (isOutOfSession()) {
+                    applySaturationToAllPlayers();
+                    setAllPlayersMaxFood();
 
                 } else if (sessionState == PRE_SESSION) {
-                    SessionManager.this.plugin.logInfo("PRE_SESSION: Setting all players to max food and saturation");
-                    SessionManager.this.setAllPlayersMaxFood();
+                    plugin.logInfo("PRE_SESSION: Setting all players to max food and saturation");
+                    setAllPlayersMaxFood();
                 }
             }
         }).runTaskTimer(this.plugin, 0L, 80L);
@@ -128,8 +128,8 @@ public class SessionManager {
     private void startActionBarTask() {
         (new BukkitRunnable() {
             public void run() {
-                if (SessionManager.this.isOutOfSession() || SessionManager.this.isPreSession()) {
-                    SessionManager.this.updateActionBarForAllPlayers();
+                if (isOutOfSession() || isPreSession()) {
+                    updateActionBarForAllPlayers();
                 }
             }
         }).runTaskTimer(this.plugin, 0L, 20L);

@@ -28,7 +28,7 @@ public class BloodMoonManager {
 
         (new BukkitRunnable() {
             public void run() {
-                BloodMoonManager.this.checkTimeAndMoon();
+                checkTimeAndMoon();
             }
         }).runTaskTimer(this.plugin, 0L, 20L);
     }
@@ -63,7 +63,7 @@ public class BloodMoonManager {
 
             this.vampireBuffTask = (new BukkitRunnable() {
                 public void run() {
-                    BloodMoonManager.this.applyVampireBuffs();
+                    applyVampireBuffs();
                 }
             }).runTaskTimer(this.plugin, 0L, 20L);
         }

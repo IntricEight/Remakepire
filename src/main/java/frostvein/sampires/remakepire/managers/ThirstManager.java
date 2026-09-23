@@ -163,18 +163,18 @@ public class ThirstManager {
     private void startThirstTask() {
         this.thirstTask = (new BukkitRunnable() {
             public void run() {
-                if (ThirstManager.this.plugin.getSessionManager().isSessionActive()) {
+                if (plugin.getSessionManager().isSessionActive()) {
                     for (Player player : Bukkit.getOnlinePlayers()) {
-                        if (ThirstManager.this.vampireManager.isVampire(player)) {
-                            ThirstManager.this.processVampireThirst(player);
+                        if (vampireManager.isVampire(player)) {
+                            processVampireThirst(player);
                         }
                     }
 
-                    --ThirstManager.this.minuteCounter;
+                    --minuteCounter;
 
-                    if (ThirstManager.this.minuteCounter <= 0) {
-                        ThirstManager.this.minuteCounter = 60;
-                        ThirstManager.this.updateImmunityTimers();
+                    if (minuteCounter <= 0) {
+                        minuteCounter = 60;
+                        updateImmunityTimers();
                     }
                 }
             }

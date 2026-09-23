@@ -140,7 +140,7 @@ public abstract class TomeAbility {
      * @param reason the reason that the player cannot use this ability.
      */
     protected void sendCannotUseMessage(Player player, String reason) {
-        player.sendMessage(Component.text("Cannot use " + this.name + ": " + reason, NamedTextColor.RED));
+        player.sendMessage(Component.text("Cannot use " + this.displayName + ": " + reason, NamedTextColor.RED));
     }
 
     /**

@@ -118,6 +118,7 @@ public class WayOfTheLumberjackTomeAbility extends TomeAbility implements Listen
                 }
             } catch (IOException e) {
                 this.plugin.getLogger().warning("WayOfTheLumberjack: Failed to load placed logs file: " + e.getMessage());
+                e.printStackTrace();
             }
         }
     }
@@ -136,6 +137,7 @@ public class WayOfTheLumberjackTomeAbility extends TomeAbility implements Listen
             }
         } catch (IOException e) {
             this.plugin.getLogger().warning("WayOfTheLumberjack: Failed to save placed logs file: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 

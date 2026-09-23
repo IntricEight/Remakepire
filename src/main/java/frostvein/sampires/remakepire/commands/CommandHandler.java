@@ -305,6 +305,7 @@ public class CommandHandler implements CommandExecutor {
             }
         } catch (Exception e) {
             this.plugin.getLogger().warning("Failed to reset death count for " + player.getName() + ": " + e.getMessage());
+            e.printStackTrace();
         }
 
         if (tomeManager != null) {

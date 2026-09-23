@@ -74,24 +74,24 @@ public class ConfigManager {
 
         if (world == null) {
             this.plugin.getLogger().severe("World '" + RemakepirePlugin.WORLD_NAME + "' not found! Cannot load tome chest locations.");
+            return locations;
+        }
 
-        } else {
-            for (String locString : locationStrings) {
-                try {
-                    String[] parts = locString.split(",");
+        for (String locString : locationStrings) {
+            try {
+                String[] parts = locString.split(",");
 
-                    if (parts.length == 3) {
-                        int x = Integer.parseInt(parts[0].trim());
-                        int y = Integer.parseInt(parts[1].trim());
-                        int z = Integer.parseInt(parts[2].trim());
+                if (parts.length == 3) {
+                    final int x = Integer.parseInt(parts[0].trim());
+                    final int y = Integer.parseInt(parts[1].trim());
+                    final int z = Integer.parseInt(parts[2].trim());
 
-                        locations.add(new Location(world, x, y, z));
-                    }
-                } catch (NumberFormatException e) {
-                    this.plugin.getLogger().warning("Invalid tome chest location format: " + locString);
+                    locations.add(new Location(world, x, y, z));
                 }
+            } catch (NumberFormatException e) {
+                this.plugin.getLogger().warning("Invalid tome chest location format: " + locString);
+                e.printStackTrace();
             }
-
         }
 
         return locations;
@@ -109,13 +109,13 @@ public class ConfigManager {
 
         if (locations.contains(locationString)) {
             return false;
-
-        } else {
-            locations.add(locationString);
-            this.plugin.getConfig().set("tome-chests.locations", locations);
-            this.saveConfig();
-            return true;
         }
+
+        locations.add(locationString);
+        this.plugin.getConfig().set("tome-chests.locations", locations);
+        this.saveConfig();
+
+        return true;
     }
 
     /**
@@ -130,13 +130,13 @@ public class ConfigManager {
 
         if (!locations.contains(locationString)) {
             return false;
-
-        } else {
-            locations.remove(locationString);
-            this.plugin.getConfig().set("tome-chests.locations", locations);
-            this.saveConfig();
-            return true;
         }
+
+        locations.remove(locationString);
+        this.plugin.getConfig().set("tome-chests.locations", locations);
+        this.saveConfig();
+
+        return true;
     }
 
     /**

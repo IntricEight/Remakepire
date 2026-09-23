@@ -48,21 +48,21 @@ public class FeedingListener implements Listener {
                     final boolean bottleFilled = this.tryFillBottleWithBlood(killer);
                     int experienceDropped = event.getDroppedExp();
 
+                    // Prevent players from getting XP when they fill a bottle with blood
                     if (bottleFilled) {
-                        // Prevent players from getting XP when they fill a bottle with blood
+                        event.setDroppedExp(0);
+                        return;
+                    }
+
+                    if (this.plugin.getVampireManager().isVampire(killer)) {
+                        // Prevent vampires from getting XP directly thr drop
                         event.setDroppedExp(0);
 
-                    } else {
-                        if (this.plugin.getVampireManager().isVampire(killer)) {
-                            // Prevent vampires from getting XP directly thr drop
-                            event.setDroppedExp(0);
+                        this.plugin.getThirstManager().handleEntityKill(killer, deadEntity, experienceDropped);
 
-                            this.plugin.getThirstManager().handleEntityKill(killer, deadEntity, experienceDropped);
-
-                            if (experienceDropped > 0 && !killer.getScoreboardTags().contains(SessionManager.INFORMED_SUCCESSFUL_FEEDING)) {
-                                killer.addScoreboardTag(SessionManager.INFORMED_SUCCESSFUL_FEEDING);
-                                killer.sendMessage(Component.text("You taste the metallic essence of life...", NamedTextColor.RED));
-                            }
+                        if (experienceDropped > 0 && !killer.getScoreboardTags().contains(SessionManager.INFORMED_SUCCESSFUL_FEEDING)) {
+                            killer.addScoreboardTag(SessionManager.INFORMED_SUCCESSFUL_FEEDING);
+                            killer.sendMessage(Component.text("You taste the metallic essence of life...", NamedTextColor.RED));
                         }
                     }
                 }
@@ -101,10 +101,9 @@ public class FeedingListener implements Listener {
 
             killer.sendActionBar(Component.text("The creatures blood pours freely into your open bottle.", NamedTextColor.RED));
             return true;
-
-        } else {
-            return false;
         }
+
+        return false;
     }
 
     /**

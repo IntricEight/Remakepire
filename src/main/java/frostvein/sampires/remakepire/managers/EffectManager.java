@@ -95,39 +95,39 @@ public class EffectManager {
         if (this.vampireManager.isVampireStage1(player)) {
             this.removeSunWeaknessEffects(player);
             this.lastTrialOmenApplied.remove(player.getUniqueId());
+            return;
+        }
+
+        // Apply sun weakness to the player during active sessions
+        if (this.canPlayerSeeSky(player) && this.isDaytime(player.getWorld()) && this.isClearWeather(player.getWorld()) && plugin.getSessionManager().isSessionActive()) {
+            final int stage = this.vampireManager.getVampireStage(player);
+            final long currentTime = System.currentTimeMillis();
+            final UUID playerUUID = player.getUniqueId();
+            final Long lastApplied = this.lastTrialOmenApplied.get(playerUUID);
+            final boolean shouldApplyTrialOmen = lastApplied == null || currentTime - lastApplied >= 300000L;
+
+            // Apply the visual indicator of sun weakness
+            if (shouldApplyTrialOmen && !player.hasPotionEffect(PotionEffectType.INVISIBILITY) && player.getGameMode() == GameMode.SURVIVAL) {
+                if (stage == 2) {
+                    player.addPotionEffect(new PotionEffect(PotionEffectType.TRIAL_OMEN, 6000, 0, false, false, true));
+                    this.lastTrialOmenApplied.put(playerUUID, currentTime);
+
+                } else if (stage == 3) {
+                    player.addPotionEffect(new PotionEffect(PotionEffectType.TRIAL_OMEN, 6000, 1, false, false, true));
+                    this.lastTrialOmenApplied.put(playerUUID, currentTime);
+                }
+            }
+
+            this.applySunWeaknessSpeed(player);
 
         } else {
-            // Apply sun weakness to the player during active sessions
-            if (this.canPlayerSeeSky(player) && this.isDaytime(player.getWorld()) && this.isClearWeather(player.getWorld()) && plugin.getSessionManager().isSessionActive()) {
-                final int stage = this.vampireManager.getVampireStage(player);
-                final long currentTime = System.currentTimeMillis();
-                final UUID playerUUID = player.getUniqueId();
-                final Long lastApplied = this.lastTrialOmenApplied.get(playerUUID);
-                final boolean shouldApplyTrialOmen = lastApplied == null || currentTime - lastApplied >= 300000L;
+            this.removeSunWeaknessEffects(player);
 
-                // Apply the visual indicator of sun weakness
-                if (shouldApplyTrialOmen && !player.hasPotionEffect(PotionEffectType.INVISIBILITY) && player.getGameMode() == GameMode.SURVIVAL) {
-                    if (stage == 2) {
-                        player.addPotionEffect(new PotionEffect(PotionEffectType.TRIAL_OMEN, 6000, 0, false, false, true));
-                        this.lastTrialOmenApplied.put(playerUUID, currentTime);
-
-                    } else if (stage == 3) {
-                        player.addPotionEffect(new PotionEffect(PotionEffectType.TRIAL_OMEN, 6000, 1, false, false, true));
-                        this.lastTrialOmenApplied.put(playerUUID, currentTime);
-                    }
-                }
-
-                this.applySunWeaknessSpeed(player);
-
-            } else {
-                this.removeSunWeaknessEffects(player);
-
-                if (player.hasPotionEffect(PotionEffectType.TRIAL_OMEN)) {
-                    player.removePotionEffect(PotionEffectType.TRIAL_OMEN);
-                }
-
-                this.lastTrialOmenApplied.remove(player.getUniqueId());
+            if (player.hasPotionEffect(PotionEffectType.TRIAL_OMEN)) {
+                player.removePotionEffect(PotionEffectType.TRIAL_OMEN);
             }
+
+            this.lastTrialOmenApplied.remove(player.getUniqueId());
         }
     }
 

@@ -66,10 +66,9 @@ public class BeaconSite {
 
         if (beaconLoc != null && beaconLoc.getWorld().equals(location.getWorld())) {
             return beaconLoc.distance(location) <= this.captureRadius;
-
-        } else {
-            return false;
         }
+
+        return false;
     }
 
     /**

@@ -106,6 +106,7 @@ public class DeathHandler implements Listener {
                     }
                 } catch (Exception e) {
                     this.plugin.getLogger().warning("Failed to cap death count for " + player.getName() + ": " + e.getMessage());
+                    e.printStackTrace();
                 }
             });
         }
@@ -294,6 +295,7 @@ public class DeathHandler implements Listener {
                 }
             } catch (Exception e) {
                 this.plugin.getLogger().warning("Failed to increment death count for " + victim.getName() + ": " + e.getMessage());
+                e.printStackTrace();
             }
         }
 
@@ -335,6 +337,7 @@ public class DeathHandler implements Listener {
             }
         } catch (Exception e) {
             this.plugin.getLogger().warning("Failed to check death count for " + player.getName() + ": " + e.getMessage());
+            e.printStackTrace();
         }
 
         return false;

@@ -69,6 +69,7 @@ public class BatTransformationManager {
             }
 
             this.plugin.logInfo("Created bat transformation persistence file");
+
         } catch (IOException e) {
             this.plugin.getLogger().severe("Failed to create bat transformation file: " + e.getMessage());
             e.printStackTrace();
@@ -83,13 +84,13 @@ public class BatTransformationManager {
             int tickCount = 0;
 
             public void run() {
-                BatTransformationManager.this.checkExpiredTransformations();
-                BatTransformationManager.this.checkBatEntityHealth();
-                BatTransformationManager.this.updateBatActionBars();
+                checkExpiredTransformations();
+                checkBatEntityHealth();
+                updateBatActionBars();
                 ++this.tickCount;
 
                 if (this.tickCount >= 6000) {
-                    BatTransformationManager.this.armorStorageManager.cleanupExpiredEntries();
+                    armorStorageManager.cleanupExpiredEntries();
                     this.tickCount = 0;
                 }
             }
@@ -280,7 +281,7 @@ public class BatTransformationManager {
                 batData.batEntity = bat;
                 batData.transformationTask = (new BukkitRunnable() {
                     public void run() {
-                        if (player.isOnline() && BatTransformationManager.this.isInBatForm(player)) {
+                        if (player.isOnline() && isInBatForm(player)) {
                             if (bat.isValid()) {
                                 bat.teleport(player.getLocation());
                             } else {
@@ -420,6 +421,7 @@ public class BatTransformationManager {
             }
 
             this.plugin.logInfo("Successfully restored " + restoredPieces + " armor pieces for player " + player.getName() + " after bat transformation");
+
         } catch (Exception e) {
             this.plugin.getLogger().severe("Failed to restore armor for player " + player.getName() + ": " + e.getMessage());
             e.printStackTrace();
@@ -521,6 +523,7 @@ public class BatTransformationManager {
             }
         } catch (IOException e) {
             this.plugin.getLogger().warning("Could not load bat transformation states: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
@@ -540,6 +543,7 @@ public class BatTransformationManager {
             }
         } catch (IOException e) {
             this.plugin.getLogger().warning("Could not save bat transformation states: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 

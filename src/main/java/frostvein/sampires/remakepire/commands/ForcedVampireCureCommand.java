@@ -101,6 +101,7 @@ public class ForcedVampireCureCommand implements CommandExecutor {
         if (nearestHolyBeacon == null) {
             caster.sendMessage(Component.text("You must be close to a holy beacon to channel the divine power of these words.", NamedTextColor.RED));
             return true;
+
         } else if (this.plugin.getForcedCureChoiceManager().isBeaconBeingUsed(nearestHolyBeacon)) {
             caster.sendMessage(Component.text("This holy beacon is actively being channeled toward another cursed creature.", NamedTextColor.RED));
             return true;

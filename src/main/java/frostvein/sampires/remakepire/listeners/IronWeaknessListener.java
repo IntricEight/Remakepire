@@ -56,13 +56,13 @@ public class IronWeaknessListener implements Listener {
 
         (new BukkitRunnable() {
             public void run() {
-                IronWeaknessListener.this.checkIronProximity();
+                checkIronProximity();
             }
         }).runTaskTimer(plugin, 0L, 10L);
 
         (new BukkitRunnable() {
             public void run() {
-                IronWeaknessListener.this.scanAndRemoveIronFromInventories();
+                scanAndRemoveIronFromInventories();
             }
         }).runTaskTimer(plugin, 0L, 200L);
     }
@@ -337,11 +337,11 @@ public class IronWeaknessListener implements Listener {
      * @return A {@code Vector} away from the provided silver block.
      */
     private Vector getDirectionAwayFromNearestIron(Location playerLocation, Location ironLocation) {
-        if (ironLocation != null) {
-            return playerLocation.toVector().subtract(ironLocation.toVector()).normalize();
-        } else {
+        if (ironLocation == null) {
             return new Vector(0, 0, 1);
         }
+
+        return playerLocation.toVector().subtract(ironLocation.toVector()).normalize();
     }
 
     /**
