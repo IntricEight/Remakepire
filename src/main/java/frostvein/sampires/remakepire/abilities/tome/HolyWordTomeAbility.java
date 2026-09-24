@@ -22,7 +22,6 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 import frostvein.sampires.remakepire.RemakepirePlugin;
-import frostvein.sampires.remakepire.managers.VampireManager;
 
 public class HolyWordTomeAbility extends TomeAbility implements Listener {
     // Controls the size of the ability (in blocks)
@@ -46,21 +45,20 @@ public class HolyWordTomeAbility extends TomeAbility implements Listener {
             this.sendCannotUseMessage(player, "Only humans can use tome abilities!");
             return false;
 
-        } else if (plugin.getSessionManager().isOutOfSession()) {
+        } else if (!this.plugin.getSessionManager().isSessionActive()) {
             this.sendCannotUseMessage(player, "This ability cannot be used outside of sessions.");
             return false;
         }
 
-        VampireManager vampireManager = this.plugin.getVampireManager();
         List<Player> nearbyPlayers = player.getWorld().getPlayers();
         boolean wasStage2Or3OParalyzed = false;
 
         for (Player target : nearbyPlayers) {
             if (!target.equals(player) && !(target.getLocation().distance(player.getLocation()) > RADIUS) && target.getGameMode() != GameMode.SPECTATOR) {
-                if (vampireManager.isVampireStage1(target)) {
+                if (this.plugin.getVampireManager().isVampireStage1(target)) {
                     target.sendMessage(Component.text("A holy word sends your mind reeling, but you hold fast against it's paralysing effects.", NamedTextColor.RED));
 
-                } else if (vampireManager.isVampireStage2(target) || vampireManager.isVampireStage3(target)) {
+                } else if (this.plugin.getVampireManager().isVampireStage2(target) || this.plugin.getVampireManager().isVampireStage3(target)) {
                     target.sendMessage(Component.text("You are frozen by divine power!", NamedTextColor.RED));
                     target.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, PARALYSIS_DURATION, 255, false, false));
                     target.leaveVehicle();

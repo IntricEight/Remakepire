@@ -30,7 +30,7 @@ public class BlessingTomeAbility extends TomeAbility {
             this.sendCannotUseMessage(player, "Only humans can use tome abilities!");
             return false;
 
-        } else if (plugin.getSessionManager().isOutOfSession()) {
+        } else if (!this.plugin.getSessionManager().isSessionActive()) {
             this.sendCannotUseMessage(player, "This ability cannot be used outside of sessions.");
             return false;
 

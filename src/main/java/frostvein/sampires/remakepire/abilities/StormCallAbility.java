@@ -38,7 +38,7 @@ public class StormCallAbility extends VampireAbility {
     public boolean execute(Player player, VampireManager vampireManager, RemakepirePlugin plugin) {
         World world = player.getWorld();
 
-        if (plugin.getSessionManager().isOutOfSession()) {
+        if (!plugin.getSessionManager().isSessionActive()) {
             player.sendMessage(Component.text("This ability cannot be used outside of sessions.", NamedTextColor.RED));
             return false;
 

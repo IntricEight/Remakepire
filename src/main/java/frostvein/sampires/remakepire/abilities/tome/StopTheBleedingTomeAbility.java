@@ -45,7 +45,7 @@ public class StopTheBleedingTomeAbility extends TomeAbility {
         if (!this.canUse(player)) {
             this.sendCannotUseMessage(player, "Only humans can use tome abilities!");
 
-        } else if (plugin.getSessionManager().isOutOfSession()) {
+        } else if (!this.plugin.getSessionManager().isSessionActive()) {
             this.sendCannotUseMessage(player, "This ability cannot be used outside of sessions.");
             return false;
         }
