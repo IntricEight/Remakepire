@@ -29,8 +29,10 @@ public class BrigadierCommands {
     private final ForcedVampireCureCommand forcedCureCommand;
     public static final List<String> VAMPIRE_ABILITIES = Arrays.asList(
             "bat",
+            "bloodties",
             "lunge",
             "vanish",
+            "raiseundead",
             "stormcall",
             "beacontravel",
             "vision"

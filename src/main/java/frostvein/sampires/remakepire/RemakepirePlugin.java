@@ -57,6 +57,7 @@ public final class RemakepirePlugin extends JavaPlugin {
     private ConfigGuiManager configGuiManager;
     private InitGameManager initGameManager;
     private CureBookReadingListener cureBookReadingListener;
+    private BloodTiesListener bloodTiesListener;
     private World world;
     private Team castTeam;
     private Team vampireCastTeam;
@@ -113,6 +114,7 @@ public final class RemakepirePlugin extends JavaPlugin {
         this.sireManager = new VampireSireManager(this);
         this.forcedCureChoiceManager = new ForcedCureChoiceManager(this);
         this.configGuiManager = new ConfigGuiManager(this);
+        this.bloodTiesListener = new BloodTiesListener(this);
 
         this.initGameManager = new InitGameManager(this);
         this.getServer().getPluginManager().registerEvents(this.damageSuppressionListener, this);
@@ -130,6 +132,7 @@ public final class RemakepirePlugin extends JavaPlugin {
         this.getServer().getPluginManager().registerEvents(new VampireFallDamageListener(this.vampireManager), this);
         this.getServer().getPluginManager().registerEvents(this.beaconConversionListener, this);
         this.getServer().getPluginManager().registerEvents(this.beaconTeleportListener, this);
+        this.getServer().getPluginManager().registerEvents(this.bloodTiesListener, this);
         this.getServer().getPluginManager().registerEvents(new BeetrootListener(this), this);
         this.getServer().getPluginManager().registerEvents(new WeaponDropRemover(this), this);
         this.getServer().getPluginManager().registerEvents(new InteractionListener(this), this);
@@ -252,6 +255,10 @@ public final class RemakepirePlugin extends JavaPlugin {
 
         if (this.vampireTrackingManager != null) {
             this.vampireTrackingManager.shutdown();
+        }
+
+        if (this.bloodTiesListener != null) {
+            this.bloodTiesListener.shutdown();
         }
 
         if (this.permadeathManager != null) {

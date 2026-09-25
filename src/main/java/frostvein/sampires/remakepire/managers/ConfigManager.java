@@ -149,6 +149,15 @@ public class ConfigManager {
     }
 
     /**
+     * Retrieve the cooldown on the vampire ability Blood Ties.
+     *
+     * @return the seconds between ability uses.
+     */
+    public int getBloodTiesCooldown() {
+        return this.plugin.getConfig().getInt("abilities.vampire.blood-ties-cooldown", 480);
+    }
+
+    /**
      * Retrieve the cooldown on the vampire ability Vampiric Lunge.
      *
      * @return the seconds between ability uses.
@@ -164,6 +173,15 @@ public class ConfigManager {
      */
     public int getVampireVanishCooldown() {
         return this.plugin.getConfig().getInt("abilities.vampire.vanish-cooldown", 420);
+    }
+
+    /**
+     * Retrieve the cooldown on the vampire ability Raise Undead.
+     *
+     * @return the seconds between ability uses.
+     */
+    public int getRaiseUndeadCooldown() {
+        return this.plugin.getConfig().getInt("abilities.vampire.raise-undead-cooldown", 600);
     }
 
     /**

@@ -384,20 +384,7 @@ public class IronWeaknessListener implements Listener {
                 if (this.vampireManager.isIronAffected(player)) {
                     // Repel the player from the silver block
                     Location nearestIronBlock = this.getNearestIronBlock(player.getLocation(), REPEL_DISTANCE);
-
-
-
-                    // TODO: After I have my fun, remove the silver repulsion from sulfur cubes
-                    Location nearestIronEntity = this.getNearestIronEntity(player.getLocation(), this.REPEL_DISTANCE), nearest;
-                    if (nearestIronBlock == null) {
-                        nearest = nearestIronEntity;
-                    } else if (nearestIronEntity == null) {
-                        nearest = nearestIronBlock;
-                    } else {
-                        final double blockDistance = nearestIronBlock.distanceSquared(player.getLocation()), entityDistance = nearestIronEntity.distanceSquared(player.getLocation());
-                        nearest = (blockDistance <= entityDistance ? nearestIronBlock : nearestIronEntity);
-                    }
-                    if (nearest != null) {
+                    if (nearestIronBlock != null) {
                         this.applyIronRepulsion(player, player.getLocation(), nearestIronBlock);
                     }
 

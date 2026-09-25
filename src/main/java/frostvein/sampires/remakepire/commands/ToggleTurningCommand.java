@@ -9,7 +9,7 @@ import org.bukkit.entity.Player;
 import frostvein.sampires.remakepire.RemakepirePlugin;
 
 public class ToggleTurningCommand implements CommandExecutor {
-    private final RemakepirePlugin plugin;
+    private RemakepirePlugin plugin;
 
     /**
      * Create an instance of the plugin's toggle vampire turning command handler.
