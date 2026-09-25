@@ -57,6 +57,7 @@ public class ArmorStorageManager {
             }
 
             this.plugin.logInfo("ArmorStorageManager: Storage files initialized");
+
         } catch (IOException e) {
             this.plugin.getLogger().severe("ArmorStorageManager: Failed to initialize storage files: " + e.getMessage());
             e.printStackTrace();
@@ -76,23 +77,25 @@ public class ArmorStorageManager {
             ItemStack[] currentArmor = player.getInventory().getArmorContents();
             StoredArmor storedArmor = new StoredArmor(currentArmor[3], currentArmor[2], currentArmor[1], currentArmor[0]);
 
-            if (storedArmor.hasAnyArmor()) {
-                this.armorCache.put(playerId, storedArmor);
-
-                player.getInventory().setHelmet(null);
-                player.getInventory().setChestplate(null);
-                player.getInventory().setLeggings(null);
-                player.getInventory().setBoots(null);
-                player.getInventory().setArmorContents(new ItemStack[4]);
-                player.updateInventory();
-
-                this.saveArmorData();
-                this.plugin.logInfo("ArmorStorageManager: Stored and cleared armor for player " + player.getName());
-                return true;
-            } else {
+            if (!storedArmor.hasAnyArmor()) {
                 this.plugin.logInfo("ArmorStorageManager: No armor to store for player " + player.getName());
                 return false;
             }
+
+            this.armorCache.put(playerId, storedArmor);
+
+            player.getInventory().setHelmet(null);
+            player.getInventory().setChestplate(null);
+            player.getInventory().setLeggings(null);
+            player.getInventory().setBoots(null);
+            player.getInventory().setArmorContents(new ItemStack[4]);
+            player.updateInventory();
+
+            this.saveArmorData();
+            this.plugin.logInfo("ArmorStorageManager: Stored and cleared armor for player " + player.getName());
+
+            return true;
+
         } catch (Exception e) {
             this.plugin.getLogger().severe("ArmorStorageManager: Failed to store and clear armor for player " + playerId + ": " + e.getMessage());
             e.printStackTrace();
@@ -163,6 +166,8 @@ public class ArmorStorageManager {
             }
         } catch (IOException e) {
             this.plugin.getLogger().warning("ArmorStorageManager: Could not load armor storage file: " + e.getMessage());
+            e.printStackTrace();
+
         } catch (Exception e) {
             this.plugin.getLogger().severe("ArmorStorageManager: Error parsing armor storage file: " + e.getMessage());
             e.printStackTrace();
@@ -177,8 +182,10 @@ public class ArmorStorageManager {
             if (this.storageFile.exists() && this.storageFile.length() > 0L) {
                 try {
                     Files.copy(this.storageFile.toPath(), this.backupFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+
                 } catch (Exception e) {
                     this.plugin.getLogger().warning("ArmorStorageManager: Failed to create backup: " + e.getMessage());
+                    e.printStackTrace();
                 }
             }
 

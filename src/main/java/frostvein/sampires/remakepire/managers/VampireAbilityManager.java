@@ -87,6 +87,7 @@ public class VampireAbilityManager {
             }
 
             this.plugin.logInfo("Created ability cooldown persistence files");
+
         } catch (IOException e) {
             this.plugin.getLogger().severe("Failed to create ability cooldown files: " + e.getMessage());
             e.printStackTrace();
@@ -125,8 +126,8 @@ public class VampireAbilityManager {
     private void startCooldownTask() {
         this.cooldownTask = (new BukkitRunnable() {
             public void run() {
-                VampireAbilityManager.this.checkCooldownExpirations();
-                VampireAbilityManager.this.checkGlobalCooldownExpirations();
+                checkCooldownExpirations();
+                checkGlobalCooldownExpirations();
             }
         }).runTaskTimer(this.plugin, 20L, 20L);
     }

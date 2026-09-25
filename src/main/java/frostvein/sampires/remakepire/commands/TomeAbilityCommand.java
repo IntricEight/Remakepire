@@ -4,6 +4,7 @@ import java.util.Set;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import org.bukkit.GameMode;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -44,10 +45,13 @@ public class TomeAbilityCommand implements CommandExecutor {
             this.sendUsage(player);
             return true;
 
-        } else {
-            String subCommand = args[0].toLowerCase();
-            return subCommand.equals("list") ? this.handleListCommand(player) : this.handleAbilityUse(player, subCommand);
+        } else if (player.getGameMode() == GameMode.SPECTATOR) {
+            player.sendMessage(Component.text("You cannot use tome abilities while in spectator mode.", NamedTextColor.RED));
+            return true;
         }
+
+        String subCommand = args[0].toLowerCase();
+        return subCommand.equals("list") ? this.handleListCommand(player) : this.handleAbilityUse(player, subCommand);
     }
 
     /**
@@ -58,38 +62,32 @@ public class TomeAbilityCommand implements CommandExecutor {
      */
     private boolean handleListCommand(Player player) {
         // The player's current tome abilities
-        Set<String> playerAbilities = this.tomeManager.getPlayerAbilities(player);
+        final Set<String> playerAbilities = this.tomeManager.getPlayerAbilities(player);
 
-        if (playerAbilities.isEmpty()) {
+        if (playerAbilities == null || playerAbilities.isEmpty()) {
             player.sendMessage(Component.text("You have not learned any tome abilities yet.", NamedTextColor.GRAY));
             player.sendMessage(Component.text("Find ancient tomes scattered throughout the world to learn new abilities.", NamedTextColor.GRAY));
+            return true;
+        }
 
-        } else {
-            player.sendMessage("");
-            player.sendMessage(Component.text("=== YOUR TOME ABILITIES ===", NamedTextColor.GOLD)
-                    .decorate(TextDecoration.BOLD));
+        player.sendMessage("");
+        player.sendMessage(Component.text("=== YOUR TOME ABILITIES ===", NamedTextColor.GOLD)
+                .decorate(TextDecoration.BOLD));
 
-            for (String abilityName : playerAbilities) {
-                TomeAbility ability = this.tomeManager.getAbility(abilityName);
-                player.sendMessage(Component.text(ability.getDisplayName(), NamedTextColor.YELLOW));
+        for (String abilityName : playerAbilities) {
+            TomeAbility ability = this.tomeManager.getAbility(abilityName);
+            player.sendMessage(Component.text(ability.getDisplayName(), NamedTextColor.YELLOW));
 
-                if (ability != null) {
-                    String[] descriptionLines = ability.getDescriptionLines();
-
-                    for (String line : descriptionLines) {
-                        player.sendMessage(Component.text("  " + line, NamedTextColor.GRAY));
-                    }
-                } else {
-                    player.sendMessage(Component.text("  No description available", NamedTextColor.GRAY));
-                }
-
-                player.sendMessage(Component.text("  Use: /pow tome " + abilityName.toLowerCase(), NamedTextColor.DARK_GRAY));
-                player.sendMessage("");
+            for (String line : ability.getDescriptionLines()) {
+                player.sendMessage(Component.text("  " + line, NamedTextColor.GRAY));
             }
 
-            player.sendMessage(Component.text("Total abilities: ", NamedTextColor.GRAY)
-                    .append(Component.text(playerAbilities.size(), NamedTextColor.YELLOW)));
+            player.sendMessage(Component.text("  Use: /pow tome " + abilityName.toLowerCase(), NamedTextColor.DARK_GRAY));
+            player.sendMessage("");
         }
+
+        player.sendMessage(Component.text("Total abilities: ", NamedTextColor.GRAY)
+                .append(Component.text(playerAbilities.size(), NamedTextColor.YELLOW)));
 
         return true;
     }

@@ -180,10 +180,9 @@ public class CommandHandler implements CommandExecutor {
         } else if (command.getName().equalsIgnoreCase("set_vampire_spawn")) {
             // Set the respawn location for vampires after they temporarily die
             return this.handleSetVampireSpawnCommand(sender, args);
-
-        } else {
-            return false;
         }
+
+        return false;
     }
 
     /**
@@ -306,6 +305,7 @@ public class CommandHandler implements CommandExecutor {
             }
         } catch (Exception e) {
             this.plugin.getLogger().warning("Failed to reset death count for " + player.getName() + ": " + e.getMessage());
+            e.printStackTrace();
         }
 
         if (tomeManager != null) {
@@ -1823,20 +1823,21 @@ public class CommandHandler implements CommandExecutor {
     private boolean handleSelectTomesCommand(CommandSender sender, String[] args) {
         if (!(sender instanceof Player admin)) {
             sender.sendMessage(Component.text("This command can only be used by players.", NamedTextColor.RED));
+            return true;
 
         } else if (args.length < 1) {
             sender.sendMessage(Component.text("Usage: /pow admin select_tomes <player>", NamedTextColor.RED));
-
-        } else {
-            Player target = Bukkit.getPlayerExact(args[0]);
-
-            if (target == null) {
-                sender.sendMessage(Component.text("Player '" + args[0] + "' not found.", NamedTextColor.RED));
-            } else {
-                this.tomeManager.openTomeSelectionGUI(admin, target);
-            }
+            return true;
         }
 
+        Player target = Bukkit.getPlayerExact(args[0]);
+
+        if (target == null) {
+            sender.sendMessage(Component.text("Player '" + args[0] + "' not found.", NamedTextColor.RED));
+            return true;
+        }
+
+        this.tomeManager.openTomeSelectionGUI(admin, target);
         return true;
     }
 

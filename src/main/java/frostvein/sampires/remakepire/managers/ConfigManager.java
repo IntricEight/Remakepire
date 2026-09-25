@@ -27,6 +27,42 @@ public class ConfigManager {
     }
 
     /**
+     * Retrieve the URL of the human's texture pack download location.
+     *
+     * @return A URL of a location that downloads a ZIP file.
+     */
+    public String getHumanTexturePackUrl() {
+        return this.plugin.getConfig().getString("human-texture-pack.url", "https://download.mc-packs.net/pack/b1fbd00667c6ad35c11967a385184aa336d605e1.zip");
+    }
+
+    /**
+     * Retrieve the SHA1 code of the human's texture pack.
+     *
+     * @return A code that should match that of the texture pack retrieved from the URL.
+     */
+    public String getHumanTexturePackSha1() {
+        return this.plugin.getConfig().getString("human-texture-pack.sha1", "b1fbd00667c6ad35c11967a385184aa336d605e1");
+    }
+
+    /**
+     * Retrieve the URL of the vampire's texture pack download location.
+     *
+     * @return A URL of a location that downloads a ZIP file.
+     */
+    public String getVampireTexturePackUrl() {
+        return this.plugin.getConfig().getString("vampire-texture-pack.url", "https://download.mc-packs.net/pack/e139890dd34f56724efcd5becb476999651ca43c.zip");
+    }
+
+    /**
+     * Retrieve the SHA1 code of the vampire's texture pack.
+     *
+     * @return A code that should match that of the texture pack retrieved from the URL.
+     */
+    public String getVampireTexturePackSha1() {
+        return this.plugin.getConfig().getString("vampire-texture-pack.sha1", "e139890dd34f56724efcd5becb476999651ca43c");
+    }
+
+    /**
      * Retrieve the locations of all the tome chests from the config.
      *
      * @return A {@code List} of chest {@code Locations}.
@@ -38,24 +74,24 @@ public class ConfigManager {
 
         if (world == null) {
             this.plugin.getLogger().severe("World '" + RemakepirePlugin.WORLD_NAME + "' not found! Cannot load tome chest locations.");
+            return locations;
+        }
 
-        } else {
-            for (String locString : locationStrings) {
-                try {
-                    String[] parts = locString.split(",");
+        for (String locString : locationStrings) {
+            try {
+                String[] parts = locString.split(",");
 
-                    if (parts.length == 3) {
-                        int x = Integer.parseInt(parts[0].trim());
-                        int y = Integer.parseInt(parts[1].trim());
-                        int z = Integer.parseInt(parts[2].trim());
+                if (parts.length == 3) {
+                    final int x = Integer.parseInt(parts[0].trim());
+                    final int y = Integer.parseInt(parts[1].trim());
+                    final int z = Integer.parseInt(parts[2].trim());
 
-                        locations.add(new Location(world, x, y, z));
-                    }
-                } catch (NumberFormatException e) {
-                    this.plugin.getLogger().warning("Invalid tome chest location format: " + locString);
+                    locations.add(new Location(world, x, y, z));
                 }
+            } catch (NumberFormatException e) {
+                this.plugin.getLogger().warning("Invalid tome chest location format: " + locString);
+                e.printStackTrace();
             }
-
         }
 
         return locations;
@@ -73,13 +109,13 @@ public class ConfigManager {
 
         if (locations.contains(locationString)) {
             return false;
-
-        } else {
-            locations.add(locationString);
-            this.plugin.getConfig().set("tome-chests.locations", locations);
-            this.saveConfig();
-            return true;
         }
+
+        locations.add(locationString);
+        this.plugin.getConfig().set("tome-chests.locations", locations);
+        this.saveConfig();
+
+        return true;
     }
 
     /**
@@ -94,13 +130,13 @@ public class ConfigManager {
 
         if (!locations.contains(locationString)) {
             return false;
-
-        } else {
-            locations.remove(locationString);
-            this.plugin.getConfig().set("tome-chests.locations", locations);
-            this.saveConfig();
-            return true;
         }
+
+        locations.remove(locationString);
+        this.plugin.getConfig().set("tome-chests.locations", locations);
+        this.saveConfig();
+
+        return true;
     }
 
     /**
@@ -331,12 +367,14 @@ public class ConfigManager {
     }
 
     /**
-     * Retrieve the enchantments whose books are allowed to appear inside tome chests.
+     * Retrieve the enchantment names whose books are allowed to appear inside tome chests.
      *
-     * @return A list of item enchantment names.
+     * @return A list of item enchantment names. All names are trimmed and set to lowercase.
      */
     public List<String> getTomeEnchantmentOptions() {
-        return this.plugin.getConfig().getStringList("tome-chests.enchantment-options");
+        List<String> options = this.plugin.getConfig().getStringList("tome-chests.enchantment-options");
+        options.replaceAll(option -> option.trim().toLowerCase());
+        return options;
     }
 
     /**
@@ -856,6 +894,16 @@ public class ConfigManager {
      */
     public boolean doCuresHaveLastingEffects() {
         return this.plugin.getConfig().getBoolean("cure.cure-aftermath", true);
+    }
+
+    /**
+     * Update the config on whether there are lasting effects from a vampire cure.
+     *
+     * @param hasEffects {@code true} if there will be lasting effects on the world when a vampire is cured.
+     */
+    public void setCuresHaveLastingEffects(boolean hasEffects) {
+        this.plugin.getConfig().set("cure.cure-aftermath", hasEffects);
+        this.plugin.saveConfig();
     }
 
     /**

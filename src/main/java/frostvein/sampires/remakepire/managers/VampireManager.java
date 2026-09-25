@@ -35,6 +35,7 @@ public class VampireManager {
     private final Map<UUID, Long> levelChangeInProgress = new HashMap<>(), lastLevelChange = new HashMap<>(), lungeTimestamps = new HashMap<>();
     private final Map<UUID, Double> lungingPlayers = new HashMap<>();
     private final Map<UUID, Integer> stageCaps = new HashMap<>();
+    // Below times are in milliseconds
     private static final long LEVEL_CHANGE_COOLDOWN = 5000L, LEVEL_CHANGE_TIMEOUT = 10000L, PROTECTION_DURATION = 10000L;
     // Vampire state tags
     public static final String HUMAN_TAG = "human", VAMPIRE_TAG = "vampire";
@@ -75,29 +76,24 @@ public class VampireManager {
     public boolean shouldPreventFallDamage(Player player) {
         final UUID playerId = player.getUniqueId();
 
-        if (!this.lungingPlayers.containsKey(playerId)) {
-            return false;
-
-        } else {
+        if (this.lungingPlayers.containsKey(playerId)) {
             final Long lungeTime = this.lungeTimestamps.get(playerId);
 
             if (lungeTime != null && System.currentTimeMillis() - lungeTime <= PROTECTION_DURATION) {
-                final Double startingY = this.lungingPlayers.get(playerId);
+                final Double protectedY = this.lungingPlayers.get(playerId);
 
-                if (startingY != null && player.getLocation().getY() >= startingY) {
+                if (protectedY != null && player.getLocation().getY() >= protectedY) {
                     this.lungingPlayers.remove(playerId);
                     this.lungeTimestamps.remove(playerId);
                     return true;
-
-                } else {
-                    return false;
                 }
-            } else {
-                this.lungingPlayers.remove(playerId);
-                this.lungeTimestamps.remove(playerId);
-                return false;
             }
+
+            this.lungingPlayers.remove(playerId);
+            this.lungeTimestamps.remove(playerId);
         }
+
+        return false;
     }
 
     /**
@@ -820,7 +816,7 @@ public class VampireManager {
     private void startLevelValidationTask() {
         this.levelValidationTask = (new BukkitRunnable() {
             public void run() {
-                VampireManager.this.validateVampireLevels();
+                validateVampireLevels();
             }
         }).runTaskTimer(this.plugin, 2400L, 2400L);
 

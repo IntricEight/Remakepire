@@ -60,46 +60,45 @@ public class ShoulderBargeTomeAbility extends TomeAbility {
         } else if (this.chargingPlayers.containsKey(player.getUniqueId())) {
             this.sendCannotUseMessage(player, "You are already charging!");
             return false;
-
-        } else {
-            Vector direction = player.getLocation().getDirection();
-            direction.setY(Math.max(direction.getY(), 0.1));
-            Vector chargeVelocity = direction.multiply(CHARGE_VELOCITY);
-            chargeVelocity.setY(UPWARD_VELOCITY);
-
-            player.setVelocity(chargeVelocity);
-            player.getWorld().playSound(player.getLocation(), "minecraft:entity.player.attack.crit", 0.8F, 1.2F);
-            this.sendSuccessMessage(player, "You lower your shoulder and charge forward!");
-
-            this.chargeHitEntities.put(player.getUniqueId(), new HashSet<>());
-
-            BukkitRunnable collisionTask = new BukkitRunnable() {
-                int ticksRemaining = CHARGE_DURATION;
-
-                public void run() {
-                    if (this.ticksRemaining > 0 && player.isOnline() && ShoulderBargeTomeAbility.this.chargingPlayers.containsKey(player.getUniqueId())) {
-                        ShoulderBargeTomeAbility.this.checkForCollisions(player);
-                        --this.ticksRemaining;
-                    } else {
-                        this.cancel();
-                    }
-                }
-            };
-
-            collisionTask.runTaskTimer(this.plugin, 0L, 1L);
-
-            BukkitTask chargeTask = Bukkit.getScheduler().runTaskLater(this.plugin, () -> {
-                this.chargingPlayers.remove(player.getUniqueId());
-
-                // Remove the caster from the list of hit entities
-                this.chargeHitEntities.remove(player.getUniqueId());
-
-                collisionTask.cancel();
-            }, CHARGE_DURATION);
-
-            this.chargingPlayers.put(player.getUniqueId(), chargeTask);
-            return true;
         }
+
+        Vector direction = player.getLocation().getDirection();
+        direction.setY(Math.max(direction.getY(), 0.1));
+        Vector chargeVelocity = direction.multiply(CHARGE_VELOCITY);
+        chargeVelocity.setY(UPWARD_VELOCITY);
+
+        player.setVelocity(chargeVelocity);
+        player.getWorld().playSound(player.getLocation(), "minecraft:entity.player.attack.crit", 0.8F, 1.2F);
+        this.sendSuccessMessage(player, "You lower your shoulder and charge forward!");
+
+        this.chargeHitEntities.put(player.getUniqueId(), new HashSet<>());
+
+        BukkitRunnable collisionTask = new BukkitRunnable() {
+            int ticksRemaining = CHARGE_DURATION;
+
+            public void run() {
+                if (this.ticksRemaining > 0 && player.isOnline() && chargingPlayers.containsKey(player.getUniqueId())) {
+                    checkForCollisions(player);
+                    --this.ticksRemaining;
+                } else {
+                    this.cancel();
+                }
+            }
+        };
+
+        collisionTask.runTaskTimer(this.plugin, 0L, 1L);
+
+        BukkitTask chargeTask = Bukkit.getScheduler().runTaskLater(this.plugin, () -> {
+            this.chargingPlayers.remove(player.getUniqueId());
+
+            // Remove the caster from the list of hit entities
+            this.chargeHitEntities.remove(player.getUniqueId());
+
+            collisionTask.cancel();
+        }, CHARGE_DURATION);
+
+        this.chargingPlayers.put(player.getUniqueId(), chargeTask);
+        return true;
     }
 
     /**

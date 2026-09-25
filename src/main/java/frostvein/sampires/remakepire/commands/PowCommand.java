@@ -53,79 +53,79 @@ public class PowCommand implements CommandExecutor {
         if (args.length == 0) {
             this.sendHelp(sender);
             return true;
+        }
 
-        } else {
-            String subCommand = args[0].toLowerCase();
-            String[] subArgs = Arrays.copyOfRange(args, 1, args.length);
+        String subCommand = args[0].toLowerCase();
+        String[] subArgs = Arrays.copyOfRange(args, 1, args.length);
 
-            switch (subCommand) {
-                case "admin":
-                    // Access the admin commands
-                    return this.handleAdminCommand(sender, subArgs);
+        switch (subCommand) {
+            case "admin":
+                // Access the admin commands
+                return this.handleAdminCommand(sender, subArgs);
 
-                case "vability":
-                    // Access the vampire ability commands
-                    return this.vampireAbilityCommand.onCommand(sender, command, label, subArgs);
+            case "vability":
+                // Access the vampire ability commands
+                return this.vampireAbilityCommand.onCommand(sender, command, label, subArgs);
 
-                case "tome":
-                    // Access the tome ability commands
-                    return this.tomeAbilityCommand.onCommand(sender, command, label, subArgs);
+            case "tome":
+                // Access the tome ability commands
+                return this.tomeAbilityCommand.onCommand(sender, command, label, subArgs);
 
-                case "checklives":
-                    // Check how many lives this player has remaining
-                    return this.checkLivesCommand.onCommand(sender, command, label, subArgs);
+            case "checklives":
+                // Check how many lives this player has remaining
+                return this.checkLivesCommand.onCommand(sender, command, label, subArgs);
 
-                case "beaconstatus":
-                case "holysites":
-                case "holy":
-                    // Check the status of the beacons in the world
-                    return this.beaconStatusCommand.onCommand(sender, command, label, subArgs);
+            case "beaconstatus":
+            case "holysites":
+            case "holy":
+                // Check the status of the beacons in the world
+                return this.beaconStatusCommand.onCommand(sender, command, label, subArgs);
 
-                case "texture":
-                case "texturepack":
-                case "resourcepack":
-                    // Force the application of a plugin texture pack
-                    return this.texturePackCommand.onCommand(sender, command, label, subArgs);
+            case "texture":
+            case "texturepack":
+            case "resourcepack":
+                // Force the application of a plugin texture pack
+                return this.texturePackCommand.onCommand(sender, command, label, subArgs);
 
-                case "toggle_permadeath":
-                case "toggle-permadeath":
-                case "togglepermadeath":
-                case "permadeath":
-                    // Change or check the permadeath setting of this player
-                    return this.permadeathCommand.onCommand(sender, command, label, subArgs);
+            case "toggle_permadeath":
+            case "toggle-permadeath":
+            case "togglepermadeath":
+            case "permadeath":
+                // Change or check the permadeath setting of this player
+                return this.permadeathCommand.onCommand(sender, command, label, subArgs);
 
-                case "toggle-turning":
-                case "turning":
-                    // Toggle whether vampire killings will attempt to turn the victim into a vampire
-                    return this.turningCommand.onCommand(sender, command, label, subArgs);
+            case "toggle-turning":
+            case "turning":
+                // Toggle whether vampire killings will attempt to turn the victim into a vampire
+                return this.turningCommand.onCommand(sender, command, label, subArgs);
 
-                case "sendmessage":
-                case "sendpendingmessage":
-                    // Force a message through the message prevention system
-                    return this.sendMessageCommand.onCommand(sender, command, label, subArgs);
+            case "sendmessage":
+            case "sendpendingmessage":
+                // Force a message through the message prevention system
+                return this.sendMessageCommand.onCommand(sender, command, label, subArgs);
 
-                case "reopen":
-                case "forcedcure-reopen":
-                    // Reopen the forced cure choice menu
-                    return this.forceCureReopenCommand.onCommand(sender, command, label, subArgs);
+            case "reopen":
+            case "forcedcure-reopen":
+                // Reopen the forced cure choice menu
+                return this.forceCureReopenCommand.onCommand(sender, command, label, subArgs);
 
-                case "stake-myself":
-                    // Allow a vampire to stake themselves
-                    return this.stakeSelfCommand.onCommand(sender, command, label, subArgs);
+            case "stake-myself":
+                // Allow a vampire to stake themselves
+                return this.stakeSelfCommand.onCommand(sender, command, label, subArgs);
 
-                case "help":
-                    // Print out a descriptive list of the commands available to this player
-                    this.sendHelp(sender);
-                    return true;
+            case "help":
+                // Print out a descriptive list of the commands available to this player
+                this.sendHelp(sender);
+                return true;
 
-                default:
-                    sender.sendMessage(Component.text("Unknown subcommand: " + subCommand, NamedTextColor.RED));
-                    sender.sendMessage(Component.text("Use ", NamedTextColor.GRAY)
-                            .append(Component.text("/pow help", NamedTextColor.YELLOW))
-                            .append(Component.text(" for a list of commands", NamedTextColor.GRAY))
-                    );
-                    return true;
-            }
+            default:
+                sender.sendMessage(Component.text("Unknown subcommand: " + subCommand, NamedTextColor.RED));
+                sender.sendMessage(Component.text("Use ", NamedTextColor.GRAY)
+                        .append(Component.text("/pow help", NamedTextColor.YELLOW))
+                        .append(Component.text(" for a list of commands", NamedTextColor.GRAY))
+                );
+
+                return true;
         }
     }
 
@@ -144,19 +144,18 @@ public class PowCommand implements CommandExecutor {
         } else if (args.length == 0) {
             this.adminHandler.sendAdminHelp(sender);
             return true;
-
-        } else {
-            final String adminSubCommand = args[0].toLowerCase();
-            final String[] adminArgs = Arrays.copyOfRange(args, 1, args.length);
-
-            Command dummyCommand = new BukkitCommand(adminSubCommand) {
-                public boolean execute(CommandSender sender, String commandLabel, String[] args) {
-                    return false;
-                }
-            };
-
-            return this.adminHandler.onCommand(sender, dummyCommand, adminSubCommand, adminArgs);
         }
+
+        final String adminSubCommand = args[0].toLowerCase();
+        final String[] adminArgs = Arrays.copyOfRange(args, 1, args.length);
+
+        Command dummyCommand = new BukkitCommand(adminSubCommand) {
+            public boolean execute(CommandSender sender, String commandLabel, String[] args) {
+                return false;
+            }
+        };
+
+        return this.adminHandler.onCommand(sender, dummyCommand, adminSubCommand, adminArgs);
     }
 
     /**

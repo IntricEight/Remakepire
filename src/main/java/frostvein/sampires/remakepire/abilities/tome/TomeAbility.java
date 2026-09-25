@@ -102,17 +102,16 @@ public abstract class TomeAbility {
         if (this.isOnCooldown(player)) {
             player.sendMessage(Component.text(" ABILITY ON COOLDOWN", NamedTextColor.RED)
                     .decorate(TextDecoration.BOLD));
-            player.sendMessage(Component.text( this.getDisplayName() + " will be ready in " + VampireAbilityManager.formatTime(this.getRemainingCooldown(player)) + ".", NamedTextColor.RED));
+            player.sendMessage(Component.text(this.getDisplayName() + " will be ready in " + VampireAbilityManager.formatTime(this.getRemainingCooldown(player)) + ".", NamedTextColor.RED));
             return false;
+        }
+
+        if (this.useAbility(player)) {
+            this.setCooldown(player);
+            return true;
 
         } else {
-            if (this.useAbility(player)) {
-                this.setCooldown(player);
-                return true;
-
-            } else {
-                return false;
-            }
+            return false;
         }
     }
 
@@ -141,7 +140,7 @@ public abstract class TomeAbility {
      * @param reason the reason that the player cannot use this ability.
      */
     protected void sendCannotUseMessage(Player player, String reason) {
-        player.sendMessage(Component.text("Cannot use " + this.name + ": " + reason, NamedTextColor.RED));
+        player.sendMessage(Component.text("Cannot use " + this.displayName + ": " + reason, NamedTextColor.RED));
     }
 
     /**

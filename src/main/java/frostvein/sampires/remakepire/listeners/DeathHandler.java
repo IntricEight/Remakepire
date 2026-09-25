@@ -23,6 +23,7 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Scoreboard;
 import frostvein.sampires.remakepire.RemakepirePlugin;
@@ -105,6 +106,7 @@ public class DeathHandler implements Listener {
                     }
                 } catch (Exception e) {
                     this.plugin.getLogger().warning("Failed to cap death count for " + player.getName() + ": " + e.getMessage());
+                    e.printStackTrace();
                 }
             });
         }
@@ -280,6 +282,7 @@ public class DeathHandler implements Listener {
             }
         }
 
+        // Increase the death counter for humans
         if (this.vampireManager.isHuman(victim)) {
             try {
                 Scoreboard mainScoreboard = Bukkit.getScoreboardManager().getMainScoreboard();
@@ -292,14 +295,52 @@ public class DeathHandler implements Listener {
                 }
             } catch (Exception e) {
                 this.plugin.getLogger().warning("Failed to increment death count for " + victim.getName() + ": " + e.getMessage());
+                e.printStackTrace();
             }
         }
 
         if (killer != null) {
-            this.handlePvPDeath(victim, killer, event);
+            this.handleVampirePvPDeath(victim, killer, event);
         } else if (this.vampireManager.isVampire(victim)) {
             victim.addScoreboardTag(PROMOTION_BAN_PENDING_TAG);
         }
+
+        // Only drop the books if the player is permadying
+        if (victim.getScoreboardTags().contains(PERMADEATH_CHOSEN_TAG) || victim.getScoreboardTags().contains(PERMAKILL_PROCESSING_TAG)) {
+            this.dropCureBooks(victim);
+        }
+    }
+
+    /**
+     * Determine if the human has exhausted their life count and should be permakilled.
+     *
+     * @param player the human whose lives are being checked.
+     * @return {@code true} if the player has run out of lives.
+     */
+    public boolean shouldHumanPermadie(Player player) {
+        // Vampires should not be permakilled by this function
+        if (this.plugin.getVampireManager().isVampire(player)) {
+            return false;
+        }
+
+        try {
+            Scoreboard mainScoreboard = Bukkit.getScoreboardManager().getMainScoreboard();
+            Objective deathObjective = mainScoreboard.getObjective("vsmp_death");
+
+            if (deathObjective != null) {
+                final int deaths = deathObjective.getScore(player.getName()).getScore();
+
+                // Only force the perma death if the human has run out of lives OR permadeath is set to ABSOLUTE
+                if (deaths >= this.plugin.getConfigManager().getHumanLifeCount() || this.plugin.getPermadeathManager().hasAbsolutePermadeathEnabled(player)) {
+                    return true;
+                }
+            }
+        } catch (Exception e) {
+            this.plugin.getLogger().warning("Failed to check death count for " + player.getName() + ": " + e.getMessage());
+            e.printStackTrace();
+        }
+
+        return false;
     }
 
     /**
@@ -309,9 +350,9 @@ public class DeathHandler implements Listener {
      * @param killer the player who killed the victim.
      * @param event a player dies.
      */
-    private void handlePvPDeath(Player victim, Player killer, PlayerDeathEvent event) {
+    private void handleVampirePvPDeath(Player victim, Player killer, PlayerDeathEvent event) {
         ItemStack weapon = killer.getInventory().getItemInMainHand();
-        boolean killedWithWoodenWeapon = this.isWoodenWeapon(weapon.getType());
+        boolean killedWithWoodenWeapon = ItemTypeChecking.isWoodenWeapon(weapon.getType());
         Material lastWeapon = this.lastWeaponUsed.get(victim.getUniqueId());
 
         if (!killedWithWoodenWeapon && lastWeapon != null) {
@@ -340,6 +381,34 @@ public class DeathHandler implements Listener {
             } else {
                 victim.addScoreboardTag(PROMOTION_BAN_PENDING_TAG);
                 this.plugin.logInfo("PROMOTION BAN: Applied " + PROMOTION_BAN_PENDING_TAG + " tag to " + victim.getName() + " (Stage " + victimStage + ", Threshold: " + woodenStakeThreshold + ")");
+            }
+        }
+    }
+
+    /**
+     * Drop any cure books that are inside the player's inventory.
+     *
+     * @param player the player dropping the books.
+     */
+    private void dropCureBooks(Player player) {
+        PlayerInventory inventory = player.getInventory();
+        ItemStack[] contents = inventory.getContents();
+
+        // Scan the player's inventory for any cure books
+        for (int slot = 0; slot < contents.length; slot++) {
+            ItemStack book = contents[slot];
+
+            // Ignore items that can't be cure book
+            if (book == null || book.getType() != Material.WRITTEN_BOOK) {
+                continue;
+            }
+
+            final int cureBookNumber = this.plugin.getCureBookReadingListener().getAuthenticCureBookNumber(book);
+
+            // If the book was a cure book, remove it from the player's inventory and drop it where they died
+            if (cureBookNumber >= 1 && cureBookNumber <= 4) {
+                inventory.setItem(slot, null);
+                player.getWorld().dropItemNaturally(player.getLocation(), book);
             }
         }
     }
@@ -385,24 +454,6 @@ public class DeathHandler implements Listener {
         }
 
         this.plugin.logInfo("PERMA-KILL: " + victim.getName() + " was permanently killed");
-    }
-
-    /**
-     * Determine if the item is a wooden weapon.
-     *
-     * @param type the item to check.
-     * @return {@code true} if the item is a wooden sword or axe.
-     */
-    private boolean isWoodenWeapon(Material type) {
-        if (type == null) {
-            this.plugin.logInfo("DEBUG: Weapon is null");
-            return false;
-
-        } else {
-            final boolean isWooden = ItemTypeChecking.isWoodenWeapon(type);
-            this.plugin.logInfo("DEBUG: Weapon type: " + type + ", Is wooden: " + isWooden);
-            return isWooden;
-        }
     }
 
     /**

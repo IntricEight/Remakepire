@@ -40,22 +40,25 @@ public class BatAbility extends VampireAbility {
                 player.sendMessage(Component.text("Failed to transform back to human form.", NamedTextColor.RED));
                 return false;
             }
+        } else if (plugin.getSessionManager().isOutOfSession()) {
+            player.sendMessage(Component.text("This ability cannot be used outside of sessions.", NamedTextColor.RED));
+            return false;
+        }
+
+        if (plugin.getBatTransformationManager().transformToBat(player)) {
+            player.sendMessage(Component.text("In a flurry of wings, you transform into a bat.", NamedTextColor.RED));
+            player.sendMessage(Component.text("Be warned, if you die in bat form, your human form dies too.", NamedTextColor.RED));
+            player.sendMessage(Component.text("Use ", NamedTextColor.GRAY)
+                    .append(Component.text("/pow vability bat", NamedTextColor.YELLOW))
+                    .append(Component.text(" again to transform back early.", NamedTextColor.GRAY))
+            );
+
+            player.playSound(player, Sound.ENTITY_BAT_AMBIENT, SoundCategory.MASTER, 1.0F, 1.2F);
+            return true;
+
         } else {
-            if (plugin.getBatTransformationManager().transformToBat(player)) {
-                player.sendMessage(Component.text("In a flurry of wings, you transform into a bat.", NamedTextColor.RED));
-                player.sendMessage(Component.text("Be warned, if you die in bat form, your human form dies too.", NamedTextColor.RED));
-                player.sendMessage(Component.text("Use ", NamedTextColor.GRAY)
-                        .append(Component.text("/pow vability bat", NamedTextColor.YELLOW))
-                        .append(Component.text(" again to transform back early.", NamedTextColor.GRAY))
-                );
-
-                player.playSound(player, Sound.ENTITY_BAT_AMBIENT, SoundCategory.MASTER, 1.0F, 1.2F);
-                return true;
-
-            } else {
-                player.sendMessage(Component.text("Failed to transform into bat form.", NamedTextColor.RED));
-                return false;
-            }
+            player.sendMessage(Component.text("Failed to transform into bat form.", NamedTextColor.RED));
+            return false;
         }
     }
 

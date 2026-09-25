@@ -97,26 +97,15 @@ tome-chests:
 #    "WayOfTheProspector"
 
   # A list of enchantment books that can spawn inside tome chests
-  # The default list is all the enchantments supported in the default plugin
-  # You can find a list of the supported enchantment options below this list
+  # The options given need to match Minecraft's internal name for the enchantment.
+  # Check this link to see Minecraft's enchantments and their names: https://minecraft.wiki/w/Enchantment#List_of_enchantments
+  # The options are not case-sensitive.
   enchantment-options:
     - "Efficiency"
-    - "FeatherFalling"
+    - "Feather_Falling"
     - "Knockback"
     - "Protection"
-    - "SweepingEdge"
-
-# Tome Enchantment Book Options
-#    "Efficiency"
-#    "FeatherFalling"
-#    "Knockback"
-#    "Mending"
-#    "Power"
-#    "Protection"
-#    "Punch"
-#    "Respiration"
-#    "Sharpness"
-#    "SweepingEdge"
+    - "Sweeping_Edge"
 
 # Tome Distribution Interval
 # How often tomes are distributed to chests (in minutes)
@@ -482,6 +471,24 @@ oakhurst:
 # WARNING: Players who haven't fulfilled a leave condition will be frozen in place if they are outside the border when this is enabled.
 # Default: true (border traps players)
 border_active: true
+
+
+# ============================================================================
+# TEXTURE PACK SETTINGS
+# ============================================================================
+
+# It is recommended to have the server's forced texture pack (Set inside server.properties) be the human texture pack,
+# in addition to the following configuration settings.
+
+# The URL and SHA1 of the texture pack that human players are provided with
+human-texture-pack:
+  url: "https://download.mc-packs.net/pack/d9f0c9f72bf1a016c63631cc6c0a2c13cfe0e594.zip"
+  sha1: "d9f0c9f72bf1a016c63631cc6c0a2c13cfe0e594"
+
+# The URL and SHA1 of the texture pack that vampire players are provided with
+vampire-texture-pack:
+  url: "https://download.mc-packs.net/pack/e139890dd34f56724efcd5becb476999651ca43c.zip"
+  sha1: "e139890dd34f56724efcd5becb476999651ca43c"
 
 
 # ============================================================================

@@ -4,15 +4,18 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import io.papermc.paper.registry.RegistryAccess;
+import io.papermc.paper.registry.RegistryKey;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
+import org.bukkit.Registry;
 import org.bukkit.block.Block;
 import org.bukkit.block.Chest;
 import org.bukkit.enchantments.Enchantment;
@@ -38,18 +41,6 @@ public class TomeDistributionManager {
 
     // The tome ability books and enchantments allowed to spawn inside the chests
     private static final Set<String> ALLOWED_TOMES = new HashSet<>(BrigadierCommands.TOME_ABILITIES);
-    private static final Map<String, Enchantment> ENCHANTMENT_OPTIONS = Map.of(
-            "Efficiency", Enchantment.EFFICIENCY,
-            "FeatherFalling", Enchantment.FEATHER_FALLING,
-            "Knockback", Enchantment.KNOCKBACK,
-            "Mending", Enchantment.MENDING,
-            "Power", Enchantment.POWER,
-            "Protection", Enchantment.PROTECTION,
-            "Punch",  Enchantment.PUNCH,
-            "Respiration", Enchantment.RESPIRATION,
-            "Sharpness", Enchantment.SHARPNESS,
-            "SweepingEdge", Enchantment.SWEEPING_EDGE
-    );
 
     /**
      * Create an instance of the Armor Storage manager.
@@ -90,15 +81,20 @@ public class TomeDistributionManager {
      * @return A {@code Enchantment[]} of enchantments that should be spawned inside tome chests.
      */
     private Enchantment[] loadEnchantmentBookOptions() {
-        List<String> options = this.configManager.getTomeEnchantmentOptions();
+        Registry<Enchantment> enchantmentRegistry = RegistryAccess.registryAccess().getRegistry(RegistryKey.ENCHANTMENT);
+        final List<String> options = this.configManager.getTomeEnchantmentOptions();
+        List<Enchantment> books = new ArrayList<>();
 
-        // Add each enchantment book to the list if it is found within the provided config list
-        List<Enchantment> books = options.stream().map(tome -> ENCHANTMENT_OPTIONS.entrySet().stream()
-                        .filter(entry -> entry.getKey().equalsIgnoreCase(tome))
-                        .map(Map.Entry::getValue)
-                        .findFirst()
-                        .orElse(null))
-                .toList();
+        // Filter in the valid enchantment book types
+        for (String enchantmentName : options) {
+            Enchantment enchantment = enchantmentRegistry.get(NamespacedKey.minecraft(enchantmentName));
+
+            if (enchantment != null) {
+                books.add(enchantment);
+            } else {
+                this.plugin.getLogger().warning("Invalid enchantment name in config: " + enchantmentName);
+            }
+        }
 
         return books.toArray(new Enchantment[0]);
     }

@@ -89,8 +89,8 @@ public class TomeVampireRestrictionListener implements Listener {
         (new BukkitRunnable() {
             public void run() {
                 for (Player player : Bukkit.getOnlinePlayers()) {
-                    if (TomeVampireRestrictionListener.this.isRestrictedVampire(player)) {
-                        TomeVampireRestrictionListener.this.checkAndDropTomes(player);
+                    if (isRestrictedVampire(player)) {
+                        checkAndDropTomes(player);
                     }
                 }
             }
@@ -161,41 +161,40 @@ public class TomeVampireRestrictionListener implements Listener {
 
         } else if (item.getType() != Material.BOOK && item.getType() != Material.WRITTEN_BOOK) {
             return false;
+        }
 
-        } else {
-            ItemMeta meta = item.getItemMeta();
+        ItemMeta meta = item.getItemMeta();
 
-            if (meta != null) {
-                if (meta.hasDisplayName()) {
-                    Component displayName = meta.customName();
+        if (meta != null) {
+            if (meta.hasDisplayName()) {
+                Component displayName = meta.customName();
 
-                    if (displayName instanceof TextComponent textComponent
-                            && NamedTextColor.GOLD.equals(textComponent.color())
-                            && textComponent.content().startsWith("Tome of ")) {
-                        return true;
-                    }
+                if (displayName instanceof TextComponent textComponent
+                        && NamedTextColor.GOLD.equals(textComponent.color())
+                        && textComponent.content().startsWith("Tome of ")) {
+                    return true;
                 }
+            }
 
-                if (meta.hasLore()) {
-                    List<String> lore = meta.getLore();
+            if (meta.hasLore()) {
+                List<String> lore = meta.getLore();
 
-                    if (lore != null) {
-                        for (String line : lore) {
-                            if (line.contains("Tome Type: ")) {
-                                return true;
-                            }
+                if (lore != null) {
+                    for (String line : lore) {
+                        if (line.contains("Tome Type: ")) {
+                            return true;
                         }
-                    }
-                }
-
-                if (item.getType() == Material.WRITTEN_BOOK && meta instanceof BookMeta bookMeta) {
-                    if (bookMeta.hasTitle()) {
-                        return this.plugin.getTomeManager().isValidAbility(bookMeta.getTitle());
                     }
                 }
             }
 
-            return false;
+            if (item.getType() == Material.WRITTEN_BOOK && meta instanceof BookMeta bookMeta) {
+                if (bookMeta.hasTitle()) {
+                    return this.plugin.getTomeManager().isValidAbility(bookMeta.getTitle());
+                }
+            }
         }
+
+        return false;
     }
 }

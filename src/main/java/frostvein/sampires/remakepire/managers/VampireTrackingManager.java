@@ -48,13 +48,13 @@ public class VampireTrackingManager {
 
                 public void run() {
                     if (this.ticksRemaining <= 0) {
-                        VampireTrackingManager.this.stopTracking(newVampireId);
+                        stopTracking(newVampireId);
                     } else {
                         if (newVampire.isOnline()) {
-                            VampireTrackingManager.this.updateTrackingForAllVampires(newVampire);
+                            updateTrackingForAllVampires(newVampire);
                             this.ticksRemaining -= UPDATE_INTERVAL_TICKS;
                         } else {
-                            VampireTrackingManager.this.stopTracking(newVampireId);
+                            stopTracking(newVampireId);
                         }
                     }
                 }
