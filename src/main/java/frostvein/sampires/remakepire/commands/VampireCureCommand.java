@@ -82,7 +82,7 @@ public class VampireCureCommand implements CommandExecutor {
             player.sendMessage(Component.text("You must be close to a holy beacon to perform this ritual.", NamedTextColor.RED));
             return true;
 
-        } else if (this.plugin.getForcedCureChoiceManager().isBeaconBeingUsed(nearestHolyBeacon)) {
+        } else if (this.plugin.getConfigManager().doCuresHaveLastingEffects() && this.plugin.getForcedCureChoiceManager().isBeaconBeingUsed(nearestHolyBeacon)) {
             player.sendMessage(Component.text("This holy beacon is actively being channeled toward another cursed creature.", NamedTextColor.RED));
             return true;
         }
@@ -146,7 +146,7 @@ public class VampireCureCommand implements CommandExecutor {
         player.getActivePotionEffects().forEach((effect) -> player.removePotionEffect(effect.getType()));
 
         // Check if players should be able to leave and are prevented from getting turned again
-        if (plugin.getConfigManager().doCuresHaveLastingEffects()) {
+        if (this.plugin.getConfigManager().doCuresHaveLastingEffects()) {
             player.addScoreboardTag(VampireManager.CURED_VAMPIRE_TAG);
         }
 
