@@ -116,33 +116,33 @@ public class InitGameManager {
 
         if (this.adminStates.get(adminId) != InitGameManager.InitState.AWAITING_FIRST_CONFIRM) {
             admin.sendMessage(Component.text("Error: Invalid initialization state.", NamedTextColor.RED));
-
-        } else {
-            this.adminStates.put(adminId, InitGameManager.InitState.AWAITING_MODE_SELECTION);
-
-            admin.sendMessage("");
-            admin.sendMessage(Component.text("========================================", NamedTextColor.GOLD).decorate(TextDecoration.BOLD).append(Component.newline())
-                    .append(Component.text("How would you like to assign vampires?").decoration(TextDecoration.BOLD, false)).append(Component.newline())
-                    .append(Component.text("========================================").decorate(TextDecoration.BOLD))
-            );
-            admin.sendMessage("");
-            admin.sendMessage(Component.text("Type ", NamedTextColor.GRAY)
-                    .append(Component.text("/pow admin init cancel", NamedTextColor.YELLOW))
-                    .append(Component.text(" to cancel.", NamedTextColor.GRAY))
-            );
-            admin.sendMessage("");
-            admin.sendMessage(Component.text("[RANDOM] ", NamedTextColor.GREEN)
-                    .decorate(TextDecoration.BOLD)
-                    .clickEvent(ClickEvent.runCommand(COMMAND_PREFIX + "mode_random"))
-                    .hoverEvent(HoverEvent.showText(Component.text("Randomly select vampires from online players", NamedTextColor.GRAY)))
-                    .append(Component.text("[SELECTED]", NamedTextColor.AQUA)
-                            .decorate(TextDecoration.BOLD)
-                            .clickEvent(ClickEvent.runCommand(COMMAND_PREFIX + "mode_selected"))
-                            .hoverEvent(HoverEvent.showText(Component.text("Manually choose which players become vampires", NamedTextColor.GRAY)))
-                    )
-            );
-            admin.sendMessage("");
+            return;
         }
+
+        this.adminStates.put(adminId, InitGameManager.InitState.AWAITING_MODE_SELECTION);
+
+        admin.sendMessage("");
+        admin.sendMessage(Component.text("========================================", NamedTextColor.GOLD).decorate(TextDecoration.BOLD).append(Component.newline())
+                .append(Component.text("How would you like to assign vampires?").decoration(TextDecoration.BOLD, false)).append(Component.newline())
+                .append(Component.text("========================================").decorate(TextDecoration.BOLD))
+        );
+        admin.sendMessage("");
+        admin.sendMessage(Component.text("Type ", NamedTextColor.GRAY)
+                .append(Component.text("/pow admin init cancel", NamedTextColor.YELLOW))
+                .append(Component.text(" to cancel.", NamedTextColor.GRAY))
+        );
+        admin.sendMessage("");
+        admin.sendMessage(Component.text("[RANDOM] ", NamedTextColor.GREEN)
+                .decorate(TextDecoration.BOLD)
+                .clickEvent(ClickEvent.runCommand(COMMAND_PREFIX + "mode_random"))
+                .hoverEvent(HoverEvent.showText(Component.text("Randomly select vampires from online players", NamedTextColor.GRAY)))
+                .append(Component.text("[SELECTED]", NamedTextColor.AQUA)
+                        .decorate(TextDecoration.BOLD)
+                        .clickEvent(ClickEvent.runCommand(COMMAND_PREFIX + "mode_selected"))
+                        .hoverEvent(HoverEvent.showText(Component.text("Manually choose which players become vampires", NamedTextColor.GRAY)))
+                )
+        );
+        admin.sendMessage("");
     }
 
     /**
@@ -155,34 +155,34 @@ public class InitGameManager {
 
         if (this.adminStates.get(adminId) != InitGameManager.InitState.AWAITING_MODE_SELECTION) {
             admin.sendMessage(Component.text("Error: Invalid initialization state.", NamedTextColor.RED));
-
-        } else {
-            InitData data = this.adminData.get(adminId);
-            data.mode = InitGameManager.InitData.VampireMode.RANDOM;
-            this.adminStates.put(adminId, InitGameManager.InitState.AWAITING_MIN_VAMPIRES);
-
-            admin.sendMessage(Component.text("========================================", NamedTextColor.YELLOW).decorate(TextDecoration.BOLD).append(Component.newline())
-                    .append(Component.text("What should the ", NamedTextColor.YELLOW)
-                            .decoration(TextDecoration.BOLD, false)
-                            .append(Component.text("minimum", NamedTextColor.YELLOW)
-                                    .decorate(TextDecoration.BOLD))
-                            .append(Component.text(" number of starting vampires be?", NamedTextColor.YELLOW)
-                                    .decoration(TextDecoration.BOLD, false))
-                    )
-                    .append(Component.newline())
-                    .append(Component.text("Please type a number in chat (must be 0 or more).", NamedTextColor.GRAY).decoration(TextDecoration.BOLD, false)).append(Component.newline())
-                    .append(Component.text("Type ", NamedTextColor.GRAY)
-                            .decoration(TextDecoration.BOLD, false)
-                            .append(Component.text("/pow admin init cancel", NamedTextColor.YELLOW))
-                            .append(Component.text(" to cancel.", NamedTextColor.GRAY))
-                    )
-                    .append(Component.newline())
-                    .append(Component.text("========================================", NamedTextColor.YELLOW)
-                            .decorate(TextDecoration.BOLD))
-            );
-
-            admin.sendMessage("");
+            return;
         }
+
+        InitData data = this.adminData.get(adminId);
+        data.mode = InitGameManager.InitData.VampireMode.RANDOM;
+        this.adminStates.put(adminId, InitGameManager.InitState.AWAITING_MIN_VAMPIRES);
+
+        admin.sendMessage(Component.text("========================================", NamedTextColor.YELLOW).decorate(TextDecoration.BOLD).append(Component.newline())
+                .append(Component.text("What should the ", NamedTextColor.YELLOW)
+                        .decoration(TextDecoration.BOLD, false)
+                        .append(Component.text("minimum", NamedTextColor.YELLOW)
+                                .decorate(TextDecoration.BOLD))
+                        .append(Component.text(" number of starting vampires be?", NamedTextColor.YELLOW)
+                                .decoration(TextDecoration.BOLD, false))
+                )
+                .append(Component.newline())
+                .append(Component.text("Please type a number in chat (must be 0 or more).", NamedTextColor.GRAY).decoration(TextDecoration.BOLD, false)).append(Component.newline())
+                .append(Component.text("Type ", NamedTextColor.GRAY)
+                        .decoration(TextDecoration.BOLD, false)
+                        .append(Component.text("/pow admin init cancel", NamedTextColor.YELLOW))
+                        .append(Component.text(" to cancel.", NamedTextColor.GRAY))
+                )
+                .append(Component.newline())
+                .append(Component.text("========================================", NamedTextColor.YELLOW)
+                        .decorate(TextDecoration.BOLD))
+        );
+
+        admin.sendMessage("");
     }
 
     /**
@@ -195,12 +195,12 @@ public class InitGameManager {
 
         if (this.adminStates.get(adminId) != InitGameManager.InitState.AWAITING_MODE_SELECTION) {
             admin.sendMessage(Component.text("Error: Invalid initialization state.", NamedTextColor.RED));
-
-        } else {
-            InitData data = this.adminData.get(adminId);
-            data.mode = InitGameManager.InitData.VampireMode.SELECTED;
-            this.openPlayerSelectionGUI(admin);
+            return;
         }
+
+        InitData data = this.adminData.get(adminId);
+        data.mode = InitGameManager.InitData.VampireMode.SELECTED;
+        this.openPlayerSelectionGUI(admin);
     }
 
     /**
@@ -215,114 +215,114 @@ public class InitGameManager {
         if (playerCount == 0) {
             admin.sendMessage(Component.text("No players are online to select.", NamedTextColor.RED));
             this.cancelInitialization(admin);
-
-        } else {
-            InitData data = this.adminData.get(admin.getUniqueId());
-            final int totalPages = (int)Math.ceil((double) playerCount / PLAYERS_PER_PAGE), currentPage = Math.min(data.currentPage, totalPages - 1);
-            data.currentPage = currentPage;
-            int slot = 0, startIndex = currentPage * PLAYERS_PER_PAGE, endIndex = Math.min(startIndex + PLAYERS_PER_PAGE, playerCount);
-            Inventory inventory = Bukkit.createInventory(null, INVENTORY_SIZE, SELECT_VAMPIRES_GUI_TITLE);
-
-            for (int i = startIndex; i < endIndex; ++i) {
-                Player player = onlinePlayers.get(i);
-                final boolean isVampire = data.selectedVampires.contains(player.getUniqueId());
-                ItemStack item = new ItemStack(isVampire ? ItemTypeChecking.getBloodBottleType() : Material.GLASS_BOTTLE);
-                ItemMeta meta = item.getItemMeta();
-
-                if (isVampire) {
-                    meta.customName(Component.text(player.getName() + " - Vampire", NamedTextColor.DARK_RED)
-                            .decoration(TextDecoration.ITALIC, false));
-                } else {
-                    meta.customName(Component.text(player.getName() + " - Human", NamedTextColor.GREEN)
-                            .decoration(TextDecoration.ITALIC, false));
-                }
-
-                List<Component> lore = new ArrayList<>();
-                lore.add(Component.text("Click to toggle", NamedTextColor.GRAY)
-                        .decoration(TextDecoration.ITALIC, false));
-                meta.lore(lore);
-                item.setItemMeta(meta);
-                inventory.setItem(slot, item);
-                ++slot;
-            }
-
-            if (currentPage > 0) {
-                // Create the button to return to the previous page
-                ItemStack prevButton = new ItemStack(Material.ARROW);
-                ItemMeta prevMeta = prevButton.getItemMeta();
-                prevMeta.customName(Component.text("« Previous Page", NamedTextColor.YELLOW)
-                        .decoration(TextDecoration.ITALIC, false));
-
-                // Inform the reader of what page number the previous button will take them to
-                List<Component> prevLore = new ArrayList<>();
-                prevLore.add(Component.text("Go to page " + currentPage, NamedTextColor.GRAY)
-                        .decoration(TextDecoration.ITALIC, false));
-                prevMeta.lore(prevLore);
-
-                prevButton.setItemMeta(prevMeta);
-                inventory.setItem(45, prevButton);
-            }
-
-            // Create a current page number item
-            ItemStack pageIndicator = new ItemStack(Material.PAPER);
-            ItemMeta pageMeta = pageIndicator.getItemMeta();
-            pageMeta.customName(Component.text("Page " + (currentPage + 1) + " of " + totalPages, NamedTextColor.WHITE)
-                    .decoration(TextDecoration.ITALIC, false));
-
-            // Note how many players have been chosen as vampires currently
-            List<Component> pageLore = new ArrayList<>();
-            pageLore.add(Component.text(playerCount, NamedTextColor.WHITE)
-                    .decoration(TextDecoration.ITALIC, false)
-                    .append(Component.text(" players total", NamedTextColor.GRAY))
-            );
-            pageLore.add(Component.text(data.selectedVampires.size(), NamedTextColor.DARK_RED)
-                    .decoration(TextDecoration.ITALIC, false)
-                    .append(Component.text(" selected as vampires", NamedTextColor.GRAY))
-            );
-            pageMeta.lore(pageLore);
-
-            pageIndicator.setItemMeta(pageMeta);
-            inventory.setItem(49, pageIndicator);
-
-            if (currentPage < totalPages - 1) {
-                // Create the button to progress to the next page
-                ItemStack nextButton = new ItemStack(Material.ARROW);
-                ItemMeta nextMeta = nextButton.getItemMeta();
-                nextMeta.customName(Component.text("Next Page »", NamedTextColor.YELLOW)
-                        .decoration(TextDecoration.ITALIC, false));
-
-                // Inform the reader of what page number the next button will take them to
-                List<Component> nextLore = new ArrayList<>();
-                nextLore.add(Component.text("Go to page " + (currentPage + 2), NamedTextColor.GRAY)
-                        .decoration(TextDecoration.ITALIC, false));
-                nextMeta.lore(nextLore);
-
-                nextButton.setItemMeta(nextMeta);
-                inventory.setItem(50, nextButton);
-            }
-
-            // Create a confirmation button to move forward
-            ItemStack confirmButton = new ItemStack(Material.LIME_CONCRETE);
-            ItemMeta confirmMeta = confirmButton.getItemMeta();
-            confirmMeta.customName(Component.text("CONFIRM SELECTION", NamedTextColor.GREEN)
-                    .decorate(TextDecoration.BOLD)
-                    .decoration(TextDecoration.ITALIC, false)
-            );
-
-            // Let the admin know how many vampires they will proceed with
-            List<Component> confirmLore = new ArrayList<>();
-            confirmLore.add(Component.text("Click to proceed with these selections", NamedTextColor.GRAY)
-                    .decoration(TextDecoration.ITALIC, false));
-            confirmLore.add(Component.text("Selected: ", NamedTextColor.GRAY)
-                    .decoration(TextDecoration.ITALIC, false)
-                    .append(Component.text(data.selectedVampires.size() + " vampires", NamedTextColor.YELLOW)));
-            confirmMeta.lore(confirmLore);
-
-            confirmButton.setItemMeta(confirmMeta);
-            inventory.setItem(53, confirmButton);
-            admin.openInventory(inventory);
-            Bukkit.getScheduler().runTaskLater(this.plugin, () -> this.guiRefreshInProgress.remove(admin.getUniqueId()), 1L);
+            return;
         }
+
+        InitData data = this.adminData.get(admin.getUniqueId());
+        final int totalPages = (int)Math.ceil((double) playerCount / PLAYERS_PER_PAGE), currentPage = Math.min(data.currentPage, totalPages - 1);
+        data.currentPage = currentPage;
+        int slot = 0, startIndex = currentPage * PLAYERS_PER_PAGE, endIndex = Math.min(startIndex + PLAYERS_PER_PAGE, playerCount);
+        Inventory inventory = Bukkit.createInventory(null, INVENTORY_SIZE, SELECT_VAMPIRES_GUI_TITLE);
+
+        for (int i = startIndex; i < endIndex; ++i) {
+            Player player = onlinePlayers.get(i);
+            final boolean isVampire = data.selectedVampires.contains(player.getUniqueId());
+            ItemStack item = new ItemStack(isVampire ? ItemTypeChecking.getBloodBottleType() : Material.GLASS_BOTTLE);
+            ItemMeta meta = item.getItemMeta();
+
+            if (isVampire) {
+                meta.customName(Component.text(player.getName() + " - Vampire", NamedTextColor.DARK_RED)
+                        .decoration(TextDecoration.ITALIC, false));
+            } else {
+                meta.customName(Component.text(player.getName() + " - Human", NamedTextColor.GREEN)
+                        .decoration(TextDecoration.ITALIC, false));
+            }
+
+            List<Component> lore = new ArrayList<>();
+            lore.add(Component.text("Click to toggle", NamedTextColor.GRAY)
+                    .decoration(TextDecoration.ITALIC, false));
+            meta.lore(lore);
+            item.setItemMeta(meta);
+            inventory.setItem(slot, item);
+            ++slot;
+        }
+
+        if (currentPage > 0) {
+            // Create the button to return to the previous page
+            ItemStack prevButton = new ItemStack(Material.ARROW);
+            ItemMeta prevMeta = prevButton.getItemMeta();
+            prevMeta.customName(Component.text("« Previous Page", NamedTextColor.YELLOW)
+                    .decoration(TextDecoration.ITALIC, false));
+
+            // Inform the reader of what page number the previous button will take them to
+            List<Component> prevLore = new ArrayList<>();
+            prevLore.add(Component.text("Go to page " + currentPage, NamedTextColor.GRAY)
+                    .decoration(TextDecoration.ITALIC, false));
+            prevMeta.lore(prevLore);
+
+            prevButton.setItemMeta(prevMeta);
+            inventory.setItem(45, prevButton);
+        }
+
+        // Create a current page number item
+        ItemStack pageIndicator = new ItemStack(Material.PAPER);
+        ItemMeta pageMeta = pageIndicator.getItemMeta();
+        pageMeta.customName(Component.text("Page " + (currentPage + 1) + " of " + totalPages, NamedTextColor.WHITE)
+                .decoration(TextDecoration.ITALIC, false));
+
+        // Note how many players have been chosen as vampires currently
+        List<Component> pageLore = new ArrayList<>();
+        pageLore.add(Component.text(playerCount, NamedTextColor.WHITE)
+                .decoration(TextDecoration.ITALIC, false)
+                .append(Component.text(" players total", NamedTextColor.GRAY))
+        );
+        pageLore.add(Component.text(data.selectedVampires.size(), NamedTextColor.DARK_RED)
+                .decoration(TextDecoration.ITALIC, false)
+                .append(Component.text(" selected as vampires", NamedTextColor.GRAY))
+        );
+        pageMeta.lore(pageLore);
+
+        pageIndicator.setItemMeta(pageMeta);
+        inventory.setItem(49, pageIndicator);
+
+        if (currentPage < totalPages - 1) {
+            // Create the button to progress to the next page
+            ItemStack nextButton = new ItemStack(Material.ARROW);
+            ItemMeta nextMeta = nextButton.getItemMeta();
+            nextMeta.customName(Component.text("Next Page »", NamedTextColor.YELLOW)
+                    .decoration(TextDecoration.ITALIC, false));
+
+            // Inform the reader of what page number the next button will take them to
+            List<Component> nextLore = new ArrayList<>();
+            nextLore.add(Component.text("Go to page " + (currentPage + 2), NamedTextColor.GRAY)
+                    .decoration(TextDecoration.ITALIC, false));
+            nextMeta.lore(nextLore);
+
+            nextButton.setItemMeta(nextMeta);
+            inventory.setItem(50, nextButton);
+        }
+
+        // Create a confirmation button to move forward
+        ItemStack confirmButton = new ItemStack(Material.LIME_CONCRETE);
+        ItemMeta confirmMeta = confirmButton.getItemMeta();
+        confirmMeta.customName(Component.text("CONFIRM SELECTION", NamedTextColor.GREEN)
+                .decorate(TextDecoration.BOLD)
+                .decoration(TextDecoration.ITALIC, false)
+        );
+
+        // Let the admin know how many vampires they will proceed with
+        List<Component> confirmLore = new ArrayList<>();
+        confirmLore.add(Component.text("Click to proceed with these selections", NamedTextColor.GRAY)
+                .decoration(TextDecoration.ITALIC, false));
+        confirmLore.add(Component.text("Selected: ", NamedTextColor.GRAY)
+                .decoration(TextDecoration.ITALIC, false)
+                .append(Component.text(data.selectedVampires.size() + " vampires", NamedTextColor.YELLOW)));
+        confirmMeta.lore(confirmLore);
+
+        confirmButton.setItemMeta(confirmMeta);
+        inventory.setItem(53, confirmButton);
+        admin.openInventory(inventory);
+        Bukkit.getScheduler().runTaskLater(this.plugin, () -> this.guiRefreshInProgress.remove(admin.getUniqueId()), 1L);
     }
 
     /**
@@ -398,51 +398,51 @@ public class InitGameManager {
 
         if (this.adminStates.get(adminId) != InitGameManager.InitState.AWAITING_MIN_VAMPIRES) {
             return false;
-        } else {
-            try {
-                int min = Integer.parseInt(input.trim());
+        }
 
-                if (min < 0) {
-                    admin.sendMessage(Component.text("The minimum must be 0 or more. Please try again:", NamedTextColor.RED));
+        try {
+            int min = Integer.parseInt(input.trim());
 
-                } else {
-                    InitData data = this.adminData.get(adminId);
-                    data.minVampires = min;
-                    this.adminStates.put(adminId, InitGameManager.InitState.AWAITING_MAX_VAMPIRES);
-
-                    admin.sendMessage(Component.text("✓ Minimum vampires set to: ", NamedTextColor.GREEN)
-                            .append(Component.text(min, NamedTextColor.YELLOW)));
-                    admin.sendMessage("");
-                    admin.sendMessage(Component.text("========================================", NamedTextColor.YELLOW).decorate(TextDecoration.BOLD).append(Component.newline())
-                            .append(Component.text("What should the ", NamedTextColor.YELLOW)
-                                    .decoration(TextDecoration.BOLD, false)
-                                    .append(Component.text("maximum", NamedTextColor.YELLOW)
-                                                    .decorate(TextDecoration.BOLD))
-                                    .append(Component.text(" number of vampires be?", NamedTextColor.YELLOW)
-                                                    .decoration(TextDecoration.BOLD, false))
-                            )
-                            .append(Component.newline())
-                            .append(Component.text("Please type a number in chat (must be " + min + " or more).", NamedTextColor.GRAY)
-                                    .decoration(TextDecoration.BOLD, false))
-                            .append(Component.newline())
-                            .append(Component.text("Type ", NamedTextColor.GRAY)
-                                    .decoration(TextDecoration.BOLD, false)
-                                    .append(Component.text("/pow admin init cancel", NamedTextColor.YELLOW))
-                                    .append(Component.text(" to cancel.", NamedTextColor.GRAY))
-                            )
-                            .append(Component.newline())
-                            .append(Component.text("========================================", NamedTextColor.YELLOW)
-                                    .decorate(TextDecoration.BOLD))
-                    );
-                    admin.sendMessage("");
-                }
-
-                return true;
-
-            } catch (NumberFormatException e) {
-                admin.sendMessage(Component.text("'" + input + "' is not a valid number. Please try again:", NamedTextColor.RED));
+            if (min < 0) {
+                admin.sendMessage(Component.text("The minimum must be 0 or more. Please try again:", NamedTextColor.RED));
                 return true;
             }
+
+            InitData data = this.adminData.get(adminId);
+            data.minVampires = min;
+            this.adminStates.put(adminId, InitGameManager.InitState.AWAITING_MAX_VAMPIRES);
+
+            admin.sendMessage(Component.text("✓ Minimum vampires set to: ", NamedTextColor.GREEN)
+                    .append(Component.text(min, NamedTextColor.YELLOW)));
+            admin.sendMessage("");
+            admin.sendMessage(Component.text("========================================", NamedTextColor.YELLOW).decorate(TextDecoration.BOLD).append(Component.newline())
+                    .append(Component.text("What should the ", NamedTextColor.YELLOW)
+                            .decoration(TextDecoration.BOLD, false)
+                            .append(Component.text("maximum", NamedTextColor.YELLOW)
+                                            .decorate(TextDecoration.BOLD))
+                            .append(Component.text(" number of vampires be?", NamedTextColor.YELLOW)
+                                            .decoration(TextDecoration.BOLD, false))
+                    )
+                    .append(Component.newline())
+                    .append(Component.text("Please type a number in chat (must be " + min + " or more).", NamedTextColor.GRAY)
+                            .decoration(TextDecoration.BOLD, false))
+                    .append(Component.newline())
+                    .append(Component.text("Type ", NamedTextColor.GRAY)
+                            .decoration(TextDecoration.BOLD, false)
+                            .append(Component.text("/pow admin init cancel", NamedTextColor.YELLOW))
+                            .append(Component.text(" to cancel.", NamedTextColor.GRAY))
+                    )
+                    .append(Component.newline())
+                    .append(Component.text("========================================", NamedTextColor.YELLOW)
+                            .decorate(TextDecoration.BOLD))
+            );
+
+            admin.sendMessage("");
+            return true;
+
+        } catch (NumberFormatException e) {
+            admin.sendMessage(Component.text("'" + input + "' is not a valid number. Please try again:", NamedTextColor.RED));
+            return true;
         }
     }
 
@@ -458,31 +458,30 @@ public class InitGameManager {
 
         if (this.adminStates.get(adminId) != InitGameManager.InitState.AWAITING_MAX_VAMPIRES) {
             return false;
+        }
 
-        } else {
-            InitData data = this.adminData.get(adminId);
+        InitData data = this.adminData.get(adminId);
 
-            try {
-                final int max = Integer.parseInt(input.trim());
+        try {
+            final int max = Integer.parseInt(input.trim());
 
-                if (max < data.minVampires) {
-                    admin.sendMessage(Component.text("The maximum must be " + data.minVampires + " or more. Please try again:", NamedTextColor.RED));
+            if (max < data.minVampires) {
+                admin.sendMessage(Component.text("The maximum must be " + data.minVampires + " or more. Please try again:", NamedTextColor.RED));
 
-                } else {
-                    data.maxVampires = max;
-                    this.adminStates.put(adminId, InitGameManager.InitState.AWAITING_FINAL_CONFIRM);
-                    admin.sendMessage(Component.text("✓ Maximum vampires set to: ", NamedTextColor.GREEN)
-                            .append(Component.text(max, NamedTextColor.YELLOW)));
-                    admin.sendMessage("");
-                    this.showFinalConfirmation(admin);
-                }
-
-                return true;
-
-            } catch (NumberFormatException e) {
-                admin.sendMessage(Component.text("'" + input + "' is not a valid number. Please try again:", NamedTextColor.RED));
-                return true;
+            } else {
+                data.maxVampires = max;
+                this.adminStates.put(adminId, InitGameManager.InitState.AWAITING_FINAL_CONFIRM);
+                admin.sendMessage(Component.text("✓ Maximum vampires set to: ", NamedTextColor.GREEN)
+                        .append(Component.text(max, NamedTextColor.YELLOW)));
+                admin.sendMessage("");
+                this.showFinalConfirmation(admin);
             }
+
+            return true;
+
+        } catch (NumberFormatException e) {
+            admin.sendMessage(Component.text("'" + input + "' is not a valid number. Please try again:", NamedTextColor.RED));
+            return true;
         }
     }
 
@@ -547,269 +546,264 @@ public class InitGameManager {
 
         if (this.adminStates.get(adminId) != InitGameManager.InitState.AWAITING_FINAL_CONFIRM) {
             admin.sendMessage(Component.text("Error: Invalid initialization state.", NamedTextColor.RED));
+            return;
+        }
 
-        } else {
-            InitData data = this.adminData.get(adminId);
-            admin.sendMessage("");
-            admin.sendMessage(Component.text("========================================", NamedTextColor.GOLD).decorate(TextDecoration.BOLD).append(Component.newline())
-                    .append(Component.text("INITIALIZING GAME...")).append(Component.newline())
-                    .append(Component.text("========================================"))
-            );
-            World world = this.plugin.getServer().getWorld(RemakepirePlugin.WORLD_NAME);
+        InitData data = this.adminData.get(adminId);
+        admin.sendMessage("");
+        admin.sendMessage(Component.text("========================================", NamedTextColor.GOLD).decorate(TextDecoration.BOLD).append(Component.newline())
+                .append(Component.text("INITIALIZING GAME...")).append(Component.newline())
+                .append(Component.text("========================================"))
+        );
+        World world = this.plugin.getServer().getWorld(RemakepirePlugin.WORLD_NAME);
 
-            if (world == null) {
-                admin.sendMessage(Component.text("Error: World '" + RemakepirePlugin.WORLD_NAME + "' not found.", NamedTextColor.RED));
-                this.cancelInitialization(admin);
+        if (world == null) {
+            admin.sendMessage(Component.text("Error: World '" + RemakepirePlugin.WORLD_NAME + "' not found.", NamedTextColor.RED));
+            this.cancelInitialization(admin);
+            return;
+        }
 
-            } else {
-                admin.sendMessage(Component.text("[1/9] Neutralizing beacons...", NamedTextColor.GRAY));
+        admin.sendMessage(Component.text("[1/9] Neutralizing beacons...", NamedTextColor.GRAY));
 
-                for (BeaconSite beacon : this.plugin.getBeaconManager().getAllBeacons()) {
-                    this.plugin.getBeaconManager().setBeaconNeutral(beacon.getName(), true);
-                    Location beaconLoc = beacon.getLocation();
+        for (BeaconSite beacon : this.plugin.getBeaconManager().getAllBeacons()) {
+            this.plugin.getBeaconManager().setBeaconNeutral(beacon.getName(), true);
+            Location beaconLoc = beacon.getLocation();
 
-                    if (beaconLoc != null && beaconLoc.getWorld() != null) {
-                        beaconLoc.getBlock().setType(Material.BARRIER);
-                    }
-                }
-
-                if (this.plugin.getBeaconManager().getBeacon("castle") != null) {
-                    this.plugin.getBeaconManager().setBeaconDesecrated("castle");
-                    admin.sendMessage(Component.text("  → Castle beacon set to desecrated", NamedTextColor.GRAY));
-                }
-
-                admin.sendMessage(Component.text("[2/9] Clearing beacon cooldowns...", NamedTextColor.GRAY));
-                this.plugin.getBeaconManager().clearAllBeaconCooldownsForNewSession();
-
-                admin.sendMessage(Component.text("[3/9] Resetting player data...", NamedTextColor.GRAY));
-                Collection<? extends Player> onlinePlayers = Bukkit.getOnlinePlayers();
-
-                // Clear all tags from all online players
-                for (Player player : onlinePlayers) {
-                    for (String tag : new HashSet<>(player.getScoreboardTags())) {
-                        player.removeScoreboardTag(tag);
-                    }
-
-                    player.getInventory().clear();
-                }
-
-                admin.sendMessage(Component.text("[3.5/9] Resetting scoreboard objectives...", NamedTextColor.GRAY));
-                Scoreboard mainScoreboard = Bukkit.getScoreboardManager().getMainScoreboard();
-
-                for (Objective obj : new HashSet<>(mainScoreboard.getObjectives())) {
-                    if (obj.getName().startsWith("vsmp_")) {
-                        final String name = obj.getName();
-                        final Component displayName = obj.displayName();
-
-                        Criteria criteria = obj.getTrackedCriteria();
-                        obj.unregister();
-                        mainScoreboard.registerNewObjective(name,criteria, displayName);
-                    }
-                }
-
-                for (Player player : onlinePlayers) {
-                    AttributeInstance healthAttr = player.getAttribute(Attribute.MAX_HEALTH);
-
-                    for (AttributeModifier modifier : healthAttr.getModifiers()) {
-                        healthAttr.removeModifier(modifier);
-                    }
-
-                    healthAttr.setBaseValue(20.0);
-                    player.setHealth(20.0);
-                    player.setLevel(0);
-                    player.setExp(0.0F);
-                    player.setTotalExperience(0);
-                }
-
-                try {
-                    Objective deathObjective = mainScoreboard.getObjective("vsmp_death");
-
-                    if (deathObjective != null) {
-                        for (Player player : onlinePlayers) {
-                            deathObjective.getScore(player.getName()).setScore(0);
-                        }
-
-                        admin.sendMessage(Component.text("  → Reset death counts for all players", NamedTextColor.GRAY));
-                    }
-                } catch (Exception e) {
-                    this.plugin.getLogger().warning("Failed to reset death scoreboard: " + e.getMessage());
-                }
-
-                admin.sendMessage(Component.text("[4/9] Priming new session and incrementing game ID...", NamedTextColor.GRAY));
-                this.plugin.getSessionManager().primeNewSession();
-                this.plugin.getSessionManager().incrementGameID();
-
-                admin.sendMessage(Component.text("[4.5/9] Resetting game state flags in config.yml...", NamedTextColor.GRAY));
-                this.plugin.getConfig().set("first_beacon_converted", false);
-                this.plugin.getConfig().set("humans_own_all_beacons", false);
-                this.plugin.getConfig().set("vampires_own_all_beacons", false);
-                this.plugin.getConfig().set("one_human_left", false);
-                this.plugin.getConfig().set("fourth_book_has_spawned", false);
-                this.plugin.getConfig().set("fourth_book_spawn_enabled", false);
-                this.plugin.saveConfig();
-
-                admin.sendMessage(Component.text("[4.6/9] Clearing sire mappings...", NamedTextColor.GRAY));
-                this.plugin.getSireManager().clearAllSireMappings();
-                admin.sendMessage(Component.text("[4.7/9] Stopping vampire tracking...", NamedTextColor.GRAY));
-
-                if (this.plugin.getVampireTrackingManager() != null) {
-                    this.plugin.getVampireTrackingManager().stopAllTracking();
-                }
-
-                admin.sendMessage(Component.text("[4.8/9] Clearing permadeath preferences...", NamedTextColor.GRAY));
-                this.plugin.getPermadeathManager().clearAllPermadeathModes();
-
-                admin.sendMessage(Component.text("[5/9] Setting world time...", NamedTextColor.GRAY));
-                world.setFullTime(1L);
-
-                admin.sendMessage(Component.text("[6/9] Applying saturation effect...", NamedTextColor.GRAY));
-                for (Player player : onlinePlayers) {
-                    player.addPotionEffect(new PotionEffect(PotionEffectType.SATURATION, 200, 9));
-                }
-
-                admin.sendMessage(Component.text("[7/9] Teleporting players...", NamedTextColor.GRAY));
-
-                for (Player player : onlinePlayers) {
-                    if (player.getGameMode() != GameMode.SURVIVAL) {
-                        GameMode oldMode = player.getGameMode();
-                        player.setGameMode(GameMode.SURVIVAL);
-                        admin.sendMessage(Component.text("  → Reset " + player.getName() + " from " + oldMode.name().toLowerCase() + " to survival", NamedTextColor.GRAY));
-                    }
-
-                    Location teleportLoc = this.getRandomTeleportLocation(world);
-
-                    if (teleportLoc != null) {
-                        player.teleport(teleportLoc);
-                    } else {
-                        admin.sendMessage(Component.text("Warning: Could not find valid teleport location for " + player.getName(), NamedTextColor.RED));
-                    }
-                }
-
-                admin.sendMessage(Component.text("[8/9] Assigning vampires...", NamedTextColor.GRAY));
-
-                List<Player> playersToConvert = new ArrayList<>();
-
-                if (data.mode == InitGameManager.InitData.VampireMode.RANDOM) {
-                    int vampireCount = ThreadLocalRandom.current().nextInt(data.minVampires, data.maxVampires + 1);
-                    List<Player> availablePlayers = new ArrayList<>(onlinePlayers);
-                    Collections.shuffle(availablePlayers);
-
-                    vampireCount = Math.min(vampireCount, availablePlayers.size());
-                    playersToConvert = availablePlayers.subList(0, vampireCount);
-
-                } else {
-                    for (Player player : onlinePlayers) {
-                        if (data.selectedVampires.contains(player.getUniqueId())) {
-                            playersToConvert.add(player);
-                        }
-                    }
-                }
-
-                Set<UUID> vampireIds = new HashSet<>();
-
-                for (Player player : playersToConvert) {
-                    this.plugin.getVampireManager().setPlayerAsVampire(player, 1);
-                    vampireIds.add(player.getUniqueId());
-
-                    player.setExp(0.5F);
-                    player.showTitle(Title.title(
-                            Component.text("Vampire", NamedTextColor.DARK_RED)
-                                    .decorate(TextDecoration.BOLD),
-                            Component.empty(),
-                            Title.Times.times(
-                                    Duration.ofMillis(500),     // 1/2 second
-                                    Duration.ofSeconds(5),
-                                    Duration.ofSeconds(1)
-                            )));
-                    player.sendMessage("");
-
-                    player.sendMessage(Component.text("========================================", NamedTextColor.DARK_RED)
-                            .decorate(TextDecoration.BOLD)
-                            .append(Component.newline())
-                            .append(Component.text("You are a creature of the night, and it is time to feed.", NamedTextColor.RED)
-                                    .decoration(TextDecoration.BOLD, false))
-                            .append(Component.newline()).append(Component.newline())
-                            .append(Component.text("What to do: Turn other humans by 'killing' them when no one is looking. As a level 1 vampire, there are very few ways you can be found out, but still be cautious. You cannot help turn beacons, eating food is bad but stomachable for now, only attack during the night. Press \"k\" to customize your vampire ability keybinds.", NamedTextColor.GRAY))
-                            .append(Component.newline())
-                            .append(Component.text("========================================", NamedTextColor.DARK_RED)
-                                    .decorate(TextDecoration.BOLD))
-                    );
-
-                    player.sendMessage("");
-                    this.plugin.getVampireTexturePackManager().sendVampireTexturePackPrompt(player);
-                }
-
-                admin.sendMessage(Component.text("  → Converted " + playersToConvert.size() + " players to vampires", NamedTextColor.GRAY));
-
-                for (Player player : onlinePlayers) {
-                    if (!vampireIds.contains(player.getUniqueId())) {
-                        player.addScoreboardTag(VampireManager.HUMAN_TAG);
-                        player.showTitle(Title.title(
-                                Component.text("Human", NamedTextColor.YELLOW)
-                                        .decorate(TextDecoration.BOLD),
-                                Component.empty(),
-                                Title.Times.times(
-                                        Duration.ofMillis(500),
-                                        Duration.ofSeconds(5),
-                                        Duration.ofSeconds(1)
-                                )));
-                        player.sendMessage("");
-                        player.sendMessage(Component.text("========================================", NamedTextColor.YELLOW).decorate(TextDecoration.BOLD).append(Component.newline())
-                                .append(Component.text("Welcome to " + plugin.getConfigManager().getTownName() + ". Survive, consecrate beacons, find tomes, and above all: Fear the night.", NamedTextColor.GRAY).decoration(TextDecoration.BOLD, false)).append(Component.newline())
-                                .append(Component.text("========================================", NamedTextColor.YELLOW).decorate(TextDecoration.BOLD))
-                        );
-
-                        player.sendMessage("");
-                        this.plugin.getVampireTexturePackManager().sendHumanTexturePackPrompt(player);
-                    }
-                }
-
-                admin.sendMessage(Component.text("[9/11] Starting session...", NamedTextColor.GRAY));
-                this.plugin.getSessionManager().startSession();
-
-                admin.sendMessage(Component.text("[10/11] Distributing tomes to chests...", NamedTextColor.GRAY));
-                if (this.plugin.getTomeDistributionManager().getTomeLocations().isEmpty()) {
-                    admin.sendMessage(Component.text("  → No tome chest locations configured, skipping tome distribution", NamedTextColor.YELLOW));
-                } else {
-                    this.plugin.getTomeDistributionManager().triggerDistribution();
-                    admin.sendMessage(Component.text("  → Tomes distributed to " + this.plugin.getTomeDistributionManager().getTomeLocations().size() + " chest locations", NamedTextColor.GRAY));
-                }
-
-                admin.sendMessage(Component.text("[11/11] Clearing potion effects...", NamedTextColor.GRAY));
-                for (Player player : onlinePlayers) {
-                    for (PotionEffect effect : player.getActivePotionEffects()) {
-                        player.removePotionEffect(effect.getType());
-                    }
-                }
-
-                this.plugin.getVampireTurningManager().enableAllVampireTurning();
-
-                admin.sendMessage("");
-                admin.sendMessage(Component.text("========================================", NamedTextColor.GREEN).decorate(TextDecoration.BOLD).append(Component.newline())
-                        .append(Component.text("GAME INITIALIZED SUCCESSFULLY.")).append(Component.newline())
-                        .append(Component.text("========================================")).append(Component.newline())
-                        .append(Component.text("Players: ", NamedTextColor.GRAY)
-                                .decoration(TextDecoration.BOLD, false)
-                                .append(Component.text(onlinePlayers.size(), NamedTextColor.YELLOW))
-                        )
-                        .append(Component.newline())
-                        .append(Component.text("Vampires: ", NamedTextColor.GRAY)
-                                .decoration(TextDecoration.BOLD, false)
-                                .append(Component.text(playersToConvert.size(), NamedTextColor.RED))
-                        )
-                        .append(Component.newline())
-                        .append(Component.text("Humans: ", NamedTextColor.GRAY)
-                                .decoration(TextDecoration.BOLD, false)
-                                .append(Component.text(onlinePlayers.size() - playersToConvert.size(), NamedTextColor.GREEN))
-                        )
-                        .append(Component.newline())
-                        .append(Component.text("========================================", NamedTextColor.GREEN).decorate(TextDecoration.BOLD))
-                );
-
-                this.adminStates.remove(adminId);
-                this.adminData.remove(adminId);
+            if (beaconLoc != null && beaconLoc.getWorld() != null) {
+                beaconLoc.getBlock().setType(Material.BARRIER);
             }
         }
+
+        if (this.plugin.getBeaconManager().getBeacon("castle") != null) {
+            this.plugin.getBeaconManager().setBeaconDesecrated("castle");
+            admin.sendMessage(Component.text("  → Castle beacon set to desecrated", NamedTextColor.GRAY));
+        }
+
+        admin.sendMessage(Component.text("[2/9] Clearing beacon cooldowns...", NamedTextColor.GRAY));
+        this.plugin.getBeaconManager().clearAllBeaconCooldownsForNewSession();
+
+        admin.sendMessage(Component.text("[3/9] Resetting player data...", NamedTextColor.GRAY));
+        Collection<? extends Player> onlinePlayers = Bukkit.getOnlinePlayers();
+
+        // Clear all tags from all online players
+        for (Player player : onlinePlayers) {
+            for (String tag : new HashSet<>(player.getScoreboardTags())) {
+                player.removeScoreboardTag(tag);
+            }
+
+            player.getInventory().clear();
+        }
+
+        admin.sendMessage(Component.text("[3.5/9] Resetting scoreboard objectives...", NamedTextColor.GRAY));
+        Scoreboard mainScoreboard = Bukkit.getScoreboardManager().getMainScoreboard();
+
+        for (Objective obj : new HashSet<>(mainScoreboard.getObjectives())) {
+            if (obj.getName().startsWith("vsmp_")) {
+                final String name = obj.getName();
+                final Component displayName = obj.displayName();
+
+                Criteria criteria = obj.getTrackedCriteria();
+                obj.unregister();
+                mainScoreboard.registerNewObjective(name,criteria, displayName);
+            }
+        }
+
+        for (Player player : onlinePlayers) {
+            AttributeInstance healthAttr = player.getAttribute(Attribute.MAX_HEALTH);
+
+            for (AttributeModifier modifier : healthAttr.getModifiers()) {
+                healthAttr.removeModifier(modifier);
+            }
+
+            healthAttr.setBaseValue(20.0);
+            player.setHealth(20.0);
+            player.setLevel(0);
+            player.setExp(0.0F);
+            player.setTotalExperience(0);
+        }
+
+        try {
+            Objective deathObjective = mainScoreboard.getObjective("vsmp_death");
+
+            if (deathObjective != null) {
+                for (Player player : onlinePlayers) {
+                    deathObjective.getScore(player.getName()).setScore(0);
+                }
+
+                admin.sendMessage(Component.text("  → Reset death counts for all players", NamedTextColor.GRAY));
+            }
+        } catch (Exception e) {
+            this.plugin.getLogger().warning("Failed to reset death scoreboard: " + e.getMessage());
+            e.printStackTrace();
+        }
+
+        admin.sendMessage(Component.text("[4/9] Priming new session and incrementing game ID...", NamedTextColor.GRAY));
+        this.plugin.getSessionManager().primeNewSession();
+        this.plugin.getSessionManager().incrementGameID();
+
+        admin.sendMessage(Component.text("[4.5/9] Resetting game state flags in config.yml...", NamedTextColor.GRAY));
+        this.plugin.getConfig().set("first_beacon_converted", false);
+        this.plugin.getConfig().set("humans_own_all_beacons", false);
+        this.plugin.getConfig().set("vampires_own_all_beacons", false);
+        this.plugin.getConfig().set("one_human_left", false);
+        this.plugin.getConfig().set("fourth_book_has_spawned", false);
+        this.plugin.getConfig().set("fourth_book_spawn_enabled", false);
+        this.plugin.saveConfig();
+
+        admin.sendMessage(Component.text("[4.6/9] Clearing sire mappings...", NamedTextColor.GRAY));
+        this.plugin.getSireManager().clearAllSireMappings();
+        admin.sendMessage(Component.text("[4.7/9] Stopping vampire tracking...", NamedTextColor.GRAY));
+
+        if (this.plugin.getVampireTrackingManager() != null) {
+            this.plugin.getVampireTrackingManager().stopAllTracking();
+        }
+
+        admin.sendMessage(Component.text("[4.8/9] Clearing permadeath preferences...", NamedTextColor.GRAY));
+        this.plugin.getPermadeathManager().clearAllPermadeathModes();
+
+        admin.sendMessage(Component.text("[5/9] Setting world time...", NamedTextColor.GRAY));
+        world.setFullTime(1L);
+
+        admin.sendMessage(Component.text("[6/9] Applying saturation effect...", NamedTextColor.GRAY));
+        for (Player player : onlinePlayers) {
+            player.addPotionEffect(new PotionEffect(PotionEffectType.SATURATION, 200, 9));
+        }
+
+        admin.sendMessage(Component.text("[7/9] Teleporting players...", NamedTextColor.GRAY));
+
+        for (Player player : onlinePlayers) {
+            if (player.getGameMode() != GameMode.SURVIVAL) {
+                GameMode oldMode = player.getGameMode();
+                player.setGameMode(GameMode.SURVIVAL);
+                admin.sendMessage(Component.text("  → Reset " + player.getName() + " from " + oldMode.name().toLowerCase() + " to survival", NamedTextColor.GRAY));
+            }
+
+            player.teleport(this.getRandomTeleportLocation(world));
+        }
+
+        admin.sendMessage(Component.text("[8/9] Assigning vampires...", NamedTextColor.GRAY));
+
+        List<Player> playersToConvert = new ArrayList<>();
+
+        if (data.mode == InitGameManager.InitData.VampireMode.RANDOM) {
+            int vampireCount = ThreadLocalRandom.current().nextInt(data.minVampires, data.maxVampires + 1);
+            List<Player> availablePlayers = new ArrayList<>(onlinePlayers);
+            Collections.shuffle(availablePlayers);
+
+            vampireCount = Math.min(vampireCount, availablePlayers.size());
+            playersToConvert = availablePlayers.subList(0, vampireCount);
+
+        } else {
+            for (Player player : onlinePlayers) {
+                if (data.selectedVampires.contains(player.getUniqueId())) {
+                    playersToConvert.add(player);
+                }
+            }
+        }
+
+        Set<UUID> vampireIds = new HashSet<>();
+
+        for (Player player : playersToConvert) {
+            this.plugin.getVampireManager().setPlayerAsVampire(player, 1);
+            vampireIds.add(player.getUniqueId());
+
+            player.setExp(0.5F);
+            player.showTitle(Title.title(
+                    Component.text("Vampire", NamedTextColor.DARK_RED)
+                            .decorate(TextDecoration.BOLD),
+                    Component.empty(),
+                    Title.Times.times(
+                            Duration.ofMillis(500),     // 1/2 second
+                            Duration.ofSeconds(5),
+                            Duration.ofSeconds(1)
+                    )));
+            player.sendMessage("");
+
+            player.sendMessage(Component.text("========================================", NamedTextColor.DARK_RED)
+                    .decorate(TextDecoration.BOLD)
+                    .append(Component.newline())
+                    .append(Component.text("You are a creature of the night, and it is time to feed.", NamedTextColor.RED)
+                            .decoration(TextDecoration.BOLD, false))
+                    .append(Component.newline()).append(Component.newline())
+                    .append(Component.text("What to do: Turn other humans by 'killing' them when no one is looking. As a level 1 vampire, there are very few ways you can be found out, but still be cautious. You cannot help turn beacons, eating food is bad but stomachable for now, only attack during the night. Press \"k\" to customize your vampire ability keybinds.", NamedTextColor.GRAY))
+                    .append(Component.newline())
+                    .append(Component.text("========================================", NamedTextColor.DARK_RED)
+                            .decorate(TextDecoration.BOLD))
+            );
+
+            player.sendMessage("");
+            this.plugin.getVampireTexturePackManager().sendVampireTexturePackPrompt(player);
+        }
+
+        admin.sendMessage(Component.text("  → Converted " + playersToConvert.size() + " players to vampires", NamedTextColor.GRAY));
+
+        for (Player player : onlinePlayers) {
+            if (!vampireIds.contains(player.getUniqueId())) {
+                player.addScoreboardTag(VampireManager.HUMAN_TAG);
+                player.showTitle(Title.title(
+                        Component.text("Human", NamedTextColor.YELLOW)
+                                .decorate(TextDecoration.BOLD),
+                        Component.empty(),
+                        Title.Times.times(
+                                Duration.ofMillis(500),
+                                Duration.ofSeconds(5),
+                                Duration.ofSeconds(1)
+                        )));
+                player.sendMessage("");
+                player.sendMessage(Component.text("========================================", NamedTextColor.YELLOW).decorate(TextDecoration.BOLD).append(Component.newline())
+                        .append(Component.text("Welcome to " + plugin.getConfigManager().getTownName() + ". Survive, consecrate beacons, find tomes, and above all: Fear the night.", NamedTextColor.GRAY).decoration(TextDecoration.BOLD, false)).append(Component.newline())
+                        .append(Component.text("========================================", NamedTextColor.YELLOW).decorate(TextDecoration.BOLD))
+                );
+
+                player.sendMessage("");
+                this.plugin.getVampireTexturePackManager().sendHumanTexturePackPrompt(player);
+            }
+        }
+
+        admin.sendMessage(Component.text("[9/11] Starting session...", NamedTextColor.GRAY));
+        this.plugin.getSessionManager().startSession();
+
+        admin.sendMessage(Component.text("[10/11] Distributing tomes to chests...", NamedTextColor.GRAY));
+        if (this.plugin.getTomeDistributionManager().getTomeLocations().isEmpty()) {
+            admin.sendMessage(Component.text("  → No tome chest locations configured, skipping tome distribution", NamedTextColor.YELLOW));
+        } else {
+            this.plugin.getTomeDistributionManager().triggerDistribution();
+            admin.sendMessage(Component.text("  → Tomes distributed to " + this.plugin.getTomeDistributionManager().getTomeLocations().size() + " chest locations", NamedTextColor.GRAY));
+        }
+
+        admin.sendMessage(Component.text("[11/11] Clearing potion effects...", NamedTextColor.GRAY));
+        for (Player player : onlinePlayers) {
+            for (PotionEffect effect : player.getActivePotionEffects()) {
+                player.removePotionEffect(effect.getType());
+            }
+        }
+
+        this.plugin.getVampireTurningManager().enableAllVampireTurning();
+
+        admin.sendMessage("");
+        admin.sendMessage(Component.text("========================================", NamedTextColor.GREEN).decorate(TextDecoration.BOLD).append(Component.newline())
+                .append(Component.text("GAME INITIALIZED SUCCESSFULLY.")).append(Component.newline())
+                .append(Component.text("========================================")).append(Component.newline())
+                .append(Component.text("Players: ", NamedTextColor.GRAY)
+                        .decoration(TextDecoration.BOLD, false)
+                        .append(Component.text(onlinePlayers.size(), NamedTextColor.YELLOW))
+                )
+                .append(Component.newline())
+                .append(Component.text("Vampires: ", NamedTextColor.GRAY)
+                        .decoration(TextDecoration.BOLD, false)
+                        .append(Component.text(playersToConvert.size(), NamedTextColor.RED))
+                )
+                .append(Component.newline())
+                .append(Component.text("Humans: ", NamedTextColor.GRAY)
+                        .decoration(TextDecoration.BOLD, false)
+                        .append(Component.text(onlinePlayers.size() - playersToConvert.size(), NamedTextColor.GREEN))
+                )
+                .append(Component.newline())
+                .append(Component.text("========================================", NamedTextColor.GREEN).decorate(TextDecoration.BOLD))
+        );
+
+        this.adminStates.remove(adminId);
+        this.adminData.remove(adminId);
     }
 
     /**

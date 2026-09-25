@@ -48,20 +48,19 @@ public class InvisibilityAbility extends VampireAbility {
             this.sendReappearMessage(player);
             this.playReappearSound(player);
             return true;
-
-        } else {
-            int vampireStage = vampireManager.getVampireStage(player);
-            int durationTicks = this.getInvisibilityDuration(vampireStage);
-
-            this.createVanishEffects(player, true);
-            PotionEffect invisibility = new PotionEffect(PotionEffectType.INVISIBILITY, durationTicks, 0, false, false, false);
-            player.addPotionEffect(invisibility);
-
-            this.sendVanishMessage(player, vampireStage, durationTicks / 20);
-            this.playVanishSound(player, vampireStage);
-            this.scheduleInvisibilityWarning(player, durationTicks, plugin);
-            return true;
         }
+
+        final int vampireStage = vampireManager.getVampireStage(player);
+        final int durationTicks = this.getInvisibilityDuration(vampireStage);
+
+        this.createVanishEffects(player, true);
+        PotionEffect invisibility = new PotionEffect(PotionEffectType.INVISIBILITY, durationTicks, 0, false, false, false);
+        player.addPotionEffect(invisibility);
+
+        this.sendVanishMessage(player, vampireStage, durationTicks / 20);
+        this.playVanishSound(player, vampireStage);
+        this.scheduleInvisibilityWarning(player, durationTicks, plugin);
+        return true;
     }
 
     /**

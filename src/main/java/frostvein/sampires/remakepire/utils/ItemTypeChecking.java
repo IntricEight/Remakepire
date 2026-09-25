@@ -54,7 +54,7 @@ public class ItemTypeChecking {
      * @return {@code true} if the item is a conventional weapon.
      */
     public static boolean isWeapon(Material type) {
-        return isSword(type) || isAxe(type) || isSpear(type);
+        return isSword(type) || isAxe(type) || isSpear(type) || type == Material.MACE || type == Material.TRIDENT;
     }
 
     /**

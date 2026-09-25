@@ -1147,6 +1147,7 @@ public class BeaconManager {
         if (location != null && location.getWorld() != null) {
             try {
                 location.getWorld().spawnParticle(Particle.END_ROD, location, 1, 0.0, 0.0, 0.0, 0.0);
+
             } catch (Exception e) {
                 this.plugin.getLogger().warning("Failed to show suppression range particle: " + e.getMessage());
             }
@@ -1313,8 +1314,10 @@ public class BeaconManager {
                 if (this.dataFile.exists()) {
                     try {
                         Files.copy(this.dataFile.toPath(), backupFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+
                     } catch (Exception e) {
                         this.plugin.getLogger().warning("Failed to create backup: " + e.getMessage());
+                        e.printStackTrace();
                     }
                 }
 
@@ -1467,6 +1470,7 @@ public class BeaconManager {
 
                         } catch (Exception e) {
                             this.plugin.getLogger().severe("Failed to restore from backup: " + e.getMessage());
+                            e.printStackTrace();
                             return;
                         }
                     }
@@ -1527,6 +1531,7 @@ public class BeaconManager {
 
                     } catch (Exception backupError) {
                         this.plugin.getLogger().severe("Failed to restore from backup: " + backupError.getMessage());
+                        e.printStackTrace();
                     }
                 }
             } catch (Exception e) {

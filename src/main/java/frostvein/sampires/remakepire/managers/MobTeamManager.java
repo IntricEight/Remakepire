@@ -52,7 +52,7 @@ public class MobTeamManager {
 
         this.mobTeamTask = (new BukkitRunnable() {
             public void run() {
-                MobTeamManager.this.assignMobsToVampireTeam();
+                assignMobsToVampireTeam();
             }
         }).runTaskTimer(this.plugin, 0L, ASSIGNMENT_INTERVALS);
 
@@ -78,20 +78,24 @@ public class MobTeamManager {
 
         if (vampireTeam == null) {
             this.plugin.getLogger().warning("MobTeamManager: VampireCastTeam not found!");
+            return;
+
         } else if (this.plugin.getWorld() == null) {
             this.plugin.getLogger().warning("MobTeamManager: World not found!");
-        } else {
-            for (Entity entity : this.plugin.getWorld().getEntities()) {
-                if (this.isTargetMob(entity)) {
-                    String entityName = entity.getUniqueId().toString();
+            return;
+        }
 
-                    if (!vampireTeam.hasEntry(entityName)) {
-                        try {
-                            vampireTeam.addEntry(entityName);
+        for (Entity entity : this.plugin.getWorld().getEntities()) {
+            if (this.isTargetMob(entity)) {
+                final String entityName = entity.getUniqueId().toString();
 
-                        } catch (Exception e) {
-                            this.plugin.getLogger().warning("Failed to add mob " + entity.getType() + " to VampireCastTeam: " + e.getMessage());
-                        }
+                if (!vampireTeam.hasEntry(entityName)) {
+                    try {
+                        vampireTeam.addEntry(entityName);
+
+                    } catch (Exception e) {
+                        this.plugin.getLogger().warning("Failed to add mob " + entity.getType() + " to VampireCastTeam: " + e.getMessage());
+                        e.printStackTrace();
                     }
                 }
             }
@@ -139,15 +143,16 @@ public class MobTeamManager {
 
         if (vampireTeam == null) {
             this.plugin.getLogger().warning("MobTeamManager: VampireCastTeam not found for clearing!");
-        } else {
-            int removedCount = vampireTeam.getSize();
-
-            for (String entry : vampireTeam.getEntries().toArray(new String[0])) {
-                vampireTeam.removeEntry(entry);
-            }
-
-            this.plugin.logInfo("MobTeamManager: Removed " + removedCount + " entries from VampireCastTeam");
+            return;
         }
+
+        int removedCount = vampireTeam.getSize();
+
+        for (String entry : vampireTeam.getEntries().toArray(new String[0])) {
+            vampireTeam.removeEntry(entry);
+        }
+
+        this.plugin.logInfo("MobTeamManager: Removed " + removedCount + " entries from VampireCastTeam");
     }
 
     /**

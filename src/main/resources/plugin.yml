@@ -7,6 +7,9 @@ authors:
   - IntricEight
 description: A remake of the Vampire SMP plugin by POW Creations.
 
+libraries:
+  - com.google.code.gson:gson:2.10.1
+
 permissions:
   vampiresmp.admin:
     description: Allows access to all Vampire SMP admin commands

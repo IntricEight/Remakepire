@@ -45,34 +45,33 @@ public class BanishUndeadTomeAbility extends TomeAbility {
         if (!this.canUse(player)) {
             this.sendCannotUseMessage(player, "Only humans can use tome abilities!");
             return false;
+        }
+
+        int mobsKilled = 0;
+
+        // Search and kill all undead entities within a (RADIUS * 2)^3 cube
+        for (Entity entity : player.getNearbyEntities(RADIUS, RADIUS, RADIUS)) {
+            if (this.isUndeadMob(entity) && entity instanceof LivingEntity livingEntity) {
+                livingEntity.setHealth(0);
+                ++mobsKilled;
+            }
+        }
+
+        // Display the visual effect of the ability
+        this.createHolyLightRings(player);
+
+        // Inform the player on the effect of their cast
+        if (mobsKilled > 0) {
+            player.playSound(player.getLocation(), "minecraft:block.beacon.power_select", 1.0F, 1.2F);
+            this.sendSuccessMessage(player, "Holy light radiates from you, banishing " + mobsKilled + " undead creature" + (mobsKilled > 1 ? "s" : "") + "!");
 
         } else {
-            int mobsKilled = 0;
-
-            // Search and kill all undead entities within a (RADIUS * 2)^3 cube
-            for (Entity entity : player.getNearbyEntities(RADIUS, RADIUS, RADIUS)) {
-                if (this.isUndeadMob(entity) && entity instanceof LivingEntity livingEntity) {
-                    livingEntity.setHealth(0);
-                    ++mobsKilled;
-                }
-            }
-
-            // Display the visual effect of the ability
-            this.createHolyLightRings(player);
-
-            // Inform the player on the effect of their cast
-            if (mobsKilled > 0) {
-                player.playSound(player.getLocation(), "minecraft:block.beacon.power_select", 1.0F, 1.2F);
-                this.sendSuccessMessage(player, "Holy light radiates from you, banishing " + mobsKilled + " undead creature" + (mobsKilled > 1 ? "s" : "") + "!");
-
-            } else {
-                player.playSound(player.getLocation(), "minecraft:block.beacon.ambient", 0.5F, 1.0F);
-                this.sendSuccessMessage(player, "Holy light radiates from you, but no undead creatures were nearby.");
-            }
-
-            // Activate the ability cooldown
-            return true;
+            player.playSound(player.getLocation(), "minecraft:block.beacon.ambient", 0.5F, 1.0F);
+            this.sendSuccessMessage(player, "Holy light radiates from you, but no undead creatures were nearby.");
         }
+
+        // Activate the ability cooldown
+        return true;
     }
 
     /**
@@ -108,7 +107,7 @@ public class BanishUndeadTomeAbility extends TomeAbility {
                 if (this.ringCount >= maxRings) {
                     this.cancel();
                 } else {
-                    BanishUndeadTomeAbility.this.createHolyLightRing(center, this.ringCount);
+                    createHolyLightRing(center, this.ringCount);
                     ++this.ringCount;
                 }
             }

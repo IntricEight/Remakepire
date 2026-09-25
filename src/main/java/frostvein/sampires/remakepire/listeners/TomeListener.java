@@ -83,47 +83,51 @@ public class TomeListener implements Listener {
             if (cureBookNumber == 4 && !CureBookReadingListener.hasReadAllCureBooks(player)) {
                 event.setCancelled(true);
                 player.openBook(this.plugin.getCureBookManager().getObscuredBook());
-
-            } else {
-                this.plugin.getCureBookReadingListener().onCureBookRead(player, cureBookNumber);
+                return;
             }
+
+            this.plugin.getCureBookReadingListener().onCureBookRead(player, cureBookNumber);
+            return;
+
         } else if (tomeTitle == null || !this.tomeManager.isValidAbility(tomeTitle)) {
             this.plugin.logInfo("Invalid tome ability: '" + tomeTitle + "'");
+            return;
 
         } else if (!this.plugin.getVampireManager().isHuman(player)) {
             event.setCancelled(true);
             player.sendMessage(Component.text("The ancient knowledge within this tome is beyond your vampiric comprehension...", NamedTextColor.RED));
+            return;
 
         } else if (!this.plugin.getSessionManager().isSessionActive()) {
             event.setCancelled(true);
             player.sendMessage(Component.text("The tome's magic lies dormant... It can only be absorbed during an active session.", NamedTextColor.RED));
+            return;
+        }
+
+        this.plugin.logInfo("Valid tome ability: '" + tomeTitle + "'");
+        event.setCancelled(true);
+
+        if (this.tomeManager.hasAbility(player, tomeTitle)) {
+            this.plugin.logInfo("Player " + player.getName() + " already has ability: '" + tomeTitle + "'");
+            player.sendMessage(Component.text("The words seem familiar and hold no new secrets for you.", NamedTextColor.GRAY));
+            return;
+        }
+
+        this.plugin.logInfo("Attempting to grant ability '" + tomeTitle + "' to player " + player.getName());
+
+        if (this.tomeManager.grantAbility(player, tomeTitle)) {
+            this.informNewTomeAbility(player, tomeTitle);
+
+            if (item.getAmount() > 1) {
+                item.setAmount(item.getAmount() - 1);
+            } else {
+                player.getInventory().setItemInMainHand(null);
+            }
+
+            this.plugin.logInfo(tomeTitle + "grant result: Successful");
 
         } else {
-            this.plugin.logInfo("Valid tome ability: '" + tomeTitle + "'");
-            event.setCancelled(true);
-
-            if (this.tomeManager.hasAbility(player, tomeTitle)) {
-                this.plugin.logInfo("Player " + player.getName() + " already has ability: '" + tomeTitle + "'");
-                player.sendMessage(Component.text("The words seem familiar and hold no new secrets for you.", NamedTextColor.GRAY));
-
-            } else {
-                this.plugin.logInfo("Attempting to grant ability '" + tomeTitle + "' to player " + player.getName());
-
-                if (this.tomeManager.grantAbility(player, tomeTitle)) {
-                    this.informNewTomeAbility(player, tomeTitle);
-
-                    if (item.getAmount() > 1) {
-                        item.setAmount(item.getAmount() - 1);
-                    } else {
-                        player.getInventory().setItemInMainHand(null);
-                    }
-
-                    this.plugin.logInfo(tomeTitle + "grant result: Successful");
-
-                } else {
-                    this.plugin.logInfo(tomeTitle + "grant result: Failure");
-                }
-            }
+            this.plugin.logInfo(tomeTitle + "grant result: Failure");
         }
     }
 
@@ -158,10 +162,10 @@ public class TomeListener implements Listener {
                 if (cureBookNumber == 4 && !CureBookReadingListener.hasReadAllCureBooks(player)) {
                     event.setCancelled(true);
                     player.openBook(this.plugin.getCureBookManager().getObscuredBook());
-
-                } else {
-                    this.plugin.getCureBookReadingListener().onCureBookRead(player, cureBookNumber);
+                    return;
                 }
+
+                this.plugin.getCureBookReadingListener().onCureBookRead(player, cureBookNumber);
             }
         }
     }

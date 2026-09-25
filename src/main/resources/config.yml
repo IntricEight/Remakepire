@@ -476,6 +476,24 @@ border_active: true
 
 
 # ============================================================================
+# TEXTURE PACK SETTINGS
+# ============================================================================
+
+# It is recommended to have the server's forced texture pack (Set inside server.properties) be the human texture pack,
+# in addition to the following configuration settings.
+
+# The URL and SHA1 of the texture pack that human players are provided with
+human-texture-pack:
+  url: "https://download.mc-packs.net/pack/4e42367081530cc073b612d9772a18daca7c0df9.zip"
+  sha1: "4e42367081530cc073b612d9772a18daca7c0df9"
+
+# The URL and SHA1 of the texture pack that vampire players are provided with
+vampire-texture-pack:
+  url: "https://download.mc-packs.net/pack/e139890dd34f56724efcd5becb476999651ca43c.zip"
+  sha1: "e139890dd34f56724efcd5becb476999651ca43c"
+
+
+# ============================================================================
 # INTERNAL STATE TRACKING - DO NOT MODIFY
 # ============================================================================
 # WARNING: The following values are used by the plugin to track game state.

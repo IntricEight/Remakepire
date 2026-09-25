@@ -275,6 +275,7 @@ public class BeaconMajorityManager {
             }
         } catch (Exception e) {
             this.plugin.getLogger().warning("Failed to get death count for " + player.getName() + ": " + e.getMessage());
+            e.printStackTrace();
         }
 
         return 0;

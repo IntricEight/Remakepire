@@ -65,6 +65,7 @@ public class BeetrootManager {
             try {
                 this.beetrootFile.createNewFile();
                 this.plugin.logInfo("Created beetroot timer persistence file");
+
             } catch (IOException e) {
                 this.plugin.getLogger().severe("Failed to create beetroot timer file: " + e.getMessage());
                 e.printStackTrace();
@@ -100,6 +101,7 @@ public class BeetrootManager {
             }
         } catch (IOException e) {
             this.plugin.getLogger().warning("Could not load beetroot timer data: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
@@ -124,6 +126,7 @@ public class BeetrootManager {
             }
         } catch (IOException e) {
             this.plugin.getLogger().warning("Could not save beetroot timer data: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
@@ -133,9 +136,9 @@ public class BeetrootManager {
     private void startBeetrootTask() {
         this.beetrootTask = (new BukkitRunnable() {
             public void run() {
-                if (BeetrootManager.this.plugin.getSessionManager().isSessionActive()) {
-                    Set<UUID> onlinePlayers = Bukkit.getOnlinePlayers().stream().map(OfflinePlayer::getUniqueId).collect(Collectors.toSet());
-                    BeetrootManager.this.processTimersForOnlinePlayers(onlinePlayers);
+                if (plugin.getSessionManager().isSessionActive()) {
+                    final Set<UUID> onlinePlayers = Bukkit.getOnlinePlayers().stream().map(OfflinePlayer::getUniqueId).collect(Collectors.toSet());
+                    processTimersForOnlinePlayers(onlinePlayers);
                 }
             }
         }).runTaskTimer(this.plugin, 20L, 20L);

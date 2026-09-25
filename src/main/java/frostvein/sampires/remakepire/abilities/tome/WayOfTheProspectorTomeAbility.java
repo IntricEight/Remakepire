@@ -33,17 +33,16 @@ public class WayOfTheProspectorTomeAbility extends TomeAbility implements Listen
         if (!this.canUse(player)) {
             this.sendCannotUseMessage(player, "Only humans can use tome abilities!");
             return false;
-
-        } else {
-            this.sendSuccessMessage(player, "You have absorbed the knowledge of the prospector!");
-            player.sendMessage(Component.text("You now have a permanent 50% chance to receive double drops when mining ores.", NamedTextColor.GRAY));
-            player.sendMessage(Component.text("This knowledge flows through your very being - you need not activate it again.", NamedTextColor.GRAY));
-
-            this.plugin.getWorld().playSound(player.getLocation(), "minecraft:block.stone.break", 1.0F, 1.2F);
-            this.plugin.getWorld().playSound(player.getLocation(), "minecraft:entity.experience_orb.pickup", 0.5F, 0.8F);
-
-            return true;
         }
+
+        this.sendSuccessMessage(player, "You have absorbed the knowledge of the prospector!");
+        player.sendMessage(Component.text("You now have a permanent 50% chance to receive double drops when mining ores.", NamedTextColor.GRAY));
+        player.sendMessage(Component.text("This knowledge flows through your very being - you need not activate it again.", NamedTextColor.GRAY));
+
+        this.plugin.getWorld().playSound(player.getLocation(), "minecraft:block.stone.break", 1.0F, 1.2F);
+        this.plugin.getWorld().playSound(player.getLocation(), "minecraft:entity.experience_orb.pickup", 0.5F, 0.8F);
+
+        return true;
     }
 
     /**
@@ -56,18 +55,14 @@ public class WayOfTheProspectorTomeAbility extends TomeAbility implements Listen
         Player player = event.getPlayer();
         Block block = event.getBlock();
 
-        if (this.plugin.getTomeManager().hasAbility(player, "wayoftheprospector")) {
-            if (ORE_MATERIALS.contains(block.getType())) {
-                ItemStack tool = player.getInventory().getItemInMainHand();
+        if (this.plugin.getTomeManager().hasAbility(player, "wayoftheprospector") && ORE_MATERIALS.contains(block.getType())) {
+            ItemStack tool = player.getInventory().getItemInMainHand();
 
-                if (!tool.containsEnchantment(Enchantment.SILK_TOUCH)) {
-                    if (this.random.nextDouble() < 0.5) {
-                        for (ItemStack drop : block.getDrops(tool)) {
-                            if (drop != null && drop.getType() != Material.AIR) {
-                                ItemStack extraDrop = drop.clone();
-                                block.getWorld().dropItemNaturally(block.getLocation(), extraDrop);
-                            }
-                        }
+            if (!tool.containsEnchantment(Enchantment.SILK_TOUCH) && this.random.nextDouble() < 0.5) {
+                for (ItemStack drop : block.getDrops(tool)) {
+                    if (drop != null && drop.getType() != Material.AIR) {
+                        ItemStack extraDrop = drop.clone();
+                        block.getWorld().dropItemNaturally(block.getLocation(), extraDrop);
                     }
                 }
             }

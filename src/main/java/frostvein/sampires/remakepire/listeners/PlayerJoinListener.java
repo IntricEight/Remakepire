@@ -163,6 +163,7 @@ public class PlayerJoinListener implements Listener {
             }
         } catch (Exception e) {
             this.plugin.getLogger().severe("Failed to add player " + player.getName() + " to CastTeam: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
