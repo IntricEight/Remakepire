@@ -349,12 +349,14 @@ public class ConfigManager {
     }
 
     /**
-     * Retrieve the enchantments whose books are allowed to appear inside tome chests.
+     * Retrieve the enchantment names whose books are allowed to appear inside tome chests.
      *
-     * @return A list of item enchantment names.
+     * @return A list of item enchantment names. All names are trimmed and set to lowercase.
      */
     public List<String> getTomeEnchantmentOptions() {
-        return this.plugin.getConfig().getStringList("tome-chests.enchantment-options");
+        List<String> options = this.plugin.getConfig().getStringList("tome-chests.enchantment-options");
+        options.replaceAll(option -> option.trim().toLowerCase());
+        return options;
     }
 
     /**

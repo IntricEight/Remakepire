@@ -83,26 +83,15 @@ tome-chests:
 #    "WayOfTheProspector"
 
   # A list of enchantment books that can spawn inside tome chests
-  # The default list is all the enchantments supported in the default plugin
-  # You can find a list of the supported enchantment options below this list
+  # The options given need to match Minecraft's internal name for the enchantment.
+  # Check this link to see Minecraft's enchantments and their names: https://minecraft.wiki/w/Enchantment#List_of_enchantments
+  # The options are not case-sensitive.
   enchantment-options:
     - "Efficiency"
-    - "FeatherFalling"
+    - "Feather_Falling"
     - "Knockback"
     - "Protection"
-    - "SweepingEdge"
-
-# Tome Enchantment Book Options
-#    "Efficiency"
-#    "FeatherFalling"
-#    "Knockback"
-#    "Mending"
-#    "Power"
-#    "Protection"
-#    "Punch"
-#    "Respiration"
-#    "Sharpness"
-#    "SweepingEdge"
+    - "Sweeping_Edge"
 
 # Tome Distribution Interval
 # How often tomes are distributed to chests (in minutes)
