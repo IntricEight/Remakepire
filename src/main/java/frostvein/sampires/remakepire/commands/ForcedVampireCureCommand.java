@@ -74,7 +74,7 @@ public class ForcedVampireCureCommand implements CommandExecutor {
             caster.sendMessage(Component.text("The blood bond must be severed through the maker's true death.", NamedTextColor.DARK_RED));
             return true;
 
-        } else if (this.plugin.getForcedCureChoiceManager().hasPendingCure(target)) {
+        } else if (this.plugin.getConfigManager().doCuresHaveLastingEffects() && this.plugin.getForcedCureChoiceManager().hasPendingCure(target)) {
             caster.sendMessage(Component.text(target.getName() + " is already being sanctified by these holy words.", NamedTextColor.RED));
             return true;
         }

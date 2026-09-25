@@ -292,7 +292,7 @@ public class ForcedCureChoiceManager {
         target.getActivePotionEffects().forEach((effect) -> target.removePotionEffect(effect.getType()));
 
         // Check if players should be able to leave and are prevented from getting turned again
-        if (plugin.getConfigManager().doCuresHaveLastingEffects()) {
+        if (this.plugin.getConfigManager().doCuresHaveLastingEffects()) {
             target.addScoreboardTag(VampireManager.CURED_VAMPIRE_TAG);
         }
 
