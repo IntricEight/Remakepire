@@ -76,29 +76,24 @@ public class VampireManager {
     public boolean shouldPreventFallDamage(Player player) {
         final UUID playerId = player.getUniqueId();
 
-        if (!this.lungingPlayers.containsKey(playerId)) {
-            return false;
-
-        } else {
+        if (this.lungingPlayers.containsKey(playerId)) {
             final Long lungeTime = this.lungeTimestamps.get(playerId);
 
             if (lungeTime != null && System.currentTimeMillis() - lungeTime <= PROTECTION_DURATION) {
-                final Double startingY = this.lungingPlayers.get(playerId);
+                final Double protectedY = this.lungingPlayers.get(playerId);
 
-                if (startingY != null && player.getLocation().getY() >= startingY) {
+                if (protectedY != null && player.getLocation().getY() >= protectedY) {
                     this.lungingPlayers.remove(playerId);
                     this.lungeTimestamps.remove(playerId);
                     return true;
-
-                } else {
-                    return false;
                 }
-            } else {
-                this.lungingPlayers.remove(playerId);
-                this.lungeTimestamps.remove(playerId);
-                return false;
             }
+
+            this.lungingPlayers.remove(playerId);
+            this.lungeTimestamps.remove(playerId);
         }
+
+        return false;
     }
 
     /**
