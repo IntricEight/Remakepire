@@ -97,26 +97,15 @@ tome-chests:
 #    "WayOfTheProspector"
 
   # A list of enchantment books that can spawn inside tome chests
-  # The default list is all the enchantments supported in the default plugin
-  # You can find a list of the supported enchantment options below this list
+  # The options given need to match Minecraft's internal name for the enchantment.
+  # Check this link to see Minecraft's enchantments and their names: https://minecraft.wiki/w/Enchantment#List_of_enchantments
+  # The options are not case-sensitive.
   enchantment-options:
     - "Efficiency"
-    - "FeatherFalling"
+    - "Feather_Falling"
     - "Knockback"
     - "Protection"
-    - "SweepingEdge"
-
-# Tome Enchantment Book Options
-#    "Efficiency"
-#    "FeatherFalling"
-#    "Knockback"
-#    "Mending"
-#    "Power"
-#    "Protection"
-#    "Punch"
-#    "Respiration"
-#    "Sharpness"
-#    "SweepingEdge"
+    - "Sweeping_Edge"
 
 # Tome Distribution Interval
 # How often tomes are distributed to chests (in minutes)
@@ -349,6 +338,11 @@ cure:
   # Controls if vampires require it to be day time (Between ticks 0 and 12000) for the cure to work
   # Default: true (It must be day time)
   daylight-requirement: true
+
+  # Control if curing vampires has a lasting effect on the players and world
+  # This controls whether players get the CuredVampire tag, and whether beacons are destroyed by cures
+  # Default: true
+  cure-aftermath: true
 
 # Fourth Cure Book Configuration
 # Controls whether "The Retribution 4/3" book should spawn in tome chests

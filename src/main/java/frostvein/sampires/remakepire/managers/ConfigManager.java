@@ -349,12 +349,14 @@ public class ConfigManager {
     }
 
     /**
-     * Retrieve the enchantments whose books are allowed to appear inside tome chests.
+     * Retrieve the enchantment names whose books are allowed to appear inside tome chests.
      *
-     * @return A list of item enchantment names.
+     * @return A list of item enchantment names. All names are trimmed and set to lowercase.
      */
     public List<String> getTomeEnchantmentOptions() {
-        return this.plugin.getConfig().getStringList("tome-chests.enchantment-options");
+        List<String> options = this.plugin.getConfig().getStringList("tome-chests.enchantment-options");
+        options.replaceAll(option -> option.trim().toLowerCase());
+        return options;
     }
 
     /**
@@ -864,6 +866,25 @@ public class ConfigManager {
      */
     public void setCureRequiresDaytime(boolean requireDay) {
         this.plugin.getConfig().set("cure.daylight-requirement", requireDay);
+        this.plugin.saveConfig();
+    }
+
+    /**
+     * Retrieve whether there are lasting effects on the world when a vampire is cured.
+     *
+     * @return {@code true} if there are lasting effects from a vampire cure.
+     */
+    public boolean doCuresHaveLastingEffects() {
+        return this.plugin.getConfig().getBoolean("cure.cure-aftermath", true);
+    }
+
+    /**
+     * Update the config on whether there are lasting effects from a vampire cure.
+     *
+     * @param hasEffects {@code true} if there will be lasting effects on the world when a vampire is cured.
+     */
+    public void setCuresHaveLastingEffects(boolean hasEffects) {
+        this.plugin.getConfig().set("cure.cure-aftermath", hasEffects);
         this.plugin.saveConfig();
     }
 
