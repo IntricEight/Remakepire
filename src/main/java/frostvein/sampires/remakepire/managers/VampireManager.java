@@ -35,6 +35,7 @@ public class VampireManager {
     private final Map<UUID, Long> levelChangeInProgress = new HashMap<>(), lastLevelChange = new HashMap<>(), lungeTimestamps = new HashMap<>();
     private final Map<UUID, Double> lungingPlayers = new HashMap<>();
     private final Map<UUID, Integer> stageCaps = new HashMap<>();
+    // Below times are in milliseconds
     private static final long LEVEL_CHANGE_COOLDOWN = 5000L, LEVEL_CHANGE_TIMEOUT = 10000L, PROTECTION_DURATION = 10000L;
     // Vampire state tags
     public static final String HUMAN_TAG = "human", VAMPIRE_TAG = "vampire";
