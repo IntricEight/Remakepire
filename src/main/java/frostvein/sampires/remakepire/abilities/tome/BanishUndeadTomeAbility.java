@@ -4,10 +4,12 @@ import java.util.Set;
 import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.entity.Bogged;
+import org.bukkit.entity.CamelHusk;
 import org.bukkit.entity.Drowned;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Husk;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Parched;
 import org.bukkit.entity.Phantom;
 import org.bukkit.entity.PigZombie;
 import org.bukkit.entity.Player;
@@ -19,6 +21,7 @@ import org.bukkit.entity.WitherSkeleton;
 import org.bukkit.entity.Zoglin;
 import org.bukkit.entity.Zombie;
 import org.bukkit.entity.ZombieHorse;
+import org.bukkit.entity.ZombieNautilus;
 import org.bukkit.entity.ZombieVillager;
 import org.bukkit.scheduler.BukkitRunnable;
 import frostvein.sampires.remakepire.RemakepirePlugin;
@@ -27,7 +30,7 @@ public class BanishUndeadTomeAbility extends TomeAbility {
     // Controls the size of the ability (in blocks)
     private static final int RADIUS = 40;
     // Controls the mobs effected by the ability
-    private final Set<Class<? extends Entity>> undeadMobTypes = Set.of(Zombie.class, ZombieVillager.class, Drowned.class, Husk.class, Skeleton.class, WitherSkeleton.class, Bogged.class, Stray.class, SkeletonHorse.class, ZombieHorse.class, Phantom.class, Wither.class, PigZombie.class, Zoglin.class);
+    private final Set<Class<? extends Entity>> undeadMobTypes = Set.of(Zombie.class, ZombieVillager.class, Drowned.class, Husk.class, Skeleton.class, WitherSkeleton.class, Bogged.class, Stray.class, Parched.class, SkeletonHorse.class, ZombieHorse.class, ZombieNautilus.class, CamelHusk.class, Phantom.class, Wither.class, PigZombie.class, Zoglin.class);
 
     /**
      * Create an instance of the Banish Undead tome ability.

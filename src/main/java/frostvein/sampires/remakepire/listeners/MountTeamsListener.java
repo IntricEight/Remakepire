@@ -4,16 +4,19 @@ import java.util.Set;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.entity.Camel;
+import org.bukkit.entity.CamelHusk;
 import org.bukkit.entity.Donkey;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Horse;
 import org.bukkit.entity.Llama;
 import org.bukkit.entity.Mule;
+import org.bukkit.entity.Nautilus;
 import org.bukkit.entity.Pig;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.SkeletonHorse;
 import org.bukkit.entity.TraderLlama;
 import org.bukkit.entity.ZombieHorse;
+import org.bukkit.entity.ZombieNautilus;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityMountEvent;
@@ -22,8 +25,8 @@ import frostvein.sampires.remakepire.RemakepirePlugin;
 public class MountTeamsListener implements Listener {
     private final RemakepirePlugin plugin;
     // List all the entities that are included in the alignment checks
-    private final Set<Class<? extends Entity>> livingMountTypes = Set.of(Pig.class, Horse.class, Donkey.class, Mule.class, Llama.class, TraderLlama.class, Camel.class);
-    private final Set<Class<? extends Entity>> undeadMountTypes = Set.of(SkeletonHorse.class, ZombieHorse.class);
+    private final Set<Class<? extends Entity>> livingMountTypes = Set.of(Pig.class, Horse.class, Donkey.class, Mule.class, Llama.class, TraderLlama.class, Camel.class, Nautilus.class);
+    private final Set<Class<? extends Entity>> undeadMountTypes = Set.of(CamelHusk.class, SkeletonHorse.class, ZombieHorse.class, ZombieNautilus.class);
 
     /**
      * Create an instance of the Mount Teams listener.

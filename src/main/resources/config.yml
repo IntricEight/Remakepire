@@ -1,6 +1,20 @@
 # Remakepire Configuration File
 
 # ============================================================================
+# DAY CYCLE SYSTEM
+# ============================================================================
+# Control the Day time duration
+# For example, set to 10 for normal day length, 20 for a day that lasts twice as long, or 15 for a day that lasts 50% longer than the standard
+# Default: 10 (A default Minecraft day is 10 minutes)
+day-length-minutes: 10
+
+# Control the Night time duration
+# For examples, set to 10 for normal night length, 20 for a night that lasts twice as long, or 15 for a night that lasts 50% longer than the standard
+# Default: 10 (A default Minecraft night is 10 minutes)
+night-length-minutes: 10
+
+
+# ============================================================================
 # CHAT SYSTEM
 # ============================================================================
 chat:
