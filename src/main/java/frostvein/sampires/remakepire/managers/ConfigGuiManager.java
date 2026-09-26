@@ -2,6 +2,7 @@ package frostvein.sampires.remakepire.managers;
 
 import java.util.ArrayList;
 import java.util.List;
+import static java.lang.Math.ceil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -21,7 +22,12 @@ public class ConfigGuiManager {
     public static final Component CONFIG_GUI_TITLE = Component.text("Configuration Options", NamedTextColor.DARK_GRAY)
             .decorate(TextDecoration.BOLD)
             .decoration(TextDecoration.ITALIC, false);
+    // Create a single shared GUI so that multiple admins can see config values update as other admins change them.
     private Inventory configGui;
+    private final String[] commandsInGui = {
+            "alert_on_quit", "holy_water_cap", "tome_cap", "vampire_level_cap", "new_vampire_tracking", "allow_vampire_mounts", "vampire_health_check",
+            "damage_suppression", "cure_requires_dead_sire", "cure_requires_daylight", "cure_book_spawning", "enable_npc_mobs", "breeding_out_of_session", "stake_permadeath_stage",
+            "human_life_limit", "one_human_left", "border_active" };
 
     public ConfigGuiManager(RemakepirePlugin plugin) {
         this.plugin = plugin;
@@ -40,16 +46,12 @@ public class ConfigGuiManager {
          * This means that for every row of 9 items, only the middle 7 should be used.
          * Additionally, the first and last 9 items should be unused to create the top and bottom empty rows.
          */
-
-        String[] commandsInGui = { "alert_on_quit", "holy_water_cap", "tome_cap", "vampire_level_cap", "new_vampire_tracking", "allow_vampire_mounts", "vampire_health_check",
-                "damage_suppression", "cure_requires_dead_sire", "cure_requires_daylight", "cure_book_spawning", "enable_npc_mobs", "breeding_out_of_session", "stake_permadeath_stage", "human_life_limit",
-                "one_human_left", "border_active" };
-        final int ROWS = 5;
+        final int ROWS = 2 + (int)ceil(commandsInGui.length / 7.0) ;
 
         this.configGui = Bukkit.createInventory(null, 9 * ROWS, CONFIG_GUI_TITLE);
 
-        for (String commandName : commandsInGui) {
-            this.configGui.setItem(getConfigPositionInGui(commandName), this.getGuiItem(commandName));
+        for (int i = 0; i < commandsInGui.length; i++) {
+            this.configGui.setItem(10 + i + (i / 7) * 2, this.getGuiItem(commandsInGui[i]));
         }
     }
 
@@ -82,32 +84,15 @@ public class ConfigGuiManager {
      * @param commandName the name of the command which modifies the config value.
      * @return The location of the command's item inside the config GUI.
      */
-    public static int getConfigPositionInGui(String commandName) {
+    public int getConfigPositionInGui(String commandName) {
         // Retrieve the placement of each command within the GUI design (0-indexed).
-        return switch (commandName) {
-            // Row 1
-            case "alert_on_quit" ->             10;
-            case "holy_water_cap" ->            11;
-            case "tome_cap" ->                  12;
-            case "vampire_level_cap" ->         13;
-            case "new_vampire_tracking" ->      14;
-            case "allow_vampire_mounts" ->      15;
-            case "vampire_health_check" ->      16;
-            // Row 2
-            case "damage_suppression" ->        19;
-            case "cure_requires_dead_sire" ->   20;
-            case "cure_requires_daylight" ->    21;
-            case "cure_book_spawning" ->        22;
-            case "enable_npc_mobs" ->           23;
-            case "breeding_out_of_session" ->   24;
-            case "stake_permadeath_stage" ->    25;
-            // Row 3
-            case "human_life_limit" ->          28;
-            case "one_human_left" ->            29;
-            case "border_active" ->             30;
+        for (int i = 0; i < commandsInGui.length; i++) {
+            if (commandsInGui[i].equals(commandName)) {
+                return 10 + i + (i / 7) * 2;
+            }
+        }
 
-            default -> throw new IllegalStateException("Unexpected command name: " + commandName);
-        };
+        throw new IllegalStateException("Unexpected command name: " + commandName);
     }
 
     /**
