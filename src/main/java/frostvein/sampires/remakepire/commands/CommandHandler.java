@@ -551,6 +551,10 @@ public class CommandHandler implements CommandExecutor {
                     senderMessage = this.configValueMessage("new_vampire_tracking", this.configManager.canTrackNewVampires());
                     break;
 
+                case "sun_through_glass":
+                    senderMessage = this.configValueMessage("new_vampire_tracking", this.configManager.doesSunAffectThroughGlass());
+                    break;
+
                 case "allow_vampire_mounts":
                     senderMessage = this.configValueMessage("allow_vampire_mounts", this.configManager.canVampiresRideLivingMounts());
                     break;
@@ -641,6 +645,11 @@ public class CommandHandler implements CommandExecutor {
                 case "new_vampire_tracking":
                     configManager.setTrackingNewVampires(Boolean.parseBoolean(args[1]));
                     senderMessage = this.configUpdateMessage("new-vampire-tracking", Boolean.parseBoolean(args[1]));
+                    break;
+
+                case "sun_through_glass":
+                    configManager.setSunAffectThroughGlass(Boolean.parseBoolean(args[1]));
+                    senderMessage = this.configUpdateMessage("sun-affects-through-glass", Boolean.parseBoolean(args[1]));
                     break;
 
                 case "allow_vampire_mounts":

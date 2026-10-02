@@ -28,6 +28,7 @@ public class ConfigGuiManager {
             "alert_on_quit", "holy_water_cap", "tome_cap", "vampire_level_cap", "new_vampire_tracking", "allow_vampire_mounts", "vampire_health_check",
             "damage_suppression", "cure_requires_dead_sire", "cure_requires_daylight", "cure_book_spawning", "enable_npc_mobs", "breeding_out_of_session", "stake_permadeath_stage",
             "human_life_limit", "one_human_left", "border_active" };
+            "alert_on_quit", "holy_water_cap", "tome_cap", "vampire_level_cap", "new_vampire_tracking", "sun_through_glass", "allow_vampire_mounts",
 
     public ConfigGuiManager(RemakepirePlugin plugin) {
         this.plugin = plugin;
@@ -108,6 +109,7 @@ public class ConfigGuiManager {
          * tome_cap                 "chest"
          * vampire_level_cap        "bat egg"
          * new_vampire_tracking     "recovery compass"
+         * sun_through_glass        *glass*
          * allow_vampire_mounts     "saddle"
          * vampire_health_check     "bottle of enchanting (blood bottle)"
          * damage_suppression       "stone sword"
@@ -130,6 +132,7 @@ public class ConfigGuiManager {
             case "tome_cap" ->                  Material.CHEST;
             case "vampire_level_cap" ->         Material.BAT_SPAWN_EGG;
             case "new_vampire_tracking" ->      Material.RECOVERY_COMPASS;
+            case "sun_through_glass" ->         Material.GLASS;
             case "allow_vampire_mounts" ->      Material.SADDLE;
             case "vampire_health_check" ->      Material.EXPERIENCE_BOTTLE;
             case "damage_suppression" ->        Material.STONE_SWORD;
@@ -160,6 +163,7 @@ public class ConfigGuiManager {
             case Material.CHEST ->                          "tome_cap";
             case Material.BAT_SPAWN_EGG ->                  "vampire_level_cap";
             case Material.RECOVERY_COMPASS ->               "new_vampire_tracking";
+            case Material.GLASS ->                          "sun_through_glass";
             case Material.SADDLE ->                         "allow_vampire_mounts";
             case Material.EXPERIENCE_BOTTLE ->              "vampire_health_check";
             case Material.STONE_SWORD ->                    "damage_suppression";
@@ -230,6 +234,7 @@ public class ConfigGuiManager {
             case "tome_cap" ->                  "Limit Tome Ability Acquisition";
             case "vampire_level_cap" ->         "Prevent Returning to Stages";
             case "new_vampire_tracking" ->      "Track New Vampires";
+            case "sun_through_glass" ->         "Sun Effects through Glass";
             case "allow_vampire_mounts" ->      "Allow Vampires Living Mounts";
             case "vampire_health_check" ->      "Vampire Regeneration Rate";
             case "damage_suppression" ->        "Player Damage Resistance";
@@ -269,6 +274,8 @@ public class ConfigGuiManager {
                     this.configManager.isVampireLevelingCapped() ? TRUE + "LOCKED OUT" : FALSE + "REGAIN STAGES";
             case "new_vampire_tracking" ->
                     this.configManager.canTrackNewVampires() ? TRUE + "TRACKING" : FALSE + "HIDDEN";
+            case "sun_through_glass" ->
+                    this.configManager.doesSunAffectThroughGlass() ? TRUE + "YES" : FALSE + "NO";
             case "allow_vampire_mounts" ->
                     this.configManager.canVampiresRideLivingMounts() ? TRUE + "ALLOWED" : FALSE + "FORBIDDEN";
             case "vampire_health_check" ->
@@ -331,6 +338,11 @@ public class ConfigGuiManager {
             case "new_vampire_tracking":
                 description.add("Provide vampires with a tracking arrow");
                 description.add("toward newly created vampires.");
+                break;
+
+            case "sun_through_glass":
+                description.add("Apply sky-based effects when only glass");
+                description.add("is above a player.");
                 break;
 
             case "allow_vampire_mounts":
@@ -459,6 +471,10 @@ public class ConfigGuiManager {
 
             case "new_vampire_tracking":
                 this.configManager.setTrackingNewVampires( !this.configManager.canTrackNewVampires() );
+                break;
+
+            case "sun_through_glass":
+                this.configManager.setSunAffectThroughGlass( !this.configManager.doesSunAffectThroughGlass() );
                 break;
 
             case "allow_vampire_mounts":
