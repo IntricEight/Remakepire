@@ -370,6 +370,11 @@ public class BrigadierCommands {
                         .then(Commands.literal("false").executes(ctx -> this.executePowCommand(ctx, "admin", "config", "allow_vampire_mounts", "false")))
                 )
 
+                .then(Commands.literal("restrict_known_vampires").executes(ctx -> this.executePowCommand(ctx, "admin", "config", "restrict_known_vampires"))
+                        .then(Commands.literal("true").executes(ctx -> this.executePowCommand(ctx, "admin", "config", "restrict_known_vampires", "true")))
+                        .then(Commands.literal("false").executes(ctx -> this.executePowCommand(ctx, "admin", "config", "restrict_known_vampires", "false")))
+                )
+
                 .then(Commands.literal("vampire_health_check").executes(ctx -> this.executePowCommand(ctx, "admin", "config", "vampire_health_check"))
                         .then(Commands.argument("ticks", IntegerArgumentType.integer(1, 1000)).executes((ctx) -> {
                             final int ticks = IntegerArgumentType.getInteger(ctx, "ticks");

@@ -202,7 +202,7 @@ public class BeaconConversionListener implements Listener {
                 return false;
             }
 
-            final boolean playerIsVampire = this.vampireManager.isVampireStage2OrHigher(player), playerIsHuman = this.vampireManager.isHuman(player);
+            final boolean playerIsVampire = this.vampireManager.isRestrictedVampire(player), playerIsHuman = this.vampireManager.isHuman(player);
 
             if (!playerIsVampire && !playerIsHuman) {
                 return false;
@@ -250,7 +250,7 @@ public class BeaconConversionListener implements Listener {
 
             for (Player nearbyPlayer : this.getPlayersInRange(beacon.getLocation(), BEACON_CONVERSION_RANGE)) {
                 if (!nearbyPlayer.equals(player)) {
-                    final boolean nearbyIsVampire = this.vampireManager.isVampireStage2OrHigher(nearbyPlayer), nearbyIsHuman = this.vampireManager.isHuman(nearbyPlayer);
+                    final boolean nearbyIsVampire = this.vampireManager.isRestrictedVampire(nearbyPlayer), nearbyIsHuman = this.vampireManager.isHuman(nearbyPlayer);
 
                     if ((!nearbyIsVampire || !nearbyPlayer.hasPotionEffect(PotionEffectType.INVISIBILITY)) && (playerIsVampire && nearbyIsHuman || !playerIsVampire && nearbyIsVampire)) {
                         if (playerIsVampire) {
@@ -905,7 +905,7 @@ public class BeaconConversionListener implements Listener {
 
             for (Player player : getPlayersInRange(beaconLoc, BEACON_CONVERSION_RANGE)) {
                 if (!this.converters.contains(player.getUniqueId())) {
-                    final boolean playerIsHuman = vampireManager.isHuman(player), playerIsVampire = vampireManager.isVampireStage2OrHigher(player);
+                    final boolean playerIsHuman = vampireManager.isHuman(player), playerIsVampire = vampireManager.isRestrictedVampire(player);
 
                     if ((playerIsVampire || playerIsHuman) && (!playerIsVampire || !player.hasPotionEffect(PotionEffectType.INVISIBILITY))) {
                         return this.isVampireConversion && playerIsHuman || !this.isVampireConversion && playerIsVampire;

@@ -58,8 +58,7 @@ public final class RemakepirePlugin extends JavaPlugin {
     private InitGameManager initGameManager;
     private CureBookReadingListener cureBookReadingListener;
     private World world;
-    private Team castTeam;
-    private Team vampireCastTeam;
+    private Team castTeam, vampireCastTeam;
     private Location vampireRespawnLocation;
     private FileConfiguration textConfig;
 
@@ -381,6 +380,7 @@ public final class RemakepirePlugin extends JavaPlugin {
             if (existingTeam != null) {
                 this.vampireCastTeam = existingTeam;
                 this.logInfo("Found existing VampireCastTeam, updating settings...");
+
             } else {
                 this.vampireCastTeam = mainScoreboard.registerNewTeam("VampireCastTeam");
                 this.logInfo("Created new VampireCastTeam for name tag management.");

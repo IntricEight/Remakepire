@@ -217,6 +217,14 @@ vampire:
   # Default: true (all mounts are allowed)
   allow-vampire-mounts: true
 
+  # Control if vampires are automatically marked as higher vampires once they stage up
+  # When true, once they have staged up, vampires are restricted from most actions forbidden to higher vampires even if they return to stage 1
+  # Some examples are feeding animals, equipping silver armor, and carrying tome books
+  # Additionally, vampires will remain on the Vampire Team even when they are stage 1 (May need to relog for this to apply if the tag is manually given)
+  # When false, you can still selectively apply this effect on players by giving them the tag 'RevealedVampire'
+  # Default: false (Restrictions are not automatically applied)
+  restrict-known-vampires: false
+
 # Vampire Health Check Configuration
 # Controls how often vampire health is checked and regenerated (in ticks)
 # 20 ticks = 1 second

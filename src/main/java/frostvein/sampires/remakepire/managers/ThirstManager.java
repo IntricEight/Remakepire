@@ -206,7 +206,7 @@ public class ThirstManager {
      * @param vampire the vampire who is starving.
      */
     private void handleThirstStarvation(Player vampire) {
-        int currentStage = this.vampireManager.getVampireStage(vampire);
+        final int currentStage = this.vampireManager.getVampireStage(vampire);
 
         if (currentStage > 1) {
             this.demoteVampire(vampire, true);
@@ -252,15 +252,13 @@ public class ThirstManager {
      * @param fromPlayerKill {@code true} if the experience has come from killing another player.
      */
     public void quenchThirst(Player vampire, int experienceDropped, boolean fromPlayerKill) {
-        float thirstGained = (float)experienceDropped * 0.01F;
-        float currentThirst = vampire.getExp();
-        float newThirst = currentThirst + thirstGained;
-        float maxThirst = this.getMaxThirstForVampire(vampire, fromPlayerKill);
+        final float thirstGained = (float)experienceDropped * 0.01F, currentThirst = vampire.getExp();
+        final float newThirst = currentThirst + thirstGained;
 
-        if (newThirst >= 1.0F && this.vampireManager.getVampireStage(vampire) < 3) {
+        if (newThirst >= 1.0F && !this.vampireManager.isVampireStage3(vampire)) {
             this.promoteVampire(vampire);
         } else {
-            vampire.setExp(Math.min(maxThirst, newThirst));
+            vampire.setExp(Math.min(this.getMaxThirstForVampire(vampire, fromPlayerKill), newThirst));
         }
     }
 
@@ -322,35 +320,37 @@ public class ThirstManager {
                     .decorate(TextDecoration.BOLD));
             vampire.sendMessage(Component.text("The curse of death still lingers upon you...", NamedTextColor.RED));
             vampire.sendMessage(Component.text("You cannot grow stronger until the next session begins.", NamedTextColor.RED));
+
             vampire.setExp(0.99F);
+            return;
+        }
 
-        } else {
-            int currentStage = this.vampireManager.getVampireStage(vampire);
-            int newStage = Math.min(3, currentStage + 1);
+        final int newStage = Math.min(3, this.vampireManager.getVampireStage(vampire) + 1);
 
-            if (this.vampireManager.hasStageCap(vampire)) {
-                int stageCap = this.vampireManager.getStageCap(vampire);
-
-                if (newStage > stageCap) {
-                    vampire.sendMessage(Component.text("PROMOTION DENIED", NamedTextColor.DARK_RED)
-                            .decorate(TextDecoration.BOLD));
-                    vampire.sendMessage(Component.text("The weakness of your starvation still haunts you...", NamedTextColor.RED));
-                    vampire.sendMessage(Component.text("You cannot reach Stage " + newStage + " until the next session begins.", NamedTextColor.RED));
-                    vampire.setExp(0.99F);
-                    return;
-                }
-            }
-
-            this.vampireManager.setPlayerAsVampire(vampire, newStage);
-            this.giveThirstImmunity(vampire);
-            vampire.setExp(0.25F);
-
-            vampire.sendMessage(Component.text("ASCENSION", NamedTextColor.DARK_RED)
+        if (this.vampireManager.hasStageCap(vampire) && newStage > this.vampireManager.getStageCap(vampire)) {
+            vampire.sendMessage(Component.text("PROMOTION DENIED", NamedTextColor.DARK_RED)
                     .decorate(TextDecoration.BOLD));
-            vampire.sendMessage(Component.text("The crimson blood coats the inside of your throat, your pupils dilate as your tension eases.", NamedTextColor.RED));
-            vampire.sendMessage(Component.text("Your thirst is quenched, you are stronger, for now...", NamedTextColor.RED));
-            vampire.sendMessage(Component.text("You are now a Stage " + newStage + " vampire.", NamedTextColor.DARK_PURPLE));
-            vampire.playSound(vampire, Sound.ENTITY_ZOMBIE_VILLAGER_CURE, SoundCategory.MASTER, 1.0F, 0.5F);
+            vampire.sendMessage(Component.text("The weakness of your starvation still haunts you...", NamedTextColor.RED));
+            vampire.sendMessage(Component.text("You cannot reach Stage " + newStage + " until the next session begins.", NamedTextColor.RED));
+
+            vampire.setExp(0.99F);
+            return;
+        }
+
+        this.vampireManager.setPlayerAsVampire(vampire, newStage);
+        this.giveThirstImmunity(vampire);
+        vampire.setExp(0.25F);
+
+        vampire.sendMessage(Component.text("ASCENSION", NamedTextColor.DARK_RED)
+                .decorate(TextDecoration.BOLD));
+        vampire.sendMessage(Component.text("The crimson blood coats the inside of your throat, your pupils dilate as your tension eases.", NamedTextColor.RED));
+        vampire.sendMessage(Component.text("Your thirst is quenched, you are stronger, for now...", NamedTextColor.RED));
+        vampire.sendMessage(Component.text("You are now a Stage " + newStage + " vampire.", NamedTextColor.DARK_PURPLE));
+        vampire.playSound(vampire, Sound.ENTITY_ZOMBIE_VILLAGER_CURE, SoundCategory.MASTER, 1.0F, 0.5F);
+
+        // If the config is set to automatically mark vampires for permanent restrictions, apply the tag
+        if (!vampire.getScoreboardTags().contains(VampireManager.MARKED_VAMPIRE_TAG) && this.plugin.getConfigManager().areKnownVampiresRestricted()) {
+            vampire.addScoreboardTag(VampireManager.MARKED_VAMPIRE_TAG);
         }
     }
 

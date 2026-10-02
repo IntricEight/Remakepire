@@ -25,10 +25,9 @@ public class ConfigGuiManager {
     // Create a single shared GUI so that multiple admins can see config values update as other admins change them.
     private Inventory configGui;
     private final String[] commandsInGui = {
-            "alert_on_quit", "holy_water_cap", "tome_cap", "vampire_level_cap", "new_vampire_tracking", "allow_vampire_mounts", "vampire_health_check",
-            "damage_suppression", "cure_requires_dead_sire", "cure_requires_daylight", "cure_book_spawning", "enable_npc_mobs", "breeding_out_of_session", "stake_permadeath_stage",
-            "human_life_limit", "one_human_left", "border_active" };
             "alert_on_quit", "holy_water_cap", "tome_cap", "vampire_level_cap", "new_vampire_tracking", "sun_through_glass", "allow_vampire_mounts",
+            "restrict_known_vampires", "vampire_health_check", "damage_suppression", "cure_requires_dead_sire", "cure_requires_daylight", "cure_book_spawning", "enable_npc_mobs",
+            "breeding_out_of_session", "stake_permadeath_stage", "human_life_limit", "one_human_left", "border_active" };
 
     public ConfigGuiManager(RemakepirePlugin plugin) {
         this.plugin = plugin;
@@ -111,6 +110,7 @@ public class ConfigGuiManager {
          * new_vampire_tracking     "recovery compass"
          * sun_through_glass        *glass*
          * allow_vampire_mounts     "saddle"
+         * restrict_known_vampires  *iron chestplate (silver chestplate)*
          * vampire_health_check     "bottle of enchanting (blood bottle)"
          * damage_suppression       "stone sword"
          * cure_requires_dead_sire  "wither skeleton skull"
@@ -134,6 +134,7 @@ public class ConfigGuiManager {
             case "new_vampire_tracking" ->      Material.RECOVERY_COMPASS;
             case "sun_through_glass" ->         Material.GLASS;
             case "allow_vampire_mounts" ->      Material.SADDLE;
+            case "restrict_known_vampires" ->   Material.IRON_CHESTPLATE;
             case "vampire_health_check" ->      Material.EXPERIENCE_BOTTLE;
             case "damage_suppression" ->        Material.STONE_SWORD;
             case "cure_requires_dead_sire" ->   Material.WITHER_SKELETON_SKULL;
@@ -165,6 +166,7 @@ public class ConfigGuiManager {
             case Material.RECOVERY_COMPASS ->               "new_vampire_tracking";
             case Material.GLASS ->                          "sun_through_glass";
             case Material.SADDLE ->                         "allow_vampire_mounts";
+            case Material.IRON_CHESTPLATE ->                "restrict_known_vampires";
             case Material.EXPERIENCE_BOTTLE ->              "vampire_health_check";
             case Material.STONE_SWORD ->                    "damage_suppression";
             case Material.WITHER_SKELETON_SKULL ->          "cure_requires_dead_sire";
@@ -236,6 +238,7 @@ public class ConfigGuiManager {
             case "new_vampire_tracking" ->      "Track New Vampires";
             case "sun_through_glass" ->         "Sun Effects through Glass";
             case "allow_vampire_mounts" ->      "Allow Vampires Living Mounts";
+            case "restrict_known_vampires" ->   "Automatically Restrict Higher Vampires";
             case "vampire_health_check" ->      "Vampire Regeneration Rate";
             case "damage_suppression" ->        "Player Damage Resistance";
             case "cure_requires_dead_sire" ->   "Sire Death for Curing";
@@ -278,6 +281,8 @@ public class ConfigGuiManager {
                     this.configManager.doesSunAffectThroughGlass() ? TRUE + "YES" : FALSE + "NO";
             case "allow_vampire_mounts" ->
                     this.configManager.canVampiresRideLivingMounts() ? TRUE + "ALLOWED" : FALSE + "FORBIDDEN";
+            case "restrict_known_vampires" ->
+                    this.configManager.areKnownVampiresRestricted() ? TRUE + "AUTOMATIC" : FALSE + "MANUAL";
             case "vampire_health_check" ->
                     OTHER + this.configManager.getVampireHealthCheckTicks();
             case "damage_suppression" ->
@@ -348,6 +353,12 @@ public class ConfigGuiManager {
             case "allow_vampire_mounts":
                 description.add("Let higher vampires ride animals that would");
                 description.add("ordinarily recoil from their true nature.");
+                break;
+
+            case "restrict_known_vampires":
+                description.add("Once a vampire stages up, should they automatically");
+                description.add("be prevented from certain activities if they");
+                description.add("return to being stage 1.");
                 break;
 
             case "vampire_health_check":
@@ -479,6 +490,10 @@ public class ConfigGuiManager {
 
             case "allow_vampire_mounts":
                 this.configManager.setVampiresRideLivingMounts( !this.configManager.canVampiresRideLivingMounts() );
+                break;
+
+            case "restrict_known_vampires":
+                this.configManager.setKnownVampireRestriction( !this.configManager.areKnownVampiresRestricted() );
                 break;
 
             case "vampire_health_check":

@@ -768,6 +768,25 @@ public class ConfigManager {
     }
 
     /**
+     * Retrieve if vampires are locked out of certain actions once they have staged up once, even if they stage down later.
+     *
+     * @return {@code true} if the server remembers if a player has staged up in the past.
+     */
+    public boolean areKnownVampiresRestricted() {
+        return this.plugin.getConfig().getBoolean("vampire.restrict-known-vampires", true);
+    }
+
+    /**
+     * Update the config on whether the server remembers if a player has staged up in the past
+     *
+     * @param restrict {@code true} if vampires are locked out of certain actions once they have staged up once, even if they stage down later.
+     */
+    public void setKnownVampireRestriction(boolean restrict) {
+        this.plugin.getConfig().set("vampire.restrict-known-vampires", restrict);
+        this.plugin.saveConfig();
+    }
+
+    /**
      * Retrieve the speed at which vampires regenerate health.
      *
      * @return The number of ticks it takes for each health point regeneration.

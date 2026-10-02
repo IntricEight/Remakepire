@@ -38,6 +38,7 @@ public class SessionManager {
     public static final String INFORMED_IRON_BLOCK_REPEL = "informed_iron_block_reply";
     public static final String INFORMED_CRAFTING_ITEMS = "informed_crafting_items";
     public static final String INFORMED_PICKUP_ITEM = "informed_pickup_item";
+    public static final String INFORMED_ARMOR_EQUIP = "informed_armor_equip";
     public static final String INFORMED_PICKUP_HOLY_WATER = "informed_pickup_holy_water";
     public static final String INFORMED_USE_HOLY_WATER = "informed_use_holy_water";
     public static final String INFORMED_IRON_BLOCK_WEAKNESS = "informed_iron_block_effects";
@@ -50,7 +51,7 @@ public class SessionManager {
     public static final String INFORMED_BOUNDARY_COMPANION = "informed_boundary_companion";
     public static final String STOPTHEBLEEDING_USED_SESSION = "stopthebleeding_used_session";
     public static final String BLESSING_USED_SESSION = "blessing_used_session";
-    public static final List<String> INFORMED_CONSTANTS = Arrays.asList(INFORMED_IRON_BLOCK_REPEL, INFORMED_CRAFTING_ITEMS, INFORMED_PICKUP_ITEM, INFORMED_PICKUP_HOLY_WATER, INFORMED_USE_HOLY_WATER, INFORMED_IRON_BLOCK_WEAKNESS, INFORMED_SUCCESSFUL_FEEDING, INFORMED_BLOOD_MOON, INFORMED_ENCHANTING_ITEMS, INFORMED_WEAPON_WEAKNESS, INFORMED_VAMPIRE_CLAWS, INFORMED_BOUNDARY, INFORMED_BOUNDARY_COMPANION, STOPTHEBLEEDING_USED_SESSION, BLESSING_USED_SESSION);
+    public static final List<String> INFORMED_CONSTANTS = Arrays.asList(INFORMED_IRON_BLOCK_REPEL, INFORMED_CRAFTING_ITEMS, INFORMED_PICKUP_ITEM, INFORMED_ARMOR_EQUIP, INFORMED_PICKUP_HOLY_WATER, INFORMED_USE_HOLY_WATER, INFORMED_IRON_BLOCK_WEAKNESS, INFORMED_SUCCESSFUL_FEEDING, INFORMED_BLOOD_MOON, INFORMED_ENCHANTING_ITEMS, INFORMED_WEAPON_WEAKNESS, INFORMED_VAMPIRE_CLAWS, INFORMED_BOUNDARY, INFORMED_BOUNDARY_COMPANION, STOPTHEBLEEDING_USED_SESSION, BLESSING_USED_SESSION);
 
     /**
      * Create an instance of the Session manager.
