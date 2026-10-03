@@ -684,6 +684,15 @@ public class ConfigManager {
     }
 
     /**
+     * Retrieve the number of claw hits required to kill a vampire.
+     *
+     * @return The number of claw hits required to kill a vampire at 0 health.
+     */
+    public int getClawHitKillRequirement() {
+        return this.plugin.getConfig().getInt("combat.kill-vampires-with-claws", 999);
+    }
+
+    /**
      * Retrieve the number of lives that humans start out with.
      *
      * @return The total number of times humans can die and respawn.

@@ -407,6 +407,12 @@ combat:
   # Default: 1 (only Stage 1 vampires can be perma-killed)
   permadeath-minimum-stage: 1
 
+  # Let vampires temporarily kill other vampires using claw damage
+  # Set a number of claw hits that will kill a vampire. Only hits done when the damage would ordinarily have killed the
+  # player count toward the tally
+  # Default: 999
+  kill-vampires-with-claws: 999
+
   # Control how many lives humans start out with
   # This is the number of times a human will revive. For example, 5 lives means 6 total deaths (5 revives + 1 starting life)
   # Humans will always start out with 10 hearts, and lose 1 heart for each life lost

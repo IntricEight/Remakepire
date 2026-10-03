@@ -72,8 +72,8 @@ public class DeathHandler implements Listener {
     @EventHandler
     public void onPlayerPostRespawn(PlayerRespawnEvent event) {
         Player player = event.getPlayer();
-        boolean wasVampire = this.vampireManager.isVampire(player);
-        boolean wasHuman = this.vampireManager.isHuman(player);
+        final boolean wasVampire = this.vampireManager.isVampire(player);
+        final boolean wasHuman = this.vampireManager.isHuman(player);
 
         if (wasVampire && player.getScoreboardTags().contains(PERMAKILL_PROCESSING_TAG)) {
             this.vampireManager.killPlayerPermanently(player);
@@ -109,6 +109,11 @@ public class DeathHandler implements Listener {
                     e.printStackTrace();
                 }
             });
+        }
+
+        if (wasVampire) {
+            // Clear the claw hit counter from a vampire when they die
+            this.plugin.getCombatListener().clearClawCounter(player.getUniqueId());
         }
 
         this.plugin.getServer().getScheduler().runTaskLater(this.plugin, () -> {
@@ -454,6 +459,23 @@ public class DeathHandler implements Listener {
         }
 
         this.plugin.logInfo("PERMA-KILL: " + victim.getName() + " was permanently killed");
+    }
+
+    public void triggerHumanPermadeath(Player attacker, Player victim, boolean wasTurnAttempt) {
+        attacker.sendMessage(Component.text("You watch the light of " + victim.getName() + "'s eyes fade, and extinguish. Lost forever.", NamedTextColor.DARK_RED));
+
+        if (wasTurnAttempt) {
+            victim.sendMessage(Component.text("The world grows dim, blurry, you feel a darkness reach out, offering you one last chance to live, as a creature of the night... But you refuse... And slip under the veil of the afterlife.", NamedTextColor.GRAY));
+        } else {
+            victim.sendMessage(Component.text("The world grows dim, blurry... the light which drew you back so many times beckons once more, but it seems fainter now, out of reach... You lose your grip, and slip under the veil of the afterlife.", NamedTextColor.GRAY));
+        }
+
+        victim.addScoreboardTag(PERMADEATH_CHOSEN_TAG);
+        victim.setHealth(0.0);
+
+        // Some instances of the permakill use this instead of just setting the health to 0.0 outside a thread
+        // I'm going to keep this around for now in case I find a reason why that was the case, or a bug caused by the lack of threading
+//        this.plugin.getServer().getScheduler().runTask(this.plugin, () -> victim.setHealth(0.0));
     }
 
     /**

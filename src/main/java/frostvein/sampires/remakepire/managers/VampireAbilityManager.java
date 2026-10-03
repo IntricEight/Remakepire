@@ -729,12 +729,13 @@ public class VampireAbilityManager {
      * @return {@code true} if the player's invisibility has been removed.
      */
     public boolean trackInvisibilityAttack(Player player) {
-        UUID playerId = player.getUniqueId();
-        int attackCount = this.invisibilityAttackCounts.getOrDefault(playerId, 0) + 1;
+        final UUID playerId = player.getUniqueId();
+        final int attackCount = this.invisibilityAttackCounts.getOrDefault(playerId, 0) + 1;
 
         if (attackCount >= 3) {
             this.invisibilityAttackCounts.remove(playerId);
             return true;
+
         } else {
             this.invisibilityAttackCounts.put(playerId, attackCount);
             return false;
