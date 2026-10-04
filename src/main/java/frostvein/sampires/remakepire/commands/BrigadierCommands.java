@@ -90,6 +90,13 @@ public class BrigadierCommands {
      */
     private void registerPowCommand(Commands commands) {
         commands.register(((LiteralArgumentBuilder) ( Commands.literal("pow").executes(ctx -> this.executePowCommand(ctx, "pow"))
+
+                .then(Commands.literal("skull")
+                        .then(Commands.argument("name", StringArgumentType.greedyString()).executes(ctx -> {
+                            final String skullName = StringArgumentType.getString(ctx, "name");
+                            return this.executePowCommand(ctx, "skull", skullName);
+                        })))
+
                 .then(Commands.literal("help").executes(ctx -> this.executePowCommand(ctx, "help"))))
 
                 .then(this.buildVampireAbilitySubcommand())

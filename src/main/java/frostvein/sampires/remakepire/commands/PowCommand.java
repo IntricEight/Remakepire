@@ -4,11 +4,14 @@ import java.util.Arrays;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.defaults.BukkitCommand;
 import frostvein.sampires.remakepire.RemakepirePlugin;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 
 public class PowCommand implements CommandExecutor {
     private final RemakepirePlugin plugin;
@@ -55,10 +58,14 @@ public class PowCommand implements CommandExecutor {
             return true;
         }
 
-        String subCommand = args[0].toLowerCase();
+        final String subCommand = args[0].toLowerCase();
         String[] subArgs = Arrays.copyOfRange(args, 1, args.length);
 
         switch (subCommand) {
+            case "skull":
+                // Give the player a skull with the text in it
+                return this.createSkullCommand(sender, command, label, args);
+
             case "admin":
                 // Access the admin commands
                 return this.handleAdminCommand(sender, subArgs);
@@ -184,5 +191,28 @@ public class PowCommand implements CommandExecutor {
         CommandHandler.sendCommandInstruction(sender, "/pow permadeath <on | off | absolute>", "Set permadeath preference");
         CommandHandler.sendCommandInstruction(sender, "/pow toggle-turning", "Toggle vampire turning ability");
         CommandHandler.sendCommandInstruction(sender, "/pow sendmessage", "Send pending chat message");
+    }
+
+    private boolean createSkullCommand(CommandSender sender, Command command, String label, String[] args) {
+        if (!(sender instanceof Player player)) {
+            sender.sendMessage(Component.text("Only players can use this command.", NamedTextColor.RED));
+            return true;
+        }
+
+        // Combine the name argument into a single string, and add the skull clarifier to it
+        String skullName = String.join(" ", Arrays.copyOfRange(args, 1, args.length)) + "'s Skull";
+
+        // Create the skull
+        ItemStack skull = new ItemStack(Material.SKELETON_SKULL);
+        skull.editMeta(meta -> meta.customName(Component.text(skullName, NamedTextColor.WHITE)));
+
+        if (player.getInventory().firstEmpty() != -1) {
+            player.getInventory().addItem(skull);
+
+        } else {
+            player.getWorld().dropItemNaturally(player.getLocation(), skull);
+        }
+
+        return true;
     }
 }
