@@ -24,6 +24,7 @@ public final class RemakepirePlugin extends JavaPlugin {
     private VampireManager vampireManager;
     private EffectManager effectManager;
     private DeathHandler deathHandler;
+    private CombatListener combatListener;
     private BloodMoonManager bloodMoonManager;
     private PlayerChatManager playerChatManager;
     private VampireAbilityManager vampireAbilityManager;
@@ -59,8 +60,7 @@ public final class RemakepirePlugin extends JavaPlugin {
     private CureBookReadingListener cureBookReadingListener;
     private BloodTiesListener bloodTiesListener;
     private World world;
-    private Team castTeam;
-    private Team vampireCastTeam;
+    private Team castTeam, vampireCastTeam;
     private Location vampireRespawnLocation;
     private FileConfiguration textConfig;
 
@@ -86,6 +86,7 @@ public final class RemakepirePlugin extends JavaPlugin {
         this.beaconManager = new BeaconManager(this);
         this.effectManager = new EffectManager(this);
         this.deathHandler = new DeathHandler(this);
+        this.combatListener = new CombatListener(this);
         this.bloodMoonManager = new BloodMoonManager(this);
         this.ironWeaknessListener = new IronWeaknessListener(this);
         this.feedingListener = new FeedingListener(this);
@@ -119,7 +120,7 @@ public final class RemakepirePlugin extends JavaPlugin {
         this.initGameManager = new InitGameManager(this);
         this.getServer().getPluginManager().registerEvents(this.damageSuppressionListener, this);
         this.getServer().getPluginManager().registerEvents(this.deathHandler, this);
-        this.getServer().getPluginManager().registerEvents(new CombatListener(this), this);
+        this.getServer().getPluginManager().registerEvents(this.combatListener, this);
         this.getServer().getPluginManager().registerEvents(new ConfigGuiListener(this), this);
         this.getServer().getPluginManager().registerEvents(new PlayerJoinListener(this), this);
         this.getServer().getPluginManager().registerEvents(new BlockListener(this), this);
@@ -281,6 +282,10 @@ public final class RemakepirePlugin extends JavaPlugin {
             this.configGuiManager.shutdown();
         }
 
+        if (this.getCombatListener() != null) {
+            this.getCombatListener().shutdown();
+        }
+
         this.logInfo("Remakepire Plugin has been disabled!");
     }
 
@@ -388,6 +393,7 @@ public final class RemakepirePlugin extends JavaPlugin {
             if (existingTeam != null) {
                 this.vampireCastTeam = existingTeam;
                 this.logInfo("Found existing VampireCastTeam, updating settings...");
+
             } else {
                 this.vampireCastTeam = mainScoreboard.registerNewTeam("VampireCastTeam");
                 this.logInfo("Created new VampireCastTeam for name tag management.");
@@ -494,6 +500,10 @@ public final class RemakepirePlugin extends JavaPlugin {
 
     public DeathHandler getDeathHandler() {
         return this.deathHandler;
+    }
+
+    public CombatListener getCombatListener() {
+        return this.combatListener;
     }
 
     public BeaconManager getBeaconManager() {

@@ -32,7 +32,7 @@ public class ConfigManager {
      * @return A URL of a location that downloads a ZIP file.
      */
     public String getHumanTexturePackUrl() {
-        return this.plugin.getConfig().getString("human-texture-pack.url", "https://download.mc-packs.net/pack/b1fbd00667c6ad35c11967a385184aa336d605e1.zip");
+        return this.plugin.getConfig().getString("human-texture-pack.url", "https://download.mc-packs.net/pack/4e42367081530cc073b612d9772a18daca7c0df9.zip");
     }
 
     /**
@@ -41,7 +41,7 @@ public class ConfigManager {
      * @return A code that should match that of the texture pack retrieved from the URL.
      */
     public String getHumanTexturePackSha1() {
-        return this.plugin.getConfig().getString("human-texture-pack.sha1", "b1fbd00667c6ad35c11967a385184aa336d605e1");
+        return this.plugin.getConfig().getString("human-texture-pack.sha1", "4e42367081530cc073b612d9772a18daca7c0df9");
     }
 
     /**
@@ -702,6 +702,15 @@ public class ConfigManager {
     }
 
     /**
+     * Retrieve the number of claw hits required to kill a vampire.
+     *
+     * @return The number of claw hits required to kill a vampire at 0 health.
+     */
+    public int getClawHitKillRequirement() {
+        return this.plugin.getConfig().getInt("combat.kill-vampires-with-claws", 999);
+    }
+
+    /**
      * Retrieve the number of lives that humans start out with.
      *
      * @return The total number of times humans can die and respawn.
@@ -748,6 +757,25 @@ public class ConfigManager {
     }
 
     /**
+     * Retrieve if sun and moon effects are applied when players are under glass.
+     *
+     * @return {@code true} if sky-based effects are applied through glass.
+     */
+    public boolean doesSunAffectThroughGlass() {
+        return this.plugin.getConfig().getBoolean("vampire.sun-affects-through-glass", false);
+    }
+
+    /**
+     * Update the config on whether sky-based effects are applied through glass
+     *
+     * @param sunAffects {@code true} if sun and moon effects will be applied when players are under glass.
+     */
+    public void setSunAffectThroughGlass(boolean sunAffects) {
+        this.plugin.getConfig().set("vampire.sun-affects-through-glass", sunAffects);
+        this.plugin.saveConfig();
+    }
+
+    /**
      * Retrieve if vampires can mount living entities. Exceptions are made for undead mounts.
      *
      * @return {@code true} if vampires can mount any animal.
@@ -757,12 +785,31 @@ public class ConfigManager {
     }
 
     /**
-     * Update the config on whether vampires can ride on living mounts
+     * Update the config on whether vampires can ride on living mounts.
      *
      * @param canRide {@code true} if vampires can ride living mounts.
      */
     public void setVampiresRideLivingMounts(boolean canRide) {
         this.plugin.getConfig().set("vampire.allow-vampire-mounts", canRide);
+        this.plugin.saveConfig();
+    }
+
+    /**
+     * Retrieve if vampires are locked out of certain actions once they have staged up once, even if they stage down later.
+     *
+     * @return {@code true} if the server remembers if a player has staged up in the past.
+     */
+    public boolean areKnownVampiresRestricted() {
+        return this.plugin.getConfig().getBoolean("vampire.restrict-known-vampires", true);
+    }
+
+    /**
+     * Update the config on whether the server remembers if a player has staged up in the past
+     *
+     * @param restrict {@code true} if vampires are locked out of certain actions once they have staged up once, even if they stage down later.
+     */
+    public void setKnownVampireRestriction(boolean restrict) {
+        this.plugin.getConfig().set("vampire.restrict-known-vampires", restrict);
         this.plugin.saveConfig();
     }
 

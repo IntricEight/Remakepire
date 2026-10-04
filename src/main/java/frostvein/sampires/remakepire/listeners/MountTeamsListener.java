@@ -62,7 +62,7 @@ public class MountTeamsListener implements Listener {
             event.setCancelled(true);
             player.sendMessage(Component.text("The animal recoils from your warm touch...", NamedTextColor.RED));
 
-        } else if (this.plugin.getVampireManager().isVampireStage2OrHigher(player) && this.isLivingMount(mount)) {
+        } else if (this.plugin.getVampireManager().isRestrictedVampire(player) && this.isLivingMount(mount)) {
             event.setCancelled(true);
             player.sendMessage(Component.text("The animal recoils from you as you extend a hand to it...", NamedTextColor.RED));
         }
