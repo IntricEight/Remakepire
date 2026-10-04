@@ -146,21 +146,19 @@ public class ItemTypeChecking {
             return false;
         } else if (item.getType() != Material.SPLASH_POTION) {
             return false;
-        } else if (!item.hasItemMeta()) {
-            return true;
-        } else if (!(item.getItemMeta() instanceof PotionMeta potionMeta)) {
+        } else if (!item.hasItemMeta() || !(item.getItemMeta() instanceof PotionMeta potionMeta)) {
             return true;
         } else {
             if (potionMeta.hasCustomEffects()) {
                 return false;
-            } else {
-                PotionType baseType = potionMeta.getBasePotionType();
+            }
 
-                if (baseType != null && baseType != PotionType.WATER) {
-                    return baseType == PotionType.AWKWARD || baseType == PotionType.MUNDANE || baseType == PotionType.THICK;
-                } else {
-                    return true;
-                }
+            PotionType baseType = potionMeta.getBasePotionType();
+
+            if (baseType != null && baseType != PotionType.WATER) {
+                return baseType == PotionType.AWKWARD || baseType == PotionType.MUNDANE || baseType == PotionType.THICK;
+            } else {
+                return true;
             }
         }
     }
@@ -174,9 +172,9 @@ public class ItemTypeChecking {
     public static boolean isWaterBottle(ItemStack item) {
         if (item.getType() != Material.POTION) {
             return false;
-        } else {
-            return !item.hasItemMeta() || item.getItemMeta().getPersistentDataContainer().isEmpty();
         }
+
+        return !item.hasItemMeta() || item.getItemMeta().getPersistentDataContainer().isEmpty();
     }
 
     /**
@@ -186,7 +184,7 @@ public class ItemTypeChecking {
      * @return {@code true} if the item is raw meat.
      */
     public static boolean isRaw(ItemStack item) {
-        String itemName = item.getType().name();
+        final String itemName = item.getType().name();
 
         if (itemName.contains("RAW")) {
             return true;
@@ -205,12 +203,12 @@ public class ItemTypeChecking {
      * @return {@code true} if the item is regular food (Check this function for the list of "not-regular" foods)
      */
     public static boolean isActualFood(ItemStack item) {
-        Material type = item.getType();
+        final Material type = item.getType();
 
         if (!type.isEdible()) {
             return false;
-        } else {
-            return !type.name().contains("POTION") && type != Material.ENDER_PEARL && type != Material.CHORUS_FRUIT && type != Material.ENCHANTED_GOLDEN_APPLE && type != Material.GOLDEN_APPLE && type != Material.BEETROOT;
         }
+
+        return !type.name().contains("POTION") && type != Material.ENDER_PEARL && type != Material.CHORUS_FRUIT && type != Material.ENCHANTED_GOLDEN_APPLE && type != Material.GOLDEN_APPLE && type != Material.BEETROOT;
     }
 }
