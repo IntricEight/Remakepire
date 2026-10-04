@@ -94,7 +94,7 @@ public class WayOfTheLumberjackTomeAbility extends TomeAbility implements Listen
                 this.placedLogs.remove(locationKey);
                 this.savePlacedLogs();
 
-            } else if (this.plugin.getTomeManager().hasAbility(player, "wayofthelumberjack")) {
+            } else if (this.plugin.getTomeManager().hasAbility(player, "wayofthelumberjack") && this.plugin.getVampireManager().isHuman(player)) {
                 if (this.random.nextDouble() < 0.3) {
                     ItemStack drop = new ItemStack(block.getType(), 1);
                     block.getWorld().dropItemNaturally(block.getLocation(), drop);
