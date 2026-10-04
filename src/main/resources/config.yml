@@ -97,9 +97,9 @@ tome-chests:
 #    "WayOfTheProspector"
 
   # A list of enchantment books that can spawn inside tome chests
-  # The options given need to match Minecraft's internal name for the enchantment.
+  # The options given need to match Minecraft's internal name for the enchantment
   # Check this link to see Minecraft's enchantments and their names: https://minecraft.wiki/w/Enchantment#List_of_enchantments
-  # The options are not case-sensitive.
+  # The options are not case-sensitive
   enchantment-options:
     - "Efficiency"
     - "Feather_Falling"
@@ -219,16 +219,29 @@ vampire:
   new-vampire-tracking: true
 
   # Control if vampires are negatively affected by silver blocks
-  # When true (default), high-level vampires are repulsed and weakened by silver-based blocks
+  # When true, high-level vampires are repulsed and weakened by silver-based blocks
   # Does not affect vampire aversion to silver items and damage
-  # Default: true
+  # Default: true (Vampires are repulsed)
   silver-weakness: true
+
+  # Control whether sky effects (such as sun weakness and bloodmoon buffs) affect players under plain glass
+  # When true, plain glass does not count as a block when checking if a player is under the sky
+  # Default: false (Clear glass stops sky effects)
+  sun-affects-through-glass: false
 
   # Control if vampires can mount animals, such as pigs and horses
   # Exceptions are made for undead mounts, such as skeleton horses
   # Humans are prevented from riding these undead mounts
   # Default: true (all mounts are allowed)
   allow-vampire-mounts: true
+
+  # Control if vampires are automatically marked as higher vampires once they stage up
+  # When true, once they have staged up, vampires are restricted from most actions forbidden to higher vampires even if they return to stage 1
+  # Some examples are feeding animals, equipping silver armor, and carrying tome books
+  # Additionally, vampires will remain on the Vampire Team even when they are stage 1 (May need to relog for this to apply if the tag is manually given)
+  # When false, you can still selectively apply this effect on players by giving them the tag 'RevealedVampire'
+  # Default: false (Restrictions are not automatically applied)
+  restrict-known-vampires: false
 
 # Vampire Health Check Configuration
 # Controls how often vampire health is checked and regenerated (in ticks)
@@ -412,8 +425,14 @@ combat:
   # Default: 1 (only Stage 1 vampires can be perma-killed)
   permadeath-minimum-stage: 1
 
+  # Let vampires temporarily kill other vampires using claw damage
+  # Set a number of claw hits that will kill a vampire. Only hits done when the damage would ordinarily have killed the
+  # player count toward the tally
+  # Default: 999
+  kill-vampires-with-claws: 999
+
   # Control how many lives humans start out with
-  # This is the number of times a human will revive. For example, 5 lives means 6 total deaths (5 revives + 1 starting life).
+  # This is the number of times a human will revive. For example, 5 lives means 6 total deaths (5 revives + 1 starting life)
   # Humans will always start out with 10 hearts, and lose 1 heart for each life lost
   # This change is not retroactive. If a human has died more times than allowed (after this value has been changed)
   #   they will need to die one more time before it takes effect
@@ -468,7 +487,7 @@ oakhurst:
 
 # Control whether the game border can hold players inside
 # When false, all players will be able to leave the town, and will be told they have escaped
-# WARNING: Players who haven't fulfilled a leave condition will be frozen in place if they are outside the border when this is enabled.
+# WARNING: Players who haven't fulfilled a leave condition will be frozen in place if they are outside the border when this is enabled
 # Default: true (border traps players)
 border_active: true
 
@@ -478,7 +497,7 @@ border_active: true
 # ============================================================================
 
 # It is recommended to have the server's forced texture pack (Set inside server.properties) be the human texture pack,
-# in addition to the following configuration settings.
+# in addition to the following configuration settings
 
 # The URL and SHA1 of the texture pack that human players are provided with
 human-texture-pack:

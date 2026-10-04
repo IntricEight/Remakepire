@@ -21,9 +21,11 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.block.BlockDispenseArmorEvent;
 import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerArmorStandManipulateEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
@@ -36,6 +38,7 @@ import org.bukkit.util.Vector;
 import frostvein.sampires.remakepire.RemakepirePlugin;
 import frostvein.sampires.remakepire.managers.SessionManager;
 import frostvein.sampires.remakepire.managers.VampireManager;
+import frostvein.sampires.remakepire.utils.ItemTypeChecking;
 
 public class IronWeaknessListener implements Listener {
     private final RemakepirePlugin plugin;
@@ -179,24 +182,57 @@ public class IronWeaknessListener implements Listener {
     }
 
     /**
-     * Prevent higher vampires from taking silver items from other inventories.
+     * Prevent higher vampires from taking silver items from other inventories, or equipping silver armor.
      *
      * @param event a player clicks inside an inventory menu.
      */
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
-        if (event.getWhoClicked() instanceof Player player) {
-            if (this.vampireManager.isIronAffected(player)) {
-                if (event.getClick() == ClickType.SHIFT_LEFT || event.getClick() == ClickType.SHIFT_RIGHT || event.getClick() == ClickType.LEFT || event.getClick() == ClickType.RIGHT) {
-                    ItemStack clickedItem = event.getCurrentItem();
+        if (!(event.getWhoClicked() instanceof Player player)) {
+            return;
+        }
 
-                    if (clickedItem == null || clickedItem.getType().isAir()) {
-                        return;
-                    }
+        // Prevent higher vampires from taking restricted items from containers
+        if (this.vampireManager.isIronAffected(player)) {
+            if (event.getClick() == ClickType.SHIFT_LEFT || event.getClick() == ClickType.SHIFT_RIGHT || event.getClick() == ClickType.LEFT || event.getClick() == ClickType.RIGHT) {
+                ItemStack clickedItem = event.getCurrentItem();
 
-                    if (event.getClickedInventory() != player.getInventory() && this.ironMaterials.contains(clickedItem.getType())) {
-                        this.handleShiftClickIntoInventory(player, clickedItem, event);
-                    }
+                if (clickedItem == null || clickedItem.getType().isAir()) {
+                    return;
+                }
+
+                if (event.getClickedInventory() != player.getInventory()) {
+                    this.handleShiftClickIntoInventory(player, clickedItem, event);
+                }
+            }
+
+            return;
+        }
+
+        // Prevent restricted vampires from equipping silver armor from their inventory
+        if (this.vampireManager.isRestrictedVampire(player)) {
+            ItemStack armorCheck = null;
+
+            if (event.getSlotType() == InventoryType.SlotType.ARMOR) {
+                if (event.getClick() == ClickType.NUMBER_KEY) {
+                    armorCheck = player.getInventory().getItem(event.getHotbarButton());
+
+                } else if (event.getClick() == ClickType.SWAP_OFFHAND) {
+                    armorCheck = player.getInventory().getItemInOffHand();
+
+                } else {
+                    armorCheck = event.getCursor();
+                }
+            } else if (event.isShiftClick()) {
+                armorCheck = event.getCurrentItem();
+            }
+
+            if (armorCheck != null & ItemTypeChecking.isIronArmor(armorCheck.getType())) {
+                event.setCancelled(true);
+
+                if (!player.getScoreboardTags().contains(SessionManager.INFORMED_ARMOR_EQUIP)) {
+                    player.addScoreboardTag(SessionManager.INFORMED_ARMOR_EQUIP);
+                    player.sendMessage(Component.text("The armor sears your flesh as you attempt to equip it. You cannot wear this anymore.", NamedTextColor.RED));
                 }
             }
         }
@@ -210,8 +246,14 @@ public class IronWeaknessListener implements Listener {
      * @param event a player clicks inside an inventory menu.
      */
     private void handleShiftClickIntoInventory(Player player, ItemStack item, InventoryClickEvent event) {
-        event.setCancelled(true);
-        player.sendMessage(Component.text("You attempt to grab the item, but it burns your hand as you reach for it."));
+        if (this.ironMaterials.contains(item.getType())) {
+            event.setCancelled(true);
+
+            if (!player.getScoreboardTags().contains(SessionManager.INFORMED_PICKUP_ITEM)) {
+                player.addScoreboardTag(SessionManager.INFORMED_PICKUP_ITEM);
+                player.sendMessage(Component.text("You attempt to grab the item, but it burns your hand as you reach for it."));
+            }
+        }
     }
 
     /**
@@ -252,21 +294,19 @@ public class IronWeaknessListener implements Listener {
         Player player = event.getPlayer();
         Material armorStandItemType = event.getArmorStandItem().getType();
 
-        if (this.vampireManager.isIronAffected(player)) {
-            if (this.ironMaterials.contains(armorStandItemType)) {
-                event.setCancelled(true);
+        if (this.vampireManager.isIronAffected(player) && this.ironMaterials.contains(armorStandItemType)) {
+            event.setCancelled(true);
 
-                // Only inform the player of the burning silver a single time each session
-                if (!player.getScoreboardTags().contains(SessionManager.INFORMED_PICKUP_ITEM)) {
-                    player.addScoreboardTag(SessionManager.INFORMED_PICKUP_ITEM);
-                    player.sendMessage(Component.text("The silver you have tried to pick up burns your fingers as you touch it... Best leave it alone...", NamedTextColor.RED));
-                }
+            // Only inform the player of the burning silver a single time each session
+            if (!player.getScoreboardTags().contains(SessionManager.INFORMED_PICKUP_ITEM)) {
+                player.addScoreboardTag(SessionManager.INFORMED_PICKUP_ITEM);
+                player.sendMessage(Component.text("The silver you have tried to pick up burns your fingers as you touch it... Best leave it alone...", NamedTextColor.RED));
             }
         }
     }
 
     /**
-     * Prevent higher vampires from throwing bottles of holy water.
+     * Prevent higher vampires from taking silver items from shelves or equipping silver armor.
      *
      * @param event a player interacts with an object.
      */
@@ -274,19 +314,49 @@ public class IronWeaknessListener implements Listener {
             priority = EventPriority.HIGH
     )
     public void onPlayerInteract(PlayerInteractEvent event) {
+        if (event.getAction() != Action.RIGHT_CLICK_AIR && event.getAction() != Action.RIGHT_CLICK_BLOCK) {
+            return;
+        }
+
         Player player = event.getPlayer();
 
-        try {
-            if (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK) {
-                if (this.vampireManager.isIronAffected(player)) {
-                    // Check if the player is taking an item from a shelf
-                    if (event.getClickedBlock() != null && event.getClickedBlock().getState() instanceof Shelf) {
-                        // Check if any iron items have entered the player's inventory after they have taken from the shelf
-                        Bukkit.getScheduler().runTaskLater(this.plugin, () -> scanAndRemoveIronFromSingleInventory(player), 5L);
-                    }
-                }
+        if (this.vampireManager.isIronAffected(player)) {
+            // Check if the player is taking an item from a shelf
+            if (event.getClickedBlock() != null && event.getClickedBlock().getState() instanceof Shelf) {
+                // Check if any iron items have entered the player's inventory after they have taken from the shelf
+                Bukkit.getScheduler().runTaskLater(this.plugin, () -> scanAndRemoveIronFromSingleInventory(player), 5L);
             }
-        } catch (Exception ignored) {}
+        }
+
+        if (this.vampireManager.isRestrictedVampire(player) && ItemTypeChecking.isIronArmor(event.getItem().getType())) {
+            event.setCancelled(true);
+
+            if (!player.getScoreboardTags().contains(SessionManager.INFORMED_ARMOR_EQUIP)) {
+                player.addScoreboardTag(SessionManager.INFORMED_ARMOR_EQUIP);
+                player.sendMessage(Component.text("The armor sears your flesh as you attempt to equip it. You cannot wear this anymore.", NamedTextColor.RED));
+            }
+        }
+    }
+
+    /**
+     * Prevent players from getting around silver armor restrictions by equipping it through a dispenser.
+     *
+     * @param event a dispenser equips armor onto a player.
+     */
+    @EventHandler
+    public void onDispenseArmor(BlockDispenseArmorEvent event) {
+        if (!(event.getTargetEntity() instanceof Player player)) {
+            return;
+        }
+
+        if (this.vampireManager.isRestrictedVampire(player) && ItemTypeChecking.isIronArmor(event.getItem().getType())) {
+            event.setCancelled(true);
+
+            if (!player.getScoreboardTags().contains(SessionManager.INFORMED_ARMOR_EQUIP)) {
+                player.addScoreboardTag(SessionManager.INFORMED_ARMOR_EQUIP);
+                player.sendMessage(Component.text("The armor sears your flesh as the dispenser attempts to equip it. You cannot wear this anymore.", NamedTextColor.RED));
+            }
+        }
     }
 
     /**

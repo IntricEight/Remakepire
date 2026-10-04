@@ -5,12 +5,14 @@ import java.util.Map;
 import java.util.UUID;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
+import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.World;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -20,10 +22,11 @@ import frostvein.sampires.remakepire.RemakepirePlugin;
 public class EffectManager {
     private final RemakepirePlugin plugin;
     private final VampireManager vampireManager;
-    private BukkitTask effectTask;
+    private BukkitTask effectTask, glassConfigCheckingTask;
     private final NamespacedKey SUN_WEAKNESS_SPEED_KEY;
     private final NamespacedKey VAMPIRE_SAFE_FALL_KEY;
     private final Map<UUID, Long> lastTrialOmenApplied = new HashMap<>();
+    private boolean shouldSunAffectThroughGlass = false;
     // Controls how much health the vampires have during the holy beacon last stand
     private final double LAST_STAND_VAMPIRE_HEALTH = 6.0;
 
@@ -45,6 +48,10 @@ public class EffectManager {
      */
     public void startEffectTask() {
         this.effectTask = Bukkit.getScheduler().runTaskTimer(this.plugin, this::applyVampireEffects, 20L, 20L);
+
+        this.glassConfigCheckingTask = Bukkit.getScheduler().runTaskTimer(this.plugin, () -> {
+            this.shouldSunAffectThroughGlass = this.plugin.getConfigManager().doesSunAffectThroughGlass();
+        }, 0L, 20L);
     }
 
     /**
@@ -53,6 +60,10 @@ public class EffectManager {
     public void stopEffectTask() {
         if (this.effectTask != null) {
             this.effectTask.cancel();
+        }
+
+        if (this.glassConfigCheckingTask != null) {
+            this.glassConfigCheckingTask.cancel();
         }
     }
 
@@ -70,7 +81,7 @@ public class EffectManager {
             } else {
                 this.removeVampireSafeFall(player);
 
-                if (this.vampireManager.isHuman(player) && this.plugin.getSessionManager().isVampiresEternalNightActive() && player.getGameMode() == GameMode.SURVIVAL) {
+                if (this.vampireManager.isHuman(player) && this.plugin.getSessionManager().isVampiresEternalNightActive() && (player.getGameMode() == GameMode.SURVIVAL || player.getGameMode() == GameMode.ADVENTURE)) {
                     this.applyEternalNightDarkness(player);
                 }
             }
@@ -206,7 +217,17 @@ public class EffectManager {
      * @return {@code true} if there are no blocks above the player.
      */
     public boolean canPlayerSeeSky(Player player) {
-        final Block highestBlock = player.getWorld().getHighestBlockAt(player.getLocation());
+        Block highestBlock = player.getWorld().getHighestBlockAt(player.getLocation());
+
+        if (shouldSunAffectThroughGlass) {
+            final int playerY = player.getLocation().getBlockY();
+
+            // Move downward until it finds the first non-air or glass block
+            while (highestBlock.getY() >= playerY && (highestBlock.getType().isAir() || highestBlock.getType() == Material.GLASS)) {
+                highestBlock = highestBlock.getRelative(BlockFace.DOWN);
+            }
+        }
+
         return player.getLocation().getBlockY() >= highestBlock.getY();
     }
 
@@ -312,6 +333,11 @@ public class EffectManager {
         if (this.effectTask != null) {
             this.effectTask.cancel();
             this.effectTask = null;
+        }
+
+        if (this.glassConfigCheckingTask != null) {
+            this.glassConfigCheckingTask.cancel();
+            this.glassConfigCheckingTask = null;
         }
 
         for (Player player : Bukkit.getOnlinePlayers()) {

@@ -41,7 +41,7 @@ public class VampireManager {
     public static final String HUMAN_TAG = "human", VAMPIRE_TAG = "vampire";
     public static final String VAMPIRE_STAGE1_TAG = "vampire_stage1", VAMPIRE_STAGE2_TAG = "vampire_stage2", VAMPIRE_STAGE3_TAG = "vampire_stage3";
     public static final String PROMOTION_BAN_TAG = "promotion_ban";
-    public static final String CURED_VAMPIRE_TAG = "CuredVampire";
+    public static final String CURED_VAMPIRE_TAG = "CuredVampire", MARKED_VAMPIRE_TAG = "RevealedVampire";
     private final NamespacedKey SUN_WEAKNESS_SPEED_KEY, VAMPIRE_SAFE_FALL_KEY;
 
     /**
@@ -194,7 +194,7 @@ public class VampireManager {
     private void addPlayerToCorrectTeam(Player player) {
         try {
             Team teamToJoin;
-            if (this.plugin.getVampireManager().isIronAffected(player)) {
+            if (this.plugin.getVampireManager().isRestrictedVampire(player)) {
                 teamToJoin = this.plugin.getVampireCastTeam();
             } else {
                 teamToJoin = this.plugin.getCastTeam();
@@ -271,9 +271,6 @@ public class VampireManager {
                     player.setLevel(1);
             }
 
-            final long baseDelay = isInBatForm ? 5L : 2L;
-            final int CURRENT_STAGE = stage;   // Copy the current stage for use within the lambda
-
             Bukkit.getScheduler().runTaskLater(this.plugin, () -> {
                 if (player.isOnline()) {
                     this.addPlayerToCorrectTeam(player);
@@ -282,15 +279,14 @@ public class VampireManager {
                         if (player.isOnline()) {
                             this.plugin.getBeaconMajorityManager().applyBonusesToPlayer(player);
 
-                            if (CURRENT_STAGE >= 2) {
-                                final long tomeDelay = isInBatForm ? 3L : 1L;
+                            if (isVampireStage2OrHigher(player)) {
                                 Bukkit.getScheduler().runTaskLater(this.plugin, () -> {
                                     if (player.isOnline()) {
                                         this.plugin.getTomeVampireRestrictionListener().forceDropTomesForPlayer(player);
                                     }
 
                                     this.completeLevelChange(playerId);
-                                }, tomeDelay);
+                                }, isInBatForm ? 3L : 1L);
                             } else {
                                 this.completeLevelChange(playerId);
                             }
@@ -302,7 +298,7 @@ public class VampireManager {
                     this.completeLevelChange(playerId);
                 }
 
-            }, baseDelay);
+            }, isInBatForm ? 5L : 2L);
         } catch (Exception e) {
             this.completeLevelChange(playerId);
             this.plugin.getLogger().severe("Error in setPlayerAsVampire for " + player.getName() + ": " + e.getMessage());
@@ -447,32 +443,24 @@ public class VampireManager {
      * @param player the vampire dropping a stage.
      */
     public void reduceVampireStage(Player player) {
-        if (player.getScoreboardTags().contains(VAMPIRE_STAGE3_TAG)) {
+        if (this.isVampireStage3(player)) {
             this.setPlayerAsVampire(player, 2);
             player.sendMessage(Component.text("Your vampire power has diminished. You are now Stage 2.", NamedTextColor.GOLD));
-            this.plugin.getVampireAbilityManager().clearAllCooldowns(player);
-            player.sendMessage(Component.text("Though your essence grows weaker, your abilities cooldowns are renewed once more", NamedTextColor.LIGHT_PURPLE));
 
-            if (this.plugin.getHolyWaterEffectManager() != null && this.plugin.getHolyWaterEffectManager().isAbilitiesDisabled(player)) {
-                this.plugin.getHolyWaterEffectManager().removeHolyWaterEffect(player, true);
-                player.sendMessage(Component.text("The holy water's grip on you has been shattered by your demotion.", NamedTextColor.GREEN));
-            }
-
-            this.applyDemotionEffectsToNearbyHumans(player);
-
-        } else if (player.getScoreboardTags().contains(VAMPIRE_STAGE2_TAG)) {
+        } else if (this.isVampireStage2(player)) {
             this.setPlayerAsVampire(player, 1);
             player.sendMessage(Component.text("Your vampire power has diminished. You are now Stage 1.", NamedTextColor.GOLD));
-            this.plugin.getVampireAbilityManager().clearAllCooldowns(player);
-            player.sendMessage(Component.text("Though your essence grows weaker, your abilities cooldowns are renewed once more", NamedTextColor.LIGHT_PURPLE));
-
-            if (this.plugin.getHolyWaterEffectManager() != null && this.plugin.getHolyWaterEffectManager().isAbilitiesDisabled(player)) {
-                this.plugin.getHolyWaterEffectManager().removeHolyWaterEffect(player, true);
-                player.sendMessage(Component.text("The holy water's grip on you has been shattered by your demotion.", NamedTextColor.GREEN));
-            }
-
-            this.applyDemotionEffectsToNearbyHumans(player);
         }
+
+        this.plugin.getVampireAbilityManager().clearAllCooldowns(player);
+        player.sendMessage(Component.text("Though your essence grows weaker, your abilities cooldowns are renewed once more", NamedTextColor.LIGHT_PURPLE));
+
+        if (this.plugin.getHolyWaterEffectManager() != null && this.plugin.getHolyWaterEffectManager().isAbilitiesDisabled(player)) {
+            this.plugin.getHolyWaterEffectManager().removeHolyWaterEffect(player, true);
+            player.sendMessage(Component.text("The holy water's grip on you has been shattered by your demotion.", NamedTextColor.GREEN));
+        }
+
+        this.applyDemotionEffectsToNearbyHumans(player);
     }
 
     /**
@@ -569,7 +557,7 @@ public class VampireManager {
      * @return {@code true} if the player is affected by silver.
      */
     public boolean isIronAffected(Player player) {
-        return this.isVampireStage2(player) || this.isVampireStage3(player);
+        return this.isVampireStage2OrHigher(player);
     }
 
     /**
@@ -580,6 +568,16 @@ public class VampireManager {
      */
     public boolean isVampireStage2OrHigher(Player player) {
         return this.isVampireStage2(player) || this.isVampireStage3(player);
+    }
+
+    /**
+     * Retrieve if the player should be prevented from certain actions because they are (or were) a higher vampire.
+     *
+     * @param player the player being checked.
+     * @return {@code true} if the player has been or is staged up beyond stage 1.
+     */
+    public boolean isRestrictedVampire(Player player) {
+        return this.isVampireStage2OrHigher(player) || (player.getScoreboardTags().contains(MARKED_VAMPIRE_TAG) && this.isVampireStage1(player));
     }
 
     /**

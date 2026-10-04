@@ -84,9 +84,9 @@ public class InteractionListener implements Listener {
     }
 
     /**
-     * Inform the player of the changing circumstances when they attempt to feed an animal.
+     * Inform the vampire of the changing or preventative circumstances when they attempt to feed an animal.
      *
-     * @param vampire the player attempting to feed an animal.
+     * @param vampire the vampire attempting to feed an animal.
      * @param mob the entity that the vampire is trying to feed.
      * @param foodItem the item used to feed the animal.
      * @param event a player interacts with an entity.
@@ -94,8 +94,9 @@ public class InteractionListener implements Listener {
     private void handleVampireFeedingAttempt(Player vampire, Entity mob, ItemStack foodItem, PlayerInteractEntityEvent event) {
         this.plugin.logInfo("Vampire " + vampire.getName() + " attempted to feed " + mob.getType() + " with " + foodItem.getType());
 
-        if (this.plugin.getVampireManager().isVampireStage1(vampire)) {
+        if (this.plugin.getVampireManager().isVampireStage1(vampire) && !this.plugin.getVampireManager().isRestrictedVampire(vampire)) {
             vampire.sendMessage(Component.text("The animal tentatively eats from your hand, eyeing you suspiciously, as if it knows your true nature...", NamedTextColor.RED));
+
         } else {
             event.setCancelled(true);
             vampire.sendMessage(Component.text("The animal recoils from you as you extend a hand to it...", NamedTextColor.RED));
