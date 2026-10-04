@@ -360,9 +360,19 @@ public class BrigadierCommands {
                         .then(Commands.literal("false").executes(ctx -> this.executePowCommand(ctx, "admin", "config", "new_vampire_tracking", "false")))
                 )
 
+                .then(Commands.literal("sun_through_glass").executes(ctx -> this.executePowCommand(ctx, "admin", "config", "sun_through_glass"))
+                        .then(Commands.literal("true").executes(ctx -> this.executePowCommand(ctx, "admin", "config", "sun_through_glass", "true")))
+                        .then(Commands.literal("false").executes(ctx -> this.executePowCommand(ctx, "admin", "config", "sun_through_glass", "false")))
+                )
+
                 .then(Commands.literal("allow_vampire_mounts").executes(ctx -> this.executePowCommand(ctx, "admin", "config", "allow_vampire_mounts"))
                         .then(Commands.literal("true").executes(ctx -> this.executePowCommand(ctx, "admin", "config", "allow_vampire_mounts", "true")))
                         .then(Commands.literal("false").executes(ctx -> this.executePowCommand(ctx, "admin", "config", "allow_vampire_mounts", "false")))
+                )
+
+                .then(Commands.literal("restrict_known_vampires").executes(ctx -> this.executePowCommand(ctx, "admin", "config", "restrict_known_vampires"))
+                        .then(Commands.literal("true").executes(ctx -> this.executePowCommand(ctx, "admin", "config", "restrict_known_vampires", "true")))
+                        .then(Commands.literal("false").executes(ctx -> this.executePowCommand(ctx, "admin", "config", "restrict_known_vampires", "false")))
                 )
 
                 .then(Commands.literal("vampire_health_check").executes(ctx -> this.executePowCommand(ctx, "admin", "config", "vampire_health_check"))

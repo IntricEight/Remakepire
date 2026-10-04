@@ -551,8 +551,16 @@ public class CommandHandler implements CommandExecutor {
                     senderMessage = this.configValueMessage("new_vampire_tracking", this.configManager.canTrackNewVampires());
                     break;
 
+                case "sun_through_glass":
+                    senderMessage = this.configValueMessage("new_vampire_tracking", this.configManager.doesSunAffectThroughGlass());
+                    break;
+
                 case "allow_vampire_mounts":
                     senderMessage = this.configValueMessage("allow_vampire_mounts", this.configManager.canVampiresRideLivingMounts());
+                    break;
+
+                case "restrict_known_vampires":
+                    senderMessage = this.configValueMessage("restrict_known_vampires", this.configManager.areKnownVampiresRestricted());
                     break;
 
                 case "vampire_health_check":
@@ -643,9 +651,19 @@ public class CommandHandler implements CommandExecutor {
                     senderMessage = this.configUpdateMessage("new-vampire-tracking", Boolean.parseBoolean(args[1]));
                     break;
 
+                case "sun_through_glass":
+                    configManager.setSunAffectThroughGlass(Boolean.parseBoolean(args[1]));
+                    senderMessage = this.configUpdateMessage("sun-affects-through-glass", Boolean.parseBoolean(args[1]));
+                    break;
+
                 case "allow_vampire_mounts":
                     configManager.setVampiresRideLivingMounts(Boolean.parseBoolean(args[1]));
                     senderMessage = this.configUpdateMessage("allow-vampire-mounts", Boolean.parseBoolean(args[1]));
+                    break;
+
+                case "restrict_known_vampires":
+                    configManager.setKnownVampireRestriction(Boolean.parseBoolean(args[1]));
+                    senderMessage = this.configUpdateMessage("restrict-known-vampires", Boolean.parseBoolean(args[1]));
                     break;
 
                 case "vampire_health_check":
@@ -1771,7 +1789,7 @@ public class CommandHandler implements CommandExecutor {
             int playercount = 0;
 
             for (Player player : Bukkit.getOnlinePlayers()) {
-                if (!vampireManager.isVampireStage2OrHigher(player)) {
+                if (!vampireManager.isRestrictedVampire(player)) {
                     this.giveTome(player, abilityName, amount);
                     playercount++;
                 }

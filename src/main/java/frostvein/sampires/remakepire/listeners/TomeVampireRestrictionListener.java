@@ -46,7 +46,7 @@ public class TomeVampireRestrictionListener implements Listener {
         LivingEntity entity = event.getEntity();
 
         if (entity instanceof Player player) {
-            if (this.isRestrictedVampire(player)) {
+            if (this.plugin.getVampireManager().isRestrictedVampire(player)) {
                 ItemStack item = event.getItem().getItemStack();
 
                 if (this.isTome(item)) {
@@ -68,7 +68,7 @@ public class TomeVampireRestrictionListener implements Listener {
         HumanEntity entity = event.getWhoClicked();
 
         if (entity instanceof Player player) {
-            if (this.isRestrictedVampire(player)) {
+            if (this.plugin.getVampireManager().isRestrictedVampire(player)) {
                 ItemStack currentItem = event.getCurrentItem();
                 ItemStack cursorItem = event.getCursor();
 
@@ -89,7 +89,7 @@ public class TomeVampireRestrictionListener implements Listener {
         (new BukkitRunnable() {
             public void run() {
                 for (Player player : Bukkit.getOnlinePlayers()) {
-                    if (isRestrictedVampire(player)) {
+                    if (plugin.getVampireManager().isRestrictedVampire(player)) {
                         checkAndDropTomes(player);
                     }
                 }
@@ -129,22 +129,12 @@ public class TomeVampireRestrictionListener implements Listener {
     }
 
     /**
-     * Determine if the player should be prevented from interacting with tomes.
-     *
-     * @param player the player attempting to interact with a tome.
-     * @return {@code true} if the player is a higher vampire.
-     */
-    private boolean isRestrictedVampire(Player player) {
-        return this.plugin.getVampireManager().isVampireStage2OrHigher(player);
-    }
-
-    /**
      * Force higher vampires to drop any tomes that they are holding.
      *
      * @param player the player being checked.
      */
     public void forceDropTomesForPlayer(Player player) {
-        if (this.isRestrictedVampire(player)) {
+        if (this.plugin.getVampireManager().isRestrictedVampire(player)) {
             this.checkAndDropTomes(player);
         }
     }

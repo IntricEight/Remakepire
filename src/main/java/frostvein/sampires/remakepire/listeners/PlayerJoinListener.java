@@ -145,7 +145,7 @@ public class PlayerJoinListener implements Listener {
         try {
             Team teamToJoin;
 
-            if (this.plugin.getVampireManager().isIronAffected(player)) {
+            if (this.plugin.getVampireManager().isRestrictedVampire(player)) {
                 teamToJoin = this.plugin.getVampireCastTeam();
             } else {
                 teamToJoin = this.plugin.getCastTeam();
