@@ -3,6 +3,7 @@ package frostvein.sampires.remakepire.commands;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
@@ -38,6 +39,10 @@ public class ForcedVampireCureCommand implements CommandExecutor {
             sender.sendMessage(Component.text("This command can only be used by players.", NamedTextColor.RED));
             return true;
 
+        } else if (caster.getGameMode() == GameMode.SPECTATOR) {
+            caster.sendMessage(Component.text("Spectators cannot cure other players of vampirism.", NamedTextColor.RED));
+            return true;
+
         } else if (!CureBookReadingListener.hasReadAllCureBooks(caster)) {
             caster.sendMessage(Component.text("You do not know these holy words...", NamedTextColor.RED));
             caster.sendMessage(Component.text("You must first read all three cure books to understand this power.", NamedTextColor.GRAY));
@@ -63,6 +68,10 @@ public class ForcedVampireCureCommand implements CommandExecutor {
 
         } else if (target.equals(caster)) {
             caster.sendMessage(Component.text("You cannot use these holy words upon yourself. The ritual must be performed by another.", NamedTextColor.RED));
+            return true;
+
+        } else if (target.getGameMode() == GameMode.SPECTATOR) {
+            caster.sendMessage(Component.text("You cannot cure a spectator of vampirism.", NamedTextColor.RED));
             return true;
 
         } else if (!this.plugin.getVampireManager().isVampire(target)) {
