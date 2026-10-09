@@ -38,6 +38,7 @@ public class SessionManager {
     public static final String INFORMED_IRON_BLOCK_REPEL = "informed_iron_block_reply";
     public static final String INFORMED_CRAFTING_ITEMS = "informed_crafting_items";
     public static final String INFORMED_PICKUP_ITEM = "informed_pickup_item";
+    public static final String INFORMED_ARMOR_EQUIP = "informed_armor_equip";
     public static final String INFORMED_PICKUP_HOLY_WATER = "informed_pickup_holy_water";
     public static final String INFORMED_USE_HOLY_WATER = "informed_use_holy_water";
     public static final String INFORMED_IRON_BLOCK_WEAKNESS = "informed_iron_block_effects";
@@ -50,7 +51,7 @@ public class SessionManager {
     public static final String INFORMED_BOUNDARY_COMPANION = "informed_boundary_companion";
     public static final String STOPTHEBLEEDING_USED_SESSION = "stopthebleeding_used_session";
     public static final String BLESSING_USED_SESSION = "blessing_used_session";
-    public static final List<String> INFORMED_CONSTANTS = Arrays.asList(INFORMED_IRON_BLOCK_REPEL, INFORMED_CRAFTING_ITEMS, INFORMED_PICKUP_ITEM, INFORMED_PICKUP_HOLY_WATER, INFORMED_USE_HOLY_WATER, INFORMED_IRON_BLOCK_WEAKNESS, INFORMED_SUCCESSFUL_FEEDING, INFORMED_BLOOD_MOON, INFORMED_ENCHANTING_ITEMS, INFORMED_WEAPON_WEAKNESS, INFORMED_VAMPIRE_CLAWS, INFORMED_BOUNDARY, INFORMED_BOUNDARY_COMPANION, STOPTHEBLEEDING_USED_SESSION, BLESSING_USED_SESSION);
+    public static final List<String> INFORMED_CONSTANTS = Arrays.asList(INFORMED_IRON_BLOCK_REPEL, INFORMED_CRAFTING_ITEMS, INFORMED_PICKUP_ITEM, INFORMED_ARMOR_EQUIP, INFORMED_PICKUP_HOLY_WATER, INFORMED_USE_HOLY_WATER, INFORMED_IRON_BLOCK_WEAKNESS, INFORMED_SUCCESSFUL_FEEDING, INFORMED_BLOOD_MOON, INFORMED_ENCHANTING_ITEMS, INFORMED_WEAPON_WEAKNESS, INFORMED_VAMPIRE_CLAWS, INFORMED_BOUNDARY, INFORMED_BOUNDARY_COMPANION, STOPTHEBLEEDING_USED_SESSION, BLESSING_USED_SESSION);
 
     /**
      * Create an instance of the Session manager.
@@ -105,18 +106,18 @@ public class SessionManager {
     private void startSaturationTask() {
         (new BukkitRunnable() {
             public void run() {
-                final int sessionState = SessionManager.this.getSessionState();
+                final int sessionState = getSessionState();
 
                 if (sessionState == PAUSED) {
-                    SessionManager.this.restorePausedFoodLevels();
+                    restorePausedFoodLevels();
 
-                } else if (SessionManager.this.isOutOfSession()) {
-                    SessionManager.this.applySaturationToAllPlayers();
-                    SessionManager.this.setAllPlayersMaxFood();
+                } else if (isOutOfSession()) {
+                    applySaturationToAllPlayers();
+                    setAllPlayersMaxFood();
 
                 } else if (sessionState == PRE_SESSION) {
-                    SessionManager.this.plugin.logInfo("PRE_SESSION: Setting all players to max food and saturation");
-                    SessionManager.this.setAllPlayersMaxFood();
+                    plugin.logInfo("PRE_SESSION: Setting all players to max food and saturation");
+                    setAllPlayersMaxFood();
                 }
             }
         }).runTaskTimer(this.plugin, 0L, 80L);
@@ -128,8 +129,8 @@ public class SessionManager {
     private void startActionBarTask() {
         (new BukkitRunnable() {
             public void run() {
-                if (SessionManager.this.isOutOfSession() || SessionManager.this.isPreSession()) {
-                    SessionManager.this.updateActionBarForAllPlayers();
+                if (isOutOfSession() || isPreSession()) {
+                    updateActionBarForAllPlayers();
                 }
             }
         }).runTaskTimer(this.plugin, 0L, 20L);

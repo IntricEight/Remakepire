@@ -26,13 +26,13 @@ public class UnnaturalHasteTomeAbility extends TomeAbility {
         if (!this.canUse(player)) {
             this.sendCannotUseMessage(player, "Only humans can use tome abilities!");
             return false;
-
-        } else {
-            player.addPotionEffect(new PotionEffect(PotionEffectType.HASTE, HASTE_DURATION, HASTE_AMPLIFIER, false, false));
-            this.plugin.getWorld().playSound(player.getLocation(), "minecraft:block.portal.ambient", 1.0F, 1.8F);
-            this.sendSuccessMessage(player, "You tap into an otherworldly pool of energy...");
-            player.sendMessage(Component.text("Your hands move with unnatural speed for 5 minutes.", NamedTextColor.GRAY));
-            return true;
         }
+
+        player.addPotionEffect(new PotionEffect(PotionEffectType.HASTE, HASTE_DURATION, HASTE_AMPLIFIER, false, false));
+        this.plugin.getWorld().playSound(player.getLocation(), "minecraft:block.portal.ambient", 1.0F, 1.8F);
+
+        this.sendSuccessMessage(player, "You tap into an otherworldly pool of energy...");
+        player.sendMessage(Component.text("Your hands move with unnatural speed for 5 minutes.", NamedTextColor.GRAY));
+        return true;
     }
 }

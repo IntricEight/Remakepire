@@ -90,6 +90,7 @@ public class BeetrootHarvestListener implements Listener {
 
         } catch (Exception e) {
             this.plugin.getLogger().warning("Failed to give always-edible beetroot: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
@@ -117,6 +118,7 @@ public class BeetrootHarvestListener implements Listener {
             }
         } catch (Exception e) {
             this.plugin.getLogger().warning("Failed to give always-edible beetroot: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 

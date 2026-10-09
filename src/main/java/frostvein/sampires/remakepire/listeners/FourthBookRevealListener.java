@@ -17,7 +17,6 @@ import frostvein.sampires.remakepire.RemakepirePlugin;
 public class FourthBookRevealListener implements Listener {
     private final RemakepirePlugin plugin;
     private final List<Location> tomeChestLocations;
-    private final Location townChestLocation;
 
     /**
      * Create an instance of the Fourth Cure Book Reveal listener.
@@ -27,14 +26,6 @@ public class FourthBookRevealListener implements Listener {
     public FourthBookRevealListener(RemakepirePlugin plugin) {
         this.plugin = plugin;
         this.tomeChestLocations = plugin.getConfigManager().getTomeChestLocations();
-
-        if (plugin.getWorld() != null) {
-            this.townChestLocation = new Location(plugin.getWorld(), 76.0, 80.0, 407.0);
-            plugin.logInfo("FourthBookRevealListener: Loaded " + this.tomeChestLocations.size() + " tome chest locations from config");
-        } else {
-            this.townChestLocation = null;
-            plugin.getLogger().warning("FourthBookRevealListener: World not found during initialization");
-        }
     }
 
     /**
@@ -54,31 +45,14 @@ public class FourthBookRevealListener implements Listener {
                             if (inventory.getHolder() != null && inventory.getHolder() instanceof Chest chest) {
                                 Location chestLocation = chest.getLocation();
 
-                                // Prevent the fourth cure book from loading in the Town's tome chest
-                                if (!this.isTownChest(chestLocation)) {
-                                    if (this.isTomeChest(chestLocation)) {
-                                        this.revealFourthBook(chest, player);
-                                    }
+                                if (this.isTomeChest(chestLocation)) {
+                                    this.revealFourthBook(chest, player);
                                 }
                             }
                         }
                     }
                 }
             }
-        }
-    }
-
-    /**
-     * Determine if a chest location is that of the town's tome chest.
-     *
-     * @param location a location that might contain a chest.
-     * @return {@code true} if
-     */
-    private boolean isTownChest(Location location) {
-        if (this.townChestLocation == null) {
-            return false;
-        } else {
-            return location.getBlockX() == this.townChestLocation.getBlockX() && location.getBlockY() == this.townChestLocation.getBlockY() && location.getBlockZ() == this.townChestLocation.getBlockZ() && location.getWorld().equals(this.townChestLocation.getWorld());
         }
     }
 
@@ -123,7 +97,7 @@ public class FourthBookRevealListener implements Listener {
      * @param player the player who discovered the fourth cure book.
      */
     private void revealFourthBook(Chest chest, Player player) {
-        ItemStack fourthBook = this.plugin.getCureBookManager().getCureBook(4);
+        final ItemStack fourthBook = this.plugin.getCureBookManager().getCureBook(4);
         Inventory chestInventory = chest.getInventory();
         chestInventory.addItem(fourthBook);
         this.markAsRevealed();

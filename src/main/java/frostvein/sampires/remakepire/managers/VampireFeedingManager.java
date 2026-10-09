@@ -61,7 +61,7 @@ public class VampireFeedingManager implements Listener {
     private void startFeedingDetectionTask() {
         (new BukkitRunnable() {
             public void run() {
-                VampireFeedingManager.this.checkFeedingSessions();
+                checkFeedingSessions();
             }
         }).runTaskTimer(this.plugin, 20L, 20L);
     }
@@ -224,11 +224,7 @@ public class VampireFeedingManager implements Listener {
      */
     private void handleFeedingDeath(FeedingSession session, Player vampire, Player target) {
         if (this.plugin.getPermadeathManager().hasAbsolutePermadeathEnabled(target)) {
-            vampire.sendMessage(Component.text("You watch the light of " + target.getName() + "'s eyes fade, and extinguish. Lost forever.", NamedTextColor.DARK_RED));
-            target.sendMessage(Component.text("The world grows dim, blurry, you feel a darkness reach out, offering you one last chance to live, as a creature of the night... But you refuse... And slip under the veil of the afterlife.", NamedTextColor.GRAY));
-
-            target.addScoreboardTag(DeathHandler.PERMADEATH_CHOSEN_TAG);
-            target.setHealth(0.0);
+            this.plugin.getDeathHandler().triggerHumanPermadeath(vampire, target, true);
             this.cancelFeedingSession(session);
 
         } else if (this.plugin.getBeetrootManager().hasBeetrootImmunity(target)) {
@@ -242,7 +238,7 @@ public class VampireFeedingManager implements Listener {
 
             vampire.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, this.plugin.getConfigManager().getGarlicWeaknessDuration() * 20, 9, false, false));
 
-            // Only trigger the target's death once
+            // Only trigger the target's death once, no matter how many vampires are feeding at the time
             if (!didVictimAlreadyDie(target)) {
                 target.sendMessage(Component.text("Your garlic immunity protects you from turning.", NamedTextColor.GREEN)
                         .decorate(TextDecoration.BOLD));
@@ -254,34 +250,20 @@ public class VampireFeedingManager implements Listener {
             this.cancelFeedingSession(session);
 
         } else if (!this.plugin.getVampireTurningManager().isTurningEnabled(vampire)) {
-            try {
-                Scoreboard mainScoreboard = Bukkit.getScoreboardManager().getMainScoreboard();
-                Objective deathObjective = mainScoreboard.getObjective("vsmp_death");
+            if (this.plugin.getDeathHandler().shouldHumanPermadie(target)) {
+                this.plugin.getDeathHandler().triggerHumanPermadeath(vampire, target, false);
+                this.cancelFeedingSession(session);
+                return;
 
-                if (deathObjective != null) {
-                    final int currentDeaths = deathObjective.getScore(target.getName()).getScore();
+            } else {
+                vampire.sendMessage(Component.text("You have killed " + target.getName() + ". They will respawn as a human, wounded.", NamedTextColor.RED));
 
-                    if (currentDeaths >= this.plugin.getConfigManager().getHumanLifeCount()) {
-                        vampire.sendMessage(Component.text("You watch the light of " + target.getName() + "'s eyes fade, and extinguish. Lost forever.", NamedTextColor.DARK_RED));
-                        target.sendMessage(Component.text("The world grows dim, blurry, you feel a darkness reach out, offering you one last chance to live, as a creature of the night... But you refuse... And slip under the veil of the afterlife.", NamedTextColor.GRAY));
-                        target.addScoreboardTag(DeathHandler.PERMADEATH_CHOSEN_TAG);
-                        target.setHealth(0.0);
+                // Only trigger the target's death once, no matter how many vampires are feeding at the time
+                if (!didVictimAlreadyDie(target)) {
+                    target.sendMessage(Component.text("You have been slain by a vampire, but they do not turn you...", NamedTextColor.GRAY));
 
-                        this.cancelFeedingSession(session);
-                        return;
-                    }
+                    this.killVictim(target);
                 }
-            } catch (Exception e) {
-                this.plugin.getLogger().warning("Failed to check death count for " + target.getName() + ": " + e.getMessage());
-            }
-
-            vampire.sendMessage(Component.text("You have killed " + target.getName() + ". They will respawn as a human, wounded.", NamedTextColor.RED));
-
-            // Only trigger the target's death once
-            if (!didVictimAlreadyDie(target)) {
-                target.sendMessage(Component.text("You have been slain by a vampire, but they do not turn you...", NamedTextColor.GRAY));
-
-                this.killVictim(target);
             }
 
             this.cancelFeedingSession(session);
@@ -299,21 +281,18 @@ public class VampireFeedingManager implements Listener {
             this.cancelFeedingSession(session);
 
         } else if (this.plugin.getPermadeathManager().hasPermadeathEnabled(target)) {
-            vampire.sendMessage(Component.text("You watch the light of " + target.getName() + "'s eyes fade, and extinguish. Lost forever.", NamedTextColor.DARK_RED));
-            target.sendMessage(Component.text("The world grows dim, blurry, you feel a darkness reach out, offering you one last chance to live, as a creature of the night... But you refuse... And slip under the veil of the afterlife.", NamedTextColor.GRAY));
-
-            target.addScoreboardTag(DeathHandler.PERMADEATH_CHOSEN_TAG);
-            target.setHealth(0.0);
-
+            this.plugin.getDeathHandler().triggerHumanPermadeath(vampire, target, true);
             this.cancelFeedingSession(session);
 
         } else {
-            this.vampireManager.performVampireTurning(target, vampire);
-            int killThirst = this.thirstManager.getKillThirstReward(vampire, target);
-            this.thirstManager.modifyQuench(vampire, killThirst, true);
+            this.plugin.getThirstManager().handleEntityKill(vampire, target, 0);
 
             vampire.sendMessage(Component.text("You feel the last drops of life force leave " + target.getName() + ".", NamedTextColor.RED));
             vampire.sendMessage(Component.text("They have become a creature of the night...", NamedTextColor.RED));
+
+            this.vampireManager.performVampireTurning(target, vampire);
+            target.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, 300, 2, false, false));
+            target.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 200, 1, false, false));
 
             if (this.plugin.getVampireTrackingManager() != null) {
                 this.plugin.getVampireTrackingManager().startTrackingNewVampire(target);
@@ -345,47 +324,39 @@ public class VampireFeedingManager implements Listener {
      * @param vampire the player feeding.
      */
     private void attemptStartFeeding(Player vampire) {
-        if (!this.isFeeding(vampire)) {
-            if (vampire.isSneaking()) {
-                if (this.vampireManager.isVampire(vampire)) {
-                    final int currentSessionThirst = this.getSessionFeedingThirst(vampire);
+        if (this.vampireManager.isVampire(vampire) && !this.isFeeding(vampire) && vampire.isSneaking()) {
+            if (this.getSessionFeedingThirst(vampire) >= this.plugin.getConfigManager().getMaxFeedingThirstPerSession()) {
+                vampire.sendMessage(Component.text("Your thirst is quenched, for now. You are unable to drink any more blood from feeding until the next session.", NamedTextColor.RED));
+                return;
+            }
 
-                    if (currentSessionThirst >= this.plugin.getConfigManager().getMaxFeedingThirstPerSession()) {
-                        vampire.sendMessage(Component.text("Your thirst is quenched, for now. You are unable to drink any more blood from feeding until the next session.", NamedTextColor.RED));
+            boolean isHuman, isVampire, inRange;
 
-                    } else {
-                        double distance;
-                        boolean isHuman, isVampire, inRange;
+            for (Player nearbyPlayer : vampire.getWorld().getPlayers()) {
+                if (!nearbyPlayer.equals(vampire) && nearbyPlayer.getGameMode() == GameMode.SURVIVAL) {
+                    isHuman = this.vampireManager.isHuman(nearbyPlayer);
+                    isVampire = this.vampireManager.isVampire(nearbyPlayer);
+                    inRange = this.isInFeedingRange(vampire, nearbyPlayer);
 
-                        for (Player nearbyPlayer : vampire.getWorld().getPlayers()) {
-                            if (!nearbyPlayer.equals(vampire) && nearbyPlayer.getGameMode() == GameMode.SURVIVAL) {
-                                distance = vampire.getLocation().distance(nearbyPlayer.getLocation());
-                                isHuman = this.vampireManager.isHuman(nearbyPlayer);
-                                isVampire = this.vampireManager.isVampire(nearbyPlayer);
-                                inRange = this.isInFeedingRange(vampire, nearbyPlayer);
-
-                                if ((isHuman || isVampire) && inRange) {
-                                    if (isVampire && nearbyPlayer.getExp() <= 0.1F) {
-                                        vampire.sendMessage(Component.text("The vampiric essence has become too low to continue siphoning from.", NamedTextColor.RED));
-                                        return;
-                                    }
-
-                                    FeedingSession session = new FeedingSession(vampire.getUniqueId(), nearbyPlayer.getUniqueId());
-                                    this.activeSessions.put(vampire.getUniqueId(), session);
-
-                                    // Modify the message based on whether the target is human or vampire
-                                    if (isHuman) {
-                                        vampire.sendMessage(Component.text("You begin preparing to feed on " + nearbyPlayer.getName() + "...", NamedTextColor.DARK_GRAY));
-                                    } else {
-                                        vampire.sendMessage(Component.text("You begin preparing to siphon from " + nearbyPlayer.getName() + "...", NamedTextColor.DARK_GRAY));
-                                    }
-
-                                    vampire.sendMessage(Component.text("Stay crouched within range for " + VampireAbilityManager.formatTime(5L), NamedTextColor.GRAY));
-                                    this.plugin.logInfo("Vampire " + vampire.getName() + " started feeding on " + nearbyPlayer.getName());
-                                    return;
-                                }
-                            }
+                    if ((isHuman || isVampire) && inRange) {
+                        if (isVampire && nearbyPlayer.getExp() <= 0.1F) {
+                            vampire.sendMessage(Component.text("The vampiric essence has become too low to continue siphoning from.", NamedTextColor.RED));
+                            return;
                         }
+
+                        FeedingSession session = new FeedingSession(vampire.getUniqueId(), nearbyPlayer.getUniqueId());
+                        this.activeSessions.put(vampire.getUniqueId(), session);
+
+                        // Modify the message based on whether the target is human or vampire
+                        if (isHuman) {
+                            vampire.sendMessage(Component.text("You begin preparing to feed on " + nearbyPlayer.getName() + "...", NamedTextColor.DARK_GRAY));
+                        } else {
+                            vampire.sendMessage(Component.text("You begin preparing to siphon from " + nearbyPlayer.getName() + "...", NamedTextColor.DARK_GRAY));
+                        }
+
+                        vampire.sendMessage(Component.text("Stay crouched within range for " + VampireAbilityManager.formatTime(5L), NamedTextColor.GRAY));
+                        this.plugin.logInfo("Vampire " + vampire.getName() + " started feeding on " + nearbyPlayer.getName());
+                        return;
                     }
                 }
             }
@@ -398,7 +369,7 @@ public class VampireFeedingManager implements Listener {
      * @param session the blood feeding session.
      */
     private void cancelFeedingSession(FeedingSession session) {
-        Player vampire = Bukkit.getPlayer(session.vampireId), target = Bukkit.getPlayer(session.targetId);
+        Player target = Bukkit.getPlayer(session.targetId);
 
         if (target != null && target.isOnline() && session.phase == VampireFeedingManager.FeedingPhase.ACTIVE_FEEDING) {
             target.sendMessage(Component.text("You no longer feel a vampire draining your life force", NamedTextColor.GREEN));

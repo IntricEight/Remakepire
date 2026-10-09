@@ -22,7 +22,6 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 import frostvein.sampires.remakepire.RemakepirePlugin;
-import frostvein.sampires.remakepire.managers.VampireManager;
 
 public class HolyWordTomeAbility extends TomeAbility implements Listener {
     // Controls the size of the ability (in blocks)
@@ -46,47 +45,49 @@ public class HolyWordTomeAbility extends TomeAbility implements Listener {
             this.sendCannotUseMessage(player, "Only humans can use tome abilities!");
             return false;
 
-        } else {
-            VampireManager vampireManager = this.plugin.getVampireManager();
-            List<Player> nearbyPlayers = player.getWorld().getPlayers();
-            boolean wasStage2Or3OParalyzed = false;
+        } else if (!this.plugin.getSessionManager().isSessionActive()) {
+            this.sendCannotUseMessage(player, "This ability cannot be used outside of sessions.");
+            return false;
+        }
 
-            for (Player target : nearbyPlayers) {
-                if (!target.equals(player) && !(target.getLocation().distance(player.getLocation()) > RADIUS) && target.getGameMode() != GameMode.SPECTATOR) {
-                    if (vampireManager.isVampireStage1(target)) {
-                        target.sendMessage(Component.text("A holy word sends your mind reeling, but you hold fast against it's paralysing effects.", NamedTextColor.RED));
+        List<Player> nearbyPlayers = player.getWorld().getPlayers();
+        boolean wasStage2Or3OParalyzed = false;
 
-                    } else if (vampireManager.isVampireStage2(target) || vampireManager.isVampireStage3(target)) {
-                        target.sendMessage(Component.text("You are frozen by divine power!", NamedTextColor.RED));
-                        target.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, PARALYSIS_DURATION, 255, false, false));
-                        target.leaveVehicle();
-                        BukkitTask paralysisTask = Bukkit.getScheduler().runTaskLater(this.plugin, () -> this.paralyzedPlayers.remove(target.getUniqueId()), PARALYSIS_DURATION);
+        for (Player target : nearbyPlayers) {
+            if (!target.equals(player) && !(target.getLocation().distance(player.getLocation()) > RADIUS) && target.getGameMode() != GameMode.SPECTATOR) {
+                if (this.plugin.getVampireManager().isVampireStage1(target)) {
+                    target.sendMessage(Component.text("A holy word sends your mind reeling, but you hold fast against it's paralysing effects.", NamedTextColor.RED));
 
-                        this.paralyzedPlayers.put(target.getUniqueId(), paralysisTask);
-                        target.getWorld().playSound(target.getLocation(), "minecraft:entity.zombie_villager.cure", 0.8F, 2.0F);
+                } else if (this.plugin.getVampireManager().isVampireStage2(target) || this.plugin.getVampireManager().isVampireStage3(target)) {
+                    target.sendMessage(Component.text("You are frozen by divine power!", NamedTextColor.RED));
+                    target.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, PARALYSIS_DURATION, 255, false, false));
+                    target.leaveVehicle();
+                    BukkitTask paralysisTask = Bukkit.getScheduler().runTaskLater(this.plugin, () -> this.paralyzedPlayers.remove(target.getUniqueId()), PARALYSIS_DURATION);
 
-                        Bukkit.getScheduler().runTaskLater(this.plugin, () -> {
-                            if (target.isOnline()) {
-                                target.sendMessage(Component.text("The divine paralysis fades... You can move again.", NamedTextColor.GRAY));
-                            }
-                        }, PARALYSIS_DURATION);
+                    this.paralyzedPlayers.put(target.getUniqueId(), paralysisTask);
+                    target.getWorld().playSound(target.getLocation(), "minecraft:entity.zombie_villager.cure", 0.8F, 2.0F);
 
-                        wasStage2Or3OParalyzed = true;
-                    }
+                    Bukkit.getScheduler().runTaskLater(this.plugin, () -> {
+                        if (target.isOnline()) {
+                            target.sendMessage(Component.text("The divine paralysis fades... You can move again.", NamedTextColor.GRAY));
+                        }
+                    }, PARALYSIS_DURATION);
+
+                    wasStage2Or3OParalyzed = true;
                 }
             }
-
-            this.createHolyLightRings(player);
-            player.getWorld().playSound(player.getLocation(), "minecraft:block.beacon.power_select", 1.0F, 1.0F);
-
-            if (wasStage2Or3OParalyzed) {
-                this.sendSuccessMessage(player, "You speak the HOLY WORD with divine authority!");
-            } else {
-                this.sendSuccessMessage(player, "You speak the HOLY WORD, but no evil is around to hear it.");
-            }
-
-            return true;
         }
+
+        this.createHolyLightRings(player);
+        player.getWorld().playSound(player.getLocation(), "minecraft:block.beacon.power_select", 1.0F, 1.0F);
+
+        if (wasStage2Or3OParalyzed) {
+            this.sendSuccessMessage(player, "You speak the HOLY WORD with divine authority!");
+        } else {
+            this.sendSuccessMessage(player, "You speak the HOLY WORD, but no evil is around to hear it.");
+        }
+
+        return true;
     }
 
     /**
@@ -178,7 +179,7 @@ public class HolyWordTomeAbility extends TomeAbility implements Listener {
                 if (this.ringCount >= maxRings) {
                     this.cancel();
                 } else {
-                    HolyWordTomeAbility.this.createHolyLightRing(center, this.ringCount);
+                    createHolyLightRing(center, this.ringCount);
                     ++this.ringCount;
                 }
             }

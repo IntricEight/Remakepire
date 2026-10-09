@@ -24,6 +24,10 @@ public class ItemTypeChecking {
      * @return {@code true} if the item is a sword.
      */
     public static boolean isSword(Material type) {
+        if (type == null) {
+            return false;
+        }
+
         return type == Material.WOODEN_SWORD || type == Material.STONE_SWORD || type == Material.COPPER_SWORD || type == Material.IRON_SWORD || type == Material.GOLDEN_SWORD || type == Material.DIAMOND_SWORD || type == Material.NETHERITE_SWORD;
     }
 
@@ -34,6 +38,10 @@ public class ItemTypeChecking {
      * @return {@code true} if the item is an axe.
      */
     public static boolean isAxe(Material type) {
+        if (type == null) {
+            return false;
+        }
+
         return type == Material.WOODEN_AXE || type == Material.STONE_AXE || type == Material.COPPER_AXE || type == Material.IRON_AXE || type == Material.GOLDEN_AXE || type == Material.DIAMOND_AXE || type == Material.NETHERITE_AXE;
     }
 
@@ -44,7 +52,11 @@ public class ItemTypeChecking {
      * @return {@code true} if the item is a conventional weapon.
      */
     public static boolean isWeapon(Material type) {
-        return isSword(type) || isAxe(type);
+        if (type == null) {
+            return false;
+        }
+
+        return isSword(type) || isAxe(type) || type == Material.MACE || type == Material.TRIDENT;
     }
 
     /**
@@ -54,6 +66,10 @@ public class ItemTypeChecking {
      * @return {@code true} if the item is a wooden sword.
      */
     public static boolean isStake(Material type) {
+        if (type == null) {
+            return false;
+        }
+
         return type == Material.WOODEN_SWORD;
     }
 
@@ -64,6 +80,10 @@ public class ItemTypeChecking {
      * @return {@code true} if the item is an experience bottle.
      */
     public static boolean isBloodBottle(Material type) {
+        if (type == null) {
+            return false;
+        }
+
         return type == Material.EXPERIENCE_BOTTLE;
     }
 
@@ -83,9 +103,9 @@ public class ItemTypeChecking {
     public static boolean isWoodenWeapon(Material type) {
         if (type == null) {
             return false;
-        } else {
-            return type == Material.WOODEN_SWORD || type == Material.WOODEN_AXE;
         }
+
+        return type == Material.WOODEN_SWORD || type == Material.WOODEN_AXE;
     }
 
     /**
@@ -97,9 +117,22 @@ public class ItemTypeChecking {
     public static boolean isIronWeapon(Material type) {
         if (type == null) {
             return false;
-        } else {
-            return type == Material.IRON_SWORD || type == Material.IRON_AXE;
         }
+
+        return type == Material.IRON_SWORD || type == Material.IRON_AXE;
+    }
+
+    /**
+     * Determine if an item is a piece of iron armor.
+     *
+     * @return {@code true} if the item is a piece of iron armor.
+     */
+    public static boolean isIronArmor(Material type) {
+        if (type == null) {
+            return false;
+        }
+
+        return type == Material.IRON_HELMET || type == Material.IRON_CHESTPLATE || type == Material.IRON_LEGGINGS || type == Material.IRON_BOOTS || type == Material.IRON_HORSE_ARMOR;
     }
 
     /**
@@ -113,21 +146,19 @@ public class ItemTypeChecking {
             return false;
         } else if (item.getType() != Material.SPLASH_POTION) {
             return false;
-        } else if (!item.hasItemMeta()) {
-            return true;
-        } else if (!(item.getItemMeta() instanceof PotionMeta potionMeta)) {
+        } else if (!item.hasItemMeta() || !(item.getItemMeta() instanceof PotionMeta potionMeta)) {
             return true;
         } else {
             if (potionMeta.hasCustomEffects()) {
                 return false;
-            } else {
-                PotionType baseType = potionMeta.getBasePotionType();
+            }
 
-                if (baseType != null && baseType != PotionType.WATER) {
-                    return baseType == PotionType.AWKWARD || baseType == PotionType.MUNDANE || baseType == PotionType.THICK;
-                } else {
-                    return true;
-                }
+            PotionType baseType = potionMeta.getBasePotionType();
+
+            if (baseType != null && baseType != PotionType.WATER) {
+                return baseType == PotionType.AWKWARD || baseType == PotionType.MUNDANE || baseType == PotionType.THICK;
+            } else {
+                return true;
             }
         }
     }
@@ -141,9 +172,9 @@ public class ItemTypeChecking {
     public static boolean isWaterBottle(ItemStack item) {
         if (item.getType() != Material.POTION) {
             return false;
-        } else {
-            return !item.hasItemMeta() || item.getItemMeta().getPersistentDataContainer().isEmpty();
         }
+
+        return !item.hasItemMeta() || item.getItemMeta().getPersistentDataContainer().isEmpty();
     }
 
     /**
@@ -153,7 +184,7 @@ public class ItemTypeChecking {
      * @return {@code true} if the item is raw meat.
      */
     public static boolean isRaw(ItemStack item) {
-        String itemName = item.getType().name();
+        final String itemName = item.getType().name();
 
         if (itemName.contains("RAW")) {
             return true;
@@ -172,12 +203,12 @@ public class ItemTypeChecking {
      * @return {@code true} if the item is regular food (Check this function for the list of "not-regular" foods)
      */
     public static boolean isActualFood(ItemStack item) {
-        Material type = item.getType();
+        final Material type = item.getType();
 
         if (!type.isEdible()) {
             return false;
-        } else {
-            return !type.name().contains("POTION") && type != Material.ENDER_PEARL && type != Material.CHORUS_FRUIT && type != Material.ENCHANTED_GOLDEN_APPLE && type != Material.GOLDEN_APPLE && type != Material.BEETROOT;
         }
+
+        return !type.name().contains("POTION") && type != Material.ENDER_PEARL && type != Material.CHORUS_FRUIT && type != Material.ENCHANTED_GOLDEN_APPLE && type != Material.GOLDEN_APPLE && type != Material.BEETROOT;
     }
 }

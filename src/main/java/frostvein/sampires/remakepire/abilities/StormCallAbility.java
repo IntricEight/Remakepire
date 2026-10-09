@@ -38,23 +38,26 @@ public class StormCallAbility extends VampireAbility {
     public boolean execute(Player player, VampireManager vampireManager, RemakepirePlugin plugin) {
         World world = player.getWorld();
 
-        if (world.hasStorm()) {
-            player.sendMessage(Component.text("The skies are already under your influence...", NamedTextColor.DARK_GRAY));
+        if (!plugin.getSessionManager().isSessionActive()) {
+            player.sendMessage(Component.text("This ability cannot be used outside of sessions.", NamedTextColor.RED));
             return false;
 
-        } else {
-            this.createStormSummonEffects(player);
-            this.sendStormCallMessage(player);
-            this.playStormCallSound(player);
-
-            world.setStorm(true);
-            world.setThundering(false);
-
-            this.broadcastStormArrival(world, player);
-            this.scheduleStormClearing(world, player, plugin);
-
-            return true;
+        } else  if (world.hasStorm()) {
+            player.sendMessage(Component.text("The skies are already under your influence...", NamedTextColor.DARK_GRAY));
+            return false;
         }
+
+        this.createStormSummonEffects(player);
+        this.sendStormCallMessage(player);
+        this.playStormCallSound(player);
+
+        world.setStorm(true);
+        world.setThundering(false);
+
+        this.broadcastStormArrival(world, player);
+        this.scheduleStormClearing(world, player, plugin);
+
+        return true;
     }
 
     /**

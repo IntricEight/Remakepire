@@ -145,7 +145,7 @@ public class PlayerJoinListener implements Listener {
         try {
             Team teamToJoin;
 
-            if (this.plugin.getVampireManager().isIronAffected(player)) {
+            if (this.plugin.getVampireManager().isRestrictedVampire(player)) {
                 teamToJoin = this.plugin.getVampireCastTeam();
             } else {
                 teamToJoin = this.plugin.getCastTeam();
@@ -163,6 +163,7 @@ public class PlayerJoinListener implements Listener {
             }
         } catch (Exception e) {
             this.plugin.getLogger().severe("Failed to add player " + player.getName() + " to CastTeam: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 

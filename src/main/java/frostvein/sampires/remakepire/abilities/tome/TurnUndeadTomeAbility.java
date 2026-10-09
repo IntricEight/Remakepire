@@ -26,41 +26,40 @@ public class TurnUndeadTomeAbility extends TomeAbility {
         if (!this.canUse(player)) {
             this.sendCannotUseMessage(player, "Only humans can use tome abilities!");
             return false;
+        }
 
-        } else {
-            Team vampireCastTeam = this.plugin.getVampireCastTeam();
+        Team vampireCastTeam = this.plugin.getVampireCastTeam();
 
-            if (vampireCastTeam == null) {
-                this.sendCannotUseMessage(player, "VampireCastTeam is not available!");
-                return false;
+        if (vampireCastTeam == null) {
+            this.sendCannotUseMessage(player, "VampireCastTeam is not available!");
+            return false;
+        }
+
+        vampireCastTeam.addEntry(player.getName());
+
+        player.addPotionEffect(new PotionEffect(PotionEffectType.DARKNESS, 200, 0, false, false));
+        player.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, 100, 1, false, false));
+
+        this.plugin.getWorld().playSound(player.getLocation(), "minecraft:ambient.warped_forest.mood", 1.0F, 1.0F);
+        this.sendSuccessMessage(player, "You feel the cold embrace of death wash over you...");
+        player.sendMessage(Component.text("Undead creatures now see you as one of their own.", NamedTextColor.GRAY));
+        player.sendMessage(Component.text("This effect will last for 5 minutes.", NamedTextColor.DARK_GRAY));
+
+        Bukkit.getScheduler().runTaskLater(this.plugin, () -> {
+            if (player.isOnline()) {
+                this.removeFromVampireCastTeam(player);
+
+                player.sendMessage(Component.text("The deathly aura fades... You feel alive once more.", NamedTextColor.GREEN));
+                player.sendMessage(Component.text("Undead creatures will now see you as a threat again.", NamedTextColor.GRAY));
+                this.plugin.getWorld().playSound(player.getLocation(), "minecraft:block.beacon.activate", 1.0F, 1.2F);
 
             } else {
-                vampireCastTeam.addEntry(player.getName());
-
-                player.addPotionEffect(new PotionEffect(PotionEffectType.DARKNESS, 200, 0, false, false));
-                player.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, 100, 1, false, false));
-
-                this.plugin.getWorld().playSound(player.getLocation(), "minecraft:ambient.warped_forest.mood", 1.0F, 1.0F);
-                this.sendSuccessMessage(player, "You feel the cold embrace of death wash over you...");
-                player.sendMessage(Component.text("Undead creatures now see you as one of their own.", NamedTextColor.GRAY));
-                player.sendMessage(Component.text("This effect will last for 5 minutes.", NamedTextColor.DARK_GRAY));
-
-                Bukkit.getScheduler().runTaskLater(this.plugin, () -> {
-                    if (player.isOnline()) {
-                        this.removeFromVampireCastTeam(player);
-
-                        player.sendMessage(Component.text("The deathly aura fades... You feel alive once more.", NamedTextColor.GREEN));
-                        player.sendMessage(Component.text("Undead creatures will now see you as a threat again.", NamedTextColor.GRAY));
-                        this.plugin.getWorld().playSound(player.getLocation(), "minecraft:block.beacon.activate", 1.0F, 1.2F);
-
-                    } else {
-                        vampireCastTeam.removeEntry(player.getName());
-                    }
-
-                }, EFFECT_DURATION * 20);
-                return true;
+                vampireCastTeam.removeEntry(player.getName());
             }
-        }
+
+        }, EFFECT_DURATION * 20);
+
+        return true;
     }
 
     /**

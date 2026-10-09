@@ -42,6 +42,23 @@ public class ForcedCureChoiceManager {
     }
 
     /**
+     * Determine if a beacon is currently being used for a force cure.
+     *
+     * @param beaconSite the beacon location to be used.
+     * @return {@code true} if the beacon is actively curing a player.
+     */
+    public boolean isBeaconBeingUsed(BeaconSite beaconSite) {
+        // Check the list of pending cures for one using this beacon
+        for (ForcedCureData data : pendingCures.values()) {
+            if (data.holyBeacon.equals(beaconSite)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
      * Freeze the target and begin the force cure process.
      *
      * @param caster the player forcing the cure.
@@ -250,8 +267,11 @@ public class ForcedCureChoiceManager {
         target.sendMessage(Component.text("The holy water burns through your veins...", NamedTextColor.GRAY));
         target.sendMessage(Component.text("Your corrupted blood boils away in divine light...", NamedTextColor.GRAY));
         target.sendMessage(Component.text("You feel your humanity returning...", NamedTextColor.GREEN));
-        target.sendMessage(Component.text("You are human once more.", NamedTextColor.GREEN));
+        target.sendMessage(Component.text("You are cured. You are human once more.", NamedTextColor.GREEN));
         target.sendMessage(Component.text("But the holy site has been permanently corrupted by your dark presence...", NamedTextColor.DARK_GRAY));
+
+        target.sendMessage("");
+        this.plugin.getVampireTexturePackManager().sendHumanTexturePackPrompt(target);
 
         // Retrieve the messages to announce to the server population
         final String messageToHumans = this.plugin.getCureBookManager().getForceCureAnnouncementMessage(true, true);
@@ -270,7 +290,11 @@ public class ForcedCureChoiceManager {
 
         this.plugin.getVampireManager().setPlayerAsHuman(target);
         target.getActivePotionEffects().forEach((effect) -> target.removePotionEffect(effect.getType()));
-        target.addScoreboardTag(VampireManager.CURED_VAMPIRE_TAG);
+
+        // Check if players should be able to leave and are prevented from getting turned again
+        if (this.plugin.getConfigManager().doCuresHaveLastingEffects()) {
+            target.addScoreboardTag(VampireManager.CURED_VAMPIRE_TAG);
+        }
 
         // Check for and apply the effects of beacon control
         if (this.plugin.getSessionManager().isHumansFinalStandActive()) {
@@ -284,8 +308,12 @@ public class ForcedCureChoiceManager {
 
         // Create the visual and audio effects of the cure working on the vampire
         this.createCureEffects(target);
-        this.createBeaconCorruptionEffects(target, holyBeacon);
-        holyBeacon.setState(BeaconState.PERMANENTLY_DESECRATED);
+
+        // Check if beacons should be damaged by the cure process
+        if (plugin.getConfigManager().doCuresHaveLastingEffects()) {
+            this.createBeaconCorruptionEffects(target, holyBeacon);
+            holyBeacon.setState(BeaconState.PERMANENTLY_DESECRATED);
+        }
 
         this.plugin.getBeaconManager().updateBeaconDisplay(holyBeacon);
         this.plugin.getBeaconManager().saveBeacons();

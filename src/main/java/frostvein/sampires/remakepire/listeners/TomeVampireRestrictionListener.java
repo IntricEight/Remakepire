@@ -46,7 +46,7 @@ public class TomeVampireRestrictionListener implements Listener {
         LivingEntity entity = event.getEntity();
 
         if (entity instanceof Player player) {
-            if (this.isRestrictedVampire(player)) {
+            if (this.plugin.getVampireManager().isRestrictedVampire(player)) {
                 ItemStack item = event.getItem().getItemStack();
 
                 if (this.isTome(item)) {
@@ -68,7 +68,7 @@ public class TomeVampireRestrictionListener implements Listener {
         HumanEntity entity = event.getWhoClicked();
 
         if (entity instanceof Player player) {
-            if (this.isRestrictedVampire(player)) {
+            if (this.plugin.getVampireManager().isRestrictedVampire(player)) {
                 ItemStack currentItem = event.getCurrentItem();
                 ItemStack cursorItem = event.getCursor();
 
@@ -89,8 +89,8 @@ public class TomeVampireRestrictionListener implements Listener {
         (new BukkitRunnable() {
             public void run() {
                 for (Player player : Bukkit.getOnlinePlayers()) {
-                    if (TomeVampireRestrictionListener.this.isRestrictedVampire(player)) {
-                        TomeVampireRestrictionListener.this.checkAndDropTomes(player);
+                    if (plugin.getVampireManager().isRestrictedVampire(player)) {
+                        checkAndDropTomes(player);
                     }
                 }
             }
@@ -129,22 +129,12 @@ public class TomeVampireRestrictionListener implements Listener {
     }
 
     /**
-     * Determine if the player should be prevented from interacting with tomes.
-     *
-     * @param player the player attempting to interact with a tome.
-     * @return {@code true} if the player is a higher vampire.
-     */
-    private boolean isRestrictedVampire(Player player) {
-        return this.plugin.getVampireManager().isVampireStage2OrHigher(player);
-    }
-
-    /**
      * Force higher vampires to drop any tomes that they are holding.
      *
      * @param player the player being checked.
      */
     public void forceDropTomesForPlayer(Player player) {
-        if (this.isRestrictedVampire(player)) {
+        if (this.plugin.getVampireManager().isRestrictedVampire(player)) {
             this.checkAndDropTomes(player);
         }
     }
@@ -161,41 +151,40 @@ public class TomeVampireRestrictionListener implements Listener {
 
         } else if (item.getType() != Material.BOOK && item.getType() != Material.WRITTEN_BOOK) {
             return false;
+        }
 
-        } else {
-            ItemMeta meta = item.getItemMeta();
+        ItemMeta meta = item.getItemMeta();
 
-            if (meta != null) {
-                if (meta.hasDisplayName()) {
-                    Component displayName = meta.customName();
+        if (meta != null) {
+            if (meta.hasDisplayName()) {
+                Component displayName = meta.customName();
 
-                    if (displayName instanceof TextComponent textComponent
-                            && NamedTextColor.GOLD.equals(textComponent.color())
-                            && textComponent.content().startsWith("Tome of ")) {
-                        return true;
-                    }
+                if (displayName instanceof TextComponent textComponent
+                        && NamedTextColor.GOLD.equals(textComponent.color())
+                        && textComponent.content().startsWith("Tome of ")) {
+                    return true;
                 }
+            }
 
-                if (meta.hasLore()) {
-                    List<String> lore = meta.getLore();
+            if (meta.hasLore()) {
+                List<String> lore = meta.getLore();
 
-                    if (lore != null) {
-                        for (String line : lore) {
-                            if (line.contains("Tome Type: ")) {
-                                return true;
-                            }
+                if (lore != null) {
+                    for (String line : lore) {
+                        if (line.contains("Tome Type: ")) {
+                            return true;
                         }
-                    }
-                }
-
-                if (item.getType() == Material.WRITTEN_BOOK && meta instanceof BookMeta bookMeta) {
-                    if (bookMeta.hasTitle()) {
-                        return this.plugin.getTomeManager().isValidAbility(bookMeta.getTitle());
                     }
                 }
             }
 
-            return false;
+            if (item.getType() == Material.WRITTEN_BOOK && meta instanceof BookMeta bookMeta) {
+                if (bookMeta.hasTitle()) {
+                    return this.plugin.getTomeManager().isValidAbility(bookMeta.getTitle());
+                }
+            }
         }
+
+        return false;
     }
 }

@@ -6,6 +6,7 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.title.Title;
 import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -45,6 +46,10 @@ public class VampireCureCommand implements CommandExecutor {
             sender.sendMessage(Component.text("This command can only be used by players.", NamedTextColor.RED));
             return true;
 
+        } else if (player.getGameMode() == GameMode.SPECTATOR) {
+            player.sendMessage(Component.text("Spectators cannot cure themselves of vampirism.", NamedTextColor.RED));
+            return true;
+
         } else if (!CureBookReadingListener.hasReadAllCureBooks(player)) {
             player.sendMessage(Component.text("You do not know these ancient words...", NamedTextColor.RED));
             player.sendMessage(Component.text("You must first read all three cure books to learn the ritual.", NamedTextColor.GRAY));
@@ -80,6 +85,10 @@ public class VampireCureCommand implements CommandExecutor {
 
         if (nearestHolyBeacon == null) {
             player.sendMessage(Component.text("You must be close to a holy beacon to perform this ritual.", NamedTextColor.RED));
+            return true;
+
+        } else if (this.plugin.getConfigManager().doCuresHaveLastingEffects() && this.plugin.getForcedCureChoiceManager().isBeaconBeingUsed(nearestHolyBeacon)) {
+            player.sendMessage(Component.text("This holy beacon is actively being channeled toward another cursed creature.", NamedTextColor.RED));
             return true;
         }
 
@@ -120,6 +129,9 @@ public class VampireCureCommand implements CommandExecutor {
         player.sendMessage(Component.text("You are cured. You are human once more.", NamedTextColor.GREEN));
         player.sendMessage(Component.text("But the holy site has been permanently corrupted by your dark presence...", NamedTextColor.DARK_GRAY));
 
+        player.sendMessage("");
+        this.plugin.getVampireTexturePackManager().sendHumanTexturePackPrompt(player);
+
         // Retrieve the messages to announce to the server population
         final String messageToHumans = this.plugin.getCureBookManager().getSelfCureAnnouncementMessage(true);
         final String messageToVampires = this.plugin.getCureBookManager().getSelfCureAnnouncementMessage(false);
@@ -137,7 +149,11 @@ public class VampireCureCommand implements CommandExecutor {
 
         this.vampireManager.setPlayerAsHuman(player);
         player.getActivePotionEffects().forEach((effect) -> player.removePotionEffect(effect.getType()));
-        player.addScoreboardTag(VampireManager.CURED_VAMPIRE_TAG);
+
+        // Check if players should be able to leave and are prevented from getting turned again
+        if (this.plugin.getConfigManager().doCuresHaveLastingEffects()) {
+            player.addScoreboardTag(VampireManager.CURED_VAMPIRE_TAG);
+        }
 
         // Check for and apply the effects of beacon control
         if (this.plugin.getSessionManager().isHumansFinalStandActive()) {
@@ -151,8 +167,12 @@ public class VampireCureCommand implements CommandExecutor {
 
         // Create the visual and audio effects of the cure working on the vampire
         this.plugin.getForcedCureChoiceManager().createCureEffects(player);
-        this.plugin.getForcedCureChoiceManager().createBeaconCorruptionEffects(player, holyBeacon);
-        holyBeacon.setState(BeaconState.PERMANENTLY_DESECRATED);
+
+        // Check if beacons should be damaged by the cure process
+        if (plugin.getConfigManager().doCuresHaveLastingEffects()) {
+            this.plugin.getForcedCureChoiceManager().createBeaconCorruptionEffects(player, holyBeacon);
+            holyBeacon.setState(BeaconState.PERMANENTLY_DESECRATED);
+        }
 
         this.beaconManager.updateBeaconDisplay(holyBeacon);
         this.beaconManager.saveBeacons();

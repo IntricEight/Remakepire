@@ -27,6 +27,42 @@ public class ConfigManager {
     }
 
     /**
+     * Retrieve the URL of the human's texture pack download location.
+     *
+     * @return A URL of a location that downloads a ZIP file.
+     */
+    public String getHumanTexturePackUrl() {
+        return this.plugin.getConfig().getString("human-texture-pack.url", "https://download.mc-packs.net/pack/4e42367081530cc073b612d9772a18daca7c0df9.zip");
+    }
+
+    /**
+     * Retrieve the SHA1 code of the human's texture pack.
+     *
+     * @return A code that should match that of the texture pack retrieved from the URL.
+     */
+    public String getHumanTexturePackSha1() {
+        return this.plugin.getConfig().getString("human-texture-pack.sha1", "4e42367081530cc073b612d9772a18daca7c0df9");
+    }
+
+    /**
+     * Retrieve the URL of the vampire's texture pack download location.
+     *
+     * @return A URL of a location that downloads a ZIP file.
+     */
+    public String getVampireTexturePackUrl() {
+        return this.plugin.getConfig().getString("vampire-texture-pack.url", "https://download.mc-packs.net/pack/e139890dd34f56724efcd5becb476999651ca43c.zip");
+    }
+
+    /**
+     * Retrieve the SHA1 code of the vampire's texture pack.
+     *
+     * @return A code that should match that of the texture pack retrieved from the URL.
+     */
+    public String getVampireTexturePackSha1() {
+        return this.plugin.getConfig().getString("vampire-texture-pack.sha1", "e139890dd34f56724efcd5becb476999651ca43c");
+    }
+
+    /**
      * Retrieve the locations of all the tome chests from the config.
      *
      * @return A {@code List} of chest {@code Locations}.
@@ -38,24 +74,24 @@ public class ConfigManager {
 
         if (world == null) {
             this.plugin.getLogger().severe("World '" + RemakepirePlugin.WORLD_NAME + "' not found! Cannot load tome chest locations.");
+            return locations;
+        }
 
-        } else {
-            for (String locString : locationStrings) {
-                try {
-                    String[] parts = locString.split(",");
+        for (String locString : locationStrings) {
+            try {
+                String[] parts = locString.split(",");
 
-                    if (parts.length == 3) {
-                        int x = Integer.parseInt(parts[0].trim());
-                        int y = Integer.parseInt(parts[1].trim());
-                        int z = Integer.parseInt(parts[2].trim());
+                if (parts.length == 3) {
+                    final int x = Integer.parseInt(parts[0].trim());
+                    final int y = Integer.parseInt(parts[1].trim());
+                    final int z = Integer.parseInt(parts[2].trim());
 
-                        locations.add(new Location(world, x, y, z));
-                    }
-                } catch (NumberFormatException e) {
-                    this.plugin.getLogger().warning("Invalid tome chest location format: " + locString);
+                    locations.add(new Location(world, x, y, z));
                 }
+            } catch (NumberFormatException e) {
+                this.plugin.getLogger().warning("Invalid tome chest location format: " + locString);
+                e.printStackTrace();
             }
-
         }
 
         return locations;
@@ -73,13 +109,13 @@ public class ConfigManager {
 
         if (locations.contains(locationString)) {
             return false;
-
-        } else {
-            locations.add(locationString);
-            this.plugin.getConfig().set("tome-chests.locations", locations);
-            this.saveConfig();
-            return true;
         }
+
+        locations.add(locationString);
+        this.plugin.getConfig().set("tome-chests.locations", locations);
+        this.saveConfig();
+
+        return true;
     }
 
     /**
@@ -94,13 +130,13 @@ public class ConfigManager {
 
         if (!locations.contains(locationString)) {
             return false;
-
-        } else {
-            locations.remove(locationString);
-            this.plugin.getConfig().set("tome-chests.locations", locations);
-            this.saveConfig();
-            return true;
         }
+
+        locations.remove(locationString);
+        this.plugin.getConfig().set("tome-chests.locations", locations);
+        this.saveConfig();
+
+        return true;
     }
 
     /**
@@ -331,12 +367,14 @@ public class ConfigManager {
     }
 
     /**
-     * Retrieve the enchantments whose books are allowed to appear inside tome chests.
+     * Retrieve the enchantment names whose books are allowed to appear inside tome chests.
      *
-     * @return A list of item enchantment names.
+     * @return A list of item enchantment names. All names are trimmed and set to lowercase.
      */
     public List<String> getTomeEnchantmentOptions() {
-        return this.plugin.getConfig().getStringList("tome-chests.enchantment-options");
+        List<String> options = this.plugin.getConfig().getStringList("tome-chests.enchantment-options");
+        options.replaceAll(option -> option.trim().toLowerCase());
+        return options;
     }
 
     /**
@@ -664,6 +702,15 @@ public class ConfigManager {
     }
 
     /**
+     * Retrieve the number of claw hits required to kill a vampire.
+     *
+     * @return The number of claw hits required to kill a vampire at 0 health.
+     */
+    public int getClawHitKillRequirement() {
+        return this.plugin.getConfig().getInt("combat.kill-vampires-with-claws", 999);
+    }
+
+    /**
      * Retrieve the number of lives that humans start out with.
      *
      * @return The total number of times humans can die and respawn.
@@ -710,6 +757,34 @@ public class ConfigManager {
     }
 
     /**
+     * Retrieve if vampires are should destroy silver door and trapdoor and raw silver items when they break their blocks.
+     *
+     * @return {@code true} if vampires will destroy the items as well as the blocks.
+     */
+    public boolean doVampiresDestroySilverDoors() {
+        return this.plugin.getConfig().getBoolean("vampire.destroy-silver-doors", true);
+    }
+
+    /**
+     * Retrieve if sun and moon effects are applied when players are under glass.
+     *
+     * @return {@code true} if sky-based effects are applied through glass.
+     */
+    public boolean doesSunAffectThroughGlass() {
+        return this.plugin.getConfig().getBoolean("vampire.sun-affects-through-glass", false);
+    }
+
+    /**
+     * Update the config on whether sky-based effects are applied through glass
+     *
+     * @param sunAffects {@code true} if sun and moon effects will be applied when players are under glass.
+     */
+    public void setSunAffectThroughGlass(boolean sunAffects) {
+        this.plugin.getConfig().set("vampire.sun-affects-through-glass", sunAffects);
+        this.plugin.saveConfig();
+    }
+
+    /**
      * Retrieve if vampires can mount living entities. Exceptions are made for undead mounts.
      *
      * @return {@code true} if vampires can mount any animal.
@@ -719,12 +794,31 @@ public class ConfigManager {
     }
 
     /**
-     * Update the config on whether vampires can ride on living mounts
+     * Update the config on whether vampires can ride on living mounts.
      *
      * @param canRide {@code true} if vampires can ride living mounts.
      */
     public void setVampiresRideLivingMounts(boolean canRide) {
         this.plugin.getConfig().set("vampire.allow-vampire-mounts", canRide);
+        this.plugin.saveConfig();
+    }
+
+    /**
+     * Retrieve if vampires are locked out of certain actions once they have staged up once, even if they stage down later.
+     *
+     * @return {@code true} if the server remembers if a player has staged up in the past.
+     */
+    public boolean areKnownVampiresRestricted() {
+        return this.plugin.getConfig().getBoolean("vampire.restrict-known-vampires", true);
+    }
+
+    /**
+     * Update the config on whether the server remembers if a player has staged up in the past
+     *
+     * @param restrict {@code true} if vampires are locked out of certain actions once they have staged up once, even if they stage down later.
+     */
+    public void setKnownVampireRestriction(boolean restrict) {
+        this.plugin.getConfig().set("vampire.restrict-known-vampires", restrict);
         this.plugin.saveConfig();
     }
 
@@ -846,6 +940,25 @@ public class ConfigManager {
      */
     public void setCureRequiresDaytime(boolean requireDay) {
         this.plugin.getConfig().set("cure.daylight-requirement", requireDay);
+        this.plugin.saveConfig();
+    }
+
+    /**
+     * Retrieve whether there are lasting effects on the world when a vampire is cured.
+     *
+     * @return {@code true} if there are lasting effects from a vampire cure.
+     */
+    public boolean doCuresHaveLastingEffects() {
+        return this.plugin.getConfig().getBoolean("cure.cure-aftermath", true);
+    }
+
+    /**
+     * Update the config on whether there are lasting effects from a vampire cure.
+     *
+     * @param hasEffects {@code true} if there will be lasting effects on the world when a vampire is cured.
+     */
+    public void setCuresHaveLastingEffects(boolean hasEffects) {
+        this.plugin.getConfig().set("cure.cure-aftermath", hasEffects);
         this.plugin.saveConfig();
     }
 

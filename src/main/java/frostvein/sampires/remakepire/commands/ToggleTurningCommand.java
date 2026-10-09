@@ -29,13 +29,13 @@ public class ToggleTurningCommand implements CommandExecutor {
         if (sender instanceof Player player) {
             if (!this.plugin.getVampireManager().isVampire(player)) {
                 player.sendMessage(Component.text("Only vampires can use this command.", NamedTextColor.RED));
+                return true;
+            }
 
+            if (this.plugin.getVampireTurningManager().toggleTurning(player)) {
+                player.sendMessage(Component.text("Vampire turning enabled. You will now turn humans into vampires when you kill them.", NamedTextColor.GREEN));
             } else {
-                if (this.plugin.getVampireTurningManager().toggleTurning(player)) {
-                    player.sendMessage(Component.text("Vampire turning enabled. You will now turn humans into vampires when you kill them.", NamedTextColor.GREEN));
-                } else {
-                    player.sendMessage(Component.text("Vampire turning disabled. Humans will die normally when you kill them.", NamedTextColor.RED));
-                }
+                player.sendMessage(Component.text("Vampire turning disabled. Humans will die normally when you kill them.", NamedTextColor.RED));
             }
         } else {
             sender.sendMessage(Component.text("This command can only be used by players.", NamedTextColor.RED));

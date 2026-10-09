@@ -27,13 +27,22 @@ public class EnlightenedEyeTomeAbility extends TomeAbility {
             this.sendCannotUseMessage(player, "Only humans can use tome abilities!");
             return false;
 
-        } else {
-            player.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION, NIGHT_VISION_DURATION, NIGHT_VISION_AMPLIFIER, false, false));
-            player.playSound(player.getLocation(), "minecraft:block.beacon.power_select", 1.0F, 1.5F);
-            this.sendSuccessMessage(player, "Your eyes adjust to pierce the darkness...");
-            player.sendMessage(Component.text("You can now see clearly in the shadows for " + (NIGHT_VISION_DURATION / 20 / 60) + " minutes.", NamedTextColor.GRAY));
-
-            return true;
+        } else if (player.hasPotionEffect(PotionEffectType.NIGHT_VISION)) {
+            player.removePotionEffect(PotionEffectType.NIGHT_VISION);
+            this.sendSuccessMessage(player, "Your vision returns to normal.");
+            return false;
         }
+
+        player.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION, NIGHT_VISION_DURATION, NIGHT_VISION_AMPLIFIER, false, false));
+        player.playSound(player.getLocation(), "minecraft:block.beacon.power_select", 1.0F, 1.5F);
+
+        this.sendSuccessMessage(player, "Your eyes adjust to pierce the darkness...");
+        player.sendMessage(Component.text("You can now see clearly in the shadows for " + (NIGHT_VISION_DURATION / 20 / 60) + " minutes.", NamedTextColor.GRAY));
+        player.sendMessage(Component.text("Use ", NamedTextColor.GRAY)
+                .append(Component.text("/pow tome EnlightenedEye", NamedTextColor.YELLOW))
+                .append(Component.text(" again to end your night vision early.", NamedTextColor.GRAY))
+        );
+
+        return true;
     }
 }

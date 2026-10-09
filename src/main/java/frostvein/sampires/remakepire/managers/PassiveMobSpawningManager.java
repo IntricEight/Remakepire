@@ -91,46 +91,55 @@ public class PassiveMobSpawningManager {
 
         if (world == null) {
             this.plugin.getLogger().warning("PassiveMobSpawningManager: World 'world' not found");
-        } else {
-            Chunk[] loadedChunks = world.getLoadedChunks();
+            return;
+        }
 
-            if (loadedChunks.length == 0) {
-                this.plugin.getLogger().warning("PassiveMobSpawningManager: No loaded chunks found");
-            } else {
-                List<Location> validLocations = this.findValidSpawnLocations(world, loadedChunks);
+        Chunk[] loadedChunks = world.getLoadedChunks();
 
-                if (validLocations.isEmpty()) {
-                    this.plugin.getLogger().warning("PassiveMobSpawningManager: No valid spawn locations found");
-                } else {
-                    Collections.shuffle(validLocations, this.random);
-                    int mobsSpawned = 0;
-                    Map<EntityType, Integer> spawnCounts = new HashMap<>();
-                    int mobsToSpawn = this.getMobsPerCycle();
+        if (loadedChunks.length == 0) {
+            this.plugin.getLogger().warning("PassiveMobSpawningManager: No loaded chunks found");
+            return;
+        }
 
-                    for (int i = 0; i < mobsToSpawn && i < validLocations.size(); ++i) {
-                        Location spawnLocation = validLocations.get(i);
-                        EntityType mobType = this.selectRandomMobType();
+        List<Location> validLocations = this.findValidSpawnLocations(world, loadedChunks);
 
-                        try {
-                            world.spawn(spawnLocation, mobType.getEntityClass(), true, (entity) -> entity.setPersistent(true));
-                            ++mobsSpawned;
-                            spawnCounts.put(mobType, spawnCounts.getOrDefault(mobType, 0) + 1);
+        if (validLocations.isEmpty()) {
+            this.plugin.getLogger().warning("PassiveMobSpawningManager: No valid spawn locations found");
+            return;
+        }
 
-                        } catch (Exception e) {
-                            this.plugin.getLogger().warning("PassiveMobSpawningManager: Failed to spawn " + mobType + " at " + ConversionAssistant.locationToString(spawnLocation) + ": " + e.getMessage());
-                        }
-                    }
+        Collections.shuffle(validLocations, this.random);
+        int mobsSpawned = 0;
+        Map<EntityType, Integer> spawnCounts = new HashMap<>();
+        int mobsToSpawn = this.getMobsPerCycle();
 
-                    StringBuilder report = new StringBuilder("PassiveMobSpawningManager: Spawned " + mobsSpawned + " mobs - ");
+        for (int i = 0; i < mobsToSpawn && i < validLocations.size(); ++i) {
+            Location spawnLocation = validLocations.get(i);
+            EntityType mobType = this.selectRandomMobType();
 
-                    for (Map.Entry<EntityType, Integer> entry : spawnCounts.entrySet()) {
-                        report.append(entry.getValue()).append(" ").append(entry.getKey()).append(", ");
-                    }
+            // If for some reason the function returns a null entity class, skip this spawn attempt
+            if (mobType.getEntityClass() == null) {
+                break;
+            }
 
-                    this.plugin.logInfo(report.toString());
-                }
+            try {
+                world.spawn(spawnLocation, mobType.getEntityClass(), true, (entity) -> entity.setPersistent(true));
+                ++mobsSpawned;
+                spawnCounts.put(mobType, spawnCounts.getOrDefault(mobType, 0) + 1);
+
+            } catch (Exception e) {
+                this.plugin.getLogger().warning("PassiveMobSpawningManager: Failed to spawn " + mobType + " at " + ConversionAssistant.locationToString(spawnLocation) + ": " + e.getMessage());
+                e.printStackTrace();
             }
         }
+
+        StringBuilder report = new StringBuilder("PassiveMobSpawningManager: Spawned " + mobsSpawned + " mobs - ");
+
+        for (Map.Entry<EntityType, Integer> entry : spawnCounts.entrySet()) {
+            report.append(entry.getValue()).append(" ").append(entry.getKey()).append(", ");
+        }
+
+        this.plugin.logInfo(report.toString());
     }
 
     /**
@@ -187,16 +196,17 @@ public class PassiveMobSpawningManager {
 //                && blockBelow.getType() != Material.MOSS_BLOCK && blockBelow.getType() != Material.MOSS_CARPET
         ) {
             return false;
+
         } else if (blockAt.getType().isAir() && blockAbove.getType().isAir()) {
             if (blockAt.getLightLevel() < 9) {
                 return false;
-            } else {
-                Biome biome = location.getBlock().getBiome();
-                return !this.blacklistedBiomes.contains(biome);
             }
-        } else {
-            return false;
+
+            Biome biome = location.getBlock().getBiome();
+            return !this.blacklistedBiomes.contains(biome);
         }
+
+        return false;
     }
 
     /**
@@ -249,26 +259,27 @@ public class PassiveMobSpawningManager {
     private void checkAndSpawnIfNeeded() {
         World world = this.plugin.getWorld();
 
-        if (world != null) {
-            long worldTime = world.getTime();
-            long currentDay = world.getFullTime() / 24000L;
-            boolean isMorning = worldTime >= MORNING_START && worldTime <= MORNING_END;
+        if (world == null) {
+            return;
+        }
 
-            if (isMorning && currentDay != this.lastDaySpawned) {
-                final int animalCount = this.countPassiveAnimalsInLoadedChunks(world);
-                final int threshold = this.configManager.getPassiveMobMinimumThreshold();
-                this.plugin.logInfo("PassiveMobSpawningManager: Morning check - Found " + animalCount + " animals (threshold: " + threshold + ")");
+        final long worldTime = world.getTime(), currentDay = world.getFullTime() / 24000L;
+        final boolean isMorning = worldTime >= MORNING_START && worldTime <= MORNING_END;
 
-                if (animalCount < threshold) {
-                    this.plugin.logInfo("PassiveMobSpawningManager: Animal count below threshold, spawning animals...");
-                    this.spawnPassiveMobs();
+        if (isMorning && currentDay != this.lastDaySpawned) {
+            final int animalCount = this.countPassiveAnimalsInLoadedChunks(world);
+            final int threshold = this.configManager.getPassiveMobMinimumThreshold();
+            this.plugin.logInfo("PassiveMobSpawningManager: Morning check - Found " + animalCount + " animals (threshold: " + threshold + ")");
 
-                } else {
-                    this.plugin.logInfo("PassiveMobSpawningManager: Animal count sufficient, skipping spawn");
-                }
+            if (animalCount < threshold) {
+                this.plugin.logInfo("PassiveMobSpawningManager: Animal count below threshold, spawning animals...");
+                this.spawnPassiveMobs();
 
-                this.lastDaySpawned = currentDay;
+            } else {
+                this.plugin.logInfo("PassiveMobSpawningManager: Animal count sufficient, skipping spawn");
             }
+
+            this.lastDaySpawned = currentDay;
         }
     }
 
