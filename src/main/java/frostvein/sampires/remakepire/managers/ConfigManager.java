@@ -744,7 +744,7 @@ public class ConfigManager {
      * @return {@code true} if vampires will destroy the items as well as the blocks.
      */
     public boolean doVampiresDestroySilverDoors() {
-        return this.plugin.getConfig().getBoolean("vampire.destroy-silver-doors", true);
+        return this.plugin.getConfig().getBoolean("vampire.destroy-silver-doors", false);
     }
 
     /**
