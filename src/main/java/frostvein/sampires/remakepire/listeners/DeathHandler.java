@@ -324,7 +324,7 @@ public class DeathHandler implements Listener {
      */
     public boolean shouldHumanPermadie(Player player) {
         // Vampires should not be permakilled by this function
-        if (this.plugin.getVampireManager().isVampire(player)) {
+        if (player == null || this.plugin.getVampireManager().isVampire(player)) {
             return false;
         }
 
@@ -356,19 +356,19 @@ public class DeathHandler implements Listener {
      * @param event a player dies.
      */
     private void handleVampirePvPDeath(Player victim, Player killer, PlayerDeathEvent event) {
-        ItemStack weapon = killer.getInventory().getItemInMainHand();
-        boolean killedWithWoodenWeapon = ItemTypeChecking.isWoodenWeapon(weapon.getType());
+        Material weaponType = killer.getInventory().getItemInMainHand().getType();
+        boolean killedWithStake = ItemTypeChecking.isStake(weaponType);
         Material lastWeapon = this.lastWeaponUsed.get(victim.getUniqueId());
 
-        if (!killedWithWoodenWeapon && lastWeapon != null) {
-            killedWithWoodenWeapon = ItemTypeChecking.isWoodenWeapon(lastWeapon);
+        if (!killedWithStake && lastWeapon != null) {
+            killedWithStake = ItemTypeChecking.isStake(lastWeapon);
 
-            if (killedWithWoodenWeapon) {
+            if (killedWithStake) {
                 this.plugin.logInfo("DEBUG: Using tracked last weapon: " + lastWeapon + " (current weapon broke/dropped)");
             }
         }
 
-        this.plugin.logInfo("DEBUG: PvP Death - Victim: " + victim.getName() + ", CurrentWeapon: " + weapon.getType() + ", LastTrackedWeapon: " + lastWeapon + ", IsWoodenWeapon: " + killedWithWoodenWeapon + ", IsVampire: " + this.vampireManager.isVampire(victim) + ", IsStage1: " + this.vampireManager.isVampireStage1(victim) + ", VictimTags: " + victim.getScoreboardTags());
+        this.plugin.logInfo("DEBUG: PvP Death - Victim: " + victim.getName() + ", CurrentWeapon: " + weaponType + ", LastTrackedWeapon: " + lastWeapon + ", IsWoodenWeapon: " + killedWithStake + ", IsVampire: " + this.vampireManager.isVampire(victim) + ", IsStage1: " + this.vampireManager.isVampireStage1(victim) + ", VictimTags: " + victim.getScoreboardTags());
         this.lastWeaponUsed.remove(victim.getUniqueId());
         this.woodenStakeKills.remove(victim.getUniqueId());
 
@@ -376,7 +376,7 @@ public class DeathHandler implements Listener {
             final int woodenStakeThreshold = this.plugin.getConfigManager().getPermadeathMinimumStage();
             final int victimStage = this.vampireManager.getVampireStage(victim);
 
-            if (victimStage <= woodenStakeThreshold && killedWithWoodenWeapon) {
+            if (victimStage <= woodenStakeThreshold && killedWithStake) {
                 victim.addScoreboardTag(PERMAKILL_PROCESSING_TAG);
                 killer.sendMessage(Component.text("You have permanently killed the vampire " + victim.getName() + "!", NamedTextColor.DARK_RED));
 
@@ -462,7 +462,14 @@ public class DeathHandler implements Listener {
     }
 
     public void triggerHumanPermadeath(Player attacker, Player victim, boolean wasTurnAttempt) {
-        attacker.sendMessage(Component.text("You watch the light of " + victim.getName() + "'s eyes fade, and extinguish. Lost forever.", NamedTextColor.DARK_RED));
+        // Exit early if there is no one to permakill
+        if (victim == null) {
+            return;
+        }
+
+        if (attacker != null) {
+            attacker.sendMessage(Component.text("You watch the light of " + victim.getName() + "'s eyes fade, and extinguish. Lost forever.", NamedTextColor.DARK_RED));
+        }
 
         if (wasTurnAttempt) {
             victim.sendMessage(Component.text("The world grows dim, blurry, you feel a darkness reach out, offering you one last chance to live, as a creature of the night... But you refuse... And slip under the veil of the afterlife.", NamedTextColor.GRAY));
@@ -472,10 +479,6 @@ public class DeathHandler implements Listener {
 
         victim.addScoreboardTag(PERMADEATH_CHOSEN_TAG);
         victim.setHealth(0.0);
-
-        // Some instances of the permakill use this instead of just setting the health to 0.0 outside a thread
-        // I'm going to keep this around for now in case I find a reason why that was the case, or a bug caused by the lack of threading
-//        this.plugin.getServer().getScheduler().runTask(this.plugin, () -> victim.setHealth(0.0));
     }
 
     /**
