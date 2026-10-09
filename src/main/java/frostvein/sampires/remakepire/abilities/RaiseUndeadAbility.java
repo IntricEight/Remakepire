@@ -54,8 +54,12 @@ public class RaiseUndeadAbility extends VampireAbility {
     }
 
     public boolean execute(Player player, VampireManager vampireManager, RemakepirePlugin plugin) {
-        // Prevent the ability from being used on Peaceful mode
-        if (plugin.getWorld().getDifficulty() == Difficulty.PEACEFUL) {
+        if (!plugin.getSessionManager().isSessionActive()) {
+            player.sendMessage(Component.text("This ability cannot be used outside of sessions.", NamedTextColor.RED));
+            return false;
+
+        } else if (plugin.getWorld().getDifficulty() == Difficulty.PEACEFUL) {
+            // Prevent the ability from being used on Peaceful mode
             player.sendMessage(Component.text("This land is too peaceful for the dead to wake.", NamedTextColor.RED));
             return false;
         }
