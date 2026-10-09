@@ -219,10 +219,13 @@ public class ThirstManager {
      *
      * @param vampire the player gaining blood.
      * @param entity the entity that the vampire killed.
-     * @param experienceDropped the experience points that the entity dropped when killed.
+     * @param experienceDropped the experience points that the entity dropped when killed, if it wasn't a player.
      */
     public void handleEntityKill(Player vampire, Entity entity, int experienceDropped) {
-        if (this.isThirstQuencher(entity)) {
+        if (entity instanceof Player) {
+            this.quenchThirst(vampire, this.getKillThirstReward(), true);
+
+        } else if (this.isThirstQuencher(entity)) {
             experienceDropped = Math.max(experienceDropped * 2 + 3, 1);
 
             EntityType entityType = entity.getType();
@@ -231,7 +234,7 @@ public class ThirstManager {
                 experienceDropped += 10;
             }
 
-            this.quenchThirst(vampire, experienceDropped);
+            this.quenchThirst(vampire, experienceDropped, false);
         }
     }
 
@@ -302,11 +305,9 @@ public class ThirstManager {
     /**
      * Retrieve the blood rewarded when a vampire kills a human player.
      *
-     * @param killer the player who killed the victim.
-     * @param victim the player who has been killed
      * @return The blood experience points to be rewarded.
      */
-    public int getKillThirstReward(Player killer, Player victim) {
+    public int getKillThirstReward() {
         return 75;
     }
 

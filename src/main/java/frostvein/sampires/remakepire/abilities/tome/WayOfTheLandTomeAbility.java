@@ -54,7 +54,7 @@ public class WayOfTheLandTomeAbility extends TomeAbility implements Listener {
         Player player = event.getPlayer();
         Block block = event.getBlock();
 
-        if (this.plugin.getTomeManager().hasAbility(player, "wayoftheland")) {
+        if (this.plugin.getTomeManager().hasAbility(player, "wayoftheland") && this.plugin.getVampireManager().isHuman(player)) {
             if (this.isFullyGrownCrop(block)) {
                 // Prevent garlic from receiving the drop rate boost from this source
                 if (block.getType() != Material.BEETROOTS) {

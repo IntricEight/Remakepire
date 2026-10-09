@@ -55,14 +55,13 @@ public class WayOfTheProspectorTomeAbility extends TomeAbility implements Listen
         Player player = event.getPlayer();
         Block block = event.getBlock();
 
-        if (this.plugin.getTomeManager().hasAbility(player, "wayoftheprospector") && ORE_MATERIALS.contains(block.getType())) {
+        if (this.plugin.getTomeManager().hasAbility(player, "wayoftheprospector") && this.plugin.getVampireManager().isHuman(player) && ORE_MATERIALS.contains(block.getType())) {
             ItemStack tool = player.getInventory().getItemInMainHand();
 
             if (!tool.containsEnchantment(Enchantment.SILK_TOUCH) && this.random.nextDouble() < 0.5) {
                 for (ItemStack drop : block.getDrops(tool)) {
                     if (drop != null && drop.getType() != Material.AIR) {
-                        ItemStack extraDrop = drop.clone();
-                        block.getWorld().dropItemNaturally(block.getLocation(), extraDrop);
+                        block.getWorld().dropItemNaturally(block.getLocation(), drop.clone());
                     }
                 }
             }

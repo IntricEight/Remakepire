@@ -129,7 +129,7 @@ public class ItemTypeChecking {
             return false;
         }
 
-        return type == Material.IRON_SWORD || type == Material.IRON_AXE || type == Material.IRON_SPEA;
+        return type == Material.IRON_SWORD || type == Material.IRON_AXE || type == Material.IRON_SPEAR;
     }
 
     /**
