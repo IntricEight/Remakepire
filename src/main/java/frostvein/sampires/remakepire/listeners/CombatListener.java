@@ -318,12 +318,6 @@ public class CombatListener implements Listener {
                         hitCounter.currentHits++;
                         hitCounter.updateHitTimer();
 
-                            if (!hitCounter.shouldVampireDie()) {
-                                event.setCancelled(true);
-                                victim.setHealth(1.0);
-                            }
-                        }
-                    } else if (!ItemTypeChecking.isIronWeapon(attackerWeaponType) && !canBeStaked) {
                         if (!hitCounter.shouldVampireDie()) {
                             event.setCancelled(true);
                             victim.setHealth(1.0);
