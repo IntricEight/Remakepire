@@ -739,6 +739,15 @@ public class ConfigManager {
     }
 
     /**
+     * Retrieve if vampires are should destroy silver door and trapdoor and raw silver items when they break their blocks.
+     *
+     * @return {@code true} if vampires will destroy the items as well as the blocks.
+     */
+    public boolean doVampiresDestroySilverDoors() {
+        return this.plugin.getConfig().getBoolean("vampire.destroy-silver-doors", true);
+    }
+
+    /**
      * Retrieve if sun and moon effects are applied when players are under glass.
      *
      * @return {@code true} if sky-based effects are applied through glass.

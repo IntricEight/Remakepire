@@ -6,6 +6,7 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.title.Title;
 import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -43,6 +44,10 @@ public class VampireCureCommand implements CommandExecutor {
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (!(sender instanceof Player player)) {
             sender.sendMessage(Component.text("This command can only be used by players.", NamedTextColor.RED));
+            return true;
+
+        } else if (player.getGameMode() == GameMode.SPECTATOR) {
+            player.sendMessage(Component.text("Spectators cannot cure themselves of vampirism.", NamedTextColor.RED));
             return true;
 
         } else if (!CureBookReadingListener.hasReadAllCureBooks(player)) {

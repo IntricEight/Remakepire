@@ -122,7 +122,7 @@ public class HolyWaterEffectManager implements Listener {
      */
     private void processHolyWaterHit(LivingEntity entity) {
         if (entity instanceof Player player) {
-            if (player.getGameMode() != GameMode.SPECTATOR && this.plugin.getVampireManager().isVampire(player) && this.plugin.getVampireManager().isVampireStage2OrHigher(player)) {
+            if (player.getGameMode() != GameMode.SPECTATOR && this.plugin.getVampireManager().isRestrictedVampire(player)) {
                 this.applyHolyWaterEffect(player);
             }
         }
