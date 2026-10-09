@@ -63,7 +63,7 @@ public class PermadeathManager {
      * @return {@code true} if the player can permanently die before their lives are used up.
      */
     public boolean hasPermadeathEnabled(Player player) {
-        PermadeathMode mode = this.getPermadeathMode(player);
+        final PermadeathMode mode = this.getPermadeathMode(player);
         return mode == PermadeathManager.PermadeathMode.ON || mode == PermadeathManager.PermadeathMode.ABSOLUTE;
     }
 
