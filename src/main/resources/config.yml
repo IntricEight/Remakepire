@@ -206,6 +206,11 @@ vampire:
   # Default: true (Vampires are repulsed)
   silver-weakness: true
 
+  # Control if higher vampires destroy silver doors and trapdoors when broken
+  # When true, if a higher vampire breaks a silver door or trapdoor, or raw silver, the item does not drop (Just like silver blocks)
+  # Default: false (Silver doors and trapdoors drop their items when broken by anyone)
+  destroy-silver-doors: false
+
   # Control whether sky effects (such as sun weakness and bloodmoon buffs) affect players under plain glass
   # When true, plain glass does not count as a block when checking if a player is under the sky
   # Default: false (Clear glass stops sky effects)
