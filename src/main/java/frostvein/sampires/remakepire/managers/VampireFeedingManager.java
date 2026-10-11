@@ -19,8 +19,6 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
-import org.bukkit.scoreboard.Objective;
-import org.bukkit.scoreboard.Scoreboard;
 import frostvein.sampires.remakepire.RemakepirePlugin;
 import frostvein.sampires.remakepire.listeners.DeathHandler;
 
@@ -74,7 +72,7 @@ public class VampireFeedingManager implements Listener {
             Player vampire = Bukkit.getPlayer(session.vampireId), target = Bukkit.getPlayer(session.targetId);
 
             if (vampire != null && target != null && vampire.isOnline() && target.isOnline() && vampire.getGameMode() != GameMode.SPECTATOR) {
-                if (target.getGameMode() != GameMode.SURVIVAL) {
+                if (target.getGameMode() == GameMode.SPECTATOR || target.getGameMode() == GameMode.CREATIVE) {
                     this.cancelFeedingSession(session);
 
                 } else if (!this.plugin.getSessionManager().isSessionActive()) {
@@ -107,7 +105,7 @@ public class VampireFeedingManager implements Listener {
      * @param target the player about to lose health or blood.
      */
     private void processPreparationPhase(FeedingSession session, Player vampire, Player target) {
-        if (target.getGameMode() != GameMode.SURVIVAL) {
+        if (target.getGameMode() == GameMode.SPECTATOR || target.getGameMode() == GameMode.CREATIVE) {
             this.cancelFeedingSession(session);
             return;
         }
@@ -157,7 +155,7 @@ public class VampireFeedingManager implements Listener {
      * @param target the player losing health or blood.
      */
     private void processActiveFeedingPhase(FeedingSession session, Player vampire, Player target) {
-        if (target.getGameMode() != GameMode.SURVIVAL) {
+        if (target.getGameMode() == GameMode.SPECTATOR || target.getGameMode() == GameMode.CREATIVE) {
             this.cancelFeedingSession(session);
             return;
         }
@@ -182,10 +180,8 @@ public class VampireFeedingManager implements Listener {
                 return;
             }
 
-            final double newHealth = currentHealth - HEALTH_DRAIN_PER_SECOND;
-            target.setHealth(newHealth);
-            final int currentFoodLevel = target.getFoodLevel(), newFoodLevel = Math.max(0, currentFoodLevel - 1);
-            target.setFoodLevel(newFoodLevel);
+            target.setHealth(currentHealth - HEALTH_DRAIN_PER_SECOND);
+            target.setFoodLevel(Math.max(0, target.getFoodLevel() - 1));
             final int thirstToGive = Math.min(2, maxFeedingThirst - currentSessionThirst);
 
             this.thirstManager.modifyQuench(vampire, thirstToGive);
@@ -254,16 +250,15 @@ public class VampireFeedingManager implements Listener {
                 this.plugin.getDeathHandler().triggerHumanPermadeath(vampire, target, false);
                 this.cancelFeedingSession(session);
                 return;
+            }
 
-            } else {
-                vampire.sendMessage(Component.text("You have killed " + target.getName() + ". They will respawn as a human, wounded.", NamedTextColor.RED));
+            vampire.sendMessage(Component.text("You have killed " + target.getName() + ". They will respawn as a human, wounded.", NamedTextColor.RED));
 
-                // Only trigger the target's death once, no matter how many vampires are feeding at the time
-                if (!didVictimAlreadyDie(target)) {
-                    target.sendMessage(Component.text("You have been slain by a vampire, but they do not turn you...", NamedTextColor.GRAY));
+            // Only trigger the target's death once, no matter how many vampires are feeding at the time
+            if (!this.didVictimAlreadyDie(target)) {
+                target.sendMessage(Component.text("You have been slain by a vampire, but they do not turn you...", NamedTextColor.GRAY));
 
-                    this.killVictim(target);
-                }
+                this.killVictim(target);
             }
 
             this.cancelFeedingSession(session);
@@ -333,7 +328,7 @@ public class VampireFeedingManager implements Listener {
             boolean isHuman, isVampire, inRange;
 
             for (Player nearbyPlayer : vampire.getWorld().getPlayers()) {
-                if (!nearbyPlayer.equals(vampire) && nearbyPlayer.getGameMode() == GameMode.SURVIVAL) {
+                if (!nearbyPlayer.equals(vampire) && nearbyPlayer.getGameMode() != GameMode.SPECTATOR && nearbyPlayer.getGameMode() != GameMode.CREATIVE) {
                     isHuman = this.vampireManager.isHuman(nearbyPlayer);
                     isVampire = this.vampireManager.isVampire(nearbyPlayer);
                     inRange = this.isInFeedingRange(vampire, nearbyPlayer);
