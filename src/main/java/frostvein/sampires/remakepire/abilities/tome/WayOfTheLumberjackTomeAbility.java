@@ -29,7 +29,7 @@ public class WayOfTheLumberjackTomeAbility extends TomeAbility implements Listen
     private final Gson gson = new Gson();
     private final File placedLogsFile;
     private Set<String> placedLogs = new HashSet<>();
-    private static final Set<Material> LOG_MATERIALS = Set.of(Material.OAK_LOG, Material.SPRUCE_LOG, Material.BIRCH_LOG, Material.JUNGLE_LOG, Material.ACACIA_LOG, Material.DARK_OAK_LOG, Material.MANGROVE_LOG, Material.CHERRY_LOG, Material.CRIMSON_STEM, Material.WARPED_STEM);
+    private static final Set<Material> LOG_MATERIALS = Set.of(Material.OAK_LOG, Material.SPRUCE_LOG, Material.BIRCH_LOG, Material.JUNGLE_LOG, Material.ACACIA_LOG, Material.DARK_OAK_LOG, Material.MANGROVE_LOG, Material.CHERRY_LOG, Material.PALE_OAK_LOG, Material.CRIMSON_STEM, Material.WARPED_STEM);
 
     /**
      * Create an instance of the Way of the Land tome ability.
