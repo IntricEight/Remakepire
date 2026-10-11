@@ -41,12 +41,12 @@ public class BlockListener implements Listener {
         Player player = event.getPlayer();
         final Material blockType = event.getBlock().getType();
 
-        if (!this.sessionManager.isSessionActive() && !this.sessionManager.isPreSession()) {
+        if (!this.sessionManager.isSessionActive() && !this.sessionManager.isPreSession() && player.getGameMode() != GameMode.CREATIVE) {
             event.setCancelled(true);
             player.sendMessage(Component.text("You cannot break blocks while the session is inactive.", NamedTextColor.RED));
             return;
 
-        } else if (this.sessionManager.isPreSession()) {
+        } else if (this.sessionManager.isPreSession() && player.getGameMode() != GameMode.CREATIVE) {
             if (blockType == Material.IRON_ORE || blockType == Material.DEEPSLATE_IRON_ORE || blockType == Material.IRON_BLOCK || blockType == Material.RAW_IRON_BLOCK) {
                 event.setCancelled(true);
                 player.sendMessage(Component.text("You cannot mine iron while in Building Mode.", NamedTextColor.RED));
@@ -56,13 +56,14 @@ public class BlockListener implements Listener {
             event.setCancelled(true);
             player.sendMessage(Component.text("You cannot break blocks while in bat form", NamedTextColor.RED));
             return;
-        }
 
-        if (blockType == Material.BEACON) {
+        } else if (blockType == Material.BEACON) {
             event.setCancelled(true);
             player.sendMessage(Component.text("You are not allowed to break beacons", NamedTextColor.RED));
+            return;
+        }
 
-        } else if (blockType == Material.NETHERITE_BLOCK) {
+        if (blockType == Material.NETHERITE_BLOCK) {
             // Stop placed silver blocks from being moved elsewhere
             event.setDropItems(false);
             player.sendMessage(Component.text("The block of silver breaks apart as you mine it, becoming useless.", NamedTextColor.GRAY));
@@ -85,7 +86,7 @@ public class BlockListener implements Listener {
     public void onBlockPlace(BlockPlaceEvent event) {
         Player player = event.getPlayer();
 
-        if (!this.sessionManager.isSessionActive() && !this.sessionManager.isPreSession()) {
+        if (!this.sessionManager.isSessionActive() && !this.sessionManager.isPreSession() && player.getGameMode() != GameMode.CREATIVE) {
             event.setCancelled(true);
             player.sendMessage(Component.text("You cannot place blocks while the session is inactive.", NamedTextColor.RED));
             return;

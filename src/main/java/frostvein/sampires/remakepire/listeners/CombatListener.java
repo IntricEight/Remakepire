@@ -91,7 +91,7 @@ public class CombatListener implements Listener {
             boolean isVictimHuman = false, isVictimVampire = false;
 
             // Determine the status an alignment of the victim
-            Player victim = event.getEntity() instanceof Player ? (Player) event.getEntity() : null;
+            Player victim = event.getEntity() instanceof Player player ? player : null;
             if (victim != null) {
                 isVictimHuman = this.vampireManager.isHuman(victim);
                 isVictimVampire = this.vampireManager.isVampire(victim);
