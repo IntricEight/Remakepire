@@ -153,6 +153,21 @@ public class BrigadierCommands {
                                     final String player = StringArgumentType.getString(ctx, "player");
                                     return this.executePowCommand(ctx, "admin", "make_incurable", player);
                                 })))
+                        .then(Commands.literal("cure-all-vampires")
+                                .then(Commands.argument("stage", IntegerArgumentType.integer())
+                                        .executes(ctx -> {
+                                            final int stage = IntegerArgumentType.getInteger(ctx, "stage");
+                                            return this.executePowCommand(ctx, "admin", "cure_all_vampires", String.valueOf(stage));
+                                        })))
+                        .then(Commands.literal("cure-vampires-in-range")
+                                .then(Commands.argument("stage", IntegerArgumentType.integer())
+                                        .then(Commands.argument("distance", IntegerArgumentType.integer())
+                                                .executes(ctx -> {
+                                                    final int stage = IntegerArgumentType.getInteger(ctx, "stage");
+                                                    final int distance = IntegerArgumentType.getInteger(ctx, "distance");
+                                                    return this.executePowCommand(ctx, "admin", "cure-vampires-in-range", String.valueOf(stage), String.valueOf(distance));
+                                                }))))
+
 
                         .then(this.buildPlayerCountSubcommand())
 
