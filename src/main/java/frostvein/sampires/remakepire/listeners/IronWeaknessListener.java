@@ -221,7 +221,7 @@ public class IronWeaknessListener implements Listener {
                 armorCheck = event.getCurrentItem();
             }
 
-            if (armorCheck != null & ItemTypeChecking.isIronArmor(armorCheck.getType())) {
+            if (armorCheck != null && ItemTypeChecking.isIronArmor(armorCheck.getType())) {
                 event.setCancelled(true);
 
                 if (!player.getScoreboardTags().contains(SessionManager.INFORMED_ARMOR_EQUIP)) {
