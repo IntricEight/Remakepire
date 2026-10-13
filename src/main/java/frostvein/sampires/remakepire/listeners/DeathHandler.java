@@ -314,6 +314,9 @@ public class DeathHandler implements Listener {
         if (victim.getScoreboardTags().contains(PERMADEATH_CHOSEN_TAG) || victim.getScoreboardTags().contains(PERMAKILL_PROCESSING_TAG)) {
             this.dropCureBooks(victim);
         }
+
+        // Drop any carved pumpkins the player is holding
+        this.dropCarvedPumpkins(victim);
     }
 
     /**
@@ -414,6 +417,27 @@ public class DeathHandler implements Listener {
             if (cureBookNumber >= 1 && cureBookNumber <= 4) {
                 inventory.setItem(slot, null);
                 player.getWorld().dropItemNaturally(player.getLocation(), book);
+            }
+        }
+    }
+
+    /**
+     * Drop any carved pumpkins that are inside the player's inventory.
+     *
+      * @param player the player dropping the pumpkins.
+     */
+    private void dropCarvedPumpkins(Player player) {
+        PlayerInventory inventory = player.getInventory();
+        ItemStack[] contents = inventory.getContents();
+
+        // Scan the player's inventory for any cure books
+        for (int slot = 0; slot < contents.length; slot++) {
+            ItemStack item = contents[slot];
+
+            // Ignore items that can't be cure book
+            if (item != null && item.getType() == Material.CARVED_PUMPKIN) {
+                inventory.setItem(slot, null);
+                player.getWorld().dropItemNaturally(player.getLocation(), item);
             }
         }
     }

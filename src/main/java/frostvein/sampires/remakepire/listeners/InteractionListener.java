@@ -4,9 +4,12 @@ import java.util.Arrays;
 import java.util.List;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.Tag;
 import org.bukkit.block.Block;
+import org.bukkit.block.Shelf;
 import org.bukkit.entity.Animals;
 import org.bukkit.entity.Bee;
 import org.bukkit.entity.Cat;
@@ -22,13 +25,26 @@ import org.bukkit.entity.Strider;
 import org.bukkit.entity.Turtle;
 import org.bukkit.entity.Wolf;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.inventory.ClickType;
+import org.bukkit.event.inventory.InventoryAction;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.inventory.InventoryDragEvent;
+import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerItemHeldEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerPickupItemEvent;
+import org.bukkit.event.player.PlayerSwapHandItemsEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import frostvein.sampires.remakepire.RemakepirePlugin;
+import org.bukkit.inventory.PlayerInventory;
 
 public class InteractionListener implements Listener {
     private final RemakepirePlugin plugin;
@@ -42,6 +58,198 @@ public class InteractionListener implements Listener {
     public InteractionListener(RemakepirePlugin plugin) {
         this.plugin = plugin;
     }
+
+    private boolean isPumpkin(ItemStack item) {
+        if (item == null) {
+            return false;
+        }
+
+        return item.getType() == Material.CARVED_PUMPKIN;
+    }
+
+    private void scheduleCheck(Player player) {
+        Bukkit.getScheduler().runTask(plugin, () -> {
+            if (player.isOnline() && !player.isDead() && player.getGameMode() != GameMode.SPECTATOR) {
+                enforcePumpkin(player);
+            }
+        });
+    }
+
+    private void enforcePumpkin(Player player) {
+        PlayerInventory inventory = player.getInventory();
+
+        // Already holding a pumpkin in either hand.
+        if (isPumpkin(inventory.getItemInMainHand()) || isPumpkin(inventory.getItemInOffHand())) {
+            return;
+        }
+
+        // Search storage inventory, including hotbar.
+        for (int slot = 0; slot < 36; slot++) {
+            ItemStack item = inventory.getItem(slot);
+
+            // Swap pumpkin with whatever is in offhand.
+            if (isPumpkin(item)) {
+                ItemStack offhand = inventory.getItemInOffHand();
+
+                inventory.setItemInOffHand(item);
+                inventory.setItem(slot, offhand);
+
+                return;
+            }
+        }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onInventoryClick(InventoryClickEvent event) {
+        if (event.getWhoClicked() instanceof Player player) {
+            scheduleCheck(player);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onInventoryDrag(InventoryDragEvent event) {
+        if (event.getWhoClicked() instanceof Player player) {
+            scheduleCheck(player);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onInventoryClose(InventoryCloseEvent event) {
+        if (event.getPlayer() instanceof Player player) {
+            scheduleCheck(player);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onItemHeld(PlayerItemHeldEvent event) {
+        scheduleCheck(event.getPlayer());
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onSwapHands(PlayerSwapHandItemsEvent event) {
+        scheduleCheck(event.getPlayer());
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onPickup(PlayerPickupItemEvent event) {
+        scheduleCheck(event.getPlayer());
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onDrop(PlayerDropItemEvent event) {
+        scheduleCheck(event.getPlayer());
+    }
+
+    @EventHandler
+    public void onJoin(PlayerJoinEvent event) {
+        scheduleCheck(event.getPlayer());
+    }
+
+
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void onContainerClick(InventoryClickEvent event) {
+        // Ignore interfaces without a separate container inventory.
+        if (event.getView().getTopInventory()
+                instanceof PlayerInventory) {
+            return;
+        }
+
+        int topSize = event.getView().getTopInventory().getSize();
+        int rawSlot = event.getRawSlot();
+
+        boolean clickedContainer = rawSlot >= 0 && rawSlot < topSize;
+
+        // Prevent placing pumpkins into container slots.
+        if (clickedContainer) {
+
+            // Regular clicks with a pumpkin on the cursor.
+            if (isPumpkin(event.getCursor())) {
+                event.setCancelled(true);
+                return;
+            }
+
+            // Hotbar number-key swaps and offhand swaps.
+            if (event.getAction() == InventoryAction.HOTBAR_SWAP || event.getAction() == InventoryAction.HOTBAR_MOVE_AND_READD) {
+                Player player = (Player) event.getWhoClicked();
+
+                if (event.getClick() == ClickType.SWAP_OFFHAND) {
+                    if (isPumpkin(player.getInventory().getItemInOffHand())) {
+                        event.setCancelled(true);
+                    }
+                } else {
+                    final int button = event.getHotbarButton();
+
+                    if (button >= 0 && button < 9 && isPumpkin(player.getInventory().getItem(button))) {
+                        event.setCancelled(true);
+                    }
+                }
+            }
+
+            return;
+        }
+
+        // Prevent shift-clicking pumpkins into containers.
+        if (event.isShiftClick() && isPumpkin(event.getCurrentItem())) {
+            event.setCancelled(true);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void onContainerDrag(InventoryDragEvent event) {
+        if (!isPumpkin(event.getOldCursor())) {
+            return;
+        }
+
+        int topSize = event.getView().getTopInventory().getSize();
+
+        // Cancel if any destination slot belongs to the container.
+        for (int rawSlot : event.getRawSlots()) {
+            if (rawSlot < topSize) {
+                event.setCancelled(true);
+                return;
+            }
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void onShelfInteract(PlayerInteractEvent event) {
+        if (event.getAction() != Action.RIGHT_CLICK_BLOCK) {
+            return;
+        }
+
+        if (event.getClickedBlock() == null) {
+            return;
+        }
+
+        if (!(event.getClickedBlock().getState() instanceof Shelf)) {
+            return;
+        }
+
+        // Shelves can transfer items from the hotbar.
+        PlayerInventory inventory = event.getPlayer().getInventory();
+
+        for (int slot = 0; slot < 9; slot++) {
+            if (isPumpkin(inventory.getItem(slot))) {
+                event.setCancelled(true);
+                return;
+            }
+        }
+
+        // Also check the offhand.
+        if (isPumpkin(inventory.getItemInOffHand())) {
+            event.setCancelled(true);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void onPumpkinPlace(BlockPlaceEvent event) {
+        if (event.getBlockPlaced().getType() == Material.CARVED_PUMPKIN) {
+            event.setCancelled(true);
+        }
+    }
+
+
+
 
     /**
      * Prevent vampires from interacting with entities in bat form or feeding entities.<br/>
