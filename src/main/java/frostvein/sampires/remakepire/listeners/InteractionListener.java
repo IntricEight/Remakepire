@@ -64,7 +64,15 @@ public class InteractionListener implements Listener {
             return false;
         }
 
-        return item.getType() == Material.CARVED_PUMPKIN;
+        return item.getType() == Material.LAPIS_BLOCK;
+    }
+
+    private boolean isPumpkin(Block block) {
+        if (block == null) {
+            return false;
+        }
+
+        return block.getType() == Material.LAPIS_BLOCK;
     }
 
     private void scheduleCheck(Player player) {
@@ -243,7 +251,7 @@ public class InteractionListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void onPumpkinPlace(BlockPlaceEvent event) {
-        if (event.getBlockPlaced().getType() == Material.CARVED_PUMPKIN) {
+        if (isPumpkin(event.getBlockPlaced())) {
             event.setCancelled(true);
         }
     }
