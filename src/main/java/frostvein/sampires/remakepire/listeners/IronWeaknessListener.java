@@ -322,7 +322,7 @@ public class IronWeaknessListener implements Listener {
             }
         }
 
-        if (this.vampireManager.isRestrictedVampire(player) && ItemTypeChecking.isIronArmor(event.getItem().getType())) {
+        if (this.vampireManager.isRestrictedVampire(player) && event.getItem() != null && ItemTypeChecking.isIronArmor(event.getItem().getType())) {
             event.setCancelled(true);
 
             if (!player.getScoreboardTags().contains(SessionManager.INFORMED_ARMOR_EQUIP)) {
