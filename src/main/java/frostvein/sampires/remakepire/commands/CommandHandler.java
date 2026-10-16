@@ -2790,19 +2790,7 @@ public class CommandHandler implements CommandExecutor {
                 target = player;
 
             } else {
-                Location senderLoc;
-
-                // Get the sending location
-                if (sender instanceof Entity entity) {
-                    senderLoc = entity.getLocation();
-
-                } else if (sender instanceof BlockCommandSender blockSender) {
-                    senderLoc = blockSender.getBlock().getLocation();
-
-                } else {
-                    sender.sendMessage(Component.text("Could not determine the sender's location.", NamedTextColor.RED));
-                    return null;
-                }
+                Location senderLoc = this.getSenderLocation(sender);
 
                 // Find the closest player to the sender
                 double nearestDistance = Double.MAX_VALUE, distance;
@@ -2833,5 +2821,28 @@ public class CommandHandler implements CommandExecutor {
         }
 
         return target;
+    }
+
+    /**
+     * Retrieve the location that a command is sent from.
+     *
+     * @return The {@code Location} of the command's source.
+     */
+    private Location getSenderLocation(CommandSender sender) {
+        Location location;
+
+        // Get the sending location
+        if (sender instanceof Entity entity) {
+            location = entity.getLocation();
+
+        } else if (sender instanceof BlockCommandSender blockSender) {
+            location = blockSender.getBlock().getLocation();
+
+        } else {
+            sender.sendMessage(Component.text("Could not determine the sender's location.", NamedTextColor.RED));
+            return null;
+        }
+
+        return location;
     }
 }
