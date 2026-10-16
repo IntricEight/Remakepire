@@ -792,6 +792,7 @@ public class VampireManager {
         player.removeScoreboardTag(VAMPIRE_STAGE1_TAG);
         player.removeScoreboardTag(VAMPIRE_STAGE2_TAG);
         player.removeScoreboardTag(VAMPIRE_STAGE3_TAG);
+        player.removeScoreboardTag(MARKED_VAMPIRE_TAG);
     }
 
     /**

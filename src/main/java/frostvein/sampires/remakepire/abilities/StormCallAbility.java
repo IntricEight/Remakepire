@@ -42,7 +42,7 @@ public class StormCallAbility extends VampireAbility {
             player.sendMessage(Component.text("This ability cannot be used outside of sessions.", NamedTextColor.RED));
             return false;
 
-        } else  if (world.hasStorm()) {
+        } else if (world.hasStorm()) {
             player.sendMessage(Component.text("The skies are already under your influence...", NamedTextColor.DARK_GRAY));
             return false;
         }
