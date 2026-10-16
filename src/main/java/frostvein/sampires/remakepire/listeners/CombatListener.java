@@ -489,10 +489,7 @@ public class CombatListener implements Listener {
             final int newDamage = currentDamage + additionalDamage;
 
             if (newDamage >= maxDurability) {
-                attacker.getInventory().setItemInMainHand(new ItemStack(Material.AIR));
-                attacker.sendMessage(Component.text("Your wooden stake breaks apart on impact.", NamedTextColor.RED));
-                attacker.getWorld().playSound(attacker.getLocation(), Sound.ENTITY_ITEM_BREAK, SoundCategory.PLAYERS, 1.0F, 1.0F);
-                attacker.setCooldown(Material.WOODEN_SWORD, this.plugin.getConfigManager().getWoodenStakeCooldownTicks());
+                this.breakStake(attacker);
 
             } else {
                 damageable.setDamage(newDamage);
@@ -626,7 +623,7 @@ public class CombatListener implements Listener {
      * @return The damage points of a stake.
      */
     private double getStakeDamage() {
-        return 8.0;
+        return this.plugin.getConfigManager().getWoodenStakeDamage();
     }
 
     /**
