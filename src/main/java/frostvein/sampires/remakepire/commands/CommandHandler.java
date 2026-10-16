@@ -182,6 +182,16 @@ public class CommandHandler implements CommandExecutor {
         } else if (command.getName().equalsIgnoreCase("set_vampire_spawn")) {
             // Set the respawn location for vampires after they temporarily die
             return this.handleSetVampireSpawnCommand(sender, args);
+
+        } else if (command.getName().equalsIgnoreCase("cure-all-vampires")) {
+            // Cure every vampire in the game
+            // TODO: Make the function to cure the vampires
+            return this.handleCureAllVampires(sender, args, false);
+
+        } else if (command.getName().equalsIgnoreCase("cure-vampires-in-range")) {
+            // Cure every vampire within a provided radius
+            // TODO: Make the function to cure the vampires
+            return this.handleCureAllVampires(sender, args, true);
         }
 
         return false;
@@ -2667,6 +2677,45 @@ public class CommandHandler implements CommandExecutor {
         this.plugin.getPassiveMobSpawningManager().triggerSpawning();
         sender.sendMessage(Component.text("Passive mob spawning complete. Check console for spawn details.", NamedTextColor.GREEN));
         return true;
+    }
+
+
+    private boolean handleCureAllVampires(CommandSender sender, String[] args, boolean usesRange) {
+        if (args.length != 2) {
+            if (usesRange) {
+                sender.sendMessage(Component.text("Usage: /pow admin cure-vampires-in-range <stage> <distance>", NamedTextColor.RED));
+            } else {
+                sender.sendMessage(Component.text("Usage: /pow admin cure-all-vampires <stage>", NamedTextColor.RED));
+            }
+
+            return true;
+        }
+
+        final int maxStage = Integer.parseInt(args[0]);
+        if (maxStage < 1 || maxStage > 3) {
+            sender.sendMessage(Component.text("Stage must be between 1 and 3.", NamedTextColor.RED));
+            return true;
+        }
+
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            if (this.vampireManager.isVampire(player) && this.vampireManager.getVampireStage(player) <= maxStage) {
+                if (usesRange) {
+
+                }
+            }
+        }
+
+
+
+
+
+
+        return true;
+    }
+
+
+    private void cureVampireFromCommand(Player vampire) {
+
     }
 
     /**
