@@ -833,6 +833,15 @@ public class ConfigManager {
     }
 
     /**
+     * Retrieve the damage that a wooden stake deals.
+     *
+     * @return The damage applied by wooden stakes.
+     */
+    public double getWoodenStakeDamage() {
+        return this.plugin.getConfig().getDouble("combat.wooden-stake-damage", 8.0);
+    }
+
+    /**
      * Retrieve the percentage of received damage that players will ignore.
      *
      * @return The percent of damage that will be ignored by players.
