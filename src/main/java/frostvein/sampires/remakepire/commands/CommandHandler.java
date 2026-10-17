@@ -2679,43 +2679,62 @@ public class CommandHandler implements CommandExecutor {
         return true;
     }
 
-
+    /**
+     * Trigger a cure of all vampires at a provided stage or below.
+     *
+     * @param usesRange {@code true} if the command is using a distance monitor for the curing.
+     * @return {@code true}
+     */
     private boolean handleCureAllVampires(CommandSender sender, String[] args, boolean usesRange) {
-        if (args.length != 2) {
-            if (usesRange) {
-                sender.sendMessage(Component.text("Usage: /pow admin cure-vampires-in-range <stage> <distance>", NamedTextColor.RED));
-            } else {
-                sender.sendMessage(Component.text("Usage: /pow admin cure-all-vampires <stage>", NamedTextColor.RED));
-            }
+        if (usesRange && args.length != 2) {
+            sender.sendMessage(Component.text("Usage: /pow admin cure-vampires-in-range <stage> <distance>", NamedTextColor.RED));
+            return true;
 
+        } else if (!usesRange && args.length != 1) {
+            sender.sendMessage(Component.text("Usage: /pow admin cure-all-vampires <stage>", NamedTextColor.RED));
             return true;
         }
 
         final int maxStage = Integer.parseInt(args[0]);
+
+        // Ensure the provided stage is a valid one
         if (maxStage < 1 || maxStage > 3) {
             sender.sendMessage(Component.text("Stage must be between 1 and 3.", NamedTextColor.RED));
             return true;
         }
 
+        double distance = 0;
+
+        // Ensure a valid distance was provided
+        if (usesRange) {
+            distance = Double.parseDouble(args[1]);
+        }
+
+        int playercount = 0;
+        final Location senderLoc = this.getSenderLocation(sender);
+        List<Player> playersToCure = new ArrayList<>();
+
+        if (senderLoc == null) {
+            return true;
+        }
+
+        // Retrieve the players who will be cured
         for (Player player : Bukkit.getOnlinePlayers()) {
             if (this.vampireManager.isVampire(player) && this.vampireManager.getVampireStage(player) <= maxStage) {
-                if (usesRange) {
+                if (usesRange && senderLoc.distanceSquared(player.getLocation()) > distance) continue;
 
-                }
+                playersToCure.add(player);
+                playercount++;
             }
         }
 
+        // Force cure every listed player. This cure overrides all protections that would otherwise prevent a cure from happening, and does not use up a beacon.
+        for (Player player : playersToCure) {
+            this.plugin.getForcedCureChoiceManager().openChoiceGUI(null, player, null);
+        }
 
-
-
-
-
+        sender.sendMessage(Component.text(playercount + " vampire" + (playercount == 1 ? "" : "s") + " have been offered a choice: Return to Humanity... or death.", NamedTextColor.DARK_PURPLE));
         return true;
-    }
-
-
-    private void cureVampireFromCommand(Player vampire) {
-
     }
 
     /**
