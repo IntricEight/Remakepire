@@ -298,12 +298,12 @@ public class BrigadierCommands {
      */
     private LiteralArgumentBuilder<CommandSourceStack> buildSessionSubcommand() {
         return Commands.literal("session").executes(ctx -> this.executePowCommand(ctx, "admin", "session"))
+                .then(Commands.literal("prime").executes(ctx -> this.executePowCommand(ctx, "admin", "session", "prime")))
+                .then(Commands.literal("building").executes(ctx -> this.executePowCommand(ctx, "admin", "session", "building")))
                 .then(Commands.literal("start").executes(ctx -> this.executePowCommand(ctx, "admin", "session", "start")))
                 .then(Commands.literal("pause").executes(ctx -> this.executePowCommand(ctx, "admin", "session", "pause")))
-                .then(Commands.literal("end").executes(ctx -> this.executePowCommand(ctx, "admin", "session", "end")))
-                .then(Commands.literal("prime").executes(ctx -> this.executePowCommand(ctx, "admin", "session", "prime")))
                 .then(Commands.literal("resume").executes(ctx -> this.executePowCommand(ctx, "admin", "session", "resume")))
-                .then(Commands.literal("building").executes(ctx -> this.executePowCommand(ctx, "admin", "session", "building")));
+                .then(Commands.literal("end").executes(ctx -> this.executePowCommand(ctx, "admin", "session", "end")));
     }
 
     /**
