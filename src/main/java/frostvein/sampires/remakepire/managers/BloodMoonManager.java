@@ -39,7 +39,9 @@ public class BloodMoonManager {
     private void checkTimeAndMoon() {
         final long fullTime = this.plugin.getWorld().getFullTime();
         final boolean isNight = !this.plugin.getEffectManager().isDaytime(this.plugin.getWorld());
-        final boolean isFullMoon = fullTime % 192000L < 24000L;
+        // To get just the full moon to trigger a blood moon, mod with 192000L
+        // Current number (96000L) triggers a blood moon on the full and new moons
+        final boolean isFullMoon = fullTime % 96000L < 24000L;
 
         if (isNight && isFullMoon && !this.isBloodMoonActive) {
             this.startBloodMoon(this.plugin.getWorld());
