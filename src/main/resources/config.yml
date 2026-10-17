@@ -455,6 +455,11 @@ combat:
   # Default: 80 ticks (4 seconds)
   wooden-stake-cooldown-ticks: 80
 
+  # The damage a wooden stake deals to a vampire (in half-hearts)
+  # The damage is affected by the damage reduction setting.
+  # Default: 8.0 (4 hearts)
+  wooden-stake-damage: 8.0
+
 # Damage Suppression Configuration
 # Controls the percentage of damage reduction for all players
 # Valid values: 0-100 (0 = no suppression, 100 = no damage taken)

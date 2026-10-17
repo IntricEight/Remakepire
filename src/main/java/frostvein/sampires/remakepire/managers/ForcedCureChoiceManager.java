@@ -66,9 +66,10 @@ public class ForcedCureChoiceManager {
      * @param holyBeacon the beacon being used for the cure.
      */
     public void openChoiceGUI(Player caster, Player target, BeaconSite holyBeacon) {
-        boolean hadFlight = target.getAllowFlight();
-        boolean wasInvulnerable = target.isInvulnerable();
-        this.pendingCures.put(target.getUniqueId(), new ForcedCureData(caster.getUniqueId(), target.getUniqueId(), holyBeacon, hadFlight, wasInvulnerable));
+        final boolean hadFlight = target.getAllowFlight();
+        final boolean wasInvulnerable = target.isInvulnerable();
+
+        this.pendingCures.put(target.getUniqueId(), new ForcedCureData(caster != null ? caster.getUniqueId() : null, target.getUniqueId(), holyBeacon, hadFlight, wasInvulnerable));
         this.applyEffectsAndOpenGUI(target);
     }
 
@@ -247,9 +248,11 @@ public class ForcedCureChoiceManager {
      */
     private void performCure(Player caster, Player target, BeaconSite holyBeacon) {
         // Inform the cure caster that the forced cure was successful
-        caster.sendMessage(Component.text(target.getName() + " has chosen to return to humanity...", NamedTextColor.GOLD));
-        caster.sendMessage(Component.text("The creature of darkness accepts their redemption...", NamedTextColor.GRAY));
-        caster.sendMessage(Component.text("You have sanctified " + target.getName() + ", and they have accepted.", NamedTextColor.GREEN));
+        if (caster != null) {
+            caster.sendMessage(Component.text(target.getName() + " has chosen to return to humanity...", NamedTextColor.GOLD));
+            caster.sendMessage(Component.text("The creature of darkness accepts their redemption...", NamedTextColor.GRAY));
+            caster.sendMessage(Component.text("You have sanctified " + target.getName() + ", and they have accepted.", NamedTextColor.GREEN));
+        }
 
         // Inform the former vampire that they are human once more
         target.showTitle(Title.title(
@@ -309,17 +312,19 @@ public class ForcedCureChoiceManager {
         // Create the visual and audio effects of the cure working on the vampire
         this.createCureEffects(target);
 
-        // Check if beacons should be damaged by the cure process
-        if (plugin.getConfigManager().doCuresHaveLastingEffects()) {
-            this.createBeaconCorruptionEffects(target, holyBeacon);
-            holyBeacon.setState(BeaconState.PERMANENTLY_DESECRATED);
-        }
+        if (holyBeacon != null) {
+            // Check if beacons should be damaged by the cure process
+            if (plugin.getConfigManager().doCuresHaveLastingEffects()) {
+                this.createBeaconCorruptionEffects(target, holyBeacon);
+                holyBeacon.setState(BeaconState.PERMANENTLY_DESECRATED);
+            }
 
-        this.plugin.getBeaconManager().updateBeaconDisplay(holyBeacon);
-        this.plugin.getBeaconManager().saveBeacons();
-        this.plugin.getBeaconMajorityManager().updateBeaconMajorityBonuses();
-        this.plugin.getBeaconManager().checkAndBroadcastCompleteControl();
-        this.plugin.getBeaconConversionListener().triggerIfAllBeaconsEvil();
+            this.plugin.getBeaconManager().updateBeaconDisplay(holyBeacon);
+            this.plugin.getBeaconManager().saveBeacons();
+            this.plugin.getBeaconMajorityManager().updateBeaconMajorityBonuses();
+            this.plugin.getBeaconManager().checkAndBroadcastCompleteControl();
+            this.plugin.getBeaconConversionListener().triggerIfAllBeaconsEvil();
+        }
 
         if (this.plugin.getVampireTurningManager() != null) {
             this.plugin.getVampireTurningManager().disableAllVampireTurning();
@@ -338,9 +343,11 @@ public class ForcedCureChoiceManager {
      */
     private void performPermadeath(Player caster, Player target, BeaconSite holyBeacon) {
         // Inform the cure caster that the forced cure was rejected
-        caster.sendMessage(Component.text(target.getName() + " has refused redemption...", NamedTextColor.DARK_RED));
-        caster.sendMessage(Component.text("The creature chooses death over humanity...", NamedTextColor.GRAY));
-        caster.sendMessage(Component.text("Their wish is granted...", NamedTextColor.DARK_GRAY));
+        if (caster != null) {
+            caster.sendMessage(Component.text(target.getName() + " has refused redemption...", NamedTextColor.DARK_RED));
+            caster.sendMessage(Component.text("The creature chooses death over humanity...", NamedTextColor.GRAY));
+            caster.sendMessage(Component.text("Their wish is granted...", NamedTextColor.DARK_GRAY));
+        }
 
         // Inform the vampire that they are now dead
         target.showTitle(Title.title(
@@ -463,7 +470,7 @@ public class ForcedCureChoiceManager {
          * @return A UUID of the caster.
          */
         public Player getCaster() {
-            return Bukkit.getPlayer(this.casterUUID);
+            return casterUUID != null ? Bukkit.getPlayer(casterUUID) : null;
         }
 
         /**
@@ -472,7 +479,7 @@ public class ForcedCureChoiceManager {
          * @return A UUID of the target.
          */
         public Player getTarget() {
-            return Bukkit.getPlayer(this.targetUUID);
+            return targetUUID != null ? Bukkit.getPlayer(targetUUID) : null;
         }
     }
 }

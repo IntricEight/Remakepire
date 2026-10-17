@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import com.mojang.brigadier.arguments.BoolArgumentType;
+import com.mojang.brigadier.arguments.DoubleArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
@@ -158,10 +159,23 @@ public class BrigadierCommands {
 
                         .then(Commands.literal("make_incurable").executes(ctx -> this.executePowCommand(ctx, "admin", "make_incurable"))
                                 .then(Commands.literal("@a").executes(ctx -> this.executePowCommand(ctx, "admin", "make_incurable", "@a")))
+                                .then(Commands.literal("@p").executes(ctx -> this.executePowCommand(ctx, "admin", "make_incurable", "@p")))
+                                .then(Commands.literal("@r").executes(ctx -> this.executePowCommand(ctx, "admin", "make_incurable", "@r")))
+                                .then(Commands.literal("@s").executes(ctx -> this.executePowCommand(ctx, "admin", "make_incurable", "@s")))
                                 .then(Commands.argument("player", StringArgumentType.word()).suggests((ctx, builder) -> this.suggestOnlinePlayers(builder)).executes((ctx) -> {
                                     final String player = StringArgumentType.getString(ctx, "player");
                                     return this.executePowCommand(ctx, "admin", "make_incurable", player);
                                 })))
+                        .then(Commands.literal("cure-all-vampires").executes(ctx -> this.executePowCommand(ctx, "admin", "cure-all-vampires"))
+                                .then(Commands.argument("stage", IntegerArgumentType.integer(1, 3)).executes(ctx -> {
+                                    final int stage = IntegerArgumentType.getInteger(ctx, "stage");
+                                    return this.executePowCommand(ctx, "admin", "cure-all-vampires", String.valueOf(stage));
+                                })
+                                        .then(Commands.argument("distance", DoubleArgumentType.doubleArg(0)).executes(ctx -> {
+                                            final int stage = IntegerArgumentType.getInteger(ctx, "stage");
+                                            final double distance = DoubleArgumentType.getDouble(ctx, "distance");
+                                            return this.executePowCommand(ctx, "admin", "cure-all-vampires", String.valueOf(stage), String.valueOf(distance));
+                                        }))))
 
                         .then(this.buildPlayerCountSubcommand())
 
@@ -172,6 +186,8 @@ public class BrigadierCommands {
                                     final String senderName = ctx.getSource().getSender().getName();
                                     return this.executePowCommand(ctx, "admin", "select_tomes", senderName);
                                 })
+                                .then(Commands.literal("@p").executes((ctx) -> this.executePowCommand(ctx, "admin", "select_tomes", "@p")))
+                                .then(Commands.literal("@r").executes((ctx) -> this.executePowCommand(ctx, "admin", "select_tomes", "@r")))
                                 .then(Commands.argument("player", StringArgumentType.word()).suggests((ctx, builder) -> this.suggestOnlinePlayers(builder)).executes((ctx) -> {
                                     final String player = StringArgumentType.getString(ctx, "player");
                                     return this.executePowCommand(ctx, "admin", "select_tomes", player);
@@ -179,9 +195,9 @@ public class BrigadierCommands {
                         .then(this.buildGiveCureBookSubcommand())
                         .then(Commands.literal("stash_cure_book").executes(ctx -> this.executePowCommand(ctx, "admin", "stash_cure_book"))
                                 .then(Commands.argument("book_number", IntegerArgumentType.integer(1, 4)).executes(ctx -> {
-                                            final int bookNum = IntegerArgumentType.getInteger(ctx, "book_number");
-                                            return this.executePowCommand(ctx, "admin", "stash_cure_book", String.valueOf(bookNum));
-                                        })
+                                    final int bookNum = IntegerArgumentType.getInteger(ctx, "book_number");
+                                    return this.executePowCommand(ctx, "admin", "stash_cure_book", String.valueOf(bookNum));
+                                })
                                         .then(Commands.argument("x", IntegerArgumentType.integer())
                                                 .then(Commands.argument("y", IntegerArgumentType.integer())
                                                         .then(Commands.argument("z", IntegerArgumentType.integer())
@@ -209,6 +225,9 @@ public class BrigadierCommands {
                                 })))
                         .then(Commands.literal("setupplayer").executes(ctx -> this.executePowCommand(ctx, "admin", "setupplayer"))
                                 .then(Commands.literal("@a").executes(ctx -> this.executePowCommand(ctx, "admin", "setupplayer", "@a")))
+                                .then(Commands.literal("@p").executes(ctx -> this.executePowCommand(ctx, "admin", "setupplayer", "@p")))
+                                .then(Commands.literal("@r").executes(ctx -> this.executePowCommand(ctx, "admin", "setupplayer", "@r")))
+                                .then(Commands.literal("@s").executes(ctx -> this.executePowCommand(ctx, "admin", "setupplayer", "@s")))
                                 .then(Commands.argument("player", StringArgumentType.word()).suggests((ctx, builder) -> this.suggestOnlinePlayers(builder)).executes((ctx) -> {
                                     final String player = StringArgumentType.getString(ctx, "player");
                                     return this.executePowCommand(ctx, "admin", "setupplayer", player);
@@ -285,12 +304,12 @@ public class BrigadierCommands {
      */
     private LiteralArgumentBuilder<CommandSourceStack> buildSessionSubcommand() {
         return Commands.literal("session").executes(ctx -> this.executePowCommand(ctx, "admin", "session"))
+                .then(Commands.literal("prime").executes(ctx -> this.executePowCommand(ctx, "admin", "session", "prime")))
+                .then(Commands.literal("building").executes(ctx -> this.executePowCommand(ctx, "admin", "session", "building")))
                 .then(Commands.literal("start").executes(ctx -> this.executePowCommand(ctx, "admin", "session", "start")))
                 .then(Commands.literal("pause").executes(ctx -> this.executePowCommand(ctx, "admin", "session", "pause")))
-                .then(Commands.literal("end").executes(ctx -> this.executePowCommand(ctx, "admin", "session", "end")))
-                .then(Commands.literal("prime").executes(ctx -> this.executePowCommand(ctx, "admin", "session", "prime")))
                 .then(Commands.literal("resume").executes(ctx -> this.executePowCommand(ctx, "admin", "session", "resume")))
-                .then(Commands.literal("building").executes(ctx -> this.executePowCommand(ctx, "admin", "session", "building")));
+                .then(Commands.literal("end").executes(ctx -> this.executePowCommand(ctx, "admin", "session", "end")));
     }
 
     /**
@@ -298,6 +317,60 @@ public class BrigadierCommands {
      */
     private LiteralArgumentBuilder<CommandSourceStack> buildVampireSubcommand() {
         return Commands.literal("vampire").executes(ctx -> this.executePowCommand(ctx, "admin", "vampire"))
+                .then(Commands.literal("@a")
+                        .then(Commands.literal("human").executes(ctx -> this.executePowCommand(ctx, "admin", "vampire", "@a", "human")))
+
+                        .then(Commands.literal("1").executes(ctx -> this.executePowCommand(ctx, "admin", "vampire", "@a", "1")))
+                        .then(Commands.literal("2").executes(ctx -> this.executePowCommand(ctx, "admin", "vampire", "@a", "2")))
+                        .then(Commands.literal("3").executes(ctx -> this.executePowCommand(ctx, "admin", "vampire", "@a", "3")))
+
+                        .then(Commands.literal("clearcap").executes(ctx -> this.executePowCommand(ctx, "admin", "vampire", "@a", "clearcap")))
+                        .then(Commands.literal("clearban").executes(ctx -> this.executePowCommand(ctx, "admin", "vampire", "@a", "clearban"))))
+                .then(Commands.literal("@p")
+                        .then(Commands.literal("human").executes(ctx -> this.executePowCommand(ctx, "admin", "vampire", "@p", "human")))
+
+                        .then(Commands.literal("1").executes(ctx -> this.executePowCommand(ctx, "admin", "vampire", "@p", "1")))
+                        .then(Commands.literal("2").executes(ctx -> this.executePowCommand(ctx, "admin", "vampire", "@p", "2")))
+                        .then(Commands.literal("3").executes(ctx -> this.executePowCommand(ctx, "admin", "vampire", "@p", "3")))
+
+                        .then((Commands.literal("turn").executes(ctx -> this.executePowCommand(ctx, "admin", "vampire", "@p", "turn")))
+                                .then(Commands.argument("turner", StringArgumentType.word()).suggests((ctx, builder) -> this.suggestOnlinePlayers(builder)).executes((ctx) -> {
+                                    final String turner = StringArgumentType.getString(ctx, "turner");
+                                    return this.executePowCommand(ctx, "admin", "vampire", "@p", "turn", turner);
+                                })))
+
+                        .then(Commands.literal("clearcap").executes(ctx -> this.executePowCommand(ctx, "admin", "vampire", "@p", "clearcap")))
+                        .then(Commands.literal("clearban").executes(ctx -> this.executePowCommand(ctx, "admin", "vampire", "@p", "clearban"))))
+                .then(Commands.literal("@r")
+                        .then(Commands.literal("human").executes(ctx -> this.executePowCommand(ctx, "admin", "vampire", "@r", "human")))
+
+                        .then(Commands.literal("1").executes(ctx -> this.executePowCommand(ctx, "admin", "vampire", "@r", "1")))
+                        .then(Commands.literal("2").executes(ctx -> this.executePowCommand(ctx, "admin", "vampire", "@r", "2")))
+                        .then(Commands.literal("3").executes(ctx -> this.executePowCommand(ctx, "admin", "vampire", "@r", "3")))
+
+                        .then((Commands.literal("turn").executes(ctx -> this.executePowCommand(ctx, "admin", "vampire", "@r", "turn")))
+                                .then(Commands.argument("turner", StringArgumentType.word()).suggests((ctx, builder) -> this.suggestOnlinePlayers(builder)).executes((ctx) -> {
+                                    final String turner = StringArgumentType.getString(ctx, "turner");
+                                    return this.executePowCommand(ctx, "admin", "vampire", "@r", "turn", turner);
+                                })))
+
+                        .then(Commands.literal("clearcap").executes(ctx -> this.executePowCommand(ctx, "admin", "vampire", "@r", "clearcap")))
+                        .then(Commands.literal("clearban").executes(ctx -> this.executePowCommand(ctx, "admin", "vampire", "@r", "clearban"))))
+                .then(Commands.literal("@s")
+                        .then(Commands.literal("human").executes(ctx -> this.executePowCommand(ctx, "admin", "vampire", "@s", "human")))
+
+                        .then(Commands.literal("1").executes(ctx -> this.executePowCommand(ctx, "admin", "vampire", "@s", "1")))
+                        .then(Commands.literal("2").executes(ctx -> this.executePowCommand(ctx, "admin", "vampire", "@s", "2")))
+                        .then(Commands.literal("3").executes(ctx -> this.executePowCommand(ctx, "admin", "vampire", "@s", "3")))
+
+                        .then((Commands.literal("turn").executes(ctx -> this.executePowCommand(ctx, "admin", "vampire", "@s", "turn")))
+                                .then(Commands.argument("turner", StringArgumentType.word()).suggests((ctx, builder) -> this.suggestOnlinePlayers(builder)).executes((ctx) -> {
+                                    final String turner = StringArgumentType.getString(ctx, "turner");
+                                    return this.executePowCommand(ctx, "admin", "vampire", "@s", "turn", turner);
+                                })))
+
+                        .then(Commands.literal("clearcap").executes(ctx -> this.executePowCommand(ctx, "admin", "vampire", "@s", "clearcap")))
+                        .then(Commands.literal("clearban").executes(ctx -> this.executePowCommand(ctx, "admin", "vampire", "@s", "clearban"))))
                 .then((Commands.argument("player", StringArgumentType.word()).suggests((ctx, builder) -> this.suggestOnlinePlayers(builder))
                         .then(Commands.literal("human").executes(ctx -> {
                             final String player = StringArgumentType.getString(ctx, "player");
@@ -551,6 +624,36 @@ public class BrigadierCommands {
                                     final int amount = IntegerArgumentType.getInteger(ctx, "amount");
                                     return this.executePowCommand(ctx, "admin", "givetome", "@a", ability, String.valueOf(amount));
                                 }))))
+                .then(Commands.literal("@p")
+                        .then(Commands.argument("ability", StringArgumentType.word()).suggests((ctx, builder) -> this.suggestAllTomeAbilities(builder)).executes((ctx) -> {
+                                    final String ability = StringArgumentType.getString(ctx, "ability");
+                                    return this.executePowCommand(ctx, "admin", "givetome", "@p", ability);
+                                })
+                                .then(Commands.argument("amount", IntegerArgumentType.integer(1, 64)).executes(ctx -> {
+                                    final String ability = StringArgumentType.getString(ctx, "ability");
+                                    final int amount = IntegerArgumentType.getInteger(ctx, "amount");
+                                    return this.executePowCommand(ctx, "admin", "givetome", "@p", ability, String.valueOf(amount));
+                                }))))
+                .then(Commands.literal("@r")
+                        .then(Commands.argument("ability", StringArgumentType.word()).suggests((ctx, builder) -> this.suggestAllTomeAbilities(builder)).executes((ctx) -> {
+                                    final String ability = StringArgumentType.getString(ctx, "ability");
+                                    return this.executePowCommand(ctx, "admin", "givetome", "@r", ability);
+                                })
+                                .then(Commands.argument("amount", IntegerArgumentType.integer(1, 64)).executes(ctx -> {
+                                    final String ability = StringArgumentType.getString(ctx, "ability");
+                                    final int amount = IntegerArgumentType.getInteger(ctx, "amount");
+                                    return this.executePowCommand(ctx, "admin", "givetome", "@r", ability, String.valueOf(amount));
+                                }))))
+                .then(Commands.literal("@s")
+                        .then(Commands.argument("ability", StringArgumentType.word()).suggests((ctx, builder) -> this.suggestAllTomeAbilities(builder)).executes((ctx) -> {
+                                    final String ability = StringArgumentType.getString(ctx, "ability");
+                                    return this.executePowCommand(ctx, "admin", "givetome", "@s", ability);
+                                })
+                                .then(Commands.argument("amount", IntegerArgumentType.integer(1, 64)).executes(ctx -> {
+                                    final String ability = StringArgumentType.getString(ctx, "ability");
+                                    final int amount = IntegerArgumentType.getInteger(ctx, "amount");
+                                    return this.executePowCommand(ctx, "admin", "givetome", "@s", ability, String.valueOf(amount));
+                                }))))
                 .then(Commands.argument("player", StringArgumentType.word()).suggests((ctx, builder) -> this.suggestOnlinePlayers(builder))
                         .then(Commands.argument("ability", StringArgumentType.word()).suggests((ctx, builder) -> this.suggestAllTomeAbilities(builder)).executes((ctx) -> {
                                     final String player = StringArgumentType.getString(ctx, "player");
@@ -574,6 +677,21 @@ public class BrigadierCommands {
                         .then(Commands.argument("book_number", IntegerArgumentType.integer(1, 4)).executes(ctx -> {
                             final int bookNum = IntegerArgumentType.getInteger(ctx, "book_number");
                             return this.executePowCommand(ctx, "admin", "give_cure_book", "@a", String.valueOf(bookNum));
+                        })))
+                .then(Commands.literal("@p")
+                        .then(Commands.argument("book_number", IntegerArgumentType.integer(1, 4)).executes(ctx -> {
+                            final int bookNum = IntegerArgumentType.getInteger(ctx, "book_number");
+                            return this.executePowCommand(ctx, "admin", "give_cure_book", "@p", String.valueOf(bookNum));
+                        })))
+                .then(Commands.literal("@r")
+                        .then(Commands.argument("book_number", IntegerArgumentType.integer(1, 4)).executes(ctx -> {
+                            final int bookNum = IntegerArgumentType.getInteger(ctx, "book_number");
+                            return this.executePowCommand(ctx, "admin", "give_cure_book", "@r", String.valueOf(bookNum));
+                        })))
+                .then(Commands.literal("@s")
+                        .then(Commands.argument("book_number", IntegerArgumentType.integer(1, 4)).executes(ctx -> {
+                            final int bookNum = IntegerArgumentType.getInteger(ctx, "book_number");
+                            return this.executePowCommand(ctx, "admin", "give_cure_book", "@s", String.valueOf(bookNum));
                         })))
                 .then(Commands.argument("player", StringArgumentType.word()).suggests((ctx, builder) -> this.suggestOnlinePlayers(builder))
                         .then(Commands.argument("book_number", IntegerArgumentType.integer(1, 4)).executes(ctx -> {
@@ -619,6 +737,21 @@ public class BrigadierCommands {
                         .then(Commands.argument("clearInventory", BoolArgumentType.bool()).executes(ctx -> {
                             final boolean clearInv = BoolArgumentType.getBool(ctx, "clearInventory");
                             return this.executePowCommand(ctx, "admin", "resetplayer", "@a", String.valueOf(clearInv));
+                        })))
+                .then(Commands.literal("@p").executes(ctx -> this.executePowCommand(ctx, "admin", "resetplayer", "@p"))
+                        .then(Commands.argument("clearInventory", BoolArgumentType.bool()).executes(ctx -> {
+                            final boolean clearInv = BoolArgumentType.getBool(ctx, "clearInventory");
+                            return this.executePowCommand(ctx, "admin", "resetplayer", "@p", String.valueOf(clearInv));
+                        })))
+                .then(Commands.literal("@r").executes(ctx -> this.executePowCommand(ctx, "admin", "resetplayer", "@r"))
+                        .then(Commands.argument("clearInventory", BoolArgumentType.bool()).executes(ctx -> {
+                            final boolean clearInv = BoolArgumentType.getBool(ctx, "clearInventory");
+                            return this.executePowCommand(ctx, "admin", "resetplayer", "@r", String.valueOf(clearInv));
+                        })))
+                .then(Commands.literal("@s").executes(ctx -> this.executePowCommand(ctx, "admin", "resetplayer", "@s"))
+                        .then(Commands.argument("clearInventory", BoolArgumentType.bool()).executes(ctx -> {
+                            final boolean clearInv = BoolArgumentType.getBool(ctx, "clearInventory");
+                            return this.executePowCommand(ctx, "admin", "resetplayer", "@s", String.valueOf(clearInv));
                         })))
                 .then((Commands.argument("player", StringArgumentType.word()).suggests((ctx, builder) -> this.suggestOnlinePlayers(builder)).executes((ctx) -> {
                     final String player = StringArgumentType.getString(ctx, "player");
