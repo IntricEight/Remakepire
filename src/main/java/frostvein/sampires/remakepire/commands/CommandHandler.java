@@ -182,6 +182,10 @@ public class CommandHandler implements CommandExecutor {
         } else if (command.getName().equalsIgnoreCase("set_vampire_spawn")) {
             // Set the respawn location for vampires after they temporarily die
             return this.handleSetVampireSpawnCommand(sender, args);
+
+        } else if (command.getName().equalsIgnoreCase("cure-all-vampires")) {
+            // Cure every vampire in the game that meets a stage, and possibly a distance, requirement
+            return this.handleCureAllVampires(sender, args);
         }
 
         return false;
@@ -2670,6 +2674,59 @@ public class CommandHandler implements CommandExecutor {
     }
 
     /**
+     * Trigger a cure of all vampires at a provided stage or below.
+     *
+     * @return {@code true}
+     */
+    private boolean handleCureAllVampires(CommandSender sender, String[] args) {
+        if (args.length < 1) {
+            sender.sendMessage(Component.text("Usage: /pow admin cure-all-vampires <stage> <distance>", NamedTextColor.RED));
+            return true;
+        }
+
+        final int maxStage = Integer.parseInt(args[0]);
+
+        // Ensure the provided stage is a valid one
+        if (maxStage < 1 || maxStage > 3) {
+            sender.sendMessage(Component.text("Stage must be between 1 and 3.", NamedTextColor.RED));
+            return true;
+        }
+
+        double distance = 0;
+
+        // Ensure a valid distance was provided
+        if (args.length >= 2) {
+            distance = Double.parseDouble(args[1]);
+        }
+
+        int playercount = 0;
+        final Location senderLoc = this.getSenderLocation(sender);
+        List<Player> playersToCure = new ArrayList<>();
+
+        if (senderLoc == null) {
+            return true;
+        }
+
+        // Retrieve the players who will be cured
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            if (this.vampireManager.isVampire(player) && this.vampireManager.getVampireStage(player) <= maxStage && player.getGameMode() != GameMode.SPECTATOR) {
+                if (args.length >= 2 && senderLoc.distanceSquared(player.getLocation()) > distance) continue;
+
+                playersToCure.add(player);
+                playercount++;
+            }
+        }
+
+        // Force cure every listed player. This cure overrides all protections that would otherwise prevent a cure from happening, and does not use up a beacon.
+        for (Player player : playersToCure) {
+            this.plugin.getForcedCureChoiceManager().openChoiceGUI(null, player, null);
+        }
+
+        sender.sendMessage(Component.text(playercount + " vampire" + (playercount == 1 ? "" : "s") + " have been offered a choice: Return to Humanity... or death.", NamedTextColor.DARK_PURPLE));
+        return true;
+    }
+
+    /**
      * Give an infinite night vision effect to the player.
      *
      * @param player the vampire gaining night vision.
@@ -2741,17 +2798,9 @@ public class CommandHandler implements CommandExecutor {
                 target = player;
 
             } else {
-                Location senderLoc;
+                Location senderLoc = this.getSenderLocation(sender);
 
-                // Get the sending location
-                if (sender instanceof Entity entity) {
-                    senderLoc = entity.getLocation();
-
-                } else if (sender instanceof BlockCommandSender blockSender) {
-                    senderLoc = blockSender.getBlock().getLocation();
-
-                } else {
-                    sender.sendMessage(Component.text("Could not determine the sender's location.", NamedTextColor.RED));
+                if (senderLoc == null) {
                     return null;
                 }
 
@@ -2784,5 +2833,28 @@ public class CommandHandler implements CommandExecutor {
         }
 
         return target;
+    }
+
+    /**
+     * Retrieve the location that a command is sent from.
+     *
+     * @return The {@code Location} of the command's source.
+     */
+    private Location getSenderLocation(CommandSender sender) {
+        Location location;
+
+        // Get the sending location
+        if (sender instanceof Entity entity) {
+            location = entity.getLocation();
+
+        } else if (sender instanceof BlockCommandSender blockSender) {
+            location = blockSender.getBlock().getLocation();
+
+        } else {
+            sender.sendMessage(Component.text("Could not determine the sender's location.", NamedTextColor.RED));
+            return null;
+        }
+
+        return location;
     }
 }
