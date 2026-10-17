@@ -2709,7 +2709,7 @@ public class CommandHandler implements CommandExecutor {
 
         // Retrieve the players who will be cured
         for (Player player : Bukkit.getOnlinePlayers()) {
-            if (this.vampireManager.isVampire(player) && this.vampireManager.getVampireStage(player) <= maxStage) {
+            if (this.vampireManager.isVampire(player) && this.vampireManager.getVampireStage(player) <= maxStage && player.getGameMode() != GameMode.SPECTATOR) {
                 if (args.length >= 2 && senderLoc.distanceSquared(player.getLocation()) > distance) continue;
 
                 playersToCure.add(player);
@@ -2799,6 +2799,10 @@ public class CommandHandler implements CommandExecutor {
 
             } else {
                 Location senderLoc = this.getSenderLocation(sender);
+
+                if (senderLoc == null) {
+                    return null;
+                }
 
                 // Find the closest player to the sender
                 double nearestDistance = Double.MAX_VALUE, distance;
