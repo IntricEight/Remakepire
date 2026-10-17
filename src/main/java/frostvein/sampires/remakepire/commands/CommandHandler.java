@@ -1996,23 +1996,24 @@ public class CommandHandler implements CommandExecutor {
      * @return {@code true}
      */
     private boolean handleSelectTomesCommand(CommandSender sender, String[] args) {
-        if (!(sender instanceof Player admin)) {
-            sender.sendMessage(Component.text("This command can only be used by players.", NamedTextColor.RED));
-            return true;
-
-        } else if (args.length < 1) {
+        if (args.length < 1) {
             sender.sendMessage(Component.text("Usage: /pow admin select_tomes <player>", NamedTextColor.RED));
             return true;
         }
 
-        Player target = Bukkit.getPlayerExact(args[0]);
+        Player target = this.getPlayerFromParameter(sender, args[0]);
 
         if (target == null) {
             sender.sendMessage(Component.text("Player '" + args[0] + "' not found.", NamedTextColor.RED));
             return true;
         }
 
-        this.tomeManager.openTomeSelectionGUI(admin, target);
+        if (sender instanceof Player admin) {
+            this.tomeManager.openTomeSelectionGUI(admin, target);
+        } else {
+            this.tomeManager.openTomeSelectionGUI(target, target);
+        }
+
         return true;
     }
 

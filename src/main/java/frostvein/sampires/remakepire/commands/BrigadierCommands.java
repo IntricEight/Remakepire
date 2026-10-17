@@ -177,6 +177,8 @@ public class BrigadierCommands {
                                     final String senderName = ctx.getSource().getSender().getName();
                                     return this.executePowCommand(ctx, "admin", "select_tomes", senderName);
                                 })
+                                .then(Commands.literal("@p").executes((ctx) -> this.executePowCommand(ctx, "admin", "select_tomes", "@p")))
+                                .then(Commands.literal("@r").executes((ctx) -> this.executePowCommand(ctx, "admin", "select_tomes", "@r")))
                                 .then(Commands.argument("player", StringArgumentType.word()).suggests((ctx, builder) -> this.suggestOnlinePlayers(builder)).executes((ctx) -> {
                                     final String player = StringArgumentType.getString(ctx, "player");
                                     return this.executePowCommand(ctx, "admin", "select_tomes", player);
