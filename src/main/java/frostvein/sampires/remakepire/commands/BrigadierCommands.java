@@ -158,20 +158,15 @@ public class BrigadierCommands {
                                     return this.executePowCommand(ctx, "admin", "make_incurable", player);
                                 })))
                         .then(Commands.literal("cure-all-vampires").executes(ctx -> this.executePowCommand(ctx, "admin", "cure-all-vampires"))
-                                .then(Commands.argument("stage", IntegerArgumentType.integer(1, 3))
-                                        .executes(ctx -> {
+                                .then(Commands.argument("stage", IntegerArgumentType.integer(1, 3)).executes(ctx -> {
+                                    final int stage = IntegerArgumentType.getInteger(ctx, "stage");
+                                    return this.executePowCommand(ctx, "admin", "cure-all-vampires", String.valueOf(stage));
+                                })
+                                        .then(Commands.argument("distance", DoubleArgumentType.doubleArg(0)).executes(ctx -> {
                                             final int stage = IntegerArgumentType.getInteger(ctx, "stage");
-                                            return this.executePowCommand(ctx, "admin", "cure-all-vampires", String.valueOf(stage));
-                                        })))
-                        .then(Commands.literal("cure-vampires-in-range").executes(ctx -> this.executePowCommand(ctx, "admin", "cure-vampires-in-range"))
-                                .then(Commands.argument("stage", IntegerArgumentType.integer(1, 3))
-                                        .then(Commands.argument("distance", DoubleArgumentType.doubleArg(0))
-                                                .executes(ctx -> {
-                                                    final int stage = IntegerArgumentType.getInteger(ctx, "stage");
-                                                    final double distance = DoubleArgumentType.getDouble(ctx, "distance");
-                                                    return this.executePowCommand(ctx, "admin", "cure-vampires-in-range", String.valueOf(stage), String.valueOf(distance));
-                                                }))))
-
+                                            final double distance = DoubleArgumentType.getDouble(ctx, "distance");
+                                            return this.executePowCommand(ctx, "admin", "cure-all-vampires", String.valueOf(stage), String.valueOf(distance));
+                                        }))))
 
                         .then(this.buildPlayerCountSubcommand())
 
@@ -189,9 +184,9 @@ public class BrigadierCommands {
                         .then(this.buildGiveCureBookSubcommand())
                         .then(Commands.literal("stash_cure_book").executes(ctx -> this.executePowCommand(ctx, "admin", "stash_cure_book"))
                                 .then(Commands.argument("book_number", IntegerArgumentType.integer(1, 4)).executes(ctx -> {
-                                            final int bookNum = IntegerArgumentType.getInteger(ctx, "book_number");
-                                            return this.executePowCommand(ctx, "admin", "stash_cure_book", String.valueOf(bookNum));
-                                        })
+                                    final int bookNum = IntegerArgumentType.getInteger(ctx, "book_number");
+                                    return this.executePowCommand(ctx, "admin", "stash_cure_book", String.valueOf(bookNum));
+                                })
                                         .then(Commands.argument("x", IntegerArgumentType.integer())
                                                 .then(Commands.argument("y", IntegerArgumentType.integer())
                                                         .then(Commands.argument("z", IntegerArgumentType.integer())

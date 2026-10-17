@@ -184,14 +184,8 @@ public class CommandHandler implements CommandExecutor {
             return this.handleSetVampireSpawnCommand(sender, args);
 
         } else if (command.getName().equalsIgnoreCase("cure-all-vampires")) {
-            // Cure every vampire in the game
-            // TODO: Make the function to cure the vampires
-            return this.handleCureAllVampires(sender, args, false);
-
-        } else if (command.getName().equalsIgnoreCase("cure-vampires-in-range")) {
-            // Cure every vampire within a provided radius
-            // TODO: Make the function to cure the vampires
-            return this.handleCureAllVampires(sender, args, true);
+            // Cure every vampire in the game that meets a stage, and possibly a distance, requirement
+            return this.handleCureAllVampires(sender, args);
         }
 
         return false;
@@ -2682,16 +2676,11 @@ public class CommandHandler implements CommandExecutor {
     /**
      * Trigger a cure of all vampires at a provided stage or below.
      *
-     * @param usesRange {@code true} if the command is using a distance monitor for the curing.
      * @return {@code true}
      */
-    private boolean handleCureAllVampires(CommandSender sender, String[] args, boolean usesRange) {
-        if (usesRange && args.length != 2) {
-            sender.sendMessage(Component.text("Usage: /pow admin cure-vampires-in-range <stage> <distance>", NamedTextColor.RED));
-            return true;
-
-        } else if (!usesRange && args.length != 1) {
-            sender.sendMessage(Component.text("Usage: /pow admin cure-all-vampires <stage>", NamedTextColor.RED));
+    private boolean handleCureAllVampires(CommandSender sender, String[] args) {
+        if (args.length < 1) {
+            sender.sendMessage(Component.text("Usage: /pow admin cure-all-vampires <stage> <distance>", NamedTextColor.RED));
             return true;
         }
 
@@ -2706,7 +2695,7 @@ public class CommandHandler implements CommandExecutor {
         double distance = 0;
 
         // Ensure a valid distance was provided
-        if (usesRange) {
+        if (args.length >= 2) {
             distance = Double.parseDouble(args[1]);
         }
 
@@ -2721,7 +2710,7 @@ public class CommandHandler implements CommandExecutor {
         // Retrieve the players who will be cured
         for (Player player : Bukkit.getOnlinePlayers()) {
             if (this.vampireManager.isVampire(player) && this.vampireManager.getVampireStage(player) <= maxStage) {
-                if (usesRange && senderLoc.distanceSquared(player.getLocation()) > distance) continue;
+                if (args.length >= 2 && senderLoc.distanceSquared(player.getLocation()) > distance) continue;
 
                 playersToCure.add(player);
                 playercount++;
