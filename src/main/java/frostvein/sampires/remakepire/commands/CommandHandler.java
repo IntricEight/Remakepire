@@ -182,6 +182,10 @@ public class CommandHandler implements CommandExecutor {
         } else if (command.getName().equalsIgnoreCase("set_vampire_spawn")) {
             // Set the respawn location for vampires after they temporarily die
             return this.handleSetVampireSpawnCommand(sender, args);
+
+        } else if (command.getName().equalsIgnoreCase("cure-all-vampires")) {
+            // Cure every vampire in the game that meets a stage, and possibly a distance, requirement
+            return this.handleCureAllVampires(sender, args);
         }
 
         return false;
@@ -1992,23 +1996,24 @@ public class CommandHandler implements CommandExecutor {
      * @return {@code true}
      */
     private boolean handleSelectTomesCommand(CommandSender sender, String[] args) {
-        if (!(sender instanceof Player admin)) {
-            sender.sendMessage(Component.text("This command can only be used by players.", NamedTextColor.RED));
-            return true;
-
-        } else if (args.length < 1) {
+        if (args.length < 1) {
             sender.sendMessage(Component.text("Usage: /pow admin select_tomes <player>", NamedTextColor.RED));
             return true;
         }
 
-        Player target = Bukkit.getPlayerExact(args[0]);
+        Player target = this.getPlayerFromParameter(sender, args[0]);
 
         if (target == null) {
             sender.sendMessage(Component.text("Player '" + args[0] + "' not found.", NamedTextColor.RED));
             return true;
         }
 
-        this.tomeManager.openTomeSelectionGUI(admin, target);
+        if (sender instanceof Player admin) {
+            this.tomeManager.openTomeSelectionGUI(admin, target);
+        } else {
+            this.tomeManager.openTomeSelectionGUI(target, target);
+        }
+
         return true;
     }
 
@@ -2670,6 +2675,59 @@ public class CommandHandler implements CommandExecutor {
     }
 
     /**
+     * Trigger a cure of all vampires at a provided stage or below.
+     *
+     * @return {@code true}
+     */
+    private boolean handleCureAllVampires(CommandSender sender, String[] args) {
+        if (args.length < 1) {
+            sender.sendMessage(Component.text("Usage: /pow admin cure-all-vampires <stage> <distance>", NamedTextColor.RED));
+            return true;
+        }
+
+        final int maxStage = Integer.parseInt(args[0]);
+
+        // Ensure the provided stage is a valid one
+        if (maxStage < 1 || maxStage > 3) {
+            sender.sendMessage(Component.text("Stage must be between 1 and 3.", NamedTextColor.RED));
+            return true;
+        }
+
+        double distance = 0;
+
+        // Ensure a valid distance was provided
+        if (args.length >= 2) {
+            distance = Double.parseDouble(args[1]);
+        }
+
+        int playercount = 0;
+        final Location senderLoc = this.getSenderLocation(sender);
+        List<Player> playersToCure = new ArrayList<>();
+
+        if (senderLoc == null) {
+            return true;
+        }
+
+        // Retrieve the players who will be cured
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            if (this.vampireManager.isVampire(player) && this.vampireManager.getVampireStage(player) <= maxStage && player.getGameMode() != GameMode.SPECTATOR) {
+                if (args.length >= 2 && senderLoc.distanceSquared(player.getLocation()) > distance) continue;
+
+                playersToCure.add(player);
+                playercount++;
+            }
+        }
+
+        // Force cure every listed player. This cure overrides all protections that would otherwise prevent a cure from happening, and does not use up a beacon.
+        for (Player player : playersToCure) {
+            this.plugin.getForcedCureChoiceManager().openChoiceGUI(null, player, null);
+        }
+
+        sender.sendMessage(Component.text(playercount + " vampire" + (playercount == 1 ? "" : "s") + " have been offered a choice: Return to Humanity... or death.", NamedTextColor.DARK_PURPLE));
+        return true;
+    }
+
+    /**
      * Give an infinite night vision effect to the player.
      *
      * @param player the vampire gaining night vision.
@@ -2742,6 +2800,10 @@ public class CommandHandler implements CommandExecutor {
 
             } else {
                 Location senderLoc = this.getSenderLocation(sender);
+
+                if (senderLoc == null) {
+                    return null;
+                }
 
                 // Find the closest player to the sender
                 double nearestDistance = Double.MAX_VALUE, distance;
