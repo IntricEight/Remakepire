@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import com.mojang.brigadier.arguments.BoolArgumentType;
+import com.mojang.brigadier.arguments.DoubleArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
@@ -156,6 +157,16 @@ public class BrigadierCommands {
                                     final String player = StringArgumentType.getString(ctx, "player");
                                     return this.executePowCommand(ctx, "admin", "make_incurable", player);
                                 })))
+                        .then(Commands.literal("cure-all-vampires").executes(ctx -> this.executePowCommand(ctx, "admin", "cure-all-vampires"))
+                                .then(Commands.argument("stage", IntegerArgumentType.integer(1, 3)).executes(ctx -> {
+                                    final int stage = IntegerArgumentType.getInteger(ctx, "stage");
+                                    return this.executePowCommand(ctx, "admin", "cure-all-vampires", String.valueOf(stage));
+                                })
+                                        .then(Commands.argument("distance", DoubleArgumentType.doubleArg(0)).executes(ctx -> {
+                                            final int stage = IntegerArgumentType.getInteger(ctx, "stage");
+                                            final double distance = DoubleArgumentType.getDouble(ctx, "distance");
+                                            return this.executePowCommand(ctx, "admin", "cure-all-vampires", String.valueOf(stage), String.valueOf(distance));
+                                        }))))
 
                         .then(this.buildPlayerCountSubcommand())
 
@@ -173,9 +184,9 @@ public class BrigadierCommands {
                         .then(this.buildGiveCureBookSubcommand())
                         .then(Commands.literal("stash_cure_book").executes(ctx -> this.executePowCommand(ctx, "admin", "stash_cure_book"))
                                 .then(Commands.argument("book_number", IntegerArgumentType.integer(1, 4)).executes(ctx -> {
-                                            final int bookNum = IntegerArgumentType.getInteger(ctx, "book_number");
-                                            return this.executePowCommand(ctx, "admin", "stash_cure_book", String.valueOf(bookNum));
-                                        })
+                                    final int bookNum = IntegerArgumentType.getInteger(ctx, "book_number");
+                                    return this.executePowCommand(ctx, "admin", "stash_cure_book", String.valueOf(bookNum));
+                                })
                                         .then(Commands.argument("x", IntegerArgumentType.integer())
                                                 .then(Commands.argument("y", IntegerArgumentType.integer())
                                                         .then(Commands.argument("z", IntegerArgumentType.integer())
@@ -282,12 +293,12 @@ public class BrigadierCommands {
      */
     private LiteralArgumentBuilder<CommandSourceStack> buildSessionSubcommand() {
         return Commands.literal("session").executes(ctx -> this.executePowCommand(ctx, "admin", "session"))
+                .then(Commands.literal("prime").executes(ctx -> this.executePowCommand(ctx, "admin", "session", "prime")))
+                .then(Commands.literal("building").executes(ctx -> this.executePowCommand(ctx, "admin", "session", "building")))
                 .then(Commands.literal("start").executes(ctx -> this.executePowCommand(ctx, "admin", "session", "start")))
                 .then(Commands.literal("pause").executes(ctx -> this.executePowCommand(ctx, "admin", "session", "pause")))
-                .then(Commands.literal("end").executes(ctx -> this.executePowCommand(ctx, "admin", "session", "end")))
-                .then(Commands.literal("prime").executes(ctx -> this.executePowCommand(ctx, "admin", "session", "prime")))
                 .then(Commands.literal("resume").executes(ctx -> this.executePowCommand(ctx, "admin", "session", "resume")))
-                .then(Commands.literal("building").executes(ctx -> this.executePowCommand(ctx, "admin", "session", "building")));
+                .then(Commands.literal("end").executes(ctx -> this.executePowCommand(ctx, "admin", "session", "end")));
     }
 
     /**
