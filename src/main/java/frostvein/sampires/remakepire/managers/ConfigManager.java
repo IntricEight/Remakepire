@@ -744,7 +744,7 @@ public class ConfigManager {
      * @return {@code true} if vampires will destroy the items as well as the blocks.
      */
     public boolean doVampiresDestroySilverDoors() {
-        return this.plugin.getConfig().getBoolean("vampire.destroy-silver-doors", true);
+        return this.plugin.getConfig().getBoolean("vampire.destroy-silver-doors", false);
     }
 
     /**
@@ -830,6 +830,15 @@ public class ConfigManager {
      */
     public int getWoodenStakeCooldownTicks() {
         return this.plugin.getConfig().getInt("combat.wooden-stake-cooldown-ticks", 80);
+    }
+
+    /**
+     * Retrieve the damage that a wooden stake deals.
+     *
+     * @return The damage applied by wooden stakes.
+     */
+    public double getWoodenStakeDamage() {
+        return this.plugin.getConfig().getDouble("combat.wooden-stake-damage", 8.0);
     }
 
     /**
