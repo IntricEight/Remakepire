@@ -130,6 +130,11 @@ public class VampireFeedingManager implements Listener {
                 vampire.sendMessage(Component.text("You begin feeding on " + target.getName() + "!", NamedTextColor.DARK_RED)
                         .decorate(TextDecoration.BOLD));
 
+                if (this.plugin.getBeetrootManager().hasBeetrootImmunity(target)) {
+                    vampire.sendMessage(Component.text("There is a nauseating undertone in the blood...", NamedTextColor.DARK_RED)
+                            .decorate(TextDecoration.BOLD));
+                }
+
                 target.sendMessage(Component.text("You feel a vampire draining your life force!", NamedTextColor.RED)
                         .decorate(TextDecoration.BOLD));
                 target.sendMessage(Component.text("Move away or break the vampire's crouch to escape!", NamedTextColor.GRAY));
