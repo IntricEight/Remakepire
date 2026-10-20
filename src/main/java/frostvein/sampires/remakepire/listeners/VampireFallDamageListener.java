@@ -30,7 +30,9 @@ public class VampireFallDamageListener implements Listener {
         if (event.getEntity() instanceof Player player) {
             if (event.getCause() == DamageCause.FALL) {
                 if (this.vampireManager.shouldPreventFallDamage(player)) {
+                    event.setDamage(0.0);
                     event.setCancelled(true);
+
                 } else {
                     if (this.vampireManager.isVampire(player)) {
                         event.setDamage(event.getDamage() * 0.5);
