@@ -130,6 +130,11 @@ public class VampireFeedingManager implements Listener {
                 vampire.sendMessage(Component.text("You begin feeding on " + target.getName() + "!", NamedTextColor.DARK_RED)
                         .decorate(TextDecoration.BOLD));
 
+                if (this.plugin.getBeetrootManager().hasBeetrootImmunity(target)) {
+                    vampire.sendMessage(Component.text("There is a nauseating undertone in the blood...", NamedTextColor.DARK_RED)
+                            .decorate(TextDecoration.BOLD));
+                }
+
                 target.sendMessage(Component.text("You feel a vampire draining your life force!", NamedTextColor.RED)
                         .decorate(TextDecoration.BOLD));
                 target.sendMessage(Component.text("Move away or break the vampire's crouch to escape!", NamedTextColor.GRAY));
@@ -167,7 +172,11 @@ public class VampireFeedingManager implements Listener {
 
             // Prevent the vampire from draining more blood than the config setting allows
             if (currentSessionThirst >= maxFeedingThirst) {
-                vampire.sendMessage(Component.text("Your thirst is quenched, for now. You are unable to drink any more blood from feeding until the next session.", NamedTextColor.RED));
+                if (!vampire.getScoreboardTags().contains(SessionManager.INFORMED_MAX_FEEDING)) {
+                    vampire.addScoreboardTag(SessionManager.INFORMED_MAX_FEEDING);
+                    vampire.sendMessage(Component.text("Your thirst is quenched, for now. You are unable to drink any more blood from feeding until the next session.", NamedTextColor.RED));
+                }
+
                 this.cancelFeedingSession(session);
                 return;
             }
@@ -321,7 +330,11 @@ public class VampireFeedingManager implements Listener {
     private void attemptStartFeeding(Player vampire) {
         if (this.vampireManager.isVampire(vampire) && !this.isFeeding(vampire) && vampire.isSneaking()) {
             if (this.getSessionFeedingThirst(vampire) >= this.plugin.getConfigManager().getMaxFeedingThirstPerSession()) {
-                vampire.sendMessage(Component.text("Your thirst is quenched, for now. You are unable to drink any more blood from feeding until the next session.", NamedTextColor.RED));
+                if (!vampire.getScoreboardTags().contains(SessionManager.INFORMED_MAX_FEEDING)) {
+                    vampire.addScoreboardTag(SessionManager.INFORMED_MAX_FEEDING);
+                    vampire.sendMessage(Component.text("Your thirst is quenched, for now. You are unable to drink any more blood from feeding until the next session.", NamedTextColor.RED));
+                }
+
                 return;
             }
 
