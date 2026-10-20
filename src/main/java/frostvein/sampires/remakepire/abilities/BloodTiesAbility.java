@@ -73,7 +73,7 @@ public class BloodTiesAbility extends VampireAbility {
         fledglingNames.removeIf(name -> {
             Player fledgling = Bukkit.getPlayerExact(name);
 
-            return fledgling == null || !fledgling.isOnline() || fledgling.getGameMode() == GameMode.SPECTATOR || fledgling.isDead() || fledgling.getScoreboardTags().contains("CuredVampire");
+            return fledgling == null || !fledgling.isOnline() || fledgling.getGameMode() == GameMode.SPECTATOR || fledgling.isDead() || !plugin.getVampireManager().isVampire(fledgling);
         });
 
         // Make sure the player has fledglings to track before letting them use the ability
