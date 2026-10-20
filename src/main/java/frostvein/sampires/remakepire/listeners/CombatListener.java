@@ -373,18 +373,18 @@ public class CombatListener implements Listener {
                 EntityDamageEvent.DamageCause cause = event.getCause();
 
                 // Modify the fire damage dealt to vampires
-                if (cause == DamageCause.FIRE || cause == DamageCause.FIRE_TICK || cause == DamageCause.LAVA) {
+                if (cause == DamageCause.FIRE || cause == DamageCause.FIRE_TICK || cause == DamageCause.CAMPFIRE || cause == DamageCause.LAVA) {
                     final int vampireStage = this.vampireManager.getVampireStage(player);
                     event.setDamage(event.getDamage() * this.getFireDamageMultiplier(vampireStage));
                 }
 
-                // Process the fire damage with the default response
-                if (event.getCause() == DamageCause.ENTITY_ATTACK) {
+                // Process the entity damage with the onEntityDamageByEntity function
+                if (cause == DamageCause.ENTITY_ATTACK) {
                     return;
                 }
 
-                // Ensure vampires can be killed by the void
-                if (event.getCause() == DamageCause.KILL || event.getCause() == DamageCause.VOID) {
+                // Ensure vampires can be killed by commands or out of bounds areas like the void
+                if (cause == DamageCause.KILL || cause == DamageCause.VOID || cause == DamageCause.WORLD_BORDER) {
                     return;
                 }
 
