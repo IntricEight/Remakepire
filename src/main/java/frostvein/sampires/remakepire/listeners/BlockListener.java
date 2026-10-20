@@ -15,6 +15,7 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
+import org.bukkit.event.player.PlayerItemDamageEvent;
 import frostvein.sampires.remakepire.RemakepirePlugin;
 import frostvein.sampires.remakepire.managers.SessionManager;
 
@@ -146,5 +147,18 @@ public class BlockListener implements Listener {
 
         // Stop blocks from being destroyed in the explosion
         event.blockList().clear();
+    }
+
+    /**
+     * Stop items from taking damage during build mode.
+     *
+     * @param event a player's item loses durability.
+     */
+    @EventHandler
+    public void onItemDamage(PlayerItemDamageEvent event) {
+        // Prevent durability loss outside of active sessions
+        if (this.plugin.getSessionManager().isPreSession()) {
+            event.setCancelled(true);
+        }
     }
 }
