@@ -142,7 +142,7 @@ public class ConfigManager {
     /**
      * Retrieve the cooldown on the vampire ability Bat Transformation.
      *
-     * @return the seconds between ability uses.
+     * @return The seconds between ability uses.
      */
     public int getVampireBatCooldown() {
         return this.plugin.getConfig().getInt("abilities.vampire.bat-cooldown", 900);
@@ -160,7 +160,7 @@ public class ConfigManager {
     /**
      * Retrieve the cooldown on the vampire ability Vampiric Lunge.
      *
-     * @return the seconds between ability uses.
+     * @return The seconds between ability uses.
      */
     public int getVampireLungeCooldown() {
         return this.plugin.getConfig().getInt("abilities.vampire.lunge-cooldown", 45);
@@ -169,7 +169,7 @@ public class ConfigManager {
     /**
      * Retrieve the cooldown on the vampire ability Vampiric Vanish.
      *
-     * @return the seconds between ability uses.
+     * @return The seconds between ability uses.
      */
     public int getVampireVanishCooldown() {
         return this.plugin.getConfig().getInt("abilities.vampire.vanish-cooldown", 420);
@@ -187,7 +187,7 @@ public class ConfigManager {
     /**
      * Retrieve the cooldown on the vampire ability Storm Call.
      *
-     * @return the seconds between ability uses.
+     * @return The seconds between ability uses.
      */
     public int getVampireStormCallCooldown() {
         return this.plugin.getConfig().getInt("abilities.vampire.storm-call-cooldown", 7200);
@@ -196,7 +196,7 @@ public class ConfigManager {
     /**
      * Retrieve the cooldown on the vampire ability Beacon Teleport.
      *
-     * @return the seconds between ability uses.
+     * @return The seconds between ability uses.
      */
     public int getVampireBeaconTeleportCooldown() {
         return this.plugin.getConfig().getInt("abilities.vampire.beacon-teleport-cooldown", 300);
@@ -205,7 +205,7 @@ public class ConfigManager {
     /**
      * Retrieve the cooldown on the vampire ability Vampire Vision.
      *
-     * @return the seconds between ability uses.
+     * @return The seconds between ability uses.
      */
     public int getVampireVisionCooldown() {
         return this.plugin.getConfig().getInt("abilities.vampire.vampire-vision-cooldown", 1);
@@ -214,7 +214,7 @@ public class ConfigManager {
     /**
      * Retrieve the cooldown on the tome ability Blessing.
      *
-     * @return the seconds between ability uses.
+     * @return The seconds between ability uses.
      */
     public int getTomeBlessingCooldown() {
         return this.plugin.getConfig().getInt("abilities.tome.blessing-cooldown", 7200);
@@ -223,7 +223,7 @@ public class ConfigManager {
     /**
      * Retrieve the cooldown on the tome ability Banish Undead.
      *
-     * @return the seconds between ability uses.
+     * @return The seconds between ability uses.
      */
     public int getTomeBanishUndeadCooldown() {
         return this.plugin.getConfig().getInt("abilities.tome.banish-undead-cooldown", 900);
@@ -232,7 +232,7 @@ public class ConfigManager {
     /**
      * Retrieve the cooldown on the tome ability Holy Word.
      *
-     * @return the seconds between ability uses.
+     * @return The seconds between ability uses.
      */
     public int getTomeHolyWordCooldown() {
         return this.plugin.getConfig().getInt("abilities.tome.holy-word-cooldown", 600);
@@ -241,7 +241,7 @@ public class ConfigManager {
     /**
      * Retrieve the cooldown on the tome ability Enlightened Eye.
      *
-     * @return the seconds between ability uses.
+     * @return The seconds between ability uses.
      */
     public int getTomeEnlightenedEyeCooldown() {
         return this.plugin.getConfig().getInt("abilities.tome.enlightened-eye-cooldown", 900);
@@ -250,7 +250,7 @@ public class ConfigManager {
     /**
      * Retrieve the cooldown on the tome ability Lantern Thrash.
      *
-     * @return the seconds between ability uses.
+     * @return The seconds between ability uses.
      */
     public int getTomeLanternThrashCooldown() {
         return this.plugin.getConfig().getInt("abilities.tome.lantern-thrash-cooldown", 300);
@@ -259,7 +259,7 @@ public class ConfigManager {
     /**
      * Retrieve the cooldown on the tome ability Prayer of Faith.
      *
-     * @return the seconds between ability uses.
+     * @return The seconds between ability uses.
      */
     public int getTomePrayerOfFaithCooldown() {
         return this.plugin.getConfig().getInt("abilities.tome.prayer-of-faith-cooldown", 900);
@@ -268,7 +268,7 @@ public class ConfigManager {
     /**
      * Retrieve the cooldown on the tome ability Rallying Cry.
      *
-     * @return the seconds between ability uses.
+     * @return The seconds between ability uses.
      */
     public int getTomeRallyingCryCooldown() {
         return this.plugin.getConfig().getInt("abilities.tome.rallying-cry-cooldown", 1200);
@@ -277,7 +277,7 @@ public class ConfigManager {
     /**
      * Retrieve the cooldown on the tome ability Shoulder Barge.
      *
-     * @return the seconds between ability uses.
+     * @return The seconds between ability uses.
      */
     public int getTomeShoulderBargeCooldown() {
         return this.plugin.getConfig().getInt("abilities.tome.shoulder-barge-cooldown", 300);
@@ -286,7 +286,7 @@ public class ConfigManager {
     /**
      * Retrieve the cooldown on the tome ability Turn Undead.
      *
-     * @return the seconds between ability uses.
+     * @return The seconds between ability uses.
      */
     public int getTomeTurnUndeadCooldown() {
         return this.plugin.getConfig().getInt("abilities.tome.turn-undead-cooldown", 1800);
@@ -296,7 +296,7 @@ public class ConfigManager {
     /**
      * Retrieve the cooldown on the tome ability Uncanny Direction.
      *
-     * @return the seconds between ability uses.
+     * @return The seconds between ability uses.
      */
     public int getTomeUncannyDirectionCooldown() {
         return this.plugin.getConfig().getInt("abilities.tome.uncanny-direction-cooldown", 30);
@@ -306,7 +306,7 @@ public class ConfigManager {
     /**
      * Retrieve the cooldown on the tome ability Unnatural Haste.
      *
-     * @return the seconds between ability uses.
+     * @return The seconds between ability uses.
      */
     public int getTomeUnnaturalHasteCooldown() {
         return this.plugin.getConfig().getInt("abilities.tome.unnatural-haste-cooldown", 900);
@@ -315,7 +315,7 @@ public class ConfigManager {
     /**
      * Retrieve the cooldown on the tome ability Way of the Land.
      *
-     * @return the seconds between ability uses.
+     * @return The seconds between ability uses.
      */
     public int getTomeWayOfTheLandCooldown() {
         return this.plugin.getConfig().getInt("abilities.tome.way-of-the-land-cooldown", 600);
@@ -324,7 +324,7 @@ public class ConfigManager {
     /**
      * Retrieve the cooldown on the tome ability Way of the Lumberjack.
      *
-     * @return the seconds between ability uses.
+     * @return The seconds between ability uses.
      */
     public int getTomeWayOfTheLumberjackCooldown() {
         return this.plugin.getConfig().getInt("abilities.tome.way-of-the-lumberjack-cooldown", 600);
@@ -333,7 +333,7 @@ public class ConfigManager {
     /**
      * Retrieve the cooldown on the tome ability Way of the Prospector.
      *
-     * @return the seconds between ability uses.
+     * @return The seconds between ability uses.
      */
     public int getTomeWayOfTheProspectorCooldown() {
         return this.plugin.getConfig().getInt("abilities.tome.way-of-the-prospector-cooldown", 600);
@@ -342,7 +342,7 @@ public class ConfigManager {
     /**
      * Retrieve the cooldown on the tome ability Stop the Bleeding.
      *
-     * @return the seconds between ability uses.
+     * @return The seconds between ability uses.
      */
     public int getTomeStopTheBleedingCooldown() {
         return this.plugin.getConfig().getInt("abilities.tome.stop-the-bleeding-cooldown", 7200);
@@ -351,7 +351,7 @@ public class ConfigManager {
     /**
      * Retrieve how many tome chests should contain tome ability books.
      *
-     * @return the number of tome chests.
+     * @return The number of tome chests.
      */
     public int getAbilityDistributionCount() {
         return this.plugin.getConfig().getInt("tome-chests.ability-book-count", 4);
@@ -409,7 +409,7 @@ public class ConfigManager {
     /**
      * Retrieve the cooldown time between when a human can gain new tome abilities.
      *
-     * @return the minutes between tome absorptions.
+     * @return The minutes between tome absorptions.
      */
     public int getTomeAbsorptionIntervalMinutes() {
         return this.plugin.getConfig().getInt("tome-absorption.tome-absorption-interval-minutes", 120);
@@ -418,7 +418,7 @@ public class ConfigManager {
     /**
      * Retrieve the time it takes for a vampire's thirst bar to fully deplete.
      *
-     * @return the minutes it takes to run out of blood.
+     * @return The minutes it takes to run out of blood.
      */
     public int getThirstDepletionMinutes() {
         return this.plugin.getConfig().getInt("thirst.depletion-minutes", 120);
@@ -427,10 +427,19 @@ public class ConfigManager {
     /**
      * Retrieve the maximum amount of blood a vampire can drain through drinking.
      *
-     * @return the points of blood that each vampire can gain.
+     * @return The points of blood that each vampire can gain.
      */
     public int getMaxFeedingThirstPerSession() {
         return this.plugin.getConfig().getInt("thirst.max-feeding-per-session", 60);
+    }
+
+    /**
+     * Retrieve the number of blood moons in a complete moon cycle
+     *
+     * @return How many nights in a moon cycle should trigger blood moons.
+     */
+    public int getBloodMoonFrequency() {
+        return Integer.max(0, Integer.min(this.plugin.getConfig().getInt("vampire.blood-moon-frequency", 1), 8));
     }
 
     /**
@@ -474,7 +483,7 @@ public class ConfigManager {
     /**
      * Retrieve the baseline complete beacon conversion time for a single player.
      *
-     * @return the milliseconds it takes to convert a beacon from one side's alignment into the others.
+     * @return The milliseconds it takes to convert a beacon from one side's alignment into the others.
      */
     public long getBeaconConversionTimeMs() {
         long seconds = this.plugin.getConfig().getLong("beacons.conversion-time-seconds", 300L);
@@ -484,7 +493,7 @@ public class ConfigManager {
     /**
      * Retrieve the cooldown between beacon conversions.
      *
-     * @return the milliseconds it takes to convert a beacon from one side's alignment into the others.
+     * @return The milliseconds it takes to convert a beacon from one side's alignment into the others.
      */
     public long getBeaconConversionCooldownMs() {
         long minutes = this.plugin.getConfig().getLong("beacons.conversion-cooldown-minutes", 60L);
