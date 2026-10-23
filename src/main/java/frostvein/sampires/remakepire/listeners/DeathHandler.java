@@ -315,8 +315,18 @@ public class DeathHandler implements Listener {
             this.dropCureBooks(victim);
         }
 
-        // Drop any carved pumpkins the player is holding
-        this.dropCarvedPumpkins(victim);
+        // Announce the player alignment to those within 15 blocks
+        final Location deathLocation = victim.getLocation();
+        final boolean wasVictimVampire = this.plugin.getVampireManager().isVampire(victim);
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            if (deathLocation.distance(player.getLocation()) <= 15) {
+                if (wasVictimVampire) {
+                    player.sendMessage(Component.text("As they fall their body begins to dissolve, becoming a slightly translucent reddish goop. This person was no person at all.", NamedTextColor.GREEN));
+                } else {
+                    player.sendMessage(Component.text("Blood spills freely from their wounds. You wait for a sign, for the dissolving to start, but it doesn't; they were human. Another life wasted.", NamedTextColor.RED));
+                }
+            }
+        }
     }
 
     /**

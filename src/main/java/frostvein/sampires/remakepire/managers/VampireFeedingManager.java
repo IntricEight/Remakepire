@@ -13,6 +13,7 @@ import org.bukkit.SoundCategory;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerToggleSneakEvent;
 import org.bukkit.potion.PotionEffect;
@@ -29,7 +30,7 @@ public class VampireFeedingManager implements Listener {
     // Controls the distance players can be while feeding
     private static final double FEEDING_RANGE = 1.5;
     // Controls the time a vampire needs to be crouching nearby before feeding begins
-    private static final int PREPARATION_TIME = 5;
+    private static final int PREPARATION_TIME = 1;
     // Controls how quickly humans are hurt by feeding
     private static final double HEALTH_DRAIN_PER_SECOND = 1.0;
     // Controls how quickly vampires gain blood from feeding
@@ -51,6 +52,16 @@ public class VampireFeedingManager implements Listener {
         Bukkit.getPluginManager().registerEvents(this, plugin);
         this.startFeedingDetectionTask();
         plugin.logInfo("VampireFeedingManager initialized");
+    }
+
+    /**
+     * Prevent the player from moving or looking around when they are being fed from
+     */
+    @EventHandler
+    public void onPlayerMove(PlayerMoveEvent event) {
+        if (activeSessions.values().stream().anyMatch(session -> session.targetId.equals(event.getPlayer().getUniqueId()))) {
+            event.setCancelled(true);
+        }
     }
 
     /**
