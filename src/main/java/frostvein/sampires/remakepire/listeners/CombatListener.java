@@ -250,7 +250,7 @@ public class CombatListener implements Listener {
 
                     } else {
                         // Apply the effects of turning a cured vampire
-                        if (victim.getScoreboardTags().contains(VampireManager.CURED_VAMPIRE_TAG)) {
+                        if (this.plugin.getVampireManager().isCuredVampire(victim)) {
                             event.setCancelled(true);
 
                             attacker.sendMessage(Component.text("You taste the blood of " + victim.getName() + ", but it rejects your curse...", NamedTextColor.DARK_RED));

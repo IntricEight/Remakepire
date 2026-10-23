@@ -264,7 +264,7 @@ public class VampireFeedingManager implements Listener {
                     this.killVictim(target);
                 }
             }
-        } else if (target.getScoreboardTags().contains(VampireManager.CURED_VAMPIRE_TAG)) {
+        } else if (this.plugin.getVampireManager().isCuredVampire(target)) {
             vampire.sendMessage(Component.text("You taste the blood of " + target.getName() + ", but it rejects your curse...", NamedTextColor.DARK_RED));
             vampire.sendMessage(Component.text("They have been cleansed by holy power - their soul slips beyond your grasp, lost forever.", NamedTextColor.DARK_RED));
 
