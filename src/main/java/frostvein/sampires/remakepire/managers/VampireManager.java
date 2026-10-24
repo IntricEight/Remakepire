@@ -551,6 +551,16 @@ public class VampireManager {
     }
 
     /**
+     * Retrieve if the player is a cured vampire.
+     *
+     * @param player the player being checked.
+     * @return {@code true} if the player is a cured vampire.
+     */
+    public boolean isCuredVampire(Player player) {
+        return player.getScoreboardTags().contains(VampireManager.CURED_VAMPIRE_TAG) && this.isHuman(player);
+    }
+
+    /**
      * Retrieve if the player should be affected by silver.
      *
      * @param player the player being checked.

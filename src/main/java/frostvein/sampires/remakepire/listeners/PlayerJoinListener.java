@@ -46,7 +46,7 @@ public class PlayerJoinListener implements Listener {
         this.plugin.getBeetrootManager().restorePlayerState(player);
 
         this.plugin.getBeaconMajorityManager().applyBonusesToPlayer(player);
-        if (this.plugin.getVampireTexturePackManager() != null && (this.vampireManager.isVampire(player) || player.getScoreboardTags().contains(VampireManager.CURED_VAMPIRE_TAG))) {
+        if (this.plugin.getVampireTexturePackManager() != null && (this.vampireManager.isVampire(player) || this.plugin.getVampireManager().isCuredVampire(player))) {
             this.plugin.getVampireTexturePackManager().onVampireLogin(player);
         }
 
