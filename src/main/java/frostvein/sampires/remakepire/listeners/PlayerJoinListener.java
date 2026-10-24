@@ -46,7 +46,7 @@ public class PlayerJoinListener implements Listener {
         this.plugin.getBeetrootManager().restorePlayerState(player);
 
         this.plugin.getBeaconMajorityManager().applyBonusesToPlayer(player);
-        if (this.plugin.getVampireTexturePackManager() != null && (this.vampireManager.isVampire(player) || player.getScoreboardTags().contains(VampireManager.CURED_VAMPIRE_TAG))) {
+        if (this.plugin.getVampireTexturePackManager() != null && (this.vampireManager.isVampire(player) || this.plugin.getVampireManager().isCuredVampire(player))) {
             this.plugin.getVampireTexturePackManager().onVampireLogin(player);
         }
 
@@ -145,7 +145,7 @@ public class PlayerJoinListener implements Listener {
         try {
             Team teamToJoin;
 
-            if (this.plugin.getVampireManager().isIronAffected(player)) {
+            if (this.plugin.getVampireManager().isRestrictedVampire(player)) {
                 teamToJoin = this.plugin.getVampireCastTeam();
             } else {
                 teamToJoin = this.plugin.getCastTeam();
@@ -163,6 +163,7 @@ public class PlayerJoinListener implements Listener {
             }
         } catch (Exception e) {
             this.plugin.getLogger().severe("Failed to add player " + player.getName() + " to CastTeam: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 

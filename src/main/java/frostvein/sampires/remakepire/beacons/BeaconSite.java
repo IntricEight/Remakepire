@@ -1,8 +1,12 @@
 package frostvein.sampires.remakepire.beacons;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
+import org.bukkit.entity.Player;
 import frostvein.sampires.remakepire.managers.SessionManager;
 
 public class BeaconSite {
@@ -66,10 +70,29 @@ public class BeaconSite {
 
         if (beaconLoc != null && beaconLoc.getWorld().equals(location.getWorld())) {
             return beaconLoc.distance(location) <= this.captureRadius;
-
-        } else {
-            return false;
         }
+
+        return false;
+    }
+
+    /**
+     * Retrieve the UUID of all players who are within the provided distance of this beacon.
+     *
+     * @param maxDistance the maximum distance from the beacon that a player will be.
+     * @return A {@code List} of UUIDs for players in range of the beacon.
+     */
+    public List<UUID> getPlayersInRange(double maxDistance) {
+        List<UUID> playersInRange = new ArrayList<>();
+        final Location beaconLoc = new Location(Bukkit.getWorld(this.worldName), this.x, this.y, this.z);
+        final double distSquared = maxDistance * maxDistance;
+
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            if (beaconLoc.distanceSquared(player.getLocation()) <= distSquared) {
+                playersInRange.add(player.getUniqueId());
+            }
+        }
+
+        return playersInRange;
     }
 
     /**

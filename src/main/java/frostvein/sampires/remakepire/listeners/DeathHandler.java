@@ -23,6 +23,7 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Scoreboard;
 import frostvein.sampires.remakepire.RemakepirePlugin;
@@ -71,8 +72,8 @@ public class DeathHandler implements Listener {
     @EventHandler
     public void onPlayerPostRespawn(PlayerRespawnEvent event) {
         Player player = event.getPlayer();
-        boolean wasVampire = this.vampireManager.isVampire(player);
-        boolean wasHuman = this.vampireManager.isHuman(player);
+        final boolean wasVampire = this.vampireManager.isVampire(player);
+        final boolean wasHuman = this.vampireManager.isHuman(player);
 
         if (wasVampire && player.getScoreboardTags().contains(PERMAKILL_PROCESSING_TAG)) {
             this.vampireManager.killPlayerPermanently(player);
@@ -95,8 +96,8 @@ public class DeathHandler implements Listener {
 
                     // Make sure the player doesn't respawn with an illegal number of lives
                     if (deathObjective != null) {
-                        int currentDeaths = deathObjective.getScore(player.getName()).getScore();
-                        int maxDeaths = this.plugin.getConfigManager().getHumanLifeCount();
+                        final int currentDeaths = deathObjective.getScore(player.getName()).getScore();
+                        final int maxDeaths = this.plugin.getConfigManager().getHumanLifeCount();
 
                         if (currentDeaths > maxDeaths) {
                             deathObjective.getScore(player.getName()).setScore(maxDeaths);
@@ -105,8 +106,14 @@ public class DeathHandler implements Listener {
                     }
                 } catch (Exception e) {
                     this.plugin.getLogger().warning("Failed to cap death count for " + player.getName() + ": " + e.getMessage());
+                    e.printStackTrace();
                 }
             });
+        }
+
+        if (wasVampire) {
+            // Clear the claw hit counter from a vampire when they die
+            this.plugin.getCombatListener().clearClawCounter(player.getUniqueId());
         }
 
         this.plugin.getServer().getScheduler().runTaskLater(this.plugin, () -> {
@@ -114,7 +121,7 @@ public class DeathHandler implements Listener {
                 this.plugin.getBeaconMajorityManager().updateBeaconMajorityBonuses();
             }
 
-            double maxHealth = player.getAttribute(Attribute.MAX_HEALTH).getValue();
+            final double maxHealth = player.getAttribute(Attribute.MAX_HEALTH).getValue();
             player.setHealth(maxHealth);
             this.plugin.getLogger().fine(player.getName() + " respawned with " + maxHealth + " HP (full health)");
         }, 5L);
@@ -138,14 +145,13 @@ public class DeathHandler implements Listener {
      */
     public static void checkAndAnnounceTeamElimination(RemakepirePlugin plugin, boolean affectedWasHuman, boolean affectedWasVampire) {
         if (plugin.getSessionManager().isSessionActive()) {
-            VampireManager vampireManager = plugin.getVampireManager();
             int aliveHumans = 0, aliveVampires = 0;
 
             for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-                if (onlinePlayer.getGameMode() == GameMode.SURVIVAL) {
-                    if (vampireManager.isHuman(onlinePlayer)) {
+                if (onlinePlayer.getGameMode() == GameMode.SURVIVAL || onlinePlayer.getGameMode() == GameMode.ADVENTURE) {
+                    if (plugin.getVampireManager().isHuman(onlinePlayer)) {
                         ++aliveHumans;
-                    } else if (vampireManager.isVampire(onlinePlayer)) {
+                    } else if (plugin.getVampireManager().isVampire(onlinePlayer)) {
                         ++aliveVampires;
                     }
                 }
@@ -269,9 +275,8 @@ public class DeathHandler implements Listener {
      */
     @EventHandler
     public void onPlayerDeath(PlayerDeathEvent event) {
-        Player victim = event.getEntity();
-        Player killer = victim.getKiller();
-        UUID trackedKillerUUID = this.woodenStakeKills.remove(victim.getUniqueId());
+        Player victim = event.getEntity(), killer = victim.getKiller();
+        final UUID trackedKillerUUID = this.woodenStakeKills.remove(victim.getUniqueId());
 
         if (trackedKillerUUID != null && killer == null) {
             Player trackedKiller = this.plugin.getServer().getPlayer(trackedKillerUUID);
@@ -282,26 +287,65 @@ public class DeathHandler implements Listener {
             }
         }
 
+        // Increase the death counter for humans
         if (this.vampireManager.isHuman(victim)) {
             try {
                 Scoreboard mainScoreboard = Bukkit.getScoreboardManager().getMainScoreboard();
                 Objective deathObjective = mainScoreboard.getObjective("vsmp_death");
 
                 if (deathObjective != null) {
-                    int currentDeaths = deathObjective.getScore(victim.getName()).getScore();
+                    final int currentDeaths = deathObjective.getScore(victim.getName()).getScore();
                     deathObjective.getScore(victim.getName()).setScore(currentDeaths + 1);
                     this.plugin.logInfo("Incremented death count for " + victim.getName() + " to " + (currentDeaths + 1));
                 }
             } catch (Exception e) {
                 this.plugin.getLogger().warning("Failed to increment death count for " + victim.getName() + ": " + e.getMessage());
+                e.printStackTrace();
             }
         }
 
         if (killer != null) {
-            this.handlePvPDeath(victim, killer, event);
+            this.handleVampirePvPDeath(victim, killer, event);
         } else if (this.vampireManager.isVampire(victim)) {
             victim.addScoreboardTag(PROMOTION_BAN_PENDING_TAG);
         }
+
+        // Only drop the books if the player is permadying
+        if (victim.getScoreboardTags().contains(PERMADEATH_CHOSEN_TAG) || victim.getScoreboardTags().contains(PERMAKILL_PROCESSING_TAG)) {
+            this.dropCureBooks(victim);
+        }
+    }
+
+    /**
+     * Determine if the human has exhausted their life count and should be permakilled.
+     *
+     * @param player the human whose lives are being checked.
+     * @return {@code true} if the player has run out of lives.
+     */
+    public boolean shouldHumanPermadie(Player player) {
+        // Vampires should not be permakilled by this function
+        if (player == null || this.plugin.getVampireManager().isVampire(player)) {
+            return false;
+        }
+
+        try {
+            Scoreboard mainScoreboard = Bukkit.getScoreboardManager().getMainScoreboard();
+            Objective deathObjective = mainScoreboard.getObjective("vsmp_death");
+
+            if (deathObjective != null) {
+                final int deaths = deathObjective.getScore(player.getName()).getScore();
+
+                // Only force the perma death if the human has run out of lives OR permadeath is set to ABSOLUTE
+                if (deaths >= this.plugin.getConfigManager().getHumanLifeCount() || this.plugin.getPermadeathManager().hasAbsolutePermadeathEnabled(player)) {
+                    return true;
+                }
+            }
+        } catch (Exception e) {
+            this.plugin.getLogger().warning("Failed to check death count for " + player.getName() + ": " + e.getMessage());
+            e.printStackTrace();
+        }
+
+        return false;
     }
 
     /**
@@ -311,20 +355,20 @@ public class DeathHandler implements Listener {
      * @param killer the player who killed the victim.
      * @param event a player dies.
      */
-    private void handlePvPDeath(Player victim, Player killer, PlayerDeathEvent event) {
-        ItemStack weapon = killer.getInventory().getItemInMainHand();
-        boolean killedWithWoodenWeapon = this.isWoodenWeapon(weapon.getType());
+    private void handleVampirePvPDeath(Player victim, Player killer, PlayerDeathEvent event) {
+        Material weaponType = killer.getInventory().getItemInMainHand().getType();
+        boolean killedWithStake = ItemTypeChecking.isStake(weaponType);
         Material lastWeapon = this.lastWeaponUsed.get(victim.getUniqueId());
 
-        if (!killedWithWoodenWeapon && lastWeapon != null) {
-            killedWithWoodenWeapon = ItemTypeChecking.isWoodenWeapon(lastWeapon);
+        if (!killedWithStake && lastWeapon != null) {
+            killedWithStake = ItemTypeChecking.isStake(lastWeapon);
 
-            if (killedWithWoodenWeapon) {
+            if (killedWithStake) {
                 this.plugin.logInfo("DEBUG: Using tracked last weapon: " + lastWeapon + " (current weapon broke/dropped)");
             }
         }
 
-        this.plugin.logInfo("DEBUG: PvP Death - Victim: " + victim.getName() + ", CurrentWeapon: " + weapon.getType() + ", LastTrackedWeapon: " + lastWeapon + ", IsWoodenWeapon: " + killedWithWoodenWeapon + ", IsVampire: " + this.vampireManager.isVampire(victim) + ", IsStage1: " + this.vampireManager.isVampireStage1(victim) + ", VictimTags: " + victim.getScoreboardTags());
+        this.plugin.logInfo("DEBUG: PvP Death - Victim: " + victim.getName() + ", CurrentWeapon: " + weaponType + ", LastTrackedWeapon: " + lastWeapon + ", IsWoodenWeapon: " + killedWithStake + ", IsVampire: " + this.vampireManager.isVampire(victim) + ", IsStage1: " + this.vampireManager.isVampireStage1(victim) + ", VictimTags: " + victim.getScoreboardTags());
         this.lastWeaponUsed.remove(victim.getUniqueId());
         this.woodenStakeKills.remove(victim.getUniqueId());
 
@@ -332,7 +376,7 @@ public class DeathHandler implements Listener {
             final int woodenStakeThreshold = this.plugin.getConfigManager().getPermadeathMinimumStage();
             final int victimStage = this.vampireManager.getVampireStage(victim);
 
-            if (victimStage <= woodenStakeThreshold && killedWithWoodenWeapon) {
+            if (victimStage <= woodenStakeThreshold && killedWithStake) {
                 victim.addScoreboardTag(PERMAKILL_PROCESSING_TAG);
                 killer.sendMessage(Component.text("You have permanently killed the vampire " + victim.getName() + "!", NamedTextColor.DARK_RED));
 
@@ -342,6 +386,34 @@ public class DeathHandler implements Listener {
             } else {
                 victim.addScoreboardTag(PROMOTION_BAN_PENDING_TAG);
                 this.plugin.logInfo("PROMOTION BAN: Applied " + PROMOTION_BAN_PENDING_TAG + " tag to " + victim.getName() + " (Stage " + victimStage + ", Threshold: " + woodenStakeThreshold + ")");
+            }
+        }
+    }
+
+    /**
+     * Drop any cure books that are inside the player's inventory.
+     *
+     * @param player the player dropping the books.
+     */
+    private void dropCureBooks(Player player) {
+        PlayerInventory inventory = player.getInventory();
+        ItemStack[] contents = inventory.getContents();
+
+        // Scan the player's inventory for any cure books
+        for (int slot = 0; slot < contents.length; slot++) {
+            ItemStack book = contents[slot];
+
+            // Ignore items that can't be cure book
+            if (book == null || book.getType() != Material.WRITTEN_BOOK) {
+                continue;
+            }
+
+            final int cureBookNumber = this.plugin.getCureBookReadingListener().getAuthenticCureBookNumber(book);
+
+            // If the book was a cure book, remove it from the player's inventory and drop it where they died
+            if (cureBookNumber >= 1 && cureBookNumber <= 4) {
+                inventory.setItem(slot, null);
+                player.getWorld().dropItemNaturally(player.getLocation(), book);
             }
         }
     }
@@ -389,22 +461,24 @@ public class DeathHandler implements Listener {
         this.plugin.logInfo("PERMA-KILL: " + victim.getName() + " was permanently killed");
     }
 
-    /**
-     * Determine if the item is a wooden weapon.
-     *
-     * @param type the item to check.
-     * @return {@code true} if the item is a wooden sword or axe.
-     */
-    private boolean isWoodenWeapon(Material type) {
-        if (type == null) {
-            this.plugin.logInfo("DEBUG: Weapon is null");
-            return false;
-
-        } else {
-            final boolean isWooden = ItemTypeChecking.isWoodenWeapon(type);
-            this.plugin.logInfo("DEBUG: Weapon type: " + type + ", Is wooden: " + isWooden);
-            return isWooden;
+    public void triggerHumanPermadeath(Player attacker, Player victim, boolean wasTurnAttempt) {
+        // Exit early if there is no one to permakill
+        if (victim == null) {
+            return;
         }
+
+        if (attacker != null) {
+            attacker.sendMessage(Component.text("You watch the light of " + victim.getName() + "'s eyes fade, and extinguish. Lost forever.", NamedTextColor.DARK_RED));
+        }
+
+        if (wasTurnAttempt) {
+            victim.sendMessage(Component.text("The world grows dim, blurry, you feel a darkness reach out, offering you one last chance to live, as a creature of the night... But you refuse... And slip under the veil of the afterlife.", NamedTextColor.GRAY));
+        } else {
+            victim.sendMessage(Component.text("The world grows dim, blurry... the light which drew you back so many times beckons once more, but it seems fainter now, out of reach... You lose your grip, and slip under the veil of the afterlife.", NamedTextColor.GRAY));
+        }
+
+        victim.addScoreboardTag(PERMADEATH_CHOSEN_TAG);
+        victim.setHealth(0.0);
     }
 
     /**

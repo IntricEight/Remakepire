@@ -1,7 +1,6 @@
 package frostvein.sampires.remakepire.commands;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -19,13 +18,13 @@ import org.bukkit.Sound;
 import org.bukkit.SoundCategory;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
+import org.bukkit.command.BlockCommandSender;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.command.TabCompleter;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.BookMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scoreboard.Objective;
@@ -34,6 +33,7 @@ import frostvein.sampires.remakepire.RemakepirePlugin;
 import frostvein.sampires.remakepire.abilities.tome.TomeAbility;
 import frostvein.sampires.remakepire.beacons.BeaconSite;
 import frostvein.sampires.remakepire.beacons.BeaconSite.BeaconState;
+import frostvein.sampires.remakepire.listeners.CureBookReadingListener;
 import frostvein.sampires.remakepire.listeners.DeathHandler;
 import frostvein.sampires.remakepire.managers.BeaconManager;
 import frostvein.sampires.remakepire.managers.ConfigManager;
@@ -41,7 +41,7 @@ import frostvein.sampires.remakepire.managers.SessionManager;
 import frostvein.sampires.remakepire.managers.TomeManager;
 import frostvein.sampires.remakepire.managers.VampireManager;
 
-public class CommandHandler implements CommandExecutor, TabCompleter {
+public class CommandHandler implements CommandExecutor {
     private final RemakepirePlugin plugin;
     private final ConfigManager configManager;
     private final SessionManager sessionManager;
@@ -183,9 +183,12 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
             // Set the respawn location for vampires after they temporarily die
             return this.handleSetVampireSpawnCommand(sender, args);
 
-        } else {
-            return false;
+        } else if (command.getName().equalsIgnoreCase("cure-all-vampires")) {
+            // Cure every vampire in the game that meets a stage, and possibly a distance, requirement
+            return this.handleCureAllVampires(sender, args);
         }
+
+        return false;
     }
 
     /**
@@ -193,7 +196,8 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
      *
      * @param sender the admin sending the command.
      */
-    private void sendAdminHelp(CommandSender sender) {
+    public void sendAdminHelp(CommandSender sender) {
+        sender.sendMessage("");
         sender.sendMessage(Component.text("=== VampireSMP Admin Commands ===", NamedTextColor.GOLD)
                 .decorate(TextDecoration.BOLD));
 
@@ -216,11 +220,12 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         sendCommandInstruction(sender, "/pow admin removeendermen <all | toggle | status>", "Manage enderman removal");
         sendCommandInstruction(sender, "/pow admin removecreepers <all | toggle | status>", "Manage creeper removal");
         sendCommandInstruction(sender, "/pow admin setupplayer <player>", "Give starter items to player");
+        sendCommandInstruction(sender, "/pow admin resetplayer <player>", "Fully reset player to fresh state");
+        sendCommandInstruction(sender, "/pow admin playercount <all | human | vampire | canCure | canForceCure> [spoiler]", "Retrieve the number of players who meet certain criteria. If [spoiler] is true, the player names will be listed as well.");
         sendCommandInstruction(sender, "/pow admin spawnanimals", "Manually trigger passive mob spawning");
         sendCommandInstruction(sender, "/pow admin addtomechest", "Add current location as tome chest spawn");
         sendCommandInstruction(sender, "/pow admin removetomechest", "Remove nearest tome chest within 10 blocks");
         sendCommandInstruction(sender, "/pow admin listtomechests", "List all tome chest locations");
-        sendCommandInstruction(sender, "/pow admin resetplayer <player>", "Fully reset player to fresh state");
         sendCommandInstruction(sender, "/pow admin set_vampire_spawn [x y z]", "Set vampire respawn location");
     }
 
@@ -235,89 +240,125 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
             sender.sendMessage(Component.text("Usage: /pow admin resetplayer <player> [true | false]", NamedTextColor.RED));
             sender.sendMessage(Component.text("  true/false = clear inventory", NamedTextColor.GRAY));
 
+            return true;
+        }
+
+        // Determine if players should have their inventories reset
+        final boolean clearInventory = args.length >= 2 && args[1].equalsIgnoreCase("true");
+
+        if (args[0].equalsIgnoreCase("@a")) {
+            int playercount = 0;
+
+            for (Player player : Bukkit.getOnlinePlayers()) {
+                this.resetPlayer(player, clearInventory);
+                playercount++;
+            }
+
+            sender.sendMessage(Component.text("Reset ", NamedTextColor.GREEN)
+                    .append(Component.text(playercount, NamedTextColor.YELLOW))
+                    .append(Component.text(" player" + (playercount == 1 ? "" : "s") + " to to a fresh state.", NamedTextColor.GREEN))
+            );
+
+            this.plugin.logInfo("Admin " + sender.getName() + " reset " + playercount + " players to fresh state.");
+
         } else {
-            Player target = Bukkit.getPlayer(args[0]);
+            Player target = this.getPlayerFromParameter(sender, args[0]);
 
             if (target == null) {
                 sender.sendMessage(Component.text("Player not found: " + args[0], NamedTextColor.RED));
-
-            } else {
-                boolean clearInventory = args.length >= 2 && args[1].equalsIgnoreCase("true");
-
-                if (target.getGameMode() == GameMode.SPECTATOR) {
-                    target.setGameMode(GameMode.SURVIVAL);
-                }
-
-                this.vampireManager.setPlayerAsHuman(target);
-
-                // Clear the player of all tags before assigning them the human tag
-                for (String tag : new HashSet<>(target.getScoreboardTags())) {
-                    target.removeScoreboardTag(tag);
-                }
-
-                target.addScoreboardTag(VampireManager.HUMAN_TAG);
-
-                // Reset the new human's death counter
-                try {
-                    Scoreboard mainScoreboard = Bukkit.getScoreboardManager().getMainScoreboard();
-                    Objective deathObjective = mainScoreboard.getObjective("vsmp_death");
-
-                    if (deathObjective != null) {
-                        deathObjective.getScore(target.getName()).setScore(0);
-                    }
-                } catch (Exception e) {
-                    this.plugin.getLogger().warning("Failed to reset death count for " + target.getName() + ": " + e.getMessage());
-                }
-
-                if (this.plugin.getTomeManager() != null) {
-                    this.plugin.getTomeManager().removeAllAbilities(target);
-                }
-
-                if (this.plugin.getThirstManager() != null) {
-                    target.removeScoreboardTag("ThirstImmunity");
-                }
-
-                if (this.plugin.getSireManager() != null) {
-                    this.plugin.getSireManager().removeSire(target.getName());
-                }
-
-                if (this.plugin.getVampireAbilityManager() != null) {
-                    this.plugin.getVampireAbilityManager().clearAllCooldowns(target);
-                }
-
-                // Reset the player's stats
-                target.getActivePotionEffects().forEach((effect) -> target.removePotionEffect(effect.getType()));
-                AttributeInstance healthAttribute = target.getAttribute(Attribute.MAX_HEALTH);
-                healthAttribute.getModifiers().forEach(healthAttribute::removeModifier);
-                healthAttribute.setBaseValue(20.0);
-                target.setHealth(healthAttribute.getValue());
-                target.setFoodLevel(20);
-                target.setSaturation(5.0F);
-                target.setExp(0.0F);
-                target.setLevel(0);
-
-                if (this.plugin.getBeaconMajorityManager() != null) {
-                    this.plugin.getBeaconMajorityManager().updateBeaconMajorityBonuses();
-                }
-
-                target.setInvulnerable(false);
-
-                // Clear the player's inventory
-                if (clearInventory) {
-                    target.getInventory().clear();
-                    target.getEnderChest().clear();
-                    sender.sendMessage(Component.text("Cleared " + target.getName() + "'s inventory and ender chest.", NamedTextColor.GRAY));
-                }
-
-                sender.sendMessage(Component.text("Player " + target.getName() + " has been fully reset to a fresh state.", NamedTextColor.GREEN));
-                target.sendMessage(Component.text("You have been reset to a fresh state by an administrator.", NamedTextColor.GREEN));
-                target.sendMessage(Component.text("All vampire status, abilities, cooldowns, and death count have been cleared." + (clearInventory ? " Your inventory has also been cleared." : ""), NamedTextColor.GRAY));
-
-                this.plugin.logInfo("Admin " + sender.getName() + " reset player " + target.getName() + " to fresh state");
+                return true;
             }
+
+            // Reset the player's game state
+            this.resetPlayer(target, clearInventory);
+
+            sender.sendMessage(Component.text("Player " + target.getName() + " has been reset to a fresh state.", NamedTextColor.GREEN));
+
+            // Clear the player's inventory
+            if (clearInventory) {
+                sender.sendMessage(Component.text("Cleared " + target.getName() + "'s inventory and ender chest.", NamedTextColor.GRAY));
+            }
+
+            this.plugin.logInfo("Admin " + sender.getName() + " reset player " + target.getName() + " to fresh state");
         }
 
         return true;
+    }
+
+    /**
+     * Reset the player's game statistics.
+     *
+     * @param player the player being reset.
+     * @param clearInventory {@code true} if the player's inventory should be wiped;
+     */
+    private void resetPlayer(Player player, boolean clearInventory) {
+        if (player.getGameMode() == GameMode.SPECTATOR) {
+            player.setGameMode(GameMode.SURVIVAL);
+        }
+
+        this.vampireManager.setPlayerAsHuman(player);
+
+        // Clear the player of all tags before assigning them the human tag
+        for (String tag : new HashSet<>(player.getScoreboardTags())) {
+            player.removeScoreboardTag(tag);
+        }
+
+        player.addScoreboardTag(VampireManager.HUMAN_TAG);
+
+        // Reset the new human's death counter
+        try {
+            Scoreboard mainScoreboard = Bukkit.getScoreboardManager().getMainScoreboard();
+            Objective deathObjective = mainScoreboard.getObjective("vsmp_death");
+
+            if (deathObjective != null) {
+                deathObjective.getScore(player.getName()).setScore(0);
+            }
+        } catch (Exception e) {
+            this.plugin.getLogger().warning("Failed to reset death count for " + player.getName() + ": " + e.getMessage());
+            e.printStackTrace();
+        }
+
+        if (tomeManager != null) {
+            tomeManager.removeAllAbilities(player);
+        }
+
+        if (this.plugin.getThirstManager() != null) {
+            player.removeScoreboardTag("ThirstImmunity");
+        }
+
+        if (this.plugin.getSireManager() != null) {
+            this.plugin.getSireManager().removeSire(player.getName());
+        }
+
+        if (this.plugin.getVampireAbilityManager() != null) {
+            this.plugin.getVampireAbilityManager().clearAllCooldowns(player);
+        }
+
+        // Reset the player's stats
+        player.getActivePotionEffects().forEach((effect) -> player.removePotionEffect(effect.getType()));
+        AttributeInstance healthAttribute = player.getAttribute(Attribute.MAX_HEALTH);
+        healthAttribute.getModifiers().forEach(healthAttribute::removeModifier);
+        healthAttribute.setBaseValue(20.0);
+        player.setHealth(healthAttribute.getValue());
+        player.setFoodLevel(20);
+        player.setSaturation(5.0F);
+        player.setExp(0.0F);
+        player.setLevel(0);
+
+        if (this.plugin.getBeaconMajorityManager() != null) {
+            this.plugin.getBeaconMajorityManager().updateBeaconMajorityBonuses();
+        }
+
+        player.setInvulnerable(false);
+
+        // Clear the player's inventory
+        if (clearInventory) {
+            player.getInventory().clear();
+            player.getEnderChest().clear();
+        }
+
+        player.sendMessage(Component.text("You have been reset to a fresh state by an administrator.", NamedTextColor.GREEN));
+        player.sendMessage(Component.text("All vampire status, abilities, cooldowns, and death count have been cleared." + (clearInventory ? " Your inventory has also been cleared." : ""), NamedTextColor.GRAY));
     }
 
     /**
@@ -329,77 +370,143 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
      */
     private boolean handlePlayerCountCommand(CommandSender sender, String[] args) {
         if (args.length == 0) {
-            sender.sendMessage(Component.text("Usage: /pow admin playercount <all | human | vampire>", NamedTextColor.RED));
+            sender.sendMessage(Component.text("Usage: /pow admin playercount <all | human | vampire | canCure | canForceCure> <spoiler>", NamedTextColor.RED));
+            CommandHandler.sendCommandCorrection(sender, "  all", "See the number of alive players.");
+            CommandHandler.sendCommandCorrection(sender, "  human", "See the number of alive human players.");
+            CommandHandler.sendCommandCorrection(sender, "  vampire", "See the number of \"alive\" vampire players.");
+            CommandHandler.sendCommandCorrection(sender, "  canCure", "See the number of alive players who can cure themselves.");
+            CommandHandler.sendCommandCorrection(sender, "  canForceCure", "See the number of alive players who can cure others.");
+            CommandHandler.sendCommandCorrection(sender, "  spoiler", "Learn the names of the players counted.");
 
-            CommandHandler.sendCommandCorrection(sender, "  all", "See the number of alive players");
-            CommandHandler.sendCommandCorrection(sender, "  human", "See the number of alive human players");
-            CommandHandler.sendCommandCorrection(sender, "  vampire", "See the number of \"alive\" vampire players");
+            return true;
+        }
 
-        } else {
-            int playerCount = 0;
+        String consoleReport;
+        List<Player> players = new ArrayList<>();
+        int playerCount;
 
-            switch (args[0].toLowerCase()) {
-                case "all":
-                    for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-                        // Make sure the player is active in the game
-                        if ((onlinePlayer.getGameMode() == GameMode.SURVIVAL || onlinePlayer.getGameMode() == GameMode.ADVENTURE)
-                                && (!onlinePlayer.getScoreboardTags().contains(DeathHandler.PERMAKILLED_TAG) || onlinePlayer.isDead())
-                        ) {
-                            playerCount++;
-                        }
+        switch (args[0].toLowerCase()) {
+            case "all":
+                for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+                    // Make sure the player is active in the game
+                    if (onlinePlayer.getGameMode() != GameMode.SPECTATOR && (!onlinePlayer.getScoreboardTags().contains(DeathHandler.PERMAKILLED_TAG) || onlinePlayer.isDead())
+                    ) {
+                        players.add(onlinePlayer);
                     }
+                }
 
-                    sender.sendMessage(Component.text("There " + (playerCount == 1 ? "is" : "are") + " currently ", NamedTextColor.WHITE)
-                            .append(Component.text(playerCount, NamedTextColor.GRAY))
-                            .append(Component.text(" player" + (playerCount == 1 ? "" : "s") + " in the session.", NamedTextColor.WHITE))
-                    );
+                playerCount = players.size();
+                sender.sendMessage(Component.text("There " + (playerCount == 1 ? "is" : "are") + " currently ", NamedTextColor.WHITE)
+                        .append(Component.text(playerCount, NamedTextColor.GRAY))
+                        .append(Component.text(" player" + (playerCount == 1 ? "" : "s") + " in the session.", NamedTextColor.WHITE))
+                );
 
-                    this.plugin.logInfo("Admin " + sender.getName() + " checked the game player count");
-                    break;
+                consoleReport = "Admin " + sender.getName() + " checked the game player count";
+                break;
 
-                case "human":
-                    for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-                        // Make sure the player is active in the game
-                        if ((onlinePlayer.getGameMode() == GameMode.SURVIVAL || onlinePlayer.getGameMode() == GameMode.ADVENTURE)
-                                && (!onlinePlayer.getScoreboardTags().contains(DeathHandler.PERMAKILLED_TAG) || onlinePlayer.isDead())
-                                && this.plugin.getVampireManager().isHuman(onlinePlayer)
-                        ) {
-                            playerCount++;
-                        }
+            case "human":
+                for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+                    // Make sure the player is active in the game
+                    if ((onlinePlayer.getGameMode() == GameMode.SURVIVAL || onlinePlayer.getGameMode() == GameMode.ADVENTURE)
+                            && (!onlinePlayer.getScoreboardTags().contains(DeathHandler.PERMAKILLED_TAG) || onlinePlayer.isDead())
+                            && vampireManager.isHuman(onlinePlayer)
+                    ) {
+                        players.add(onlinePlayer);
                     }
+                }
 
-                    sender.sendMessage(Component.text("There " + (playerCount == 1 ? "is" : "are") + " currently ", NamedTextColor.WHITE)
-                            .append(Component.text(playerCount, NamedTextColor.GOLD))
-                            .append(Component.text(" human" + (playerCount == 1 ? "" : "s") + " in the session.", NamedTextColor.WHITE))
-                    );
+                playerCount = players.size();
+                sender.sendMessage(Component.text("There " + (playerCount == 1 ? "is" : "are") + " currently ", NamedTextColor.WHITE)
+                        .append(Component.text(playerCount, NamedTextColor.GOLD))
+                        .append(Component.text(" human" + (playerCount == 1 ? "" : "s") + " in the session.", NamedTextColor.WHITE))
+                );
 
-                    this.plugin.logInfo("Admin " + sender.getName() + " checked the human player count");
-                    break;
+                consoleReport = "Admin " + sender.getName() + " checked the human player count";
+                break;
 
-                case "vampire":
-                    for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-                        // Make sure the player is active in the game
-                        if ((onlinePlayer.getGameMode() == GameMode.SURVIVAL || onlinePlayer.getGameMode() == GameMode.ADVENTURE)
-                                && (!onlinePlayer.getScoreboardTags().contains(DeathHandler.PERMAKILLED_TAG) || onlinePlayer.isDead())
-                                && this.plugin.getVampireManager().isVampire(onlinePlayer)
-                        ) {
-                            playerCount++;
-                        }
+            case "vampire":
+                for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+                    // Make sure the player is active in the game
+                    if ((onlinePlayer.getGameMode() == GameMode.SURVIVAL || onlinePlayer.getGameMode() == GameMode.ADVENTURE)
+                            && (!onlinePlayer.getScoreboardTags().contains(DeathHandler.PERMAKILLED_TAG) || onlinePlayer.isDead())
+                            && vampireManager.isVampire(onlinePlayer)
+                    ) {
+                        players.add(onlinePlayer);
                     }
+                }
 
-                    sender.sendMessage(Component.text("There " + (playerCount == 1 ? "is" : "are") + " currently ", NamedTextColor.WHITE)
-                            .append(Component.text(playerCount, NamedTextColor.RED))
-                            .append(Component.text(" vampire" + (playerCount == 1 ? "" : "s") + " in the session.", NamedTextColor.WHITE))
-                    );
+                playerCount = players.size();
+                sender.sendMessage(Component.text("There " + (playerCount == 1 ? "is" : "are") + " currently ", NamedTextColor.WHITE)
+                        .append(Component.text(playerCount, NamedTextColor.RED))
+                        .append(Component.text(" vampire" + (playerCount == 1 ? "" : "s") + " in the session.", NamedTextColor.WHITE))
+                );
 
-                    this.plugin.logInfo("Admin " + sender.getName() + " checked the vampire player count");
-                    break;
+                consoleReport = "Admin " + sender.getName() + " checked the vampire player count";
+                break;
 
-                default:
-                    sender.sendMessage(Component.text("Invalid action. Use 'all', 'human', or 'vampire'.", NamedTextColor.RED));
+            case "cancure":
+                for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+                    // Make sure the player is active in the game
+                    if ((onlinePlayer.getGameMode() == GameMode.SURVIVAL || onlinePlayer.getGameMode() == GameMode.ADVENTURE)
+                            && (!onlinePlayer.getScoreboardTags().contains(DeathHandler.PERMAKILLED_TAG) || onlinePlayer.isDead())
+                            && CureBookReadingListener.hasReadAllCureBooks(onlinePlayer)
+                    ) {
+                        players.add(onlinePlayer);
+                    }
+                }
+
+                playerCount = players.size();
+                sender.sendMessage(Component.text("There " + (playerCount == 1 ? "is" : "are") + " currently ", NamedTextColor.WHITE)
+                        .append(Component.text(playerCount, NamedTextColor.AQUA))
+                        .append(Component.text(" player" + (playerCount == 1 ? "" : "s") + " who can cure themselves in the session.", NamedTextColor.WHITE))
+                );
+
+                consoleReport = "Admin " + sender.getName() + " checked the count of players who can cure";
+                break;
+
+            case "canforcecure":
+                for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+                    // Make sure the player is active in the game
+                    if ((onlinePlayer.getGameMode() == GameMode.SURVIVAL || onlinePlayer.getGameMode() == GameMode.ADVENTURE)
+                            && (!onlinePlayer.getScoreboardTags().contains(DeathHandler.PERMAKILLED_TAG) || onlinePlayer.isDead())
+                            && CureBookReadingListener.hasReadAllCureBooks(onlinePlayer) && CureBookReadingListener.hasReadFourthBook(onlinePlayer)
+                    ) {
+                        players.add(onlinePlayer);
+                    }
+                }
+
+                playerCount = players.size();
+                sender.sendMessage(Component.text("There " + (playerCount == 1 ? "is" : "are") + " currently ", NamedTextColor.WHITE)
+                        .append(Component.text(playerCount, NamedTextColor.DARK_AQUA))
+                        .append(Component.text(" player" + (playerCount == 1 ? "" : "s") + " who can cure others in the session.", NamedTextColor.WHITE))
+                );
+
+                consoleReport = "Admin " + sender.getName() + " checked the count of players who can force cure";
+                break;
+
+            default:
+                sender.sendMessage(Component.text("Invalid action. Use 'all', 'human', or 'vampire'.", NamedTextColor.RED));
+                return true;
+        }
+
+        // Display the names of the players who meet the conditions searched for
+        if (args.length >= 2 && !players.isEmpty()) {
+            final boolean spoiler = Boolean.parseBoolean(args[1]);
+
+            if (spoiler) {
+                StringBuilder playerNames = new StringBuilder();
+
+                for (Player onlinePlayer : players) {
+                    playerNames.append(onlinePlayer.getName()).append("  ");
+                }
+
+                sender.sendMessage(Component.text(playerNames.toString(), NamedTextColor.WHITE));
+
+                consoleReport += " using the SPOILER view.";
             }
         }
 
+        this.plugin.logInfo(consoleReport);
         return true;
     }
 
@@ -454,8 +561,16 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                     senderMessage = this.configValueMessage("new_vampire_tracking", this.configManager.canTrackNewVampires());
                     break;
 
+                case "sun_through_glass":
+                    senderMessage = this.configValueMessage("new_vampire_tracking", this.configManager.doesSunAffectThroughGlass());
+                    break;
+
                 case "allow_vampire_mounts":
                     senderMessage = this.configValueMessage("allow_vampire_mounts", this.configManager.canVampiresRideLivingMounts());
+                    break;
+
+                case "restrict_known_vampires":
+                    senderMessage = this.configValueMessage("restrict_known_vampires", this.configManager.areKnownVampiresRestricted());
                     break;
 
                 case "vampire_health_check":
@@ -524,7 +639,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
 
                     // Clear the list of tome absorption if the cap is being disabled
                     if (!Boolean.parseBoolean(args[1])) {
-                        this.plugin.getTomeManager().clearAllTomeUsage();
+                        tomeManager.clearAllTomeUsage();
                     }
 
                     break;
@@ -534,8 +649,8 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
 
                     // Clear existing promotion and stage bans if capping is being disabled
                     if (!Boolean.parseBoolean(args[1])) {
-                        plugin.getVampireManager().clearAllPromotionBans();
-                        plugin.getVampireManager().clearAllStageCaps();
+                        vampireManager.clearAllPromotionBans();
+                        vampireManager.clearAllStageCaps();
                     }
 
                     senderMessage = this.configUpdateMessage("vampire-level-capping", Boolean.parseBoolean(args[1]));
@@ -546,9 +661,19 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                     senderMessage = this.configUpdateMessage("new-vampire-tracking", Boolean.parseBoolean(args[1]));
                     break;
 
+                case "sun_through_glass":
+                    configManager.setSunAffectThroughGlass(Boolean.parseBoolean(args[1]));
+                    senderMessage = this.configUpdateMessage("sun-affects-through-glass", Boolean.parseBoolean(args[1]));
+                    break;
+
                 case "allow_vampire_mounts":
                     configManager.setVampiresRideLivingMounts(Boolean.parseBoolean(args[1]));
                     senderMessage = this.configUpdateMessage("allow-vampire-mounts", Boolean.parseBoolean(args[1]));
+                    break;
+
+                case "restrict_known_vampires":
+                    configManager.setKnownVampireRestriction(Boolean.parseBoolean(args[1]));
+                    senderMessage = this.configUpdateMessage("restrict-known-vampires", Boolean.parseBoolean(args[1]));
                     break;
 
                 case "vampire_health_check":
@@ -738,7 +863,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         }
 
         String locationStr = (int)x + "," + (int)y + "," + (int)z;
-        this.plugin.getConfigManager().setVampireRespawnLocation(locationStr);
+        configManager.setVampireRespawnLocation(locationStr);
         this.plugin.reloadVampireRespawnLocation();
 
         sender.sendMessage(Component.text("Vampire spawn location set to: ", NamedTextColor.GREEN)
@@ -779,39 +904,40 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
             CommandHandler.sendCommandCorrection(sender, "  reset <player>", "Reset cooldowns for a specific player");
             CommandHandler.sendCommandCorrection(sender, "  clear", "Same as reset");
 
-        } else {
-            String action = args[0].toLowerCase();
-            if (!action.equals("reset") && !action.equals("clear")) {
-                sender.sendMessage(Component.text("Invalid action. Use 'reset' or 'clear'.", NamedTextColor.RED));
+            return true;
+        }
 
-            } else if (args.length >= 2) {
-                Player target = Bukkit.getPlayer(args[1]);
+        final String action = args[0].toLowerCase();
+        if (!action.equals("reset") && !action.equals("clear")) {
+            sender.sendMessage(Component.text("Invalid action. Use 'reset' or 'clear'.", NamedTextColor.RED));
 
-                if (target == null) {
-                    sender.sendMessage(Component.text("Player '" + args[1] + "' not found.", NamedTextColor.RED));
+        } else if (args.length >= 2) {
+            Player target = Bukkit.getPlayerExact(args[1]);
 
-                } else {
-                    this.resetPlayerCooldowns(target);
+            if (target == null) {
+                sender.sendMessage(Component.text("Player '" + args[1] + "' not found.", NamedTextColor.RED));
 
-                    sender.sendMessage(Component.text("Reset all cooldowns for player: ", NamedTextColor.GREEN)
-                            .append(Component.text(target.getName(), NamedTextColor.YELLOW)));
-                    target.sendMessage(Component.text("Your vampire ability cooldowns have been reset by an administrator.", NamedTextColor.GREEN));
-                }
             } else {
-                int playersAffected = 0;
+                this.resetPlayerCooldowns(target);
 
-                for (Player player : Bukkit.getOnlinePlayers()) {
-                    this.resetPlayerCooldowns(player);
-                    player.sendMessage(Component.text("Your vampire ability cooldowns have been reset by an administrator.", NamedTextColor.GREEN));
-                    ++playersAffected;
-                }
-
-                sender.sendMessage(Component.text("Reset all vampire ability cooldowns for ", NamedTextColor.GREEN)
-                        .append(Component.text(playersAffected, NamedTextColor.YELLOW))
-                        .append(Component.text(" online players.", NamedTextColor.GREEN))
-                );
-                this.plugin.logInfo("Admin " + sender.getName() + " reset cooldowns for " + playersAffected + " players");
+                sender.sendMessage(Component.text("Reset all cooldowns for player: ", NamedTextColor.GREEN)
+                        .append(Component.text(target.getName(), NamedTextColor.YELLOW)));
+                target.sendMessage(Component.text("Your vampire ability cooldowns have been reset by an administrator.", NamedTextColor.GREEN));
             }
+        } else {
+            int playersAffected = 0;
+
+            for (Player player : Bukkit.getOnlinePlayers()) {
+                this.resetPlayerCooldowns(player);
+                player.sendMessage(Component.text("Your vampire ability cooldowns have been reset by an administrator.", NamedTextColor.GREEN));
+                ++playersAffected;
+            }
+
+            sender.sendMessage(Component.text("Reset all vampire ability cooldowns for ", NamedTextColor.GREEN)
+                    .append(Component.text(playersAffected, NamedTextColor.YELLOW))
+                    .append(Component.text(" online player" + (playersAffected == 1 ? "" : "s") + ".", NamedTextColor.GREEN))
+            );
+            this.plugin.logInfo("Admin " + sender.getName() + " reset cooldowns for " + playersAffected + " players");
         }
 
         return true;
@@ -838,7 +964,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         // Handle the cooldown command for individual players
         if (args.length == 0) {
             for (Player player : Bukkit.getOnlinePlayers()) {
-                if (this.plugin.getVampireManager().isHuman(player)) {
+                if (vampireManager.isHuman(player)) {
                     TomeAbility.clearAllCooldowns(player);
 
                     player.removeScoreboardTag(SessionManager.BLESSING_USED_SESSION);
@@ -850,9 +976,9 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
             }
         } else {
             // Handle the cooldown command for a single player
-            Player target = Bukkit.getPlayer(args[0]);
+            Player target = Bukkit.getPlayerExact(args[0]);
 
-            if (target != null && this.plugin.getVampireManager().isHuman(target)) {
+            if (target != null && vampireManager.isHuman(target)) {
                 TomeAbility.clearAllCooldowns(target);
 
                 target.removeScoreboardTag(SessionManager.BLESSING_USED_SESSION);
@@ -868,7 +994,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         } else {
             sender.sendMessage(Component.text("Reset all tome ability cooldowns for ", NamedTextColor.GREEN)
                     .append(Component.text(humansAffected, NamedTextColor.YELLOW))
-                    .append(Component.text(" human players.", NamedTextColor.GREEN))
+                    .append(Component.text(" human player" + (humansAffected == 1 ? "" : "s") + "." , NamedTextColor.GREEN))
             );
         }
 
@@ -911,86 +1037,86 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
     private boolean handleSessionCommand(CommandSender sender, String[] args) {
         if (args.length != 1) {
             sender.sendMessage(Component.text("Usage: /pow admin session <start | pause | end | prime | resume | building>", NamedTextColor.RED));
+            return true;
+        }
 
-        } else {
-            switch (args[0].toLowerCase()) {
-                case "start":
-                    int currentState = this.sessionManager.getSessionState();
-                    if (currentState == 3) {
-                        sender.sendMessage(Component.text("Session ended - auto-priming for new session...", NamedTextColor.YELLOW));
-                        this.sessionManager.primeNewSession();
-                        currentState = this.sessionManager.getSessionState();
-                    }
-
-                    if (currentState != 0 && currentState != 4) {
-                        sender.sendMessage(Component.text("Cannot start session. Session must be primed or in building mode first.", NamedTextColor.RED));
-                        return true;
-                    }
-
-                    this.sessionManager.startSession();
-                    sender.sendMessage(Component.text("Session started.", NamedTextColor.GREEN));
-                    break;
-
-                case "pause":
-                    if (this.sessionManager.getSessionState() != 1) {
-                        sender.sendMessage(Component.text("Cannot pause session. No session is currently running.", NamedTextColor.RED));
-                        return true;
-                    }
-
-                    this.sessionManager.pauseSession();
-                    sender.sendMessage(Component.text("Session paused.", NamedTextColor.YELLOW));
-                    break;
-
-                case "end":
-                    if (this.sessionManager.getSessionState() != 1 && this.sessionManager.getSessionState() != 2) {
-                        sender.sendMessage(Component.text("Cannot end session. No session is currently running or paused.", NamedTextColor.RED));
-                        return true;
-                    }
-
-                    this.sessionManager.endSession();
-                    sender.sendMessage(Component.text("Session ended.", NamedTextColor.RED));
-                    break;
-
-                case "prime":
-                    if (this.sessionManager.getSessionState() == 0) {
-                        sender.sendMessage(Component.text("Cannot prime session. A session is already primed. Start it with '/pow admin session start'.", NamedTextColor.RED));
-                        return true;
-
-                    } else if (this.sessionManager.getSessionState() == 1) {
-                        sender.sendMessage(Component.text("Cannot prime session. A session is currently running. End it first with '/pow admin session end'.", NamedTextColor.RED));
-                        return true;
-
-                    } else if (this.sessionManager.getSessionState() == 2) {
-                        sender.sendMessage(Component.text("Cannot prime session. A session is currently paused. Resume it first with '/pow admin session resume'.", NamedTextColor.RED));
-                        return true;
-                    }
-
+        switch (args[0].toLowerCase()) {
+            case "start":
+                int currentState = this.sessionManager.getSessionState();
+                if (currentState == 3) {
+                    sender.sendMessage(Component.text("Session ended - auto-priming for new session...", NamedTextColor.YELLOW));
                     this.sessionManager.primeNewSession();
-                    sender.sendMessage(Component.text("Session primed. Use '/pow admin session start' to begin.", NamedTextColor.GREEN));
-                    break;
+                    currentState = this.sessionManager.getSessionState();
+                }
 
-                case "resume":
-                    if (this.sessionManager.getSessionState() != 2) {
-                        sender.sendMessage(Component.text("Cannot resume session. No session is currently paused.", NamedTextColor.RED));
-                        return true;
-                    }
+                if (currentState != 0 && currentState != 4) {
+                    sender.sendMessage(Component.text("Cannot start session. Session must be primed or in building mode first.", NamedTextColor.RED));
+                    return true;
+                }
 
-                    this.sessionManager.resumeSession();
-                    sender.sendMessage(Component.text("Session resumed.", NamedTextColor.GREEN));
-                    break;
+                this.sessionManager.startSession();
+                sender.sendMessage(Component.text("Session started.", NamedTextColor.GREEN));
+                break;
 
-                case "building":
-                    if (this.sessionManager.getSessionState() != 0) {
-                        sender.sendMessage(Component.text("Cannot enter building mode. Session must be primed first. Use '/pow admin session prime' to prepare a new session.", NamedTextColor.RED));
-                        return true;
-                    }
+            case "pause":
+                if (this.sessionManager.getSessionState() != 1) {
+                    sender.sendMessage(Component.text("Cannot pause session. No session is currently running.", NamedTextColor.RED));
+                    return true;
+                }
 
-                    this.sessionManager.preStartSession();
-                    break;
+                this.sessionManager.pauseSession();
+                sender.sendMessage(Component.text("Session paused.", NamedTextColor.YELLOW));
+                break;
 
-                default:
-                    sender.sendMessage(Component.text("Invalid action. Use: start, pause, end, prime, resume, or building.", NamedTextColor.RED));
-            }
+            case "end":
+                if (this.sessionManager.getSessionState() != 1 && this.sessionManager.getSessionState() != 2) {
+                    sender.sendMessage(Component.text("Cannot end session. No session is currently running or paused.", NamedTextColor.RED));
+                    return true;
+                }
+
+                this.sessionManager.endSession();
+                sender.sendMessage(Component.text("Session ended.", NamedTextColor.RED));
+                break;
+
+            case "prime":
+                if (this.sessionManager.getSessionState() == 0) {
+                    sender.sendMessage(Component.text("Cannot prime session. A session is already primed. Start it with '/pow admin session start'.", NamedTextColor.RED));
+                    return true;
+
+                } else if (this.sessionManager.getSessionState() == 1) {
+                    sender.sendMessage(Component.text("Cannot prime session. A session is currently running. End it first with '/pow admin session end'.", NamedTextColor.RED));
+                    return true;
+
+                } else if (this.sessionManager.getSessionState() == 2) {
+                    sender.sendMessage(Component.text("Cannot prime session. A session is currently paused. Resume it first with '/pow admin session resume'.", NamedTextColor.RED));
+                    return true;
+                }
+
+                this.sessionManager.primeNewSession();
+                sender.sendMessage(Component.text("Session primed. Use '/pow admin session start' to begin.", NamedTextColor.GREEN));
+                break;
+
+            case "resume":
+                if (this.sessionManager.getSessionState() != 2) {
+                    sender.sendMessage(Component.text("Cannot resume session. No session is currently paused.", NamedTextColor.RED));
+                    return true;
+                }
+
+                this.sessionManager.resumeSession();
+                sender.sendMessage(Component.text("Session resumed.", NamedTextColor.GREEN));
+                break;
+
+            case "building":
+                if (this.sessionManager.getSessionState() != 0) {
+                    sender.sendMessage(Component.text("Cannot enter building mode. Session must be primed first. Use '/pow admin session prime' to prepare a new session.", NamedTextColor.RED));
+                    return true;
+                }
+
+                this.sessionManager.preStartSession();
+                break;
+
+            default:
+                sender.sendMessage(Component.text("Invalid action. Use: start, pause, end, prime, resume, or building.", NamedTextColor.RED));
         }
 
         return true;
@@ -1007,15 +1133,15 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
             sendCommandCorrection(sender, "  clearcap", "Remove stage cap (allows vampire to level up after thirst demotion)");
             sendCommandCorrection(sender, "  clearban", "Remove promotion ban (allows vampire to level up again)");
 
-        } else {
-            Player target = Bukkit.getPlayer(args[0]);
+            return true;
+        }
 
-            if (target == null) {
-                sender.sendMessage(Component.text("Player not found.", NamedTextColor.RED));
+        if (args[0].equalsIgnoreCase("@a")) {
+            int playercount = 0;
 
-            } else {
-                switch (args[1].toLowerCase()) {
-                    case "human":
+            switch (args[1].toLowerCase()) {
+                case "human":
+                    for (Player target : Bukkit.getOnlinePlayers()) {
                         this.vampireManager.setPlayerAsHuman(target);
                         target.getActivePotionEffects().forEach((effect) -> target.removePotionEffect(effect.getType()));
 
@@ -1024,12 +1150,18 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                         }
 
                         target.setHealth(target.getAttribute(Attribute.MAX_HEALTH).getValue());
-                        sender.sendMessage(Component.text(target.getName() + " is now human.", NamedTextColor.GREEN));
                         target.sendMessage(Component.text("You have been set as human.", NamedTextColor.GREEN));
-                        this.sendHumanTexturePackPrompt(target);
-                        break;
+                        this.plugin.getVampireTexturePackManager().sendHumanTexturePackPrompt(target);
 
-                    case "1":
+                        playercount++;
+                    }
+
+                    sender.sendMessage(Component.text(playercount, NamedTextColor.LIGHT_PURPLE)
+                            .append(Component.text(" player" + (playercount == 1 ? "" : "s") + " have been set to human.", NamedTextColor.DARK_PURPLE)));
+                    break;
+
+                case "1":
+                    for (Player target : Bukkit.getOnlinePlayers()) {
                         this.vampireManager.setPlayerAsVampire(target, 1, true);
 
                         if (this.plugin.getBeaconMajorityManager() != null) {
@@ -1041,12 +1173,18 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                         this.applyVampireNightVision(target);
                         target.setExp(0.5F);
 
-                        sender.sendMessage(Component.text(target.getName() + " is now a Stage 1 vampire.", NamedTextColor.DARK_PURPLE));
                         target.sendMessage(Component.text("You have been set as a Stage 1 vampire.", NamedTextColor.DARK_PURPLE));
-                        this.sendVampireTexturePackPrompt(target);
-                        break;
+                        this.plugin.getVampireTexturePackManager().sendVampireTexturePackPrompt(target);
 
-                    case "2":
+                        playercount++;
+                    }
+
+                    sender.sendMessage(Component.text(playercount, NamedTextColor.LIGHT_PURPLE)
+                            .append(Component.text(" player" + (playercount == 1 ? "" : "s") + " have been set to a Stage 1 vampire.", NamedTextColor.DARK_PURPLE)));
+                    break;
+
+                case "2":
+                    for (Player target : Bukkit.getOnlinePlayers()) {
                         this.vampireManager.setPlayerAsVampire(target, 2, true);
 
                         if (this.plugin.getBeaconMajorityManager() != null) {
@@ -1058,12 +1196,18 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                         this.applyVampireNightVision(target);
                         target.setExp(0.5F);
 
-                        sender.sendMessage(Component.text(target.getName() + " is now a Stage 2 vampire.", NamedTextColor.DARK_PURPLE));
                         target.sendMessage(Component.text("You have been set as a Stage 2 vampire.", NamedTextColor.DARK_PURPLE));
-                        this.sendVampireTexturePackPrompt(target);
-                        break;
+                        this.plugin.getVampireTexturePackManager().sendVampireTexturePackPrompt(target);
 
-                    case "3":
+                        playercount++;
+                    }
+
+                    sender.sendMessage(Component.text(playercount, NamedTextColor.LIGHT_PURPLE)
+                            .append(Component.text(" player" + (playercount == 1 ? "" : "s") + " have been set to a Stage 2 vampire.", NamedTextColor.DARK_PURPLE)));
+                    break;
+
+                case "3":
+                    for (Player target : Bukkit.getOnlinePlayers()) {
                         this.vampireManager.setPlayerAsVampire(target, 3, true);
 
                         if (this.plugin.getBeaconMajorityManager() != null) {
@@ -1075,44 +1219,165 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                         this.applyVampireNightVision(target);
                         target.setExp(0.5F);
 
-                        sender.sendMessage(Component.text(target.getName() + " is now a Stage 3 vampire.", NamedTextColor.DARK_PURPLE));
                         target.sendMessage(Component.text("You have been set as a Stage 3 vampire.", NamedTextColor.DARK_PURPLE));
-                        this.sendVampireTexturePackPrompt(target);
-                        break;
+                        this.plugin.getVampireTexturePackManager().sendVampireTexturePackPrompt(target);
 
-                    case "turn":
-                        return this.handleTurnCommand(sender, target, args);
+                        playercount++;
+                    }
 
-                    case "clearcap":
-                    case "clear_stage_cap":
+                    sender.sendMessage(Component.text(playercount, NamedTextColor.LIGHT_PURPLE)
+                            .append(Component.text(" player" + (playercount == 1 ? "" : "s") + " have been set to a Stage 3 vampire.", NamedTextColor.DARK_PURPLE)));
+                    break;
+
+                case "turn":
+                    sender.sendMessage(Component.text("'@a' is not a supported option when causing a turn for a sire.", NamedTextColor.RED));
+                    return true;
+
+                case "clearcap":
+                case "clear_stage_cap":
+                    for (Player target : Bukkit.getOnlinePlayers()) {
                         if (this.vampireManager.hasStageCap(target)) {
-                            int cap = this.vampireManager.getStageCap(target);
                             this.vampireManager.clearStageCap(target);
-
-                            sender.sendMessage(Component.text("Cleared stage cap for " + target.getName() + " (was capped at stage " + cap + ")", NamedTextColor.GREEN));
                             target.sendMessage(Component.text("Your stage cap has been removed by an administrator. You can now level up freely.", NamedTextColor.GREEN));
 
-                        } else {
-                            sender.sendMessage(Component.text(target.getName() + " does not have a stage cap.", NamedTextColor.RED));
+                            playercount++;
                         }
-                        break;
+                    }
 
-                    case "clearban":
-                    case "clear_promotion_ban":
+                    sender.sendMessage(Component.text("Cleared the stage cap for ", NamedTextColor.DARK_PURPLE)
+                            .append(Component.text(playercount, NamedTextColor.LIGHT_PURPLE))
+                            .append(Component.text(" vampire" + (playercount == 1 ? "" : "s") + ".", NamedTextColor.DARK_PURPLE))
+                    );
+                    break;
+
+                case "clearban":
+                case "clear_promotion_ban":
+                    for (Player target : Bukkit.getOnlinePlayers()) {
                         if (this.vampireManager.hasPromotionBan(target)) {
                             this.vampireManager.clearPromotionBan(target);
-                            sender.sendMessage(Component.text("Cleared promotion ban for " + target.getName(), NamedTextColor.GREEN));
                             target.sendMessage(Component.text("Your promotion ban has been removed by an administrator. You can now level up.", NamedTextColor.GREEN));
 
-                        } else {
-                            sender.sendMessage(Component.text(target.getName() + " does not have a promotion ban.", NamedTextColor.RED));
+                            playercount++;
                         }
-                        break;
+                    }
 
-                    default:
-                        sender.sendMessage(Component.text("Invalid type. Use: human, 1, 2, 3, turn, clearcap, or clearban.", NamedTextColor.RED));
-                        return true;
-                }
+                    sender.sendMessage(Component.text("Cleared the promotion ban for ", NamedTextColor.DARK_PURPLE)
+                            .append(Component.text(playercount, NamedTextColor.LIGHT_PURPLE))
+                            .append(Component.text(" vampire" + (playercount == 1 ? "" : "s") + ".", NamedTextColor.DARK_PURPLE))
+                    );
+                    break;
+
+                default:
+                    sender.sendMessage(Component.text("Invalid type. Use: human, 1, 2, 3, turn, clearcap, or clearban.", NamedTextColor.RED));
+                    return true;
+            }
+
+        } else {
+            Player target = this.getPlayerFromParameter(sender, args[0]);
+
+            if (target == null) {
+                sender.sendMessage(Component.text("Player not found.", NamedTextColor.RED));
+                return true;
+            }
+
+            switch (args[1].toLowerCase()) {
+                case "human":
+                    this.vampireManager.setPlayerAsHuman(target);
+                    target.getActivePotionEffects().forEach((effect) -> target.removePotionEffect(effect.getType()));
+
+                    if (this.plugin.getBeaconMajorityManager() != null) {
+                        this.plugin.getBeaconMajorityManager().updateBeaconMajorityBonuses();
+                    }
+
+                    target.setHealth(target.getAttribute(Attribute.MAX_HEALTH).getValue());
+                    sender.sendMessage(Component.text(target.getName() + " is now human.", NamedTextColor.DARK_PURPLE));
+                    target.sendMessage(Component.text("You have been set as human.", NamedTextColor.GREEN));
+                    this.plugin.getVampireTexturePackManager().sendHumanTexturePackPrompt(target);
+                    break;
+
+                case "1":
+                    this.vampireManager.setPlayerAsVampire(target, 1, true);
+
+                    if (this.plugin.getBeaconMajorityManager() != null) {
+                        this.plugin.getBeaconMajorityManager().removeBonusesFromPlayer(target);
+                        this.plugin.getBeaconMajorityManager().applyBonusesToPlayer(target);
+                    }
+
+                    target.setHealth(target.getAttribute(Attribute.MAX_HEALTH).getValue());
+                    this.applyVampireNightVision(target);
+                    target.setExp(0.5F);
+
+                    sender.sendMessage(Component.text(target.getName() + " is now a Stage 1 vampire.", NamedTextColor.DARK_PURPLE));
+                    target.sendMessage(Component.text("You have been set as a Stage 1 vampire.", NamedTextColor.DARK_PURPLE));
+                    this.plugin.getVampireTexturePackManager().sendVampireTexturePackPrompt(target);
+                    break;
+
+                case "2":
+                    this.vampireManager.setPlayerAsVampire(target, 2, true);
+
+                    if (this.plugin.getBeaconMajorityManager() != null) {
+                        this.plugin.getBeaconMajorityManager().removeBonusesFromPlayer(target);
+                        this.plugin.getBeaconMajorityManager().applyBonusesToPlayer(target);
+                    }
+
+                    target.setHealth(target.getAttribute(Attribute.MAX_HEALTH).getValue());
+                    this.applyVampireNightVision(target);
+                    target.setExp(0.5F);
+
+                    sender.sendMessage(Component.text(target.getName() + " is now a Stage 2 vampire.", NamedTextColor.DARK_PURPLE));
+                    target.sendMessage(Component.text("You have been set as a Stage 2 vampire.", NamedTextColor.DARK_PURPLE));
+                    this.plugin.getVampireTexturePackManager().sendVampireTexturePackPrompt(target);
+                    break;
+
+                case "3":
+                    this.vampireManager.setPlayerAsVampire(target, 3, true);
+
+                    if (this.plugin.getBeaconMajorityManager() != null) {
+                        this.plugin.getBeaconMajorityManager().removeBonusesFromPlayer(target);
+                        this.plugin.getBeaconMajorityManager().applyBonusesToPlayer(target);
+                    }
+
+                    target.setHealth(target.getAttribute(Attribute.MAX_HEALTH).getValue());
+                    this.applyVampireNightVision(target);
+                    target.setExp(0.5F);
+
+                    sender.sendMessage(Component.text(target.getName() + " is now a Stage 3 vampire.", NamedTextColor.DARK_PURPLE));
+                    target.sendMessage(Component.text("You have been set as a Stage 3 vampire.", NamedTextColor.DARK_PURPLE));
+                    this.plugin.getVampireTexturePackManager().sendVampireTexturePackPrompt(target);
+                    break;
+
+                case "turn":
+                    return this.handleTurnCommand(sender, target, args);
+
+                case "clearcap":
+                case "clear_stage_cap":
+                    if (this.vampireManager.hasStageCap(target)) {
+                        int cap = this.vampireManager.getStageCap(target);
+                        this.vampireManager.clearStageCap(target);
+
+                        sender.sendMessage(Component.text("Cleared stage cap for " + target.getName() + " (was capped at stage " + cap + ")", NamedTextColor.GREEN));
+                        target.sendMessage(Component.text("Your stage cap has been removed by an administrator. You can now level up freely.", NamedTextColor.GREEN));
+
+                    } else {
+                        sender.sendMessage(Component.text(target.getName() + " does not have a stage cap.", NamedTextColor.RED));
+                    }
+                    break;
+
+                case "clearban":
+                case "clear_promotion_ban":
+                    if (this.vampireManager.hasPromotionBan(target)) {
+                        this.vampireManager.clearPromotionBan(target);
+                        sender.sendMessage(Component.text("Cleared promotion ban for " + target.getName(), NamedTextColor.GREEN));
+                        target.sendMessage(Component.text("Your promotion ban has been removed by an administrator. You can now level up.", NamedTextColor.GREEN));
+
+                    } else {
+                        sender.sendMessage(Component.text(target.getName() + " does not have a promotion ban.", NamedTextColor.RED));
+                    }
+                    break;
+
+                default:
+                    sender.sendMessage(Component.text("Invalid type. Use: human, 1, 2, 3, turn, clearcap, or clearban.", NamedTextColor.RED));
+                    return true;
             }
         }
 
@@ -1128,51 +1393,50 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         if (args.length == 0) {
             this.sendBeaconHelp(sender);
             return true;
+        }
 
-        } else {
-            switch (args[0].toLowerCase()) {
-                case "add":
-                    return this.handleBeaconAdd(sender, args);
-                case "remove":
-                case "delete":
-                    return this.handleBeaconRemove(sender, args);
-                case "list":
-                    return this.handleBeaconList(sender, args);
-                case "reload":
-                    return this.handleBeaconReload(sender, args);
-                case "stats":
-                    return this.handleBeaconStats(sender, args);
-                case "info":
-                    return this.handleBeaconInfo(sender, args);
-                case "validate":
-                    return this.handleBeaconValidate(sender, args);
-                case "holy":
-                    return this.handleBeaconHoly(sender, args);
-                case "desecrated":
-                case "desecrate":
-                    return this.handleBeaconDesecrated(sender, args);
-                case "break":
-                case "corrupt":
-                case "corrupted":
-                    return this.handleBeaconCorrupted(sender, args);
-                case "neutral":
-                    return this.handleBeaconNeutral(sender, args);
-                case "fix":
-                case "repair":
-                    return this.handleBeaconFix(sender, args);
-                case "debug":
-                    return this.handleBeaconDebug(sender, args);
-                case "refresh":
-                    return this.handleBeaconRefresh(sender, args);
-                case "cleanup":
-                    return this.handleBeaconCleanup(sender, args);
-                case "clearcooldowns":
-                    return this.handleBeaconClearCooldowns(sender, args);
-                default:
-                    sender.sendMessage(Component.text("Unknown beacon command: " + args[0].toLowerCase(), NamedTextColor.RED));
-                    this.sendBeaconHelp(sender);
-                    return true;
-            }
+        switch (args[0].toLowerCase()) {
+            case "add":
+                return this.handleBeaconAdd(sender, args);
+            case "remove":
+            case "delete":
+                return this.handleBeaconRemove(sender, args);
+            case "list":
+                return this.handleBeaconList(sender, args);
+            case "reload":
+                return this.handleBeaconReload(sender, args);
+            case "stats":
+                return this.handleBeaconStats(sender, args);
+            case "info":
+                return this.handleBeaconInfo(sender, args);
+            case "validate":
+                return this.handleBeaconValidate(sender, args);
+            case "holy":
+                return this.handleBeaconHoly(sender, args);
+            case "desecrated":
+            case "desecrate":
+                return this.handleBeaconDesecrated(sender, args);
+            case "break":
+            case "corrupt":
+            case "corrupted":
+                return this.handleBeaconCorrupted(sender, args);
+            case "neutral":
+                return this.handleBeaconNeutral(sender, args);
+            case "fix":
+            case "repair":
+                return this.handleBeaconFix(sender, args);
+            case "debug":
+                return this.handleBeaconDebug(sender, args);
+            case "refresh":
+                return this.handleBeaconRefresh(sender, args);
+            case "cleanup":
+                return this.handleBeaconCleanup(sender, args);
+            case "clearcooldowns":
+                return this.handleBeaconClearCooldowns(sender, args);
+            default:
+                sender.sendMessage(Component.text("Unknown beacon command: " + args[0].toLowerCase(), NamedTextColor.RED));
+                this.sendBeaconHelp(sender);
+                return true;
         }
     }
 
@@ -1196,8 +1460,8 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
     private boolean handleBeaconDebug(CommandSender sender, String[] args) {
         if (args.length != 1) {
             if (args.length == 2) {
-                String beaconName = args[1];
-                String debugInfo = this.beaconManager.getBeaconDisplayDebugInfo(beaconName);
+                final String beaconName = args[1];
+                final String debugInfo = this.beaconManager.getBeaconDisplayDebugInfo(beaconName);
 
                 if (debugInfo != null) {
                     sender.sendMessage(Component.text("=== BEACON DISPLAY DEBUG: " + beaconName.toUpperCase() + " ===", NamedTextColor.GOLD));
@@ -1211,6 +1475,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                 sender.sendMessage(Component.text("Usage: /pow admin beacon debug [beacon_name]", NamedTextColor.RED));
             }
         } else {
+            sender.sendMessage("");
             sender.sendMessage(Component.text("=== BEACON DISPLAY DEBUG INFO ===", NamedTextColor.GOLD));
 
             for (BeaconSite beacon : this.beaconManager.getAllBeacons()) {
@@ -1328,43 +1593,43 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
     private boolean handleBeaconRemove(CommandSender sender, String[] args) {
         if (args.length < 2) {
             sender.sendMessage(Component.text("Usage: /pow admin beacon remove <name>", NamedTextColor.RED));
+            return true;
+        }
+
+        final String name = args[1];
+        BeaconSite beacon = this.beaconManager.getBeacon(name);
+
+        if (beacon == null) {
+            sender.sendMessage(Component.text("Beacon '" + name + "' not found.", NamedTextColor.RED));
 
         } else {
-            String name = args[1];
-            BeaconSite beacon = this.beaconManager.getBeacon(name);
+            if (sender instanceof Player player) {
+                Location beaconLoc = beacon.getLocation();
 
-            if (beacon == null) {
-                sender.sendMessage(Component.text("Beacon '" + name + "' not found.", NamedTextColor.RED));
+                if (beaconLoc != null && beaconLoc.getWorld() != null) {
+                    Location originalLoc = player.getLocation().clone();
+                    player.teleport(beaconLoc);
+                    sender.sendMessage(Component.text("Teleported to beacon location to ensure chunk is loaded...", NamedTextColor.GRAY));
 
+                    this.plugin.getServer().getScheduler().runTaskLater(this.plugin, () -> {
+                        if (this.beaconManager.removeBeacon(name)) {
+                            sender.sendMessage(Component.text("Beacon '" + name + "' removed.", NamedTextColor.GREEN));
+                        } else {
+                            sender.sendMessage(Component.text("Failed to remove beacon '" + name + "'.", NamedTextColor.RED));
+                        }
+
+                        player.teleport(originalLoc);
+                        sender.sendMessage(Component.text("Teleported back to original location.", NamedTextColor.GRAY));
+                    }, 5L);
+
+                    return true;
+                }
+            }
+
+            if (this.beaconManager.removeBeacon(name)) {
+                sender.sendMessage(Component.text("Beacon '" + name + "' removed.", NamedTextColor.GREEN));
             } else {
-                if (sender instanceof Player player) {
-                    Location beaconLoc = beacon.getLocation();
-
-                    if (beaconLoc != null && beaconLoc.getWorld() != null) {
-                        Location originalLoc = player.getLocation().clone();
-                        player.teleport(beaconLoc);
-                        sender.sendMessage(Component.text("Teleported to beacon location to ensure chunk is loaded...", NamedTextColor.GRAY));
-
-                        this.plugin.getServer().getScheduler().runTaskLater(this.plugin, () -> {
-                            if (this.beaconManager.removeBeacon(name)) {
-                                sender.sendMessage(Component.text("Beacon '" + name + "' removed.", NamedTextColor.GREEN));
-                            } else {
-                                sender.sendMessage(Component.text("Failed to remove beacon '" + name + "'.", NamedTextColor.RED));
-                            }
-
-                            player.teleport(originalLoc);
-                            sender.sendMessage(Component.text("Teleported back to original location.", NamedTextColor.GRAY));
-                        }, 5L);
-
-                        return true;
-                    }
-                }
-
-                if (this.beaconManager.removeBeacon(name)) {
-                    sender.sendMessage(Component.text("Beacon '" + name + "' removed.", NamedTextColor.GREEN));
-                } else {
-                    sender.sendMessage(Component.text("Failed to remove beacon '" + name + "'.", NamedTextColor.RED));
-                }
+                sender.sendMessage(Component.text("Failed to remove beacon '" + name + "'.", NamedTextColor.RED));
             }
         }
 
@@ -1402,10 +1667,11 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
      */
     private boolean handleBeaconStats(CommandSender sender, String[] args) {
         Map<BeaconSite.BeaconState, Integer> stateStats = this.beaconManager.getStateStats();
+        final int total = stateStats.values().stream().mapToInt(Integer::intValue).sum();
+
+        sender.sendMessage("");
         sender.sendMessage(Component.text("=== BEACON STATISTICS ===", NamedTextColor.GOLD)
                 .decorate(TextDecoration.BOLD));
-        int total = stateStats.values().stream().mapToInt(Integer::intValue).sum();
-
         sender.sendMessage(Component.text("Total Beacons: ", NamedTextColor.GRAY)
                 .append(Component.text(total, NamedTextColor.YELLOW)));
         sender.sendMessage("");
@@ -1413,8 +1679,8 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                 .decorate(TextDecoration.BOLD));
 
         for (BeaconSite.BeaconState state : BeaconState.values()) {
-            int count = stateStats.get(state);
-            double percentage = total > 0 ? count * 100.0 / (double)total : 0;
+            final int count = stateStats.get(state);
+            final double percentage = total > 0 ? count * 100.0 / (double)total : 0;
             String icon = "";
 
             switch (state) {
@@ -1441,20 +1707,20 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
     private boolean handleBeaconInfo(CommandSender sender, String[] args) {
         if (args.length < 2) {
             sender.sendMessage(Component.text("Usage: /pow admin beacon info <name>", NamedTextColor.RED));
-
-        } else {
-            String name = args[1];
-            BeaconSite beacon = this.beaconManager.getBeacon(name);
-
-            if (beacon == null) {
-                sender.sendMessage(Component.text("Beacon '" + name + "' not found.", NamedTextColor.RED));
-
-            } else {
-                sender.sendMessage(Component.text("=== BEACON INFO ===", NamedTextColor.GOLD)
-                        .decorate(TextDecoration.BOLD));
-                sender.sendMessage(beacon.getStatusString(this.plugin.getSessionManager()));
-            }
+            return true;
         }
+
+        final String name = args[1];
+        BeaconSite beacon = this.beaconManager.getBeacon(name);
+
+        if (beacon == null) {
+            sender.sendMessage(Component.text("Beacon '" + name + "' not found.", NamedTextColor.RED));
+            return true;
+        }
+
+        sender.sendMessage(Component.text("=== BEACON INFO ===", NamedTextColor.GOLD)
+                .decorate(TextDecoration.BOLD));
+        sender.sendMessage(beacon.getStatusString(sessionManager));
 
         return true;
     }
@@ -1478,15 +1744,17 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
     private boolean handleBeaconHoly(CommandSender sender, String[] args) {
         if (args.length < 2) {
             sender.sendMessage(Component.text("Usage: /pow admin beacon holy <name>", NamedTextColor.RED));
-        } else {
-            String name = args[1];
+            return true;
+        }
 
-            if (this.beaconManager.setBeaconHoly(name)) {
-                sender.sendMessage(Component.text("Beacon '" + name + "' has been consecrated as holy.", NamedTextColor.GREEN));
-                sender.sendMessage(Component.text("The beacon now emanates divine light and protection.", NamedTextColor.GRAY));
-            } else {
-                sender.sendMessage(Component.text("Beacon '" + name + "' not found.", NamedTextColor.RED));
-            }
+        final String name = args[1];
+
+        if (this.beaconManager.setBeaconHoly(name)) {
+            sender.sendMessage(Component.text("Beacon '" + name + "' has been consecrated as holy.", NamedTextColor.GREEN));
+            sender.sendMessage(Component.text("The beacon now emanates divine light and protection.", NamedTextColor.GRAY));
+
+        } else {
+            sender.sendMessage(Component.text("Beacon '" + name + "' not found.", NamedTextColor.RED));
         }
 
         return true;
@@ -1500,15 +1768,17 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
     private boolean handleBeaconDesecrated(CommandSender sender, String[] args) {
         if (args.length < 2) {
             sender.sendMessage(Component.text("Usage: /pow admin beacon desecrated <name>", NamedTextColor.RED));
-        } else {
-            String name = args[1];
+            return true;
+        }
 
-            if (this.beaconManager.setBeaconDesecrated(name)) {
-                sender.sendMessage(Component.text("Beacon '" + name + "' has been desecrated by dark forces.", NamedTextColor.DARK_RED));
-                sender.sendMessage(Component.text("The beacon now radiates malevolent energy and shadow.", NamedTextColor.GRAY));
-            } else {
-                sender.sendMessage(Component.text("Beacon '" + name + "' not found.", NamedTextColor.RED));
-            }
+        final String name = args[1];
+
+        if (this.beaconManager.setBeaconDesecrated(name)) {
+            sender.sendMessage(Component.text("Beacon '" + name + "' has been desecrated by dark forces.", NamedTextColor.DARK_RED));
+            sender.sendMessage(Component.text("The beacon now radiates malevolent energy and shadow.", NamedTextColor.GRAY));
+
+        } else {
+            sender.sendMessage(Component.text("Beacon '" + name + "' not found.", NamedTextColor.RED));
         }
 
         return true;
@@ -1522,15 +1792,17 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
     private boolean handleBeaconCorrupted(CommandSender sender, String[] args) {
         if (args.length < 2) {
             sender.sendMessage(Component.text("Usage: /pow admin beacon corrupted <name>", NamedTextColor.RED));
-        } else {
-            String name = args[1];
+            return true;
+        }
 
-            if (this.beaconManager.setBeaconCorrupted(name)) {
-                sender.sendMessage(Component.text("Beacon '" + name + "' has been corrupted by an expulsion of light and dark.", NamedTextColor.DARK_RED));
-                sender.sendMessage(Component.text("A lifeless energy leaks from the beacon.", NamedTextColor.GRAY));
-            } else {
-                sender.sendMessage(Component.text("Beacon '" + name + "' not found.", NamedTextColor.RED));
-            }
+        final String name = args[1];
+
+        if (this.beaconManager.setBeaconCorrupted(name)) {
+            sender.sendMessage(Component.text("Beacon '" + name + "' has been corrupted by an expulsion of light and dark.", NamedTextColor.DARK_RED));
+            sender.sendMessage(Component.text("A lifeless energy leaks from the beacon.", NamedTextColor.GRAY));
+
+        } else {
+            sender.sendMessage(Component.text("Beacon '" + name + "' not found.", NamedTextColor.RED));
         }
 
         return true;
@@ -1544,15 +1816,17 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
     private boolean handleBeaconNeutral(CommandSender sender, String[] args) {
         if (args.length < 2) {
             sender.sendMessage(Component.text("Usage: /pow admin beacon neutral <name>", NamedTextColor.RED));
-        } else {
-            String name = args[1];
+            return false;
+        }
 
-            if (this.beaconManager.setBeaconNeutral(name)) {
-                sender.sendMessage(Component.text("Beacon '" + name + "' has been unaligned and set to neutral.", NamedTextColor.GRAY));
-                sender.sendMessage(Component.text("The beacon texture has changed. Players will receive a notification in " + this.plugin.getConfigManager().getBeaconNeutralAnnouncementDelaySeconds() + " seconds.", NamedTextColor.GRAY));
-            } else {
-                sender.sendMessage(Component.text("Beacon '" + name + "' not found.", NamedTextColor.RED));
-            }
+        final String name = args[1];
+
+        if (this.beaconManager.setBeaconNeutral(name)) {
+            sender.sendMessage(Component.text("Beacon '" + name + "' has been unaligned and set to neutral.", NamedTextColor.GRAY));
+            sender.sendMessage(Component.text("The beacon texture has changed. Players will receive a notification in " + configManager.getBeaconNeutralAnnouncementDelaySeconds() + " seconds.", NamedTextColor.GRAY));
+
+        } else {
+            sender.sendMessage(Component.text("Beacon '" + name + "' not found.", NamedTextColor.RED));
         }
 
         return true;
@@ -1562,6 +1836,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
      * Provide the sender with a helpful list of instructions on using POW's plugin commands
      */
     private void sendBeaconHelp(CommandSender sender) {
+        sender.sendMessage("");
         sender.sendMessage(Component.text("=== BEACON COMMANDS ===", NamedTextColor.GOLD)
                 .decorate(TextDecoration.BOLD));
 
@@ -1585,7 +1860,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
     }
 
     /**
-     * Turn a human player into a new vampire and set their sire as another existing vampire.
+     * Handle the command to turn a human player into a new vampire.
      *
      * @param target the player being turned into a fledgling vampire.
      * @return {@code true}
@@ -1593,27 +1868,102 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
     private boolean handleTurnCommand(CommandSender sender, Player target, String[] args) {
         if (!this.vampireManager.isHuman(target)) {
             sender.sendMessage(Component.text(target.getName() + " is not human. Only humans can be turned into vampires.", NamedTextColor.RED));
+            return true;
+        }
 
-        } else {
-            Player turner = null;
+        Player turner = null;
 
-            if (args.length >= 3) {
-                turner = Bukkit.getPlayer(args[2]);
+        if (args.length >= 3) {
+            turner = Bukkit.getPlayerExact(args[2]);
 
-                if (turner == null) {
-                    sender.sendMessage(Component.text("Turner player '" + args[2] + "' not found.", NamedTextColor.RED));
-                    return true;
-                }
-
-                if (!this.vampireManager.isVampire(turner)) {
-                    sender.sendMessage(Component.text(turner.getName() + " is not a vampire. Only vampires can turn humans.", NamedTextColor.RED));
-                    return true;
-                }
-            } else {
-                sender.sendMessage(Component.text("Missing crucial argument for the turner player.", NamedTextColor.RED));
+            if (turner == null) {
+                sender.sendMessage(Component.text("Turner player '" + args[2] + "' not found.", NamedTextColor.RED));
+                return true;
             }
 
-            this.plugin.getVampireManager().performVampireTurning(target, turner);
+            if (!this.vampireManager.isVampire(turner)) {
+                sender.sendMessage(Component.text(turner.getName() + " is not a vampire. Only vampires can turn humans.", NamedTextColor.RED));
+                return true;
+            }
+        } else {
+            sender.sendMessage(Component.text("Missing crucial argument for the turner player.", NamedTextColor.RED));
+        }
+
+        vampireManager.performVampireTurning(target, turner);
+        return true;
+    }
+
+    /**
+     * Handle the command to give out physical tome ability book(s) directly to players.
+     *
+     * @return {@code true}
+     */
+    private boolean handleGiveTomeCommand(CommandSender sender, String[] args) {
+        if (args.length < 2) {
+            sender.sendMessage(Component.text("Usage: /pow admin givetome <player> <ability> [amount]", NamedTextColor.RED));
+            return true;
+        }
+
+        // Make sure the inputs are valid before flooding the admin with failure messages
+        int amount = 1;
+        String abilityName = args[1];
+
+        if (!this.tomeManager.isValidAbility(abilityName)) {
+            sender.sendMessage(Component.text("Unknown tome ability: '" + abilityName + "'", NamedTextColor.RED)
+                    .append(Component.newline())
+                    .append(Component.text("Available abilities: " + String.join(", ", this.tomeManager.getAllAbilityNames()), NamedTextColor.GRAY))
+            );
+
+            return true;
+        }
+
+        if (args.length >= 3) {
+            try {
+                amount = Integer.parseInt(args[2]);
+
+                if (amount < 1 || amount > 64) {
+                    sender.sendMessage(Component.text("Amount must be between 1 and 64.", NamedTextColor.RED));
+                    return true;
+                }
+            } catch (NumberFormatException e) {
+                sender.sendMessage(Component.text("Invalid amount: '" + args[2] + "'. Must be a number between 1 and 64.", NamedTextColor.RED));
+                return true;
+            }
+        }
+
+        // Determine whether a single player or everyone should get the tome book
+        if (args[0].equalsIgnoreCase("@a")) {
+            int playercount = 0;
+
+            for (Player player : Bukkit.getOnlinePlayers()) {
+                if (!vampireManager.isRestrictedVampire(player)) {
+                    this.giveTome(player, abilityName, amount);
+                    playercount++;
+                }
+            }
+
+            sender.sendMessage(Component.text("Gave " + amount + "x Tome of ", NamedTextColor.GREEN)
+                    .append(Component.text(abilityName, NamedTextColor.DARK_GREEN))
+                    .append(Component.text(" to ", NamedTextColor.GREEN))
+                    .append(Component.text(playercount, NamedTextColor.YELLOW))
+                    .append(Component.text(" player" + (playercount == 1 ? "" : "s") + ".", NamedTextColor.GREEN))
+            );
+
+        } else {
+            Player target = this.getPlayerFromParameter(sender, args[0]);
+
+            if (target == null) {
+                sender.sendMessage(Component.text("Player '" + args[0] + "' not found.", NamedTextColor.RED));
+                return true;
+            }
+
+            this.giveTome(target, abilityName, amount);
+            sender.sendMessage(Component.text("Gave " + amount + "x Tome of ", NamedTextColor.GREEN)
+                    .append(Component.text(abilityName, NamedTextColor.DARK_GREEN))
+                    .append(Component.text(" to ", NamedTextColor.GREEN))
+                    .append(Component.text(target.getName(), NamedTextColor.YELLOW))
+                    .append(Component.text(".", NamedTextColor.GREEN))
+            );
         }
 
         return true;
@@ -1622,102 +1972,22 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
     /**
      * Give physical tome ability book(s) to a player.
      *
-     * @return {@code true}
+     * @param target the player receiving a tome book.
+     * @param abilityName the tome ability provided by the book.
+     * @param amount the number of tome books to give the player.
      */
-    private boolean handleGiveTomeCommand(CommandSender sender, String[] args) {
-        if (args.length < 2) {
-            sender.sendMessage(Component.text("Usage: /pow admin givetome <player> <ability> [amount]", NamedTextColor.RED));
+    private void giveTome(Player target, String abilityName, int amount) {
+        final TomeAbility ability = this.tomeManager.getAbility(abilityName);
+        final ItemStack tome = this.plugin.getTomeDistributionManager().createTomeItem(ability != null ? ability.getName() : abilityName, amount);
+
+        if (target.getInventory().firstEmpty() == -1) {
+            target.getWorld().dropItemNaturally(target.getLocation(), tome);
+            target.sendMessage(Component.text("A mysterious tome appears at your feet...", NamedTextColor.YELLOW));
 
         } else {
-            Player target = Bukkit.getPlayer(args[0]);
-
-            if (target == null) {
-                sender.sendMessage(Component.text("Player '" + args[0] + "' not found.", NamedTextColor.RED));
-
-            } else {
-                String abilityName = args[1];
-
-                if (!this.tomeManager.isValidAbility(abilityName)) {
-                    sender.sendMessage(Component.text("Unknown tome ability: '" + abilityName + "'", NamedTextColor.RED));
-                    sender.sendMessage(Component.text("Available abilities: " + String.join(", ", this.tomeManager.getAllAbilityNames()), NamedTextColor.GRAY));
-
-                } else {
-                    int amount = 1;
-
-                    if (args.length >= 3) {
-                        try {
-                            amount = Integer.parseInt(args[2]);
-
-                            if (amount < 1 || amount > 64) {
-                                sender.sendMessage(Component.text("Amount must be between 1 and 64.", NamedTextColor.RED));
-                                return true;
-                            }
-                        } catch (NumberFormatException e) {
-                            sender.sendMessage(Component.text("Invalid amount: '" + args[2] + "'. Must be a number between 1 and 64.", NamedTextColor.RED));
-                            return true;
-                        }
-                    }
-
-                    TomeAbility ability = this.tomeManager.getAbility(abilityName);
-                    ItemStack tome = new ItemStack(Material.WRITTEN_BOOK, amount);
-                    BookMeta bookMeta = (BookMeta)tome.getItemMeta();
-
-                    if (bookMeta != null) {
-                        String canonicalName = ability != null ? ability.getName() : abilityName;
-                        bookMeta.setTitle(canonicalName);
-                        bookMeta.author(Component.text("A source unknown...", NamedTextColor.GOLD));
-
-                        if (ability != null) {
-                            List<String> lore = new ArrayList<>();
-                            String[] descriptionLines = ability.getDescriptionLines();
-
-                            for (String line : descriptionLines) {
-                                lore.add("§7" + line);
-                            }
-
-                            lore.add("");
-                            lore.add("§eRight-click with this tome in hand to learn its secrets");
-                            bookMeta.setLore(lore);
-                        }
-
-                        List<String> pages = new ArrayList<>();
-                        StringBuilder pageContent = new StringBuilder();
-                        pageContent.append("§5§lANCIENT KNOWLEDGE§r\n\n");
-                        pageContent.append("§8The secrets of ")
-                                .append(abilityName)
-                                .append(" are contained within these pages.\n\n");
-
-                        if (ability != null) {
-                            String[] descriptionLines = ability.getDescriptionLines();
-
-                            for (String line : descriptionLines) {
-                                pageContent.append("§7").append(line).append("\n");
-                            }
-                        } else {
-                            pageContent.append("§7No description available\n");
-                        }
-
-                        pageContent.append("\n§6Use this knowledge wisely, for it comes with great responsibility.");
-                        pages.add(pageContent.toString());
-                        bookMeta.setPages(pages);
-                        tome.setItemMeta(bookMeta);
-                    }
-
-                    if (target.getInventory().firstEmpty() == -1) {
-                        target.getWorld().dropItemNaturally(target.getLocation(), tome);
-                        target.sendMessage(Component.text("A mysterious tome appears at your feet...", NamedTextColor.YELLOW));
-
-                    } else {
-                        target.getInventory().addItem(tome);
-                        target.sendMessage(Component.text("A mysterious tome has appeared in your inventory...", NamedTextColor.YELLOW));
-                    }
-
-                    sender.sendMessage(Component.text("Gave " + amount + "x Tome of " + abilityName + " to " + target.getName() + ".", NamedTextColor.GREEN));
-                }
-            }
+            target.getInventory().addItem(tome);
+            target.sendMessage(Component.text("A mysterious tome has appeared in your inventory...", NamedTextColor.YELLOW));
         }
-
-        return true;
     }
 
     /**
@@ -1726,20 +1996,22 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
      * @return {@code true}
      */
     private boolean handleSelectTomesCommand(CommandSender sender, String[] args) {
-        if (!(sender instanceof Player admin)) {
-            sender.sendMessage(Component.text("This command can only be used by players.", NamedTextColor.RED));
-
-        } else if (args.length < 1) {
+        if (args.length < 1) {
             sender.sendMessage(Component.text("Usage: /pow admin select_tomes <player>", NamedTextColor.RED));
+            return true;
+        }
 
+        Player target = this.getPlayerFromParameter(sender, args[0]);
+
+        if (target == null) {
+            sender.sendMessage(Component.text("Player '" + args[0] + "' not found.", NamedTextColor.RED));
+            return true;
+        }
+
+        if (sender instanceof Player admin) {
+            this.tomeManager.openTomeSelectionGUI(admin, target);
         } else {
-            Player target = Bukkit.getPlayer(args[0]);
-
-            if (target == null) {
-                sender.sendMessage(Component.text("Player '" + args[0] + "' not found.", NamedTextColor.RED));
-            } else {
-                this.tomeManager.openTomeSelectionGUI(admin, target);
-            }
+            this.tomeManager.openTomeSelectionGUI(target, target);
         }
 
         return true;
@@ -1752,46 +2024,72 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
      */
     private boolean handleGiveCureBookCommand(CommandSender sender, String[] args) {
         if (args.length < 2) {
-            sender.sendMessage("§cUsage: /pow admin give_cure_book <player> <1 | 2 | 3 | 4>");
+            sender.sendMessage(Component.text("Usage: /pow admin give_cure_book <player> <1 | 2 | 3 | 4>", NamedTextColor.RED));
+            return true;
+        }
+
+        // Make sure the inputs are valid before flooding the admin with failure messages
+        int bookNum;
+
+        try {
+            bookNum = Integer.parseInt(args[1]);
+
+            if (bookNum < 1 || bookNum > 4) {
+                sender.sendMessage(Component.text("Book number must be 1, 2, 3, or 4.", NamedTextColor.RED));
+                return true;
+            }
+        } catch (NumberFormatException e) {
+            sender.sendMessage(Component.text("Invalid book number: '" + args[1] + "'. Must be 1, 2, 3, or 4.", NamedTextColor.RED));
+            return true;
+        }
+
+        // Determine whether a single player or everyone should get the cure book
+        if (args[0].equalsIgnoreCase("@a")) {
+            int playercount = 0;
+
+            for (Player player : Bukkit.getOnlinePlayers()) {
+                this.giveCureBook(player, bookNum);
+                playercount++;
+            }
+
+            sender.sendMessage(Component.text("Gave Cure Book " + bookNum + " to ", NamedTextColor.GREEN)
+                    .append(Component.text(playercount, NamedTextColor.YELLOW))
+                    .append(Component.text(" player" + (playercount == 1 ? "" : "s") + ".", NamedTextColor.GREEN))
+            );
 
         } else {
-            Player target = Bukkit.getPlayer(args[0]);
+            Player target = this.getPlayerFromParameter(sender, args[0]);
 
             if (target == null) {
                 sender.sendMessage(Component.text("Player '" + args[0] + "' not found.", NamedTextColor.RED));
-
-            } else {
-                int bookNum;
-
-                try {
-                    bookNum = Integer.parseInt(args[1]);
-
-                    if (bookNum < 1 || bookNum > 4) {
-                        sender.sendMessage(Component.text("Book number must be 1, 2, 3, or 4.", NamedTextColor.RED));
-                        return true;
-                    }
-                } catch (NumberFormatException e) {
-                    sender.sendMessage(Component.text("Invalid book number: '" + args[1] + "'. Must be 1, 2, 3, or 4.", NamedTextColor.RED));
-                    return true;
-                }
-
-                ItemStack book = this.plugin.getCureBookManager().getCureBook(bookNum);
-
-                if (target.getInventory().firstEmpty() == -1) {
-                    target.getWorld().dropItemNaturally(target.getLocation(), book);
-                    target.sendMessage(Component.text("An ancient tome appears at your feet...", NamedTextColor.DARK_PURPLE));
-
-                } else {
-                    target.getInventory().addItem(book);
-                    target.sendMessage(Component.text("An ancient tome has appeared in your inventory...", NamedTextColor.DARK_PURPLE));
-                }
-
-                sender.sendMessage(Component.text("Gave Cure Book " + bookNum + " to ", NamedTextColor.GREEN)
-                        .append(Component.text(target.getName(), NamedTextColor.YELLOW)));
+                return true;
             }
+
+            this.giveCureBook(target, bookNum);
+            sender.sendMessage(Component.text("Gave Cure Book " + bookNum + " to ", NamedTextColor.GREEN)
+                    .append(Component.text(target.getName(), NamedTextColor.YELLOW)));
         }
 
         return true;
+    }
+
+    /**
+     * Give a physical cure book to a player.
+     *
+     * @param target the player receiving a cure book.
+     * @param bookNum the cure book to give the player.
+     */
+    private void giveCureBook(Player target, int bookNum) {
+        final ItemStack book = this.plugin.getCureBookManager().getCureBook(bookNum);
+
+        if (target.getInventory().firstEmpty() == -1) {
+            target.getWorld().dropItemNaturally(target.getLocation(), book);
+            target.sendMessage(Component.text("An ancient tome appears at your feet...", NamedTextColor.DARK_PURPLE));
+
+        } else {
+            target.getInventory().addItem(book);
+            target.sendMessage(Component.text("An ancient tome has appeared in your inventory...", NamedTextColor.DARK_PURPLE));
+        }
     }
 
     /**
@@ -1802,7 +2100,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
     private boolean handleStashCureBookCommand(CommandSender sender, String[] args) {
         // Catch if an improper number of parameters was provided
         if (args.length != 1 && args.length != 4) {
-            sender.sendMessage("§cUsage: /pow admin stash_cure_book <1 | 2 | 3 | 4> <x> <y> <z>");
+            sender.sendMessage(Component.text("Usage: /pow admin stash_cure_book <1 | 2 | 3 | 4> <x> <y> <z>", NamedTextColor.RED));
             return true;
         }
 
@@ -1821,7 +2119,6 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         // Check a valid cure book number was provided
         if (bookNumber < 1 || bookNumber > 4) {
             sender.sendMessage(Component.text("Invalid book number. Choose a number between 1 and 4.", NamedTextColor.RED));
-
             return true;
         }
 
@@ -1894,24 +2191,24 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
     private boolean handleAddTomeChestCommand(CommandSender sender, String[] args) {
         if (!(sender instanceof Player player)) {
             sender.sendMessage(Component.text("This command can only be used by players.", NamedTextColor.RED));
+            return true;
+        }
+
+        Location location = player.getLocation();
+
+        if (this.plugin.getTomeDistributionManager().addTomeLocation(location)) {
+            location.getBlock().setType(Material.CHEST);
+            sender.sendMessage(Component.text("✔ Successfully added tome chest location.", NamedTextColor.GREEN));
+            sender.sendMessage(Component.text("Location: ", NamedTextColor.GRAY)
+                    .append(Component.text(location.getBlockX() + ", " + location.getBlockY() + ", " + location.getBlockZ(), NamedTextColor.YELLOW)));
+            sender.sendMessage(Component.text("A chest has been placed at this location.", NamedTextColor.GRAY));
+            sender.sendMessage(Component.text("Total tome chest locations: ", NamedTextColor.GRAY)
+                    .append(Component.text(this.plugin.getTomeDistributionManager().getTomeLocations().size(), NamedTextColor.YELLOW)));
 
         } else {
-            Location location = player.getLocation();
-
-            if (this.plugin.getTomeDistributionManager().addTomeLocation(location)) {
-                location.getBlock().setType(Material.CHEST);
-                sender.sendMessage(Component.text("✔ Successfully added tome chest location.", NamedTextColor.GREEN));
-                sender.sendMessage(Component.text("Location: ", NamedTextColor.GRAY)
-                        .append(Component.text(location.getBlockX() + ", " + location.getBlockY() + ", " + location.getBlockZ(), NamedTextColor.YELLOW)));
-                sender.sendMessage(Component.text("A chest has been placed at this location.", NamedTextColor.GRAY));
-                sender.sendMessage(Component.text("Total tome chest locations: ", NamedTextColor.GRAY)
-                        .append(Component.text(this.plugin.getTomeDistributionManager().getTomeLocations().size(), NamedTextColor.YELLOW)));
-
-            } else {
-                sender.sendMessage(Component.text("✖ This location already exists in the tome chest list.", NamedTextColor.RED));
-                sender.sendMessage(Component.text("Location: ", NamedTextColor.GRAY)
-                        .append(Component.text(location.getBlockX() + ", " + location.getBlockY() + ", " + location.getBlockZ(), NamedTextColor.YELLOW)));
-            }
+            sender.sendMessage(Component.text("✖ This location already exists in the tome chest list.", NamedTextColor.RED));
+            sender.sendMessage(Component.text("Location: ", NamedTextColor.GRAY)
+                    .append(Component.text(location.getBlockX() + ", " + location.getBlockY() + ", " + location.getBlockZ(), NamedTextColor.YELLOW)));
         }
 
         return true;
@@ -1925,45 +2222,45 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
     private boolean handleRemoveTomeChestCommand(CommandSender sender, String[] args) {
         if (!(sender instanceof Player player)) {
             sender.sendMessage(Component.text("This command can only be used by players.", NamedTextColor.RED));
+            return true;
+        }
 
-        } else {
-            Location playerLocation = player.getLocation(), nearestLocation = null;
-            List<Location> tomeLocations = this.plugin.getTomeDistributionManager().getTomeLocations();
-            double nearestDistance = Double.MAX_VALUE, distance;
+        Location playerLocation = player.getLocation(), nearestLocation = null;
+        List<Location> tomeLocations = this.plugin.getTomeDistributionManager().getTomeLocations();
+        double nearestDistance = Double.MAX_VALUE, distance;
 
-            for (Location loc : tomeLocations) {
-                if (loc.getWorld() != null && loc.getWorld().equals(playerLocation.getWorld())) {
-                    distance = playerLocation.distance(loc);
+        for (Location loc : tomeLocations) {
+            if (loc.getWorld() != null && loc.getWorld().equals(playerLocation.getWorld())) {
+                distance = playerLocation.distance(loc);
 
-                    if (distance < nearestDistance) {
-                        nearestDistance = distance;
-                        nearestLocation = loc;
-                    }
+                if (distance < nearestDistance) {
+                    nearestDistance = distance;
+                    nearestLocation = loc;
                 }
             }
+        }
 
-            if (nearestLocation != null && !(nearestDistance > 10)) {
-                if (nearestLocation.getBlock().getType() == Material.CHEST) {
-                    nearestLocation.getBlock().setType(Material.AIR);
-                    sender.sendMessage(Component.text("Removed physical chest at location.", NamedTextColor.GRAY));
-                }
+        if (nearestLocation != null && !(nearestDistance > 10)) {
+            if (nearestLocation.getBlock().getType() == Material.CHEST) {
+                nearestLocation.getBlock().setType(Material.AIR);
+                sender.sendMessage(Component.text("Removed physical chest at location.", NamedTextColor.GRAY));
+            }
 
-                if (this.plugin.getTomeDistributionManager().removeTomeLocation(nearestLocation)) {
-                    sender.sendMessage(Component.text("✔ Successfully removed tome chest location.", NamedTextColor.GREEN));
-                    sender.sendMessage(Component.text("Location: ", NamedTextColor.GRAY)
-                            .append(Component.text(nearestLocation.getBlockX() + ", " + nearestLocation.getBlockY() + ", "+ nearestLocation.getBlockZ(), NamedTextColor.YELLOW)));
-                    sender.sendMessage(Component.text("Distance: ", NamedTextColor.GRAY)
-                            .append(Component.text(String.format("%.1f", nearestDistance) + " blocks", NamedTextColor.YELLOW)));
-                    sender.sendMessage(Component.text("Total tome chest locations: ", NamedTextColor.GRAY)
-                            .append(Component.text(this.plugin.getTomeDistributionManager().getTomeLocations().size(), NamedTextColor.YELLOW)));
+            if (this.plugin.getTomeDistributionManager().removeTomeLocation(nearestLocation)) {
+                sender.sendMessage(Component.text("✔ Successfully removed tome chest location.", NamedTextColor.GREEN));
+                sender.sendMessage(Component.text("Location: ", NamedTextColor.GRAY)
+                        .append(Component.text(nearestLocation.getBlockX() + ", " + nearestLocation.getBlockY() + ", "+ nearestLocation.getBlockZ(), NamedTextColor.YELLOW)));
+                sender.sendMessage(Component.text("Distance: ", NamedTextColor.GRAY)
+                        .append(Component.text(String.format("%.1f", nearestDistance) + " blocks", NamedTextColor.YELLOW)));
+                sender.sendMessage(Component.text("Total tome chest locations: ", NamedTextColor.GRAY)
+                        .append(Component.text(this.plugin.getTomeDistributionManager().getTomeLocations().size(), NamedTextColor.YELLOW)));
 
-                } else {
-                    sender.sendMessage(Component.text("✖ Failed to remove tome chest location from config.", NamedTextColor.RED));
-                }
             } else {
-                sender.sendMessage(Component.text("✖ No tome chest found within 10 blocks.", NamedTextColor.RED));
-                sender.sendMessage(Component.text("Move closer to a tome chest location and try again.", NamedTextColor.GRAY));
+                sender.sendMessage(Component.text("✖ Failed to remove tome chest location from config.", NamedTextColor.RED));
             }
+        } else {
+            sender.sendMessage(Component.text("✖ No tome chest found within 10 blocks.", NamedTextColor.RED));
+            sender.sendMessage(Component.text("Move closer to a tome chest location and try again.", NamedTextColor.GRAY));
         }
 
         return true;
@@ -1977,6 +2274,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
     private boolean handleListTomeChestsCommand(CommandSender sender, String[] args) {
         List<Location> tomeLocations = this.plugin.getTomeDistributionManager().getTomeLocations();
 
+        sender.sendMessage("");
         sender.sendMessage(Component.text("=== TOME CHEST LOCATIONS ===", NamedTextColor.GOLD)
                 .decorate(TextDecoration.BOLD));
         sender.sendMessage(Component.text("Total: ", NamedTextColor.GRAY)
@@ -1990,36 +2288,34 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                     .append(Component.text(" to add a location.", NamedTextColor.GRAY))
             );
 
-        } else {
-            int index = 1;
-
-            for (Location loc : tomeLocations) {
-                boolean hasChest = loc.getWorld() != null && loc.getBlock().getType() == Material.CHEST;
-                Component chestStatus = hasChest ?
-                        Component.text("✔", NamedTextColor.GREEN) :
-                        Component.text("✖", NamedTextColor.RED);
-                String tpCommand = String.format("/tp %d %d %d", loc.getBlockX(), loc.getBlockY(), loc.getBlockZ());
-
-                Component message = Component.text(index + ". ", NamedTextColor.GRAY)
-                        .append(Component.text(String.format("%d, %d, %d", loc.getBlockX(), loc.getBlockY(), loc.getBlockZ()), NamedTextColor.YELLOW)
-                                .clickEvent(ClickEvent.runCommand(tpCommand))
-                                .hoverEvent(HoverEvent.showText(Component.text("Click to teleport to this location", NamedTextColor.GREEN)))
-                        )
-                        .append(Component.text(" (chest: ", NamedTextColor.GRAY))
-                        .append(chestStatus)
-                        .append(Component.text(")", NamedTextColor.GRAY));
-
-                sender.sendMessage(message);
-
-                ++index;
-            }
-
-            sender.sendMessage("");
-            sender.sendMessage(Component.text("Click a location to teleport, or use ", NamedTextColor.GRAY)
-                    .append(Component.text("/pow admin removetomechest", NamedTextColor.YELLOW))
-                    .append(Component.text(" nearby to remove.", NamedTextColor.GRAY))
-            );
+            return true;
         }
+
+        int index = 1;
+
+        for (Location loc : tomeLocations) {
+            final boolean hasChest = loc.getWorld() != null && loc.getBlock().getType() == Material.CHEST;
+            final String tpCommand = String.format("/tp %d %d %d", loc.getBlockX(), loc.getBlockY(), loc.getBlockZ());
+
+            sender.sendMessage(Component.text(index + ". ", NamedTextColor.GRAY)
+                    .append(Component.text(String.format("%d, %d, %d", loc.getBlockX(), loc.getBlockY(), loc.getBlockZ()), NamedTextColor.YELLOW)
+                            .clickEvent(ClickEvent.runCommand(tpCommand))
+                            .hoverEvent(HoverEvent.showText(Component.text("Click to teleport to this location", NamedTextColor.GREEN)))
+                    )
+                    .append(Component.text(" (chest: ", NamedTextColor.GRAY))
+                    .append(hasChest ?
+                            Component.text("✔", NamedTextColor.GREEN) :
+                            Component.text("✖", NamedTextColor.RED))
+                    .append(Component.text(")", NamedTextColor.GRAY)));
+
+            ++index;
+        }
+
+        sender.sendMessage("");
+        sender.sendMessage(Component.text("Click a location to teleport, or use ", NamedTextColor.GRAY)
+                .append(Component.text("/pow admin removetomechest", NamedTextColor.YELLOW))
+                .append(Component.text(" nearby to remove.", NamedTextColor.GRAY))
+        );
 
         return true;
     }
@@ -2031,42 +2327,42 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
      */
     private boolean handleClearBloodMoonBuffsCommand(CommandSender sender, String[] args) {
         if (args.length == 0) {
-            sender.sendMessage("§cUsage: /pow admin clearbloodmoonbuffs <player | all>");
-            sender.sendMessage("§7This command removes stacked blood moon attribute modifiers");
+            sender.sendMessage(Component.text("Usage: /pow admin clearbloodmoonbuffs <player | all>", NamedTextColor.RED));
+            sender.sendMessage(Component.text("This command removes stacked blood moon attribute modifiers", NamedTextColor.GRAY));
+            return true;
+        }
+
+        final String target = args[0].toLowerCase();
+
+        if (target.equals("all")) {
+            int playersAffected = 0;
+
+            for (Player player : Bukkit.getOnlinePlayers()) {
+                this.plugin.getBloodMoonAttributeListener().forceRemoveBloodMoonAttributes(player);
+                ++playersAffected;
+            }
+
+            sender.sendMessage(Component.text("Cleared blood moon buffs for ", NamedTextColor.GREEN)
+                    .append(Component.text(playersAffected, NamedTextColor.YELLOW))
+                    .append(Component.text(" online player" + (playersAffected == 1 ? "" : "s") + ".", NamedTextColor.GREEN))
+            );
+            this.plugin.logInfo("Admin " + sender.getName() + " cleared blood moon buffs for all players");
 
         } else {
-            String target = args[0].toLowerCase();
+            Player targetPlayer = Bukkit.getPlayerExact(target);
 
-            if (target.equals("all")) {
-                int playersAffected = 0;
-
-                for (Player player : Bukkit.getOnlinePlayers()) {
-                    this.plugin.getBloodMoonAttributeListener().forceRemoveBloodMoonAttributes(player);
-                    ++playersAffected;
-                }
-
-                sender.sendMessage(Component.text("Cleared blood moon buffs for ", NamedTextColor.GREEN)
-                        .append(Component.text(playersAffected, NamedTextColor.YELLOW))
-                        .append(Component.text(" online players.", NamedTextColor.GREEN))
-                );
-                this.plugin.logInfo("Admin " + sender.getName() + " cleared blood moon buffs for all players");
-
-            } else {
-                Player targetPlayer = Bukkit.getPlayer(target);
-
-                if (targetPlayer == null) {
-                    sender.sendMessage(Component.text("Player '" + target + "' not found or not online.", NamedTextColor.RED));
-                    return true;
-                }
-
-                this.plugin.getBloodMoonAttributeListener().forceRemoveBloodMoonAttributes(targetPlayer);
-                sender.sendMessage(Component.text("Cleared blood moon buffs for ", NamedTextColor.GREEN)
-                        .append(Component.text(targetPlayer.getName(), NamedTextColor.YELLOW))
-                        .append(Component.text(".", NamedTextColor.GREEN))
-                );
-                targetPlayer.sendMessage(Component.text("An admin has cleared your blood moon buffs.", NamedTextColor.GREEN));
-                this.plugin.logInfo("Admin " + sender.getName() + " cleared blood moon buffs for " + targetPlayer.getName());
+            if (targetPlayer == null) {
+                sender.sendMessage(Component.text("Player '" + target + "' not found or not online.", NamedTextColor.RED));
+                return true;
             }
+
+            this.plugin.getBloodMoonAttributeListener().forceRemoveBloodMoonAttributes(targetPlayer);
+            sender.sendMessage(Component.text("Cleared blood moon buffs for ", NamedTextColor.GREEN)
+                    .append(Component.text(targetPlayer.getName(), NamedTextColor.YELLOW))
+                    .append(Component.text(".", NamedTextColor.GREEN))
+            );
+            targetPlayer.sendMessage(Component.text("An admin has cleared your blood moon buffs.", NamedTextColor.GREEN));
+            this.plugin.logInfo("Admin " + sender.getName() + " cleared blood moon buffs for " + targetPlayer.getName());
         }
 
         return true;
@@ -2079,29 +2375,47 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
      */
     private boolean makePlayerIncurable(CommandSender sender, String[] args) {
         if (args.length == 0) {
-            sender.sendMessage("§cUsage: /pow admin make_incurable <player>");
-            sender.sendMessage("§7This command makes a vampire impossible to cure, and immune to the force cure movement trap.");
-            sender.sendMessage("§7The plugin will treat the player as though their sire was still alive.");
-            sender.sendMessage("§7However, it will still prevent curing even if the config is toggled to ignore whether the vampire's sire is alive.");
-            sender.sendMessage("§7To revert, use '/tag <name> remove CannotCure' to manually remove the CannotCure tag from the player.");
+            sender.sendMessage(Component.text("Usage: /pow admin make_incurable <player>", NamedTextColor.RED));
+            sender.sendMessage(Component.text("This command makes a vampire impossible to cure, and immune to the force cure movement trap.", NamedTextColor.GRAY));
+            sender.sendMessage(Component.text("The plugin will treat the player as though their sire was still alive.", NamedTextColor.GRAY));
+            sender.sendMessage(Component.text("However, it will still prevent curing even if the config is toggled to ignore whether the vampire's sire is alive.", NamedTextColor.GRAY));
+            sender.sendMessage(Component.text("To undo, use '/tag <name> remove CannotCure' to manually remove the CannotCure tag from the player.", NamedTextColor.GRAY));
+
+            return true;
+        }
+
+        if (args[0].equalsIgnoreCase("@a")) {
+            int playercount = 0;
+
+            for (Player player : Bukkit.getOnlinePlayers()) {
+                player.addScoreboardTag("CannotCure");
+                player.sendMessage(Component.text("An admin has made you impossible to cure.", NamedTextColor.GREEN));
+                playercount++;
+            }
+
+            sender.sendMessage(Component.text("Made ", NamedTextColor.GREEN)
+                    .append(Component.text(playercount, NamedTextColor.YELLOW))
+                    .append(Component.text(" player" + (playercount == 1 ? "" : "s") + " immune to the cure.", NamedTextColor.GREEN))
+            );
+            this.plugin.logInfo("Admin " + sender.getName() + " made " + playercount + " players impossible to cure");
 
         } else {
-            String target = args[0].toLowerCase();
-            Player targetPlayer = Bukkit.getPlayer(args[0].toLowerCase());
+            Player target = this.getPlayerFromParameter(sender, args[0]);
 
-            if (targetPlayer == null) {
-                sender.sendMessage(Component.text("Player '" + target + "' not found or not online.", NamedTextColor.RED));
+            if (target == null) {
+                sender.sendMessage(Component.text("Player '" + args[0] + "' not found or not online.", NamedTextColor.RED));
                 return true;
             }
 
-            targetPlayer.addScoreboardTag("CannotCure");
+            target.addScoreboardTag("CannotCure");
 
             sender.sendMessage(Component.text("Made ", NamedTextColor.GREEN)
-                    .append(Component.text(targetPlayer.getName(), NamedTextColor.YELLOW))
+                    .append(Component.text(target.getName(), NamedTextColor.YELLOW))
                     .append(Component.text(" immune to the cure.", NamedTextColor.GREEN))
             );
-            targetPlayer.sendMessage(Component.text("An admin has made you impossible to cure.", NamedTextColor.GREEN));
-            this.plugin.logInfo("Admin " + sender.getName() + " made " + targetPlayer.getName() + "impossible to cure");
+            target.sendMessage(Component.text("An admin has made you impossible to cure.", NamedTextColor.GREEN));
+
+            this.plugin.logInfo("Admin " + sender.getName() + " made " + target.getName() + " impossible to cure");
         }
 
         return true;
@@ -2115,45 +2429,46 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
     private boolean handleFixAttributesCommand(CommandSender sender, String[] args) {
         if (args.length == 0) {
             if (sender instanceof Player) {
-                this.plugin.getBloodMoonAttributeListener().forceCleanupOnJoin((Player)sender);
+                this.plugin.getBloodMoonAttributeListener().forceCleanupOnJoin((Player) sender);
                 sender.sendMessage(Component.text("Aggressively cleaned your attribute modifiers.", NamedTextColor.GREEN));
 
             } else {
-                sender.sendMessage("§cUsage: /pow admin fixattributes <player | all>");
+                sender.sendMessage(Component.text("Usage: /pow admin fixattributes <player | all>", NamedTextColor.RED));
             }
+
+            return true;
+        }
+
+        final String target = args[0].toLowerCase();
+
+        if (target.equals("all")) {
+            int playersAffected = 0;
+
+            for (Player player : Bukkit.getOnlinePlayers()) {
+                this.plugin.getBloodMoonAttributeListener().forceCleanupOnJoin(player);
+                ++playersAffected;
+            }
+
+            sender.sendMessage(Component.text("Aggressively cleaned attribute modifiers for ", NamedTextColor.GREEN)
+                    .append(Component.text(playersAffected, NamedTextColor.YELLOW))
+                    .append(Component.text(" online player" + (playersAffected == 1 ? "" : "s") + ".", NamedTextColor.GREEN))
+            );
+            this.plugin.logInfo("Admin " + sender.getName() + " fixed attributes for all players");
 
         } else {
-            String target = args[0].toLowerCase();
+            Player targetPlayer = Bukkit.getPlayerExact(target);
 
-            if (target.equals("all")) {
-                int playersAffected = 0;
-
-                for (Player player : Bukkit.getOnlinePlayers()) {
-                    this.plugin.getBloodMoonAttributeListener().forceCleanupOnJoin(player);
-                    ++playersAffected;
-                }
-
-                sender.sendMessage(Component.text("Aggressively cleaned attribute modifiers for ", NamedTextColor.GREEN)
-                        .append(Component.text(playersAffected, NamedTextColor.YELLOW))
-                        .append(Component.text(" online players.", NamedTextColor.GREEN))
-                );
-                this.plugin.logInfo("Admin " + sender.getName() + " fixed attributes for all players");
-
-            } else {
-                Player targetPlayer = Bukkit.getPlayer(target);
-
-                if (targetPlayer == null) {
-                    sender.sendMessage(Component.text("Player '" + target + "' not found or not online.", NamedTextColor.RED));
-                    return true;
-                }
-
-                this.plugin.getBloodMoonAttributeListener().forceCleanupOnJoin(targetPlayer);
-                sender.sendMessage(Component.text("Aggressively cleaned attribute modifiers for ", NamedTextColor.GREEN)
-                        .append(Component.text(targetPlayer.getName(), NamedTextColor.YELLOW))
-                        .append(Component.text(".", NamedTextColor.GREEN))
-                );
-                this.plugin.logInfo("Admin " + sender.getName() + " fixed attributes for " + targetPlayer.getName());
+            if (targetPlayer == null) {
+                sender.sendMessage(Component.text("Player '" + target + "' not found or not online.", NamedTextColor.RED));
+                return true;
             }
+
+            this.plugin.getBloodMoonAttributeListener().forceCleanupOnJoin(targetPlayer);
+            sender.sendMessage(Component.text("Aggressively cleaned attribute modifiers for ", NamedTextColor.GREEN)
+                    .append(Component.text(targetPlayer.getName(), NamedTextColor.YELLOW))
+                    .append(Component.text(".", NamedTextColor.GREEN))
+            );
+            this.plugin.logInfo("Admin " + sender.getName() + " fixed attributes for " + targetPlayer.getName());
         }
 
         return true;
@@ -2166,44 +2481,45 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
      */
     private boolean handleRemoveEndermenCommand(CommandSender sender, String[] args) {
         if (args.length == 0) {
-            sender.sendMessage("§cUsage: /pow admin removeendermen <all | toggle | status>");
+            sender.sendMessage(Component.text("Usage: /pow admin removeendermen <all | toggle | status>", NamedTextColor.RED));
             CommandHandler.sendCommandCorrection(sender, "  all", "Remove all existing endermen from loaded chunks");
             CommandHandler.sendCommandCorrection(sender, "  toggle", "Toggle enderman spawn prevention on/off");
             CommandHandler.sendCommandCorrection(sender, "  status", "Check if enderman removal is enabled");
 
-        } else {
-            switch (args[0].toLowerCase()) {
-                case "all":
-                    int removedCount = this.plugin.getSpawnRemovalListener().removeAllEndermen();
-                    sender.sendMessage(Component.text("Removed ", NamedTextColor.GREEN)
-                            .append(Component.text(removedCount, NamedTextColor.YELLOW))
-                            .append(Component.text(" endermen from all loaded chunks.", NamedTextColor.GREEN))
-                    );
-                    this.plugin.logInfo("Admin " + sender.getName() + " removed " + removedCount + " endermen");
-                    break;
+            return true;
+        }
 
-                case "toggle":
-                    boolean currentStatus = this.plugin.getSpawnRemovalListener().isEndermanRemovalEnabled();
-                    this.plugin.getSpawnRemovalListener().setEndermanRemovalEnabled(!currentStatus);
-                    String newStatus = !currentStatus ? "ENABLED" : "DISABLED";
-                    sender.sendMessage(Component.text("Enderman removal is now ", NamedTextColor.GREEN)
-                            .append(Component.text(newStatus, NamedTextColor.YELLOW))
-                            .append(Component.text(".", NamedTextColor.GREEN))
-                    );
-                    this.plugin.logInfo("Admin " + sender.getName() + " toggled enderman removal to " + newStatus);
-                    break;
+        switch (args[0].toLowerCase()) {
+            case "all":
+                final int removedCount = this.plugin.getSpawnRemovalListener().removeAllEndermen();
+                sender.sendMessage(Component.text("Removed ", NamedTextColor.GREEN)
+                        .append(Component.text(removedCount, NamedTextColor.YELLOW))
+                        .append(Component.text(" endermen from all loaded chunks.", NamedTextColor.GREEN))
+                );
+                this.plugin.logInfo("Admin " + sender.getName() + " removed " + removedCount + " endermen");
+                break;
 
-                case "status":
-                    final Component statusMessage = this.plugin.getSpawnRemovalListener().isEndermanRemovalEnabled()
-                            ? Component.text("ENABLED", NamedTextColor.GREEN)
-                            : Component.text("DISABLED", NamedTextColor.RED);
-                    sender.sendMessage(Component.text("Enderman removal is currently: ", NamedTextColor.GRAY)
-                            .append(statusMessage));
-                    break;
+            case "toggle":
+                final boolean currentStatus = this.plugin.getSpawnRemovalListener().isEndermanRemovalEnabled();
+                this.plugin.getSpawnRemovalListener().setEndermanRemovalEnabled(!currentStatus);
 
-                default:
-                    sender.sendMessage(Component.text("Invalid action. Use 'all', 'toggle', or 'status'.", NamedTextColor.RED));
-            }
+                final String newStatus = !currentStatus ? "ENABLED" : "DISABLED";
+                sender.sendMessage(Component.text("Enderman removal is now ", NamedTextColor.GREEN)
+                        .append(Component.text(newStatus, NamedTextColor.YELLOW))
+                        .append(Component.text(".", NamedTextColor.GREEN))
+                );
+                this.plugin.logInfo("Admin " + sender.getName() + " toggled enderman removal to " + newStatus);
+                break;
+
+            case "status":
+                sender.sendMessage(Component.text("Enderman removal is currently: ", NamedTextColor.GRAY)
+                        .append(this.plugin.getSpawnRemovalListener().isEndermanRemovalEnabled()
+                                ? Component.text("ENABLED", NamedTextColor.GREEN)
+                                : Component.text("DISABLED", NamedTextColor.RED)));
+                break;
+
+            default:
+                sender.sendMessage(Component.text("Invalid action. Use 'all', 'toggle', or 'status'.", NamedTextColor.RED));
         }
 
         return true;
@@ -2216,47 +2532,48 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
      */
     private boolean handleRemoveCreeperCommand(CommandSender sender, String[] args) {
         if (args.length == 0) {
-            sender.sendMessage("§cUsage: /pow admin removecreepers <all | toggle | status>");
+            sender.sendMessage(Component.text("Usage: /pow admin removecreepers <all | toggle | status>", NamedTextColor.RED));
             CommandHandler.sendCommandCorrection(sender, "  all", "Remove all existing creepers from loaded chunks");
             CommandHandler.sendCommandCorrection(sender, "  toggle", "Toggle creeper spawn prevention on/off");
             CommandHandler.sendCommandCorrection(sender, "  status", "Check if creeper removal is enabled");
 
-        } else {
-            switch (args[0].toLowerCase()) {
-                case "all":
-                    final int removedCount = this.plugin.getSpawnRemovalListener().removeAllCreepers();
-                    sender.sendMessage(Component.text("Removed ", NamedTextColor.GREEN)
-                            .append(Component.text(removedCount, NamedTextColor.YELLOW))
-                            .append(Component.text(" creepers from all loaded chunks.", NamedTextColor.GREEN))
-                    );
+            return true;
+        }
 
-                    this.plugin.logInfo("Admin " + sender.getName() + " removed " + removedCount + " creepers");
-                    break;
+        switch (args[0].toLowerCase()) {
+            case "all":
+                final int removedCount = this.plugin.getSpawnRemovalListener().removeAllCreepers();
+                sender.sendMessage(Component.text("Removed ", NamedTextColor.GREEN)
+                        .append(Component.text(removedCount, NamedTextColor.YELLOW))
+                        .append(Component.text(" creepers from all loaded chunks.", NamedTextColor.GREEN))
+                );
 
-                case "toggle":
-                    final boolean currentStatus = this.plugin.getSpawnRemovalListener().isCreeperRemovalEnabled();
-                    this.plugin.getSpawnRemovalListener().setCreeperRemovalEnabled(!currentStatus);
+                this.plugin.logInfo("Admin " + sender.getName() + " removed " + removedCount + " creepers");
+                break;
 
-                    final String newStatus = !currentStatus ? "ENABLED" : "DISABLED";
-                    sender.sendMessage(Component.text("Creeper removal is now ", NamedTextColor.GREEN)
-                            .append(Component.text(newStatus, NamedTextColor.YELLOW))
-                            .append(Component.text(".", NamedTextColor.GREEN))
-                    );
+            case "toggle":
+                final boolean currentStatus = this.plugin.getSpawnRemovalListener().isCreeperRemovalEnabled();
+                this.plugin.getSpawnRemovalListener().setCreeperRemovalEnabled(!currentStatus);
 
-                    this.plugin.logInfo("Admin " + sender.getName() + " toggled creeper removal to " + newStatus);
-                    break;
+                final String newStatus = !currentStatus ? "ENABLED" : "DISABLED";
+                sender.sendMessage(Component.text("Creeper removal is now ", NamedTextColor.GREEN)
+                        .append(Component.text(newStatus, NamedTextColor.YELLOW))
+                        .append(Component.text(".", NamedTextColor.GREEN))
+                );
 
-                case "status":
-                    final Component statusMessage = this.plugin.getSpawnRemovalListener().isCreeperRemovalEnabled()
-                            ? Component.text("ENABLED", NamedTextColor.GREEN)
-                            : Component.text("DISABLED", NamedTextColor.RED);
-                    sender.sendMessage(Component.text("Creeper removal is currently: ", NamedTextColor.GRAY)
-                            .append(statusMessage));
-                    break;
+                this.plugin.logInfo("Admin " + sender.getName() + " toggled creeper removal to " + newStatus);
+                break;
 
-                default:
-                    sender.sendMessage(Component.text("Invalid action. Use 'all', 'toggle', or 'status'.", NamedTextColor.RED));
-            }
+            case "status":
+                final Component statusMessage = this.plugin.getSpawnRemovalListener().isCreeperRemovalEnabled()
+                        ? Component.text("ENABLED", NamedTextColor.GREEN)
+                        : Component.text("DISABLED", NamedTextColor.RED);
+                sender.sendMessage(Component.text("Creeper removal is currently: ", NamedTextColor.GRAY)
+                        .append(statusMessage));
+                break;
+
+            default:
+                sender.sendMessage(Component.text("Invalid action. Use 'all', 'toggle', or 'status'.", NamedTextColor.RED));
         }
 
         return true;
@@ -2269,53 +2586,80 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
      */
     private boolean handleSetupPlayerCommand(CommandSender sender, String[] args) {
         if (args.length != 1) {
-            sender.sendMessage("§cUsage: /pow admin setupplayer <playername>");
+            sender.sendMessage(Component.text("Usage: /pow admin setupplayer <playername>", NamedTextColor.RED));
+            return true;
+        }
+
+        if (args[0].equalsIgnoreCase("@a")) {
+            int playercount = 0;
+
+            for (Player player : Bukkit.getOnlinePlayers()) {
+                this.setupPlayer(player);
+                playercount++;
+            }
+
+            sender.sendMessage(Component.text("Gave starter items to ", NamedTextColor.GREEN)
+                    .append(Component.text(playercount, NamedTextColor.YELLOW))
+                    .append(Component.text(" player" + (playercount == 1 ? "" : "s") + ".", NamedTextColor.GREEN))
+            );
 
         } else {
-            Player target = Bukkit.getPlayer(args[0]);
+            Player target = this.getPlayerFromParameter(sender, args[0]);
 
             if (target == null) {
                 sender.sendMessage(Component.text("Player '" + args[0] + "' not found.", NamedTextColor.RED));
-
-            } else {
-                Random random = new Random();
-                List<ItemStack> starterItems = new ArrayList<>();
-
-                // The items players will start a game with
-                starterItems.add(new ItemStack(Material.STONE_SWORD, 1));
-                starterItems.add(new ItemStack(Material.STONE_PICKAXE, 1));
-                starterItems.add(new ItemStack(Material.STONE_AXE, 1));
-                starterItems.add(new ItemStack(Material.COOKED_CHICKEN, 1 + random.nextInt(4)));
-                starterItems.add(new ItemStack(Material.COOKED_SALMON, 1 + random.nextInt(4)));
-                starterItems.add(new ItemStack(Material.BREAD, 1 + random.nextInt(4)));
-                starterItems.add(new ItemStack(Material.BAKED_POTATO, 1 + random.nextInt(4)));
-
-                int itemsGiven = 0, itemsDropped = 0;
-
-                for (ItemStack item : starterItems) {
-                    if (target.getInventory().firstEmpty() != -1) {
-                        target.getInventory().addItem(item);
-                        ++itemsGiven;
-
-                    } else {
-                        target.getWorld().dropItemNaturally(target.getLocation(), item);
-                        ++itemsDropped;
-                    }
-                }
-
-                if (itemsGiven > 0) {
-                    target.sendMessage(Component.text("You have received starter items. (" + itemsGiven + " items added to inventory)", NamedTextColor.GREEN));
-                }
-
-                if (itemsDropped > 0) {
-                    target.sendMessage(Component.text("Your inventory was full. " + itemsDropped + " items were dropped at your feet.", NamedTextColor.YELLOW));
-                }
-
-                sender.sendMessage(Component.text("Gave starter items to " + target.getName() + ". (" + itemsGiven + " in inventory, " + itemsDropped + " dropped)", NamedTextColor.GREEN));
+                return true;
             }
+
+            // Reset the player
+            final int[] itemReport = setupPlayer(target);
+
+            sender.sendMessage(Component.text("Gave starter items to " + target.getName() + ". (" + itemReport[0] + " in inventory, " + itemReport[1] + " dropped)", NamedTextColor.GREEN));
         }
 
         return true;
+    }
+
+    /**
+     * Give a player the default starting items.
+     *
+     * @param player the player being given their starting items.
+     * @return A 2-element Integer array, where the first element is the number of items placed into the player's inventory, and the second element is the number of items that were dropped at the player's feet.
+     */
+    private int[] setupPlayer(Player player) {
+        List<ItemStack> starterItems = new ArrayList<>();
+
+        // The items players will start a game with
+        starterItems.add(new ItemStack(Material.STONE_SWORD, 1));
+        starterItems.add(new ItemStack(Material.STONE_PICKAXE, 1));
+        starterItems.add(new ItemStack(Material.STONE_AXE, 1));
+        starterItems.add(new ItemStack(Material.COOKED_CHICKEN, 4));
+        starterItems.add(new ItemStack(Material.COOKED_SALMON, 4));
+        starterItems.add(new ItemStack(Material.BREAD, 4));
+        starterItems.add(new ItemStack(Material.BAKED_POTATO, 4));
+
+        int itemsGiven = 0, itemsDropped = 0;
+
+        for (ItemStack item : starterItems) {
+            if (player.getInventory().firstEmpty() != -1) {
+                player.getInventory().addItem(item);
+                ++itemsGiven;
+
+            } else {
+                player.getWorld().dropItemNaturally(player.getLocation(), item);
+                ++itemsDropped;
+            }
+        }
+
+        if (itemsGiven > 0) {
+            player.sendMessage(Component.text("You have received starter items. (" + itemsGiven + " items added to inventory)", NamedTextColor.GREEN));
+        }
+
+        if (itemsDropped > 0) {
+            player.sendMessage(Component.text("Your inventory was full. " + itemsDropped + " items were dropped at your feet.", NamedTextColor.YELLOW));
+        }
+
+        return new int[]{itemsGiven, itemsDropped};
     }
 
     /**
@@ -2331,150 +2675,56 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
     }
 
     /**
-     * Create the list of autocorrecting options for admin commands as they are written out in the command line.
+     * Trigger a cure of all vampires at a provided stage or below.
      *
-     * @param command the previous word in the argument list.
-     * @return A {@code List} of options for the autocomplete to suggest.
+     * @return {@code true}
      */
-    public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
-        if (!sender.hasPermission("vampiresmp.admin")) {
-            return new ArrayList<>();
-
-        } else {
-            // Stores the autocomplete options that will be displayed
-            List<String> completions = new ArrayList<>();
-
-            if (command.getName().equalsIgnoreCase("session")) {
-                if (args.length == 1) {
-                    completions.addAll(Arrays.asList("start", "pause", "end", "prime", "resume", "building"));
-                }
-
-            } else if (command.getName().equalsIgnoreCase("vampire")) {
-                if (args.length == 1) {
-                    for (Player player : Bukkit.getOnlinePlayers()) {
-                        completions.add(player.getName());
-                    }
-                } else if (args.length == 2) {
-                    completions.addAll(Arrays.asList("human", "1", "2", "3", "turn", "clearcap", "clearban"));
-
-                } else if (args.length == 3 && args[1].equalsIgnoreCase("turn")) {
-                    for (Player player : Bukkit.getOnlinePlayers()) {
-                        if (this.vampireManager.isVampire(player)) {
-                            completions.add(player.getName());
-                        }
-                    }
-                }
-
-            } else if (command.getName().equalsIgnoreCase("config")) {
-                if (args.length == 1) {
-                    completions.addAll(Arrays.asList("help", "alert_on_quit", "holy_water_cap", "tome_cap", "vampire_level_cap", "new_vampire_tracking", "allow_vampire_mounts", "vampire_health_check", "damage_suppression", "cure_requires_dead_sire", "cure_requires_daylight", "cure_book_spawning", "enable_npc_mobs", "breeding_out_of_session", "stake_permadeath_stage", "human_life_limit", "one_human_left", "border_active"));
-
-                } else if (args.length == 2) {
-                    switch (args[0]) {
-                        case "stake_permadeath_stage":
-                            completions.addAll(Arrays.asList("1", "2", "3"));
-                            break;
-
-                        case "vampire_health_check":
-                            completions.addAll(Arrays.asList("20", "40", "60", "100", "200"));
-                            break;
-
-                        case "damage_suppression":
-                            completions.addAll(Arrays.asList("0", "10", "25", "50", "75", "100"));
-                            break;
-
-                        default:
-                            completions.addAll(Arrays.asList("true", "false"));
-                            break;
-                    }
-                }
-
-            } else if (command.getName().equalsIgnoreCase("beacon")) {
-                if (args.length == 1) {
-                    completions.addAll(Arrays.asList("add", "remove", "list", "info", "stats", "reload", "validate", "holy", "desecrated", "corrupted", "neutral", "fix", "refresh", "cleanup", "clearcooldowns", "debug"));
-
-                } else if (args.length == 2) {
-                    String subCommand = args[0].toLowerCase();
-
-                    if (!subCommand.equals("remove") && !subCommand.equals("delete") && !subCommand.equals("info") && !subCommand.equals("holy") && !subCommand.equals("desecrated") && !subCommand.equals("desecrate") && !subCommand.equals("break") && !subCommand.equals("corrupt") && !subCommand.equals("corrupted") && !subCommand.equals("neutral")) {
-                        if (subCommand.equals("add")) {
-                            completions.add("<beacon_name>");
-                        }
-                    } else {
-                        completions.addAll(this.beaconManager.getBeaconNames());
-                    }
-                } else if (args.length == 3 && args[0].equalsIgnoreCase("add")) {
-                    completions.addAll(Arrays.asList("5", "10", "15", "20", "25"));
-                }
-            } else if (command.getName().equalsIgnoreCase("cooldowns")) {
-                if (args.length == 1) {
-                    completions.addAll(Arrays.asList("reset", "clear"));
-
-                } else if (args.length == 2 && (args[0].equalsIgnoreCase("reset") || args[0].equalsIgnoreCase("clear"))) {
-                    for (Player player : Bukkit.getOnlinePlayers()) {
-                        completions.add(player.getName());
-                    }
-                }
-            } else if (command.getName().equalsIgnoreCase("break_warning")) {
-                completions.clear();
-
-            } else if (command.getName().equalsIgnoreCase("givetome")) {
-                if (args.length == 1) {
-                    for (Player player : Bukkit.getOnlinePlayers()) {
-                        completions.add(player.getName());
-                    }
-                } else if (args.length == 2) {
-                    completions.addAll(this.tomeManager.getAllAbilityNames());
-
-                } else if (args.length == 3) {
-                    completions.addAll(Arrays.asList("1", "5", "10", "16", "32", "64"));
-                }
-            } else if (command.getName().equalsIgnoreCase("distributetomes")) {
-                completions.clear();
-
-            } else if (command.getName().equalsIgnoreCase("clearbloodmoonbuffs")) {
-                if (args.length == 1) {
-                    completions.add("all");
-
-                    for (Player player : Bukkit.getOnlinePlayers()) {
-                        completions.add(player.getName());
-                    }
-                }
-            } else if (command.getName().equalsIgnoreCase("make_incurable")) {
-                if (args.length == 1) {
-                    for (Player player : Bukkit.getOnlinePlayers()) {
-                        completions.add(player.getName());
-                    }
-                }
-            } else if (command.getName().equalsIgnoreCase("fixattributes")) {
-                if (args.length == 1) {
-                    completions.add("all");
-
-                    for (Player player : Bukkit.getOnlinePlayers()) {
-                        completions.add(player.getName());
-                    }
-                }
-            } else if (command.getName().equalsIgnoreCase("removeendermen")) {
-                if (args.length == 1) {
-                    completions.addAll(Arrays.asList("all", "toggle", "status"));
-                }
-            } else if (command.getName().equalsIgnoreCase("setupplayer")) {
-                if (args.length == 1) {
-                    for (Player player : Bukkit.getOnlinePlayers()) {
-                        completions.add(player.getName());
-                    }
-                }
-            } else if (command.getName().equalsIgnoreCase("spawnanimals")) {
-                completions.clear();
-            }
-
-            if (args.length > 0) {
-                String input = args[args.length - 1].toLowerCase();
-                completions.removeIf((s) -> !s.toLowerCase().startsWith(input));
-            }
-
-            return completions;
+    private boolean handleCureAllVampires(CommandSender sender, String[] args) {
+        if (args.length < 1) {
+            sender.sendMessage(Component.text("Usage: /pow admin cure-all-vampires <stage> <distance>", NamedTextColor.RED));
+            return true;
         }
+
+        final int maxStage = Integer.parseInt(args[0]);
+
+        // Ensure the provided stage is a valid one
+        if (maxStage < 1 || maxStage > 3) {
+            sender.sendMessage(Component.text("Stage must be between 1 and 3.", NamedTextColor.RED));
+            return true;
+        }
+
+        double distance = 0;
+
+        // Ensure a valid distance was provided
+        if (args.length >= 2) {
+            distance = Double.parseDouble(args[1]);
+        }
+
+        int playercount = 0;
+        final Location senderLoc = this.getSenderLocation(sender);
+        List<Player> playersToCure = new ArrayList<>();
+
+        if (senderLoc == null) {
+            return true;
+        }
+
+        // Retrieve the players who will be cured
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            if (this.vampireManager.isVampire(player) && this.vampireManager.getVampireStage(player) <= maxStage && player.getGameMode() != GameMode.SPECTATOR) {
+                if (args.length >= 2 && senderLoc.distanceSquared(player.getLocation()) > distance) continue;
+
+                playersToCure.add(player);
+                playercount++;
+            }
+        }
+
+        // Force cure every listed player. This cure overrides all protections that would otherwise prevent a cure from happening, and does not use up a beacon.
+        for (Player player : playersToCure) {
+            this.plugin.getForcedCureChoiceManager().openChoiceGUI(null, player, null);
+        }
+
+        sender.sendMessage(Component.text(playercount + " vampire" + (playercount == 1 ? "" : "s") + " have been offered a choice: Return to Humanity... or death.", NamedTextColor.DARK_PURPLE));
+        return true;
     }
 
     /**
@@ -2483,36 +2733,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
      * @param player the vampire gaining night vision.
      */
     private void applyVampireNightVision(Player player) {
-        PotionEffect nightVision = new PotionEffect(PotionEffectType.NIGHT_VISION, -1, 0, false, false, false);
-        player.addPotionEffect(nightVision);
-    }
-
-    /**
-     * Give the player a link to apply the vampire texture pack to their game.
-     *
-     * @param player the player changing to the vampire texture pack.
-     */
-    private void sendVampireTexturePackPrompt(Player player) {
-        player.sendMessage(Component.text("Apply the vampire texture pack: ", NamedTextColor.GRAY)
-                .append(Component.text("[CLICK HERE]", NamedTextColor.RED)
-                        .decorate(TextDecoration.UNDERLINED)
-                        .clickEvent(ClickEvent.runCommand("/pow texture vampire"))
-                        .hoverEvent(HoverEvent.showText(Component.text("Click to apply the vampire texture pack", NamedTextColor.GRAY)))
-                ));
-    }
-
-    /**
-     * Give the player a link to apply the human texture pack to their game.
-     *
-     * @param player the player changing to the human texture pack.
-     */
-    private void sendHumanTexturePackPrompt(Player player) {
-        player.sendMessage(Component.text("Apply the human texture pack: ", NamedTextColor.GRAY)
-                .append(Component.text("[CLICK HERE]", NamedTextColor.GREEN)
-                        .decorate(TextDecoration.UNDERLINED)
-                        .clickEvent(ClickEvent.runCommand("/pow texture human"))
-                        .hoverEvent(HoverEvent.showText(Component.text("Click to apply the human texture pack", NamedTextColor.GRAY)))
-                ));
+        player.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION, -1, 0, false, false, false));
     }
 
     /**
@@ -2559,5 +2780,82 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
      */
     public static void sendCommandCorrection(CommandSender sender, String command, String info) {
         sender.sendMessage(formatCommandCorrection(command, info));
+    }
+
+    /**
+     * Retrieve a single player based on the argument passed in.
+     *
+     * @param sender a command triggering entity or block.
+     * @param argument the player's name or a single-target @ command.<br/>
+     *                 Supports @p, @r, and @s.
+     * @return A player to be used by the command.
+     */
+    private Player getPlayerFromParameter(CommandSender sender, String argument) {
+        Player target = null;
+
+        // @p = Nearest, @r = Random, @s = Self
+        if (argument.equalsIgnoreCase("@p")) {
+            if (sender instanceof Player player) {
+                target = player;
+
+            } else {
+                Location senderLoc = this.getSenderLocation(sender);
+
+                if (senderLoc == null) {
+                    return null;
+                }
+
+                // Find the closest player to the sender
+                double nearestDistance = Double.MAX_VALUE, distance;
+
+                for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+                    distance = senderLoc.distanceSquared(onlinePlayer.getLocation());
+
+                    if (distance < nearestDistance) {
+                        nearestDistance = distance;
+                        target = onlinePlayer;
+                    }
+                }
+            }
+        } else if (argument.equalsIgnoreCase("@r")) {
+            ArrayList<Player> allPlayers = new ArrayList<>(Bukkit.getOnlinePlayers());
+            target = allPlayers.get(new Random().nextInt(allPlayers.size()));
+
+        } else if (argument.equalsIgnoreCase("@s")) {
+            if (sender instanceof Player player) {
+                target = player;
+
+            } else {
+                sender.sendMessage(Component.text("Only players can use this command on themselves.", NamedTextColor.RED));
+                return null;
+            }
+        } else {
+            target = Bukkit.getPlayerExact(argument);
+        }
+
+        return target;
+    }
+
+    /**
+     * Retrieve the location that a command is sent from.
+     *
+     * @return The {@code Location} of the command's source.
+     */
+    private Location getSenderLocation(CommandSender sender) {
+        Location location;
+
+        // Get the sending location
+        if (sender instanceof Entity entity) {
+            location = entity.getLocation();
+
+        } else if (sender instanceof BlockCommandSender blockSender) {
+            location = blockSender.getBlock().getLocation();
+
+        } else {
+            sender.sendMessage(Component.text("Could not determine the sender's location.", NamedTextColor.RED));
+            return null;
+        }
+
+        return location;
     }
 }

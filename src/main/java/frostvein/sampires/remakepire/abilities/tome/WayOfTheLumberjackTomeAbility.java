@@ -29,7 +29,7 @@ public class WayOfTheLumberjackTomeAbility extends TomeAbility implements Listen
     private final Gson gson = new Gson();
     private final File placedLogsFile;
     private Set<String> placedLogs = new HashSet<>();
-    private static final Set<Material> LOG_MATERIALS = Set.of(Material.OAK_LOG, Material.SPRUCE_LOG, Material.BIRCH_LOG, Material.JUNGLE_LOG, Material.ACACIA_LOG, Material.DARK_OAK_LOG, Material.MANGROVE_LOG, Material.CHERRY_LOG, Material.CRIMSON_STEM, Material.WARPED_STEM);
+    private static final Set<Material> LOG_MATERIALS = Set.of(Material.OAK_LOG, Material.SPRUCE_LOG, Material.BIRCH_LOG, Material.JUNGLE_LOG, Material.ACACIA_LOG, Material.DARK_OAK_LOG, Material.MANGROVE_LOG, Material.CHERRY_LOG, Material.PALE_OAK_LOG, Material.CRIMSON_STEM, Material.WARPED_STEM);
 
     /**
      * Create an instance of the Way of the Land tome ability.
@@ -37,7 +37,7 @@ public class WayOfTheLumberjackTomeAbility extends TomeAbility implements Listen
      * @param plugin the host plugin object.
      */
     public WayOfTheLumberjackTomeAbility(RemakepirePlugin plugin) {
-        super(plugin, "WayOfTheLumberjack", new String[]{"You gain knowledge on how to fell the forest.", "You permanently gain a 30% chance to harvest", "twice the yield from each harvest."}, 0);
+        super(plugin, "WayOfTheLumberjack", "Way of the Lumberjack", new String[]{"You gain knowledge on how to fell the forest.", "You permanently gain a 30% chance to harvest", "twice the yield from each harvest."}, 0);
         this.placedLogsFile = new File(plugin.getDataFolder(), "placed_logs.json");
         this.loadPlacedLogs();
         Bukkit.getPluginManager().registerEvents(this, plugin);
@@ -47,17 +47,16 @@ public class WayOfTheLumberjackTomeAbility extends TomeAbility implements Listen
         if (!this.canUse(player)) {
             this.sendCannotUseMessage(player, "Only humans can use tome abilities!");
             return false;
-
-        } else {
-            this.sendSuccessMessage(player, "You have absorbed the knowledge of the lumberjack!");
-            player.sendMessage(Component.text("You now have a permanent 30% chance to receive double drops when harvesting natural logs.", NamedTextColor.GRAY));
-            player.sendMessage(Component.text("This knowledge flows through your very being - you need not activate it again.", NamedTextColor.GRAY));
-
-            this.plugin.getWorld().playSound(player.getLocation(), "minecraft:block.wood.break", 1.0F, 1.2F);
-            this.plugin.getWorld().playSound(player.getLocation(), "minecraft:entity.experience_orb.pickup", 0.5F, 0.8F);
-
-            return true;
         }
+
+        this.sendSuccessMessage(player, "You have absorbed the knowledge of the lumberjack!");
+        player.sendMessage(Component.text("You now have a permanent 30% chance to receive double drops when harvesting natural logs.", NamedTextColor.GRAY));
+        player.sendMessage(Component.text("This knowledge flows through your very being - you need not activate it again.", NamedTextColor.GRAY));
+
+        this.plugin.getWorld().playSound(player.getLocation(), "minecraft:block.wood.break", 1.0F, 1.2F);
+        this.plugin.getWorld().playSound(player.getLocation(), "minecraft:entity.experience_orb.pickup", 0.5F, 0.8F);
+
+        return true;
     }
 
     /**
@@ -95,7 +94,7 @@ public class WayOfTheLumberjackTomeAbility extends TomeAbility implements Listen
                 this.placedLogs.remove(locationKey);
                 this.savePlacedLogs();
 
-            } else if (this.plugin.getTomeManager().hasAbility(player, "wayofthelumberjack")) {
+            } else if (this.plugin.getTomeManager().hasAbility(player, "wayofthelumberjack") && this.plugin.getVampireManager().isHuman(player)) {
                 if (this.random.nextDouble() < 0.3) {
                     ItemStack drop = new ItemStack(block.getType(), 1);
                     block.getWorld().dropItemNaturally(block.getLocation(), drop);
@@ -119,6 +118,7 @@ public class WayOfTheLumberjackTomeAbility extends TomeAbility implements Listen
                 }
             } catch (IOException e) {
                 this.plugin.getLogger().warning("WayOfTheLumberjack: Failed to load placed logs file: " + e.getMessage());
+                e.printStackTrace();
             }
         }
     }
@@ -137,6 +137,7 @@ public class WayOfTheLumberjackTomeAbility extends TomeAbility implements Listen
             }
         } catch (IOException e) {
             this.plugin.getLogger().warning("WayOfTheLumberjack: Failed to save placed logs file: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 

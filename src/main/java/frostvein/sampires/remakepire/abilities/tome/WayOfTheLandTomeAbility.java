@@ -24,7 +24,7 @@ public class WayOfTheLandTomeAbility extends TomeAbility implements Listener {
      * @param plugin the host plugin object.
      */
     public WayOfTheLandTomeAbility(RemakepirePlugin plugin) {
-        super(plugin, "WayOfTheLand", new String[]{"You gain knowledge on how to live off the land.", "You permanently have a 75% chance when harvesting a crop", "to receive double drops."}, 0);
+        super(plugin, "WayOfTheLand", "Way of the Land", new String[]{"You gain knowledge on how to live off the land.", "You permanently have a 75% chance when harvesting a crop", "to receive double drops."}, 0);
         Bukkit.getPluginManager().registerEvents(this, plugin);
     }
 
@@ -32,17 +32,16 @@ public class WayOfTheLandTomeAbility extends TomeAbility implements Listener {
         if (!this.canUse(player)) {
             this.sendCannotUseMessage(player, "Only humans can use tome abilities!");
             return false;
-
-        } else {
-            this.sendSuccessMessage(player, "You have absorbed the knowledge of living off the land!");
-            player.sendMessage(Component.text("You now have a permanent 75% chance to receive double drops when harvesting crops.", NamedTextColor.GRAY));
-            player.sendMessage(Component.text("This knowledge flows through your very being - you need not activate it again.", NamedTextColor.GRAY));
-
-            this.plugin.getWorld().playSound(player.getLocation(), "minecraft:block.grass.break", 1.0F, 1.2F);
-            this.plugin.getWorld().playSound(player.getLocation(), "minecraft:entity.experience_orb.pickup", 0.5F, 0.8F);
-
-            return true;
         }
+
+        this.sendSuccessMessage(player, "You have absorbed the knowledge of living off the land!");
+        player.sendMessage(Component.text("You now have a permanent 75% chance to receive double drops when harvesting crops.", NamedTextColor.GRAY));
+        player.sendMessage(Component.text("This knowledge flows through your very being - you need not activate it again.", NamedTextColor.GRAY));
+
+        this.plugin.getWorld().playSound(player.getLocation(), "minecraft:block.grass.break", 1.0F, 1.2F);
+        this.plugin.getWorld().playSound(player.getLocation(), "minecraft:entity.experience_orb.pickup", 0.5F, 0.8F);
+
+        return true;
     }
 
     /**
@@ -55,7 +54,7 @@ public class WayOfTheLandTomeAbility extends TomeAbility implements Listener {
         Player player = event.getPlayer();
         Block block = event.getBlock();
 
-        if (this.plugin.getTomeManager().hasAbility(player, "wayoftheland")) {
+        if (this.plugin.getTomeManager().hasAbility(player, "wayoftheland") && this.plugin.getVampireManager().isHuman(player)) {
             if (this.isFullyGrownCrop(block)) {
                 // Prevent garlic from receiving the drop rate boost from this source
                 if (block.getType() != Material.BEETROOTS) {

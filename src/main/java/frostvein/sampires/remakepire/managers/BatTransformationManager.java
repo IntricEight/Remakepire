@@ -69,6 +69,7 @@ public class BatTransformationManager {
             }
 
             this.plugin.logInfo("Created bat transformation persistence file");
+
         } catch (IOException e) {
             this.plugin.getLogger().severe("Failed to create bat transformation file: " + e.getMessage());
             e.printStackTrace();
@@ -83,13 +84,13 @@ public class BatTransformationManager {
             int tickCount = 0;
 
             public void run() {
-                BatTransformationManager.this.checkExpiredTransformations();
-                BatTransformationManager.this.checkBatEntityHealth();
-                BatTransformationManager.this.updateBatActionBars();
+                checkExpiredTransformations();
+                checkBatEntityHealth();
+                updateBatActionBars();
                 ++this.tickCount;
 
                 if (this.tickCount >= 6000) {
-                    BatTransformationManager.this.armorStorageManager.cleanupExpiredEntries();
+                    armorStorageManager.cleanupExpiredEntries();
                     this.tickCount = 0;
                 }
             }
@@ -104,7 +105,7 @@ public class BatTransformationManager {
 
         while(iterator.hasNext()) {
             Map.Entry<UUID, BatData> entry = iterator.next();
-            UUID playerId = entry.getKey();
+            final UUID playerId = entry.getKey();
             BatData batData = entry.getValue();
 
             if (batData.isExpired()) {
@@ -129,7 +130,7 @@ public class BatTransformationManager {
      */
     private void updateBatActionBars() {
         for (Map.Entry<UUID, BatData> entry : this.activeBats.entrySet()) {
-            UUID playerId = entry.getKey();
+            final UUID playerId = entry.getKey();
             BatData batData = entry.getValue();
             Player player = Bukkit.getPlayer(playerId);
 
@@ -151,7 +152,7 @@ public class BatTransformationManager {
 
         while(iterator.hasNext()) {
             Map.Entry<UUID, BatData> entry = iterator.next();
-            UUID playerId = entry.getKey();
+            final UUID playerId = entry.getKey();
             BatData batData = entry.getValue();
 
             if (batData.batEntity != null && !batData.batEntity.isValid()) {
@@ -229,8 +230,8 @@ public class BatTransformationManager {
      */
     public Player getPlayerFromBat(Bat bat) {
         if (bat.getCustomName() != null && bat.getCustomName().startsWith("Â§8")) {
-            String playerName = bat.getCustomName().substring(2);
-            return Bukkit.getPlayer(playerName);
+            final String playerName = bat.getCustomName().substring(2);
+            return Bukkit.getPlayerExact(playerName);
 
         } else {
             return null;
@@ -280,7 +281,7 @@ public class BatTransformationManager {
                 batData.batEntity = bat;
                 batData.transformationTask = (new BukkitRunnable() {
                     public void run() {
-                        if (player.isOnline() && BatTransformationManager.this.isInBatForm(player)) {
+                        if (player.isOnline() && isInBatForm(player)) {
                             if (bat.isValid()) {
                                 bat.teleport(player.getLocation());
                             } else {
@@ -364,7 +365,7 @@ public class BatTransformationManager {
      * @param player the vampire using the bat ability.
      */
     private void restorePlayerArmor(Player player) {
-        UUID playerId = player.getUniqueId();
+        final UUID playerId = player.getUniqueId();
 
         try {
             if (!this.armorStorageManager.hasStoredArmor(playerId)) {
@@ -420,6 +421,7 @@ public class BatTransformationManager {
             }
 
             this.plugin.logInfo("Successfully restored " + restoredPieces + " armor pieces for player " + player.getName() + " after bat transformation");
+
         } catch (Exception e) {
             this.plugin.getLogger().severe("Failed to restore armor for player " + player.getName() + ": " + e.getMessage());
             e.printStackTrace();
@@ -473,7 +475,7 @@ public class BatTransformationManager {
      * @param player the player joining the game.
      */
     public void handlePlayerJoin(Player player) {
-        UUID playerId = player.getUniqueId();
+        final UUID playerId = player.getUniqueId();
 
         if (this.armorStorageManager.hasStoredArmor(playerId)) {
             this.plugin.logInfo("Found stored armor for player " + player.getName() + " on join - attempting restoration");
@@ -513,14 +515,15 @@ public class BatTransformationManager {
 
                 String[] parts = line.split(":");
                 if (parts.length == 2) {
-                    UUID playerId = UUID.fromString(parts[0]);
-                    long startTime = Long.parseLong(parts[1]);
+                    final UUID playerId = UUID.fromString(parts[0]);
+                    final long startTime = Long.parseLong(parts[1]);
                     BatData batData = new BatData(startTime);
                     this.activeBats.put(playerId, batData);
                 }
             }
         } catch (IOException e) {
             this.plugin.getLogger().warning("Could not load bat transformation states: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
@@ -530,7 +533,7 @@ public class BatTransformationManager {
     private void saveBatStates() {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(this.batStateFile))) {
             for (Map.Entry<UUID, BatData> entry : this.activeBats.entrySet()) {
-                UUID playerId = entry.getKey();
+                final UUID playerId = entry.getKey();
                 BatData batData = entry.getValue();
 
                 if (!batData.isExpired()) {
@@ -540,6 +543,7 @@ public class BatTransformationManager {
             }
         } catch (IOException e) {
             this.plugin.getLogger().warning("Could not save bat transformation states: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 

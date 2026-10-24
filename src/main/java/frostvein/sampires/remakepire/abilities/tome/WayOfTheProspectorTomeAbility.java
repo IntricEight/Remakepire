@@ -25,7 +25,7 @@ public class WayOfTheProspectorTomeAbility extends TomeAbility implements Listen
      * @param plugin the host plugin object.
      */
     public WayOfTheProspectorTomeAbility(RemakepirePlugin plugin) {
-        super(plugin, "WayOfTheProspector", new String[]{"You gain knowledge on how to extract value from the very earth beneath you.", "You permanently gain a 50% chance for an ore", "to drop twice its drops."}, 0);
+        super(plugin, "WayOfTheProspector", "Way of the Prospector", new String[]{"You gain knowledge on how to extract value from the very earth beneath you.", "You permanently gain a 50% chance for an ore", "to drop twice its drops."}, 0);
         Bukkit.getPluginManager().registerEvents(this, plugin);
     }
 
@@ -33,17 +33,16 @@ public class WayOfTheProspectorTomeAbility extends TomeAbility implements Listen
         if (!this.canUse(player)) {
             this.sendCannotUseMessage(player, "Only humans can use tome abilities!");
             return false;
-
-        } else {
-            this.sendSuccessMessage(player, "You have absorbed the knowledge of the prospector!");
-            player.sendMessage(Component.text("You now have a permanent 50% chance to receive double drops when mining ores.", NamedTextColor.GRAY));
-            player.sendMessage(Component.text("This knowledge flows through your very being - you need not activate it again.", NamedTextColor.GRAY));
-
-            this.plugin.getWorld().playSound(player.getLocation(), "minecraft:block.stone.break", 1.0F, 1.2F);
-            this.plugin.getWorld().playSound(player.getLocation(), "minecraft:entity.experience_orb.pickup", 0.5F, 0.8F);
-
-            return true;
         }
+
+        this.sendSuccessMessage(player, "You have absorbed the knowledge of the prospector!");
+        player.sendMessage(Component.text("You now have a permanent 50% chance to receive double drops when mining ores.", NamedTextColor.GRAY));
+        player.sendMessage(Component.text("This knowledge flows through your very being - you need not activate it again.", NamedTextColor.GRAY));
+
+        this.plugin.getWorld().playSound(player.getLocation(), "minecraft:block.stone.break", 1.0F, 1.2F);
+        this.plugin.getWorld().playSound(player.getLocation(), "minecraft:entity.experience_orb.pickup", 0.5F, 0.8F);
+
+        return true;
     }
 
     /**
@@ -56,18 +55,13 @@ public class WayOfTheProspectorTomeAbility extends TomeAbility implements Listen
         Player player = event.getPlayer();
         Block block = event.getBlock();
 
-        if (this.plugin.getTomeManager().hasAbility(player, "wayoftheprospector")) {
-            if (ORE_MATERIALS.contains(block.getType())) {
-                ItemStack tool = player.getInventory().getItemInMainHand();
+        if (this.plugin.getTomeManager().hasAbility(player, "wayoftheprospector") && this.plugin.getVampireManager().isHuman(player) && ORE_MATERIALS.contains(block.getType())) {
+            ItemStack tool = player.getInventory().getItemInMainHand();
 
-                if (!tool.containsEnchantment(Enchantment.SILK_TOUCH)) {
-                    if (this.random.nextDouble() < 0.5) {
-                        for (ItemStack drop : block.getDrops(tool)) {
-                            if (drop != null && drop.getType() != Material.AIR) {
-                                ItemStack extraDrop = drop.clone();
-                                block.getWorld().dropItemNaturally(block.getLocation(), extraDrop);
-                            }
-                        }
+            if (!tool.containsEnchantment(Enchantment.SILK_TOUCH) && this.random.nextDouble() < 0.5) {
+                for (ItemStack drop : block.getDrops(tool)) {
+                    if (drop != null && drop.getType() != Material.AIR) {
+                        block.getWorld().dropItemNaturally(block.getLocation(), drop.clone());
                     }
                 }
             }

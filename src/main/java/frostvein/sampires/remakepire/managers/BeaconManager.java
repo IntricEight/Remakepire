@@ -1147,6 +1147,7 @@ public class BeaconManager {
         if (location != null && location.getWorld() != null) {
             try {
                 location.getWorld().spawnParticle(Particle.END_ROD, location, 1, 0.0, 0.0, 0.0, 0.0);
+
             } catch (Exception e) {
                 this.plugin.getLogger().warning("Failed to show suppression range particle: " + e.getMessage());
             }
@@ -1313,8 +1314,10 @@ public class BeaconManager {
                 if (this.dataFile.exists()) {
                     try {
                         Files.copy(this.dataFile.toPath(), backupFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+
                     } catch (Exception e) {
                         this.plugin.getLogger().warning("Failed to create backup: " + e.getMessage());
+                        e.printStackTrace();
                     }
                 }
 
@@ -1467,6 +1470,7 @@ public class BeaconManager {
 
                         } catch (Exception e) {
                             this.plugin.getLogger().severe("Failed to restore from backup: " + e.getMessage());
+                            e.printStackTrace();
                             return;
                         }
                     }
@@ -1527,6 +1531,7 @@ public class BeaconManager {
 
                     } catch (Exception backupError) {
                         this.plugin.getLogger().severe("Failed to restore from backup: " + backupError.getMessage());
+                        e.printStackTrace();
                     }
                 }
             } catch (Exception e) {
@@ -1681,16 +1686,16 @@ public class BeaconManager {
 
         BukkitTask task = this.plugin.getServer().getScheduler().runTaskLater(this.plugin, () -> {
             if (beacon.getState() == BeaconState.NEUTRAL) {
-                Component message = Component.text("Beacon", NamedTextColor.GRAY)
+                Component message = Component.text("Beacon ", NamedTextColor.GRAY)
                         .append(Component.text(beacon.getName(), NamedTextColor.YELLOW));
 
                 // Add on a description based on the beacon's previous state
                 if (previousState == BeaconState.HOLY) {
-                    message = message.append(Component.text("has lost its divine protection...", NamedTextColor.GRAY));
+                    message = message.append(Component.text(" has lost its divine protection...", NamedTextColor.GRAY));
                 } else if (previousState == BeaconState.DESECRATED) {
-                    message = message.append(Component.text("has been cleansed of dark influence...", NamedTextColor.GRAY));
+                    message = message.append(Component.text(" has been cleansed of dark influence...", NamedTextColor.GRAY));
                 } else {
-                    message = message.append(Component.text("is now neutral.", NamedTextColor.GRAY));
+                    message = message.append(Component.text(" is now neutral.", NamedTextColor.GRAY));
                 }
 
                 for (Player player : this.plugin.getServer().getOnlinePlayers()) {

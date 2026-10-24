@@ -29,7 +29,7 @@ public class ConfigGuiListener  implements Listener {
 
             if (clickedItem != null && clickedItem.getType() != Material.AIR) {
                 // Retrieve the command that the admin is interacting with
-                String commandName = ConfigGuiManager.getCommandNameFromItem(clickedItem.getType());
+                String commandName = ConfigGuiManager.getConfigNameFromItem(clickedItem.getType());
 
                 // Execute the different commands as the admin interacts with their GUI item
                 this.plugin.getConfigGuiManager().runConfigCommand(commandName);

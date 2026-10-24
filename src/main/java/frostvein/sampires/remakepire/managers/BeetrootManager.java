@@ -65,6 +65,7 @@ public class BeetrootManager {
             try {
                 this.beetrootFile.createNewFile();
                 this.plugin.logInfo("Created beetroot timer persistence file");
+
             } catch (IOException e) {
                 this.plugin.getLogger().severe("Failed to create beetroot timer file: " + e.getMessage());
                 e.printStackTrace();
@@ -85,9 +86,9 @@ public class BeetrootManager {
                 String[] parts = line.split(":");
 
                 if (parts.length == 3) {
-                    UUID uuid = UUID.fromString(parts[0]);
-                    String type = parts[1];
-                    int seconds = Integer.parseInt(parts[2]);
+                    final UUID uuid = UUID.fromString(parts[0]);
+                    final String type = parts[1];
+                    final int seconds = Integer.parseInt(parts[2]);
 
                     if ("processing".equals(type)) {
                         this.processingTimers.put(uuid, seconds);
@@ -100,6 +101,7 @@ public class BeetrootManager {
             }
         } catch (IOException e) {
             this.plugin.getLogger().warning("Could not load beetroot timer data: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
@@ -124,6 +126,7 @@ public class BeetrootManager {
             }
         } catch (IOException e) {
             this.plugin.getLogger().warning("Could not save beetroot timer data: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
@@ -133,9 +136,9 @@ public class BeetrootManager {
     private void startBeetrootTask() {
         this.beetrootTask = (new BukkitRunnable() {
             public void run() {
-                if (BeetrootManager.this.plugin.getSessionManager().isSessionActive()) {
-                    Set<UUID> onlinePlayers = Bukkit.getOnlinePlayers().stream().map(OfflinePlayer::getUniqueId).collect(Collectors.toSet());
-                    BeetrootManager.this.processTimersForOnlinePlayers(onlinePlayers);
+                if (plugin.getSessionManager().isSessionActive()) {
+                    final Set<UUID> onlinePlayers = Bukkit.getOnlinePlayers().stream().map(OfflinePlayer::getUniqueId).collect(Collectors.toSet());
+                    processTimersForOnlinePlayers(onlinePlayers);
                 }
             }
         }).runTaskTimer(this.plugin, 20L, 20L);
@@ -151,10 +154,10 @@ public class BeetrootManager {
 
         // Handle the manual timers for activating the garlic immunity
         for (Map.Entry<UUID, Integer> entry : this.processingTimers.entrySet()) {
-            UUID playerId = entry.getKey();
+            final UUID playerId = entry.getKey();
 
             if (onlinePlayers.contains(playerId)) {
-                int timeLeft = entry.getValue() - 1;
+                final int timeLeft = entry.getValue() - 1;
 
                 if (timeLeft <= 0) {
                     processingToRemove.add(playerId);
@@ -176,10 +179,10 @@ public class BeetrootManager {
 
         // Handle the manual timers for the garlic immunity duration
         for (Map.Entry<UUID, Integer> entry : this.immunityTimers.entrySet()) {
-            UUID playerId = entry.getKey();
+            final UUID playerId = entry.getKey();
 
             if (onlinePlayers.contains(playerId)) {
-                int timeLeft = entry.getValue() - 1;
+                final int timeLeft = entry.getValue() - 1;
 
                 if (timeLeft <= 0) {
                     immunityToRemove.add(playerId);
@@ -201,10 +204,10 @@ public class BeetrootManager {
 
         // Handle the manual timers for the garlic recovery duration
         for (Map.Entry<UUID, Integer> entry : this.recoveryTimers.entrySet()) {
-            UUID playerId = entry.getKey();
+            final UUID playerId = entry.getKey();
 
             if (onlinePlayers.contains(playerId)) {
-                int timeLeft = entry.getValue() - 1;
+                final int timeLeft = entry.getValue() - 1;
 
                 if (timeLeft <= 0) {
                     recoveryToRemove.add(playerId);

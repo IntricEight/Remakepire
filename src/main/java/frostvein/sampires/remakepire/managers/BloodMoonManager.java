@@ -17,6 +17,7 @@ public class BloodMoonManager {
     private RemakepirePlugin plugin;
     private BukkitTask vampireBuffTask;
     private boolean isBloodMoonActive = false;
+    private int bloodMoonFrequency;
 
     /**
      * Create an instance of the Blood Moon manager.
@@ -26,11 +27,19 @@ public class BloodMoonManager {
     public BloodMoonManager(RemakepirePlugin plugin) {
         this.plugin = plugin;
 
+        // Check if a blood moon is active
         (new BukkitRunnable() {
             public void run() {
-                BloodMoonManager.this.checkTimeAndMoon();
+                checkTimeAndMoon();
             }
         }).runTaskTimer(this.plugin, 0L, 20L);
+
+        // Retrieve the number of blood moons that should occur in a Minecraft 8-day week
+        (new BukkitRunnable() {
+            public void run() {
+                bloodMoonFrequency = plugin.getConfigManager().getBloodMoonFrequency();
+            }
+        }).runTaskTimer(this.plugin, 0L, 300L);
     }
 
     /**
@@ -39,13 +48,13 @@ public class BloodMoonManager {
     private void checkTimeAndMoon() {
         final long fullTime = this.plugin.getWorld().getFullTime();
         final boolean isNight = !this.plugin.getEffectManager().isDaytime(this.plugin.getWorld());
-        final boolean isFullMoon = fullTime % 192000L < 24000L;
+        final boolean isBloodMoon = bloodMoonFrequency != 0 && fullTime % (192000L / bloodMoonFrequency) < 24000L;
 
-        if (isNight && isFullMoon && !this.isBloodMoonActive) {
+        if (isNight && isBloodMoon && !this.isBloodMoonActive) {
             this.startBloodMoon(this.plugin.getWorld());
         }
 
-        if (this.isBloodMoonActive && (!isNight || !isFullMoon)) {
+        if (this.isBloodMoonActive && (!isNight || !isBloodMoon)) {
             this.endBloodMoon();
         }
     }
@@ -63,7 +72,7 @@ public class BloodMoonManager {
 
             this.vampireBuffTask = (new BukkitRunnable() {
                 public void run() {
-                    BloodMoonManager.this.applyVampireBuffs();
+                    applyVampireBuffs();
                 }
             }).runTaskTimer(this.plugin, 0L, 20L);
         }

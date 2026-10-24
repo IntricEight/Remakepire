@@ -2,14 +2,20 @@ package frostvein.sampires.remakepire.listeners;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.entity.Creeper;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Wither;
+import org.bukkit.entity.WitherSkull;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
+import org.bukkit.event.player.PlayerItemDamageEvent;
 import frostvein.sampires.remakepire.RemakepirePlugin;
 import frostvein.sampires.remakepire.managers.SessionManager;
 
@@ -35,39 +41,40 @@ public class BlockListener implements Listener {
     @EventHandler
     public void onBlockBreak(BlockBreakEvent event) {
         Player player = event.getPlayer();
+        final Material blockType = event.getBlock().getType();
 
-        if (!this.sessionManager.isSessionActive() && !this.sessionManager.isPreSession()) {
+        if (!this.sessionManager.isSessionActive() && !this.sessionManager.isPreSession() && player.getGameMode() != GameMode.CREATIVE) {
             event.setCancelled(true);
             player.sendMessage(Component.text("You cannot break blocks while the session is inactive.", NamedTextColor.RED));
+            return;
 
-        } else {
-            if (this.sessionManager.isPreSession()) {
-                Material blockType = event.getBlock().getType();
-
-                if (blockType == Material.IRON_ORE || blockType == Material.DEEPSLATE_IRON_ORE || blockType == Material.IRON_BLOCK || blockType == Material.RAW_IRON_BLOCK) {
-                    event.setCancelled(true);
-                    player.sendMessage(Component.text("You cannot mine iron while in Building Mode.", NamedTextColor.RED));
-                    return;
-                }
+        } else if (this.sessionManager.isPreSession() && player.getGameMode() != GameMode.CREATIVE) {
+            if (blockType == Material.IRON_ORE || blockType == Material.DEEPSLATE_IRON_ORE || blockType == Material.IRON_BLOCK || blockType == Material.RAW_IRON_BLOCK) {
+                event.setCancelled(true);
+                player.sendMessage(Component.text("You cannot mine iron while in Building Mode.", NamedTextColor.RED));
+                return;
             }
+        } else if (this.plugin.getBatTransformationManager().isInBatForm(player)) {
+            event.setCancelled(true);
+            player.sendMessage(Component.text("You cannot break blocks while in bat form", NamedTextColor.RED));
+            return;
 
-            if (this.plugin.getBatTransformationManager().isInBatForm(player)) {
-                event.setCancelled(true);
-                player.sendMessage(Component.text("You cannot break blocks while in bat form", NamedTextColor.RED));
+        } else if (blockType == Material.BEACON) {
+            event.setCancelled(true);
+            player.sendMessage(Component.text("You are not allowed to break beacons", NamedTextColor.RED));
+            return;
+        }
 
-            } else if (event.getBlock().getType() == Material.BEACON) {
-                event.setCancelled(true);
-                player.sendMessage(Component.text("You are not allowed to break beacons", NamedTextColor.RED));
+        if (blockType == Material.NETHERITE_BLOCK) {
+            // Stop placed silver blocks from being moved elsewhere
+            event.setDropItems(false);
+            player.sendMessage(Component.text("The block of silver breaks apart as you mine it, becoming useless.", NamedTextColor.GRAY));
 
-            } else {
-                // Stop placed silver blocks from being moved elsewhere
-                if (event.getBlock().getType() == Material.NETHERITE_BLOCK) {
-                    event.setDropItems(false);
-                }
-
-                if (event.getBlock().getType() == Material.NETHERITE_BLOCK) {
-                    player.sendMessage(Component.text("The block of silver breaks apart as you mine it, becoming useless.", NamedTextColor.GRAY));
-                }
+        } else if (blockType == Material.RAW_IRON_BLOCK || blockType == Material.IRON_DOOR || blockType == Material.IRON_TRAPDOOR) {
+            // If vampires can permanently destroy other silver blocks, stop the item from dropping and being moved elsewhere
+            if (this.plugin.getVampireManager().isRestrictedVampire(player) && this.plugin.getConfigManager().doVampiresDestroySilverDoors()) {
+                event.setDropItems(false);
+                player.sendMessage(Component.text("The silver crumbles as you mine it, becoming useless.", NamedTextColor.GRAY));
             }
         }
     }
@@ -81,46 +88,77 @@ public class BlockListener implements Listener {
     public void onBlockPlace(BlockPlaceEvent event) {
         Player player = event.getPlayer();
 
-        if (!this.sessionManager.isSessionActive() && !this.sessionManager.isPreSession()) {
+        if (!this.sessionManager.isSessionActive() && !this.sessionManager.isPreSession() && player.getGameMode() != GameMode.CREATIVE) {
             event.setCancelled(true);
             player.sendMessage(Component.text("You cannot place blocks while the session is inactive.", NamedTextColor.RED));
+            return;
 
         } else if (this.plugin.getBatTransformationManager().isInBatForm(player)) {
             event.setCancelled(true);
             player.sendMessage(Component.text("You cannot place blocks while in bat form", NamedTextColor.RED));
+            return;
+        }
 
-        } else {
-            if (event.getBlock().getLocation().distance(this.plugin.getVampireRespawnLocation()) < 3) {
-                // Prevent humans from messing with the vampire respawn location
-                if (!this.plugin.getVampireManager().isVampire(player)) {
-                    player.sendMessage(Component.text("This is desecrated ground, you find yourself unable to place blocks here.", NamedTextColor.RED));
-                    event.setCancelled(true);
-                    return;
-                }
-
-                player.sendMessage(Component.text("Warning: This is the vampire spawn point, placing blocks here may cause issues for you and your fellow thralls.", NamedTextColor.RED));
+        if (event.getBlock().getLocation().distance(this.plugin.getVampireRespawnLocation()) < 3) {
+            // Prevent humans from messing with the vampire respawn location
+            if (!this.plugin.getVampireManager().isVampire(player)) {
+                player.sendMessage(Component.text("This is desecrated ground, you find yourself unable to place blocks here.", NamedTextColor.RED));
+                event.setCancelled(true);
+                return;
             }
 
-            // Only replace iron blocks with the more resistant alternative if vampires are affected by it
-            if (event.getBlock().getType() == Material.IRON_BLOCK && plugin.getConfigManager().doSilverBlocksWeakenVampires()) {
-                event.getBlock().setType(Material.NETHERITE_BLOCK);
+            player.sendMessage(Component.text("Warning: This is the vampire spawn point, placing blocks here may cause issues for you and your fellow thralls.", NamedTextColor.RED));
+        }
+
+        // Only replace iron blocks with the more resistant alternative if vampires are affected by it
+        if (event.getBlock().getType() == Material.IRON_BLOCK && plugin.getConfigManager().doSilverBlocksWeakenVampires()) {
+            event.getBlock().setType(Material.NETHERITE_BLOCK);
+        }
+    }
+
+    /**
+     * Prevent players from breaking crops by jumping on them during inactive game sessions.
+     *
+     * @param event a block state is changed.
+     */
+    @EventHandler
+    public void onFarmlandTrample(EntityChangeBlockEvent event) {
+        if (this.plugin.getSessionManager().isOutOfSession()) {
+            // Stop players from turning farm blocks into dirt blocks outside of interaction times (active session and build mode)
+            if (event.getBlock().getType() == Material.FARMLAND && event.getTo() == Material.DIRT) {
+                event.setCancelled(true);
             }
         }
     }
 
     /**
-     * Stop creeper explosions from destroying blocks.
+     * Stop creeper and wither explosions from destroying blocks.
      *
-     * @param event a creeper explodes.
+     * @param event an entity explodes.
      */
     @EventHandler
-    public void onCreeperExplode(EntityExplodeEvent event) {
-        // Only stop the block destruction if it is from a Creeper
-        if (!(event.getEntity() instanceof Creeper)) {
+    public void onEntityExplode(EntityExplodeEvent event) {
+        final Entity entity = event.getEntity();
+
+        // Only stop the block destruction if it is from a Creeper or a Wither
+        if (!(entity instanceof Creeper || entity instanceof Wither || entity instanceof WitherSkull)) {
             return;
         }
 
         // Stop blocks from being destroyed in the explosion
         event.blockList().clear();
+    }
+
+    /**
+     * Stop items from taking damage during build mode.
+     *
+     * @param event a player's item loses durability.
+     */
+    @EventHandler
+    public void onItemDamage(PlayerItemDamageEvent event) {
+        // Prevent durability loss outside of active sessions
+        if (this.plugin.getSessionManager().isPreSession()) {
+            event.setCancelled(true);
+        }
     }
 }

@@ -29,7 +29,7 @@ public class LanternThrashTomeAbility extends TomeAbility {
      * @param plugin the host plugin object.
      */
     public LanternThrashTomeAbility(RemakepirePlugin plugin) {
-        super(plugin, "LanternThrash", new String[]{"You learn how to thrash your lantern around you in a wide circle,", "igniting the ground beneath you,", "while coating yourself in a flame resistant ichor."}, plugin.getConfigManager().getTomeLanternThrashCooldown());
+        super(plugin, "LanternThrash", "Lantern Thrash", new String[]{"You learn how to thrash your lantern around you in a wide circle,", "igniting the ground beneath you,", "while coating yourself in a flame resistant ichor."}, plugin.getConfigManager().getTomeLanternThrashCooldown());
     }
 
     protected boolean useAbility(Player player) {
@@ -37,24 +37,27 @@ public class LanternThrashTomeAbility extends TomeAbility {
             this.sendCannotUseMessage(player, "Only humans can use tome abilities!");
             return false;
 
+        } else if (plugin.getSessionManager().isOutOfSession()) {
+            this.sendCannotUseMessage(player, "This ability cannot be used outside of sessions.");
+            return false;
+
         } else if (!this.hasLanternInInventory(player)) {
             this.sendCannotUseMessage(player, "You need a regular lantern in your inventory to thrash!");
             return false;
-
-        } else {
-            final Location playerLoc = player.getLocation();
-            final double playerYaw = Math.toRadians((playerLoc.getYaw() + 90.0F));
-
-            List<Location> fireLocations = this.calculateFireLocations(playerLoc);
-            this.sortLocationsByAngle(fireLocations, playerLoc, playerYaw);
-
-            player.playSound(player.getLocation(), "minecraft:item.firecharge.use", 1.0F, 1.0F);
-            player.addPotionEffect(new PotionEffect(PotionEffectType.FIRE_RESISTANCE, FIRE_RESISTANCE_DURATION, FIRE_RESISTANCE_AMPLIFIER, false, false));
-            this.sendSuccessMessage(player, "You thrash your lantern wildly, igniting the ground around you!");
-            this.startFireSpread(player, fireLocations);
-
-            return true;
         }
+
+        final Location playerLoc = player.getLocation();
+        final double playerYaw = Math.toRadians((playerLoc.getYaw() + 90.0F));
+
+        List<Location> fireLocations = this.calculateFireLocations(playerLoc);
+        this.sortLocationsByAngle(fireLocations, playerLoc, playerYaw);
+
+        player.playSound(player.getLocation(), "minecraft:item.firecharge.use", 1.0F, 1.0F);
+        player.addPotionEffect(new PotionEffect(PotionEffectType.FIRE_RESISTANCE, FIRE_RESISTANCE_DURATION, FIRE_RESISTANCE_AMPLIFIER, false, false));
+        this.sendSuccessMessage(player, "You thrash your lantern wildly, igniting the ground around you!");
+        this.startFireSpread(player, fireLocations);
+
+        return true;
     }
 
     /**

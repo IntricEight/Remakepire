@@ -4,14 +4,18 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import io.papermc.paper.registry.RegistryAccess;
+import io.papermc.paper.registry.RegistryKey;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
+import org.bukkit.Registry;
 import org.bukkit.block.Block;
 import org.bukkit.block.Chest;
 import org.bukkit.enchantments.Enchantment;
@@ -37,18 +41,6 @@ public class TomeDistributionManager {
 
     // The tome ability books and enchantments allowed to spawn inside the chests
     private static final Set<String> ALLOWED_TOMES = new HashSet<>(BrigadierCommands.TOME_ABILITIES);
-    private static final Map<String, Enchantment> ENCHANTMENT_OPTIONS = Map.of(
-            "Efficiency", Enchantment.EFFICIENCY,
-            "FeatherFalling", Enchantment.FEATHER_FALLING,
-            "Knockback", Enchantment.KNOCKBACK,
-            "Mending", Enchantment.MENDING,
-            "Power", Enchantment.POWER,
-            "Protection", Enchantment.PROTECTION,
-            "Punch",  Enchantment.PUNCH,
-            "Respiration", Enchantment.RESPIRATION,
-            "Sharpness", Enchantment.SHARPNESS,
-            "SweepingEdge", Enchantment.SWEEPING_EDGE
-    );
 
     /**
      * Create an instance of the Armor Storage manager.
@@ -89,15 +81,20 @@ public class TomeDistributionManager {
      * @return A {@code Enchantment[]} of enchantments that should be spawned inside tome chests.
      */
     private Enchantment[] loadEnchantmentBookOptions() {
-        List<String> options = this.configManager.getTomeEnchantmentOptions();
+        Registry<Enchantment> enchantmentRegistry = RegistryAccess.registryAccess().getRegistry(RegistryKey.ENCHANTMENT);
+        final List<String> options = this.configManager.getTomeEnchantmentOptions();
+        List<Enchantment> books = new ArrayList<>();
 
-        // Add each enchantment book to the list if it is found within the provided config list
-        List<Enchantment> books = options.stream().map(tome -> ENCHANTMENT_OPTIONS.entrySet().stream()
-                        .filter(entry -> entry.getKey().equalsIgnoreCase(tome))
-                        .map(Map.Entry::getValue)
-                        .findFirst()
-                        .orElse(null))
-                .toList();
+        // Filter in the valid enchantment book types
+        for (String enchantmentName : options) {
+            Enchantment enchantment = enchantmentRegistry.get(NamespacedKey.minecraft(enchantmentName));
+
+            if (enchantment != null) {
+                books.add(enchantment);
+            } else {
+                this.plugin.getLogger().warning("Invalid enchantment name in config: " + enchantmentName);
+            }
+        }
 
         return books.toArray(new Enchantment[0]);
     }
@@ -228,7 +225,7 @@ public class TomeDistributionManager {
         }
 
         Chest chest = (Chest)block.getState();
-        chest.getInventory().addItem(this.createTomeItem(tomeType));
+        chest.getInventory().addItem(this.createTomeItem(tomeType, 1));
 
         this.plugin.logInfo("TomeDistributionManager: Added " + tomeType + " tome to chest at " + ConversionAssistant.locationToString(location));
     }
@@ -239,8 +236,19 @@ public class TomeDistributionManager {
      * @param tomeType the tome ability name.
      * @return A book that will grant a human player the tome ability when used.
      */
-    private ItemStack createTomeItem(String tomeType) {
-        ItemStack tome = new ItemStack(Material.WRITTEN_BOOK);
+    public ItemStack createTomeItem(String tomeType) {
+        return this.createTomeItem(tomeType, 1);
+    }
+
+    /**
+     * Create the tome ability book for the tome ability.
+     *
+     * @param tomeType the tome ability name.
+     * @param amount the number of tome books to create.
+     * @return A book that will grant a human player the tome ability when used.
+     */
+    public ItemStack createTomeItem(String tomeType, int amount) {
+        ItemStack tome = new ItemStack(Material.WRITTEN_BOOK, amount);
         BookMeta bookMeta = (BookMeta)tome.getItemMeta();
 
         if (bookMeta != null) {
@@ -249,36 +257,46 @@ public class TomeDistributionManager {
             TomeAbility ability = this.plugin.getTomeManager().getAbility(tomeType);
 
             if (ability != null) {
-                List<String> lore = new ArrayList<>();
+                List<Component> lore = new ArrayList<>();
                 String[] descriptionLines = ability.getDescriptionLines();
 
                 for (String line : descriptionLines) {
-                    lore.add("§7" + line);
+                    lore.add(Component.text(line, NamedTextColor.GRAY)
+                            .decoration(TextDecoration.ITALIC, false));
                 }
 
-                lore.add("");
-                lore.add("§eRight-click with this tome in hand to learn its secrets");
-                bookMeta.setLore(lore);
+                lore.add(Component.empty());
+                lore.add(Component.text("Right-click with this tome in hand to learn its secrets", NamedTextColor.YELLOW)
+                                .decoration(TextDecoration.ITALIC, false));
+
+                bookMeta.lore(lore);
             }
 
-            List<String> pages = new ArrayList<>();
-            StringBuilder pageContent = new StringBuilder();
-            pageContent.append("§5§lANCIENT KNOWLEDGE§r\n\n");
-            pageContent.append("§8The secrets of ").append(tomeType).append(" are contained within these pages.\n\n");
+            Component pages = Component.text("ANCIENT KNOWLEDGE", NamedTextColor.DARK_PURPLE)
+                    .decorate(TextDecoration.BOLD)
+                    .append(Component.newline())
+                    .append(Component.newline())
+                    .append(Component.text("The secrets of " + this.plugin.getTomeManager().getAbility(tomeType).getDisplayName() + " are contained within these pages.", NamedTextColor.DARK_GRAY)
+                            .decoration(TextDecoration.BOLD, false)
+                    )
+                    .append(Component.newline())
+                    .append(Component.newline());
 
             if (ability != null) {
                 String[] descriptionLines = ability.getDescriptionLines();
 
                 for (String line : descriptionLines) {
-                    pageContent.append("§7").append(line).append("\n");
+                    pages = pages.append(Component.text(line, NamedTextColor.GRAY))
+                            .append(Component.newline());
                 }
             } else {
-                pageContent.append("§7No description available\n");
+                pages = pages.append(Component.text("No description available", NamedTextColor.GRAY))
+                        .append(Component.newline());
             }
 
-            pageContent.append("\n§6Use this knowledge wisely, for it comes with great responsibility.");
-            pages.add(pageContent.toString());
-            bookMeta.setPages(pages);
+            pages = pages.append(Component.newline())
+                    .append(Component.text("Use this knowledge wisely, for it comes with great responsibility.", NamedTextColor.GOLD));
+            bookMeta.pages(pages);
             tome.setItemMeta(bookMeta);
         }
 
@@ -295,8 +313,10 @@ public class TomeDistributionManager {
         EnchantmentStorageMeta meta = (EnchantmentStorageMeta)enchantedBook.getItemMeta();
 
         if (meta != null) {
-            Enchantment randomEnchantment = this.enchantmentTypes[this.random.nextInt(this.enchantmentTypes.length)];
+            // Enchantment books are prevented from spawning above this level within VampireSMP
             final int level = 1;
+
+            Enchantment randomEnchantment = this.enchantmentTypes[this.random.nextInt(this.enchantmentTypes.length)];
             meta.addStoredEnchant(randomEnchantment, level, true);
             enchantedBook.setItemMeta(meta);
         }

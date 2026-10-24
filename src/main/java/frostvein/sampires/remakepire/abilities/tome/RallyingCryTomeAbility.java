@@ -22,48 +22,47 @@ public class RallyingCryTomeAbility extends TomeAbility {
      * @param plugin the host plugin object.
      */
     public RallyingCryTomeAbility(RemakepirePlugin plugin) {
-        super(plugin, "RallyingCry", new String[]{"You learn the secrets needed to inspire man.", "At your word, you and humans around you", "gain strength for " + (STRENGTH_DURATION / 20) + " seconds."}, plugin.getConfigManager().getTomeRallyingCryCooldown());
+        super(plugin, "RallyingCry", "Rallying Cry", new String[]{"You learn the secrets needed to inspire man.", "At your word, you and humans around you", "gain strength for " + (STRENGTH_DURATION / 20) + " seconds."}, plugin.getConfigManager().getTomeRallyingCryCooldown());
     }
 
     protected boolean useAbility(Player player) {
         if (!this.canUse(player)) {
             this.sendCannotUseMessage(player, "Only humans can use tome abilities!");
             return false;
-
-        } else {
-            boolean othersAffected = false;
-
-            // Give the caster the strength effect
-            player.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH, STRENGTH_DURATION, STRENGTH_AMPLIFIER, false, false));
-
-            List<Player> nearbyHumans = player.getNearbyEntities(EFFECT_RADIUS, EFFECT_RADIUS, EFFECT_RADIUS).stream().
-                    filter((entity) -> entity instanceof Player).map((entity) -> (Player)entity).filter((nearbyPlayer) -> this.plugin.getVampireManager().isHuman(nearbyPlayer)).toList();
-            List<Player> nearbyVampires = player.getNearbyEntities(EFFECT_RADIUS, EFFECT_RADIUS, EFFECT_RADIUS).stream()
-                    .filter((entity) -> entity instanceof Player).map((entity) -> (Player)entity).filter((nearbyPlayer) -> !this.plugin.getVampireManager().isHuman(nearbyPlayer)).toList();
-
-            // Give nearby humans the strength effect
-            for (Player nearbyHuman : nearbyHumans) {
-                nearbyHuman.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH, STRENGTH_DURATION, STRENGTH_AMPLIFIER, false, false));
-                nearbyHuman.sendMessage(Component.text(player.getName() + "'s rallying cry fills you with strength.", NamedTextColor.GOLD));
-                othersAffected = true;
-            }
-
-            // Inform nearby vampires of their inhumanity
-            for (Player nearbyVampire : nearbyVampires) {
-                nearbyVampire.sendMessage(Component.text("A human nearby rallies strength to their comrades. The words find no purchase in your cold dead heart.", NamedTextColor.GRAY));
-            }
-
-            // Play a sound to show the ability's activation
-            this.plugin.getWorld().playSound(player.getLocation(), "minecraft:entity.pillager.celebrate", 1.0F, 1.0F);
-
-            // Inform the human on whether they buffed any allies near them
-            if (othersAffected) {
-                this.sendSuccessMessage(player, "Your rallying cry inspires those around you!");
-            } else {
-                this.sendSuccessMessage(player, "Your rallying cry echoes around you!");
-            }
-
-            return true;
         }
+
+        boolean othersAffected = false;
+
+        // Give the caster the strength effect
+        player.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH, STRENGTH_DURATION, STRENGTH_AMPLIFIER, false, false));
+
+        List<Player> nearbyHumans = player.getNearbyEntities(EFFECT_RADIUS, EFFECT_RADIUS, EFFECT_RADIUS).stream().
+                filter((entity) -> entity instanceof Player).map((entity) -> (Player)entity).filter((nearbyPlayer) -> this.plugin.getVampireManager().isHuman(nearbyPlayer)).toList();
+        List<Player> nearbyVampires = player.getNearbyEntities(EFFECT_RADIUS, EFFECT_RADIUS, EFFECT_RADIUS).stream()
+                .filter((entity) -> entity instanceof Player).map((entity) -> (Player)entity).filter((nearbyPlayer) -> !this.plugin.getVampireManager().isHuman(nearbyPlayer)).toList();
+
+        // Give nearby humans the strength effect
+        for (Player nearbyHuman : nearbyHumans) {
+            nearbyHuman.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH, STRENGTH_DURATION, STRENGTH_AMPLIFIER, false, false));
+            nearbyHuman.sendMessage(Component.text(player.getName() + "'s rallying cry fills you with strength.", NamedTextColor.GOLD));
+            othersAffected = true;
+        }
+
+        // Inform nearby vampires of their inhumanity
+        for (Player nearbyVampire : nearbyVampires) {
+            nearbyVampire.sendMessage(Component.text("A human nearby rallies strength to their comrades. The words find no purchase in your cold dead heart.", NamedTextColor.GRAY));
+        }
+
+        // Play a sound to show the ability's activation
+        this.plugin.getWorld().playSound(player.getLocation(), "minecraft:entity.pillager.celebrate", 1.0F, 1.0F);
+
+        // Inform the human on whether they buffed any allies near them
+        if (othersAffected) {
+            this.sendSuccessMessage(player, "Your rallying cry inspires those around you!");
+        } else {
+            this.sendSuccessMessage(player, "Your rallying cry echoes around you!");
+        }
+
+        return true;
     }
 }

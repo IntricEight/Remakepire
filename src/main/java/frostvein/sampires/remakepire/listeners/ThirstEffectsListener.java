@@ -154,16 +154,16 @@ public class ThirstEffectsListener implements Listener {
     private void scheduleVampireHealthCheck() {
         (new BukkitRunnable() {
             public void run() {
-                if (!ThirstEffectsListener.this.plugin.getSessionManager().isSessionActive()) {
-                    ThirstEffectsListener.this.scheduleVampireHealthCheck();
+                if (!plugin.getSessionManager().isSessionActive()) {
+                    scheduleVampireHealthCheck();
                 } else {
-                    for (Player player : ThirstEffectsListener.this.plugin.getServer().getOnlinePlayers()) {
-                        if (ThirstEffectsListener.this.vampireManager.isVampire(player)) {
-                            ThirstEffectsListener.this.processVampireFoodRegeneration(player);
+                    for (Player player : plugin.getServer().getOnlinePlayers()) {
+                        if (vampireManager.isVampire(player)) {
+                            processVampireFoodRegeneration(player);
                         }
                     }
 
-                    ThirstEffectsListener.this.scheduleVampireHealthCheck();
+                    scheduleVampireHealthCheck();
                 }
             }
         }).runTaskLater(this.plugin, this.plugin.getConfigManager().getVampireHealthCheckTicks());

@@ -45,31 +45,31 @@ public class ExperienceBottleListener implements Listener {
                 if (action == Action.RIGHT_CLICK_AIR || action == Action.RIGHT_CLICK_BLOCK) {
                     if (this.vampireManager.isHuman(player)) {
                         event.setCancelled(true);
-                        player.sendMessage(Component.text("You recoil at the sight of thick crimson blood rolling across the inside of the bottle... Who would collect something like this?", NamedTextColor.RED));
+                        player.sendMessage(Component.text("You recoil at the sight of thick crimson blood rolling across the inside of the bottle... The thought of drinking it makes your stomach churn", NamedTextColor.RED));
+                        return;
+                    }
 
-                    } else {
-                        event.setCancelled(true);
-                        PlayerInventory inventory = player.getInventory();
-                        ItemStack heldItem = inventory.getItemInMainHand();
+                    event.setCancelled(true);
+                    PlayerInventory inventory = player.getInventory();
+                    ItemStack heldItem = inventory.getItemInMainHand();
 
-                        if (ItemTypeChecking.isBloodBottle(heldItem.getType())) {
-                            if (heldItem.getAmount() > 1) {
-                                heldItem.setAmount(heldItem.getAmount() - 1);
-                            } else {
-                                inventory.setItemInMainHand(new ItemStack(Material.AIR));
-                            }
-
-                            ItemStack glassBottle = new ItemStack(Material.GLASS_BOTTLE, 1);
-                            if (inventory.firstEmpty() != -1) {
-                                inventory.addItem(glassBottle);
-                            } else {
-                                player.getWorld().dropItemNaturally(player.getLocation(), glassBottle);
-                            }
-
-                            final int experienceGained = 8;
-                            this.plugin.getThirstManager().quenchThirst(player, experienceGained);
-                            player.sendActionBar(Component.text("You drain the essence from the bottle, satisfying your vampiric thirst...", NamedTextColor.RED));
+                    if (ItemTypeChecking.isBloodBottle(heldItem.getType())) {
+                        if (heldItem.getAmount() > 1) {
+                            heldItem.setAmount(heldItem.getAmount() - 1);
+                        } else {
+                            inventory.setItemInMainHand(new ItemStack(Material.AIR));
                         }
+
+                        ItemStack glassBottle = new ItemStack(Material.GLASS_BOTTLE, 1);
+                        if (inventory.firstEmpty() != -1) {
+                            inventory.addItem(glassBottle);
+                        } else {
+                            player.getWorld().dropItemNaturally(player.getLocation(), glassBottle);
+                        }
+
+                        final int experienceGained = 8;
+                        this.plugin.getThirstManager().quenchThirst(player, experienceGained);
+                        player.sendActionBar(Component.text("You drain the essence from the bottle, satisfying your vampiric thirst...", NamedTextColor.RED));
                     }
                 }
             }

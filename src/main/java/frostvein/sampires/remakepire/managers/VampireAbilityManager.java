@@ -85,6 +85,7 @@ public class VampireAbilityManager {
             }
 
             this.plugin.logInfo("Created ability cooldown persistence files");
+
         } catch (IOException e) {
             this.plugin.getLogger().severe("Failed to create ability cooldown files: " + e.getMessage());
             e.printStackTrace();
@@ -121,8 +122,8 @@ public class VampireAbilityManager {
     private void startCooldownTask() {
         this.cooldownTask = (new BukkitRunnable() {
             public void run() {
-                VampireAbilityManager.this.checkCooldownExpirations();
-                VampireAbilityManager.this.checkGlobalCooldownExpirations();
+                checkCooldownExpirations();
+                checkGlobalCooldownExpirations();
             }
         }).runTaskTimer(this.plugin, 20L, 20L);
     }
@@ -132,7 +133,7 @@ public class VampireAbilityManager {
      * Notify vampires when their ability's cooldown has elapsed.
      */
     private void checkCooldownExpirations() {
-        long currentTime = this.sessionManager.getSessionTimeSeconds();
+        final long currentTime = this.sessionManager.getSessionTimeSeconds();
 
         for (UUID playerId : this.abilityCooldowns.keySet()) {
             Player player = Bukkit.getPlayer(playerId);
@@ -143,8 +144,8 @@ public class VampireAbilityManager {
 
                 while(iterator.hasNext()) {
                     Map.Entry<String, Long> entry = iterator.next();
-                    String abilityName = entry.getKey();
-                    long cooldownEnd = entry.getValue();
+                    final String abilityName = entry.getKey();
+                    final long cooldownEnd = entry.getValue();
 
                     if (currentTime >= cooldownEnd) {
                         iterator.remove();
@@ -267,13 +268,12 @@ public class VampireAbilityManager {
                 } else {
                     if (ability instanceof StormCallAbility) {
                         if (this.isOnGlobalCooldown(abilityName)) {
-                            final long remainingSeconds = this.getRemainingGlobalCooldown(abilityName);
                             GlobalCooldownData data = this.globalCooldowns.get(abilityName.toLowerCase());
 
                             player.sendMessage(Component.text(" GLOBAL ABILITY COOLDOWN", NamedTextColor.RED)
                                     .decorate(TextDecoration.BOLD));
                             player.sendMessage(Component.text(ability.getDisplayName() + " was recently used by " + data.lastUserName + ".", NamedTextColor.RED));
-                            player.sendMessage(Component.text("It will be available to all vampires in " + formatTime(remainingSeconds) + ".", NamedTextColor.RED));
+                            player.sendMessage(Component.text("It will be available to all vampires in " + formatTime(this.getRemainingGlobalCooldown(abilityName)) + ".", NamedTextColor.RED));
 
                             return false;
                         }
@@ -287,10 +287,9 @@ public class VampireAbilityManager {
                         }
 
                         if (this.isOnCooldown(player, abilityName)) {
-                            long remainingSeconds = this.getRemainingCooldown(player, abilityName);
                             player.sendMessage(Component.text(" ABILITY ON COOLDOWN", NamedTextColor.RED)
                                     .decorate(TextDecoration.BOLD));
-                            player.sendMessage(Component.text(ability.getDisplayName() + " will be ready in " + formatTime(remainingSeconds) + ".", NamedTextColor.RED));
+                            player.sendMessage(Component.text(ability.getDisplayName() + " will be ready in " + formatTime(this.getRemainingCooldown(player, abilityName)) + ".", NamedTextColor.RED));
                             return false;
                         }
                     }
@@ -354,20 +353,20 @@ public class VampireAbilityManager {
      * @return {@code true} if the ability is on cooldown.
      */
     public boolean isOnCooldown(Player player, String abilityName) {
-        UUID playerId = player.getUniqueId();
+        final UUID playerId = player.getUniqueId();
         Map<String, Long> playerCooldowns = this.abilityCooldowns.get(playerId);
 
         if (playerCooldowns == null) {
             return false;
 
         } else {
-            Long cooldownEnd = playerCooldowns.get(abilityName.toLowerCase());
+            final Long cooldownEnd = playerCooldowns.get(abilityName.toLowerCase());
 
             if (cooldownEnd == null) {
                 return false;
 
             } else {
-                long currentTime = this.sessionManager.getSessionTimeSeconds();
+                final long currentTime = this.sessionManager.getSessionTimeSeconds();
                 return currentTime < cooldownEnd;
             }
         }
@@ -398,20 +397,20 @@ public class VampireAbilityManager {
      * @return The remaining seconds until the cooldown has elapsed.
      */
     public long getRemainingCooldown(Player player, String abilityName) {
-        UUID playerId = player.getUniqueId();
+        final UUID playerId = player.getUniqueId();
         Map<String, Long> playerCooldowns = this.abilityCooldowns.get(playerId);
 
         if (playerCooldowns == null) {
             return 0L;
 
         } else {
-            Long cooldownEnd = playerCooldowns.get(abilityName.toLowerCase());
+            final Long cooldownEnd = playerCooldowns.get(abilityName.toLowerCase());
 
             if (cooldownEnd == null) {
                 return 0L;
 
             } else {
-                long currentTime = this.sessionManager.getSessionTimeSeconds();
+                final long currentTime = this.sessionManager.getSessionTimeSeconds();
                 return Math.max(0L, cooldownEnd - currentTime);
             }
         }
@@ -443,8 +442,8 @@ public class VampireAbilityManager {
      * @param cooldownSeconds the time until the player can use the ability again.
      */
     private void setCooldown(Player player, String abilityName, int cooldownSeconds) {
-        UUID playerId = player.getUniqueId();
-        long cooldownEnd = this.sessionManager.getSessionTimeSeconds() + (long)cooldownSeconds;
+        final UUID playerId = player.getUniqueId();
+        final long cooldownEnd = this.sessionManager.getSessionTimeSeconds() + (long)cooldownSeconds;
         (this.abilityCooldowns.computeIfAbsent(playerId, k -> new HashMap<>())).put(abilityName.toLowerCase(), cooldownEnd);
     }
 
@@ -467,11 +466,11 @@ public class VampireAbilityManager {
      * @param player the player with active cooldowns.
      */
     public void clearAllCooldowns(Player player) {
-        UUID playerId = player.getUniqueId();
+        final UUID playerId = player.getUniqueId();
         Map<String, Long> playerCooldowns = this.abilityCooldowns.get(playerId);
 
         if (playerCooldowns != null) {
-            int clearedCount = playerCooldowns.size();
+            final int clearedCount = playerCooldowns.size();
             playerCooldowns.clear();
             this.abilityCooldowns.remove(playerId);
             this.plugin.logInfo("Cleared " + clearedCount + " personal cooldowns for player: " + player.getName());
@@ -485,7 +484,7 @@ public class VampireAbilityManager {
      */
     public void clearGlobalCooldowns() {
         if (!this.globalCooldowns.isEmpty()) {
-            int clearedCount = this.globalCooldowns.size();
+            final int clearedCount = this.globalCooldowns.size();
             List<String> clearedAbilities = new ArrayList<>(this.globalCooldowns.keySet());
             this.globalCooldowns.clear();
             this.plugin.logInfo("Cleared " + clearedCount + " global cooldowns for abilities: " + String.join(", ", clearedAbilities));
@@ -730,12 +729,13 @@ public class VampireAbilityManager {
      * @return {@code true} if the player's invisibility has been removed.
      */
     public boolean trackInvisibilityAttack(Player player) {
-        UUID playerId = player.getUniqueId();
-        int attackCount = this.invisibilityAttackCounts.getOrDefault(playerId, 0) + 1;
+        final UUID playerId = player.getUniqueId();
+        final int attackCount = this.invisibilityAttackCounts.getOrDefault(playerId, 0) + 1;
 
         if (attackCount >= 3) {
             this.invisibilityAttackCounts.remove(playerId);
             return true;
+
         } else {
             this.invisibilityAttackCounts.put(playerId, attackCount);
             return false;

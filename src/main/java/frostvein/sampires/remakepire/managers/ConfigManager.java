@@ -27,6 +27,42 @@ public class ConfigManager {
     }
 
     /**
+     * Retrieve the URL of the human's texture pack download location.
+     *
+     * @return A URL of a location that downloads a ZIP file.
+     */
+    public String getHumanTexturePackUrl() {
+        return this.plugin.getConfig().getString("human-texture-pack.url", "https://download.mc-packs.net/pack/4e42367081530cc073b612d9772a18daca7c0df9.zip");
+    }
+
+    /**
+     * Retrieve the SHA1 code of the human's texture pack.
+     *
+     * @return A code that should match that of the texture pack retrieved from the URL.
+     */
+    public String getHumanTexturePackSha1() {
+        return this.plugin.getConfig().getString("human-texture-pack.sha1", "4e42367081530cc073b612d9772a18daca7c0df9");
+    }
+
+    /**
+     * Retrieve the URL of the vampire's texture pack download location.
+     *
+     * @return A URL of a location that downloads a ZIP file.
+     */
+    public String getVampireTexturePackUrl() {
+        return this.plugin.getConfig().getString("vampire-texture-pack.url", "https://download.mc-packs.net/pack/e139890dd34f56724efcd5becb476999651ca43c.zip");
+    }
+
+    /**
+     * Retrieve the SHA1 code of the vampire's texture pack.
+     *
+     * @return A code that should match that of the texture pack retrieved from the URL.
+     */
+    public String getVampireTexturePackSha1() {
+        return this.plugin.getConfig().getString("vampire-texture-pack.sha1", "e139890dd34f56724efcd5becb476999651ca43c");
+    }
+
+    /**
      * Retrieve the locations of all the tome chests from the config.
      *
      * @return A {@code List} of chest {@code Locations}.
@@ -38,24 +74,24 @@ public class ConfigManager {
 
         if (world == null) {
             this.plugin.getLogger().severe("World '" + RemakepirePlugin.WORLD_NAME + "' not found! Cannot load tome chest locations.");
+            return locations;
+        }
 
-        } else {
-            for (String locString : locationStrings) {
-                try {
-                    String[] parts = locString.split(",");
+        for (String locString : locationStrings) {
+            try {
+                String[] parts = locString.split(",");
 
-                    if (parts.length == 3) {
-                        int x = Integer.parseInt(parts[0].trim());
-                        int y = Integer.parseInt(parts[1].trim());
-                        int z = Integer.parseInt(parts[2].trim());
+                if (parts.length == 3) {
+                    final int x = Integer.parseInt(parts[0].trim());
+                    final int y = Integer.parseInt(parts[1].trim());
+                    final int z = Integer.parseInt(parts[2].trim());
 
-                        locations.add(new Location(world, x, y, z));
-                    }
-                } catch (NumberFormatException e) {
-                    this.plugin.getLogger().warning("Invalid tome chest location format: " + locString);
+                    locations.add(new Location(world, x, y, z));
                 }
+            } catch (NumberFormatException e) {
+                this.plugin.getLogger().warning("Invalid tome chest location format: " + locString);
+                e.printStackTrace();
             }
-
         }
 
         return locations;
@@ -73,13 +109,13 @@ public class ConfigManager {
 
         if (locations.contains(locationString)) {
             return false;
-
-        } else {
-            locations.add(locationString);
-            this.plugin.getConfig().set("tome-chests.locations", locations);
-            this.saveConfig();
-            return true;
         }
+
+        locations.add(locationString);
+        this.plugin.getConfig().set("tome-chests.locations", locations);
+        this.saveConfig();
+
+        return true;
     }
 
     /**
@@ -94,19 +130,19 @@ public class ConfigManager {
 
         if (!locations.contains(locationString)) {
             return false;
-
-        } else {
-            locations.remove(locationString);
-            this.plugin.getConfig().set("tome-chests.locations", locations);
-            this.saveConfig();
-            return true;
         }
+
+        locations.remove(locationString);
+        this.plugin.getConfig().set("tome-chests.locations", locations);
+        this.saveConfig();
+
+        return true;
     }
 
     /**
      * Retrieve the cooldown on the vampire ability Bat Transformation.
      *
-     * @return the seconds between ability uses.
+     * @return The seconds between ability uses.
      */
     public int getVampireBatCooldown() {
         return this.plugin.getConfig().getInt("abilities.vampire.bat-cooldown", 900);
@@ -115,7 +151,7 @@ public class ConfigManager {
     /**
      * Retrieve the cooldown on the vampire ability Vampiric Lunge.
      *
-     * @return the seconds between ability uses.
+     * @return The seconds between ability uses.
      */
     public int getVampireLungeCooldown() {
         return this.plugin.getConfig().getInt("abilities.vampire.lunge-cooldown", 45);
@@ -124,7 +160,7 @@ public class ConfigManager {
     /**
      * Retrieve the cooldown on the vampire ability Vampiric Vanish.
      *
-     * @return the seconds between ability uses.
+     * @return The seconds between ability uses.
      */
     public int getVampireVanishCooldown() {
         return this.plugin.getConfig().getInt("abilities.vampire.vanish-cooldown", 420);
@@ -133,7 +169,7 @@ public class ConfigManager {
     /**
      * Retrieve the cooldown on the vampire ability Storm Call.
      *
-     * @return the seconds between ability uses.
+     * @return The seconds between ability uses.
      */
     public int getVampireStormCallCooldown() {
         return this.plugin.getConfig().getInt("abilities.vampire.storm-call-cooldown", 7200);
@@ -142,7 +178,7 @@ public class ConfigManager {
     /**
      * Retrieve the cooldown on the vampire ability Beacon Teleport.
      *
-     * @return the seconds between ability uses.
+     * @return The seconds between ability uses.
      */
     public int getVampireBeaconTeleportCooldown() {
         return this.plugin.getConfig().getInt("abilities.vampire.beacon-teleport-cooldown", 300);
@@ -151,7 +187,7 @@ public class ConfigManager {
     /**
      * Retrieve the cooldown on the vampire ability Vampire Vision.
      *
-     * @return the seconds between ability uses.
+     * @return The seconds between ability uses.
      */
     public int getVampireVisionCooldown() {
         return this.plugin.getConfig().getInt("abilities.vampire.vampire-vision-cooldown", 1);
@@ -160,7 +196,7 @@ public class ConfigManager {
     /**
      * Retrieve the cooldown on the tome ability Blessing.
      *
-     * @return the seconds between ability uses.
+     * @return The seconds between ability uses.
      */
     public int getTomeBlessingCooldown() {
         return this.plugin.getConfig().getInt("abilities.tome.blessing-cooldown", 7200);
@@ -169,7 +205,7 @@ public class ConfigManager {
     /**
      * Retrieve the cooldown on the tome ability Banish Undead.
      *
-     * @return the seconds between ability uses.
+     * @return The seconds between ability uses.
      */
     public int getTomeBanishUndeadCooldown() {
         return this.plugin.getConfig().getInt("abilities.tome.banish-undead-cooldown", 900);
@@ -178,7 +214,7 @@ public class ConfigManager {
     /**
      * Retrieve the cooldown on the tome ability Holy Word.
      *
-     * @return the seconds between ability uses.
+     * @return The seconds between ability uses.
      */
     public int getTomeHolyWordCooldown() {
         return this.plugin.getConfig().getInt("abilities.tome.holy-word-cooldown", 600);
@@ -187,7 +223,7 @@ public class ConfigManager {
     /**
      * Retrieve the cooldown on the tome ability Enlightened Eye.
      *
-     * @return the seconds between ability uses.
+     * @return The seconds between ability uses.
      */
     public int getTomeEnlightenedEyeCooldown() {
         return this.plugin.getConfig().getInt("abilities.tome.enlightened-eye-cooldown", 900);
@@ -196,7 +232,7 @@ public class ConfigManager {
     /**
      * Retrieve the cooldown on the tome ability Lantern Thrash.
      *
-     * @return the seconds between ability uses.
+     * @return The seconds between ability uses.
      */
     public int getTomeLanternThrashCooldown() {
         return this.plugin.getConfig().getInt("abilities.tome.lantern-thrash-cooldown", 300);
@@ -205,7 +241,7 @@ public class ConfigManager {
     /**
      * Retrieve the cooldown on the tome ability Prayer of Faith.
      *
-     * @return the seconds between ability uses.
+     * @return The seconds between ability uses.
      */
     public int getTomePrayerOfFaithCooldown() {
         return this.plugin.getConfig().getInt("abilities.tome.prayer-of-faith-cooldown", 900);
@@ -214,7 +250,7 @@ public class ConfigManager {
     /**
      * Retrieve the cooldown on the tome ability Rallying Cry.
      *
-     * @return the seconds between ability uses.
+     * @return The seconds between ability uses.
      */
     public int getTomeRallyingCryCooldown() {
         return this.plugin.getConfig().getInt("abilities.tome.rallying-cry-cooldown", 1200);
@@ -223,7 +259,7 @@ public class ConfigManager {
     /**
      * Retrieve the cooldown on the tome ability Shoulder Barge.
      *
-     * @return the seconds between ability uses.
+     * @return The seconds between ability uses.
      */
     public int getTomeShoulderBargeCooldown() {
         return this.plugin.getConfig().getInt("abilities.tome.shoulder-barge-cooldown", 300);
@@ -232,7 +268,7 @@ public class ConfigManager {
     /**
      * Retrieve the cooldown on the tome ability Turn Undead.
      *
-     * @return the seconds between ability uses.
+     * @return The seconds between ability uses.
      */
     public int getTomeTurnUndeadCooldown() {
         return this.plugin.getConfig().getInt("abilities.tome.turn-undead-cooldown", 1800);
@@ -242,7 +278,7 @@ public class ConfigManager {
     /**
      * Retrieve the cooldown on the tome ability Uncanny Direction.
      *
-     * @return the seconds between ability uses.
+     * @return The seconds between ability uses.
      */
     public int getTomeUncannyDirectionCooldown() {
         return this.plugin.getConfig().getInt("abilities.tome.uncanny-direction-cooldown", 30);
@@ -252,7 +288,7 @@ public class ConfigManager {
     /**
      * Retrieve the cooldown on the tome ability Unnatural Haste.
      *
-     * @return the seconds between ability uses.
+     * @return The seconds between ability uses.
      */
     public int getTomeUnnaturalHasteCooldown() {
         return this.plugin.getConfig().getInt("abilities.tome.unnatural-haste-cooldown", 900);
@@ -261,7 +297,7 @@ public class ConfigManager {
     /**
      * Retrieve the cooldown on the tome ability Way of the Land.
      *
-     * @return the seconds between ability uses.
+     * @return The seconds between ability uses.
      */
     public int getTomeWayOfTheLandCooldown() {
         return this.plugin.getConfig().getInt("abilities.tome.way-of-the-land-cooldown", 600);
@@ -270,7 +306,7 @@ public class ConfigManager {
     /**
      * Retrieve the cooldown on the tome ability Way of the Lumberjack.
      *
-     * @return the seconds between ability uses.
+     * @return The seconds between ability uses.
      */
     public int getTomeWayOfTheLumberjackCooldown() {
         return this.plugin.getConfig().getInt("abilities.tome.way-of-the-lumberjack-cooldown", 600);
@@ -279,7 +315,7 @@ public class ConfigManager {
     /**
      * Retrieve the cooldown on the tome ability Way of the Prospector.
      *
-     * @return the seconds between ability uses.
+     * @return The seconds between ability uses.
      */
     public int getTomeWayOfTheProspectorCooldown() {
         return this.plugin.getConfig().getInt("abilities.tome.way-of-the-prospector-cooldown", 600);
@@ -288,7 +324,7 @@ public class ConfigManager {
     /**
      * Retrieve the cooldown on the tome ability Stop the Bleeding.
      *
-     * @return the seconds between ability uses.
+     * @return The seconds between ability uses.
      */
     public int getTomeStopTheBleedingCooldown() {
         return this.plugin.getConfig().getInt("abilities.tome.stop-the-bleeding-cooldown", 7200);
@@ -297,7 +333,7 @@ public class ConfigManager {
     /**
      * Retrieve how many tome chests should contain tome ability books.
      *
-     * @return the number of tome chests.
+     * @return The number of tome chests.
      */
     public int getAbilityDistributionCount() {
         return this.plugin.getConfig().getInt("tome-chests.ability-book-count", 4);
@@ -313,12 +349,14 @@ public class ConfigManager {
     }
 
     /**
-     * Retrieve the enchantments whose books are allowed to appear inside tome chests.
+     * Retrieve the enchantment names whose books are allowed to appear inside tome chests.
      *
-     * @return A list of item enchantment names.
+     * @return A list of item enchantment names. All names are trimmed and set to lowercase.
      */
     public List<String> getTomeEnchantmentOptions() {
-        return this.plugin.getConfig().getStringList("tome-chests.enchantment-options");
+        List<String> options = this.plugin.getConfig().getStringList("tome-chests.enchantment-options");
+        options.replaceAll(option -> option.trim().toLowerCase());
+        return options;
     }
 
     /**
@@ -353,7 +391,7 @@ public class ConfigManager {
     /**
      * Retrieve the cooldown time between when a human can gain new tome abilities.
      *
-     * @return the minutes between tome absorptions.
+     * @return The minutes between tome absorptions.
      */
     public int getTomeAbsorptionIntervalMinutes() {
         return this.plugin.getConfig().getInt("tome-absorption.tome-absorption-interval-minutes", 120);
@@ -362,7 +400,7 @@ public class ConfigManager {
     /**
      * Retrieve the time it takes for a vampire's thirst bar to fully deplete.
      *
-     * @return the minutes it takes to run out of blood.
+     * @return The minutes it takes to run out of blood.
      */
     public int getThirstDepletionMinutes() {
         return this.plugin.getConfig().getInt("thirst.depletion-minutes", 120);
@@ -371,10 +409,19 @@ public class ConfigManager {
     /**
      * Retrieve the maximum amount of blood a vampire can drain through drinking.
      *
-     * @return the points of blood that each vampire can gain.
+     * @return The points of blood that each vampire can gain.
      */
     public int getMaxFeedingThirstPerSession() {
         return this.plugin.getConfig().getInt("thirst.max-feeding-per-session", 60);
+    }
+
+    /**
+     * Retrieve the number of blood moons in a complete moon cycle
+     *
+     * @return How many nights in a moon cycle should trigger blood moons.
+     */
+    public int getBloodMoonFrequency() {
+        return Integer.max(0, Integer.min(this.plugin.getConfig().getInt("vampire.blood-moon-frequency", 1), 8));
     }
 
     /**
@@ -418,7 +465,7 @@ public class ConfigManager {
     /**
      * Retrieve the baseline complete beacon conversion time for a single player.
      *
-     * @return the milliseconds it takes to convert a beacon from one side's alignment into the others.
+     * @return The milliseconds it takes to convert a beacon from one side's alignment into the others.
      */
     public long getBeaconConversionTimeMs() {
         long seconds = this.plugin.getConfig().getLong("beacons.conversion-time-seconds", 300L);
@@ -428,7 +475,7 @@ public class ConfigManager {
     /**
      * Retrieve the cooldown between beacon conversions.
      *
-     * @return the milliseconds it takes to convert a beacon from one side's alignment into the others.
+     * @return The milliseconds it takes to convert a beacon from one side's alignment into the others.
      */
     public long getBeaconConversionCooldownMs() {
         long minutes = this.plugin.getConfig().getLong("beacons.conversion-cooldown-minutes", 60L);
@@ -646,6 +693,15 @@ public class ConfigManager {
     }
 
     /**
+     * Retrieve the number of claw hits required to kill a vampire.
+     *
+     * @return The number of claw hits required to kill a vampire at 0 health.
+     */
+    public int getClawHitKillRequirement() {
+        return this.plugin.getConfig().getInt("combat.kill-vampires-with-claws", 999);
+    }
+
+    /**
      * Retrieve the number of lives that humans start out with.
      *
      * @return The total number of times humans can die and respawn.
@@ -692,6 +748,34 @@ public class ConfigManager {
     }
 
     /**
+     * Retrieve if vampires are should destroy silver door and trapdoor and raw silver items when they break their blocks.
+     *
+     * @return {@code true} if vampires will destroy the items as well as the blocks.
+     */
+    public boolean doVampiresDestroySilverDoors() {
+        return this.plugin.getConfig().getBoolean("vampire.destroy-silver-doors", false);
+    }
+
+    /**
+     * Retrieve if sun and moon effects are applied when players are under glass.
+     *
+     * @return {@code true} if sky-based effects are applied through glass.
+     */
+    public boolean doesSunAffectThroughGlass() {
+        return this.plugin.getConfig().getBoolean("vampire.sun-affects-through-glass", false);
+    }
+
+    /**
+     * Update the config on whether sky-based effects are applied through glass
+     *
+     * @param sunAffects {@code true} if sun and moon effects will be applied when players are under glass.
+     */
+    public void setSunAffectThroughGlass(boolean sunAffects) {
+        this.plugin.getConfig().set("vampire.sun-affects-through-glass", sunAffects);
+        this.plugin.saveConfig();
+    }
+
+    /**
      * Retrieve if vampires can mount living entities. Exceptions are made for undead mounts.
      *
      * @return {@code true} if vampires can mount any animal.
@@ -701,12 +785,31 @@ public class ConfigManager {
     }
 
     /**
-     * Update the config on whether vampires can ride on living mounts
+     * Update the config on whether vampires can ride on living mounts.
      *
      * @param canRide {@code true} if vampires can ride living mounts.
      */
     public void setVampiresRideLivingMounts(boolean canRide) {
         this.plugin.getConfig().set("vampire.allow-vampire-mounts", canRide);
+        this.plugin.saveConfig();
+    }
+
+    /**
+     * Retrieve if vampires are locked out of certain actions once they have staged up once, even if they stage down later.
+     *
+     * @return {@code true} if the server remembers if a player has staged up in the past.
+     */
+    public boolean areKnownVampiresRestricted() {
+        return this.plugin.getConfig().getBoolean("vampire.restrict-known-vampires", true);
+    }
+
+    /**
+     * Update the config on whether the server remembers if a player has staged up in the past
+     *
+     * @param restrict {@code true} if vampires are locked out of certain actions once they have staged up once, even if they stage down later.
+     */
+    public void setKnownVampireRestriction(boolean restrict) {
+        this.plugin.getConfig().set("vampire.restrict-known-vampires", restrict);
         this.plugin.saveConfig();
     }
 
@@ -736,6 +839,15 @@ public class ConfigManager {
      */
     public int getWoodenStakeCooldownTicks() {
         return this.plugin.getConfig().getInt("combat.wooden-stake-cooldown-ticks", 80);
+    }
+
+    /**
+     * Retrieve the damage that a wooden stake deals.
+     *
+     * @return The damage applied by wooden stakes.
+     */
+    public double getWoodenStakeDamage() {
+        return this.plugin.getConfig().getDouble("combat.wooden-stake-damage", 8.0);
     }
 
     /**
@@ -828,6 +940,25 @@ public class ConfigManager {
      */
     public void setCureRequiresDaytime(boolean requireDay) {
         this.plugin.getConfig().set("cure.daylight-requirement", requireDay);
+        this.plugin.saveConfig();
+    }
+
+    /**
+     * Retrieve whether there are lasting effects on the world when a vampire is cured.
+     *
+     * @return {@code true} if there are lasting effects from a vampire cure.
+     */
+    public boolean doCuresHaveLastingEffects() {
+        return this.plugin.getConfig().getBoolean("cure.cure-aftermath", true);
+    }
+
+    /**
+     * Update the config on whether there are lasting effects from a vampire cure.
+     *
+     * @param hasEffects {@code true} if there will be lasting effects on the world when a vampire is cured.
+     */
+    public void setCuresHaveLastingEffects(boolean hasEffects) {
+        this.plugin.getConfig().set("cure.cure-aftermath", hasEffects);
         this.plugin.saveConfig();
     }
 

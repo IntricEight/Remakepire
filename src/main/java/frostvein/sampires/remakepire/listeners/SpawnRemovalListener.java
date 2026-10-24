@@ -1,6 +1,7 @@
 package frostvein.sampires.remakepire.listeners;
 
 import org.bukkit.Chunk;
+import org.bukkit.Material;
 import org.bukkit.entity.Creeper;
 import org.bukkit.entity.Enderman;
 import org.bukkit.entity.Entity;
@@ -9,14 +10,14 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.CreatureSpawnEvent;
+import org.bukkit.event.entity.EntityDropItemEvent;
 import org.bukkit.event.player.PlayerEggThrowEvent;
 import org.bukkit.event.world.ChunkLoadEvent;
 import frostvein.sampires.remakepire.RemakepirePlugin;
 
 public class SpawnRemovalListener implements Listener {
     private final RemakepirePlugin plugin;
-    private boolean endermanRemovalEnabled, creeperRemovalEnabled;
-    private boolean witchRemovalEnabled;
+    private boolean endermanRemovalEnabled, creeperRemovalEnabled, witchRemovalEnabled;
 
     /**
      * Create an instance of the Mob Spawn Removal listener.
@@ -46,8 +47,9 @@ public class SpawnRemovalListener implements Listener {
     )
     public void onCreatureSpawn(CreatureSpawnEvent event) {
         if (!this.plugin.getConfigManager().canBreedAnimalsOutOfSession() && !this.plugin.getSessionManager().isSessionActive()) {
-            event.setCancelled(event.getEntityType() == EntityType.CHICKEN && event.getSpawnReason() == CreatureSpawnEvent.SpawnReason.EGG);
-
+            if (event.getEntityType() == EntityType.CHICKEN && event.getSpawnReason() == CreatureSpawnEvent.SpawnReason.EGG) {
+                event.setCancelled(true);
+            }
         } else if (this.endermanRemovalEnabled && event.getEntityType() == EntityType.ENDERMAN) {
             event.setCancelled(true);
             this.plugin.logInfo("Prevented Enderman spawn at " + event.getLocation().getBlockX() + ", " + event.getLocation().getBlockY() + ", " + event.getLocation().getBlockZ() + " (Reason: " + event.getSpawnReason() + ")");
@@ -58,6 +60,20 @@ public class SpawnRemovalListener implements Listener {
 
         } else if (this.witchRemovalEnabled && event.getEntityType() == EntityType.WITCH) {
             event.setCancelled(true);
+        }
+    }
+
+    /**
+     * Prevent chickens from laying eggs when a session is not active and animal breeding is disabled.
+     *
+     * @param event an entity drops an item.
+     */
+    @EventHandler
+    public void onChickenLayEgg(EntityDropItemEvent event) {
+        if (!this.plugin.getConfigManager().canBreedAnimalsOutOfSession() && !this.plugin.getSessionManager().isSessionActive()) {
+            if (event.getEntityType() == EntityType.CHICKEN || event.getItemDrop().getItemStack().getType() != Material.EGG) {
+                event.setCancelled(true);
+            }
         }
     }
 
