@@ -56,6 +56,8 @@ tome-chests:
     - -630,256,-1168
 
   # Control how many tome chests should contain tome ability books each distribution cycle
+  # Chests chosen to spawn tome ability books on a given day are unable to spawn cure books
+  # The number of chests that can spawn cure or enchantment books is found by <total tome chest locations> - ability-book-count
   # Default: 4
   ability-book-count: 4
 

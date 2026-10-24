@@ -230,7 +230,6 @@ public class VampireFeedingManager implements Listener {
     private void handleFeedingDeath(FeedingSession session, Player vampire, Player target) {
         if (this.plugin.getPermadeathManager().hasAbsolutePermadeathEnabled(target)) {
             this.plugin.getDeathHandler().triggerHumanPermadeath(vampire, target, true);
-            this.cancelFeedingSession(session);
 
         } else if (this.plugin.getBeetrootManager().hasBeetrootImmunity(target)) {
             vampire.sendMessage(Component.text("The sting of garlic sears at your gums, protecting your meal from your bite.", NamedTextColor.RED));
@@ -238,7 +237,7 @@ public class VampireFeedingManager implements Listener {
             if (this.plugin.getVampireTurningManager().isTurningEnabled(vampire)) {
                 vampire.sendMessage(Component.text("You have failed to turn " + target.getName() + " - they will die as a human, wounded.", NamedTextColor.RED));
             } else {
-                vampire.sendMessage(Component.text("You have killed " + target.getName() + " - they will die as a human, wounded.", NamedTextColor.RED));
+                vampire.sendMessage(Component.text("You have killed " + target.getName() + ".", NamedTextColor.RED));
             }
 
             vampire.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, this.plugin.getConfigManager().getGarlicWeaknessDuration() * 20, 9, false, false));
@@ -252,27 +251,20 @@ public class VampireFeedingManager implements Listener {
                 this.killVictim(target);
             }
 
-            this.cancelFeedingSession(session);
-
         } else if (!this.plugin.getVampireTurningManager().isTurningEnabled(vampire)) {
             if (this.plugin.getDeathHandler().shouldHumanPermadie(target)) {
                 this.plugin.getDeathHandler().triggerHumanPermadeath(vampire, target, false);
-                this.cancelFeedingSession(session);
-                return;
+
+            } else {
+                vampire.sendMessage(Component.text("You have killed " + target.getName() + ". They will respawn as a human, wounded.", NamedTextColor.RED));
+
+                // Only trigger the target's death once, no matter how many vampires are feeding at the time
+                if (!this.didVictimAlreadyDie(target)) {
+                    target.sendMessage(Component.text("You have been slain by a vampire, but they do not turn you...", NamedTextColor.GRAY));
+                    this.killVictim(target);
+                }
             }
-
-            vampire.sendMessage(Component.text("You have killed " + target.getName() + ". They will respawn as a human, wounded.", NamedTextColor.RED));
-
-            // Only trigger the target's death once, no matter how many vampires are feeding at the time
-            if (!this.didVictimAlreadyDie(target)) {
-                target.sendMessage(Component.text("You have been slain by a vampire, but they do not turn you...", NamedTextColor.GRAY));
-
-                this.killVictim(target);
-            }
-
-            this.cancelFeedingSession(session);
-
-        } else if (target.getScoreboardTags().contains(VampireManager.CURED_VAMPIRE_TAG)) {
+        } else if (this.plugin.getVampireManager().isCuredVampire(target)) {
             vampire.sendMessage(Component.text("You taste the blood of " + target.getName() + ", but it rejects your curse...", NamedTextColor.DARK_RED));
             vampire.sendMessage(Component.text("They have been cleansed by holy power - their soul slips beyond your grasp, lost forever.", NamedTextColor.DARK_RED));
 
@@ -282,11 +274,8 @@ public class VampireFeedingManager implements Listener {
             target.addScoreboardTag(DeathHandler.PERMADEATH_CHOSEN_TAG);
             target.setHealth(0.0);
 
-            this.cancelFeedingSession(session);
-
         } else if (this.plugin.getPermadeathManager().hasPermadeathEnabled(target)) {
             this.plugin.getDeathHandler().triggerHumanPermadeath(vampire, target, true);
-            this.cancelFeedingSession(session);
 
         } else {
             this.plugin.getThirstManager().handleEntityKill(vampire, target, 0);
@@ -302,9 +291,10 @@ public class VampireFeedingManager implements Listener {
                 this.plugin.getVampireTrackingManager().startTrackingNewVampire(target);
             }
 
-            this.cancelFeedingSession(session);
             this.plugin.logInfo("Vampire " + vampire.getName() + " transformed " + target.getName() + " into a vampire through feeding");
         }
+
+        this.cancelFeedingSession(session);
     }
 
     /**
