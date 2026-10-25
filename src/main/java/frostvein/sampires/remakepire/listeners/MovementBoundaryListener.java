@@ -492,7 +492,7 @@ public class MovementBoundaryListener implements Listener {
         // Check if the border is currently enabled
         if (this.plugin.getSessionManager().isBorderActive()) {
             // Each of the following is a leave condition
-            if (player.getScoreboardTags().contains(VampireManager.CURED_VAMPIRE_TAG) || player.getScoreboardTags().contains(OVERRIDE_TAG)) {
+            if (this.plugin.getVampireManager().isCuredVampire(player) || player.getScoreboardTags().contains(OVERRIDE_TAG)) {
                 return true;
 
             } else if (this.plugin.getVampireManager().isVampire(player)) {
@@ -521,7 +521,7 @@ public class MovementBoundaryListener implements Listener {
         List<String> messages = new ArrayList<>();
 
         // Tune the freedom message based on the game's condition and player's alignment
-        if (player.getScoreboardTags().contains(VampireManager.CURED_VAMPIRE_TAG) || player.getScoreboardTags().contains(OVERRIDE_TAG)) {
+        if (this.plugin.getVampireManager().isCuredVampire(player) || player.getScoreboardTags().contains(OVERRIDE_TAG)) {
             if (CUSTOM_BORDER_MESSAGES) {
                 messages = this.textConfig.getStringList("border-freedom-messages.cured-vampire-freedom");
             } else {

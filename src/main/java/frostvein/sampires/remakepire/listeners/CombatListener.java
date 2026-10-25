@@ -17,6 +17,7 @@ import org.bukkit.SoundCategory;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Projectile;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -250,7 +251,7 @@ public class CombatListener implements Listener {
 
                     } else {
                         // Apply the effects of turning a cured vampire
-                        if (victim.getScoreboardTags().contains(VampireManager.CURED_VAMPIRE_TAG)) {
+                        if (this.plugin.getVampireManager().isCuredVampire(victim)) {
                             event.setCancelled(true);
 
                             attacker.sendMessage(Component.text("You taste the blood of " + victim.getName() + ", but it rejects your curse...", NamedTextColor.DARK_RED));
@@ -549,17 +550,20 @@ public class CombatListener implements Listener {
      */
     private void applyDamageReduction(EntityDamageByEntityEvent event) {
         if (event.getEntity() instanceof Player victim) {
+            // Determine if the damage was caused by a player
+            final boolean wasPlayerDamage = event.getDamager() instanceof Player || (event.getDamager() instanceof Projectile projectile && projectile.getShooter() instanceof Player);
+
             // Modify the damage dealt to humans
             if (this.vampireManager.isHuman(victim)) {
                 // Reduce the damage done by mobs
-                if (!(event.getDamager() instanceof Player)) {
+                if (!wasPlayerDamage) {
                     event.setDamage(event.getDamage() * 0.5);
                 }
 
                 // Modify the damage dealt to vampires
             } else if (this.vampireManager.isVampire(victim)) {
                 // Reduce the damage done by mobs
-                if (!(event.getDamager() instanceof Player)) {
+                if (!wasPlayerDamage) {
                     event.setDamage(event.getDamage() * 0.05);
                 }
 
