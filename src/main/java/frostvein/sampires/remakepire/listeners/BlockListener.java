@@ -65,17 +65,10 @@ public class BlockListener implements Listener {
             return;
         }
 
-        if (blockType == Material.NETHERITE_BLOCK) {
+        if (blockType == Material.NETHERITE_BLOCK || blockType == Material.RAW_IRON_BLOCK || blockType == Material.IRON_DOOR || blockType == Material.IRON_TRAPDOOR) {
             // Stop placed silver blocks from being moved elsewhere
             event.setDropItems(false);
             player.sendMessage(Component.text("The block of silver breaks apart as you mine it, becoming useless.", NamedTextColor.GRAY));
-
-        } else if (blockType == Material.RAW_IRON_BLOCK || blockType == Material.IRON_DOOR || blockType == Material.IRON_TRAPDOOR) {
-            // If vampires can permanently destroy other silver blocks, stop the item from dropping and being moved elsewhere
-            if (this.plugin.getVampireManager().isRestrictedVampire(player) && this.plugin.getConfigManager().doVampiresDestroySilverDoors()) {
-                event.setDropItems(false);
-                player.sendMessage(Component.text("The silver crumbles as you mine it, becoming useless.", NamedTextColor.GRAY));
-            }
         }
     }
 
