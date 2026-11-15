@@ -38,6 +38,7 @@ public class VampireManager {
     // Below times are in milliseconds
     private static final long LEVEL_CHANGE_COOLDOWN = 5000L, LEVEL_CHANGE_TIMEOUT = 10000L, PROTECTION_DURATION = 10000L;
     // Vampire state tags
+    public static final int MIN_STAGE = 1, MAX_STAGE = 3;
     public static final String HUMAN_TAG = "human", VAMPIRE_TAG = "vampire";
     public static final String VAMPIRE_STAGE1_TAG = "vampire_stage1", VAMPIRE_STAGE2_TAG = "vampire_stage2", VAMPIRE_STAGE3_TAG = "vampire_stage3";
     public static final String PROMOTION_BAN_TAG = "promotion_ban";
@@ -233,8 +234,8 @@ public class VampireManager {
     public void setPlayerAsVampire(Player player, int stage, boolean adminOverride) {
         final UUID playerId = player.getUniqueId();
 
-        if (!adminOverride && this.hasPromotionBan(player) && stage > 1) {
-            stage = 1;
+        if (!adminOverride && this.hasPromotionBan(player) && stage > MIN_STAGE) {
+            stage = MIN_STAGE;
         }
 
         this.startLevelChange(playerId);
@@ -329,7 +330,7 @@ public class VampireManager {
      * @param turner the player who turned the target.
      */
     public void performVampireTurning(Player target, Player turner) {
-        this.setPlayerAsVampire(target, 1);
+        this.setPlayerAsVampire(target, MIN_STAGE);
 
         if (!target.getScoreboardTags().contains(VAMPIRE_TAG)) {
             target.addScoreboardTag(VAMPIRE_TAG);
@@ -656,7 +657,7 @@ public class VampireManager {
     public void applyPromotionBan(Player player) {
         if (this.isVampire(player)) {
             // Force the player to return to the lowest level
-            this.setPlayerAsVampire(player, 1);
+            this.setPlayerAsVampire(player, MIN_STAGE);
 
             player.sendMessage(Component.text("DEATH PENALTY", NamedTextColor.DARK_RED)
                     .decorate(TextDecoration.BOLD));
@@ -667,6 +668,7 @@ public class VampireManager {
 
                 player.sendMessage(Component.text("Your death has cursed you with weakness.", NamedTextColor.RED));
                 player.sendMessage(Component.text("You cannot grow stronger until the next session begins...", NamedTextColor.RED));
+
             } else {
                 player.sendMessage(Component.text("Your death has sapped your blood, weakened you...", NamedTextColor.RED));
                 player.sendMessage(Component.text("And yet, your potential remains. Grow strong, creature of the night.", NamedTextColor.RED));
@@ -709,7 +711,7 @@ public class VampireManager {
      * @return The player's maximum allowed stage.
      */
     public int getStageCap(Player player) {
-        return this.stageCaps.getOrDefault(player.getUniqueId(), 3);
+        return this.stageCaps.getOrDefault(player.getUniqueId(), MAX_STAGE);
     }
 
     /**
@@ -719,7 +721,7 @@ public class VampireManager {
      * @param maxStage the stage that the player is capped at.
      */
     public void setStageCap(Player player, int maxStage) {
-        if (maxStage >= 1 && maxStage <= 3) {
+        if (maxStage >= MIN_STAGE && maxStage <= MAX_STAGE) {
             if (plugin.getConfigManager().isVampireLevelingCapped()) {
                 this.stageCaps.put(player.getUniqueId(), maxStage);
                 this.plugin.logInfo("Stage cap set for " + player.getName() + ": max stage " + maxStage);
@@ -755,24 +757,6 @@ public class VampireManager {
             player.addScoreboardTag(VAMPIRE_TAG);
         } else if (!this.isVampire(player) && player.getScoreboardTags().contains(VAMPIRE_TAG)) {
             player.removeScoreboardTag(VAMPIRE_TAG);
-        }
-    }
-
-    /**
-     * Retrieve the damage multiplier of wooden weapons against vampires.
-     *
-     * @param player the player taking damage from the wooden weapon.
-     * @return The wooden weapon's damage multiplier.
-     */
-    public double getWoodenWeaponMultiplier(Player player) {
-        if (this.isVampireStage1(player)) {
-            return 2.5;
-        } else if (this.isVampireStage2(player)) {
-            return 3.0;
-        } else if (this.isVampireStage3(player)) {
-            return 4.0;
-        } else {
-            return 1.0;
         }
     }
 
