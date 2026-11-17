@@ -306,6 +306,7 @@ public class DeathHandler implements Listener {
 
         if (killer != null) {
             this.handleVampirePvPDeath(victim, killer, event);
+
         } else if (this.vampireManager.isVampire(victim)) {
             victim.addScoreboardTag(PROMOTION_BAN_PENDING_TAG);
         }
@@ -461,6 +462,14 @@ public class DeathHandler implements Listener {
         this.plugin.logInfo("PERMA-KILL: " + victim.getName() + " was permanently killed");
     }
 
+    /**
+     * Make the announcements and apply the conditions marking a human as having been permanently killed.<br/>
+     * Doesn't actively kill the player due to a bug with stacking deaths when events are canceled.
+     *
+     * @param attacker the player who killed the human.
+     * @param victim the human who died.
+     * @param wasTurnAttempt {@code true} if the human died from a vampire attempting to turn them.
+     */
     public void triggerHumanPermadeath(Player attacker, Player victim, boolean wasTurnAttempt) {
         // Exit early if there is no one to permakill
         if (victim == null) {
@@ -478,7 +487,6 @@ public class DeathHandler implements Listener {
         }
 
         victim.addScoreboardTag(PERMADEATH_CHOSEN_TAG);
-        victim.setHealth(0.0);
     }
 
     /**
