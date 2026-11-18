@@ -42,7 +42,7 @@ public class LanternThrashTomeAbility extends TomeAbility {
             return false;
 
         } else if (!this.hasLanternInInventory(player)) {
-            this.sendCannotUseMessage(player, "You need a regular lantern in your inventory to thrash!");
+            this.sendCannotUseMessage(player, "You need a lantern in your inventory to thrash!");
             return false;
         }
 
@@ -77,13 +77,14 @@ public class LanternThrashTomeAbility extends TomeAbility {
 
                 // Prevent the creation of fire outside the ability ring
                 if (distance <= FIRE_OUTER_RADIUS && distance >= FIRE_INNER_RADIUS) {
-                    for (int yOffset = -1; yOffset <= 0; ++yOffset) {
+                    // Search for the lowest valid fire location
+                    for (int yOffset = -2; yOffset <= 0; ++yOffset) {
                         final Location blockLocation = new Location(playerLoc.getWorld(), x, playerY + yOffset, z);
-                        final Block block = blockLocation.getBlock();
-                        final Block blockAbove = blockLocation.clone().add(0.0, 1.0, 0.0).getBlock();
+                        final Block block = blockLocation.getBlock(), blockAbove = blockLocation.clone().add(0.0, 1.0, 0.0).getBlock();
 
-                        if (blockAbove.getType() == Material.AIR && block.getType() != Material.AIR) {
+                        if (blockAbove.getType().isAir() && !block.getType().isAir()) {
                             locations.add(blockAbove.getLocation());
+                            break;
                         }
                     }
                 }
@@ -154,10 +155,10 @@ public class LanternThrashTomeAbility extends TomeAbility {
 
                     for (int locationsSet = 0; this.currentIndex < fireLocations.size() && locationsSet < locationsThisTick; ++locationsSet) {
                         final Location fireLoc = fireLocations.get(this.currentIndex);
-                        Block fireBlock = fireLoc.getBlock();
 
-                        if (fireBlock.getType() == Material.AIR) {
-                            fireBlock.setType(Material.FIRE);
+                        // If the location is valid, spawn a fire at it
+                        if (fireLoc.getBlock().getType().isAir()) {
+                            fireLoc.getBlock().setType(Material.FIRE);
 
                             if (this.currentIndex % 8 == 0) {
                                 player.playSound(fireLoc, "minecraft:item.flintandsteel.use", 0.3F, 1.2F);
