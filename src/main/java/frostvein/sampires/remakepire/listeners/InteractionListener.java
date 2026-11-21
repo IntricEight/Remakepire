@@ -29,11 +29,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockPlaceEvent;
-import org.bukkit.event.inventory.ClickType;
-import org.bukkit.event.inventory.InventoryAction;
-import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
-import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -59,7 +55,13 @@ public class InteractionListener implements Listener {
         this.plugin = plugin;
     }
 
-    private boolean isPumpkin(ItemStack item) {
+    /**
+     * Determine in an item is the chalice.
+     *
+     * @param item the item being checked.
+     * @return {@code true} if the item is the chalice's material type.
+     */
+    private boolean isChalice(ItemStack item) {
         if (item == null) {
             return false;
         }
@@ -67,7 +69,13 @@ public class InteractionListener implements Listener {
         return item.getType() == Material.LAPIS_BLOCK;
     }
 
-    private boolean isPumpkin(Block block) {
+    /**
+     * Determine in a block is the chalice.
+     *
+     * @param block the block being checked.
+     * @return {@code true} if the block is the chalice's material type.
+     */
+    private boolean isChalice(Block block) {
         if (block == null) {
             return false;
         }
@@ -75,7 +83,12 @@ public class InteractionListener implements Listener {
         return block.getType() == Material.LAPIS_BLOCK;
     }
 
-    private void scheduleCheck(Player player) {
+    /**
+     * Force the chalice to be in the player's active slots.
+     *
+     * @param player the player with the chalice.
+     */
+    private void applyChalice(Player player) {
         Bukkit.getScheduler().runTask(plugin, () -> {
             if (player.isOnline() && !player.isDead() && player.getGameMode() != GameMode.SPECTATOR) {
                 enforcePumpkin(player);
@@ -83,11 +96,16 @@ public class InteractionListener implements Listener {
         });
     }
 
+    /**
+     * Place the chalice in one of the player's hands.
+     *
+     * @param player the player with the chalice.
+     */
     private void enforcePumpkin(Player player) {
         PlayerInventory inventory = player.getInventory();
 
         // Already holding a pumpkin in either hand.
-        if (isPumpkin(inventory.getItemInMainHand()) || isPumpkin(inventory.getItemInOffHand())) {
+        if (isChalice(inventory.getItemInMainHand()) || isChalice(inventory.getItemInOffHand())) {
             return;
         }
 
@@ -96,7 +114,7 @@ public class InteractionListener implements Listener {
             ItemStack item = inventory.getItem(slot);
 
             // Swap pumpkin with whatever is in offhand.
-            if (isPumpkin(item)) {
+            if (isChalice(item)) {
                 ItemStack offhand = inventory.getItemInOffHand();
 
                 inventory.setItemInOffHand(item);
@@ -108,118 +126,38 @@ public class InteractionListener implements Listener {
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-    public void onInventoryClick(InventoryClickEvent event) {
-        if (event.getWhoClicked() instanceof Player player) {
-            scheduleCheck(player);
-        }
-    }
-
-    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-    public void onInventoryDrag(InventoryDragEvent event) {
-        if (event.getWhoClicked() instanceof Player player) {
-            scheduleCheck(player);
-        }
-    }
-
-    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onInventoryClose(InventoryCloseEvent event) {
         if (event.getPlayer() instanceof Player player) {
-            scheduleCheck(player);
+            applyChalice(player);
         }
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onItemHeld(PlayerItemHeldEvent event) {
-        scheduleCheck(event.getPlayer());
+        applyChalice(event.getPlayer());
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onSwapHands(PlayerSwapHandItemsEvent event) {
-        scheduleCheck(event.getPlayer());
+        applyChalice(event.getPlayer());
     }
 
-    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    @EventHandler
     public void onPickup(PlayerPickupItemEvent event) {
-        scheduleCheck(event.getPlayer());
+        applyChalice(event.getPlayer());
     }
 
-    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    @EventHandler
     public void onDrop(PlayerDropItemEvent event) {
-        scheduleCheck(event.getPlayer());
+        applyChalice(event.getPlayer());
     }
 
     @EventHandler
     public void onJoin(PlayerJoinEvent event) {
-        scheduleCheck(event.getPlayer());
+        applyChalice(event.getPlayer());
     }
 
-
-    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
-    public void onContainerClick(InventoryClickEvent event) {
-        // Ignore interfaces without a separate container inventory.
-        if (event.getView().getTopInventory()
-                instanceof PlayerInventory) {
-            return;
-        }
-
-        int topSize = event.getView().getTopInventory().getSize();
-        int rawSlot = event.getRawSlot();
-
-        boolean clickedContainer = rawSlot >= 0 && rawSlot < topSize;
-
-        // Prevent placing pumpkins into container slots.
-        if (clickedContainer) {
-
-            // Regular clicks with a pumpkin on the cursor.
-            if (isPumpkin(event.getCursor())) {
-                event.setCancelled(true);
-                return;
-            }
-
-            // Hotbar number-key swaps and offhand swaps.
-            if (event.getAction() == InventoryAction.HOTBAR_SWAP || event.getAction() == InventoryAction.HOTBAR_MOVE_AND_READD) {
-                Player player = (Player) event.getWhoClicked();
-
-                if (event.getClick() == ClickType.SWAP_OFFHAND) {
-                    if (isPumpkin(player.getInventory().getItemInOffHand())) {
-                        event.setCancelled(true);
-                    }
-                } else {
-                    final int button = event.getHotbarButton();
-
-                    if (button >= 0 && button < 9 && isPumpkin(player.getInventory().getItem(button))) {
-                        event.setCancelled(true);
-                    }
-                }
-            }
-
-            return;
-        }
-
-        // Prevent shift-clicking pumpkins into containers.
-        if (event.isShiftClick() && isPumpkin(event.getCurrentItem())) {
-            event.setCancelled(true);
-        }
-    }
-
-    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
-    public void onContainerDrag(InventoryDragEvent event) {
-        if (!isPumpkin(event.getOldCursor())) {
-            return;
-        }
-
-        int topSize = event.getView().getTopInventory().getSize();
-
-        // Cancel if any destination slot belongs to the container.
-        for (int rawSlot : event.getRawSlots()) {
-            if (rawSlot < topSize) {
-                event.setCancelled(true);
-                return;
-            }
-        }
-    }
-
-    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    @EventHandler
     public void onShelfInteract(PlayerInteractEvent event) {
         if (event.getAction() != Action.RIGHT_CLICK_BLOCK) {
             return;
@@ -237,27 +175,24 @@ public class InteractionListener implements Listener {
         PlayerInventory inventory = event.getPlayer().getInventory();
 
         for (int slot = 0; slot < 9; slot++) {
-            if (isPumpkin(inventory.getItem(slot))) {
+            if (isChalice(inventory.getItem(slot))) {
                 event.setCancelled(true);
                 return;
             }
         }
 
         // Also check the offhand.
-        if (isPumpkin(inventory.getItemInOffHand())) {
+        if (isChalice(inventory.getItemInOffHand())) {
             event.setCancelled(true);
         }
     }
 
-    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
-    public void onPumpkinPlace(BlockPlaceEvent event) {
-        if (isPumpkin(event.getBlockPlaced())) {
+    @EventHandler
+    public void onChalicePlace(BlockPlaceEvent event) {
+        if (isChalice(event.getBlockPlaced())) {
             event.setCancelled(true);
         }
     }
-
-
-
 
     /**
      * Prevent vampires from interacting with entities in bat form or feeding entities.<br/>
