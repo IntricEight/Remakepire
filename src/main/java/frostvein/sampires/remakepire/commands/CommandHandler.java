@@ -728,7 +728,7 @@ public class CommandHandler implements CommandExecutor {
                     break;
 
                 case "stake_permadeath_stage":
-                    if (Integer.parseInt(args[1]) >= 1 && Integer.parseInt(args[1]) <= 3) {
+                    if (Integer.parseInt(args[1]) >= VampireManager.MIN_STAGE && Integer.parseInt(args[1]) <= VampireManager.MAX_STAGE) {
                         configManager.setStakePermadeathMinimumStage(Integer.parseInt(args[1]));
                         senderMessage = this.configUpdateMessage("permadeath-minimum-stage", Integer.parseInt(args[1]));
                     } else {

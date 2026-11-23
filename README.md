@@ -46,19 +46,6 @@ the old and new config files and manually replace values for settings shared by 
 
 Other files, such as _beacons.json_, can be copied or dragged into the _Remakepire_ folder to replace the generated files.
 
-
-### Using the custom ControllableDays
-Because of the way POW's _ControllableDays_ is programmed, it will not work well with _Remakepire_.
-To keep time frozen outside active sessions, you will need to download my custom version of _ControllableDays_.
-This plugin is the same as POW's released version, aside from a single new option in the _config.yml_ file
-that allows this plugin to work with projects beyond _VampireSMP_.
-
-By default, this custom plugin's config is set
-to work with _Remakepire_, but you can also modify and use it with any custom vampires-based plugin.
-If you don't use the custom _ControllableDays_, your game will still run with the slower daytime cycle. However, time
-won't freeze when the session does, which may lead to inconsistencies in session times around breaks.
-
-
 ### Using Custom Text through text-config.yml
 One of the files created by _Remakepire_ is a rather overwhelming heap of text titled _text-config.yml_.
 This file gives game runners almost complete control over the contents of major text instances within the Vampires game.

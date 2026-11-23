@@ -163,7 +163,7 @@ public final class RemakepirePlugin extends JavaPlugin {
         this.effectManager.startEffectTask();
         this.beaconManager.validateBeacons();
         this.initVampireRespawnLocation();
-        this.sessionManager.executeServerCommand("tick freeze");
+        this.sessionManager.freezeTick();
         this.logInfo("Remakepire Plugin has been enabled!");
     }
 

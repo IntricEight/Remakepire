@@ -648,7 +648,7 @@ public class InitGameManager {
         this.plugin.getConfig().set("one_human_left", false);
         this.plugin.getConfig().set("fourth_book_has_spawned", false);
         this.plugin.getConfig().set("fourth_book_spawn_enabled", false);
-        this.plugin.saveConfig();
+        this.plugin.getSessionManager().setBorderActive(true);
 
         admin.sendMessage(Component.text("[4.6/9] Clearing sire mappings...", NamedTextColor.GRAY));
         this.plugin.getSireManager().clearAllSireMappings();

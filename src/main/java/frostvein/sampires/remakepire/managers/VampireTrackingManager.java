@@ -51,7 +51,10 @@ public class VampireTrackingManager {
                         stopTracking(newVampireId);
                     } else {
                         if (newVampire.isOnline()) {
-                            updateTrackingForAllVampires(newVampire);
+                            if (plugin.getSessionManager().isSessionActive()) {
+                                updateTrackingForAllVampires(newVampire);
+                            }
+
                             this.ticksRemaining -= UPDATE_INTERVAL_TICKS;
                         } else {
                             stopTracking(newVampireId);
@@ -72,7 +75,7 @@ public class VampireTrackingManager {
      */
     private void updateTrackingForAllVampires(Player trackedVampire) {
         if (this.mostRecentVampireId == null || trackedVampire.getUniqueId().equals(this.mostRecentVampireId)) {
-            Location trackedLocation = trackedVampire.getLocation();
+            final Location trackedLocation = trackedVampire.getLocation();
 
             // Check if the new vampire should be tracked
             // Done out here instead of inside the task to reduce the config checks
@@ -84,11 +87,10 @@ public class VampireTrackingManager {
 
                     // Only give directions if that feature is enabled
                     if (shouldTrack) {
-                        Location vampireLocation = vampire.getLocation();
+                        final Location vampireLocation = vampire.getLocation();
 
-                        double deltaX = trackedLocation.getX() - vampireLocation.getX();
-                        double deltaZ = trackedLocation.getZ() - vampireLocation.getZ();
-                        double distance = Math.sqrt(deltaX * deltaX + deltaZ * deltaZ);
+                        final double deltaX = trackedLocation.getX() - vampireLocation.getX(), deltaZ = trackedLocation.getZ() - vampireLocation.getZ();
+                        final double distance = Math.sqrt(deltaX * deltaX + deltaZ * deltaZ);
 
                         String direction = ConversionAssistant.getRelativeDirection(deltaX, deltaZ, vampireLocation.getYaw());
                         messageComponent = messageComponent.append(Component.text(direction, NamedTextColor.WHITE))
