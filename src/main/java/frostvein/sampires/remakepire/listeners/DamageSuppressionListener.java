@@ -25,7 +25,7 @@ public class DamageSuppressionListener implements Listener {
      * @param event an entity receives damage.
      */
     @EventHandler(
-            priority = EventPriority.HIGHEST
+            priority = EventPriority.LOW
     )
     public void onEntityDamage(EntityDamageEvent event) {
         if (event.getEntity() instanceof Player) {

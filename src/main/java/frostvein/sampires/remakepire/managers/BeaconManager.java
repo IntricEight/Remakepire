@@ -1102,7 +1102,7 @@ public class BeaconManager {
                 highest.setY(y);
                 Material blockType = highest.getBlock().getType();
 
-                if (blockType.isSolid() && blockType != Material.AIR) {
+                if (blockType.isSolid() && !blockType.isAir()) {
                     return highest.clone().add(0.0, 1.5, 0.0);
                 }
             }

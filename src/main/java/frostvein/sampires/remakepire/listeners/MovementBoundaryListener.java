@@ -20,7 +20,6 @@ import org.bukkit.util.Vector;
 import frostvein.sampires.remakepire.RemakepirePlugin;
 import frostvein.sampires.remakepire.beacons.BeaconSite;
 import frostvein.sampires.remakepire.managers.SessionManager;
-import frostvein.sampires.remakepire.managers.VampireManager;
 
 public class MovementBoundaryListener implements Listener {
     private final RemakepirePlugin plugin;

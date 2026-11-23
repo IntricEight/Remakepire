@@ -91,15 +91,15 @@ public class SessionManager {
     /**
      * Freeze the game ticks.
      */
-    private void freezeTick() {
-        this.executeServerCommand("tick freeze");
+    public void freezeTick() {
+        Bukkit.getServerTickManager().setFrozen(true);
     }
 
     /**
      * Resume the game ticks.
      */
-    private void unfreezeTick() {
-        this.executeServerCommand("tick unfreeze");
+    public void unfreezeTick() {
+        Bukkit.getServerTickManager().setFrozen(false);
     }
 
     /**

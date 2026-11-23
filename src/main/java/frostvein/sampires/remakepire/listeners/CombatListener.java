@@ -190,7 +190,6 @@ public class CombatListener implements Listener {
             if (victim != null && victim.getHealth() - event.getFinalDamage() <= 0) {
                 // If the config is set to allow non-vampire kill sources on humans, check if the human has run out of lives and
                 if (isAttackerHuman && plugin.getConfigManager().isLifeLimitEnforced() && this.plugin.getDeathHandler().shouldHumanPermadie(victim)) {
-                    event.setCancelled(true);
                     this.plugin.getDeathHandler().triggerHumanPermadeath(attacker, victim, false);
                     return;
                 }
@@ -203,8 +202,6 @@ public class CombatListener implements Listener {
                     if (this.plugin.getPermadeathManager().hasAbsolutePermadeathEnabled(victim)
                             || (this.plugin.getPermadeathManager().hasPermadeathEnabled(victim) && this.plugin.getVampireTurningManager().isTurningEnabled(attacker))
                     ) {
-                        event.setCancelled(true);
-
                         this.plugin.getDeathHandler().triggerHumanPermadeath(attacker, victim, true);
                         this.plugin.getThirstManager().handleEntityKill(attacker, victim, 0);
 
@@ -213,7 +210,6 @@ public class CombatListener implements Listener {
 
                     // Apply the effect of active garlic on death
                     if (this.plugin.getBeetrootManager().hasBeetrootImmunity(victim)) {
-                        event.setCancelled(true);
                         attacker.sendMessage(Component.text("The sting of garlic sears at your gums, protecting your meal from your bite.", NamedTextColor.RED));
 
                         if (this.plugin.getVampireTurningManager().isTurningEnabled(attacker)) {
@@ -227,15 +223,11 @@ public class CombatListener implements Listener {
                         victim.sendMessage(Component.text("Your garlic immunity protects you from turning.", NamedTextColor.GREEN)
                                 .decorate(TextDecoration.BOLD));
                         victim.sendMessage(Component.text("You will respawn as a human, not as a cursed creature.", NamedTextColor.GREEN));
-
-                        victim.setHealth(0.0);
                         return;
                     }
 
                     // Apply the effects of killing a human without attempting to turn them
                     if (!this.plugin.getVampireTurningManager().isTurningEnabled(attacker)) {
-                        event.setCancelled(true);
-
                         if (this.plugin.getDeathHandler().shouldHumanPermadie(victim)) {
                             this.plugin.getDeathHandler().triggerHumanPermadeath(attacker, victim, true);
                             this.plugin.getThirstManager().handleEntityKill(attacker, victim, 0);
@@ -245,15 +237,11 @@ public class CombatListener implements Listener {
 
                             attacker.sendMessage(Component.text("You have killed " + victim.getName() + ". They will respawn as a human, wounded.", NamedTextColor.RED));
                             victim.sendMessage(Component.text("You have been slain by a vampire, but they do not turn you...", NamedTextColor.GRAY));
-
-                            victim.setHealth(0.0);
                         }
 
                     } else {
                         // Apply the effects of turning a cured vampire
                         if (this.plugin.getVampireManager().isCuredVampire(victim)) {
-                            event.setCancelled(true);
-
                             attacker.sendMessage(Component.text("You taste the blood of " + victim.getName() + ", but it rejects your curse...", NamedTextColor.DARK_RED));
                             attacker.sendMessage(Component.text("They have been cleansed by holy power - their soul slips beyond your grasp, lost forever.", NamedTextColor.DARK_RED));
 
@@ -262,7 +250,6 @@ public class CombatListener implements Listener {
 
                             victim.addScoreboardTag(DeathHandler.PERMADEATH_CHOSEN_TAG);
                             this.plugin.getThirstManager().handleEntityKill(attacker, victim, 0);
-                            victim.setHealth(0.0);
 
                             return;
                         }
@@ -397,8 +384,8 @@ public class CombatListener implements Listener {
             } else if (this.vampireManager.isHuman(player)) {
                 // If the config is set to allow non-vampire kill sources on humans, check if the human has run out of lives
                 if (plugin.getConfigManager().isLifeLimitEnforced() && playerShouldDie && this.plugin.getDeathHandler().shouldHumanPermadie(player)) {
-                    event.setCancelled(true);
                     this.plugin.getDeathHandler().triggerHumanPermadeath(null, player, false);
+                    return;
                 }
             }
         }

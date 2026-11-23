@@ -229,7 +229,10 @@ public class VampireFeedingManager implements Listener {
      */
     private void handleFeedingDeath(FeedingSession session, Player vampire, Player target) {
         if (this.plugin.getPermadeathManager().hasAbsolutePermadeathEnabled(target)) {
-            this.plugin.getDeathHandler().triggerHumanPermadeath(vampire, target, true);
+            if (!didVictimAlreadyDie(target)) {
+                this.plugin.getDeathHandler().triggerHumanPermadeath(vampire, target, true);
+                this.killVictim(target);
+            }
 
         } else if (this.plugin.getBeetrootManager().hasBeetrootImmunity(target)) {
             vampire.sendMessage(Component.text("The sting of garlic sears at your gums, protecting your meal from your bite.", NamedTextColor.RED));
@@ -253,7 +256,10 @@ public class VampireFeedingManager implements Listener {
 
         } else if (!this.plugin.getVampireTurningManager().isTurningEnabled(vampire)) {
             if (this.plugin.getDeathHandler().shouldHumanPermadie(target)) {
-                this.plugin.getDeathHandler().triggerHumanPermadeath(vampire, target, false);
+                if (!didVictimAlreadyDie(target)) {
+                    this.plugin.getDeathHandler().triggerHumanPermadeath(vampire, target, false);
+                    this.killVictim(target);
+                }
 
             } else {
                 vampire.sendMessage(Component.text("You have killed " + target.getName() + ". They will respawn as a human, wounded.", NamedTextColor.RED));
@@ -271,11 +277,18 @@ public class VampireFeedingManager implements Listener {
             target.sendMessage(Component.text("The darkness reaches for you, but the holy blessing protects your soul...", NamedTextColor.GRAY));
             target.sendMessage(Component.text("You feel yourself slipping away, into a peaceful sleep.", NamedTextColor.GRAY));
 
-            target.addScoreboardTag(DeathHandler.PERMADEATH_CHOSEN_TAG);
-            target.setHealth(0.0);
+            // Only apply the death statuses a single time
+            if (!this.didVictimAlreadyDie(target)) {
+                // Apply the tag manually to avoid other messages from flooding the player
+                target.addScoreboardTag(DeathHandler.PERMADEATH_CHOSEN_TAG);
+                this.killVictim(target);
+            }
 
         } else if (this.plugin.getPermadeathManager().hasPermadeathEnabled(target)) {
-            this.plugin.getDeathHandler().triggerHumanPermadeath(vampire, target, true);
+            if (!didVictimAlreadyDie(target)) {
+                this.plugin.getDeathHandler().triggerHumanPermadeath(vampire, target, true);
+                this.killVictim(target);
+            }
 
         } else {
             this.plugin.getThirstManager().handleEntityKill(vampire, target, 0);
