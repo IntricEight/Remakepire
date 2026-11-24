@@ -25,7 +25,6 @@ import org.bukkit.entity.Strider;
 import org.bukkit.entity.Turtle;
 import org.bukkit.entity.Wolf;
 import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockPlaceEvent;
@@ -125,19 +124,19 @@ public class InteractionListener implements Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    @EventHandler
     public void onInventoryClose(InventoryCloseEvent event) {
         if (event.getPlayer() instanceof Player player) {
             applyChalice(player);
         }
     }
 
-    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    @EventHandler
     public void onItemHeld(PlayerItemHeldEvent event) {
         applyChalice(event.getPlayer());
     }
 
-    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    @EventHandler
     public void onSwapHands(PlayerSwapHandItemsEvent event) {
         applyChalice(event.getPlayer());
     }
