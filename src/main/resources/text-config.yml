@@ -236,7 +236,7 @@ border-blocked-messages:
 
 # The custom messages that appear when players successfully leave the game boundary for the first time
 border-freedom-messages:
-  # The player is a cured vampire or the border has been disabled
+  # The player is a cured vampire or the player has been given the BorderOverride tag
   cured-vampire-freedom:
     - "§6You are leaving Oakhurst..."
     - "§eThe familiar lands fade behind you as you venture beyond the border."
@@ -248,6 +248,10 @@ border-freedom-messages:
   # The player is a vampire
   vampire-freedom:
     - "§4You are free of your chains, creature of the night..."
+
+  # The player has escaped despite not meeting a previous requirement, or the border has been disabled
+  disabled-border-freedom:
+    - "§aDespite all odds, you have slipped beyond the beacon's grasp and escaped."
 
 
 # ============================================================================

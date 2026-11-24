@@ -542,8 +542,12 @@ public class MovementBoundaryListener implements Listener {
                 messages.add("§aYou are free... Finally free...");
             }
         } else {
-            // Because this function is only meant to be used when the player is allowed to leave, this return statement should not fire
-            messages.add("§aDespite all odds, you have slipped beyond the beacon's grasp and escaped.");
+            if (CUSTOM_BORDER_MESSAGES) {
+                messages = this.textConfig.getStringList("border-freedom-messages.disabled-border-freedom");
+            } else {
+                // Because this function is only meant to be used when the player is allowed to leave, this return statement should not fire
+                messages.add("§aDespite all odds, you have slipped beyond the beacon's grasp and escaped.");
+            }
         }
 
         return messages.toArray(new String[0]);
